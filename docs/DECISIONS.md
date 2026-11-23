@@ -498,3 +498,33 @@ rendered pages retain every token/image within bounds but visibly flatten note
 tables. Record that reader interoperability limit; do not flatten valid SF/OOXML
 to make a visual oracle pass. Broader Word/producer qualification remains required.
 Explicit cell/note breaks and oversized image atoms remain unfinished work.
+
+
+## Forced boundaries are control events, not measured height
+
+Represent PageBreak in cell/note flow with a zero-height control and return an
+explicit forced-boundary flag. A table first selects each active cell, chooses
+the earliest forced position and reselects every sibling from the same immutable
+cursor at that cut. Propagate the flag through parent table heads. Break-aware
+groups must bypass the ordinary whole-group draw path even when their total
+height fits. Coalesce aligned sibling requests; preserve repeated events in one
+flow. Blank cell fragments retain the renderer's padding and page frames.
+
+Notes consume controls before queuing remaining flow. Leading controls keep the
+first-body flag until actual content is drawn; break-only definitions target the
+final requested blank page. Empty trailing chunks request a page without adding
+a label/separator; resumed body reuses that fresh page. Explicit note boundaries
+cannot be avoided by moving the reference to another page, so ordinary avoidable
+split preference does not move such references merely to fit the full note.
+Other definitions may still begin on the reference page. Remainder measurement
+walks all forced segments instead of treating the first one as the whole tail.
+
+Independent XML proves DOCX retains all content and control ownership. The actual
+LibreOffice 7.6 mixed-story rendering nevertheless drops NOTE_SIDE_A/NOTE_SIDE_B
+and changes cell break placement. Keep this as a failed visual result. A QA-only
+variant using pageBreakBefore on four following paragraphs retains all original
+tokens/images in LibreOffice but still differs in cell pagination. Do not weaken
+fixtures or silently flatten note tables. Qualify a production paragraph-property
+codec with SF round trips, repeated/trailing controls and broader Word behavior
+before changing encoding. The current native PDF behavior is independently
+verified; the larger goal remains incomplete.

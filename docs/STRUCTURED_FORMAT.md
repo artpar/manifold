@@ -139,8 +139,11 @@ flow onto labelled continuation-only pages before body flow resumes; repeated
 references link to the single first body. Endnotes use a separate measured section
 and the normal block renderer. Rich endnotes inherit its table/image/layout limits.
 Footnote images/tables use shared cell fragments and continue between text lines
-or recursively split table bands. Oversized images and explicit cell/note page
-breaks remain required continuation work. Custom separator content, nondecimal note numbering, restart/start
+or recursively split table bands. Explicit cell/note page breaks propagate
+through native table/note layout. Leading breaks can move the first note body
+away from its reference; links target that body or a break-only note's final
+blank page. Repeated breaks preserve blank pages. Oversized images remain
+required expansion. Custom separator content, nondecimal note numbering, restart/start
 or placement changes are diagnosed on DOCX import; custom marks encoded as text remain literal
 text alongside the normalized reference, with an explicit diagnostic. Symbol-font
 glyph runs reject until an explicit font-to-Unicode mapping is available. The omitted
@@ -214,8 +217,9 @@ The following remain required work, even where the current bridge rejects them:
   validation. Positions/assets/pages and explicit/inferred provenance now exist;
   more complex layouts and broader real exports still need qualification.
 - PDF font/shaping coverage and table pagination/cell layout expansion, including
-  explicit cell/note page breaks and repeated headers. Oversized body/nested/
-  footnote groups now continue recursively.
+  repeated headers and oversized images. Oversized body/nested/footnote groups
+  and explicit cell/note page breaks now continue recursively. Qualify DOCX
+  paragraph break-property import/export without changing SF control semantics.
 
 Profile extensions must preserve existing encoded semantics. If a change alters
 meaning, use a new schema version and explicit migration. Never use a new profile
@@ -286,5 +290,7 @@ image/nested cells now uses measured fragments. SF retains preferred image sizes
 DOCX/PDF fit images to their available container width, so imported rendered
 formats return physical extents. One requested dimension preserves intrinsic
 ratio; neither means 96 DPI. Oversized body/nested/note groups now continue
-recursively. Explicit cell/note page breaks and oversized images still need work.
+recursively, including explicit cell/note boundaries. Aligned sibling breaks
+coalesce; consecutive breaks in one flow preserve distinct pages. Oversized
+images and DOCX paragraph-break interoperability still need work.
 No SF schema change is required.

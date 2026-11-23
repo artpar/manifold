@@ -979,5 +979,113 @@
       "broader Word/producer note-table visual qualification",
       "other unfinished ACCEPTANCE.md rows"
     ]
+  },
+  "explicit_page_break_milestone": {
+    "date": "2026-11-23",
+    "goal_complete": false,
+    "prior_checkpoint": "959fe46",
+    "go_tests": {
+      "result": "passed",
+      "library_seconds": 4.067
+    },
+    "race": {
+      "result": "passed",
+      "library_seconds": 47.162
+    },
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host": "built and executed",
+    "diff_check": "passed",
+    "cell_fuzz": {
+      "seconds": 15,
+      "workers": 2,
+      "executions": 1825,
+      "result": "passed"
+    },
+    "note_fuzz": {
+      "seconds": 15,
+      "workers": 2,
+      "executions": 1831,
+      "result": "passed"
+    },
+    "independent_script": "scripts/verify_page_breaks.py",
+    "native": {
+      "mixed_pages": 5,
+      "cell_boundary_pages": [
+        1,
+        2
+      ],
+      "reference_and_note_start_page": 2,
+      "note_continuation_only_pages": [
+        3,
+        4
+      ],
+      "body_resumes_page": 5,
+      "images": [
+        {
+          "page": 2,
+          "bounds_pt": [
+            32,
+            46,
+            62,
+            61
+          ]
+        },
+        {
+          "page": 4,
+          "bounds_pt": [
+            44,
+            172,
+            68,
+            184
+          ]
+        }
+      ],
+      "image_pixels": "exact source RGB",
+      "frames": "source-derived spanning columns, one page frame per spanning cell",
+      "empty_note_pages": 3,
+      "empty_note_reference_target": 3,
+      "visual": "all five mixed and three empty-case pages inspected"
+    },
+    "docx": {
+      "semantic_checks": "all four controls and original content, merged-cell ownership, URI/note relationships and media",
+      "libreoffice_version": "7.6",
+      "rendered_pages": 3,
+      "visual_acceptance": false,
+      "observed_losses": [
+        "cell/note break placement differs",
+        "NOTE_SIDE_A omitted",
+        "NOTE_SIDE_B omitted"
+      ],
+      "evidence": "output/page-breaks/libreoffice-observation.json; both texts independently present in OOXML/native PDF"
+    },
+    "experimental_paragraph_variant": {
+      "script": "scripts/author_paragraph_break_variant.py",
+      "replacements": 4,
+      "libreoffice_pages": 2,
+      "missing_original_tokens": [],
+      "images": 2,
+      "production_codec": false,
+      "limitations": "cell pagination still differs; import/export, repeated control semantics and Word qualification unfinished"
+    },
+    "prosemirror": {
+      "new_example_nodes": 64,
+      "corpus_files": 51,
+      "corpus_nodes": 9027,
+      "result": "passed"
+    },
+    "poppler_comparisons": {
+      "passed": 28,
+      "total": 28
+    },
+    "production_dependencies_added": false,
+    "regressions": "regenerated recursive/body continuation, rich cells/notes, normal/five-page notes and exact merged rectangles passed",
+    "remaining": [
+      "DOCX paragraph break-property codec/round-trip qualification",
+      "resolve/qualify LibreOffice note side-text loss",
+      "oversized images",
+      "repeated headers",
+      "all other unfinished ACCEPTANCE.md rows"
+    ]
   }
 }

@@ -583,3 +583,60 @@ body/rich-cell/note/merged examples pass their exact independent oracles. The
 sections' nested/footnote-group rejection statements describe prior milestones;
 recursive continuation is now implemented. Explicit cell/note page breaks,
 oversized images, repeated headers and the other ACCEPTANCE.md rows remain open.
+
+
+## Explicit cell/note page boundaries
+
+```sh
+GOWORK=off go test -run 'TestPDF.*Break|TestPageBreak' -count=1
+GOWORK=off go run ./examples/page-breaks
+GOWORK=off go run ./examples/page-breaks -empty-note -out output/page-breaks/empty
+output/qa-venv/bin/python scripts/verify_page_breaks.py
+output/qa-venv/bin/python scripts/verify_page_breaks.py output/page-breaks/empty --empty-note
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/page-breaks/page-breaks.sf output/page-breaks/empty/page-breaks.sf
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFCellPageBreaks$' -fuzztime=15s -parallel=2 -timeout=45s
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFFootnotePageBreaks$' -fuzztime=15s -parallel=2 -timeout=45s
+```
+
+Independent pypdf/MuPDF/python-docx/XML checks assert five native mixed-story
+pages, literal token ownership, real target pages, span frames/column positions,
+marks/URIs and original media. The body image is on page two at
+(32,46)-(62,61); the note image on page four at (44,172)-(68,184), with exact
+source pixels. The cell split is between pages one/two. The note starts on page
+two, continues on pages three/four, and body resumes on page five. The empty
+note case has three pages, with a link from page one to blank page three; both
+blank continuation pages persist. All eight native pages were visually inspected.
+Both SF trees pass ProseMirror (64 nodes combined). SF/DOCX tests preserve four
+mixed-story controls, note identity and merged-cell ownership.
+
+Unit tests cover aligned/staggered sibling controls; leading/consecutive/trailing
+breaks through four nesting depths; empty notes with only 20pt of content height;
+visible notes alongside explicitly delayed notes; valid blank-page destinations;
+no mutation and atomic error output. Fifteen-second/two-worker campaigns passed
+1,825 cell-break and 1,831 note-break executions. These vary break positions,
+counts, nesting and page heights, checking every original token's ownership/order,
+blank page counts, synchronized sibling cuts and actual note destinations.
+All earlier layout examples were regenerated and their exact independent
+oracles still pass, alongside the 28 Poppler comparisons and 51-file/9,027-node
+ProseMirror corpus. Full Go/race/vet/module/CGO-disabled build/diff checks pass;
+latest measured timings are in verification.json.
+
+The mixed DOCX's LibreOffice 7.6 rendering is an explicit failed visual check:
+three pages, different cell/note boundaries and missing NOTE_SIDE_A/NOTE_SIDE_B.
+The original OOXML includes both texts and all four controls. Reproduce the
+observation with an isolated profile and record it separately from native checks:
+
+```sh
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///absolute/output/lo-pagebreak-profile --headless --convert-to pdf --outdir output/page-breaks/lo output/page-breaks/page-breaks.docx
+output/qa-venv/bin/python scripts/verify_page_breaks.py --office
+output/qa-venv/bin/python scripts/author_paragraph_break_variant.py
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///absolute/output/lo-pagebreak-experiment-profile --headless --convert-to pdf --outdir output/page-breaks/lo-experiment output/page-breaks/paragraph-breaks.docx
+```
+
+`--office` writes libreoffice-observation.json and says explicitly that its
+observation is not a pass. The variant changes four standalone break runs into
+pageBreakBefore on following paragraphs. Its actual two-page rendering retains
+all original tokens and both images, but cell-break pagination still differs.
+This authors an experiment only, not a production codec or round-trip claim.
+Next implement/qualify paragraph-property import/export while preserving the
+existing forced-event SF semantics. Original fixtures remain unchanged.

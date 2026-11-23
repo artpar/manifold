@@ -20,6 +20,7 @@ type pdfFragment struct {
 	Height  float64
 	Image   *pdfImageLayout
 	Table   *pdfTableSlice
+	Break   bool
 }
 type pdfImageLayout struct {
 	image         *Image
@@ -41,6 +42,7 @@ type pdfTableGroup struct {
 	start, end, first, last int
 	height                  float64
 	keys                    []noteKey
+	breaks                  bool
 }
 type pdfTableSlice struct {
 	table  *pdfTableLayout
@@ -56,6 +58,15 @@ func flowHeight(flow []pdfFragment) float64 {
 		h += f.Height
 	}
 	return h
+}
+
+func flowHasBreak(flow []pdfFragment) bool {
+	for _, f := range flow {
+		if f.Break || f.Table != nil && f.Table.group.breaks {
+			return true
+		}
+	}
+	return false
 }
 func flowNoteKeys(flow []pdfFragment) []noteKey {
 	var keys []noteKey
@@ -112,6 +123,8 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent float64) ([]pdfFragment
 			return nil, err
 		}
 		switch b.Kind {
+		case PageBreak:
+			flow = append(flow, pdfFragment{Break: true})
 		case Paragraph, Heading:
 			runs := append([]Run(nil), b.Runs...)
 			if b.Kind == Heading {
@@ -158,7 +171,7 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent float64) ([]pdfFragment
 				flow = append(flow, pdfFragment{Table: &pdfTableSlice{table: plan, group: g, gap: height - g.height}, Indent: indent, Height: height})
 			}
 		default:
-			return nil, fmt.Errorf("%w: explicit page breaks inside PDF cells/footnotes require cell continuation layout", ErrUnsupported)
+			return nil, fmt.Errorf("%w: unknown PDF cell/footnote block %s", ErrUnsupported, b.Kind)
 		}
 	}
 	if len(flow) == 0 {
@@ -260,6 +273,7 @@ func (r *pdfRenderer) measureTable(b Block, width float64) (*pdfTableLayout, err
 		g := pdfTableGroup{start: start, end: end, first: cursor, last: last, height: plan.offsets[end] - plan.offsets[start]}
 		for _, cell := range plan.cells[cursor:last] {
 			g.keys = append(g.keys, flowNoteKeys(cell.flow)...)
+			g.breaks = g.breaks || flowHasBreak(cell.flow)
 		}
 		plan.groups = append(plan.groups, g)
 		cursor, start = last, end
@@ -297,7 +311,7 @@ func (r *pdfRenderer) table(b Block, width, x float64) error {
 		if err != nil {
 			return err
 		}
-		if g.height+minimum > r.height-2*r.margin {
+		if g.breaks || g.height+minimum > r.height-2*r.margin {
 			if err := r.continueTableGroup(plan, g, x); err != nil {
 				return fmt.Errorf("PDF table row group %d-%d: %w", g.start+1, g.end, err)
 			}

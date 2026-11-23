@@ -18,6 +18,7 @@ type pdfCellCursor struct {
 	flow []pdfFragment
 }
 type pdfTableBand struct {
+	forced bool
 	height float64
 	cells  []pdfTableBandCell
 }
@@ -27,6 +28,7 @@ type pdfTableBandCell struct {
 	top, bottom bool
 }
 type pdfTablePage struct {
+	forced bool
 	bands  []pdfTableBand
 	height float64
 	keys   []noteKey
@@ -63,24 +65,53 @@ func (r *pdfRenderer) nextPDFTableBand(plan *pdfTableLayout, g pdfTableGroup, cu
 			desired = math.Max(desired, flowHeight(c.flow)+12)
 		}
 	}
-	if capacity+1e-7 < minimum {
+	if capacity+1e-7 < 12 {
 		return pdfTableBand{}, cursor, false, nil
 	}
 	height := math.Min(capacity, math.Max(desired, minimum))
-	band := pdfTableBand{height: height}
-	next := cursor
-	next.cells = make([]pdfCellCursor, len(cursor.cells))
-	next.remaining = math.Max(0, cursor.remaining-height)
-	done := next.remaining <= 1e-7
-	for i, c := range cursor.cells {
-		p := plan.cells[c.cell].position
-		head, tail, _, err := r.takeFragments(c.flow, height-12)
+	selectCells := func(height float64) (pdfTableBand, []pdfCellCursor, float64, error) {
+		band := pdfTableBand{height: height}
+		cells := make([]pdfCellCursor, len(cursor.cells))
+		cut := height
+		for i, c := range cursor.cells {
+			p := plan.cells[c.cell].position
+			head, tail, used, forced, err := r.takeFragments(c.flow, height-12)
+			if err != nil {
+				return band, nil, 0, err
+			}
+			cells[i] = pdfCellCursor{c.cell, tail}
+			band.cells = append(band.cells, pdfTableBandCell{position: p, flow: head, top: cursor.first && p.Row == cursor.row})
+			if forced {
+				band.forced = true
+				cut = math.Min(cut, used+12)
+			}
+		}
+		return band, cells, cut, nil
+	}
+	band, cells, cut, err := selectCells(height)
+	if err != nil {
+		return pdfTableBand{}, cursor, false, err
+	}
+	if !band.forced && capacity+1e-7 < minimum {
+		return pdfTableBand{}, cursor, false, nil
+	}
+	if band.forced {
+		// Retry all cells from the same immutable cursor at the first break.
+		// No sibling may paint text beyond that boundary on this page.
+		band, cells, _, err = selectCells(cut)
 		if err != nil {
 			return pdfTableBand{}, cursor, false, err
 		}
-		next.cells[i] = pdfCellCursor{c.cell, tail}
-		band.cells = append(band.cells, pdfTableBandCell{position: p, flow: head, top: cursor.first && p.Row == cursor.row})
-		if p.Row+p.RowSpan == cursor.row+1 && len(tail) > 0 {
+		band.forced = true
+		height = cut
+	}
+	next := cursor
+	next.cells = cells
+	next.remaining = math.Max(0, cursor.remaining-height)
+	done := next.remaining <= 1e-7
+	for _, c := range cells {
+		p := plan.cells[c.cell].position
+		if p.Row+p.RowSpan == cursor.row+1 && len(c.flow) > 0 {
 			done = false
 		}
 	}
@@ -128,6 +159,10 @@ func (r *pdfRenderer) planTablePage(plan *pdfTableLayout, g pdfTableGroup, curso
 			page.keys = append(page.keys, flowNoteKeys(c.flow)...)
 		}
 		cursor = next
+		if band.forced {
+			page.forced = true
+			break
+		}
 	}
 	return page, cursor, nil
 }
@@ -232,7 +267,7 @@ func (r *pdfRenderer) continueTableGroup(plan *pdfTableLayout, g pdfTableGroup, 
 		}
 		r.y += page.height
 		cursor = next
-		if cursor.row < g.end {
+		if cursor.row < g.end || page.forced {
 			if err := r.nextPage(true); err != nil {
 				return err
 			}

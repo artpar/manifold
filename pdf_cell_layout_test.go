@@ -203,14 +203,12 @@ func TestImageHeightOnlyAndCellFitting(t *testing.T) {
 }
 
 func TestPDFRichCellsFailuresAreAtomic(t *testing.T) {
-	for _, kind := range []string{"oversized", "pagebreak", "bad_image", "oversized_note"} {
+	for _, kind := range []string{"oversized", "bad_image", "oversized_note"} {
 		t.Run(kind, func(t *testing.T) {
 			d := richCellDocument(t)
 			switch kind {
 			case "oversized":
 				d.Layout.Height = 150
-			case "pagebreak":
-				d.Blocks[1].Rows[0].Cells[0].Blocks = append([]Block{{Kind: PageBreak}}, d.Blocks[1].Rows[0].Cells[0].Blocks...)
 			case "bad_image":
 				d.Blocks[1].Rows[0].Cells[0].Blocks[1].Image.Data = []byte("not an image")
 			case "oversized_note":

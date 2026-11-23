@@ -44,6 +44,7 @@ func (r *pdfRenderer) measureFootnote(key noteKey) (pdfNoteChunk, error) {
 func (r *pdfRenderer) minimumNewFootnotes(keys []noteKey, fresh bool) (float64, error) {
 	seen := map[noteKey]bool{}
 	height := 0.0
+	separator := fresh || len(r.pageNotes) == 0
 	for _, key := range keys {
 		if key.kind != Footnote || r.seenFootnotes[key] || seen[key] {
 			continue
@@ -52,11 +53,13 @@ func (r *pdfRenderer) minimumNewFootnotes(keys []noteKey, fresh bool) (float64, 
 		if err != nil {
 			return 0, err
 		}
-		if len(seen) == 0 && (fresh || len(r.pageNotes) == 0) {
+		start := minimumPDFFragmentHeight(chunk.lines[0])
+		if start > 0 && separator {
 			height += footnoteSeparatorHeight
+			separator = false
 		}
 		seen[key] = true
-		height += minimumPDFFragmentHeight(chunk.lines[0])
+		height += start
 	}
 	return height, nil
 }
@@ -71,6 +74,7 @@ func (r *pdfRenderer) ensureWithNotes(height float64, keys []noteKey) error {
 	var additions []pdfNoteChunk
 	seen := map[noteKey]bool{}
 	desired, minimumStarts := 0.0, 0.0
+	together := true
 	for _, key := range keys {
 		if key.kind != Footnote || r.seenFootnotes[key] || seen[key] {
 			continue
@@ -83,20 +87,21 @@ func (r *pdfRenderer) ensureWithNotes(height float64, keys []noteKey) error {
 		additions = append(additions, chunk)
 		desired += flowHeight(chunk.lines)
 		minimumStarts += minimumPDFFragmentHeight(chunk.lines[0])
+		together = together && !flowHasBreak(chunk.lines)
 	}
 	extraSeparator := 0.0
-	if len(additions) > 0 && len(r.pageNotes) == 0 {
+	if minimumStarts > 0 && len(r.pageNotes) == 0 {
 		extraSeparator = footnoteSeparatorHeight
 	}
 	required := height + r.noteReserve + extraSeparator + desired
 	// Prefer a fresh page to an avoidable note split. Existing notes are flushed
 	// before moving the reference, so no already-painted body content overlaps.
-	if r.y+required > r.height-r.margin && r.y > r.margin && (height+footnoteSeparatorHeight+desired <= contentHeight || len(additions) == 0) {
+	if r.y+required > r.height-r.margin && r.y > r.margin && (together && height+footnoteSeparatorHeight+desired <= contentHeight || len(additions) == 0) {
 		if err := r.nextPage(true); err != nil {
 			return err
 		}
 		extraSeparator = 0
-		if len(additions) > 0 {
+		if minimumStarts > 0 {
 			extraSeparator = footnoteSeparatorHeight
 		}
 	}
@@ -105,7 +110,7 @@ func (r *pdfRenderer) ensureWithNotes(height float64, keys []noteKey) error {
 			return err
 		}
 		extraSeparator = 0
-		if len(additions) > 0 {
+		if minimumStarts > 0 {
 			extraSeparator = footnoteSeparatorHeight
 		}
 	}
@@ -115,7 +120,10 @@ func (r *pdfRenderer) ensureWithNotes(height float64, keys []noteKey) error {
 			if err := r.nextPage(true); err != nil {
 				return err
 			}
-			extraSeparator = footnoteSeparatorHeight
+			extraSeparator = 0
+			if minimumStarts > 0 {
+				extraSeparator = footnoteSeparatorHeight
+			}
 			capacity = contentHeight - height - extraSeparator
 		}
 		if capacity+1e-7 < minimumStarts {
@@ -127,20 +135,25 @@ func (r *pdfRenderer) ensureWithNotes(height float64, keys []noteKey) error {
 		remainingStarts := minimumStarts
 		for _, chunk := range additions {
 			remainingStarts -= minimumPDFFragmentHeight(chunk.lines[0])
-			head, tail, used, err := r.takeFragments(chunk.lines, capacity-remainingStarts)
+			head, tail, used, forced, err := r.takeFragments(chunk.lines, capacity-remainingStarts)
 			if err != nil {
 				return err
 			}
-			if len(head) == 0 {
+			if len(head) == 0 && !forced {
 				return fmt.Errorf("%w: no room for footnote start", ErrUnsupported)
 			}
-			r.pageNotes = append(r.pageNotes, pdfNoteChunk{key: chunk.key, lines: head, first: true, indent: chunk.indent})
+			if len(head) > 0 {
+				r.pageNotes = append(r.pageNotes, pdfNoteChunk{key: chunk.key, lines: head, first: true, indent: chunk.indent})
+			}
 			r.noteReserve += used
 			capacity -= used
 			r.seenFootnotes[chunk.key] = true
-			if len(tail) > 0 {
-				r.pendingNotes = append(r.pendingNotes, pdfNoteChunk{key: chunk.key, lines: tail, indent: chunk.indent})
+			if len(tail) > 0 || forced {
+				r.pendingNotes = append(r.pendingNotes, pdfNoteChunk{key: chunk.key, lines: tail, first: len(head) == 0, indent: chunk.indent})
 			}
+		}
+		if len(r.pageNotes) == 0 {
+			r.noteReserve -= extraSeparator
 		}
 	}
 	return r.ctx.Err()
@@ -188,9 +201,17 @@ func (r *pdfRenderer) nextPage(bodyNeeded bool) error {
 	pending := r.pendingNotes
 	r.pendingNotes = nil
 	capacity := r.height - 2*r.margin - footnoteSeparatorHeight - 10
-	if len(pending) > 0 && capacity <= 0 {
-		return fmt.Errorf("%w: page too small for footnote continuation", ErrUnsupported)
+	if capacity <= 0 {
+		for _, chunk := range pending {
+			for _, f := range chunk.lines {
+				if minimumPDFFragmentHeight(f) > 0 {
+					return fmt.Errorf("%w: page too small for footnote continuation", ErrUnsupported)
+				}
+			}
+		}
+		capacity = 0
 	}
+	lastEmpty := false
 	for len(pending) > 0 {
 		if err := r.ctx.Err(); err != nil {
 			return err
@@ -199,32 +220,49 @@ func (r *pdfRenderer) nextPage(bodyNeeded bool) error {
 		r.y = r.margin
 		left := capacity
 		var chunks []pdfNoteChunk
-		for len(pending) > 0 && left > 0 {
+		for len(pending) > 0 && (left > 0 || len(pending[0].lines) == 0 || pending[0].lines[0].Break) {
 			chunk := pending[0]
-			head, tail, used, err := r.takeFragments(chunk.lines, left)
+			// A trailing break with no remaining body still requests a page.
+			if len(chunk.lines) == 0 {
+				if chunk.first {
+					r.pdf.SetLink(r.noteLinks[chunk.key], r.margin, -1)
+				}
+				pending = pending[1:]
+				continue
+			}
+			head, tail, used, forced, err := r.takeFragments(chunk.lines, left)
 			if err != nil {
 				return err
 			}
-			if len(head) == 0 {
+			if len(head) == 0 && !forced {
 				if len(chunks) == 0 {
 					return fmt.Errorf("%w: footnote fragment is taller than a continuation page", ErrUnsupported)
 				}
 				break
 			}
-			chunks = append(chunks, pdfNoteChunk{key: chunk.key, lines: head, first: chunk.first, indent: chunk.indent})
+			if len(head) > 0 {
+				chunks = append(chunks, pdfNoteChunk{key: chunk.key, lines: head, first: chunk.first, indent: chunk.indent})
+			}
 			left -= used
 			if len(tail) == 0 {
 				pending = pending[1:]
 			} else {
 				pending[0].lines = tail
-				pending[0].first = false
+				pending[0].first = chunk.first && len(head) == 0
+			}
+			if forced {
+				if len(tail) == 0 {
+					pending = append([]pdfNoteChunk{{key: chunk.key, first: chunk.first && len(head) == 0}}, pending...)
+				}
+				break
 			}
 		}
+		lastEmpty = len(chunks) == 0
 		if err := r.paintFootnotes(chunks, true); err != nil {
 			return err
 		}
 	}
-	if bodyNeeded {
+	if bodyNeeded && !lastEmpty {
 		r.pdf.AddPage()
 		r.y = r.margin
 	}

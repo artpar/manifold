@@ -1,0 +1,331 @@
+{
+  "type": "doc",
+  "attrs": {
+    "schema": "manydoc-prosemirror/1",
+    "metadata": {
+      "title": "Explicit cell and footnote page breaks",
+      "author": "manydoc"
+    },
+    "layout": {
+      "width": 480,
+      "height": 240,
+      "margin": 20
+    },
+    "notes": [
+      {
+        "kind": "footnote",
+        "id": "broken",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "NOTE_BEFORE"
+              }
+            ]
+          },
+          {
+            "type": "page_break"
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "NOTE_AFTER"
+              }
+            ]
+          },
+          {
+            "type": "table",
+            "content": [
+              {
+                "type": "table_row",
+                "content": [
+                  {
+                    "type": "table_cell",
+                    "attrs": {
+                      "rowspan": 2
+                    },
+                    "content": [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "NOTE_INNER_BEFORE"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "page_break"
+                      },
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "NOTE_INNER_AFTER"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "image",
+                        "attrs": {
+                          "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAIAAAB7QOjdAAAAD0lEQVR4nGNY8GyLyAIbAAzNAysUpEmZAAAAAElFTkSuQmCC",
+                          "width": 24,
+                          "height": 12,
+                          "alt": "Green note image"
+                        }
+                      },
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "NOTE_END",
+                            "marks": [
+                              {
+                                "type": "link",
+                                "attrs": {
+                                  "href": "https://example.invalid/note-break"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "table_cell",
+                    "attrs": {},
+                    "content": [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "NOTE_SIDE_A"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "table_row",
+                "content": [
+                  {
+                    "type": "table_cell",
+                    "attrs": {},
+                    "content": [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "NOTE_SIDE_B"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "content": [
+    {
+      "type": "table",
+      "content": [
+        {
+          "type": "table_row",
+          "content": [
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 2,
+                "rowspan": 2
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "OUTER_BEFORE"
+                    }
+                  ]
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "table_row",
+                      "content": [
+                        {
+                          "type": "table_cell",
+                          "attrs": {
+                            "rowspan": 2
+                          },
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "INNER_BEFORE"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "page_break"
+                            },
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "INNER_AFTER",
+                                  "marks": [
+                                    {
+                                      "type": "strong"
+                                    },
+                                    {
+                                      "type": "link",
+                                      "attrs": {
+                                        "href": "https://example.invalid/break"
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "note_reference",
+                                  "attrs": {
+                                    "kind": "footnote",
+                                    "id": "broken"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "image",
+                              "attrs": {
+                                "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAGCAIAAAB4jOjWAAAAGklEQVR4nGO49Pq/SMod/CQDQRVAkmEQmgQAS9uSQY5qJlAAAAAASUVORK5CYII=",
+                                "width": 30,
+                                "height": 15,
+                                "alt": "Blue checkerboard"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "table_cell",
+                          "attrs": {},
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "INNER_SIDE_A"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "table_row",
+                      "content": [
+                        {
+                          "type": "table_cell",
+                          "attrs": {},
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "INNER_SIDE_B"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "OUTER_AFTER"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "attrs": {},
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "OUTER_SIDE_A"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table_row",
+          "content": [
+            {
+              "type": "table_cell",
+              "attrs": {},
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "OUTER_SIDE_B"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "page_break"
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "BODY_AFTER"
+        }
+      ]
+    }
+  ]
+}

@@ -17,10 +17,12 @@ integration and do not authorize changes to Daptin.
 4. Expand forward tagged-PDF recovery and the implemented untagged whitespace/heading/list/numeric/painted-grid table inference (including merges/empty/multiline cells) with more complex/double-border/occluded/rotated layouts; validate inverse ParentTree and internal links. Expand CMaps,
    vertical text and remaining image codecs/masks/colors. A successful extraction must not imply
    reconstruction of editable Word structure.
-5. Extend recursive body/nested/footnote table continuation with explicit cell/note
-   page breaks, oversized image handling, repeated headers and broader pagination
-   qualification. Qualify note-table visual interoperability beyond the observed
-   LibreOffice flattening; retain the actual OOXML/SF table semantics.
+5. Extend recursive body/nested/footnote continuation with oversized images,
+   repeated headers and broader pagination qualification; native explicit breaks
+   now exist. Prioritize DOCX paragraph break-property import/export qualification:
+   a QA pageBreakBefore variant recovers note side texts omitted by LibreOffice's
+   rendering of break runs. Preserve SF control events and disclose the visual
+   failure until the mitigation and broader Word behavior are qualified.
 6. Build the Colleaf .vdocs adapter once its actual schema and supported features
    are supplied or inspected. Do not invent a second native editor schema.
 7. Integrate thin Daptin performers around this public library. Keep Daptin's

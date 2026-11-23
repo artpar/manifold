@@ -21,7 +21,53 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: recursive table and footnote continuation
+## Latest milestone: explicit cell and footnote page breaks
+
+- `pdfFragment.Break` is a zero-height control event. Break-aware table groups
+  always use the planner, including groups otherwise small enough for one page.
+  A cell's first forced boundary cuts the whole table band; every sibling is
+  reselected from the same immutable cursor at that cut. Nested boundaries
+  propagate to parent tables. Aligned sibling breaks share a boundary; consecutive
+  breaks in one flow retain separate pages. Blank cell fragments keep padding.
+- `pdf_notes.go` moves forced note tails to continuation pages. Leading breaks
+  can move the first actual body away from its reference; links target that body,
+  or the final blank page for a note containing only breaks. Such empty notes
+  reserve no separator/text height. Trailing breaks create a fresh page that
+  resumed body can reuse, avoiding an extra unintended blank page. Other note
+  definitions can still start on the original reference page.
+- `examples/page-breaks` supplies a five-page mixed case and a three-page
+  `-empty-note` case. Independent pypdf/MuPDF/python-docx/XML checks verify exact
+  page ownership, nested span frames/columns, original styles/URIs, both image
+  pixels/positions and actual destinations. The empty note's reference targets
+  page three; both empty continuation pages remain present. All eight native
+  pages were visually inspected. SF/DOCX preserve all four mixed-story breaks.
+- Full Go tests, race, vet, module verification, CGO-disabled host build/execution
+  and diff checks pass; timings are in verification.json. Two fifteen-second,
+  two-worker campaigns passed 1,825 cell-break and 1,831 note-break executions.
+  Tests include simultaneous/staggered sibling breaks, four nesting depths,
+  leading/consecutive/trailing controls, empty notes on a 20pt content area,
+  adjacent visible/moved notes and atomic errors. Regenerated prior layout/note
+  examples, all 28 Poppler comparisons and the 51-file/9,027-node ProseMirror
+  corpus pass. Both new SF examples pass at 64 combined nodes.
+- LibreOffice 7.6 rendered the mixed DOCX in three inspected pages, changed the
+  cell/note break placement and omitted NOTE_SIDE_A/NOTE_SIDE_B. Both texts are
+  present in independently checked OOXML and the native PDF. This is a failed
+  LibreOffice visual check, not accepted content loss. `--office` records the
+  failure explicitly in output/page-breaks/libreoffice-observation.json.
+- A reproducible QA variant replaces four standalone break runs with
+  pageBreakBefore on their following paragraphs. LibreOffice renders it in two
+  pages with all original tokens and two images, but still differs from native
+  forced cell pagination. `scripts/author_paragraph_break_variant.py` authors
+  that experiment only; production encoding/import/round-trip support has not
+  changed. This is a concrete compatibility mitigation to qualify next.
+
+The goal remains incomplete. Prioritize paragraph break-property import/export
+and qualification of that DOCX mitigation, preserving leading/consecutive/trailing
+break intent. Then oversized images, repeated headers and the other ACCEPTANCE.md
+rows remain. No external blocker prevents continuing. The prior checkpoint is
+`959fe46`; this milestone is committed with its tests, examples and KT docs.
+
+## Earlier milestone: recursive table and footnote continuation
 
 - `pdf_fragment_continue.go` selects measured prefixes and immutable continuation
   tails. A table fragment can supply a smaller page band to its containing cell
@@ -611,19 +657,25 @@ module access. The go.mod selects Go 1.25; do not force an older local toolchain
 
 ## Next work (required for the active goal)
 
-No external blocker currently prevents development. Nested body/footnote tables
-now split recursively, with immutable cell-flow cursors and page-local note
-reservation. Next represent explicit page breaks in the fragment flow, propagate
-forced boundaries through parent table cursors and note continuation, and verify
-other cells stay in order. Then implement oversized image handling, repeated
-headers and the other ACCEPTANCE.md rows. The LibreOffice note-table flattening
-observation needs broader producer/Word qualification, not silently changed SF
-or OOXML content. Required unfinished capabilities remain in the audit.
+No external blocker currently prevents development. Native cell/note page breaks
+now propagate recursively and retain blank pages. Next qualify paragraph
+pageBreakBefore import/export as a mitigation for the observed LibreOffice loss
+with break runs inside note tables. The checked experimental variant recovers
+all content but still differs in cell pagination; require SF/DOCX round-trip and
+leading/consecutive/trailing tests before changing production encoding. Then
+implement oversized images, repeated headers and the remaining acceptance rows.
+Do not hide the failed LibreOffice visual check or change original fixtures.
 
 Next concrete commands:
 
 ```sh
-rg -n 'PageBreak|takeFragments|minimumPDFFragmentHeight|planTablePage' pdf_cell_layout.go pdf_fragment_continue.go pdf_table_continue.go pdf_notes.go
+rg -n 'pageBreakBefore|case PageBreak|case .br.|pPr' docx_read.go docx_write.go pdf_pagebreak_test.go
+GOWORK=off go test -run 'TestPDF.*Break|TestPageBreak' -count=1
+GOWORK=off go run ./examples/page-breaks
+GOWORK=off go run ./examples/page-breaks -empty-note -out output/page-breaks/empty
+output/qa-venv/bin/python scripts/verify_page_breaks.py
+output/qa-venv/bin/python scripts/verify_page_breaks.py output/page-breaks/empty --empty-note
+output/qa-venv/bin/python scripts/author_paragraph_break_variant.py
 GOWORK=off go test -run 'TestPDFRecursive|TestRecursiveTable' -count=1
 GOWORK=off go run ./examples/recursive-tables
 output/qa-venv/bin/python scripts/verify_recursive_tables.py

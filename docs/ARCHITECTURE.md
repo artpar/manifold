@@ -72,9 +72,12 @@ separators and labelled text/list/image/table bodies, draining overlong notes on
 continuation-only pages before resuming body flow. Text lines/images remain
 atomic; connected table groups can supply smaller bands recursively. Endnotes use the body renderer
 in a separate section. Internal links target actual note pages; independent
-readers check destinations, not only labels/text. Oversized atomic fragments,
-explicit cell/footnote page breaks and richer numbering/separator/layout behavior
-remain required expansion.
+readers check destinations, not only labels/text. Forced note breaks move their
+remaining flow to continuation pages. Leading breaks delay the first destination;
+empty break-only definitions target the final requested blank page. Trailing
+breaks leave a fresh page that resumed body can reuse. Empty notes reserve no
+separator height. Oversized atomic fragments and richer numbering/separator/layout
+behavior remain required expansion.
 
 ## Lists
 
@@ -113,8 +116,13 @@ band, including padding/final spacing. Only references in selected heads are
 admitted. Remeasuring a remainder without a page limit accounts for added
 continuation padding; a parent does not underestimate its child and close/reopen
 the same merged frame several times on one physical page. Same-row bands can
-combine into one page plan. Explicit cell/footnote page-break continuation and
-oversized image handling are still unfinished.
+combine into one page plan. A zero-height Break fragment stops selection and
+returns a forced-boundary signal. Every cell is reselected at the first cut,
+preventing siblings from painting beyond it. The flag propagates through nested
+table heads; groups with controls bypass the ordinary whole-group fast path.
+Aligned sibling breaks coalesce, while repeated controls in one flow retain
+separate pages. Remainder measurement traverses all forced segments. Oversized
+image handling and broader continuation qualification remain unfinished.
 
 `image_layout.go` fits preferred image dimensions to the current page/cell/list
 container before deriving a missing dimension, preventing overflow for extreme

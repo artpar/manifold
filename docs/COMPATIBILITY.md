@@ -4,7 +4,7 @@ This initial implementation targets explicit, testable document operations.
 Passing the included corpus is not a guarantee for arbitrary customer files.
 
 The active completion goal is broader than this initial support table. Required
-work such as PDF structured recovery, explicit cell/footnote page breaks and richer footnote layout is unfinished;
+work such as PDF structured recovery, DOCX break-property interoperability and richer footnote layout is unfinished;
 current rejection behavior must not be read as an exemption from that goal.
 
 ## Format support
@@ -14,7 +14,7 @@ current rejection behavior must not be read as an exemption from that goal.
 | DOCX read | Paragraphs/headings, bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
 | DOCX write | Paragraphs/headings/runs/links, lists, tables/nesting/row and column spans, PNG/JPEG images, metadata, one page layout and header/footer, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
 | PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; more complex inference, internal destinations and OCR unfinished; unsupported codecs/encodings/operators reject |
-| PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, text headers/footers, linked rich footnotes/endnotes with continuation | Embedded Go font coverage; complex shaping/bidi rejected; body/nested/footnote row groups continue recursively; oversized image atoms and explicit cell/footnote page breaks still reject |
+| PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, text headers/footers, linked rich footnotes/endnotes with continuation | Embedded Go font coverage; complex shaping/bidi rejected; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; oversized image atoms still reject |
 | SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; richer required features remain unfinished |
 | Legacy JSON | Public model with base64 image data and diagnostics | Unknown JSON fields rejected; this is manydoc's model, not Colleaf's .vdocs schema |
 | Text | Body/table/note text; form feeds represent page breaks | Formatting and binary image data are not represented |
@@ -129,8 +129,11 @@ ending cells draw interior horizontal borders; continuation pages close their
 outer borders. Each band has 6pt top/bottom padding. Nested cell/footnote tables
 now supply smaller bands recursively, retaining original flow/merge ownership
 and one enclosing frame per physical page. An oversized table can be the first
-footnote block. Oversized image atoms and explicit cell page breaks still need
-continuation work and reject without output. Image sizes are preferences fitted to available
+footnote block. Explicit breaks cut the whole table page at the first cell
+boundary; sibling content remains unconsumed after that point. Nested breaks
+propagate to parents. Aligned sibling events share a page boundary; repeated
+breaks in one flow retain separate pages. Oversized image atoms still require
+expansion and reject without output. Image sizes are preferences fitted to available
 container width; a single dimension preserves intrinsic ratio, neither means
 96 DPI. DOCX/PDF padding differs, so physical fitted sizes may differ. SF retains
 requested sizes; rendered-format readers recover physical drawing extents.
@@ -188,8 +191,16 @@ fixture independently checks native columns, borders, pixels and destinations
 across seven pages. LibreOffice 7.6 reads its DOCX with all content/images but
 flattens note tables; native PDF and XML semantics pass, while note-table visual
 interoperability needs broader Word/producer qualification. Oversized image
-atoms, explicit cell/footnote page breaks, richer note numbering/placement and
-custom separators remain required expansion.
+atoms, richer note numbering/placement and custom separators remain required
+expansion. Explicit note breaks now move remaining content to continuation pages.
+Leading breaks delay the first destination; a break-only note targets its final
+blank page and needs no separator height. Trailing breaks create a reusable fresh
+page. Standard DOCX break runs persist, but the mixed cell/note-break fixture
+failed LibreOffice 7.6 visual qualification: pagination differs and two note side
+texts disappear despite their presence in OOXML/native PDF. A QA paragraph
+pageBreakBefore variant recovers all texts/images but still differs in cell
+pagination. Production paragraph-property import/export remains required work;
+this observation is not a supported loss or a Word-fidelity claim.
 The reader diagnoses Word's lowerRoman-vs-OOXML decimal ambiguity when endnote
 format is omitted. DOCX customMarkFollows retains marks encoded as literal text but
 normalizes the automatic reference, with a diagnostic; it is not a custom-label
@@ -257,6 +268,7 @@ retain original content with ambiguity diagnostics. Coordinate/line/slot budgets
 bound inference. Border appearance, authorial/header semantics, arbitrary curves,
 occlusion, double borders and complex orientations are not established by this
 milestone. Native PDF output now supports measured image/nested cells and
-recursive oversized body/nested/footnote group continuation. Explicit cell/note
-page breaks and oversized images still need work. DOCX/SF preserve imported
+recursive oversized body/nested/footnote group continuation and explicit
+cell/note page boundaries. Oversized images and DOCX break-property
+interoperability still need work. DOCX/SF preserve imported
 cell content, with rendered image sizes fitted to the available width.
