@@ -855,3 +855,25 @@ Previously the sectioned writer omitted these, introducing a default-numbering
 ambiguity diagnostic on its own endnote reimport. The helper preserves flat output
 exactly and changes only sectioned note properties. No canonical schema change or
 reader diagnostic suppression was used to obtain the exact source round trip.
+
+
+## Original Word corpus and independent oracles
+
+The original MQTT 5.0 DOCX/PDF pair lives under testdata/real, with immutable hashes
+and retained publisher Notices. `audit_mqtt_source.py` derives Word paragraph and
+per-cell content hashes, merged origin coordinates, header prefixes, hyperlink
+ownership and media identity directly from ZIP/XML. The Go regression checks all
+59 tables/756 rows/3,009 origins plus complete normalized SF preservation through
+DOCX. These are structural/textual checks, not Word-layout equivalence.
+
+`audit_mqtt_pdf.py` independently records original forward tagged-table membership
+and default spans, not inferred geometry. Its 90 tables/3,020 cells include empty
+vertical continuation cells omitted from Word origin lists. Forty-two tables lack
+span attributes, making current strict rectangular-grid recovery fail. Existing
+painted-grid inference demonstrates recovery on an untagged local page-17 control;
+merging that geometric evidence with authoritative tagged membership remains the
+next required implementation. Missing span attributes must not be confused with
+invalid PDF objects, nor should the whole logical table be discarded to obtain a
+passing plain-text extraction. Cell/attribute provenance and empty continuations
+need explicit treatment. Native output also needs a font covering actual U+2A6D4;
+missing-glyph rejection currently preserves atomicity, not full-goal completion.

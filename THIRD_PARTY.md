@@ -29,7 +29,8 @@ Source: <https://github.com/notofonts/noto-fonts>.
 
 `testdata/assets/w3c-dummy.pdf` and its corpus copy are a published W3C test
 resource: <https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf>.
-The remaining document content is synthetic. Fixture provenance, SHA-256 hashes,
+The remaining initial corpus document content is synthetic; the separately listed
+real exports below retain their original notices. Fixture provenance, SHA-256 hashes,
 and expectations are in `testdata/corpus/manifest.json`.
 
 Python fixture/verification tools are optional development tools, with package
@@ -98,3 +99,18 @@ It is test/example data, not embedded into the library/CLI. The authored
 `testdata/rtl-item-context.json` records fourteen original-font native HarfBuzz
 item-context measurements; optional scripts/verify_bidi_context.py checks actual
 regular/bold PDF glyphs/positions. No proprietary implementation or new module.
+
+
+`testdata/real/mqtt-v5.0-os.docx` and `.pdf` are the unmodified authoritative Word
+source and paired published PDF of **MQTT Version 5.0**, OASIS Standard,
+7 March 2019, edited by Andrew Banks, Ed Briggs, Ken Borgendale and Rahul Gupta.
+Copyright © OASIS Open 2019. The publication's [Notices](https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html)
+permit copying/furnishing the document with the copyright notice and Notices
+included; both original files retain those sections in full. They are not MIT
+licensed implementation code. Do not modify the originals or present generated
+normalized QA conversions as an OASIS Standard. The manifest pins original bytes,
+sources, rights and current conversion failures. The adjacent structural oracle
+contains independently extracted counts, geometry and content hashes, not another
+edition of the standard. Original embedded fonts/marks remain inside the originals
+and are not reused as manydoc output fonts. No endorsement is implied. Optional
+QA conversions stay ignored.

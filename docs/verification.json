@@ -2154,7 +2154,7 @@
     "fixture_oracle_changed": false,
     "external_blocker": null
   },
-  "latest_milestone": "section_control_ownership_and_note_numbering",
+  "latest_milestone": "original_word_corpus",
   "language_direction_ltr_shaping": {
     "date": "2026-11-23",
     "goal_complete": false,
@@ -2499,7 +2499,7 @@
     ],
     "external_blocker": null
   },
-  "latest_evidence": "section_control_ownership_2026_11_24",
+  "latest_evidence": "original_word_corpus_2026_11_24",
   "paragraph_bidi_levels_2026_11_24": {
     "goal_complete": false,
     "previous_checkpoint": "658a5b0",
@@ -3973,5 +3973,109 @@
       "GOWORK=off go test -run 'TestPDFSectionControl|TestPDFEmptyPending|TestPDFEmptyContinuous|TestSectionedDOCXDeclares' .",
       "rg -n 'real|export|corpus|remaining' docs/ACCEPTANCE.md docs/COMPATIBILITY.md testdata/real"
     ]
+  },
+  "original_word_corpus_2026_11_24": {
+    "status": "verified corpus/normalized DOCX milestone; full goal incomplete; no external blocker",
+    "original_sources": [
+      "testdata/real/mqtt-v5.0-os.docx",
+      "testdata/real/mqtt-v5.0-os.pdf"
+    ],
+    "rights": "unmodified OASIS Open publication copies; complete embedded copyright/Notices retained; see manifest and THIRD_PARTY.md",
+    "oracles": [
+      "scripts/audit_mqtt_source.py",
+      "scripts/audit_mqtt_pdf.py",
+      "testdata/real/mqtt-v5.0-oracle.json",
+      "testdata/real/mqtt-v5.0-pdf-oracle.json"
+    ],
+    "checks": {
+      "go_test_all": "passed: library 10.263s; CLI/bidi cached",
+      "go_test_race_all": "passed: library 124.903s; CLI/bidi cached",
+      "go_vet_all": "passed",
+      "module_verify": "passed",
+      "malformed_docx_fuzz": {
+        "executions": 500,
+        "passed": true,
+        "seconds": 1.532
+      },
+      "cgo_disabled_host_build_and_docx_cli_paths": "passed",
+      "cgo_disabled_linux_amd64_arm64": "builds passed; not executed",
+      "diff_check": "passed"
+    },
+    "word_structure": {
+      "sections": 2,
+      "headings": 291,
+      "nonempty_body_paragraphs": 4998,
+      "tables": 59,
+      "rows": 756,
+      "origin_cells": 3009,
+      "merged_colspan_origins": 161,
+      "merged_rowspan_origins": 7,
+      "hyperlink_target_text_hashes": 434,
+      "original_jpeg_bytes": 4046,
+      "original_jpeg_sha256": "fe9737d0cb4f905917054c7938fc3ccf4b83f0623df9cd5d62192dbaae26b510",
+      "independent_xml": "all original per-cell geometry/content/link/media facts match generated DOCX",
+      "normalized_sf_roundtrip": "exact after explicitly acknowledged source diagnostics; original source diagnostics retained in extracted SF"
+    },
+    "prosemirror": {
+      "files": 2,
+      "nodes_marks_attributes": 46798,
+      "result": "passed actual schema"
+    },
+    "publisher_pdf": {
+      "pages": 137,
+      "independent_readers": "pypdf strict and MuPDF open successfully",
+      "tagged_tables": 90,
+      "tagged_rows": 756,
+      "tagged_cells": 3020,
+      "ragged_default_span_tables": 42,
+      "first_gap": {
+        "object": 4887,
+        "page": 17,
+        "unit_span_row_widths": [
+          9,
+          2,
+          2,
+          2
+        ],
+        "word_and_painted_spans": "three lower data rows have an eight-column merged value cell"
+      },
+      "current_native_result": "rejects: PDF logical structure: tagged table rows do not cover the declared grid; required recovery gap, not an exempt invalid fixture"
+    },
+    "visual": {
+      "sampled_original_pages": [
+        1,
+        17,
+        22,
+        89
+      ],
+      "sampled_normalized_render_pages": [
+        1,
+        17,
+        22,
+        89
+      ],
+      "normalized_libreoffice_pages": 143,
+      "observations": [
+        "substantial numbering/presentation/reflow differences",
+        "cached PAGE/NUMPAGES remain cached under explicit field policy",
+        "no Word-equivalence or full four-path source qualification claim"
+      ]
+    },
+    "open_required_work": [
+      "combine explicit tagged membership with unique painted grid to infer missing spans; account for eleven logical vertical continuation cells and attribute provenance",
+      "supply and qualify a reusable source font covering actual U+2A6D4; retain explicit current missing-glyph outcome rather than removing the character",
+      "source numbering templates/formats, shading, unequal widths and broader font/layout/recovery/corpus requirements"
+    ],
+    "next_commands": [
+      "GOWORK=off go test -run '^TestRealWordMQTT' .",
+      "output/qa-venv/bin/python scripts/audit_mqtt_pdf.py",
+      "bin/manydoc extract -format sf -pdf-skip-inference -o output/real-docx/mqtt-pdf.sf testdata/real/mqtt-v5.0-os.pdf",
+      "rg -n 'table|rulingRegions|ruledPDFCells' pdf_structure_blocks.go pdf_ruled_table.go"
+    ],
+    "sf_schema": {
+      "files": 2,
+      "nodes_checked": 46798,
+      "marks_and_attributes": "validated with actual ProseMirror"
+    }
   }
 }

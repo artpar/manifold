@@ -19,7 +19,7 @@ prevents continuing implementation.
 | Supported SF round-trip semantics | Current engine fields compared across 51 accepted inputs, targeted rich tree regression, unsafe separate-list collapse rejected | Expand preservation coverage as required semantics are implemented |
 | Stable public Go API and CLI | Existing Read/Write, new public structured tree/codecs, CLI atomic output and four-path tests | Reassess/finalize rich API contract after missing semantics land |
 | Pure Go in-process, no service/CGO/executable requirement | Go tests/race/vet/module verification and host CGO-disabled build pass; new SF codec adds no dependency | Repeat final cross-builds and audit once feature work is finished |
-| Representative corpus, independent readers and visual QA | Mostly synthetic corpus, one W3C PDF plus an original ten-page published InDesign government export (57 list items/16 URI targets), current report checked independently and PDF rendered; merged-table example checked structurally, native PDF and LibreOffice-rendered DOCX visually inspected | Real exported documents from representative editors/producers, licensing/provenance, structural oracles and broader DOCX visual acceptance |
+| Representative corpus, independent readers and visual QA | Targeted synthetic corpus, original Word MQTT 5.0 DOCX/PDF pair with all cell/merge/text/link/asset oracles, one W3C PDF plus an original ten-page published InDesign government export (57 list items/16 URI targets), current report checked independently and PDF rendered; merged-table example checked structurally, native PDF and LibreOffice-rendered DOCX visually inspected | Real exported documents from representative editors/producers, licensing/provenance, structural oracles and broader DOCX visual acceptance |
 | Robustness/final checks | Existing deterministic damaged-input tests pass; SF fuzz 177,117 executions passed; full tests/race/vet/build pass | Repeat relevant malformed-input/fuzz and final complete checks after remaining implementation |
 | Recovery documentation | STATUS/ARCHITECTURE/DECISIONS/COMPATIBILITY/STRUCTURED_FORMAT/TESTING plus verification summary | Keep current each milestone; no completion claim until every row is proven |
 
@@ -175,3 +175,11 @@ forty-three inspected producer pages preserve body/note content with different
 ownership/packing. These remain targeted synthetic controls, not representative
 real-world export coverage. Broader bindings, corpus, font/script and PDF recovery
 requirements remain open; the full objective is incomplete.
+
+
+The original MQTT Word export now qualifies normalized DOCX/SF structure across
+59 tables and all 3,009 origin cells plus 434 hyperlink ownership hashes. This
+advances the real-corpus requirement without claiming four-path completion: its
+paired PDF still fails tagged-span recovery, and native output still needs a
+font for its supplementary CJK character. Source formatting/numbering and visual
+normalization differences remain explicit. Original files/oracles are retained.

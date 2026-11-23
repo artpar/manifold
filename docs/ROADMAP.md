@@ -155,3 +155,11 @@ Next audit the representative export corpus and acquire a reusable licensed rich
 DOCX with structural oracles, then address concrete font/script/theme/note/recovery
 failures. Continue qualifying richer control/binding combinations and conservative
 packing; the targeted milestone does not close the full rich-document goal.
+
+
+An original licensed rich Word export and independent cell/link/content/asset
+oracles now exist (MQTT 5.0). Next combine its explicit PDF membership with painted
+span evidence, handling empty vertical continuation cells and inference provenance.
+Then qualify an actual supplementary CJK font and address concrete numbering,
+width/shading and layout gaps. Preserve original sources instead of normalizing
+away failures; broader corpus and every original acceptance item remain required.

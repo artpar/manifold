@@ -596,3 +596,13 @@ attributes or inferred authored controls. Sectioned DOCX now declares the model'
 existing decimal/continuous note numbering in every section, retaining exact
 source SF including empty bodies/endnotes. Broader bindings and real exports
 remain required; native and producer layout ownership can differ.
+
+
+The original MQTT Word corpus independently verifies the current profile's
+normalized paragraph/cell/merge/link/asset semantics. Its source diagnostics remain
+in extracted SF; a caller-acknowledged normalized DOCX round trip matches the
+profile after removing that source diagnostic record. This is not preservation
+of all original numbering/layout/field semantics. No schema change is introduced
+by the corpus checkpoint. Tagged PDF cells with missing spans still need
+geometry-backed inference and per-attribute/continuation provenance; original
+logical membership must remain distinguishable from inferred geometry.

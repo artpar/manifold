@@ -802,3 +802,22 @@ Custom numbering, more note/page bindings and broader real exports remain open.
 The fourteen producer exports retain all body/note content across forty-three
 pages but differ in conditional-start behavior, empty parity collapse and first/
 even/running ownership; they do not prove Word-equivalent native pagination.
+
+
+The original MQTT 5.0 Word export now has independent structural/content/asset/
+relationship checks: 4,998 nonempty body paragraphs, 291 headings, 59 tables with
+756 rows/3,009 origins and every merge/per-cell text hash, 434 hyperlink ownership
+hashes and the original JPEG. Supported normalized SF round-trips through DOCX
+exactly after source diagnostics are acknowledged. This does not preserve every
+source list-numbering template, highlight/shading/width or cached-field evaluation.
+Four selected normalized render pages were inspected; the producer reflow is
+143 pages against the original paired PDF's 137, with substantial presentation
+and numbering differences. No general DOCX/Word visual-fidelity claim follows.
+
+The original Word 2016 PDF currently fails native logical recovery on an incomplete
+unit-span grid: 42 of its 90 tagged tables omit spans despite visible merged cells.
+This is an outstanding required recovery capability, not a malformed-fixture or
+unsupported-feature exemption. Original tags and painted grids provide evidence
+for recovery with explicit/inferred provenance. The source's actual U+2A6D4 also
+requires a suitable font; mapping all families to Go fails explicitly/atomically
+rather than discarding it. All four paths are not yet qualified for this source.

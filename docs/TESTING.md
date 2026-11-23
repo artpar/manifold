@@ -1947,3 +1947,89 @@ under go run -race. Logs/renderings are ignored in output/section-controls.
 The overall goal remains incomplete: representative rich DOCX exports, broader
 fonts/scripts/themes/note placement/PDF recovery and conservative packing still
 need implementation/qualification.
+
+
+## Original MQTT Word export and paired publisher PDF (2026-11-24)
+
+Original authoritative MQTT 5.0 DOCX and Word 2016 PDF bytes, with publisher
+copyright/Notices retained, are committed under testdata/real. SHA-256/size/source/
+rights and precise current gaps are in the manifest and THIRD_PARTY.md. These are
+original published files, not synthetic documents or manydoc-generated output.
+The previous government PDF's hash lookup now finds its exact path once in the
+expanded manifest; its source bytes and original expectations remain unchanged.
+
+```sh
+output/qa-venv/bin/python scripts/audit_mqtt_source.py --output output/real-docx/source-oracle.json
+cmp testdata/real/mqtt-v5.0-oracle.json output/real-docx/source-oracle.json
+output/qa-venv/bin/python scripts/audit_mqtt_pdf.py --output output/real-docx/pdf-oracle.json
+cmp testdata/real/mqtt-v5.0-pdf-oracle.json output/real-docx/pdf-oracle.json
+GOWORK=off go test -run '^TestRealWordMQTT|^TestRealExportFixtureHashes' .
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+bin/manydoc extract -format sf -o output/real-docx/mqtt.sf testdata/real/mqtt-v5.0-os.docx
+bin/manydoc convert -allow-lossy -o output/real-docx/roundtrip.docx output/real-docx/mqtt.sf
+output/qa-venv/bin/python scripts/audit_mqtt_source.py --source output/real-docx/roundtrip.docx --compare testdata/real/mqtt-v5.0-oracle.json
+bin/manydoc extract -format sf -o output/real-docx/roundtrip.sf output/real-docx/roundtrip.docx
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/real-docx/mqtt.sf output/real-docx/roundtrip.sf
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-real-docx-qa --headless --convert-to pdf --outdir output/real-docx/office output/real-docx/roundtrip.docx
+GOWORK=off go test ./...
+GOWORK=off go test -race ./...
+GOWORK=off go vet ./...
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime 500x -parallel 2 .
+GOWORK=off go mod verify
+git diff --check
+```
+
+The independent Word oracle uses ZIP/XML without manydoc output: all 4,998
+nonempty body paragraphs (whitespace-normalized multiset hash), 291 headings,
+two sections, 59 tables/756 rows/3,009 origin cells with every row/column/span and
+per-cell text hash, 434 ordered hyperlink-target text hashes, and one original
+4,046-byte JPEG. Tests verify these facts, the supplementary U+2A6D4, strict loss
+acknowledgement/atomicity, source immutability and exact normalized SF/DOCX/SF.
+Original diagnostics persist in source SF; normalized DOCX consumes that source
+loss record, so equality excludes it explicitly. This does not establish original
+numbering/presentation fidelity. Independent re-audit of the generated DOCX also
+retains the package/cell/link/media facts. Two SF files pass the actual ProseMirror
+schema (46,798 nodes, with marks/attributes validated).
+
+The publisher PDF independently opens in pypdf/MuPDF as 137 pages. Its forward
+logical tree has 90 page-local tables, 756 rows and 3,020 cells; 42 tables have
+unequal default-unit-span row widths and no merge attributes. First failing table
+4887 on page 17 has row counts 9/2/2/2, while the original Word table and painted
+borders prove three 8-column merged cells. The raw Word package has 3,020 cell
+elements, including eleven vertical-merge continuations omitted from its 3,009
+origins. Future inferred PDF spans must account for those explicit memberships.
+The committed PDF oracle records original memberships/default widths, not invented
+successful recovery. The current Go PDF reader still rejects that source:
+
+```sh
+bin/manydoc extract -format sf -pdf-skip-inference -o output/real-docx/mqtt-pdf.sf testdata/real/mqtt-v5.0-os.pdf
+# Current error: PDF logical structure: tagged table rows do not cover the declared grid
+```
+
+This is an outstanding required recovery gap, not an invalid-source exception.
+Native SF→PDF also requires supplied source-family mappings and a font covering
+U+2A6D4. Mapping all source families to Go/Go Mono correctly rejects that actual
+character; the source and oracle were not simplified to obtain a passing file.
+No successful native PDF output or four-path completion is claimed for this pair.
+
+Four selected publisher pages (1/17/22/89) and four corresponding-number normalized
+DOCX render pages were visually inspected. LibreOffice reflows the normalized
+source to 143 pages, with different numbering/table widths/spacing/shading; the
+same page numbers do not imply corresponding content. Cached PAGE/NUMPAGES remain
+cached under the explicit field diagnostic (including stale source values).
+No general native/Word visual-equivalence claim is made. Full body layout and
+formatting/numbering qualification, native CJK font output and original tagged
+span recovery remain required. QA renderings/reflowed files stay ignored and are
+not redistributed as authoritative OASIS editions.
+
+Full tests pass (library 10.263s, CLI/bidi cached); full race passes (final log
+records current library timing, CLI/bidi cached). Vet/modules and host/Linux
+amd64/arm64 CGO-disabled builds pass; the host CLI was executed. Malformed DOCX
+fuzz completes 500 executions (1.532s). Runtime dependencies are unchanged.
+
+For this checkpoint, full tests pass (library 10.263s; CLI/bidi cached), full race
+passes (124.903s; CLI/bidi cached), and vet/module verification pass. Malformed DOCX
+fuzz completes 500 executions (1.532s). Host and Linux amd64/arm64 CGO-disabled
+builds pass; only the host CLI was executed. These checks cover the implemented
+subset and the new normalized Word regression; they do not turn the failing
+original-PDF/native-font paths into achieved capabilities.

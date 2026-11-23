@@ -1236,3 +1236,27 @@ implement arbitrary custom numbering or broader placement bindings. Preserve
 reader diagnostics for ambiguous external sources. The old pinned writer
 reproduces the ambiguity for both endnote examples, while the new writer retains
 exact SF without suppressing a diagnostic or altering an oracle.
+
+
+## 2026-11-24 Add an original Word export before further compatibility claims
+
+Use the [authoritative OASIS MQTT Version 5.0 Word source and paired PDF](https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html)
+as unmodified real-export fixtures. Its publication Notices permit redistribution
+of unmodified copies with the complete copyright/Notices retained. Keep those
+sections embedded, attribute the source, pin hashes and do not redistribute
+normalized QA output as an authoritative OASIS edition. No proprietary converter
+implementation or embedded publisher font becomes manydoc code/output font.
+
+Generate structural oracles independently from the original package and PDF tree,
+not from successful manydoc output. Preserve per-cell text and hyperlink ownership
+as well as counts. A normalized SF round trip proves the supported representation,
+not the original automatic numbering, cached-field evaluation, table widths or
+visual fidelity. Caller acknowledgement consumes conversion diagnostics for the
+normalized DOCX; keep the original SF/report for the source loss record.
+
+Retain the failing original PDF and supplementary CJK example. The tagged-table
+failure is a required recovery gap: missing attributes coexist with recoverable
+painted merges. Word raw continuation cells also remain explicit PDF members.
+Use both sources to qualify future inferred spans and provenance; do not remove
+the character, simplify tables, flatten logical structure or edit an oracle to
+turn this source into an artificial passing example.

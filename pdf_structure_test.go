@@ -235,13 +235,20 @@ func TestPDFPublishedInDesignExport(t *testing.T) {
 	}
 	var metadata struct {
 		Files []struct {
+			Path   string `json:"path"`
 			SHA256 string `json:"sha256"`
 		}
 	}
 	if e = json.Unmarshal(manifest, &metadata); e != nil {
 		t.Fatal(e)
 	}
-	if len(metadata.Files) != 1 || fmt.Sprintf("%x", sha256.Sum256(data)) != metadata.Files[0].SHA256 {
+	matches := 0
+	for _, file := range metadata.Files {
+		if file.Path == "copyright-office-circular-1-2021.pdf" && fmt.Sprintf("%x", sha256.Sum256(data)) == file.SHA256 {
+			matches++
+		}
+	}
+	if matches != 1 {
 		t.Fatal("published fixture bytes changed")
 	}
 	d := readRecovery(t, data)

@@ -20,6 +20,8 @@ Run `GOWORK=off go run ./examples/sections` for all four conversion paths; see
 stories that start fresh native pages while preserving source start intent.
 `GOWORK=off go run ./examples/section-controls` qualifies page controls, empty
 section ownership and document-wide note numbering.
+The [real-export manifest](testdata/real/manifest.json) includes original Word and
+InDesign publications, independent structural oracles and current conversion gaps.
 Applications retain ownership of identity, authorization, persistence and jobs.
 No external Office installation or conversion service is required.
 
