@@ -102,6 +102,7 @@ func writeSectionedDOCX(ctx context.Context, out io.Writer, d *Document) error {
 				fmt.Fprintf(&props, `<w:%sReference w:type="%s" r:id="%s"/>`, role.kind, variant.name, id)
 			}
 		}
+		props.WriteString(docxNoteProperties(counts))
 		start := s.Start
 		if start == "" {
 			start = SectionNextPage

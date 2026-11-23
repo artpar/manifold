@@ -21,7 +21,50 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: continuous story admission across incompatible frames
+## Latest milestone: page-control ownership and sectioned note numbering
+
+- Fourteen targeted cases qualify leading/trailing/adjacent explicit controls,
+  conditional paragraph starts, control-only/empty continuous and next/parity
+  sections, independent inherited/blank stories, changed pending frames, old
+  footer geometry and continued/endnote ownership. The first section starts the
+  document; physical parity constrains later starts. An explicit control advances
+  even an otherwise empty body page; a conditional start skips at body top.
+- Opened-page running stories stay with their owner. Continuous empty sections
+  count a shared page as local page one; a later page selects default/even stories
+  with that local count. Parity fillers remain completely blank on the preceding
+  canvas. Old continued notes finish before later section bodies; endnotes use
+  the final effective frame, including an otherwise empty continuous section.
+- That endnote case exposed a real DOCX defect: the sectioned writer omitted the
+  flat writer's explicit decimal/continuous numbering policy. Both paths now use
+  one helper, and every section with document notes declares the policy. Source
+  endnotes round-trip without a new default-numbering ambiguity diagnostic.
+- `examples/section-controls` exercises all four paths for fourteen cases. Exact
+  source DOCX SF, independent standard XML/relationships, forty-five native pages,
+  thirty-three URI annotations/six actual note targets and 156 recovered text
+  spans (page/baseline/quad/font size/link) pass. Seventy SF files pass the actual
+  ProseMirror schema (2,703 nodes/marks/attributes). Forty-five native and forty-
+  three producer pages were visually inspected. All body/note content persists;
+  producer conditional-start, empty parity and running-owner behavior differ.
+- Tests/race/vet/malformed DOCX/module checks and host/Linux CGO-disabled builds
+  pass; the host CLI passes all four paths for all cases. See TESTING.md and
+  verification.json for commands/results. A fresh pinned 97095a1 build confirms
+  all forty-five PDF page streams exact. Eleven control DOCX packages and the
+  flat-note package remain exact; three sectioned note packages change only
+  document.xml by adding the explicit note properties. Original fixtures remain.
+
+The goal remains **incomplete**, with no external blocker. Targeted control/empty
+ownership is now qualified; representative real exported DOCX documents and the
+broader font/script/theme/note/PDF recovery requirements still need evidence and
+implementation. Next audit the existing published/export corpus and add a usable,
+licensed rich DOCX export with structural oracles; let concrete failures drive
+required feature expansion. Conservative common-frame packing/adverse-chain
+performance and broader page/note bindings remain unfinished.
+Next commands: `GOWORK=off go run ./examples/section-controls`;
+`output/qa-venv/bin/python scripts/verify_section_controls.py --office`;
+`GOWORK=off go test -run 'TestPDFSectionControl|TestPDFEmptyPending|TestPDFEmptyContinuous|TestSectionedDOCXDeclares' .`;
+`rg -n 'real|export|corpus|remaining' docs/ACCEPTANCE.md docs/COMPATIBILITY.md testdata/real`.
+
+## Previous milestone: continuous story admission across incompatible frames
 
 - Individually valid fixed/minimum running stories now generate PDFs even when
   they cannot share one body frame. Compatible whole chains retain their output;
@@ -48,9 +91,9 @@ compatibility has not been established. No Daptin files were changed.
   TESTING.md/verification.json for commands/results. A fresh pinned f9f7fcf build
   proves twenty-seven earlier PDF page streams/eight DOCX packages remain exact.
 
-The goal remains **incomplete**, with no external blocker. Next qualify leading,
-trailing and adjacent explicit page controls and empty-section ownership across
-continuous/parity boundaries, inherited first/even stories and note continuation.
+The targeted control/empty ownership work requested at this checkpoint is now
+qualified in the latest milestone above. Broader combinations still require real-
+export evidence.
 The shared-frame planner remains conservative; fallback admission can remeasure
 prefixes repeatedly and is not a globally minimal page-packing algorithm. Broader
 page/note bindings, fonts/scripts/PDF recovery and real exports remain required.

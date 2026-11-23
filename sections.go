@@ -29,6 +29,9 @@ type RunningStory struct {
 
 // Section owns body content. Layout nil inherits the previous effective layout
 // (the document layout for the first section). Stories inherit independently.
+// Native PDF keeps the stories of the section that opened a physical page.
+// A continuous section counts a shared page as local page one, even when its
+// body is empty. Later pages select its default/even stories using that count.
 type Section struct {
 	Layout    *Layout        `json:"layout,omitempty"`
 	Start     SectionStart   `json:"start,omitempty"`

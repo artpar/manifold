@@ -12,6 +12,19 @@ import (
 const docxNotesNS = "urn:manydoc:metadata:1"
 const markupCompatibilityNS = "http://schemas.openxmlformats.org/markup-compatibility/2006"
 
+// The canonical model numbers each note kind once across the document. Emit
+// this policy explicitly in every section rather than relying on producer
+// defaults (notably for endnotes), including sections with an empty body.
+func docxNoteProperties(counts map[string]int) string {
+	var properties strings.Builder
+	for _, kind := range []string{Footnote, Endnote} {
+		if counts[kind] > 0 {
+			properties.WriteString(`<w:` + kind + `Pr><w:numFmt w:val="decimal"/><w:numRestart w:val="continuous"/></w:` + kind + `Pr>`)
+		}
+	}
+	return properties.String()
+}
+
 func (n *xmlNode) attributeNS(space, name string) string {
 	if n == nil {
 		return ""

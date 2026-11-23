@@ -1876,3 +1876,74 @@ page controls, empty-section ownership and first/even/parity/note interactions.
 The planner conservatively reserves group frames and may repeat prefix refits;
 minimal packing and adverse-chain performance remain unqualified, alongside the
 original font/script/PDF recovery/color/real-export requirements.
+
+## Page controls, empty owners and section note numbering (2026-11-24)
+
+Fourteen examples and targeted ownership regressions exercise leading, trailing
+and adjacent explicit controls, conditional starts, control-only and empty
+continuous/next/parity sections, independent inherited/blank variants, changed
+pending geometry, old footer ownership, a 32-paragraph continued footnote and
+endnotes bound to a final empty section. A separate XML regression verifies both
+EvenAndOddHeaders modes with footnotes/endnotes in multiple sections.
+
+The endnote source first failed exact DOCX SF because the sectioned writer omitted
+explicit numbering and reimport added note_default_numbering. Both writers now
+share explicit decimal/continuous properties, emitted in every section for note
+kinds present. The external-input ambiguity diagnostic remains unchanged.
+
+```sh
+GOWORK=off go run ./examples/section-controls
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-section-controls-qa --headless --convert-to pdf --outdir output/section-controls/office output/section-controls/*.docx
+output/qa-venv/bin/python scripts/verify_section_controls.py --office
+# Run before producing parent-baseline *.sf artifacts, or select only the cases.
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/section-controls/*.sf
+GOWORK=off go test ./...
+GOWORK=off go test -race ./...
+GOWORK=off go vet ./...
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime 500x -parallel 2 .
+GOWORK=off go mod verify
+git diff --check
+```
+
+Independent pypdf/PyMuPDF/python-docx/XML checks pass: forty-five native pages,
+all declared page/body/story owners, completely white parity fillers, signed/
+continuous page fields, checked variant relationship presence, ordinary
+pageBreakBefore XML controls, note properties, exact source DOCX SF, thirty-three
+URI annotations and six actual note targets. PDF → SF preserves page boundaries
+and 156 tracked spans with independently matching physical baselines/font sizes,
+source quads/page provenance and URI marks. Internal destination loss remains
+explicitly diagnosed; this is not recovery of authored sections or typed notes.
+All seventy library/CLI SF files pass the actual ProseMirror schema (2,703 nodes
+and marks/attributes). All four CGO-disabled host CLI paths pass fourteen cases,
+with exact DOCX SF and forty-five page streams matching the library.
+
+All forty-five native and forty-three LibreOffice pages were visually inspected.
+Both retain all thirty-three body tokens and thirty-seven note-body paragraphs.
+The producer applies a conditional start in a previously empty shared section,
+collapses some empty parity sections, and selects some default/first/even stories
+differently; its endnote-only page omits running stories in the observed exports.
+These are distinct producer observations, not a Word-equivalent native policy.
+
+A fresh detached 97095a1 CLI produces identical forty-five decoded PDF page
+streams. Eleven control DOCX packages are whole-file exact. In the other three
+(with notes), only word/document.xml changes, by adding standard note properties;
+removing only those added elements yields the prior XML exactly. Both old endnote
+SF reimports reproduce the diagnostic, and otherwise match the source values.
+The unchanged flat-note example retains a whole-file exact DOCX package. Reproduce
+with a detached output/control-parent worktree, build from there into
+../../bin/control-parent, and convert each unchanged case SF to parent-{case}.pdf
+and .docx in the current output directory. Extract the two old endnote examples
+to parent-{case}-docx.sf. The verifier checks these optional pinned artifacts;
+remove the clean worktree afterward. Original source/content fixtures and native
+ownership expectations remain unchanged.
+
+Full tests pass (library 7.910s, CLI 0.435s, bidi cached); full race passes (library
+99.518s, CLI/bidi cached). Only the explanatory Section comment changed after that
+race run; production behavior and tests are unchanged. Vet/modules pass. Host
+and Linux amd64/arm64 CGO-disabled builds pass; the host binary was executed.
+Malformed DOCX fuzz completes 500 executions (1.515s). The example also executes
+under go run -race. Logs/renderings are ignored in output/section-controls.
+The overall goal remains incomplete: representative rich DOCX exports, broader
+fonts/scripts/themes/note placement/PDF recovery and conservative packing still
+need implementation/qualification.

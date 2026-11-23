@@ -783,3 +783,22 @@ ownership in these sources: eight pages/five placements, including no later fixe
 backgrounds in the minimum-first case. Producer running-story visibility and
 pagination differences are explicit qualification limits. Conservative packing,
 control/empty ownership, broader page/note/font/recovery and corpus work remain.
+
+
+Fourteen page-control/empty-section cases now qualify the native policy: explicit
+controls always advance, conditional starts skip at body top, first-section start
+hints do not create a predecessor, empty continuous sections retain opened-page
+stories, and local variant counts include the shared page. Next/parity starts are
+separate from explicit controls; parity fillers are completely blank on the old
+canvas. Notes finish in their applicable frames; endnotes bind an empty final
+section's effective layout. Independent checks include forty-five physical pages,
+actual note targets and recovered text baselines/quads/font sizes/URI marks.
+
+Sectioned DOCX now emits explicit decimal/continuous note-numbering properties
+for each document note kind in every section, including empty bodies. The flat
+writer uses the same helper and retains exact output. No reader diagnostic was
+removed: unspecified external endnote numbering still reports its ambiguity.
+Custom numbering, more note/page bindings and broader real exports remain open.
+The fourteen producer exports retain all body/note content across forty-three
+pages but differ in conditional-start behavior, empty parity collapse and first/
+even/running ownership; they do not prove Word-equivalent native pagination.

@@ -18,6 +18,8 @@ Run `GOWORK=off go run ./examples/sections` for all four conversion paths; see
 `GOWORK=off go run ./examples/signed-overlap` covers fixed signed running overlap.
 `GOWORK=off go run ./examples/continuous-admission` covers incompatible continuous
 stories that start fresh native pages while preserving source start intent.
+`GOWORK=off go run ./examples/section-controls` qualifies page controls, empty
+section ownership and document-wide note numbering.
 Applications retain ownership of identity, authorization, persistence and jobs.
 No external Office installation or conversion service is required.
 

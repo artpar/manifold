@@ -825,4 +825,33 @@ first-page story and local page one; compatible successors may share again.
 intent or DOCX section properties. Running assets retain their source sizes.
 The frame strategy remains conservative, not globally minimal packing; fallback
 prefix refitting may repeat measurements (quadratic work in an adverse chain).
-Control/empty-section ownership and broader real-export qualification remain open.
+Targeted control/empty ownership is qualified below; broader real-export
+qualification remains open.
+
+
+## Page controls, empty owners and explicit note numbering
+
+Page controls and section starts are distinct requests. A body `PageBreak` always
+advances; a paragraph `PageBreakBefore` skips at the first body position. Native
+section starts are relative to a preceding section, so the first section opens
+the document regardless of its start hint. Later next/parity starts open pages;
+parity fillers use the preceding physical canvas and suppress both stories.
+Explicit trailing controls may therefore leave a running-only page before a
+next-page section. Source controls and conditional intent remain separate in SF
+and DOCX (standard pageBreakBefore plus checked ignorable control metadata).
+
+An empty continuous section can update the pending plan without repainting the
+opened page. Each shared start counts as local page one; the next opened page
+selects that section's local default/even variant. It retains the opened page's
+header/footer owner until then. Footnote continuations drain before a subsequent
+explicit/section boundary. Endnotes bind the final effective body frame even if
+its section contains no body. Tests and independent physical page/annotation/
+baseline checks qualify these specific combinations; this is not Word-equivalent
+pagination. More general packing, note bindings and real-export coverage remain.
+
+`docxNoteProperties` is shared by flat and sectioned writers. For document note
+kinds present, every section emits decimal numFmt and continuous numRestart.
+Previously the sectioned writer omitted these, introducing a default-numbering
+ambiguity diagnostic on its own endnote reimport. The helper preserves flat output
+exactly and changes only sectioned note properties. No canonical schema change or
+reader diagnostic suppression was used to obtain the exact source round trip.

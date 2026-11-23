@@ -1214,3 +1214,25 @@ can take quadratic work; minimal packing and control/empty ownership qualificati
 are still required work. Independent producer outputs differ in packing and
 running-story ownership. Record content, asset and visual observations separately;
 neither producer equivalence nor full-goal completion is established.
+
+
+## 2026-11-24 Qualify controls and declare section note numbering
+
+Keep explicit controls and conditional paragraph starts separate. The native API
+uses relative section starts, section-local variant counts and opened-page owner
+retention. Qualify empty/control-only sources against these declared semantics,
+including completely blank physical parity fillers, note drainage and final
+empty-section endnote frames. Record independent producer differences instead of
+rewriting the source or the expected native policy to match one producer.
+
+The final-empty-section endnote regression revealed that sectioned DOCX output
+omitted explicit note numbering. Its reimport added note_default_numbering while
+flat output already declared decimal and continuous. Use one helper in both
+writers and emit the policy for every section and document note kind, including
+empty bodies. Microsoft documents the section-level [endnote numbering format](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.endnoteproperties.numberingformat?view=openxml-3.0.1)
+and [numbering restart](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.endnoteproperties.numberingrestart?view=openxml-3.0.1)
+properties. This change makes the existing model policy explicit; it does not
+implement arbitrary custom numbering or broader placement bindings. Preserve
+reader diagnostics for ambiguous external sources. The old pinned writer
+reproduces the ambiguity for both endnote examples, while the new writer retains
+exact SF without suppressing a diagnostic or altering an oracle.

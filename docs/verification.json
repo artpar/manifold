@@ -2154,7 +2154,7 @@
     "fixture_oracle_changed": false,
     "external_blocker": null
   },
-  "latest_milestone": "continuous_story_admission",
+  "latest_milestone": "section_control_ownership_and_note_numbering",
   "language_direction_ltr_shaping": {
     "date": "2026-11-23",
     "goal_complete": false,
@@ -2499,7 +2499,7 @@
     ],
     "external_blocker": null
   },
-  "latest_evidence": "continuous_story_admission_2026_11_24",
+  "latest_evidence": "section_control_ownership_2026_11_24",
   "paragraph_bidi_levels_2026_11_24": {
     "goal_complete": false,
     "previous_checkpoint": "658a5b0",
@@ -3900,6 +3900,78 @@
       "output/qa-venv/bin/python scripts/verify_continuous_admission.py --office",
       "GOWORK=off go test -run 'TestPDFContinuous|FuzzContinuousAdmission' .",
       "rg -n 'pendingPage|nextBlank|freshPage|PageBreak' pdf_sections.go sections_test.go"
+    ]
+  },
+  "section_control_ownership_2026_11_24": {
+    "status": "verified targeted milestone; full rich-document goal incomplete; no external blocker",
+    "example": "examples/section-controls",
+    "behavior": [
+      "explicit controls and conditional starts remain distinct",
+      "empty/control-only continuous owners preserve opened-page stories and section-local counts",
+      "blank parity fillers keep preceding canvas; pending geometry does not move the old footer",
+      "continued footnotes finish before boundaries; endnotes bind the final empty section frame",
+      "flat and sectioned DOCX share explicit decimal/continuous note properties; external diagnostic behavior unchanged"
+    ],
+    "checks": {
+      "go_test_all": "passed: library 7.910s; CLI 0.435s; bidi cached",
+      "go_test_race_all": "passed: library 99.518s; CLI/bidi cached; explanatory Section comment only changed afterward",
+      "example_race": "passed",
+      "go_vet_all": "passed",
+      "module_verify": "passed",
+      "host_cgo_disabled_build_and_four_cli_paths": "passed for fourteen cases, forty-five matching PDF page streams",
+      "linux_cgo_disabled_amd64_arm64": "builds passed; not executed",
+      "malformed_docx_fuzz": {
+        "executions": 500,
+        "seconds": 1.515,
+        "passed": true
+      },
+      "diff_check": "passed"
+    },
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_section_controls.py --office",
+      "result": "passed",
+      "cases": 14,
+      "native_pages": 45,
+      "producer_pages": 43,
+      "source_docx_sf": "exact all fourteen",
+      "body_uri_annotations": 33,
+      "actual_note_targets": 6,
+      "recovered_spans_matching_independent_page_baseline_size_quad_uri": 156,
+      "sf_schema": {
+        "files": 70,
+        "nodes_marks_attributes": 2703,
+        "result": "passed actual ProseMirror schema"
+      },
+      "visual_inspection": "all forty-five native and forty-three producer pages",
+      "producer_content": "all thirty-three body tokens and thirty-seven note-body paragraphs preserved",
+      "producer_limits": [
+        "conditional-start packing differs",
+        "some empty parity sections collapse",
+        "first/even/default and endnote-page running ownership differ",
+        "no Word-equivalence claim"
+      ],
+      "recovery_scope": "physical page/text provenance and URI marks; internal destination loss remains diagnosed, authored sections/typed note recovery not established"
+    },
+    "fresh_parent": {
+      "commit": "97095a1",
+      "control_pdf_page_streams_exact": 45,
+      "control_docx_packages_whole_exact": 11,
+      "sectioned_note_packages_changed": 3,
+      "only_changed_part": "word/document.xml; removing added note properties restores original XML exactly",
+      "flat_note_docx_package": "whole-file exact",
+      "old_endnote_reimport": "both examples reproduce note_default_numbering, otherwise source-exact; new values source-exact without suppressing diagnostics"
+    },
+    "oracle_policy": "original source/content fixtures and native ownership expectations retained",
+    "remaining": [
+      "representative licensed rich DOCX export corpus and independent structural oracles",
+      "broader fonts/scripts/theme/note bindings/PDF recovery original acceptance work",
+      "conservative common-frame packing and repeated-prefix adverse performance"
+    ],
+    "next_commands": [
+      "GOWORK=off go run ./examples/section-controls",
+      "output/qa-venv/bin/python scripts/verify_section_controls.py --office",
+      "GOWORK=off go test -run 'TestPDFSectionControl|TestPDFEmptyPending|TestPDFEmptyContinuous|TestSectionedDOCXDeclares' .",
+      "rg -n 'real|export|corpus|remaining' docs/ACCEPTANCE.md docs/COMPATIBILITY.md testdata/real"
     ]
   }
 }

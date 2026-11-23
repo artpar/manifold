@@ -584,3 +584,15 @@ finish before the new frame binds. Incompatible continuous story envelopes now
 produce fresh native pages while preserving source continuous starts exactly.
 Admission groups and page-owner state are renderer internals, not new SF fields.
 Conservative packing and the full goal remain open.
+
+
+Control/empty-section combinations now have targeted independent qualification:
+relative starts apply after the first section, explicit page_break always
+advances, and pageBreakBefore is conditional at body top. Continuous empty sections
+may update pending ownership while the opened page keeps its original stories;
+local section page counts include the shared page. Parity fillers are blank;
+endnotes use the final effective frame. These are renderer rules, not new SF
+attributes or inferred authored controls. Sectioned DOCX now declares the model's
+existing decimal/continuous note numbering in every section, retaining exact
+source SF including empty bodies/endnotes. Broader bindings and real exports
+remain required; native and producer layout ownership can differ.

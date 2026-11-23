@@ -143,5 +143,15 @@ measured notes into another interval. Controls/empty owners and the original
 font/script/recovery/real-export requirements remain open. Reproduce the current
 capability with `GOWORK=off go run ./examples/signed-overlap` and its independent
 verifier. The continuous-admission example/verifier adds fresh-page boundaries,
-old-note drainage and actual body-floor evidence. Next qualify control/empty
-section ownership, then conservative packing and the broader requirements above.
+old-note drainage and actual body-floor evidence. The control/empty ownership
+checkpoint below supplies targeted qualification; conservative packing and broader
+requirements remain open.
+
+
+Targeted page-control/empty ownership now has fourteen four-path cases and
+independent text, standard OOXML, annotations, physical geometry and visual
+qualification. Sectioned note numbering is explicit and exact through SF/DOCX.
+Next audit the representative export corpus and acquire a reusable licensed rich
+DOCX with structural oracles, then address concrete font/script/theme/note/recovery
+failures. Continue qualifying richer control/binding combinations and conservative
+packing; the targeted milestone does not close the full rich-document goal.

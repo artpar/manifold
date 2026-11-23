@@ -122,11 +122,7 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 	if err := w.writeNoteParts(d.Notes); err != nil {
 		return err
 	}
-	for _, kind := range []string{Footnote, Endnote} {
-		if noteCounts[kind] > 0 {
-			section += `<w:` + kind + `Pr><w:numFmt w:val="decimal"/><w:numRestart w:val="continuous"/></w:` + kind + `Pr>`
-		}
-	}
+	section += docxNoteProperties(noteCounts)
 	orientation := ""
 	if wid > hei {
 		orientation = ` w:orient="landscape"`
