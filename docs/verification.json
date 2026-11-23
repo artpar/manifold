@@ -1677,5 +1677,141 @@
       "GOWORK=off go run ./examples/text-style",
       "output/qa-venv/bin/python scripts/verify_text_style.py"
     ]
+  },
+  "pdf_editable_text_recovery_milestone": {
+    "date": "2026-11-23",
+    "prior_checkpoint": "f8668e6",
+    "active_goal_complete": false,
+    "exists": [
+      "editable PDF family/physical size/8-bit device-color recovery",
+      "descriptor/embedded/core/fallback source family evidence",
+      "effective source device-space components",
+      "fill/stroke/qQ/Form/resource-alias state",
+      "common style intersection for content and structural ActualText and synthetic gaps",
+      "bounded embedded family metadata",
+      "direct numeric tokens preserve RG operator"
+    ],
+    "checks": {
+      "go_test_all": {
+        "passed": true,
+        "library_seconds": 5.268,
+        "cli_seconds": 0.689,
+        "log": "output/pdf-style-tests.log"
+      },
+      "go_test_race_all": {
+        "passed": true,
+        "library_seconds": 70.439,
+        "cli_seconds": 2.119,
+        "log": "output/pdf-style-race-final.log"
+      },
+      "go_vet": "passed",
+      "cgo_disabled_cli": "built darwin/arm64, executed help and independent conversions",
+      "git_diff_check": "passed",
+      "fuzz": {
+        "PDFEditableStyles": {
+          "executions": 1000,
+          "passed": true,
+          "seconds": 1.375
+        },
+        "ReadPDF": {
+          "executions": 500,
+          "passed": true,
+          "seconds": 2.159
+        },
+        "ReadStructured": {
+          "executions": 1000,
+          "passed": true,
+          "seconds": 1.124
+        }
+      },
+      "poppler_text": {
+        "passed": 28,
+        "total": 28
+      },
+      "prosemirror_corpus": {
+        "files": 51,
+        "nodes": 9027,
+        "passed": true
+      },
+      "prosemirror_style_recovery_inference": {
+        "nodes": 104,
+        "passed": true
+      },
+      "independent_scripts_passed": [
+        "verify_pdf_text_styles.py --office output/pdf-text-styles/lo/reflow.pdf",
+        "verify_pdf_recovery.py",
+        "verify_pdf_structure.py",
+        "verify_pdf_inference.py",
+        "verify_pdf_rulings.py",
+        "verify_pdf_rulings_office.py",
+        "verify_published_pdf.py"
+      ]
+    },
+    "independent_style_oracle": {
+      "author": "ReportLab 5.1.0, QA only",
+      "source_pages": 2,
+      "spans": 10,
+      "families": [
+        "Helvetica",
+        "Times",
+        "Courier"
+      ],
+      "sizes_points": [
+        10.5,
+        12,
+        14,
+        18,
+        24
+      ],
+      "checks": [
+        "actual core faces and marks",
+        "RGB",
+        "source baselines/pages",
+        "DOCX XML properties",
+        "native mapped Go/Go Mono PDF span styles"
+      ],
+      "native_pages": 2,
+      "libreoffice_pages": 2,
+      "visually_inspected": {
+        "source": 2,
+        "native": 2,
+        "libreoffice": 2
+      },
+      "office_fonts": [
+        "Helvetica",
+        "Helvetica-Bold",
+        "LiberationMono",
+        "LiberationMono-BoldItali",
+        "LiberationSerif-Italic"
+      ],
+      "font_or_pagination_equivalence_claimed": false
+    },
+    "publication": {
+      "source_families": 10,
+      "source_sizes": 15,
+      "original_SF_retained": true,
+      "normalized_reflow_oracle_pages": 9,
+      "normalization": "QA caller explicitly writes a separate default-typography SF; original /K, 57 list bodies, 16 URIs and 20,531 normalized nonspace characters unchanged",
+      "Go_reflow": "explicit maps and caller-selected 0.01pt size rounding"
+    },
+    "oracle_corrections": {
+      "image_pixels": "Prior f8668e6 isolated build and current produce identical order/pixels; unchanged pixel expectations bind to objects instead of stale paint-order indices",
+      "mark_identity": "source marks selected by type beside new textStyle",
+      "token_test": "initial fmt string comparison failed; replaced with actual typed numeric/operator equality; final ordinary/race pass"
+    },
+    "remaining_required": [
+      "broader source-font metadata and theme/script handling",
+      "complex color management and paint effects",
+      "shaping/bidi/font formats and supplementary-plane output",
+      "rich page/running content",
+      "broader PDF structure and internal destinations",
+      "representative real exported corpus and broader Word qualification"
+    ],
+    "next_commands": [
+      "rg -n 'shaping|bidi|complex|supplement|theme' pdf_text.go pdf_font.go docx_text_style.go",
+      "GOWORK=off go test -run TestPDFRecovered -count=1",
+      "output/qa-venv/bin/python scripts/verify_pdf_text_styles.py"
+    ],
+    "external_blocker": null
   }
 }

@@ -153,6 +153,7 @@ func (s *pdfStructureRecovery) structureReplacement(blocks []Block, text string,
 	count := 0
 	var first *SourceInfo
 	mixedFont := false
+	mixedPaint := false
 	for _, b := range blocks {
 		if b.Kind != Paragraph && b.Kind != Heading {
 			continue
@@ -163,16 +164,16 @@ func (s *pdfStructureRecovery) structureReplacement(blocks []Block, text string,
 			}
 			if count == 0 {
 				out.Bold, out.Italic, out.Underline, out.Strike, out.Link = r.Bold, r.Italic, r.Underline, r.Strike, r.Link
+				out.FontFamily, out.FontSize, out.Color = r.FontFamily, r.FontSize, r.Color
 				first = r.Source
 			} else {
-				if out.Bold != r.Bold || out.Italic != r.Italic || out.Underline != r.Underline || out.Strike != r.Strike || out.Link != r.Link {
+				var styleMixed bool
+				out, styleMixed = commonTextStyle(out, r)
+				if styleMixed {
 					s.warn("pdf_actualtext_style", "ActualText covers mixed formatting that cannot be mapped exactly to replacement characters")
 				}
-				out.Bold, out.Italic, out.Underline, out.Strike = out.Bold && r.Bold, out.Italic && r.Italic, out.Underline && r.Underline, out.Strike && r.Strike
-				if out.Link != r.Link {
-					out.Link = ""
-				}
-				mixedFont = mixedFont || first == nil || r.Source == nil || first.Font != r.Source.Font || math.Abs(first.FontSize-r.Source.FontSize) > .01
+				mixedFont = mixedFont || first == nil || r.Source == nil || first.Font != r.Source.Font || math.Abs(first.FontSize-r.Source.FontSize) > 1e-7
+				mixedPaint = mixedPaint || !sameSourcePaint(first, r.Source)
 			}
 			if r.Source != nil {
 				source.Confidence = min(source.Confidence, r.Source.Confidence)
@@ -182,10 +183,15 @@ func (s *pdfStructureRecovery) structureReplacement(blocks []Block, text string,
 	}
 	if first != nil && !mixedFont {
 		source.Font, source.FontSize = first.Font, first.FontSize
+		source.FontFamilyEvidence = first.FontFamilyEvidence
 		if count == 1 && source.Page == first.Page && first.Baseline != nil {
 			baseline := *first.Baseline
 			source.Baseline = &baseline
 		}
+	}
+	if first != nil && !mixedPaint {
+		source.ColorSpace = first.ColorSpace
+		source.ColorComponents = append([]float64(nil), first.ColorComponents...)
 	}
 	if mixedFont {
 		s.warn("pdf_actualtext_style", "ActualText covers different fonts or sizes; a single font metric is not assigned to the replacement")
@@ -258,7 +264,10 @@ func (s *pdfStructureRecovery) joinParagraph(last *Block, b Block) {
 		src.Quad = nil
 		src.Regions = nil
 		src.Precision = "synthetic_separator"
-		last.Runs = append(last.Runs, Run{Text: " ", Source: src})
+		gap, _ := commonTextStyle(last.Runs[len(last.Runs)-1], b.Runs[0])
+		gap.Text = " "
+		gap.Source = src
+		last.Runs = append(last.Runs, gap)
 	}
 	last.Runs = append(last.Runs, b.Runs...)
 	// Do not union different pages into the first page's coordinate system.

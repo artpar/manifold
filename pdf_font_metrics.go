@@ -197,6 +197,7 @@ func (r *pdfReader) fontMetrics(f *pdfFont, d types.Dict) error {
 			f.boundsEstimate = false
 		}
 	}
+	r.fontFamily(f, descriptor)
 	core := f.name
 	if len(core) > 7 && core[6] == '+' {
 		core = core[7:]

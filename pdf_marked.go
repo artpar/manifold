@@ -115,7 +115,10 @@ func (r *pdfReader) endMarked() {
 		frame.source.Precision = "replacement_span_bounds"
 	}
 	if *frame.actual != "" {
-		r.current = append(r.current, Run{Text: *frame.actual, Source: frame.source, Bold: frame.bold, Italic: frame.italic})
+		run := frame.style
+		run.Text = *frame.actual
+		run.Source = frame.source
+		r.current = append(r.current, run)
 	}
 }
 

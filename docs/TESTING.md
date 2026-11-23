@@ -880,9 +880,9 @@ Record actual final counts in verification.json, including worker overshoot.
 Custom-font and malformed DOCX/SF fuzzing include new style/font seeds. Finite
 campaigns are not exhaustive malformed-input/resource safety evidence. Final Go,
 race, vet, CGO-disabled, independent-reader and corpus checks are recorded there.
-PDF import currently retains font names/sizes as source evidence and diagnoses
-unfinished editable font/color reconstruction via pdf_editable_text_style; that
-and the remaining acceptance rows are still required work.
+At that checkpoint PDF import diagnosed missing editable styles. The following
+PDF recovery milestone supersedes that blanket warning; broader source-font,
+color-management and the other acceptance rows remain required work.
 
 
 Used-face registration was measured with BenchmarkPDFUsedFontRegistration (20
@@ -897,3 +897,67 @@ lookup now uses NFC plus Unicode case folding, including Greek final sigma.
 The independent paragraph-property fixture's retained Cambria request also needs
 an explicit Go mapping in its CLI conversion. Its authored source, token pages,
 break inheritance/cancellation and geometry/content assertions are unchanged.
+
+
+## PDF editable style recovery qualification
+
+```sh
+GOWORK=off go test -run 'TestPDFRecovered|TestPDFActualTextRetains|TestPDFSourceStyle|TestContentNumbers' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFEditableStyles$' -fuzztime=1000x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=500x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadStructured$' -fuzztime=1000x -parallel=2 -timeout=90s
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+output/qa-venv/bin/python scripts/verify_pdf_text_styles.py
+mkdir -p output/pdf-text-styles/lo
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/pdf-text-styles/lo-profile --headless --convert-to pdf --outdir output/pdf-text-styles/lo output/pdf-text-styles/reflow.docx
+output/qa-venv/bin/python scripts/verify_pdf_text_styles.py --office output/pdf-text-styles/lo/reflow.pdf
+output/qa-venv/bin/python scripts/verify_pdf_recovery.py
+output/qa-venv/bin/python scripts/verify_pdf_structure.py
+output/qa-venv/bin/python scripts/verify_pdf_inference.py
+output/qa-venv/bin/python scripts/verify_pdf_rulings.py
+output/qa-venv/bin/python scripts/verify_pdf_rulings_office.py
+output/qa-venv/bin/python scripts/verify_published_pdf.py
+python3 scripts/compare_pdf_text.py
+python3 scripts/verify_structured_corpus.py
+GOWORK=off go test ./... -count=1
+GOWORK=off go test -race ./... -count=1
+GOWORK=off go vet ./...
+git diff --check
+```
+
+ReportLab independently authors ten spans on two pages with five actual core
+faces/styles, sizes 10.5/12/14/18/24pt and five colors. MuPDF checks source face,
+size/color and baselines against recovered textStyle/source marks; DOCX XML checks
+family/half-points/RGB/boolean marks. A native two-page PDF uses explicitly mapped
+Go/Go Mono output programs and preserves actual sizes/colors/bold/italic. All four
+source/native pages and both LibreOffice DOCX pages were visually inspected.
+LibreOffice retains all ten tokens/styles but uses Helvetica, Liberation Mono
+and Liberation Serif faces; the observation records substitutions, not equivalence.
+This remains targeted synthetic QA, not representative producer/Word fidelity.
+
+Go tests cover descriptor/core/inferred/embedded-name provenance, caller alias vs
+actual embedded family, Gray/RGB/CMYK and stroke-only paint, alias cycles, q/Q/Form
+scope, unknown paint, mixed/homogeneous content/structural ActualText, synthetic
+separators, strict SF evidence, malformed metadata and 32MiB expansion limits.
+Numeric-token regressions verify RG is not consumed as an indirect reference;
+malformed numeric syntax rejects. The first new token test incorrectly compared
+pdfcpu Float's formatted string to a different decimal spelling; it now checks
+actual typed numeric/operator values. Final tests/race passed after that test fix.
+
+Existing publication source/content/relationships remain fixed. Ten families and
+fifteen source sizes now recover. The Go reflow test explicitly maps families and
+rounds sizes to 0.01pt; independent publication QA preserves original SF and writes
+a separate default-typography normalized SF for its existing nine-page oracle.
+These are caller choices, not import-side style losses. Missing fonts/unsupported
+writer precision still reject. Other recovery QA scripts select explicit font maps.
+A stale image-order assertion was reproduced on an isolated build of f8668e6:
+prior/current order and pixels agree. Pixel oracles now bind to unchanged source
+object identities. Source-mark checks use type identity rather than array position.
+
+Final checks: Go tests, race, vet, CGO-disabled CLI build/execution passed; style
+fuzz 1,000, PDF-input fuzz 500 and SF fuzz 1,000 executions passed; all 28 Poppler
+text comparisons and 51 accepted corpus SFs (9,027 actual ProseMirror nodes) passed.
+The new style/recovery/inference SFs add 104 independently checked nodes. Seven
+recovery/structure/inference/ruling/office/publication/style QA scripts passed;
+verification.json holds the durable evidence and limitations. Generated fixtures,
+binaries, images, logs and QA environments remain ignored. No new runtime dependency.

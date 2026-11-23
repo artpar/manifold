@@ -191,3 +191,12 @@ bin/manydoc convert -allow-lossy -pdf-font-map 'Calibri=Go' -pdf-font-map 'Cambr
 DOCX sizes require half-points; PDF sizes require 0.01pt precision. Theme/script
 choices, shaping/bidi, broader PDF recovery and real-export qualification remain
 unfinished; see docs/COMPATIBILITY.md and docs/STATUS.md.
+
+
+PDF → SF also recovers editable font families, physical point sizes and device
+text colors, with source evidence and explicit uncertainty/loss diagnostics.
+Source font names are lookup requests; configure output faces or mappings before
+reflow. Imported sizes finer than writer precision require explicit caller choices.
+Optional QA: `output/qa-venv/bin/python scripts/verify_pdf_text_styles.py` checks an
+independent ReportLab source through SF, DOCX and mapped-font PDF. See the current
+recovery contract and remaining work in docs/COMPATIBILITY.md.

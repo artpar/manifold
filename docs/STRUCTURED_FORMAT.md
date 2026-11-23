@@ -362,4 +362,17 @@ metadata. PDF uses actual configured face programs and effective metrics in all
 stories; caller font data/mappings are output configuration rather than customer
 identity/permissions or required services. Missing glyph/style/family and unsafe
 precision reject. PDF provenance remains separate from editable fields; broader
-PDF style recovery, theme/script handling, shading and shaping/bidi remain required.
+PDF style/color/source-font coverage, theme/script handling, shading and shaping/bidi
+remain required; device-style recovery now exists as described below.
+
+
+PDF imports now populate textStyle from recoverable family/physical size/device
+paint. Optional source-mark attributes font_family_evidence, color_space and
+color_components retain origin and effective component values separately from
+editable values. Evidence enumeration and component count/range validate in Go;
+schema defaults are empty strings/array. Existing source marks/profile meanings
+remain valid. ActualText preserves common fields and diagnoses mixed-field losses;
+synthetic separators claim only common editable styles and inferred provenance.
+Unknown paint omits editable color with a diagnostic; quantization/CMYK/default
+space approximations and transforms diagnose. Original SF must survive any caller
+retypesetting chosen to satisfy output font availability/precision restrictions.

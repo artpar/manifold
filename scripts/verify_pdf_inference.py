@@ -90,8 +90,8 @@ listing=bs[7];assert listing['attrs']['order']==3 and len(listing['content'])==2
 first,second=listing['content'];assert plain(first)=='First numbered item continued at the hanging indent.'
 assert first['attrs']['source']['label']=='3.' and second['attrs']['source']['label']=='4.'
 assert second['content'][1]['type']=='bullet_list' and [plain(i) for i in second['content'][1]['content']]==['Nested one','Nested two']
-assert first['content'][0]['content'][0]['marks'][0]['type']=='source'
-assert first['content'][0]['content'][0]['marks'][0]['attrs']['precision']=='partial_text_span_bounds'
+first_source=next(m['attrs'] for m in first['content'][0]['content'][0]['marks'] if m['type']=='source')
+assert first_source['precision']=='partial_text_span_bounds'
 labels=[]
 def walk(n):
     if n['type']=='list_item':labels.append(n['attrs']['source']['label'])
@@ -113,7 +113,7 @@ raw_path=out/'paint-order.sf'
 subprocess.run(['bin/manydoc','extract','-pdf-skip-inference','-format','sf','-o',str(raw_path),str(source)],check=True)
 raw=json.loads(raw_path.read_text());assert plain(raw['content'][0])=='RIGHT continues in the same paragraph.'
 assert 'pdf_structure_inferred' not in {d['code'] for d in raw['attrs']['diagnostics']}
-for ext in ('docx','pdf'):subprocess.run(['bin/manydoc','convert','-allow-lossy','-o',str(out/f'reflow.{ext}'),str(sf_path)],check=True)
+for ext in ('docx','pdf'):subprocess.run(['bin/manydoc','convert','-allow-lossy','-pdf-font-map','Helvetica=Go','-o',str(out/f'reflow.{ext}'),str(sf_path)],check=True)
 word=Document(out/'reflow.docx');assert len(word.tables)==1 and len(word.inline_shapes)==1
 assert [[c.text for c in row.cells] for row in word.tables[0].rows]==values
 with ZipFile(out/'reflow.docx') as z:assert b'https://example.invalid/right' in z.read('word/_rels/document.xml.rels')

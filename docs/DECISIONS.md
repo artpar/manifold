@@ -677,8 +677,9 @@ style b/i/strike enablement toggles inherited values, while direct run values
 remain absolute ([published Bold reference](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.bold?view=openxml-3.0.1)).
 Tests distinguish paragraph, character and direct cases. Unknown style properties,
 source page backgrounds and embedded font omission diagnose representation loss.
-The new pdf_editable_text_style diagnostic explicitly identifies the remaining
-PDF editable-font/color reconstruction gap while preserving source evidence.
+At that checkpoint pdf_editable_text_style identified the missing editable PDF
+recovery; the subsequent recovery milestone below replaces that blanket warning
+with specific evidence and loss diagnostics.
 
 
 Register font programs lazily rather than preloading the whole face catalog.
@@ -689,3 +690,35 @@ Generated note labels register their fixed Go face only when notes exist. The
 four-page example now embeds its four used faces from nine configured choices;
 its original glyph/size/color/geometry/link checks remain unchanged. The controlled
 before/after benchmark records actual allocation/output effects in verification.json.
+
+
+## 2026-11-23 PDF editable text styles and evidence
+
+Recover editable Run fields alongside original geometry, rather than making source
+provenance the only font record. Descriptor family and embedded sfnt typographic/
+legacy family names have stronger evidence than arbitrary PostScript identifiers.
+Known PDF core-face names can group by their standard family; unknown style suffixes
+must not be guessed away. Embedded metadata is bounded and read-only. Output fonts
+remain explicit caller configuration; source embedding rights are not inferred.
+
+Device text color and effective physical size populate SF. Preserve effective
+source components separately, with explicit RGB quantization/CMYK conversion,
+unknown general-space/default override and text-paint/transform diagnostics. This
+is not a color-managed PDF appearance engine. ActualText maps characters without
+necessarily mapping formatting: keep common fields, clear ambiguous fields, report
+uncertainty. Apply the same rule to content and structure replacements and gaps.
+
+Existing publication source/content oracles remain intact. Imported fine-grained
+sizes may exceed current writer precision and source fonts may be unavailable.
+The Go reflow test selects alternatives and explicit 0.01pt rounding. The existing
+nine-page independent oracle now writes a separate default-typography normalized SF;
+original SF retains all source styles, including 10 families and 15 sizes. This
+preserves the old controlled reflow comparison without implying source typography
+or pagination fidelity. New independent span/style checks cover actual styles.
+
+A stale positioned-PDF QA assertion bound pixels by paint-order array index while
+inference had ordered figures geometrically. An isolated build of prior f8668e6
+and the current build produced identical image order/pixels. Bind unchanged red,
+inline and blue pixel oracles to source objects (8 0 R), inline:page:1:6 and
+(12 0 R); no image fixture or expected pixel changed. Source-mark checks use mark
+identity, independent of ordering beside the new textStyle mark.

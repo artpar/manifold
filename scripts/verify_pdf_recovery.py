@@ -124,17 +124,20 @@ with pymupdf.open(pdf_path) as doc:
         assert any(all(abs(a-b) < .02 for a,b in zip(info["bbox"], bbox)) for info in infos), bbox
     for i, page in enumerate(doc):
         page.get_pixmap(matrix=pymupdf.Matrix(2, 2), alpha=False).save(root / f"source-{i+1}.png")
-assets = [Image.open(io.BytesIO(base64.b64decode(n["attrs"]["src"].split(",",1)[1]))).convert("RGBA") for n in images]
-assert assets[0].getpixel((0,0)) == (255,0,0,255)
-assert assets[0].getpixel((1,0))[3] == 0
-assert assets[1].getpixel((0,0)) == (ord("E"),ord("I"),32,255)
-assert assets[2].getpixel((0,0)) == (0,0,255,255) and assets[2].getpixel((1,0))[3] == 0
+# Inference orders figures geometrically; bind each pixel oracle to its source
+# object rather than paint-order indices. HEAD already produced this ordering.
+assets = {source(n)["object"]: Image.open(io.BytesIO(base64.b64decode(n["attrs"]["src"].split(",",1)[1]))).convert("RGBA") for n in images}
+assert assets["(8 0 R)"].getpixel((0,0)) == (255,0,0,255)
+assert assets["(8 0 R)"].getpixel((1,0))[3] == 0
+assert assets["inline:page:1:6"].getpixel((0,0)) == (ord("E"),ord("I"),32,255)
+assert assets["(12 0 R)"].getpixel((0,0)) == (0,0,255,255)
+assert assets["(12 0 R)"].getpixel((1,0))[3] == 0
 print("Independent pypdf/MuPDF checks passed: 2 page coordinate systems, transformed text, forms/annotation, 3 image placements/assets, masks, ActualText and SF provenance")
 
 # Exercise recovered SF through both rendered formats, explicitly acknowledging
 # flow-layout/provenance losses. Verify that supported content/assets survive.
 for ext in ("pdf", "docx"):
-    subprocess.run(["bin/manydoc", "convert", "-allow-lossy", "-o", str(root / f"reflow.{ext}"), str(sf_path)], check=True)
+    subprocess.run(["bin/manydoc", "convert", "-allow-lossy", "-pdf-font-map", "Courier=Go Mono", "-o", str(root / f"reflow.{ext}"), str(sf_path)], check=True)
 reflow = PdfReader(root / "reflow.pdf", strict=True)
 assert len(reflow.pages) == 2
 text = "".join(p.extract_text() for p in reflow.pages)

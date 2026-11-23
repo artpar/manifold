@@ -36,27 +36,30 @@ type SourceRegion struct {
 // advance/font metrics, not glyph ink outlines. Precision discloses estimates.
 // Confidence is a heuristic ranking, not a calibrated probability.
 type SourceInfo struct {
-	Format     Format         `json:"format"`
-	Page       int            `json:"page,omitempty"`
-	Object     string         `json:"object,omitempty"`
-	Stream     string         `json:"stream,omitempty"`
-	Role       string         `json:"role,omitempty"`
-	Element    string         `json:"element,omitempty"`
-	Order      int            `json:"order,omitempty"`
-	Quad       *Quad          `json:"quad,omitempty"`
-	Baseline   *[2]Point      `json:"baseline,omitempty"`
-	Matrix     *Matrix        `json:"matrix,omitempty"`
-	Regions    []SourceRegion `json:"regions,omitempty"`
-	Font       string         `json:"font,omitempty"`
-	FontSize   float64        `json:"font_size,omitempty"`
-	MCID       *int           `json:"mcid,omitempty"`
-	Tag        string         `json:"tag,omitempty"`
-	Structure  string         `json:"structure"` // explicit, inferred or unstructured
-	Evidence   string         `json:"evidence"`
-	Confidence float64        `json:"confidence"`
-	Precision  string         `json:"precision,omitempty"`
-	Label      string         `json:"label,omitempty"`
-	RenderMode int            `json:"render_mode,omitempty"`
+	Format             Format         `json:"format"`
+	Page               int            `json:"page,omitempty"`
+	Object             string         `json:"object,omitempty"`
+	Stream             string         `json:"stream,omitempty"`
+	Role               string         `json:"role,omitempty"`
+	Element            string         `json:"element,omitempty"`
+	Order              int            `json:"order,omitempty"`
+	Quad               *Quad          `json:"quad,omitempty"`
+	Baseline           *[2]Point      `json:"baseline,omitempty"`
+	Matrix             *Matrix        `json:"matrix,omitempty"`
+	Regions            []SourceRegion `json:"regions,omitempty"`
+	Font               string         `json:"font,omitempty"`
+	FontFamilyEvidence string         `json:"font_family_evidence,omitempty"`
+	ColorSpace         string         `json:"color_space,omitempty"`
+	ColorComponents    []float64      `json:"color_components,omitempty"`
+	FontSize           float64        `json:"font_size,omitempty"`
+	MCID               *int           `json:"mcid,omitempty"`
+	Tag                string         `json:"tag,omitempty"`
+	Structure          string         `json:"structure"` // explicit, inferred or unstructured
+	Evidence           string         `json:"evidence"`
+	Confidence         float64        `json:"confidence"`
+	Precision          string         `json:"precision,omitempty"`
+	Label              string         `json:"label,omitempty"`
+	RenderMode         int            `json:"render_mode,omitempty"`
 }
 
 // PDFPage records physical page boundaries even when a logical tagged paragraph
@@ -88,6 +91,21 @@ func (s *SourceInfo) validate(pages []PDFPage) error {
 	}
 	if s.Order < 0 || !finite(s.FontSize) || s.FontSize < 0 || !finite(s.Confidence) || s.Confidence < 0 || s.Confidence > 1 {
 		return fmt.Errorf("invalid source metrics/confidence")
+	}
+	switch s.FontFamilyEvidence {
+	case "", "descriptor", "embedded_name", "core_font", "postscript_fallback", "unresolved":
+	default:
+		return fmt.Errorf("invalid font family evidence")
+	}
+	count := map[string]int{"": 0, "DeviceGray": 1, "DeviceRGB": 3, "DeviceCMYK": 4}
+	n, ok := count[s.ColorSpace]
+	if !ok || len(s.ColorComponents) != n {
+		return fmt.Errorf("invalid source color components")
+	}
+	for _, v := range s.ColorComponents {
+		if !finite(v) || v < 0 || v > 1 {
+			return fmt.Errorf("invalid source color value")
+		}
 	}
 	if s.MCID != nil && *s.MCID < 0 {
 		return fmt.Errorf("invalid marked-content ID")

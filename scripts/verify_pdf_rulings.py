@@ -72,7 +72,7 @@ for table in (bs[0],bs[2]):
 norm=lambda s:Counter(''.join(s.split()))
 assert norm(plain(sf))==norm(original)
 assert any(d['code']=='pdf_table_rulings_inferred' for d in sf['attrs']['diagnostics'])
-for ext in ('docx','pdf'):subprocess.run(['bin/manydoc','convert','-allow-lossy','-o',str(out/f'reflow.{ext}'),str(sf_path)],check=True)
+for ext in ('docx','pdf'):subprocess.run(['bin/manydoc','convert','-allow-lossy','-pdf-font-map','Helvetica=Go','-o',str(out/f'reflow.{ext}'),str(sf_path)],check=True)
 word=Document(out/'reflow.docx');assert len(word.tables)==2
 for t in word.tables:
     assert t.cell(0,0)._tc is t.cell(0,1)._tc and t.cell(1,0)._tc is t.cell(2,0)._tc

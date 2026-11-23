@@ -78,11 +78,27 @@ with pymupdf.open(fixture) as doc:
 # Reading order and inferred whitespace differ, so this is content-multiset
 # evidence only. Exact /K/list/relationship checks above supply structure evidence.
 assert normalized(''.join(text))==normalized(original_text)
-subprocess.run(['bin/manydoc','convert','-allow-lossy','-o',str(out/'publication.docx'),str(sf_path)],check=True)
+# Keep the existing nine-page normalized-typography regression reproducible.
+# PDF imports now retain source sizes/colors/families; this caller explicitly
+# retypesets to default 11pt Go rather than relying on the old discarded styles.
+# Original SF above remains untouched for structural/style evidence.
+normalized_sf=json.loads(sf_path.read_text())
+styles=[]
+def normalize_typography(node):
+    for mark in node.get('marks',[]):
+        if mark['type']=='textStyle':styles.append(mark['attrs'].copy())
+    if 'marks' in node:node['marks']=[m for m in node['marks'] if m['type']!='textStyle']
+    for child in node.get('content',[]):normalize_typography(child)
+normalize_typography(normalized_sf)
+assert len({v['fontFamily'] for v in styles})==10 and len({v['fontSize'] for v in styles})==15
+normalized_sf['attrs']['diagnostics'].append({'code':'qa_typesetting','message':'QA caller explicitly replaces recovered source typography with default Go 11pt for the existing normalized reflow oracle'})
+normalized_path=out/'publication-normalized.sf'
+normalized_path.write_text(json.dumps(normalized_sf))
+subprocess.run(['bin/manydoc','convert','-allow-lossy','-o',str(out/'publication.docx'),str(normalized_path)],check=True)
 word=Document(out/'publication.docx');assert word.core_properties.title==r.metadata.title
 assert normalized(''.join(p.text for p in word.paragraphs))==normalized(''.join(body))
 print('Published export passed: original bytes/metadata; 10 lists, 57 items/bodies with exact /K block membership and joined discretionary words, 16 URI targets; no invented explicit headings; 20,531 normalized nonspace characters; DOCX content/metadata')
-subprocess.run(['bin/manydoc','convert','-allow-lossy','-o',str(out/'publication.pdf'),str(sf_path)],check=True)
+subprocess.run(['bin/manydoc','convert','-allow-lossy','-o',str(out/'publication.pdf'),str(normalized_path)],check=True)
 flow=PdfReader(out/'publication.pdf',strict=True)
 assert flow.metadata.title==r.metadata.title and len(flow.pages)==9
 flow_uris={str(a.get_object()['/A']['/URI']) for p in flow.pages for a in p.get('/Annots',[]) if a.get_object().get('/A',{}).get('/S')=='/URI'}

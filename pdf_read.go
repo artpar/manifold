@@ -215,6 +215,9 @@ type pdfTextState struct {
 	metricEstimate                                    bool
 	fill                                              [3]float64
 	fillUnknown                                       bool
+	fillSpace, strokeSpace                            string
+	fillValues, strokeValues                          [4]float64
+	strokeUnknown                                     bool
 	rulingWidth                                       float64
 	rulingStrokeAlpha, rulingFillAlpha                float64
 	rulingClip                                        *pdfRulingRect
@@ -228,18 +231,24 @@ func (r *pdfReader) newline() {
 		r.current = nil
 	}
 }
-func (r *pdfReader) space() {
+func (r *pdfReader) space(next Run) {
 	if len(r.current) == 0 {
 		return
 	}
 	last := &r.current[len(r.current)-1]
 	lastRune, _ := utf8.DecodeLastRuneInString(last.Text)
 	if last.Text != "" && !unicode.IsSpace(lastRune) {
-		copyRun := *last
+		copyRun, _ := commonTextStyle(*last, next)
 		copyRun.Text = " "
 		copyRun.Note = nil
 		if last.Source != nil {
 			source := *last.Source
+			source.Font = ""
+			source.FontSize = 0
+			source.RenderMode = 0
+			source.FontFamilyEvidence = ""
+			source.ColorSpace = ""
+			source.ColorComponents = nil
 			source.Quad = nil
 			source.Matrix = nil
 			source.Baseline = nil
@@ -269,7 +278,6 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 	if s.font.vertical {
 		return fmt.Errorf("%w: vertical PDF font positioning", ErrUnsupported)
 	}
-	r.doc.warn("pdf_editable_text_style", "Font names/sizes remain source evidence; editable font/color reconstruction is unfinished")
 	text := ""
 	actual := r.actualFrame()
 	if actual == nil {
@@ -283,6 +291,7 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 		return err
 	}
 	source := r.sourceFor(s, advance, estimated)
+	style := r.textStyle(s, source)
 	r.checkPageBounds(*source.Quad)
 	if s.renderMode == 3 || s.renderMode == 7 {
 		r.warnPage("pdf_invisible_text", "Invisible/clipping-only text is retained with its render mode in source provenance")
@@ -312,20 +321,27 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 		if r.lastDirection.X*direction.X+r.lastDirection.Y*direction.Y < .95 || math.Abs(cross) > .02 || perpendicular > max(1, source.FontSize*.4) {
 			r.newline()
 		} else if dx*r.lastDirection.X+dy*r.lastDirection.Y > max(.5, source.FontSize*.15) {
-			r.space()
+			r.space(style)
 		}
 	}
 	if actual != nil {
 		if !actual.haveStyle {
-			actual.bold = s.font.bold
-			actual.italic = s.font.italic
+			actual.style = style
+			actual.style.Source = nil
 			actual.haveStyle = true
 			baseline := *source.Baseline
 			actual.baseline = &baseline
 		} else {
-			actual.styleMixed = actual.styleMixed || actual.bold != s.font.bold || actual.italic != s.font.italic
-			actual.bold = actual.bold && s.font.bold
-			actual.italic = actual.italic && s.font.italic
+			var mixed bool
+			actual.style, mixed = commonTextStyle(actual.style, style)
+			actual.styleMixed = actual.styleMixed || mixed
+			if !sameSourcePaint(actual.source, source) {
+				actual.source.ColorSpace = ""
+				actual.source.ColorComponents = nil
+			}
+			if actual.style.FontFamily == "" {
+				actual.source.FontFamilyEvidence = ""
+			}
 			first, last := actual.baseline[0], actual.baseline[1]
 			dx, dy := last.X-first.X, last.Y-first.Y
 			length := math.Hypot(dx, dy)
@@ -335,7 +351,7 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 				actual.noncollinear = actual.noncollinear || math.Hypot(begin.X-first.X, begin.Y-first.Y) > .01
 			}
 			actual.baseline[1] = end
-			actual.mixedFont = actual.mixedFont || actual.source.Font != source.Font || math.Abs(actual.source.FontSize-source.FontSize) > .01
+			actual.mixedFont = actual.mixedFont || actual.source.Font != source.Font || math.Abs(actual.source.FontSize-source.FontSize) > 1e-7
 		}
 		if actual.styleMixed {
 			r.warnPage("pdf_actualtext_style", "ActualText covers mixed formatting that cannot be mapped exactly to replacement characters")
@@ -350,7 +366,7 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 		actual.source.Regions = append(actual.source.Regions, SourceRegion{Page: r.page, Quad: *source.Quad})
 	}
 	if text != "" {
-		r.current = append(r.current, Run{Text: text, Bold: s.font.bold, Italic: s.font.italic, Source: source})
+		r.current = append(r.current, Run{Text: text, Bold: style.Bold, Italic: style.Italic, FontFamily: style.FontFamily, FontSize: style.FontSize, Color: style.Color, Source: source})
 	}
 	s.advanceText(advance)
 	s.metricEstimate = s.metricEstimate || estimated
@@ -362,6 +378,15 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 }
 
 func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state pdfTextState) error {
+	spaces, err := r.pdf.DereferenceDict(resources["ColorSpace"])
+	if err != nil {
+		return err
+	}
+	for _, key := range []string{"DefaultGray", "DefaultRGB", "DefaultCMYK"} {
+		if spaces[key] != nil {
+			r.warnPage("pdf_default_color_space", "Default device color-space overrides are not resolved; editable RGB uses base device components as an approximation")
+		}
+	}
 	if depth > 32 {
 		return errors.New("cyclic or excessively nested PDF Form XObject")
 	}
@@ -612,37 +637,33 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 				return fmt.Errorf("unbalanced marked-content end")
 			}
 			r.endMarked()
-		case "cs", "sc", "scn":
-			state.fillUnknown = true
-			r.warnPage("pdf_color_state", "General color-space operators are not reconstructed; color-dependent stencil extraction may reject")
-		case "g", "rg", "k":
-			n := 1
-			if op == "rg" {
-				n = 3
-			}
-			if op == "k" {
-				n = 4
-			}
-			if err := need(n); err != nil {
+
+		case "cs", "CS":
+			if err := r.selectTextColorSpace(args, resources, &state, op == "CS"); err != nil {
 				return err
 			}
-			var c [4]float64
-			for i, v := range args {
-				value, e := pdfNumber(v)
-				if e != nil {
-					return e
-				}
-				c[i] = math.Max(0, math.Min(1, value))
+		case "sc", "scn", "SC", "SCN":
+			if err := setTextColorValues(args, &state, op == "SC" || op == "SCN"); err != nil {
+				return err
 			}
-			state.fillUnknown = false
-			switch op {
-			case "g":
-				state.fill = [3]float64{c[0], c[0], c[0]}
-			case "rg":
-				state.fill = [3]float64{c[0], c[1], c[2]}
-			case "k":
-				state.fill = [3]float64{1 - math.Min(1, c[0]+c[3]), 1 - math.Min(1, c[1]+c[3]), 1 - math.Min(1, c[2]+c[3])}
+		case "g", "rg", "k", "G", "RG", "K":
+			stroke := op == "G" || op == "RG" || op == "K"
+			space := "DeviceGray"
+			if op == "rg" || op == "RG" {
+				space = "DeviceRGB"
 			}
+			if op == "k" || op == "K" {
+				space = "DeviceCMYK"
+			}
+			if stroke {
+				state.strokeSpace = space
+			} else {
+				state.fillSpace = space
+			}
+			if err := setTextColorValues(args, &state, stroke); err != nil {
+				return fmt.Errorf("%s: %w", op, err)
+			}
+
 		case "m", "l", "c", "v", "y", "h", "re", "n", "S", "s", "f", "F", "f*", "B", "B*", "b", "b*", "W", "W*", "w":
 			if err := r.pathOperator(string(op), args, &path, &state); err != nil {
 				return err
@@ -654,7 +675,7 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 				return err
 			}
 			r.warnPage("pdf_graphics_effects", "Extended graphics-state effects are not reconstructed")
-		case "J", "j", "M", "d", "ri", "i", "CS", "SC", "SCN", "G", "RG", "K", "MP", "DP", "BX", "EX", "d0", "d1":
+		case "J", "j", "M", "d", "ri", "i", "MP", "DP", "BX", "EX", "d0", "d1":
 		default:
 			return fmt.Errorf("%w: PDF content operator %q", ErrUnsupported, op)
 		}
@@ -753,6 +774,7 @@ type pdfFont struct {
 	bold, italic                                                   bool
 	widths                                                         map[uint32]float64
 	name                                                           string
+	family, familyEvidence                                         string
 	ascent, descent, defaultWidth                                  float64
 	boundsEstimate, defaultExact, composite, identityCID, vertical bool
 }

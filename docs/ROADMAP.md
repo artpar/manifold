@@ -16,7 +16,9 @@ integration and do not authorize changes to Daptin.
 3. Extend the new Unicode-space/NFC/grapheme wrapping foundation with Go text shaping/bidi and configurable licensed fonts for broader PDF
    generation. Preserve explicit missing-glyph errors while this is incomplete.
 4. Expand forward tagged-PDF recovery and the implemented untagged whitespace/heading/list/numeric/painted-grid table inference (including merges/empty/multiline cells) with more complex/double-border/occluded/rotated layouts; validate inverse ParentTree and internal links. Expand CMaps,
-   vertical text and remaining image codecs/masks/colors. A successful extraction must not imply
+   vertical text and remaining image codecs/masks/colors. Editable family/physical
+   size/device-color recovery now has source evidence and independent span checks;
+   broader source-font/color-management coverage remains required. A successful extraction must not imply
    reconstruction of editable Word structure.
 5. Extend recursive body/nested/footnote continuation with broader pagination
    qualification; repeated header prefixes now exist across those contexts; full-container image fitting, native explicit breaks

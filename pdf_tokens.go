@@ -40,7 +40,32 @@ func nextPDFToken(ctx context.Context, s *string) (any, error) {
 		return nil, nil
 	}
 	c := (*s)[0]
-	if strings.ContainsRune("(/[<+-.0123456789", rune(c)) || strings.HasPrefix(*s, "true") || strings.HasPrefix(*s, "false") || strings.HasPrefix(*s, "null") {
+	// Content-stream operands are direct objects. Parsing adjacent numbers as
+	// a general object can consume the R prefix of RG as an indirect reference
+	// (for example, "0 1 RG"), losing both paint operands and the operator.
+	if strings.ContainsRune("+-.0123456789", rune(c)) {
+		i := 0
+		for i < len(*s) && !pdfDelimiter((*s)[i]) {
+			i++
+		}
+		token := (*s)[:i]
+		*s = (*s)[i:]
+		for j, ch := range token {
+			if !(ch >= '0' && ch <= '9' || ch == '.' || j == 0 && (ch == '+' || ch == '-')) {
+				return nil, fmt.Errorf("invalid PDF number %q", token)
+			}
+		}
+		if !strings.Contains(token, ".") {
+			n, err := strconv.ParseInt(token, 10, 0)
+			return types.Integer(n), err
+		}
+		n, err := strconv.ParseFloat(token, 64)
+		if err != nil || !finite(n) {
+			return nil, fmt.Errorf("invalid PDF number %q", token)
+		}
+		return types.Float(n), nil
+	}
+	if strings.ContainsRune("(/[<", rune(c)) || strings.HasPrefix(*s, "true") || strings.HasPrefix(*s, "false") || strings.HasPrefix(*s, "null") {
 		before := len(*s)
 		v, err := model.ParseObjectContext(ctx, s)
 		if err != nil {

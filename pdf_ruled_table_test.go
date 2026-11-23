@@ -88,7 +88,7 @@ func TestPDFRuledMergedEmptyMultilineAndLinks(t *testing.T) {
 			closePoint(t, empty.Source.Quad[0], 240, 240)
 			closePoint(t, empty.Source.Quad[2], 340, 280)
 			var pdf, word bytes.Buffer
-			if e := Write(context.Background(), &pdf, d, PDF, WriteOptions{AllowLossy: true}); e != nil {
+			if e := Write(context.Background(), &pdf, d, PDF, WriteOptions{AllowLossy: true, PDFFontMap: map[string]string{"Helvetica": "Go"}}); e != nil {
 				t.Fatal(e)
 			}
 			decoded, e := ReadPDF(context.Background(), bytes.NewReader(pdf.Bytes()), ReadOptions{})
@@ -198,7 +198,7 @@ func TestPDFRuledNestedAndImageCellPreservation(t *testing.T) {
 		t.Fatal("cell image lost or duplicated")
 	}
 	var output bytes.Buffer
-	if e := Write(context.Background(), &output, d, PDF, WriteOptions{AllowLossy: true}); e != nil {
+	if e := Write(context.Background(), &output, d, PDF, WriteOptions{AllowLossy: true, PDFFontMap: map[string]string{"Helvetica": "Go"}}); e != nil {
 		t.Fatal(e)
 	}
 	back, e := ReadPDF(context.Background(), bytes.NewReader(output.Bytes()), ReadOptions{})

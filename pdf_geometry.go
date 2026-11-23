@@ -63,7 +63,7 @@ func (r *pdfReader) pageGeometry(number int, d types.Dict, attrs *model.Inherite
 	return p, err
 }
 func initialPDFState() pdfTextState {
-	return pdfTextState{ctm: identityMatrix(), tm: identityMatrix(), lm: identityMatrix(), hscale: 1, rulingWidth: 1, rulingStrokeAlpha: 1, rulingFillAlpha: 1}
+	return pdfTextState{ctm: identityMatrix(), tm: identityMatrix(), lm: identityMatrix(), hscale: 1, rulingWidth: 1, rulingStrokeAlpha: 1, rulingFillAlpha: 1, fillSpace: "DeviceGray", strokeSpace: "DeviceGray"}
 }
 func (s *pdfTextState) advanceText(dx float64) { s.tm = s.tm.compose(translation(dx, 0)) }
 func (s *pdfTextState) moveLine(dx, dy float64) {
@@ -109,6 +109,9 @@ func sourceForRuns(runs []Run) *SourceInfo {
 			copy.Baseline = nil
 			copy.Font = ""
 			copy.FontSize = 0
+			copy.FontFamilyEvidence = ""
+			copy.ColorSpace = ""
+			copy.ColorComponents = nil
 			copy.MCID = nil
 			copy.Tag = ""
 			copy.Structure = "inferred"
@@ -135,14 +138,15 @@ func sourceForRuns(runs []Run) *SourceInfo {
 }
 
 type pdfMarkedContent struct {
-	tag                                            string
-	stream                                         string
-	mcid                                           *int
-	actual                                         *string
-	source                                         *SourceInfo
-	bold, italic, haveStyle, mixedFont, styleMixed bool
-	baseline                                       *[2]Point
-	noncollinear                                   bool
+	tag                              string
+	stream                           string
+	mcid                             *int
+	actual                           *string
+	source                           *SourceInfo
+	haveStyle, mixedFont, styleMixed bool
+	style                            Run
+	baseline                         *[2]Point
+	noncollinear                     bool
 }
 
 func matrixOperands(a []any) (Matrix, error) {

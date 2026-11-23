@@ -347,8 +347,8 @@ Run.FontFamily/FontSize/Color use one family name, points (zero means renderer
 default) and #RRGGBB/auto (empty means default). SF textStyle carries the same
 semantics. RGB hex spelling canonicalizes; actual scalar values persist. This
 profile uses numeric points, not arbitrary Tiptap CSS strings. Imported PDF
-Source.Font/FontSize remain physical provenance; editable PDF font/color recovery
-still needs expansion. No Colleaf/Tiptap drop-in schema compatibility is asserted.
+Source.Font/FontSize remain physical provenance; editable family/size/device-color
+recovery now also exists with evidence and explicit approximation diagnostics. No Colleaf/Tiptap drop-in schema compatibility is asserted.
 
 DOCX resolves docDefaults, paragraph/character basedOn chains and direct fields.
 Bold/italic/strike in style definitions toggle, whereas direct values are absolute.
@@ -387,3 +387,30 @@ advance/font-program/link/bounds tests; its four pages were inspected. A supplie
 Noto face also passes Unicode/metrics/ownership checks. LibreOffice's two inspected
 pages retain all tokens but use installed substitutes and different pagination;
 that observation does not establish matching fonts or Word-equivalent layout.
+
+
+### PDF imported text styles
+
+Editable FontFamily resolves descriptor, embedded TrueType family metadata or
+known standard core-face grouping; a stripped subset PostScript identifier is a
+last-resort lookup request with uncertain grouping diagnosed. SourceInfo has
+font_family_evidence (descriptor/embedded_name/core_font/postscript_fallback/
+unresolved), color_space and color_components. Color components represent effective
+Gray/RGB/CMYK values; Source.Font preserves the original face identifier. Embedded
+font data is read only for metadata, not exported or made an available output font.
+Unsupported font metadata decoders/oversized names fall back with diagnostics.
+
+FontSize uses physical vertical scale. Other transforms remain source geometry;
+nonuniform/skew effects diagnose. Opaque RGB retains 8-bit values; more precise
+Gray/RGB components persist with a quantization warning. CMYK is an approximation,
+not ICC-managed conversion. Unresolved general spaces omit editable color and warn;
+default device-space overrides, render/opacity/blend/clip effects warn. Pattern,
+ICC, spot and other complex text colors remain required expansion. Source render
+modes/geometry persist. Mixed ActualText keeps each common style independently and
+warns for ambiguous ones; homogeneous replacements retain their paint evidence.
+
+Missing imported family/style still rejects PDF output unless callers supply fonts
+or explicit mappings. Imported point sizes need not match writer precision; users
+must choose and disclose retypesetting when necessary. Neither AllowLossy nor PDF
+import silently substitutes output fonts or rounds source styles. Full rich-document
+acceptance remains unfinished, including broader source-font/color/shaping coverage.

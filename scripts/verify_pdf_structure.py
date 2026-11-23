@@ -82,7 +82,7 @@ assert text(bs[5])=='FORM TEXT' and text(bs[6])=='Example link'
 assert any(m['type']=='link' and m['attrs']['href']=='https://example.invalid/structure' for m in bs[6]['content'][0]['marks'])
 assert [text(b) for b in bs[-2:]]==['PAGE ONE FOOTER','PAGE TWO FOOTER']
 for ext in ('docx','pdf'):
-    subprocess.run(['bin/manydoc','convert','-allow-lossy','-o',str(root/f'reflow.{ext}'),str(sf_path)],check=True)
+    subprocess.run(['bin/manydoc','convert','-allow-lossy','-pdf-font-map','Courier=Go Mono','-o',str(root/f'reflow.{ext}'),str(sf_path)],check=True)
 word=Document(root/'reflow.docx');assert len(word.tables)==1 and len(word.inline_shapes)==1
 wt=word.tables[0];assert wt.cell(0,0)._tc is wt.cell(1,1)._tc and wt.cell(0,0).text=='MERGED'
 with ZipFile(root/'reflow.docx') as z:

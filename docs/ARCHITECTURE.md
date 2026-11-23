@@ -359,7 +359,7 @@ required. Runtime dependencies and application admission boundaries are unchange
 ## Rich text style values and font resources
 
 Run.FontFamily/FontSize/Color are primary style values; PDF Source.Font/FontSize
-remain source evidence, not editable font decisions. SF textStyle attributes use
+remain separate source evidence; PDF imports now also recover editable values. SF textStyle attributes use
 one family name, numeric point size and #RRGGBB/auto. Existing defaults remain
 unset; no global font substitution or Daptin admission rule is introduced.
 
@@ -387,3 +387,28 @@ run color, then restore surrounding drawing state. PDF sizes match the engine's
 0.01pt serialization; derived note sizes are rounded to that layout precision.
 DOCX requires exact half-points. Header/table/image planners consume the same
 fragment heights, including rich text inside repeated prefixes.
+
+
+## PDF editable style recovery
+
+`pdf_text_style.go` resolves descriptor FontFamily, then bounded embedded sfnt
+name-table family metadata, then standard core families or a diagnosed PostScript
+lookup identifier. This identifies a request, not an available output font. No
+source program is silently reused as a configured face. Metadata decoding accepts
+unfiltered/single-Flate streams within 32MiB, observes cancellation, and falls back
+with diagnostics for malformed/unsupported metadata without discarding text.
+
+Graphics state carries independent device fill/stroke spaces/components. Standard
+operators and resource aliases resolve Gray/RGB/CMYK; saves/Forms preserve scope.
+SourceInfo records family evidence, color space and effective components. Editable
+RGB is 8-bit; quantization/CMYK/default-space approximation and unrepresented paint
+or transform effects diagnose. Unknown general spaces leave editable color unset.
+Physical vertical scale supplies point size; source matrices retain other geometry.
+
+Content and structure-tree ActualText intersect styles independently rather than
+assigning first-character formatting to a replacement span. Only homogeneous
+paint receives shared source components. Synthetic gaps intersect neighboring
+editable styles, without claiming original painted evidence. PDF numeric operands
+are parsed as direct numbers; PDF object parsing of adjacent integers can otherwise
+consume an RG operator prefix as an indirect reference. SF source marks declare
+all new fields with optional defaults; prior field meanings/profile version persist.

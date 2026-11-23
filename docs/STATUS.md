@@ -21,7 +21,49 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: rich text styles and configurable PDF fonts
+## Latest milestone: editable PDF text style recovery
+
+- PDF → SF now populates editable family, physical point size, RGB and existing
+  bold/italic marks from text/graphics state. SourceInfo separately records
+  font-family evidence and effective device-space components. Descriptor names,
+  bounded embedded TrueType names and standard core-family grouping are explicit
+  evidence; arbitrary PostScript fallback identifiers diagnose uncertain grouping.
+  Source font programs are never registered as output fonts or exported assets.
+- Fill/stroke colors follow graphics saves, Forms and resource aliases. Gray/RGB
+  quantization, approximate CMYK/default overrides, unknown color spaces,
+  opacity/render modes and nonuniform transforms have explicit diagnostics.
+  Unknown paint stays unset rather than being falsely recovered as black.
+- Content-stream and structural ActualText retain only common editable fields;
+  mixed fields clear with diagnostics, and homogeneous source paint persists.
+  Synthetic word gaps retain only common styles and do not claim painted colors.
+  New source fields survive strict SF/legacy JSON codecs and validation.
+- A new independently authored ReportLab fixture checks ten spans on two pages
+  against MuPDF: family, size, RGB, bold/italic, source baselines/pages; DOCX XML
+  and mapped-font native PDF independently preserve these values. All four
+  source/native output pages and both LibreOffice DOCX pages were visually inspected.
+  LibreOffice preserves tokens/styles but substitutes some font faces. This is targeted synthetic QA.
+- Numeric content operands now parse directly: the general object parser could
+  consume the R in `0 1 RG` as an indirect reference. Regression tests cover RG,
+  numeric types and malformed numbers. Embedded-name decoding is bounded to
+  32MiB with cancellation, filter and expansion checks.
+- Source/content/structure oracles remain fixed. Existing PDF round-trip tests
+  and QA scripts now select explicit font substitutes. The publication Go test
+  explicitly rounds requested output sizes to 0.01pt; its original SF is intact.
+  The nine-page publication QA oracle explicitly chooses its prior default
+  typography in a separate normalized SF, while checking all ten recovered
+  families/fifteen sizes. Writer precision and missing-font rejection remain
+  explicit. A stale recovery script assumed paint-order image indices although
+  both prior HEAD and current inference produce the same geometric order: its
+  unchanged pixel values now bind to original PDF object identities. Mark checks
+  select source marks by type rather than position beside the new textStyle.
+
+The full goal remains incomplete. Finish broader source/theme/script/color
+handling and shaping/bidi/font qualification, then remaining page/running-content,
+PDF structure and representative real-export rows in ACCEPTANCE.md. No external
+blocker exists. Prior checkpoint: f8668e6. Actual checks and recovery commands are
+recorded in TESTING.md and verification.json; generated QA output stays ignored.
+
+## Earlier milestone: rich text styles and configurable PDF fonts
 
 - Public runs now retain FontFamily, FontSize (points) and Color (#RRGGBB/auto).
   SF uses a textStyle mark with fontFamily/fontSize/color attributes, following
@@ -855,18 +897,21 @@ module access. The go.mod selects Go 1.25; do not force an older local toolchain
 
 ## Next work (required for the active goal)
 
-No external blocker currently prevents development. Rich text family/size/color,
-configured PDF TTF faces and explicit mappings now exist. Next recover editable
-font/size/color from PDF evidence (including homogeneous ActualText and mixed-style
-diagnostics), then finish theme/script/source-font handling and Go shaping/bidi.
-The new pdf_editable_text_style diagnostic makes that remaining recovery loss
-explicit. Rich page/running content, broader PDF recovery, note-layout/Word
-qualification and representative real exports remain required; see ACCEPTANCE.md.
+No external blocker currently prevents development. Editable PDF family/physical
+size/device-color recovery now exists with provenance and uncertainty diagnostics.
+Next expand theme/script/source-font handling, color management and Go shaping/bidi;
+continue page/running content, broader PDF recovery and representative real exports.
+These remain required acceptance work. Existing precision restrictions can require
+explicit caller retypesetting of imported PDFs; preserve original SF and disclose
+that choice. Do not silently substitute font programs or round source values.
 
 Next concrete commands:
 
 ```sh
-rg -n 'Run\{Text|actual|FontFamily|FontSize|fillUnknown|state.fill|structureReplacement' pdf_read.go pdf_marked.go pdf_structure_blocks.go pdf_infer.go pdf_geometry.go
+GOWORK=off go test -run 'TestPDFRecovered|TestPDFActualTextRetains|TestPDFSourceStyle|TestContentNumbers' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFEditableStyles$' -fuzztime=1000x -parallel=2 -timeout=90s
+output/qa-venv/bin/python scripts/verify_pdf_text_styles.py
+rg -n 'shaping|bidi|complex|supplement|theme' pdf_text.go pdf_font.go docx_text_style.go
 GOWORK=off go run ./examples/text-style
 output/qa-venv/bin/python scripts/verify_text_style.py --office output/text-style/lo/text-style.pdf
 GOWORK=off go test -run 'TestTextStyle|TestDOCXText|TestSuppliedNoto|TestPDFExplicitFont' -count=1

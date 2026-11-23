@@ -262,6 +262,17 @@
         "element": {
           "default": "",
           "validate": "string"
+        },
+        "font_family_evidence": {
+          "default": "",
+          "validate": "string"
+        },
+        "color_space": {
+          "default": "",
+          "validate": "string"
+        },
+        "color_components": {
+          "default": []
         }
       }
     },

@@ -213,7 +213,35 @@ func TestPDFPublishedExportNowRenders(t *testing.T) {
 		t.Fatal(e)
 	}
 	var out bytes.Buffer
-	if e = Write(context.Background(), &out, shared, PDF, WriteOptions{AllowLossy: true}); e != nil {
+	// Source programs are not licensed output fonts. A caller must choose
+	// substitutions and explicitly resolve sizes finer than PDF writer precision.
+	if e = Write(context.Background(), &out, shared, PDF, WriteOptions{AllowLossy: true}); !errors.Is(e, ErrUnsupported) || out.Len() != 0 {
+		t.Fatalf("missing font substitution must reject atomically: %v", e)
+	}
+	mapping := map[string]string{}
+	var prepare func([]Block)
+	prepare = func(blocks []Block) {
+		for i := range blocks {
+			for j := range blocks[i].Runs {
+				r := &blocks[i].Runs[j]
+				mapping[r.FontFamily] = "Go"
+				r.FontSize = math.Round(r.FontSize*100) / 100
+			}
+			for j := range blocks[i].Items {
+				prepare(blocks[i].Items[j].Blocks)
+			}
+			for j := range blocks[i].Rows {
+				for k := range blocks[i].Rows[j].Cells {
+					prepare(blocks[i].Rows[j].Cells[k].Blocks)
+				}
+			}
+		}
+	}
+	prepare(shared.Blocks)
+	if len(mapping) != 10 {
+		t.Fatalf("publication families lost: %v", mapping)
+	}
+	if e = Write(context.Background(), &out, shared, PDF, WriteOptions{AllowLossy: true, PDFFontMap: mapping}); e != nil {
 		t.Fatal(e)
 	}
 	rendered, e := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{})

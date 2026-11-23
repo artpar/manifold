@@ -289,7 +289,11 @@ func joinPDFLayoutRuns(a, b []Run) []Run {
 		if x.Link == y.Link {
 			link = x.Link
 		}
-		a = append(a, Run{Text: " ", Bold: x.Bold && y.Bold, Italic: x.Italic && y.Italic, Underline: x.Underline && y.Underline, Strike: x.Strike && y.Strike, Link: link, Source: s})
+		gap, _ := commonTextStyle(x, y)
+		gap.Text = " "
+		gap.Source = s
+		gap.Link = link
+		a = append(a, gap)
 	}
 	return append(a, b...)
 }
