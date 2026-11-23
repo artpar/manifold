@@ -1,0 +1,6 @@
+# Preserve document bytes: whitespace edits would invalidate PDF xref offsets
+# and corpus checksums. These are binary test assets even when mostly ASCII.
+*.pdf binary
+*.docx binary
+*.ttf binary
+*.png binary

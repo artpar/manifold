@@ -1,0 +1,6 @@
+/bin/
+/output/
+/coverage.out
+*.test
+__pycache__/
+.DS_Store

@@ -1,0 +1,75 @@
+{
+  "date": "2026-11-23",
+  "project": "github.com/artpar/manydoc",
+  "go": "go version go1.25.0 darwin/arm64",
+  "host": "macOS-15.4-arm64-arm-64bit-Mach-O",
+  "packages": {
+    "github.com/artpar/manydoc/cmd/manydoc": "passed",
+    "github.com/artpar/manydoc/examples/report": "passed",
+    "github.com/artpar/manydoc": "passed"
+  },
+  "coverage_percent": {
+    "github.com/artpar/manydoc/cmd/manydoc": 75.0,
+    "github.com/artpar/manydoc/examples/report": 0.0,
+    "github.com/artpar/manydoc": 76.4
+  },
+  "top_level_tests_passed": 21,
+  "named_corpus": {
+    "total": 64,
+    "docx": 31,
+    "pdf": 33,
+    "mostly_synthetic": true
+  },
+  "deterministic_damaged_input_mutations": 200,
+  "race_detector": "passed",
+  "go_vet": "passed",
+  "module_verification": "passed",
+  "cgo_disabled_builds": {
+    "darwin_arm64": "built and executed",
+    "linux_amd64": "cross-build only",
+    "linux_arm64": "cross-build only"
+  },
+  "pdf_poppler_text_comparisons": {
+    "passed": 28,
+    "total": 28,
+    "comparison": "whitespace normalized"
+  },
+  "generated_output": {
+    "docx_independent_reader": "passed",
+    "pdf_poppler_text": "passed",
+    "pdf_pages": 2,
+    "docx_tables": 1,
+    "docx_images": 1,
+    "word_visual_layout": "not verified by this script"
+  },
+  "fuzz_campaigns": {
+    "DOCX": {
+      "passed": true,
+      "executions": 20100,
+      "requested_budget_seconds": 15,
+      "workers": 2,
+      "log": "output/fuzz-docx-final.log"
+    },
+    "PDF": {
+      "passed": true,
+      "executions": 79880,
+      "requested_budget_seconds": 15,
+      "workers": 2,
+      "log": "output/fuzz-pdf-final.log"
+    },
+    "ToUnicode": {
+      "passed": true,
+      "executions": 178299,
+      "requested_budget_seconds": 15,
+      "workers": 2,
+      "log": "output/fuzz-cmap.log"
+    }
+  },
+  "limits": [
+    "Short fuzz campaigns are not exhaustive",
+    "Mostly synthetic corpus",
+    "Word/LibreOffice visual acceptance not completed",
+    "No Daptin or Colleaf adapter integration tested"
+  ],
+  "raw_logs": "output/ (ignored, regenerable; see docs/TESTING.md)"
+}

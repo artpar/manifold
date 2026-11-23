@@ -1,0 +1,567 @@
+[
+  {
+    "name": "docx_basic.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36629,
+    "sha256": "2c49a557c30fe3d1da77b6606682038c3cdd418463716c6758e251789542978c"
+  },
+  {
+    "name": "docx_blank.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36563,
+    "sha256": "33b60696cba10a60724c603a086d6fb917908591ccbeada918a0d53c9572e0c5"
+  },
+  {
+    "name": "docx_unicode.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36695,
+    "sha256": "ab8792388d37989de4cebefe58addd22c20182953eb1ec7dbf907e667b179406"
+  },
+  {
+    "name": "docx_runs.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36658,
+    "sha256": "fc19869975160bc707e3549f2c28b9dce2d46f57fc5aad676700436d31304686"
+  },
+  {
+    "name": "docx_whitespace.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36618,
+    "sha256": "ed5b8be4115e5cf25a48db2645afa03552d0d469e23b1ec09ea78b37a7a536d3"
+  },
+  {
+    "name": "docx_lists.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36622,
+    "sha256": "cec0118f9e8436db024718a3032df4dc9bfe5f18195253ce5e273d5910eacc4c"
+  },
+  {
+    "name": "docx_table.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36754,
+    "sha256": "7b58222e5a6a66391ef24e2e9771eb09d1baae91a8088c6f259174d814532fef"
+  },
+  {
+    "name": "docx_nested_table.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36759,
+    "sha256": "5d7c639d1ea73b6a021ecd7bf80f00e2a029ae3f0507c8354a29eeae97793a47"
+  },
+  {
+    "name": "docx_header_footer.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 37686,
+    "sha256": "c2d81baa806bdff6e81cf23a4d459f0c40477fee978b1ed9797930fa0845e4a8"
+  },
+  {
+    "name": "docx_image.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 38349,
+    "sha256": "06bed5b371a5c9f3156196872cbf0912004ace076e12e9d0a60e4e391db77566"
+  },
+  {
+    "name": "docx_hyperlink.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36683,
+    "sha256": "87aaf95d818337cdb7ccb59eeaef3516d4d0298223c368f67d7523df836cc786"
+  },
+  {
+    "name": "docx_sections.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36605,
+    "sha256": "25efab61d5af934545aba7f245936075fb1a8ac554b29a302538490952bc4240"
+  },
+  {
+    "name": "docx_page_break.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36606,
+    "sha256": "1b0a0a105f198ca6cb97fc1d4f83423c9e81b9a0a04b87dae5ad7cb4f14942b0"
+  },
+  {
+    "name": "docx_large.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 50219,
+    "sha256": "4538658148bd44b36c4677c582ef6553e2fb9961881ce0ce70d6e2d5c0ede53c"
+  },
+  {
+    "name": "docx_tracked.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36698,
+    "sha256": "d546aa2dd88ff1ee29e631139618c57741b56f56a674cc44aa2c3acd11f1e3f3"
+  },
+  {
+    "name": "docx_content_control.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36678,
+    "sha256": "575ac54fa9393103f149133e62948fc0d72da96983a4a690fe20c476a063ba59"
+  },
+  {
+    "name": "docx_textbox.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36693,
+    "sha256": "5e5316d6cf40f0a09a559844f7e7c9ac1c037d817b0f43c8ca01402641ca51b6"
+  },
+  {
+    "name": "docx_field.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36672,
+    "sha256": "1b52d5a8e53733b247f2710dbb9feef2fedff5a88088249f740860fa2cd09b0d"
+  },
+  {
+    "name": "docx_bookmark.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36681,
+    "sha256": "513baf3e93f463ec7e9a466c0fe3635ca48e25acc0d63276d565482fbb32020f"
+  },
+  {
+    "name": "docx_missing_styles.docx",
+    "kind": "docx",
+    "expect": "reject",
+    "size": 24376,
+    "sha256": "e05363cec7d50e2a6d11374b08c6aa97d7e42eed999028e107e69bc951d70613",
+    "note": "dangling styles relationship"
+  },
+  {
+    "name": "docx_missing_document.docx",
+    "kind": "docx",
+    "expect": "reject",
+    "size": 35950,
+    "sha256": "f7d56bdf4ac4d5bce8df3f9486c674a436edda9408bde8281c0b786f752b9135"
+  },
+  {
+    "name": "docx_missing_rels.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36191,
+    "sha256": "d6b43842b7740a4dc2fd24faec683dd7b5cc3a22ab72d54a358cb70e23353758",
+    "note": "Optional document relationships part omitted; remaining styles/numbering parts are unreferenced"
+  },
+  {
+    "name": "docx_bad_xml.docx",
+    "kind": "docx",
+    "expect": "reject",
+    "size": 36082,
+    "sha256": "1ee0850a1cfcaa9253e35b84cc65d0f515b84d22d6d21aef8db66b09999246ac"
+  },
+  {
+    "name": "docx_wrong_root.docx",
+    "kind": "docx",
+    "expect": "reject",
+    "size": 36093,
+    "sha256": "ea0dcbe04bf78be778507723e90ac2bcd3672a1632e8f1fc87cac9eb2b32bfe5"
+  },
+  {
+    "name": "docx_strict.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 36637,
+    "sha256": "d78ebbd869551c2d9a08c55da31ab79a8a93904ff079b46d92889021346bbd30",
+    "note": "strict main namespace with transitional package"
+  },
+  {
+    "name": "docx_compressed_payload.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 44897,
+    "sha256": "c5cc84d91feaab3e01110600fc95eb1cfa752c03ae3c79d605fa12bc32c5bd82",
+    "note": "8 MiB highly compressed unused member"
+  },
+  {
+    "name": "docx_empty.docx",
+    "kind": "docx",
+    "expect": "reject",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "docx_random.docx",
+    "kind": "docx",
+    "expect": "reject",
+    "size": 10,
+    "sha256": "a2aa2861e1785cac8572d37d73c3fa1eed89d2c953b40a49b958a25756671507"
+  },
+  {
+    "name": "docx_truncated.docx",
+    "kind": "docx",
+    "expect": "reject",
+    "size": 100,
+    "sha256": "c7f9240f59cd18f7d74110afa6c4acb57c6597d1e76bea9f554b34c4ef99e05a"
+  },
+  {
+    "name": "docx_empty_zip.docx",
+    "kind": "docx",
+    "expect": "reject",
+    "size": 22,
+    "sha256": "8739c76e681f900923b900c9df0ef75cf421d39cabb54650c4b9ad19b6a76d85"
+  },
+  {
+    "name": "docx_minimal.docx",
+    "kind": "docx",
+    "expect": "accept",
+    "size": 813,
+    "sha256": "bfbbe9f89640e1119949b6ec3fcad70131bb509b83111a2fd7b09afee299a7ca",
+    "note": "valid minimal package, no styles or document relationships"
+  },
+  {
+    "name": "pdf_basic.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 1360,
+    "sha256": "cb6cbc244e927ddc917befd25bb17b3139463d71fe1539acd6d0df97b38162e2",
+    "markers": [
+      "Alpha paragraph",
+      "Beta paragraph"
+    ]
+  },
+  {
+    "name": "pdf_w3c_dummy.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 13264,
+    "sha256": "3df79d34abbca99308e79cb94461c1893582604d68329a41fd4bec1885e6adb4",
+    "markers": [
+      "Dummy",
+      "PDF",
+      "file"
+    ],
+    "source": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+  },
+  {
+    "name": "pdf_multipage.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 2207,
+    "sha256": "c35862d66479ee06d68cb7047de9394cfea9e473c6ac6bff65044be9ee25cbf2",
+    "markers": [
+      "PAGE_ONE",
+      "PAGE_TWO",
+      "PAGE_THREE"
+    ],
+    "pages": 3
+  },
+  {
+    "name": "pdf_blank.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 1298,
+    "sha256": "d90f5c0ad72a67341295f79c67274f934f38c68518de29fc6f62b39f541629cf",
+    "pages": 1
+  },
+  {
+    "name": "pdf_unicode.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 16879,
+    "sha256": "acf0346006cef025ea47bce2e577e0e14153c17e11d9c0dafd5917db7489b9ea",
+    "markers": [
+      "café",
+      "Ελληνικά",
+      "Привет"
+    ]
+  },
+  {
+    "name": "pdf_cjk.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 2336,
+    "sha256": "c144291c4e368aa95fb7717ee1631848caa1c6b6e95d0cc8c383c13342e10ba1",
+    "markers": [
+      "中文测试",
+      "日本語"
+    ]
+  },
+  {
+    "name": "pdf_japanese.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 2898,
+    "sha256": "e811f9dbdd0a96c635a903f05d479f4f12521fce1f830805e850379164ecf52b",
+    "markers": [
+      "日本語テスト"
+    ]
+  },
+  {
+    "name": "pdf_ligatures.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 15487,
+    "sha256": "727bd53c1d9fb16d4917ef8a74e5ccb94f4ff6144d8dacfcf51eb36c3f3e3f48",
+    "markers": [
+      "office",
+      "ﬁ",
+      "ﬂ"
+    ]
+  },
+  {
+    "name": "pdf_columns.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 1408,
+    "sha256": "75caa6c3b27c0a7c369405f20fed2408ba754d830cff3f1ba65fb0d2990f731d",
+    "markers": [
+      "LEFT_0",
+      "LEFT_3",
+      "RIGHT_0",
+      "RIGHT_3"
+    ]
+  },
+  {
+    "name": "pdf_rotated.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 1361,
+    "sha256": "92c69ed4fe14b5aa9c5c2b6333cb03d5213cd51846346540391a666599739d8a",
+    "markers": [
+      "ROTATED_MARKER"
+    ]
+  },
+  {
+    "name": "pdf_form_xobject.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 1802,
+    "sha256": "c6610a1fc4d5accf3041e9ed3e8f673478e476a1639ae2a8a6c0768fbab8b736",
+    "markers": [
+      "FORM_XOBJECT_MARKER",
+      "DIRECT_MARKER"
+    ]
+  },
+  {
+    "name": "pdf_scan.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 3060,
+    "sha256": "e0c5b219d7060b0782e5d7734209210cb9f780c0a0e487425e3110ead7d546ab",
+    "note": "image only, no OCR expected"
+  },
+  {
+    "name": "pdf_table.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 1405,
+    "sha256": "09d38d22e8f92f24afeff1dd0bf99664db8f3b49d9ac87e6c72f2a55e78581c9",
+    "markers": [
+      "Product",
+      "Quantity",
+      "Daptin",
+      "42"
+    ]
+  },
+  {
+    "name": "pdf_large.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 74018,
+    "sha256": "96eb736e98b368ea319fb648ea9e24c15cf4b62adab64e93724972378a5738d6",
+    "pages": 100,
+    "markers": [
+      "PAGE_000_LINE_00",
+      "PAGE_099_LINE_34"
+    ]
+  },
+  {
+    "name": "pdf_font_a.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 15691,
+    "sha256": "e30f6e94dd0b922dd1772cfe42b8e18d9d1d179140dd507c6f102c01d210d317",
+    "markers": [
+      "café",
+      "Ω"
+    ]
+  },
+  {
+    "name": "pdf_font_b.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 15882,
+    "sha256": "72520f0d1a751f35a55b21f510b50680347fe8bdb901aa5f859358b9df59bb99",
+    "markers": [
+      "Привет",
+      "Ж"
+    ]
+  },
+  {
+    "name": "pdf_font_collision.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 30397,
+    "sha256": "114a6a61ce2daa68f7461031aa884eaa47ce3c56654932089dc8efe7f6112a8f",
+    "pages": 2,
+    "markers": [
+      "café",
+      "Ω",
+      "Привет",
+      "Ж"
+    ]
+  },
+  {
+    "name": "pdf_version_2.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 1360,
+    "sha256": "2b1ccf35754332c0856fe8d7db9781a4566c6285685abef3f0fe4e4d60a26474",
+    "markers": [
+      "Alpha paragraph"
+    ],
+    "note": "synthetic PDF 2.0 header, same object syntax"
+  },
+  {
+    "name": "pdf_rc4_40.pdf",
+    "kind": "pdf",
+    "expect": "password",
+    "size": 1326,
+    "sha256": "be67540fcc71972e624194acc8ce86b840ca3cc1e62b6dbdcc992f0a3d2ef84b",
+    "markers": [
+      "Alpha paragraph"
+    ]
+  },
+  {
+    "name": "pdf_rc4_128.pdf",
+    "kind": "pdf",
+    "expect": "password",
+    "size": 1327,
+    "sha256": "6dd11847348333209295143a85db172ca502816bfdf14fb9e5c341e0b0705a30",
+    "markers": [
+      "Alpha paragraph"
+    ]
+  },
+  {
+    "name": "pdf_aes-128.pdf",
+    "kind": "pdf",
+    "expect": "password",
+    "size": 1498,
+    "sha256": "67224fbc649d3ee69abe280f74187ce72d142cc270ba73244f1355eb4a95dab5",
+    "markers": [
+      "Alpha paragraph"
+    ]
+  },
+  {
+    "name": "pdf_aes-256.pdf",
+    "kind": "pdf",
+    "expect": "password",
+    "size": 1746,
+    "sha256": "fef6a93fa466150e8f07bf16761adfe121b51617a1cc60bcc67a6429d2605f3c",
+    "markers": [
+      "Alpha paragraph"
+    ]
+  },
+  {
+    "name": "pdf_object_stream.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 1120,
+    "sha256": "eca482ffd77af6673c76c968ef4e9156016f94bb9a409d3490440a4dce2c55e8",
+    "markers": [
+      "Alpha paragraph",
+      "Beta paragraph"
+    ]
+  },
+  {
+    "name": "pdf_incremental.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 2224,
+    "sha256": "4affb0606c43497c15367746d86d0fbec31658e357cf950cd23a7415f188b97d",
+    "markers": [
+      "Alpha paragraph",
+      "INCREMENTAL_MARKER"
+    ]
+  },
+  {
+    "name": "pdf_form_field.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 3703,
+    "sha256": "40fe1246f49e64c3167c79fae97e0c7e186c5835e9402fc13f50677581c8e798",
+    "markers": [
+      "Form label"
+    ],
+    "note": "report widget-value omission separately"
+  },
+  {
+    "name": "pdf_tj_spacing.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 680,
+    "sha256": "1676b94489707ed824bd58da43d64efaeb558852a8c455c128e48994d4884a79",
+    "markers": [
+      "hello world"
+    ],
+    "note": "spacing inferred from TJ glyph positioning"
+  },
+  {
+    "name": "pdf_double_quote.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 686,
+    "sha256": "a6cefd01a8992c69cb8b521dbff99a55bbe526e9cae6c64d2aa7c1b8ecfdfafa",
+    "markers": [
+      "FIRST",
+      "SECOND"
+    ],
+    "note": "valid three-operand double-quote text operator"
+  },
+  {
+    "name": "pdf_compressed_payload.pdf",
+    "kind": "pdf",
+    "expect": "accept",
+    "size": 8705,
+    "sha256": "3f8b16cd4b3ff7973f9c69c994dc77f427c6d7d6c9f15cc877787b4ed089e80e",
+    "note": "8 MiB decompressed whitespace stream"
+  },
+  {
+    "name": "pdf_bad_operator.pdf",
+    "kind": "pdf",
+    "expect": "reject",
+    "size": 657,
+    "sha256": "52b6113d0ecf573a9439cd3291526e8c3fddb0638389074e16c42e9f03c61514"
+  },
+  {
+    "name": "pdf_empty.pdf",
+    "kind": "pdf",
+    "expect": "reject",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "pdf_random.pdf",
+    "kind": "pdf",
+    "expect": "reject",
+    "size": 9,
+    "sha256": "6d689ba9522127c0c759535f5adb7f2c8f182ac280d94eab93cb54e5ec598fa0"
+  },
+  {
+    "name": "pdf_truncated.pdf",
+    "kind": "pdf",
+    "expect": "reject",
+    "size": 100,
+    "sha256": "c37f2033f7cc382cc326b0d01507b41ae81eabb38b9f080afe26f3c7db48c836"
+  },
+  {
+    "name": "pdf_no_eof.pdf",
+    "kind": "pdf",
+    "expect": "reject",
+    "size": 1354,
+    "sha256": "693087fbf28287a8122ad41b034f1714ad3258580046a9e20b3e89382f46e705"
+  }
+]
