@@ -20,6 +20,8 @@ const (
 	DOCX Format = "docx"
 	PDF  Format = "pdf"
 	JSON Format = "json"
+	// SF is versioned ProseMirror JSON, stored with the .sf extension.
+	SF   Format = "sf"
 	Text Format = "txt"
 )
 
@@ -34,6 +36,7 @@ type Document struct {
 	Footers     []Block      `json:"footers,omitempty"`
 	Notes       []Note       `json:"notes,omitempty"`
 	Diagnostics []Diagnostic `json:"diagnostics,omitempty"`
+	Pages       []PDFPage    `json:"pages,omitempty"`
 }
 type Metadata struct {
 	Title     string `json:"title,omitempty"`
@@ -54,25 +57,43 @@ const (
 	Paragraph Kind = "paragraph"
 	Heading   Kind = "heading"
 	Table     Kind = "table"
+	ListBlock Kind = "list"
 	Picture   Kind = "image"
 	PageBreak Kind = "page_break"
 )
 
 type Block struct {
-	Kind  Kind   `json:"kind"`
-	Runs  []Run  `json:"runs,omitempty"`
-	Level int    `json:"level,omitempty"`
-	List  string `json:"list,omitempty"` // bullet or number
-	Rows  []Row  `json:"rows,omitempty"`
-	Image *Image `json:"image,omitempty"`
+	Kind  Kind       `json:"kind"`
+	Runs  []Run      `json:"runs,omitempty"`
+	Level int        `json:"level,omitempty"`
+	List  string     `json:"list,omitempty"` // bullet or number
+	Rows  []Row      `json:"rows,omitempty"`
+	Image *Image     `json:"image,omitempty"`
+	Items []ListItem `json:"items,omitempty"`
+	// Start is the first ordered-list value; nil means one. Zero is valid.
+	Start           *int        `json:"start,omitempty"`
+	Source          *SourceInfo `json:"source,omitempty"`
+	docxList        *docxListRef
+	docxNumberID    int
+	docxNumberLevel int
+	docxIndent      int
 }
+
+// ListItem owns its ordered blocks, including continuation paragraphs and nested lists.
+type ListItem struct {
+	Blocks []Block     `json:"blocks"`
+	Source *SourceInfo `json:"source,omitempty"`
+}
+
 type Run struct {
-	Text      string `json:"text"`
-	Bold      bool   `json:"bold,omitempty"`
-	Italic    bool   `json:"italic,omitempty"`
-	Underline bool   `json:"underline,omitempty"`
-	Strike    bool   `json:"strike,omitempty"`
-	Link      string `json:"link,omitempty"`
+	Text      string         `json:"text"`
+	Bold      bool           `json:"bold,omitempty"`
+	Italic    bool           `json:"italic,omitempty"`
+	Underline bool           `json:"underline,omitempty"`
+	Strike    bool           `json:"strike,omitempty"`
+	Link      string         `json:"link,omitempty"`
+	Note      *NoteReference `json:"note,omitempty"`
+	Source    *SourceInfo    `json:"source,omitempty"`
 }
 type Row struct {
 	Cells []Cell `json:"cells"`
@@ -80,6 +101,10 @@ type Row struct {
 type Cell struct {
 	Blocks  []Block `json:"blocks"`
 	ColSpan int     `json:"col_span,omitempty"`
+	// RowSpan includes the origin row; zero means one. Covered cells are
+	// omitted from subsequent rows, rather than stored as duplicate content.
+	RowSpan int         `json:"row_span,omitempty"`
+	Source  *SourceInfo `json:"source,omitempty"`
 }
 type Image struct {
 	Data      []byte  `json:"data"` // JSON represents bytes as base64.
@@ -101,7 +126,13 @@ type Diagnostic struct {
 var ErrUnsupported = errors.New("unsupported document feature")
 var ErrLossy = errors.New("conversion would lose document features")
 
-type ReadOptions struct{ Password string }
+type ReadOptions struct {
+	Password string
+	// PDFSkipInference retains untagged PDF paint order and baseline groups for
+	// callers inspecting physical extraction. Tagged logical trees still apply.
+	// The default recovers geometric structure with disclosed uncertainty.
+	PDFSkipInference bool
+}
 type WriteOptions struct {
 	// AllowLossy acknowledges diagnostics on an imported document. Unsupported
 	// writer features still return errors rather than silently producing bad output.
@@ -111,7 +142,7 @@ type WriteOptions struct {
 func FormatFromName(name string) (Format, error) {
 	f := Format(strings.ToLower(strings.TrimPrefix(filepath.Ext(name), ".")))
 	switch f {
-	case DOCX, PDF, JSON, Text:
+	case DOCX, PDF, JSON, SF, Text:
 		return f, nil
 	}
 	return "", fmt.Errorf("%w: format %q", ErrUnsupported, f)
@@ -125,6 +156,12 @@ func Read(ctx context.Context, r io.Reader, format Format, opts ReadOptions) (*D
 		return ReadDOCX(ctx, r)
 	case PDF:
 		return ReadPDF(ctx, r, opts)
+	case SF:
+		s, err := ReadStructured(ctx, r)
+		if err != nil {
+			return nil, err
+		}
+		return FromStructured(s)
 	case JSON:
 		var d Document
 		dec := json.NewDecoder(r)
@@ -165,14 +202,23 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 	if err := d.Validate(); err != nil {
 		return err
 	}
-	if format != JSON && format != Text && len(d.Diagnostics) > 0 && !opts.AllowLossy {
+	if format != JSON && format != SF && format != Text && len(d.Diagnostics) > 0 && !opts.AllowLossy {
 		return fmt.Errorf("%w: %s", ErrLossy, d.Diagnostics[0].Message)
+	}
+	if (format == DOCX || format == PDF) && d.hasPDFSource() && !opts.AllowLossy {
+		return fmt.Errorf("%w: positioned PDF source content will be reflowed and provenance omitted", ErrLossy)
 	}
 	switch format {
 	case DOCX:
 		return writeDOCX(ctx, w, d)
 	case PDF:
 		return writePDF(ctx, w, d)
+	case SF:
+		s, err := ToStructured(d)
+		if err != nil {
+			return err
+		}
+		return WriteStructured(ctx, w, s)
 	case JSON:
 		enc := json.NewEncoder(w)
 		enc.SetIndent("", "  ")
@@ -213,6 +259,10 @@ func textBlocks(b *strings.Builder, blocks []Block) {
 				}
 				b.WriteByte('\n')
 			}
+		case ListBlock:
+			for _, item := range v.Items {
+				textBlocks(b, item.Blocks)
+			}
 		case Picture:
 			if v.Image != nil && v.Image.Alt != "" {
 				b.WriteString(v.Image.Alt)
@@ -220,7 +270,11 @@ func textBlocks(b *strings.Builder, blocks []Block) {
 			}
 		default:
 			for _, r := range v.Runs {
-				b.WriteString(r.Text)
+				if r.Note != nil {
+					b.WriteString("[" + r.Note.Kind + ":" + r.Note.ID + "]")
+				} else {
+					b.WriteString(r.Text)
+				}
 			}
 			b.WriteByte('\n')
 		}
@@ -229,6 +283,9 @@ func textBlocks(b *strings.Builder, blocks []Block) {
 func (d *Document) Validate() error {
 	if d == nil {
 		return errors.New("nil document")
+	}
+	if err := validatePDFPages(d.Pages); err != nil {
+		return err
 	}
 	for _, s := range []string{d.Metadata.Title, d.Metadata.Author, d.Metadata.Subject} {
 		if err := validateString(s); err != nil {
@@ -250,7 +307,16 @@ func (d *Document) Validate() error {
 			return errors.New("document nesting exceeds 64 levels")
 		}
 		for _, b := range bs {
+			if err := b.Source.validate(d.Pages); err != nil {
+				return err
+			}
+			if b.Kind != ListBlock && (len(b.Items) > 0 || b.Start != nil) {
+				return errors.New("list items/start require a list block")
+			}
 			for _, r := range b.Runs {
+				if err := r.Source.validate(d.Pages); err != nil {
+					return err
+				}
 				if err := validateString(r.Text); err != nil {
 					return err
 				}
@@ -269,12 +335,47 @@ func (d *Document) Validate() error {
 				if b.List != "" && b.List != "bullet" && b.List != "number" {
 					return errors.New("list must be bullet or number")
 				}
+			case ListBlock:
+				if b.List != "bullet" && b.List != "number" {
+					return errors.New("list kind must be bullet or number")
+				}
+				if b.Level != 0 || len(b.Runs) > 0 || len(b.Rows) > 0 || b.Image != nil {
+					return errors.New("list content belongs in items")
+				}
+				if len(b.Items) == 0 {
+					return errors.New("list requires items")
+				}
+				if b.Start != nil && (b.List != "number" || *b.Start < 0 || int64(*b.Start)+int64(len(b.Items))-1 > 2147483647) {
+					return errors.New("invalid ordered-list start/range")
+				}
+				for _, item := range b.Items {
+					if err := item.Source.validate(d.Pages); err != nil {
+						return err
+					}
+					if len(item.Blocks) == 0 || (item.Blocks[0].Kind != Paragraph && item.Blocks[0].Kind != Heading) {
+						return errors.New("list item must start with paragraph or heading")
+					}
+					for _, child := range item.Blocks {
+						if child.Kind != ListBlock && child.List != "" {
+							return errors.New("explicit list item cannot contain legacy list paragraphs")
+						}
+					}
+					if err := walk(item.Blocks, depth+1); err != nil {
+						return err
+					}
+				}
 			case Table:
 				if len(b.Runs) > 0 || b.Image != nil {
 					return errors.New("table cannot contain direct runs or an image")
 				}
+				if _, err := tableGrid(b.Rows); err != nil {
+					return err
+				}
 				for _, r := range b.Rows {
 					for _, c := range r.Cells {
+						if err := c.Source.validate(d.Pages); err != nil {
+							return err
+						}
 						if c.ColSpan < 0 || c.ColSpan > 1000 {
 							return errors.New("invalid column span")
 						}
@@ -313,7 +414,7 @@ func (d *Document) Validate() error {
 			return err
 		}
 	}
-	return nil
+	return validateNotes(d)
 }
 func layout(l Layout) (float64, float64, float64) {
 	w, h, m := l.Width, l.Height, l.Margin

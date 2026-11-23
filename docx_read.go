@@ -127,12 +127,21 @@ type docxRelation struct {
 	External     bool
 }
 type docxReader struct {
-	ctx    context.Context
-	files  map[string]*zip.File
-	doc    *Document
-	styles map[string]*xmlNode
-	num    map[string]string
-	types  map[string]string
+	ctx                 context.Context
+	files               map[string]*zip.File
+	doc                 *Document
+	styles              map[string]*xmlNode
+	num                 map[string]map[int]docxListLevel
+	inTaggedList        int
+	inNote              int
+	implicitNoteLayout  bool
+	notePropertySources []*xmlNode
+	noteBookmarkIDs     map[string]bool
+	noteBookmarkEnds    map[string]bool
+	noteBookmarkNames   map[string]bool
+	cachedNoteMarks     map[string][]string
+	rangeNumIDs         map[string]bool
+	types               map[string]string
 }
 
 func (r *docxReader) part(name string) ([]byte, error) {
@@ -213,7 +222,7 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 	if err != nil {
 		return nil, fmt.Errorf("DOCX archive: %w", err)
 	}
-	r := &docxReader{ctx: ctx, files: map[string]*zip.File{}, doc: &Document{}, styles: map[string]*xmlNode{}, num: map[string]string{}, types: map[string]string{}}
+	r := &docxReader{ctx: ctx, files: map[string]*zip.File{}, doc: &Document{}, styles: map[string]*xmlNode{}, num: map[string]map[int]docxListLevel{}, types: map[string]string{}}
 	for _, f := range z.File {
 		if f.FileInfo().IsDir() {
 			continue
@@ -292,27 +301,22 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 					r.styles[v.attr("styleId")] = v
 				}
 			}
+		case strings.HasSuffix(v.Type, "/settings"):
+			settings, e := r.xml(v.Target)
+			if e != nil {
+				return nil, e
+			}
+			if settings.Name.Local != "settings" {
+				return nil, fmt.Errorf("invalid DOCX settings root")
+			}
+			r.notePropertySources = append(r.notePropertySources, settings)
 		case strings.HasSuffix(v.Type, "/numbering"):
 			s, e := r.xml(v.Target)
 			if e != nil {
 				return nil, e
 			}
-			abstract := map[string]string{}
-			for _, a := range s.Children {
-				if a.Name.Local == "abstractNum" {
-					kind := "number"
-					for _, f := range a.all("numFmt") {
-						if f.attr("val") == "bullet" {
-							kind = "bullet"
-						}
-					}
-					abstract[a.attr("abstractNumId")] = kind
-				}
-			}
-			for _, a := range s.Children {
-				if a.Name.Local == "num" {
-					r.num[a.attr("numId")] = abstract[a.child("abstractNumId").attr("val")]
-				}
+			if e := r.readNumbering(s); e != nil {
+				return nil, e
 			}
 		}
 	}
@@ -321,6 +325,7 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 		return nil, err
 	}
 	for _, s := range n.all("sectPr") {
+		r.notePropertySources = append(r.notePropertySources, s)
 		if p := s.child("pgSz"); p != nil {
 			r.doc.Layout.Width = number(p.attr("w")) / 20
 			r.doc.Layout.Height = number(p.attr("h")) / 20
@@ -361,38 +366,12 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 	if len(n.all("sectPr")) > 1 {
 		r.doc.warn("multiple_sections", "Multiple sections are flattened to one page layout")
 	}
-	for _, v := range mainRels {
-		if v.External {
-			continue
-		}
-		kind := ""
-		if strings.HasSuffix(v.Type, "/footnotes") {
-			kind = "footnote"
-		}
-		if strings.HasSuffix(v.Type, "/endnotes") {
-			kind = "endnote"
-		}
-		if kind == "" {
-			continue
-		}
-		notes, e := r.xml(v.Target)
-		if e != nil {
-			return nil, e
-		}
-		nr, e := r.rels(v.Target)
-		if e != nil {
-			return nil, e
-		}
-		for _, nn := range notes.Children {
-			if nn.Name.Local != kind || strings.HasPrefix(nn.attr("id"), "-") || nn.attr("type") != "" {
-				continue
-			}
-			bs, e := r.blocks(nn, nr, 0)
-			if e != nil {
-				return nil, e
-			}
-			r.doc.Notes = append(r.doc.Notes, Note{nn.attr("id"), kind, bs})
-		}
+	if err := r.readNoteParts(mainRels); err != nil {
+		return nil, err
+	}
+
+	if err := r.foldDocumentLists(); err != nil {
+		return nil, err
 	}
 	return r.doc, r.doc.Validate()
 }
@@ -401,8 +380,12 @@ func (r *docxReader) blocks(n *xmlNode, rels map[string]docxRelation, depth int)
 	if depth > 64 {
 		return nil, errors.New("DOCX block nesting exceeds 64 levels")
 	}
+	children, err := expandListBookmarks(n.Children, depth)
+	if err != nil {
+		return nil, err
+	}
 	var out []Block
-	for _, c := range n.Children {
+	for _, c := range children {
 		if err := r.ctx.Err(); err != nil {
 			return nil, err
 		}
@@ -414,30 +397,20 @@ func (r *docxReader) blocks(n *xmlNode, rels map[string]docxRelation, depth int)
 			}
 			out = append(out, bs...)
 		case "tbl":
-			b := Block{Kind: Table}
-			for _, row := range c.Children {
-				if row.Name.Local != "tr" {
-					continue
-				}
-				rr := Row{}
-				for _, cell := range row.Children {
-					if cell.Name.Local != "tc" {
-						continue
-					}
-					bs, err := r.blocks(cell, rels, depth+1)
-					if err != nil {
-						return nil, err
-					}
-					span := int(number(cell.child("tcPr").child("gridSpan").attr("val")))
-					if cell.child("tcPr").child("vMerge") != nil {
-						r.doc.warn("vertical_merge", "Vertical table merge is not represented")
-					}
-					rr.Cells = append(rr.Cells, Cell{bs, span})
-				}
-				b.Rows = append(b.Rows, rr)
+			b, err := r.table(c, rels, depth)
+			if err != nil {
+				return nil, err
 			}
 			out = append(out, b)
 		case "sdt":
+			if c.Name.Space == "" && strings.HasPrefix(c.child("sdtPr").child("tag").attr("val"), docxListTag) {
+				b, err := r.taggedList(c, rels, depth)
+				if err != nil {
+					return nil, err
+				}
+				out = append(out, b)
+				continue
+			}
 			r.doc.warn("content_control", "Content control content is retained; control properties are not represented")
 			if content := c.child("sdtContent"); content != nil {
 				bs, err := r.blocks(content, rels, depth+1)
@@ -469,6 +442,14 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 		for _, p := range ppr.Children {
 			switch p.Name.Local {
 			case "pStyle", "numPr", "outlineLvl", "sectPr", "keepNext":
+			case "tabs":
+				if !(r.implicitNoteLayout && len(p.Children) == 1 && p.Children[0].Name.Local == "tab" && p.Children[0].attr("val") == "left" && p.Children[0].attr("pos") == "360") {
+					r.doc.warn("paragraph_formatting", "Paragraph property not represented: tabs")
+				}
+			case "ind":
+				if r.inTaggedList == 0 && !(r.implicitNoteLayout && p.attr("left") == "360") {
+					r.doc.warn("paragraph_formatting", "Paragraph property not represented: ind")
+				}
 			default:
 				r.doc.warn("paragraph_formatting", "Paragraph property not represented: "+p.Name.Local)
 			}
@@ -489,18 +470,10 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			b.Level = v
 		}
 	}
-	if ppr.child("numPr") != nil {
-		b.List = r.num[ppr.child("numPr").child("numId").attr("val")]
-		if b.List == "" {
-			b.List = "number"
-		}
+	if err := r.paragraphList(&b, ppr, styleID); err != nil {
+		return nil, err
 	}
-	if strings.Contains(strings.ToLower(styleID), "listbullet") {
-		b.List = "bullet"
-	}
-	if strings.Contains(strings.ToLower(styleID), "listnumber") {
-		b.List = "number"
-	}
+	originalList := b.docxList
 	out := []Block{}
 	base := Run{}
 	seen := map[string]bool{}
@@ -519,6 +492,10 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 	}
 	applyStyle(styleID)
 	flush := func() { out = append(out, b); b.Runs = nil }
+	skipNoteSeparator := false
+	activeNoteBookmark := ""
+	var activeNoteReference *NoteReference
+	seenNoteReference := false
 	var walk func(*xmlNode, Run) error
 	walk = func(c *xmlNode, style Run) error {
 		switch c.Name.Local {
@@ -534,6 +511,10 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				for _, p := range props.Children {
 					switch p.Name.Local {
 					case "b", "i", "u", "strike":
+					case "rStyle":
+						if p.attr("val") != "FootnoteReference" && p.attr("val") != "EndnoteReference" {
+							r.doc.warn("run_formatting", "Run property not represented: rStyle")
+						}
 					default:
 						r.doc.warn("run_formatting", "Run property not represented: "+p.Name.Local)
 					}
@@ -551,10 +532,15 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				style.Link = "#" + a
 			}
 		case "t":
+			skipNoteSeparator = false
 			style.Text = c.content()
 			b.Runs = append(b.Runs, style)
 			return nil
 		case "tab":
+			if skipNoteSeparator {
+				skipNoteSeparator = false
+				return nil
+			}
 			style.Text = "\t"
 			b.Runs = append(b.Runs, style)
 			return nil
@@ -615,23 +601,92 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			out = append(out, bs...)
 			return nil
 		case "fldSimple":
+			if strings.HasPrefix(strings.TrimSpace(c.attr("instr")), "NOTEREF mdnote1_") {
+				ref, err := r.noteField(c)
+				if err != nil {
+					return err
+				}
+				applyRunProps(&style, c.child("r").child("rPr"))
+				style.Text = ""
+				style.Note = ref
+				b.Runs = append(b.Runs, style)
+				return nil
+			}
 			r.doc.warn("field", "Cached field text is retained; field evaluation is not supported")
 		case "instrText", "fldChar":
 			r.doc.warn("field", "Cached field text is retained; field evaluation is not supported")
 			return nil
 		case "sdt":
+
 			r.doc.warn("content_control", "Content control content is retained; control properties are not represented")
 		case "bookmarkStart", "bookmarkEnd":
+			if c.Name.Local == "bookmarkStart" && strings.HasPrefix(c.attr("name"), "mdnote1_") {
+				ref, err := parseNoteBookmark(c.attr("name"))
+				if err != nil {
+					return err
+				}
+				bookmarkID, err := strconv.Atoi(c.attr("id"))
+				if err != nil || bookmarkID < 0 || bookmarkID > 2147483647 {
+					return fmt.Errorf("invalid note bookmark range ID")
+				}
+				if activeNoteBookmark != "" {
+					return fmt.Errorf("nested note reference bookmarks")
+				}
+				activeNoteBookmark = c.attr("id")
+				activeNoteReference = ref
+				seenNoteReference = false
+				if r.noteBookmarkIDs == nil {
+					r.noteBookmarkIDs = map[string]bool{}
+					r.noteBookmarkEnds = map[string]bool{}
+					r.noteBookmarkNames = map[string]bool{}
+				}
+				if r.noteBookmarkIDs[c.attr("id")] || r.noteBookmarkNames[c.attr("name")] {
+					return fmt.Errorf("duplicate note bookmark")
+				}
+				r.noteBookmarkIDs[c.attr("id")] = true
+				r.noteBookmarkNames[c.attr("name")] = true
+				return nil
+			}
+			if c.Name.Local == "bookmarkEnd" && r.noteBookmarkIDs[c.attr("id")] {
+				if activeNoteBookmark != c.attr("id") || !seenNoteReference {
+					return fmt.Errorf("note bookmark does not enclose its matching reference")
+				}
+				activeNoteBookmark = ""
+				activeNoteReference = nil
+				if r.noteBookmarkEnds[c.attr("id")] {
+					return fmt.Errorf("duplicate note bookmark end")
+				}
+				r.noteBookmarkEnds[c.attr("id")] = true
+				return nil
+			}
 			r.doc.warn("bookmarks", "Bookmark text is retained; bookmark destinations are not represented")
 			return nil
 		case "footnoteReference", "endnoteReference":
-			style.Text = "[" + c.attr("id") + "]"
+			id, err := strconv.Atoi(c.attr("id"))
+			if err != nil || id < 0 || id > 2147483647 {
+				return fmt.Errorf("invalid note reference ID")
+			}
+			style.Text = ""
+			style.Note = &NoteReference{ID: strconv.Itoa(id), Kind: strings.TrimSuffix(c.Name.Local, "Reference")}
+			if activeNoteReference != nil {
+				if *activeNoteReference != *style.Note || seenNoteReference {
+					return fmt.Errorf("note bookmark identity contradicts enclosed reference")
+				}
+				seenNoteReference = true
+			}
+			if c.attr("customMarkFollows") != "" && c.attr("customMarkFollows") != "0" && c.attr("customMarkFollows") != "false" && c.attr("customMarkFollows") != "off" {
+				r.doc.warn("note_custom_mark", "Custom note mark semantics are not preserved; automatic reference numbering normalized")
+			}
 			b.Runs = append(b.Runs, style)
-			r.doc.warn("note_reference", "Note text is retained separately; inline reference semantics are not represented")
+			return nil
+		case "footnoteRef", "endnoteRef":
+			skipNoteSeparator = r.inNote > 0
 			return nil
 		case "commentReference", "commentRangeStart", "commentRangeEnd":
 			r.doc.warn("comments", "Comment annotations are not represented")
 			return nil
+		case "sym":
+			return fmt.Errorf("%w: DOCX symbol-font glyph requires an explicit font-to-Unicode mapping", ErrUnsupported)
 		case "noBreakHyphen":
 			style.Text = "\u2011"
 			b.Runs = append(b.Runs, style)
@@ -653,8 +708,22 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			return nil, err
 		}
 	}
+	if activeNoteBookmark != "" {
+		return nil, fmt.Errorf("unclosed note bookmark range in paragraph")
+	}
 	if len(b.Runs) > 0 || len(out) == 0 {
 		flush()
+	}
+	if originalList != nil && (len(out) > 1 || (len(out) > 0 && out[0].Kind != Paragraph && out[0].Kind != Heading)) {
+		for i := range out {
+			out[i].List = ""
+			out[i].docxList = nil
+		}
+		if out[0].Kind != Paragraph && out[0].Kind != Heading {
+			out = append([]Block{{Kind: Paragraph}}, out...)
+		}
+		r.doc.warn("list_inline_layout", "Numbered paragraph inline content retained as item blocks; inline layout normalized")
+		return []Block{{Kind: ListBlock, List: originalList.Definition.Kind, Items: []ListItem{{Blocks: out}}, docxList: originalList}}, nil
 	}
 	return out, nil
 }

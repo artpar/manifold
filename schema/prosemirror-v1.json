@@ -1,0 +1,255 @@
+{
+  "nodes": {
+    "doc": {
+      "content": "block*",
+      "attrs": {
+        "schema": {
+          "default": "manydoc-prosemirror/1",
+          "validate": "string"
+        },
+        "metadata": {
+          "default": {}
+        },
+        "layout": {
+          "default": {}
+        },
+        "headers": {
+          "default": []
+        },
+        "footers": {
+          "default": []
+        },
+        "notes": {
+          "default": []
+        },
+        "diagnostics": {
+          "default": []
+        },
+        "pages": {
+          "default": []
+        }
+      }
+    },
+    "paragraph": {
+      "group": "block",
+      "content": "(text | note_reference)*",
+      "attrs": {
+        "source": {
+          "default": null
+        }
+      }
+    },
+    "heading": {
+      "group": "block",
+      "content": "(text | note_reference)*",
+      "attrs": {
+        "level": {
+          "default": 1,
+          "validate": "number"
+        },
+        "source": {
+          "default": null
+        }
+      }
+    },
+    "text": {
+      "group": "inline"
+    },
+    "bullet_list": {
+      "group": "block",
+      "content": "list_item+",
+      "attrs": {
+        "source": {
+          "default": null
+        }
+      }
+    },
+    "ordered_list": {
+      "group": "block",
+      "content": "list_item+",
+      "attrs": {
+        "order": {
+          "default": 1,
+          "validate": "number"
+        },
+        "source": {
+          "default": null
+        }
+      }
+    },
+    "list_item": {
+      "content": "(paragraph | heading) block*",
+      "attrs": {
+        "source": {
+          "default": null
+        }
+      }
+    },
+    "table": {
+      "group": "block",
+      "content": "table_row*",
+      "attrs": {
+        "source": {
+          "default": null
+        }
+      }
+    },
+    "table_row": {
+      "content": "table_cell*"
+    },
+    "table_cell": {
+      "content": "block*",
+      "attrs": {
+        "colspan": {
+          "default": 1,
+          "validate": "number"
+        },
+        "rowspan": {
+          "default": 1,
+          "validate": "number"
+        },
+        "source": {
+          "default": null
+        }
+      }
+    },
+    "image": {
+      "group": "block",
+      "attrs": {
+        "src": {
+          "validate": "string"
+        },
+        "alt": {
+          "default": "",
+          "validate": "string"
+        },
+        "width": {
+          "default": 0,
+          "validate": "number"
+        },
+        "height": {
+          "default": 0,
+          "validate": "number"
+        },
+        "source": {
+          "default": null
+        }
+      }
+    },
+    "page_break": {
+      "group": "block",
+      "attrs": {
+        "source": {
+          "default": null
+        }
+      }
+    },
+    "note_reference": {
+      "group": "inline",
+      "inline": true,
+      "atom": true,
+      "attrs": {
+        "id": {
+          "validate": "string"
+        },
+        "kind": {
+          "validate": "string"
+        }
+      }
+    }
+  },
+  "marks": {
+    "strong": {},
+    "em": {},
+    "underline": {},
+    "strike": {},
+    "link": {
+      "attrs": {
+        "href": {
+          "validate": "string"
+        }
+      },
+      "inclusive": false
+    },
+    "source": {
+      "attrs": {
+        "format": {
+          "default": "pdf",
+          "validate": "string"
+        },
+        "page": {
+          "default": 0,
+          "validate": "number"
+        },
+        "object": {
+          "default": "",
+          "validate": "string"
+        },
+        "order": {
+          "default": 0,
+          "validate": "number"
+        },
+        "quad": {
+          "default": null
+        },
+        "baseline": {
+          "default": null
+        },
+        "matrix": {
+          "default": null
+        },
+        "regions": {
+          "default": []
+        },
+        "font": {
+          "default": "",
+          "validate": "string"
+        },
+        "font_size": {
+          "default": 0,
+          "validate": "number"
+        },
+        "mcid": {
+          "default": null
+        },
+        "tag": {
+          "default": "",
+          "validate": "string"
+        },
+        "structure": {
+          "validate": "string"
+        },
+        "evidence": {
+          "validate": "string"
+        },
+        "confidence": {
+          "validate": "number"
+        },
+        "precision": {
+          "default": "",
+          "validate": "string"
+        },
+        "label": {
+          "default": "",
+          "validate": "string"
+        },
+        "render_mode": {
+          "default": 0,
+          "validate": "number"
+        },
+        "stream": {
+          "default": "",
+          "validate": "string"
+        },
+        "role": {
+          "default": "",
+          "validate": "string"
+        },
+        "element": {
+          "default": "",
+          "validate": "string"
+        }
+      }
+    }
+  }
+}

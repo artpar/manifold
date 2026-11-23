@@ -41,7 +41,7 @@ func main() {
 		{Kind: manydoc.PageBreak}, {Kind: manydoc.Heading, Level: 2, Runs: []manydoc.Run{{Text: "Second page"}}},
 		{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: "End of the example report."}}},
 	}}
-	for _, format := range []manydoc.Format{manydoc.DOCX, manydoc.PDF, manydoc.JSON} {
+	for _, format := range []manydoc.Format{manydoc.DOCX, manydoc.PDF, manydoc.SF, manydoc.JSON} {
 		name := filepath.Join(*out, "report."+string(format))
 		f, e := os.Create(name)
 		if e != nil {

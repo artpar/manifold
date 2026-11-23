@@ -1,0 +1,240 @@
+package manydoc
+
+import (
+	"fmt"
+	"math"
+)
+
+// A cursor owns only unconsumed cell flows for the current logical row. Planning
+// copies these slices, never the caller's blocks or the measured table.
+type pdfTableCursor struct {
+	row, next int
+	remaining float64
+	first     bool
+	cells     []pdfCellCursor
+}
+type pdfCellCursor struct {
+	cell int
+	flow []pdfFragment
+}
+type pdfTableBand struct {
+	height float64
+	cells  []pdfTableBandCell
+}
+type pdfTableBandCell struct {
+	position    *tableCellPosition
+	flow        []pdfFragment
+	top, bottom bool
+}
+type pdfTablePage struct {
+	bands  []pdfTableBand
+	height float64
+	keys   []noteKey
+}
+
+func enterPDFTableRow(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor) pdfTableCursor {
+	cursor.remaining = plan.offsets[cursor.row+1] - plan.offsets[cursor.row]
+	cursor.first = true
+	active := make([]pdfCellCursor, 0, len(cursor.cells)+1)
+	for _, c := range cursor.cells {
+		p := plan.cells[c.cell].position
+		if p.Row+p.RowSpan > cursor.row {
+			active = append(active, c)
+		}
+	}
+	for cursor.next < g.last && plan.cells[cursor.next].position.Row == cursor.row {
+		active = append(active, pdfCellCursor{cursor.next, plan.cells[cursor.next].flow})
+		cursor.next++
+	}
+	cursor.cells = active
+	return cursor
+}
+
+// Plan one portion of one logical row. Row-spanning cells carry their own
+// unconsumed flow forward. Content ending in this row can extend its measured
+// height to account for padding added at page continuations.
+func nextPDFTableBand(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor, capacity float64) (pdfTableBand, pdfTableCursor, bool) {
+	minimum := 22.0
+	desired := cursor.remaining
+	for _, c := range cursor.cells {
+		p := plan.cells[c.cell].position
+		if p.Row+p.RowSpan == cursor.row+1 && len(c.flow) > 0 {
+			minimum = math.Max(minimum, c.flow[0].Height+12)
+			desired = math.Max(desired, flowHeight(c.flow)+12)
+		}
+	}
+	if capacity+1e-7 < minimum {
+		return pdfTableBand{}, cursor, false
+	}
+	height := math.Min(capacity, math.Max(desired, minimum))
+	band := pdfTableBand{height: height}
+	next := cursor
+	next.cells = make([]pdfCellCursor, len(cursor.cells))
+	next.remaining = math.Max(0, cursor.remaining-height)
+	done := next.remaining <= 1e-7
+	for i, c := range cursor.cells {
+		p := plan.cells[c.cell].position
+		take, _ := takePDFFragments(c.flow, height-12)
+		next.cells[i] = pdfCellCursor{c.cell, c.flow[take:]}
+		band.cells = append(band.cells, pdfTableBandCell{position: p, flow: c.flow[:take], top: cursor.first && p.Row == cursor.row})
+		if p.Row+p.RowSpan == cursor.row+1 && take < len(c.flow) {
+			done = false
+		}
+	}
+	for i := range band.cells {
+		p := band.cells[i].position
+		band.cells[i].bottom = done && p.Row+p.RowSpan == cursor.row+1
+	}
+	if done {
+		next.row++
+		if next.row < g.end {
+			next = enterPDFTableRow(plan, g, next)
+		}
+	} else {
+		next.first = false
+		if next.remaining <= 1e-7 {
+			// Only ending cells force this logical row to grow; spanning content
+			// can continue in the next row, where its ownership is unchanged.
+			for _, c := range next.cells {
+				p := plan.cells[c.cell].position
+				if p.Row+p.RowSpan == cursor.row+1 {
+					next.remaining = math.Max(next.remaining, flowHeight(c.flow)+12)
+				}
+			}
+		}
+	}
+	return band, next, true
+}
+
+func (r *pdfRenderer) planTablePage(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor, capacity float64) (pdfTablePage, pdfTableCursor, error) {
+	var page pdfTablePage
+	for cursor.row < g.end {
+		if err := r.ctx.Err(); err != nil {
+			return page, cursor, err
+		}
+		band, next, ok := nextPDFTableBand(plan, g, cursor, capacity-page.height)
+		if !ok {
+			break
+		}
+		page.bands = append(page.bands, band)
+		page.height += band.height
+		for _, c := range band.cells {
+			page.keys = append(page.keys, flowNoteKeys(c.flow)...)
+		}
+		row := cursor.row
+		cursor = next
+		if cursor.row == row { // A split row continues on the next page.
+			break
+		}
+	}
+	return page, cursor, nil
+}
+
+func (r *pdfRenderer) paintTablePage(plan *pdfTableLayout, page pdfTablePage, x, top float64) error {
+	y := top
+	r.pdf.SetDrawColor(120, 120, 120)
+	for _, band := range page.bands {
+		for _, c := range band.cells {
+			if err := r.ctx.Err(); err != nil {
+				return err
+			}
+			p := c.position
+			cx, cw := x+float64(p.Column)*plan.unit, float64(p.ColSpan)*plan.unit
+			r.pdf.SetDrawColor(120, 120, 120)
+			r.pdf.Line(cx, y, cx, y+band.height)
+			r.pdf.Line(cx+cw, y, cx+cw, y+band.height)
+			if c.top {
+				r.pdf.Line(cx, y, cx+cw, y)
+			}
+			if c.bottom {
+				r.pdf.Line(cx, y+band.height, cx+cw, y+band.height)
+			}
+			fy := y + 6
+			for _, f := range c.flow {
+				if err := r.drawFragment(f, cx+6, fy); err != nil {
+					return err
+				}
+				fy += f.Height
+			}
+		}
+		y += band.height
+	}
+	// Close page fragments, while interior bands retain true rowspan borders.
+	r.pdf.SetDrawColor(120, 120, 120)
+	for _, edge := range []struct {
+		band pdfTableBand
+		y    float64
+	}{{page.bands[0], top}, {page.bands[len(page.bands)-1], y}} {
+		for _, c := range edge.band.cells {
+			p := c.position
+			cx := x + float64(p.Column)*plan.unit
+			r.pdf.Line(cx, edge.y, cx+float64(p.ColSpan)*plan.unit, edge.y)
+		}
+	}
+	return r.pdf.Error()
+}
+
+func (r *pdfRenderer) continueTableGroup(plan *pdfTableLayout, g pdfTableGroup, x float64) error {
+	contentHeight := r.height - 2*r.margin
+	// Images and nested row groups remain atomic at this layer. Reject before
+	// spending pages on preceding rows if an atom cannot fit any continuation.
+	for _, c := range plan.cells[g.first:g.last] {
+		for _, f := range c.flow {
+			if f.Height+12 > contentHeight+1e-7 {
+				return fmt.Errorf("%w: PDF cell fragment is taller than a continuation page", ErrUnsupported)
+			}
+		}
+	}
+	cursor := enterPDFTableRow(plan, g, pdfTableCursor{row: g.start, next: g.first})
+	for cursor.row < g.end {
+		available := r.height - r.margin - r.y - r.noteReserve
+		budget := available
+		var page pdfTablePage
+		var next pdfTableCursor
+		for {
+			var err error
+			page, next, err = r.planTablePage(plan, g, cursor, budget)
+			if err != nil {
+				return err
+			}
+			if len(page.bands) == 0 {
+				break
+			}
+			minimum, err := r.minimumNewFootnotes(page.keys, false)
+			if err != nil {
+				return err
+			}
+			freshMinimum, err := r.minimumNewFootnotes(page.keys, true)
+			if err != nil {
+				return err
+			}
+			if page.height+minimum <= available+1e-7 && page.height+freshMinimum <= contentHeight+1e-7 {
+				break
+			}
+			budget = math.Min(budget-1e-6, math.Min(available-minimum, contentHeight-freshMinimum))
+		}
+		if len(page.bands) == 0 {
+			if r.y <= r.margin+1e-7 && r.noteReserve == 0 {
+				return fmt.Errorf("%w: PDF table continuation cannot fit a cell fragment and its footnote start", ErrUnsupported)
+			}
+			if err := r.nextPage(true); err != nil {
+				return err
+			}
+			continue
+		}
+		if err := r.ensureWithNotes(page.height, page.keys); err != nil {
+			return err
+		}
+		if err := r.paintTablePage(plan, page, x, r.y); err != nil {
+			return err
+		}
+		r.y += page.height
+		cursor = next
+		if cursor.row < g.end {
+			if err := r.nextPage(true); err != nil {
+				return err
+			}
+		}
+	}
+	return r.pdf.Error()
+}

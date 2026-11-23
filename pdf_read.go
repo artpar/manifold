@@ -8,6 +8,8 @@ import (
 	"io"
 	"math"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/benoitkugler/textlayout/fonts/glyphsnames"
 	"github.com/benoitkugler/textlayout/fonts/simpleencodings"
@@ -16,8 +18,9 @@ import (
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 )
 
-// ReadPDF extracts page content and painted form appearances. It does not
-// reconstruct original paragraph/table structure or perform OCR.
+// ReadPDF recovers positioned text/images and supported tagged logical structure.
+// Untagged structure is inferred from geometry with explicit uncertainty. OCR is
+// not provided by this reader.
 func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Document, err error) {
 	// A dependency parser's panic must never escape this public boundary or
 	// yield partially extracted content as a successful document.
@@ -46,16 +49,61 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 		return nil, errors.New("negative PDF page count")
 	}
 	doc = &Document{Metadata: Metadata{Title: p.Title, Author: p.Author, Subject: p.Subject, PageCount: p.PageCount}}
-	doc.warn("pdf_layout", "PDF text is extracted in content-stream order; editable document layout is not reconstructed")
-	r := &pdfReader{ctx: ctx, pdf: p, doc: doc}
+	if p.Info != nil {
+		info, e := p.DereferenceDict(*p.Info)
+		if e != nil {
+			return nil, e
+		}
+		for _, entry := range []struct {
+			key    string
+			target *string
+		}{{"Title", &doc.Metadata.Title}, {"Author", &doc.Metadata.Author}, {"Subject", &doc.Metadata.Subject}} {
+			if value := info[entry.key]; value != nil {
+				v, e := p.Dereference(value)
+				if e != nil {
+					return nil, e
+				}
+				text, e := pdfTextString(v)
+				if e != nil {
+					return nil, fmt.Errorf("PDF metadata %s: %w", entry.key, e)
+				}
+				*entry.target = text
+			}
+		}
+		for _, key := range []string{"Keywords", "Creator", "Producer", "CreationDate", "ModDate"} {
+			if info[key] != nil {
+				doc.warn("pdf_metadata_extra", "Additional PDF producer/date/keyword metadata is not yet represented")
+			}
+		}
+	}
+	doc.warn("pdf_layout", "PDF source geometry is retained; recovered semantic structure and reflowed output do not reproduce the original visual layout")
+	catalog, e := p.Catalog()
+	if e != nil {
+		return nil, e
+	}
+	if catalog["Metadata"] != nil {
+		doc.warn("pdf_xmp_metadata", "XMP metadata is not merged into the editable metadata model")
+	}
+	r := &pdfReader{ctx: ctx, pdf: p, doc: doc, pageRefs: map[string]int{}, objects: map[pdfObjectKey][]pdfPaintRange{}, links: map[pdfObjectKey]pdfRecoveredLink{}, partialLinks: map[int]bool{}}
 	for page := 1; page <= p.PageCount; page++ {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		d, _, attrs, e := p.PageDict(page, false)
+		d, pageRef, attrs, e := p.PageDict(page, false)
 		if e != nil {
 			return nil, fmt.Errorf("PDF page %d: %w", page, e)
 		}
+		if pageRef != nil {
+			r.pageRefs[fmt.Sprint(*pageRef)] = page
+		}
+		geometry, e := r.pageGeometry(page, d, attrs)
+		if e != nil {
+			return nil, e
+		}
+		doc.Pages = append(doc.Pages, geometry)
+		r.page = page
+		r.pageInfo = geometry
+		r.stream = fmt.Sprintf("page:%d", page)
 		data, e := p.PageContent(d, page)
 		if e != nil && !errors.Is(e, model.ErrNoContent) {
 			return nil, e
@@ -63,7 +111,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 		r.lines = nil
 		r.current = nil
 		r.fonts = map[string]*pdfFont{}
-		if e = r.content(data, attrs.Resources, 0, pdfTextState{}); e != nil {
+		if e = r.content(data, attrs.Resources, 0, initialPDFState()); e != nil {
 			return nil, fmt.Errorf("PDF page %d: %w", page, e)
 		}
 		if ann, e := p.DereferenceArray(d["Annots"]); e != nil {
@@ -77,6 +125,9 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 				if ad == nil {
 					continue
 				}
+				if e := r.readLink(a, ad); e != nil {
+					return nil, e
+				}
 				ap, e := p.DereferenceDict(ad["AP"])
 				if e != nil {
 					return nil, e
@@ -84,7 +135,8 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 				if ap == nil {
 					continue
 				}
-				o, e := p.Dereference(ap["N"])
+				appearanceObject := ap["N"]
+				o, e := p.Dereference(appearanceObject)
 				if e != nil {
 					return nil, e
 				}
@@ -92,15 +144,18 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 					state := ad.NameEntry("AS")
 					if state != nil {
 						o = states[*state]
+						appearanceObject = o
 					} else {
 						r.doc.warn("annotation_state", "Annotation has multiple appearances without a selected state")
 						continue
 					}
 				}
 				if o != nil {
-					if e = r.form(o, attrs.Resources, 0); e != nil {
+					start := r.order
+					if e = r.appearance(appearanceObject, ad, attrs.Resources); e != nil {
 						return nil, e
 					}
+					r.recordObject(a, start, r.order)
 				}
 			}
 		}
@@ -110,31 +165,66 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 		}
 		doc.Blocks = append(doc.Blocks, r.lines...)
 	}
+	r.geometricLinks()
+	if catalog["StructTreeRoot"] == nil && !opts.PDFSkipInference {
+		if e := r.inferStructure(); e != nil {
+			return nil, fmt.Errorf("PDF inferred structure: %w", e)
+		}
+	}
+	if e := r.recoverStructure(catalog["StructTreeRoot"]); e != nil {
+		return nil, fmt.Errorf("PDF logical structure: %w", e)
+	}
+	r.diagnosePartialLinks()
 	if strings.TrimSpace(strings.ReplaceAll(doc.Text(), "\f", "")) == "" {
 		doc.warn("no_text", "No extractable text was found; scanned/image-only documents require OCR")
+	}
+	if err := doc.Validate(); err != nil {
+		return nil, fmt.Errorf("PDF recovered model: %w", err)
 	}
 	return doc, nil
 }
 
 type pdfReader struct {
-	ctx            context.Context
-	pdf            *model.Context
-	doc            *Document
-	fonts          map[string]*pdfFont
-	lines          []Block
-	current        []Run
-	lastEnd, lastY float64
-	havePosition   bool
+	ctx                      context.Context
+	pdf                      *model.Context
+	doc                      *Document
+	fonts                    map[string]*pdfFont
+	lines                    []Block
+	current                  []Run
+	havePosition             bool
+	page                     int
+	pageInfo                 PDFPage
+	stream                   string
+	order                    int
+	marked                   []pdfMarkedContent
+	lastPoint, lastDirection Point
+	lastSize                 float64
+	pageRefs                 map[string]int
+	objects                  map[pdfObjectKey][]pdfPaintRange
+	links                    map[pdfObjectKey]pdfRecoveredLink
+	partialLinks             map[int]bool
+	rulings                  map[int][]pdfRuling
+	rulingOverflow           map[int]bool
 }
 type pdfTextState struct {
-	font                                               *pdfFont
-	size, leading, wordSpace, charSpace, x, y, cursorX float64
+	rulingMask, rulingBlend, rulingTransfer           bool
+	font                                              *pdfFont
+	size, leading, wordSpace, charSpace, hscale, rise float64
+	ctm, tm, lm                                       Matrix
+	renderMode                                        int
+	metricEstimate                                    bool
+	fill                                              [3]float64
+	fillUnknown                                       bool
+	rulingWidth                                       float64
+	rulingStrokeAlpha, rulingFillAlpha                float64
+	rulingClip                                        *pdfRulingRect
+	rulingClipUnknown, rulingEffects                  bool
 }
 
 func (r *pdfReader) newline() {
 	r.havePosition = false
 	if len(r.current) > 0 {
-		r.lines = append(r.lines, Block{Kind: Paragraph, Runs: r.current})
+		r.lines = append(r.lines, Block{Kind: Paragraph, Runs: r.current, Source: sourceForRuns(r.current)})
 		r.current = nil
 	}
 }
@@ -143,8 +233,26 @@ func (r *pdfReader) space() {
 		return
 	}
 	last := &r.current[len(r.current)-1]
-	if last.Text != "" && !strings.HasSuffix(last.Text, " ") && !strings.HasSuffix(last.Text, "\t") {
-		last.Text += " "
+	lastRune, _ := utf8.DecodeLastRuneInString(last.Text)
+	if last.Text != "" && !unicode.IsSpace(lastRune) {
+		copyRun := *last
+		copyRun.Text = " "
+		copyRun.Note = nil
+		if last.Source != nil {
+			source := *last.Source
+			source.Quad = nil
+			source.Matrix = nil
+			source.Baseline = nil
+			source.Regions = nil
+			source.MCID = nil
+			source.Tag = ""
+			source.Structure = "inferred"
+			source.Evidence = "positioned_word_gap"
+			source.Confidence = .6
+			source.Precision = "synthetic_separator"
+			copyRun.Source = &source
+		}
+		r.current = append(r.current, copyRun)
 	}
 }
 func (r *pdfReader) show(v any, s *pdfTextState) error {
@@ -158,20 +266,100 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 	if s.font == nil {
 		return errors.New("PDF text has no selected font")
 	}
-	text, err := s.font.decode(b)
+	if s.font.vertical {
+		return fmt.Errorf("%w: vertical PDF font positioning", ErrUnsupported)
+	}
+	text := ""
+	actual := r.actualFrame()
+	if actual == nil {
+		text, err = s.font.decode(b)
+		if err != nil {
+			return err
+		}
+	}
+	advance, estimated, err := s.font.displacement(b, s.size, s.charSpace, s.wordSpace, s.hscale)
 	if err != nil {
 		return err
 	}
-	if text != "" {
-		if r.havePosition && math.Abs(s.y-r.lastY) < max(1, s.size*.4) && s.cursorX-r.lastEnd > max(.5, s.size*.15) {
+	source := r.sourceFor(s, advance, estimated)
+	r.checkPageBounds(*source.Quad)
+	if s.renderMode == 3 || s.renderMode == 7 {
+		r.warnPage("pdf_invisible_text", "Invisible/clipping-only text is retained with its render mode in source provenance")
+	}
+	if estimated {
+		r.warnPage("pdf_font_metrics", "Text advance estimated because font metrics/code-to-CID mapping are incomplete")
+	}
+	if s.font.boundsEstimate {
+		r.warnPage("pdf_font_bounds", "Font ascent/descent bounds are estimated")
+	}
+	begin, end := source.Baseline[0], source.Baseline[1]
+	direction := Point{end.X - begin.X, end.Y - begin.Y}
+	norm := math.Hypot(direction.X, direction.Y)
+	if norm == 0 {
+		base := r.pageInfo.Transform.compose(s.ctm).compose(s.tm)
+		direction = Point{base[0], base[1]}
+		norm = math.Hypot(direction.X, direction.Y)
+	}
+	if norm > 0 {
+		direction.X /= norm
+		direction.Y /= norm
+	}
+	if r.havePosition {
+		cross := r.lastDirection.X*direction.Y - r.lastDirection.Y*direction.X
+		dx, dy := begin.X-r.lastPoint.X, begin.Y-r.lastPoint.Y
+		perpendicular := math.Abs(dx*r.lastDirection.Y - dy*r.lastDirection.X)
+		if r.lastDirection.X*direction.X+r.lastDirection.Y*direction.Y < .95 || math.Abs(cross) > .02 || perpendicular > max(1, source.FontSize*.4) {
+			r.newline()
+		} else if dx*r.lastDirection.X+dy*r.lastDirection.Y > max(.5, source.FontSize*.15) {
 			r.space()
 		}
-		r.current = append(r.current, Run{Text: text, Bold: s.font.bold, Italic: s.font.italic})
-		s.cursorX += s.font.advance(b)*s.size/1000 + float64(len([]rune(text)))*s.charSpace + float64(strings.Count(text, " "))*s.wordSpace
-		r.lastEnd, r.lastY, r.havePosition = s.cursorX, s.y, true
 	}
+	if actual != nil {
+		if !actual.haveStyle {
+			actual.bold = s.font.bold
+			actual.italic = s.font.italic
+			actual.haveStyle = true
+			baseline := *source.Baseline
+			actual.baseline = &baseline
+		} else {
+			actual.styleMixed = actual.styleMixed || actual.bold != s.font.bold || actual.italic != s.font.italic
+			actual.bold = actual.bold && s.font.bold
+			actual.italic = actual.italic && s.font.italic
+			first, last := actual.baseline[0], actual.baseline[1]
+			dx, dy := last.X-first.X, last.Y-first.Y
+			length := math.Hypot(dx, dy)
+			if length > 1e-8 {
+				actual.noncollinear = actual.noncollinear || (math.Abs((begin.X-first.X)*dy-(begin.Y-first.Y)*dx)/length > .01 || math.Abs((end.X-first.X)*dy-(end.Y-first.Y)*dx)/length > .01)
+			} else {
+				actual.noncollinear = actual.noncollinear || math.Hypot(begin.X-first.X, begin.Y-first.Y) > .01
+			}
+			actual.baseline[1] = end
+			actual.mixedFont = actual.mixedFont || actual.source.Font != source.Font || math.Abs(actual.source.FontSize-source.FontSize) > .01
+		}
+		if actual.styleMixed {
+			r.warnPage("pdf_actualtext_style", "ActualText covers mixed formatting that cannot be mapped exactly to replacement characters")
+		}
+		if actual.source == nil {
+			copy := *source
+			copy.Evidence = "pdf_actualtext"
+			copy.Regions = nil
+			actual.source = &copy
+		}
+		actual.source.Confidence = min(actual.source.Confidence, source.Confidence)
+		actual.source.Regions = append(actual.source.Regions, SourceRegion{Page: r.page, Quad: *source.Quad})
+	}
+	if text != "" {
+		r.current = append(r.current, Run{Text: text, Bold: s.font.bold, Italic: s.font.italic, Source: source})
+	}
+	s.advanceText(advance)
+	s.metricEstimate = s.metricEstimate || estimated
+	r.lastPoint = end
+	r.lastDirection = direction
+	r.lastSize = source.FontSize
+	r.havePosition = true
 	return nil
 }
+
 func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state pdfTextState) error {
 	if depth > 32 {
 		return errors.New("cyclic or excessively nested PDF Form XObject")
@@ -179,6 +367,8 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 	input := string(data)
 	var args []any
 	var saved []pdfTextState
+	var path pdfCurrentPath
+	markedBase := len(r.marked)
 	for input != "" {
 		v, err := nextPDFToken(r.ctx, &input)
 		if err != nil {
@@ -203,8 +393,9 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 			if err := need(0); err != nil {
 				return err
 			}
-			r.newline()
-			state.x, state.y, state.cursorX = 0, 0, 0
+			state.tm = identityMatrix()
+			state.lm = identityMatrix()
+			state.metricEstimate = false
 		case "ET":
 			if err := need(0); err != nil {
 				return err
@@ -251,10 +442,7 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 					if e != nil {
 						return e
 					}
-					if n <= -150 {
-						r.space()
-					}
-					state.cursorX -= n * state.size / 1000
+					state.advanceText(-n * state.size * state.hscale / 1000)
 				}
 			}
 		case "'":
@@ -262,7 +450,7 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 				return err
 			}
 			r.newline()
-			state.cursorX = state.x
+			state.moveLine(0, -state.leading)
 			if err := r.show(args[0], &state); err != nil {
 				return err
 			}
@@ -279,7 +467,7 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 				return err
 			}
 			r.newline()
-			state.cursorX = state.x
+			state.moveLine(0, -state.leading)
 			if err := r.show(args[2], &state); err != nil {
 				return err
 			}
@@ -288,8 +476,7 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 				return err
 			}
 			r.newline()
-			state.y -= state.leading
-			state.cursorX = state.x
+			state.moveLine(0, -state.leading)
 		case "Td", "TD":
 			if err := need(2); err != nil {
 				return err
@@ -302,12 +489,10 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 			if e != nil {
 				return e
 			}
-			if math.Abs(dy) > .1 {
-				r.newline()
-			}
-			state.x += dx
-			state.y += dy
-			state.cursorX = state.x
+			// A Td immediately after BT positions the first span; its y
+			// operand is not proof of a new visual line. show compares the
+			// transformed baselines, including across separate text objects.
+			state.moveLine(dx, dy)
 			if op == "TD" {
 				state.leading = -dy
 			}
@@ -315,21 +500,14 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 			if err := need(6); err != nil {
 				return err
 			}
-			x, e := pdfNumber(args[4])
+			matrix, e := matrixOperands(args)
 			if e != nil {
 				return e
 			}
-			y, e := pdfNumber(args[5])
-			if e != nil {
-				return e
-			}
-			if math.Abs(y-state.y) > max(1, state.size*.4) {
-				r.newline()
-			}
-			state.x = x
-			state.y = y
-			state.cursorX = x
-		case "TL", "Tw", "Tc":
+			state.tm = matrix
+			state.lm = matrix
+			state.metricEstimate = false
+		case "TL", "Tw", "Tc", "Ts", "Tz", "Tr":
 			if err := need(1); err != nil {
 				return err
 			}
@@ -344,6 +522,16 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 				state.wordSpace = n
 			case "Tc":
 				state.charSpace = n
+			case "Ts":
+				state.rise = n
+			case "Tz":
+				state.hscale = n / 100
+			case "Tr":
+				if n != math.Trunc(n) || n < 0 || n > 7 {
+					return fmt.Errorf("invalid text render mode")
+				}
+				state.renderMode = int(n)
+
 			}
 		case "q":
 			if err := need(0); err != nil {
@@ -357,7 +545,9 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 			if len(saved) == 0 {
 				return errors.New("unbalanced PDF graphics state")
 			}
+			tm, lm, estimate := state.tm, state.lm, state.metricEstimate
 			state = saved[len(saved)-1]
+			state.tm, state.lm, state.metricEstimate = tm, lm, estimate
 			saved = saved[:len(saved)-1]
 		case "Do":
 			if err := need(1); err != nil {
@@ -375,23 +565,112 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 			if o == nil {
 				return fmt.Errorf("missing PDF XObject %q", name)
 			}
-			if e = r.form(o, resources, depth+1); e != nil {
+			if e = r.form(o, resources, depth+1, state); e != nil {
 				return e
 			}
 		case "BI":
-			return fmt.Errorf("%w: inline PDF images; external image XObjects are supported", ErrUnsupported)
-		case "cm", "w", "J", "j", "M", "d", "ri", "i", "gs", "m", "l", "c", "v", "y", "h", "re", "S", "s", "f", "F", "f*", "B", "B*", "b", "b*", "n", "W", "W*", "CS", "cs", "SC", "SCN", "sc", "scn", "G", "g", "RG", "rg", "K", "k", "sh", "MP", "DP", "BMC", "BDC", "EMC", "BX", "EX", "d0", "d1", "Tr", "Ts", "Tz":
+			if err := need(0); err != nil {
+				return err
+			}
+			if err := r.inlineImage(&input, resources, state); err != nil {
+				return err
+			}
+		case "cm":
+			if err := need(6); err != nil {
+				return err
+			}
+			matrix, err := matrixOperands(args)
+			if err != nil {
+				return err
+			}
+			state.ctm = state.ctm.compose(matrix)
+		case "BMC", "BDC":
+			n := 1
+			if op == "BDC" {
+				n = 2
+			}
+			if err := need(n); err != nil {
+				return err
+			}
+			tag, err := pdfName(args[0])
+			if err != nil {
+				return err
+			}
+			var props any
+			if n == 2 {
+				props = args[1]
+			}
+			if err := r.beginMarked(tag, props, resources); err != nil {
+				return err
+			}
+		case "EMC":
+			if err := need(0); err != nil {
+				return err
+			}
+			if len(r.marked) <= markedBase {
+				return fmt.Errorf("unbalanced marked-content end")
+			}
+			r.endMarked()
+		case "cs", "sc", "scn":
+			state.fillUnknown = true
+			r.warnPage("pdf_color_state", "General color-space operators are not reconstructed; color-dependent stencil extraction may reject")
+		case "g", "rg", "k":
+			n := 1
+			if op == "rg" {
+				n = 3
+			}
+			if op == "k" {
+				n = 4
+			}
+			if err := need(n); err != nil {
+				return err
+			}
+			var c [4]float64
+			for i, v := range args {
+				value, e := pdfNumber(v)
+				if e != nil {
+					return e
+				}
+				c[i] = math.Max(0, math.Min(1, value))
+			}
+			state.fillUnknown = false
+			switch op {
+			case "g":
+				state.fill = [3]float64{c[0], c[0], c[0]}
+			case "rg":
+				state.fill = [3]float64{c[0], c[1], c[2]}
+			case "k":
+				state.fill = [3]float64{1 - math.Min(1, c[0]+c[3]), 1 - math.Min(1, c[1]+c[3]), 1 - math.Min(1, c[2]+c[3])}
+			}
+		case "m", "l", "c", "v", "y", "h", "re", "n", "S", "s", "f", "F", "f*", "B", "B*", "b", "b*", "W", "W*", "w":
+			if err := r.pathOperator(string(op), args, &path, &state); err != nil {
+				return err
+			}
+		case "sh":
+			r.warnPage("pdf_vector_graphics", "Painted vector paths/shading are not represented as editable content")
+		case "gs":
+			if err := r.rulingGraphicsState(args, resources, &state); err != nil {
+				return err
+			}
+			r.warnPage("pdf_graphics_effects", "Extended graphics-state effects are not reconstructed")
+		case "J", "j", "M", "d", "ri", "i", "CS", "SC", "SCN", "G", "RG", "K", "MP", "DP", "BX", "EX", "d0", "d1":
 		default:
 			return fmt.Errorf("%w: PDF content operator %q", ErrUnsupported, op)
 		}
 		args = nil
+	}
+	if len(saved) > 0 {
+		return errors.New("unbalanced PDF graphics save")
+	}
+	if len(r.marked) != markedBase {
+		return errors.New("unbalanced PDF marked content")
 	}
 	if len(args) > 0 {
 		return errors.New("PDF content ends with operands without an operator")
 	}
 	return nil
 }
-func (r *pdfReader) form(o types.Object, parent types.Dict, depth int) error {
+func (r *pdfReader) form(o types.Object, parent types.Dict, depth int, state pdfTextState) error {
 	sd, _, err := r.pdf.DereferenceStreamDict(o)
 	if err != nil {
 		return err
@@ -403,11 +682,16 @@ func (r *pdfReader) form(o types.Object, parent types.Dict, depth int) error {
 	if sub == nil {
 		return errors.New("PDF XObject subtype missing")
 	}
+	start := r.order
+	defer func() { r.recordObject(o, start, r.order) }()
 	if *sub == "Image" {
-		return nil
+		return r.imageXObject(sd, o, parent, state)
 	}
 	if *sub != "Form" {
 		return fmt.Errorf("%w: PDF XObject subtype %s", ErrUnsupported, *sub)
+	}
+	if sd.Dict["BBox"] != nil {
+		r.warnPage("pdf_form_clip", "Form BBox clipping is not applied to recovered content bounds")
 	}
 	if err := sd.Decode(); err != nil {
 		return err
@@ -419,49 +703,57 @@ func (r *pdfReader) form(o types.Object, parent types.Dict, depth int) error {
 	if resources == nil {
 		resources = parent
 	}
+	if value := sd.Dict["Matrix"]; value != nil {
+		a, err := r.pdf.DereferenceArray(value)
+		if err != nil {
+			return err
+		}
+		m, err := matrixPDF(a)
+		if err != nil {
+			return err
+		}
+		state.ctm = state.ctm.compose(m)
+	}
+	if value := sd.Dict["BBox"]; value != nil {
+		a, err := r.pdf.DereferenceArray(value)
+		if err != nil {
+			return err
+		}
+		if len(a) != 4 {
+			return fmt.Errorf("invalid Form BBox")
+		}
+		var v [4]float64
+		for i, x := range a {
+			n, e := pdfNumber(x)
+			if e != nil || !finite(n) {
+				return fmt.Errorf("invalid Form BBox")
+			}
+			v[i] = n
+		}
+		m := r.pageInfo.Transform.compose(state.ctm)
+		points := []Point{m.point(v[0], v[1]), m.point(v[2], v[1]), m.point(v[2], v[3]), m.point(v[0], v[3]), m.point(v[0], v[1])}
+		if clip, ok := rulingRect(points); ok {
+			state.rulingClip = intersectRulingClip(state.rulingClip, &clip)
+		} else {
+			state.rulingClipUnknown = true
+		}
+	}
+	oldStream := r.stream
+	r.stream = r.objectID(o, "form")
+	defer func() { r.stream = oldStream }()
 	r.newline()
-	return r.content(sd.Content, resources, depth+1, pdfTextState{})
+	return r.content(sd.Content, resources, depth+1, state)
 }
 
 type pdfFont struct {
-	mapping      *unicodeMap
-	encoding     simpleencodings.Encoding
-	unicode      bool
-	bold, italic bool
-	widths       map[uint32]float64
-}
-
-func (f *pdfFont) advance(b []byte) float64 {
-	var width float64
-	step := 1
-	if f.unicode {
-		step = 2
-	}
-	for len(b) > 0 {
-		size := step
-		if f.mapping != nil && len(f.mapping.spaces) > 0 {
-			for _, s := range f.mapping.spaces {
-				if len(b) >= s.size {
-					v := codeNumber(b[:s.size])
-					if v >= s.low && v <= s.high {
-						size = s.size
-						break
-					}
-				}
-			}
-		}
-		if size > len(b) {
-			break
-		}
-		code := codeNumber(b[:size])
-		b = b[size:]
-		w, ok := f.widths[code]
-		if !ok {
-			w = 500
-		}
-		width += w
-	}
-	return width
+	mapping                                                        *unicodeMap
+	encoding                                                       simpleencodings.Encoding
+	unicode                                                        bool
+	bold, italic                                                   bool
+	widths                                                         map[uint32]float64
+	name                                                           string
+	ascent, descent, defaultWidth                                  float64
+	boundsEstimate, defaultExact, composite, identityCID, vertical bool
 }
 
 func (f *pdfFont) decode(b []byte) (string, error) {
@@ -520,7 +812,9 @@ func (r *pdfReader) font(resources types.Dict, name string) (*pdfFont, error) {
 		}
 	}
 	base := d.NameEntry("BaseFont")
+	f.name = "unknown"
 	if base != nil {
+		f.name = *base
 		lower := strings.ToLower(*base)
 		f.bold = strings.Contains(lower, "bold")
 		f.italic = strings.Contains(lower, "italic") || strings.Contains(lower, "oblique")
@@ -545,6 +839,12 @@ func (r *pdfReader) font(resources types.Dict, name string) (*pdfFont, error) {
 		f.mapping, err = parseUnicodeMap(r.ctx, sd.Content)
 		if err != nil {
 			return nil, fmt.Errorf("ToUnicode: %w", err)
+		}
+		if err := r.fontMetrics(f, d); err != nil {
+			return nil, err
+		}
+		if err := r.normalizeSimpleCMap(f); err != nil {
+			return nil, err
 		}
 		r.fonts[key] = f
 		return f, nil
@@ -606,6 +906,9 @@ func (r *pdfReader) font(resources types.Dict, name string) (*pdfFont, error) {
 		}
 	default:
 		return nil, errors.New("invalid PDF font encoding")
+	}
+	if err := r.fontMetrics(f, d); err != nil {
+		return nil, err
 	}
 	r.fonts[key] = f
 	return f, nil

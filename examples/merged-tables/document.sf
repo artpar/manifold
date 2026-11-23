@@ -1,0 +1,30 @@
+{
+  "type": "doc",
+  "attrs": {
+    "schema": "manydoc-prosemirror/1",
+    "metadata": {"title": "Merged table example", "author": "manydoc"},
+    "layout": {"width": 360, "height": 300, "margin": 30},
+    "headers": [{"type":"paragraph","content":[{"type":"text","text":"manydoc merged table example"}]}],
+    "footers": [{"type":"paragraph","content":[{"type":"text","text":"Horizontal and vertical spans"}]}]
+  },
+  "content": [{
+    "type": "table",
+    "content": [
+      {"type":"table_row","content":[
+        {"type":"table_cell","attrs":{"colspan":2,"rowspan":2},"content":[{"type":"paragraph","content":[{"type":"text","text":"Merged A","marks":[{"type":"strong"},{"type":"link","attrs":{"href":"https://example.invalid/merge"}}]}]}]},
+        {"type":"table_cell","attrs":{"rowspan":3},"content":[{"type":"paragraph","content":[{"type":"text","text":"Merged B"}]}]},
+        {"type":"table_cell","content":[{"type":"paragraph","content":[{"type":"text","text":"Right C"}]}]}
+      ]},
+      {"type":"table_row","content":[
+        {"type":"table_cell","content":[{"type":"paragraph","content":[{"type":"text","text":"Right D"}]}]}
+      ]},
+      {"type":"table_row","content":[
+        {"type":"table_cell","attrs":{"colspan":2},"content":[{"type":"paragraph","content":[{"type":"text","text":"Bottom E"}]}]},
+        {"type":"table_cell","content":[{"type":"paragraph","content":[{"type":"text","text":"Right F"}]}]}
+      ]},
+      {"type":"table_row","content":[
+        {"type":"table_cell","attrs":{"colspan":4},"content":[{"type":"paragraph","content":[{"type":"text","text":"Full G"}]}]}
+      ]}
+    ]
+  }]
+}

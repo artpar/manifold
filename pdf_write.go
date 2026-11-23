@@ -4,11 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"image"
 	"io"
-	"math"
-	"regexp"
-	"strings"
 	"sync"
 	"unicode"
 
@@ -18,6 +14,7 @@ import (
 	"golang.org/x/image/font/gofont/goitalic"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/font/sfnt"
+	"golang.org/x/text/unicode/norm"
 )
 
 var pdfFonts = []struct {
@@ -55,12 +52,15 @@ func validatePDFText(r Run) error {
 	}
 	font := parsedPDFFonts[runStyle(r)]
 	var buf sfnt.Buffer
-	for _, ch := range r.Text {
-		if ch == '\n' || ch == '\r' || ch == '\t' {
+	for _, ch := range norm.NFC.String(r.Text) {
+		if pdfSpecial(ch) {
 			continue
 		}
 		if unicode.Is(unicode.Arabic, ch) || unicode.Is(unicode.Devanagari, ch) || unicode.Is(unicode.Hebrew, ch) {
 			return fmt.Errorf("%w: PDF output needs shaping/bidirectional layout for %U", ErrUnsupported, ch)
+		}
+		if unicode.Is(unicode.Mn, ch) || unicode.Is(unicode.Mc, ch) || unicode.Is(unicode.Me, ch) {
+			return fmt.Errorf("%w: PDF text needs combining-mark positioning for %U", ErrUnsupported, ch)
 		}
 		g, err := font.GlyphIndex(&buf, ch)
 		if err != nil {
@@ -85,15 +85,22 @@ type pdfRenderer struct {
 	width, height, margin, y float64
 	images                   int
 	headers, footers         []Block
+	notes                    *noteCatalog
+	noteLinks                map[noteKey]int
+	seenFootnotes            map[noteKey]bool
+	pageNotes, pendingNotes  []pdfNoteChunk
+	noteReserve              float64
 }
 
-var wordTokens = regexp.MustCompile(`\n|\t| +|[^ \n\t\r]+`)
-
 func writePDF(ctx context.Context, out io.Writer, d *Document) error {
-	if len(d.Notes) > 0 {
-		return fmt.Errorf("%w: PDF note layout is not implemented", ErrUnsupported)
+	notes, err := catalogNotes(d, true)
+	if err != nil {
+		return err
 	}
 	w, h, m := layout(d.Layout)
+	if w > 14400 || h > 14400 {
+		return fmt.Errorf("%w: PDF page dimensions exceed 14400pt without UserUnit", ErrUnsupported)
+	}
 	p := gofpdf.NewCustom(&gofpdf.InitType{UnitStr: "pt", Size: gofpdf.SizeType{Wd: w, Ht: h}})
 	p.SetMargins(m, m, m)
 	p.SetAutoPageBreak(false, m)
@@ -106,17 +113,18 @@ func writePDF(ctx context.Context, out io.Writer, d *Document) error {
 		p.AddUTF8FontFromBytes("Go", f.style, append([]byte(nil), f.data...))
 	}
 	r := &pdfRenderer{ctx: ctx, pdf: p, width: w, height: h, margin: m, y: m, headers: d.Headers, footers: d.Footers}
+	r.notes = notes
+	r.noteLinks = map[noteKey]int{}
+	r.seenFootnotes = map[noteKey]bool{}
+	for _, key := range notes.order {
+		r.noteLinks[key] = p.AddLink()
+	}
 	// Headers and footers use an explicit small-text contract to avoid recursive
 	// pagination or dropping nontext content.
 	for _, blocks := range [][]Block{d.Headers, d.Footers} {
 		for _, b := range blocks {
-			if b.Kind != Paragraph && b.Kind != Heading {
+			if (b.Kind != Paragraph && b.Kind != Heading) || b.List != "" {
 				return fmt.Errorf("%w: PDF header/footer must contain paragraphs", ErrUnsupported)
-			}
-			for _, run := range b.Runs {
-				if err := validatePDFText(run); err != nil {
-					return err
-				}
 			}
 		}
 	}
@@ -124,6 +132,9 @@ func writePDF(ctx context.Context, out io.Writer, d *Document) error {
 	p.SetFooterFunc(func() { r.headerFooter(d.Footers, h-m/2) })
 	p.AddPage()
 	if err := r.blocks(d.Blocks, w-2*m, m); err != nil {
+		return err
+	}
+	if err := r.finishNotes(); err != nil {
 		return err
 	}
 	if err := ctx.Err(); err != nil {
@@ -136,7 +147,13 @@ func writePDF(ctx context.Context, out io.Writer, d *Document) error {
 	if err := p.Output(&b); err != nil {
 		return err
 	}
-	_, err := io.Copy(out, &b)
+	// ActualText was introduced in PDF 1.4. gofpdf has no public minimum
+	// version setter and otherwise emits 1.3 for opaque documents. This
+	// equal-length header promotion leaves every object/xref offset unchanged.
+	if bytes.HasPrefix(b.Bytes(), []byte("%PDF-1.3")) {
+		b.Bytes()[7] = '4'
+	}
+	_, err = io.Copy(out, &b)
 	return err
 }
 func (r *pdfRenderer) headerFooter(bs []Block, y float64) {
@@ -157,101 +174,18 @@ func (r *pdfRenderer) headerFooter(bs []Block, y float64) {
 		}
 	}
 }
-func (r *pdfRenderer) ensure(height float64) error {
-	if height > r.height-2*r.margin {
-		return fmt.Errorf("%w: PDF block is taller than a page", ErrUnsupported)
-	}
-	if r.y+height > r.height-r.margin {
-		r.pdf.AddPage()
-		r.y = r.margin
-	}
-	return r.ctx.Err()
-}
-func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) {
-	if width <= 0 {
-		return nil, fmt.Errorf("invalid PDF text width")
-	}
-	lines := []pdfLine{{}}
-	used := 0.0
-	add := func(run Run, text string, w float64) {
-		i := len(lines) - 1
-		n := len(lines[i])
-		if n > 0 && lines[i][n-1].run == run {
-			lines[i][n-1].text += text
-			lines[i][n-1].width += w
-		} else {
-			lines[i] = append(lines[i], pdfSpan{run, text, w})
-		}
-		used += w
-	}
-	newline := func() { lines = append(lines, pdfLine{}); used = 0 }
-	for _, run := range runs {
-		if err := validatePDFText(run); err != nil {
-			return nil, err
-		}
-		r.pdf.SetFont("Go", runStyle(run), size)
-		for _, word := range wordTokens.FindAllString(run.Text, -1) {
-			if word == "\n" {
-				newline()
-				continue
-			}
-			if word == "\t" {
-				word = "    "
-			}
-			space := strings.Trim(word, " ") == ""
-			ww := r.pdf.GetStringWidth(word)
-			if used+ww > width && used > 0 {
-				newline()
-				if space {
-					continue
-				}
-			}
-			if ww <= width {
-				add(run, word, ww)
-				continue
-			}
-			for _, ch := range word {
-				t := string(ch)
-				cw := r.pdf.GetStringWidth(t)
-				if cw > width {
-					return nil, fmt.Errorf("%w: glyph wider than PDF content area", ErrUnsupported)
-				}
-				if used+cw > width {
-					newline()
-				}
-				add(run, t, cw)
-			}
-		}
-	}
-	return lines, nil
-}
-func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
-	for _, span := range line {
-		style := runStyle(span.run)
-		if span.run.Underline {
-			style += "U"
-		}
-		r.pdf.SetFont("Go", style, size)
-		r.pdf.Text(x, y+size, span.text)
-		if span.run.Link != "" {
-			r.pdf.LinkString(x, y, span.width, size*1.3, span.run.Link)
-		}
-		if span.run.Strike {
-			r.pdf.Line(x, y+size*.6, x+span.width, y+size*.6)
-		}
-		x += span.width
-	}
-}
+func (r *pdfRenderer) ensure(height float64) error { return r.ensureWithNotes(height, nil) }
+
 func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
-	number := 0
-	for _, b := range bs {
+	for _, b := range legacyLists(bs) {
 		if err := r.ctx.Err(); err != nil {
 			return err
 		}
 		switch b.Kind {
 		case PageBreak:
-			r.pdf.AddPage()
-			r.y = r.margin
+			if err := r.nextPage(true); err != nil {
+				return err
+			}
 		case Paragraph, Heading:
 			size := 11.0
 			runs := append([]Run(nil), b.Runs...)
@@ -261,16 +195,7 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 					runs[i].Bold = true
 				}
 			}
-			if b.List != "" {
-				prefix := "• "
-				if b.List == "number" {
-					number++
-					prefix = fmt.Sprintf("%d. ", number)
-				}
-				runs = append([]Run{{Text: prefix}}, runs...)
-			} else {
-				number = 0
-			}
+
 			lines, err := r.lines(runs, width, size)
 			if err != nil {
 				return err
@@ -282,100 +207,35 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 				}
 			}
 			for _, line := range lines {
-				if err := r.ensure(leading); err != nil {
+				if err := r.ensureWithNotes(leading, lineNoteKeys(line)); err != nil {
 					return err
 				}
 				r.drawLine(line, x, r.y, size)
 				r.y += leading
 			}
 			r.y += size * .4
+		case ListBlock:
+			if err := r.list(b, width, x); err != nil {
+				return err
+			}
 		case Table:
 			if err := r.table(b, width, x); err != nil {
 				return err
 			}
 			r.y += 8
 		case Picture:
-			im := b.Image
-			conf, kind, err := image.DecodeConfig(bytes.NewReader(im.Data))
+			im, err := r.measureImage(b.Image, width)
 			if err != nil {
 				return err
 			}
-			if kind != "png" && kind != "jpeg" {
-				return fmt.Errorf("%w: PDF image %s", ErrUnsupported, kind)
-			}
-			iw, ih := im.Width, im.Height
-			if iw == 0 {
-				iw = float64(conf.Width) * .75
-			}
-			if ih == 0 {
-				ih = iw * float64(conf.Height) / float64(conf.Width)
-			}
-			if iw > width {
-				ih *= width / iw
-				iw = width
-			}
-			if err := r.ensure(ih + 8); err != nil {
+			if err := r.ensure(im.height + 8); err != nil {
 				return err
 			}
-			r.images++
-			name := fmt.Sprintf("image%d", r.images)
-			r.pdf.RegisterImageOptionsReader(name, gofpdf.ImageOptions{ImageType: kind}, bytes.NewReader(im.Data))
-			r.pdf.ImageOptions(name, x, r.y, iw, ih, false, gofpdf.ImageOptions{ImageType: kind}, 0, "")
-			r.y += ih + 8
+			if err := r.drawImage(im, x, r.y); err != nil {
+				return err
+			}
+			r.y += im.height + 8
 		}
 	}
 	return r.pdf.Error()
-}
-func (r *pdfRenderer) table(b Block, width, x float64) error {
-	cols := 0
-	for _, row := range b.Rows {
-		n := 0
-		for _, c := range row.Cells {
-			n += max(1, c.ColSpan)
-		}
-		cols = max(cols, n)
-	}
-	if cols == 0 {
-		return nil
-	}
-	unit := width / float64(cols)
-	for _, row := range b.Rows {
-		var cells [][]pdfLine
-		var widths []float64
-		rowHeight := 22.0
-		for _, cell := range row.Cells {
-			cw := unit * float64(max(1, cell.ColSpan))
-			var runs []Run
-			for i, b := range cell.Blocks {
-				if b.Kind != Paragraph && b.Kind != Heading {
-					return fmt.Errorf("%w: PDF table cells support text paragraphs", ErrUnsupported)
-				}
-				if i > 0 {
-					runs = append(runs, Run{Text: "\n"})
-				}
-				runs = append(runs, b.Runs...)
-			}
-			lines, err := r.lines(runs, cw-12, 10)
-			if err != nil {
-				return err
-			}
-			cells = append(cells, lines)
-			widths = append(widths, cw)
-			rowHeight = math.Max(rowHeight, float64(len(lines))*14+12)
-		}
-		if err := r.ensure(rowHeight); err != nil {
-			return err
-		}
-		cx := x
-		for i, lines := range cells {
-			r.pdf.SetDrawColor(120, 120, 120)
-			r.pdf.Rect(cx, r.y, widths[i], rowHeight, "D")
-			for j, line := range lines {
-				r.drawLine(line, cx+6, r.y+6+float64(j)*14, 10)
-			}
-			cx += widths[i]
-		}
-		r.y += rowHeight
-	}
-	return nil
 }

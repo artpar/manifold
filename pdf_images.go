@@ -1,0 +1,256 @@
+package manydoc
+
+import (
+	"bytes"
+	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	"image/png"
+	"io"
+	"math"
+
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
+	_ "golang.org/x/image/tiff"
+)
+
+// Bound image allocations before asking a decoder to expand untrusted pixels.
+const maxPDFImagePixels = 25_000_000
+
+func (r *pdfReader) imageDimensions(sd *types.StreamDict) (int, int, error) {
+	w, e := r.pdf.DereferenceInteger(sd.Dict["Width"])
+	if e != nil {
+		return 0, 0, e
+	}
+	h, e := r.pdf.DereferenceInteger(sd.Dict["Height"])
+	if e != nil {
+		return 0, 0, e
+	}
+	if w == nil || h == nil || *w <= 0 || *h <= 0 || int64(*w) > maxPDFImagePixels/int64(*h) {
+		return 0, 0, fmt.Errorf("invalid or excessive PDF image dimensions")
+	}
+	return int(*w), int(*h), nil
+}
+func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, resources types.Dict, state pdfTextState) error {
+	w, h, err := r.imageDimensions(sd)
+	if err != nil {
+		return err
+	}
+	copySD := *sd
+	copySD.Dict = types.Dict{}
+	for k, v := range sd.Dict {
+		copySD.Dict[k] = v
+	}
+	// Resolve a resource-local color space before handing the stream to pdfcpu.
+	if name, ok := copySD.Dict["ColorSpace"].(types.Name); ok && name != "DeviceRGB" && name != "DeviceGray" && name != "DeviceCMYK" {
+		spaces, e := r.pdf.DereferenceDict(resources["ColorSpace"])
+		if e != nil {
+			return e
+		}
+		if spaces[string(name)] == nil {
+			return fmt.Errorf("missing image color space %s", name)
+		}
+		copySD.Dict["ColorSpace"] = spaces[string(name)]
+	}
+	if n := len(copySD.FilterPipeline); n > 0 && (copySD.FilterPipeline[n-1].Name == "ASCIIHexDecode" || copySD.FilterPipeline[n-1].Name == "ASCII85Decode") {
+		if err := copySD.Decode(); err != nil {
+			return err
+		}
+		copySD.Raw = copySD.Content
+		copySD.FilterPipeline = nil
+	}
+	if copySD.Dict["Mask"] != nil {
+		return fmt.Errorf("%w: PDF explicit/color-key image masks", ErrUnsupported)
+	}
+	soft := copySD.Dict["SMask"]
+	delete(copySD.Dict, "SMask")
+	var pixels image.Image
+	var dctDecode []float64
+	if len(copySD.FilterPipeline) > 0 && copySD.FilterPipeline[len(copySD.FilterPipeline)-1].Name == "DCTDecode" && copySD.Dict["Decode"] != nil {
+		a, e := r.pdf.DereferenceArray(copySD.Dict["Decode"])
+		if e != nil {
+			return e
+		}
+		cs := copySD.Dict["ColorSpace"]
+		components := 0
+		if cs == types.Name("DeviceRGB") {
+			components = 3
+		}
+		if cs == types.Name("DeviceGray") {
+			components = 1
+		}
+		if components == 0 || len(a) != 2*components {
+			return fmt.Errorf("%w: DCT Decode for this color space", ErrUnsupported)
+		}
+		for _, v := range a {
+			n, e := pdfNumber(v)
+			if e != nil || !finite(n) {
+				return fmt.Errorf("invalid image Decode")
+			}
+			dctDecode = append(dctDecode, n)
+		}
+	}
+	if cs, ok := copySD.Dict["ColorSpace"].(types.Array); ok && len(cs) > 0 && (cs[0] == types.Name("ICCBased") || cs[0] == types.Name("Separation") || cs[0] == types.Name("DeviceN")) {
+		r.warnPage("pdf_image_color", "Image extraction uses the decoder's alternate/device color conversion; original color-profile semantics are not retained")
+	}
+
+	if stencil := copySD.BooleanEntry("ImageMask"); stencil != nil && *stencil {
+		if state.fillUnknown {
+			return fmt.Errorf("%w: stencil requires unresolved general fill color", ErrUnsupported)
+		}
+		if err := copySD.Decode(); err != nil {
+			return err
+		}
+		row := (w + 7) / 8
+		if len(copySD.Content) != row*h {
+			return fmt.Errorf("invalid stencil image sample length")
+		}
+		invert := false
+		if d, err := r.pdf.DereferenceArray(copySD.Dict["Decode"]); err != nil {
+			return err
+		} else if len(d) > 0 {
+			if len(d) != 2 {
+				return fmt.Errorf("invalid stencil Decode")
+			}
+			a, e := pdfNumber(d[0])
+			if e != nil {
+				return e
+			}
+			b, e := pdfNumber(d[1])
+			if e != nil {
+				return e
+			}
+			if a == 1 && b == 0 {
+				invert = true
+			} else if a != 0 || b != 1 {
+				return fmt.Errorf("invalid stencil Decode")
+			}
+		}
+		dst := image.NewNRGBA(image.Rect(0, 0, w, h))
+		c := color.NRGBA{uint8(math.Round(state.fill[0] * 255)), uint8(math.Round(state.fill[1] * 255)), uint8(math.Round(state.fill[2] * 255)), 255}
+		for y := 0; y < h; y++ {
+			for x := 0; x < w; x++ {
+				bit := copySD.Content[y*row+x/8] >> (7 - uint(x%8)) & 1
+				paint := bit == 0
+				if invert {
+					paint = !paint
+				}
+				if paint {
+					dst.SetNRGBA(x, y, c)
+				}
+			}
+		}
+		pixels = dst
+	} else {
+		extracted, e := pdfcpu.ExtractImage(r.pdf, &copySD, false, "", 0, false)
+		if e != nil {
+			return e
+		}
+		if extracted == nil || extracted.Reader == nil {
+			return fmt.Errorf("%w: PDF image decoding produced no asset", ErrUnsupported)
+		}
+		data, e := io.ReadAll(io.LimitReader(extracted.Reader, 200_000_001))
+		if e != nil {
+			return e
+		}
+		if len(data) > 200_000_000 {
+			return fmt.Errorf("PDF image asset exceeds limit")
+		}
+		cfg, _, e := image.DecodeConfig(bytes.NewReader(data))
+		if e != nil {
+			return fmt.Errorf("%w: PDF image codec %s: %v", ErrUnsupported, extracted.FileType, e)
+		}
+		if cfg.Width != w || cfg.Height != h {
+			return fmt.Errorf("image stream dimensions contradict image dictionary")
+		}
+		pixels, _, err = image.Decode(bytes.NewReader(data))
+		if err != nil {
+			return err
+		}
+	}
+	if len(dctDecode) > 0 {
+		dst := image.NewNRGBA(image.Rect(0, 0, w, h))
+		convert := func(value uint8, i int) uint8 {
+			x := dctDecode[i] + float64(value)/255*(dctDecode[i+1]-dctDecode[i])
+			return uint8(math.Round(max(0, min(1, x)) * 255))
+		}
+		for y := 0; y < h; y++ {
+			for x := 0; x < w; x++ {
+				c := color.NRGBAModel.Convert(pixels.At(x, y)).(color.NRGBA)
+				if len(dctDecode) == 2 {
+					v := convert(color.GrayModel.Convert(pixels.At(x, y)).(color.Gray).Y, 0)
+					c.R = v
+					c.G = v
+					c.B = v
+				} else {
+					c.R = convert(c.R, 0)
+					c.G = convert(c.G, 2)
+					c.B = convert(c.B, 4)
+				}
+				dst.SetNRGBA(x, y, c)
+			}
+		}
+		pixels = dst
+	}
+	if soft != nil {
+		mask, _, e := r.pdf.DereferenceStreamDict(soft)
+		if e != nil {
+			return e
+		}
+		if mask == nil {
+			return fmt.Errorf("invalid soft mask")
+		}
+		mw, mh, e := r.imageDimensions(mask)
+		if e != nil {
+			return e
+		}
+		// Matte needs unpremultiplication in the original color space, not a guessed RGB correction.
+		if mask.Dict["Matte"] != nil {
+			return fmt.Errorf("%w: PDF soft-mask Matte", ErrUnsupported)
+		}
+		if cs := mask.NameEntry("ColorSpace"); cs == nil || *cs != "DeviceGray" {
+			return fmt.Errorf("invalid soft-mask color space")
+		}
+		im, e := pdfcpu.ExtractImage(r.pdf, mask, false, "", 0, false)
+		if e != nil {
+			return e
+		}
+		if im == nil || im.Reader == nil {
+			return fmt.Errorf("unsupported soft-mask codec")
+		}
+		alpha, _, e := image.Decode(im.Reader)
+		if e != nil {
+			return e
+		}
+		if alpha.Bounds().Dx() != mw || alpha.Bounds().Dy() != mh {
+			return fmt.Errorf("soft-mask dimensions disagree")
+		}
+		if mw != w || mh != h {
+			r.warnPage("pdf_mask_resampling", "Differently sized soft mask is resampled using nearest neighbors")
+		}
+		dst := image.NewNRGBA(image.Rect(0, 0, w, h))
+		draw.Draw(dst, dst.Bounds(), pixels, pixels.Bounds().Min, draw.Src)
+		for y := 0; y < h; y++ {
+			for x := 0; x < w; x++ {
+				a := color.GrayModel.Convert(alpha.At(x*mw/w, y*mh/h)).(color.Gray).Y
+				offset := dst.PixOffset(x, y)
+				dst.Pix[offset+3] = uint8(uint16(dst.Pix[offset+3]) * uint16(a) / 255)
+			}
+		}
+		pixels = dst
+	}
+	var encoded bytes.Buffer
+	if err := png.Encode(&encoded, pixels); err != nil {
+		return err
+	}
+	m := r.pageInfo.Transform.compose(state.ctm)
+	q := Quad{m.point(0, 1), m.point(1, 1), m.point(1, 0), m.point(0, 0)}
+	r.checkPageBounds(q)
+	r.order++
+	source := &SourceInfo{Format: PDF, Page: r.page, Object: r.objectID(object, "image"), Stream: r.stream, Order: r.order, Quad: &q, Matrix: &m, Structure: "unstructured", Evidence: "pdf_image_xobject", Confidence: 1, Precision: "image_unit_square"}
+	r.applyMarked(source)
+	r.newline()
+	r.lines = append(r.lines, Block{Kind: Picture, Source: source, Image: &Image{Data: encoded.Bytes(), MediaType: "image/png", Width: math.Hypot(m[0], m[1]), Height: math.Hypot(m[2], m[3])}})
+	return nil
+}

@@ -1,0 +1,256 @@
+{
+  "type": "doc",
+  "attrs": {
+    "schema": "manydoc-prosemirror/1",
+    "metadata": {
+      "title": "Images and nested cells",
+      "author": "manydoc"
+    },
+    "layout": {
+      "width": 420,
+      "height": 380,
+      "margin": 30
+    },
+    "notes": [
+      {
+        "id": "cell",
+        "kind": "footnote",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "NOTE_CELL"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "nested",
+        "kind": "footnote",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "NOTE_NESTED"
+              }
+            ]
+          },
+          {
+            "type": "image",
+            "attrs": {
+              "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAIAAAB7QOjdAAAAD0lEQVR4nGNY8GyLyAIbAAzNAysUpEmZAAAAAElFTkSuQmCC",
+              "width": 12,
+              "height": 6,
+              "alt": "Green note image"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "content": [
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "PREFACE\nPREFACE\nPREFACE"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "content": [
+        {
+          "type": "table_row",
+          "content": [
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 2,
+                "rowspan": 2
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CELL_START",
+                      "marks": [
+                        {
+                          "type": "strong"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "note_reference",
+                      "attrs": {
+                        "kind": "footnote",
+                        "id": "cell"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "image",
+                  "attrs": {
+                    "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAGCAIAAAB4jOjWAAAAGklEQVR4nGO49Pq/SMod/CQDQRVAkmEQmgQAS9uSQY5qJlAAAAAASUVORK5CYII=",
+                    "width": 400,
+                    "height": 200,
+                    "alt": "Blue checkerboard"
+                  }
+                },
+                {
+                  "type": "table",
+                  "content": [
+                    {
+                      "type": "table_row",
+                      "content": [
+                        {
+                          "type": "table_cell",
+                          "attrs": {
+                            "rowspan": 2
+                          },
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "INNER_A"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "image",
+                              "attrs": {
+                                "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAACCAIAAAASFvFNAAAAFUlEQVR4nGP4f8ftdYAckGSAUEASAHDaCm82XuuKAAAAAElFTkSuQmCC",
+                                "width": 30,
+                                "height": 20,
+                                "alt": "Orange checkerboard"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "table_cell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "INNER_B",
+                                  "marks": [
+                                    {
+                                      "type": "link",
+                                      "attrs": {
+                                        "href": "https://example.invalid/inner"
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "table_row",
+                      "content": [
+                        {
+                          "type": "table_cell",
+                          "content": [
+                            {
+                              "type": "paragraph",
+                              "content": [
+                                {
+                                  "type": "text",
+                                  "text": "INNER_C",
+                                  "marks": [
+                                    {
+                                      "type": "em"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "note_reference",
+                                  "attrs": {
+                                    "kind": "footnote",
+                                    "id": "nested"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CELL_END"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "TOP_RIGHT"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table_row",
+          "content": [
+            {
+              "type": "table_cell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "BOTTOM_RIGHT"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "AFTER_TABLE"
+        }
+      ]
+    }
+  ]
+}

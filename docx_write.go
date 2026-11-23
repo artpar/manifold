@@ -10,6 +10,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -25,11 +26,17 @@ const xmlHeader = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`
 const wordNamespaces = ` xmlns:w="` + wordNS + `" xmlns:r="` + relNS + `" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"`
 
 type docxWriter struct {
-	ctx    context.Context
-	parts  map[string][]byte
-	rels   []string
-	next   int
-	images int
+	ctx          context.Context
+	parts        map[string][]byte
+	rels         []string
+	next         int
+	images       int
+	contentWidth float64
+	numberings   []docxNumbering
+	bookmarks    int
+	noteIDs      map[noteKey]int
+	noteLabels   map[noteKey]string
+	seenNoteRefs map[noteKey]bool
 }
 
 func (w *docxWriter) addRel(kind, target string, external bool) string {
@@ -44,17 +51,26 @@ func (w *docxWriter) addRel(kind, target string, external bool) string {
 }
 
 func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
-	if len(d.Notes) > 0 {
-		return fmt.Errorf("%w: DOCX writing note references is not implemented", ErrUnsupported)
+	notes, err := catalogNotes(d, true)
+	if err != nil {
+		return err
 	}
-	w := &docxWriter{ctx: ctx, parts: map[string][]byte{}, next: 1}
+	wid, hei, mar := layout(d.Layout)
+	w := &docxWriter{ctx: ctx, parts: map[string][]byte{}, next: 1, contentWidth: wid - 2*mar}
+	w.noteIDs = map[noteKey]int{}
+	w.noteLabels = notes.labels
+	w.seenNoteRefs = map[noteKey]bool{}
+	noteCounts := map[string]int{}
+	for _, n := range d.Notes {
+		noteCounts[n.Kind]++
+		w.noteIDs[noteIdentity(n)] = noteCounts[n.Kind]
+	}
 	w.addRel("styles", "styles.xml", false)
 	w.addRel("numbering", "numbering.xml", false)
 	body, err := w.blocks(d.Blocks)
 	if err != nil {
 		return err
 	}
-	wid, hei, mar := layout(d.Layout)
 	section := `<w:sectPr>`
 	for _, v := range []struct {
 		name, root, ref string
@@ -77,16 +93,24 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 		w.parts["word/"+v.name] = []byte(xmlHeader + `<w:` + v.root + wordNamespaces + `>` + part + `</w:` + v.root + `>`)
 		section += `<w:` + v.ref + ` w:type="default" r:id="` + id + `"/>`
 	}
+	if err := w.writeNoteParts(d.Notes); err != nil {
+		return err
+	}
+	for _, kind := range []string{Footnote, Endnote} {
+		if noteCounts[kind] > 0 {
+			section += `<w:` + kind + `Pr><w:numFmt w:val="decimal"/><w:numRestart w:val="continuous"/></w:` + kind + `Pr>`
+		}
+	}
 	section += fmt.Sprintf(`<w:pgSz w:w="%.0f" w:h="%.0f"/><w:pgMar w:top="%.0f" w:right="%.0f" w:bottom="%.0f" w:left="%.0f" w:header="360" w:footer="360"/></w:sectPr>`, wid*20, hei*20, mar*20, mar*20, mar*20, mar*20)
 	w.parts["word/document.xml"] = []byte(xmlHeader + `<w:document` + wordNamespaces + `><w:body>` + body + section + `</w:body></w:document>`)
-	w.parts["word/styles.xml"] = []byte(xmlHeader + `<w:styles xmlns:w="` + wordNS + `"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Noto Sans" w:hAnsi="Noto Sans"/><w:sz w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>` + headingStyles() + `</w:styles>`)
-	w.parts["word/numbering.xml"] = []byte(xmlHeader + `<w:numbering xmlns:w="` + wordNS + `"><w:abstractNum w:abstractNumId="0"><w:multiLevelType w:val="singleLevel"/><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="•"/><w:pPr><w:ind w:left="360" w:hanging="180"/></w:pPr></w:lvl></w:abstractNum><w:abstractNum w:abstractNumId="1"><w:multiLevelType w:val="singleLevel"/><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="decimal"/><w:lvlText w:val="%1."/><w:pPr><w:ind w:left="360" w:hanging="180"/></w:pPr></w:lvl></w:abstractNum><w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num><w:num w:numId="2"><w:abstractNumId w:val="1"/></w:num></w:numbering>`)
+	w.parts["word/styles.xml"] = []byte(xmlHeader + `<w:styles xmlns:w="` + wordNS + `"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Noto Sans" w:hAnsi="Noto Sans"/><w:sz w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>` + headingStyles() + noteStyles() + `</w:styles>`)
+	w.parts["word/numbering.xml"] = []byte(w.numberingXML())
 	relsHead := xmlHeader + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`
 	w.parts["word/_rels/document.xml.rels"] = []byte(relsHead + strings.Join(w.rels, "") + `</Relationships>`)
 	w.parts["_rels/.rels"] = []byte(relsHead + `<Relationship Id="rId1" Type="` + relNS + `/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`)
 	w.parts["docProps/core.xml"] = []byte(xmlHeader + `<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>` + escape(d.Metadata.Title) + `</dc:title><dc:creator>` + escape(d.Metadata.Author) + `</dc:creator><dc:subject>` + escape(d.Metadata.Subject) + `</dc:subject></cp:coreProperties>`)
 	ct := xmlHeader + `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Default Extension="jpg" ContentType="image/jpeg"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>`
-	for _, v := range []struct{ name, kind string }{{"header1.xml", "header"}, {"footer1.xml", "footer"}} {
+	for _, v := range []struct{ name, kind string }{{"header1.xml", "header"}, {"footer1.xml", "footer"}, {"footnotes.xml", "footnotes"}, {"endnotes.xml", "endnotes"}} {
 		if w.parts["word/"+v.name] != nil {
 			ct += `<Override PartName="/word/` + v.name + `" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.` + v.kind + `+xml"/>`
 		}
@@ -124,9 +148,10 @@ func headingStyles() string {
 	}
 	return b.String()
 }
-func (w *docxWriter) blocks(blocks []Block) (string, error) {
+func (w *docxWriter) blocks(blocks []Block) (string, error) { return w.blocksAt(blocks, 0) }
+func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 	var out strings.Builder
-	for _, b := range blocks {
+	for _, b := range legacyLists(blocks) {
 		if err := w.ctx.Err(); err != nil {
 			return "", err
 		}
@@ -138,15 +163,34 @@ func (w *docxWriter) blocks(blocks []Block) (string, error) {
 			if b.Kind == Heading {
 				fmt.Fprintf(&out, `<w:pStyle w:val="Heading%d"/>`, b.Level)
 			}
-			if b.List != "" {
-				id := 1
-				if b.List == "number" {
-					id = 2
-				}
-				fmt.Fprintf(&out, `<w:numPr><w:ilvl w:val="0"/><w:numId w:val="%d"/></w:numPr>`, id)
+			if b.docxNumberID > 0 {
+				fmt.Fprintf(&out, `<w:numPr><w:ilvl w:val="%d"/><w:numId w:val="%d"/></w:numPr>`, b.docxNumberLevel, b.docxNumberID)
+			}
+			if b.docxIndent > 0 {
+				fmt.Fprintf(&out, `<w:ind w:left="%d"/>`, b.docxIndent)
 			}
 			out.WriteString(`</w:pPr>`)
 			for _, r := range b.Runs {
+				repeated := false
+				noteBookmark := 0
+				noteName := ""
+				if r.Note != nil {
+					key := referenceKey(r.Note)
+					id, ok := w.noteIDs[key]
+					if !ok {
+						return "", fmt.Errorf("dangling note reference")
+					}
+					noteName = fmt.Sprintf("mdnote1_%s_%d", key.kind, id)
+					repeated = w.seenNoteRefs[key]
+					if repeated {
+						fmt.Fprintf(&out, `<w:fldSimple w:instr=" NOTEREF %s \h \f ">`, noteName)
+					} else {
+						w.seenNoteRefs[key] = true
+						w.bookmarks++
+						noteBookmark = w.bookmarks
+						fmt.Fprintf(&out, `<w:bookmarkStart w:id="%d" w:name="%s"/>`, noteBookmark, noteName)
+					}
+				}
 				if r.Link != "" {
 					if strings.HasPrefix(r.Link, "#") {
 						out.WriteString(`<w:hyperlink w:anchor="` + escape(strings.TrimPrefix(r.Link, "#")) + `">`)
@@ -156,6 +200,9 @@ func (w *docxWriter) blocks(blocks []Block) (string, error) {
 					}
 				}
 				out.WriteString(`<w:r><w:rPr>`)
+				if r.Note != nil {
+					out.WriteString(`<w:rStyle w:val="` + strings.Title(r.Note.Kind) + `Reference"/>`)
+				}
 				if r.Bold {
 					out.WriteString(`<w:b/>`)
 				}
@@ -169,6 +216,18 @@ func (w *docxWriter) blocks(blocks []Block) (string, error) {
 					out.WriteString(`<w:strike/>`)
 				}
 				out.WriteString(`</w:rPr>`)
+				if r.Note != nil {
+					id, ok := w.noteIDs[referenceKey(r.Note)]
+					if !ok {
+						return "", fmt.Errorf("dangling note reference")
+					}
+					if repeated {
+						fmt.Fprintf(&out, `<w:t>%s</w:t></w:r></w:fldSimple>`, escape(w.noteLabels[referenceKey(r.Note)]))
+					} else {
+						fmt.Fprintf(&out, `<w:%sReference w:id="%d"/></w:r><w:bookmarkEnd w:id="%d"/>`, r.Note.Kind, id, noteBookmark)
+					}
+					continue
+				}
 				var text strings.Builder
 				flush := func() {
 					if text.Len() > 0 {
@@ -196,41 +255,18 @@ func (w *docxWriter) blocks(blocks []Block) (string, error) {
 				}
 			}
 			out.WriteString(`</w:p>`)
+		case ListBlock:
+			v, err := w.list(b, depth)
+			if err != nil {
+				return "", err
+			}
+			out.WriteString(v)
 		case Table:
-			columns := 0
-			for _, r := range b.Rows {
-				n := 0
-				for _, c := range r.Cells {
-					n += max(1, c.ColSpan)
-				}
-				columns = max(columns, n)
+			v, err := w.table(b)
+			if err != nil {
+				return "", err
 			}
-			out.WriteString(`<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/><w:tblBorders><w:top w:val="single" w:sz="4"/><w:left w:val="single" w:sz="4"/><w:bottom w:val="single" w:sz="4"/><w:right w:val="single" w:sz="4"/><w:insideH w:val="single" w:sz="4"/><w:insideV w:val="single" w:sz="4"/></w:tblBorders></w:tblPr><w:tblGrid>`)
-			for i := 0; i < columns; i++ {
-				out.WriteString(`<w:gridCol w:w="2400"/>`)
-			}
-			out.WriteString(`</w:tblGrid>`)
-			for _, row := range b.Rows {
-				out.WriteString(`<w:tr>`)
-				for _, c := range row.Cells {
-					out.WriteString(`<w:tc><w:tcPr>`)
-					if c.ColSpan > 1 {
-						fmt.Fprintf(&out, `<w:gridSpan w:val="%d"/>`, c.ColSpan)
-					}
-					out.WriteString(`</w:tcPr>`)
-					v, err := w.blocks(c.Blocks)
-					if err != nil {
-						return "", err
-					}
-					out.WriteString(v)
-					if len(c.Blocks) == 0 || c.Blocks[len(c.Blocks)-1].Kind == Table {
-						out.WriteString(`<w:p/>`)
-					}
-					out.WriteString(`</w:tc>`)
-				}
-				out.WriteString(`</w:tr>`)
-			}
-			out.WriteString(`</w:tbl>`)
+			out.WriteString(v)
 		case Picture:
 			im := b.Image
 			config, kind, err := image.DecodeConfig(bytes.NewReader(im.Data))
@@ -247,14 +283,20 @@ func (w *docxWriter) blocks(blocks []Block) (string, error) {
 			name := fmt.Sprintf("media/image%d.%s", w.images, ext)
 			w.parts["word/"+name] = im.Data
 			id := w.addRel("image", name, false)
-			width, height := im.Width, im.Height
-			if width == 0 {
-				width = float64(config.Width) * 0.75
+			available := w.contentWidth - float64(b.docxIndent)/20
+			width, height, err := fitImageSize(im, config.Width, config.Height, available)
+			if err != nil {
+				return "", err
 			}
-			if height == 0 {
-				height = width * float64(config.Height) / float64(config.Width)
+			if width > float64(math.MaxInt64)/12700 || height > float64(math.MaxInt64)/12700 {
+				return "", fmt.Errorf("%w: DOCX image exceeds EMU coordinate range", ErrUnsupported)
 			}
-			fmt.Fprintf(&out, `<w:p><w:r><w:drawing><wp:inline><wp:extent cx="%.0f" cy="%.0f"/><wp:docPr id="%d" name="Image %d" descr="%s"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="Image"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="%s"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="%.0f" cy="%.0f"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`, width*12700, height*12700, w.images, w.images, escape(im.Alt), id, width*12700, height*12700)
+			imageParagraph := "<w:p>"
+			if b.docxIndent > 0 {
+				imageParagraph += fmt.Sprintf(`<w:pPr><w:ind w:left="%d"/></w:pPr>`, b.docxIndent)
+			}
+			out.WriteString(imageParagraph)
+			fmt.Fprintf(&out, `<w:r><w:drawing><wp:inline><wp:extent cx="%.0f" cy="%.0f"/><wp:docPr id="%d" name="Image %d" descr="%s"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="Image"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="%s"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="%.0f" cy="%.0f"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`, width*12700, height*12700, w.images, w.images, escape(im.Alt), id, width*12700, height*12700)
 		}
 	}
 	return out.String(), nil

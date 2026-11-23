@@ -71,5 +71,820 @@
     "Word/LibreOffice visual acceptance not completed",
     "No Daptin or Colleaf adapter integration tested"
   ],
-  "raw_logs": "output/ (ignored, regenerable; see docs/TESTING.md)"
+  "raw_logs": "output/ (ignored, regenerable; see docs/TESTING.md)",
+  "scope": "Original initial-implementation baseline. Fields above structured_format_milestone are historical, not coverage/build claims for the new SF code.",
+  "structured_format_milestone": {
+    "date": "2026-11-23",
+    "schema": "manydoc-prosemirror/1",
+    "checks": {
+      "go test ./... -count=1": "passed",
+      "go test -race ./... -count=1": "passed",
+      "go vet ./...": "passed",
+      "go mod verify": "passed",
+      "CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc": "passed; host build executed by corpus CLI QA",
+      "git diff --check": "passed"
+    },
+    "environment": "GOWORK=off for Go commands; optional QA tools are not runtime dependencies",
+    "structure_tests": "All 51 accepted named inputs preserve all current model semantics through the SF bridge, with documented empty-run and span normalization; plus rich-model, invalid-structure and CLI tests.",
+    "independent_prosemirror_reader": {
+      "package": "prosemirror-model",
+      "version": "1.25.13",
+      "corpus_files": 51,
+      "corpus_nodes": 12415,
+      "example_nodes": 40,
+      "result": "passed; Node.check and text/mark/attribute checks"
+    },
+    "structured_fuzz": {
+      "passed": true,
+      "executions": 177117,
+      "requested_budget_seconds": 10,
+      "workers": 2
+    },
+    "sf_generated_output": {
+      "path": "output/sf-generated/ (ignored)",
+      "docx_python_docx": "passed metadata, text, links, formatting, tables, images and running content checks",
+      "pdf_pypdf_poppler": "passed; 2 pages",
+      "pdf_visual": "Both page PNGs inspected",
+      "docx_visual": "not verified"
+    },
+    "completion": "Incomplete; see ACCEPTANCE.md. This milestone establishes the initial SF profile and bridges, not full rich-document conversion."
+  },
+  "merged_table_milestone": {
+    "date": "2026-11-23",
+    "checks": {
+      "GOWORK=off go test ./... -count=1": "passed",
+      "GOWORK=off go test -race ./... -count=1": "passed",
+      "GOWORK=off go vet ./...": "passed",
+      "CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc": "passed",
+      "git diff --check": "passed"
+    },
+    "tests": "Hand-authored OOXML merge geometry, SF/DOCX semantic round trips, continuation content, invalid spans/regions, fully covered rows, exact PDF rectangles, pagination, and nested DOCX widths.",
+    "example": "examples/merged-tables/document.sf (hand-authored source)",
+    "independent_readers": {
+      "prosemirror-model": "passed, 31 nodes",
+      "python-docx": "passed merged-cell identities, seven contents, bold and hyperlink",
+      "pypdf": "passed seven exact rectangles, seven texts, hyperlink annotation"
+    },
+    "visual": {
+      "native_pdf": "one page rendered and inspected",
+      "docx": "LibreOffice 7.6 rendered to PDF; all seven cell texts retained; one page rendered and inspected",
+      "defect_found_and_fixed": "Fixed 2400-twip DOCX grids clipped the rightmost column; page/parent-cell constrained widths fixed it."
+    },
+    "fuzz": {
+      "DOCX": {
+        "passed": true,
+        "executions": 19800,
+        "seconds": 10,
+        "workers": 2,
+        "merge_seed": true
+      },
+      "SF": {
+        "passed": true,
+        "executions": 157962,
+        "seconds": 10,
+        "workers": 2,
+        "merge_seed": true
+      }
+    },
+    "corpus": "51 accepted inputs still pass independent SF verification, 12415 nodes; named corpus remains mostly synthetic.",
+    "remaining": "List boundaries/restarts/hierarchy; notes/references/output; PDF geometry/images/provenance; oversized merged-group splitting and richer PDF cell content; fonts/shaping/page settings; representative real exported documents."
+  },
+  "explicit_list_milestone": {
+    "date": "2026-11-23",
+    "checks": {
+      "GOWORK=off go test ./... -count=1": "passed",
+      "GOWORK=off go test -race ./... -count=1": "passed",
+      "GOWORK=off go vet ./...": "passed",
+      "CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc": "passed",
+      "git diff --check": "passed"
+    },
+    "semantics": "Explicit list boundaries, starts including zero, hierarchy, multi-block items; legacy flat adapter; DOCX per-level instance/style/start/restart handling; PDF body and table-cell indentation/layout.",
+    "go_tests": "Independent hand-authored OOXML hierarchy/override/restart oracles; SF/DOCX/legacy JSON structure and relationship round trips; assets/table membership; inline image placement diagnostics; invalid ranges/start conflicts; PDF pagination and format depth limits.",
+    "independent_readers": {
+      "prosemirror-model": "51 nodes in one-page example; 51 nodes in compact example; both passed",
+      "python-docx_lxml": "Six numbering identities/starts, 10 numbered items and levels, 16 unique invisible list/item bookmarks, link/bold checked",
+      "pypdf_pymupdf": "Content, starts, three indentation positions, continuation and cell indentation, and annotations passed for one-page and three-page PDFs"
+    },
+    "visual": {
+      "native_pdf": "One-page example and all three compact pages rendered and inspected",
+      "docx": "LibreOffice 7.6 one-page render inspected; all texts/numbers retained and no visible field instructions",
+      "design_defect_avoided": "Content-control grouping exposed hyperlink instructions in LibreOffice; output uses invisible bookmark ranges with standard numbering instead."
+    },
+    "fuzz": {
+      "DOCX": {
+        "passed": true,
+        "executions": 22404,
+        "requested_seconds": 10,
+        "workers": 2,
+        "list_seeds": "ordinary multilevel and exported bookmark ranges"
+      },
+      "SF": {
+        "passed": true,
+        "executions": 203187,
+        "requested_seconds": 10,
+        "workers": 2,
+        "list_seed": true
+      }
+    },
+    "existing_regressions": {
+      "accepted_corpus_sf": "51 files, 12415 nodes, independent ProseMirror passed",
+      "report": "independent DOCX/PDF checks passed after regeneration",
+      "merged_tables": "independent DOCX/PDF checks passed after regeneration"
+    },
+    "limitations": "Synthetic qualifications; broader number formats and external continuation inference remain limited. Notes/output, PDF geometry/assets/provenance, larger table layouts, fonts/shaping/page settings, and real exported-document corpus remain unfinished.",
+    "commands": "See docs/TESTING.md Explicit lists and docs/STATUS.md next commands."
+  },
+  "typed_note_milestone": {
+    "date": "2026-11-23",
+    "checks": {
+      "GOWORK=off go test ./... -count=1": "passed",
+      "GOWORK=off go test -race ./... -count=1": "passed",
+      "GOWORK=off go vet ./...": "passed",
+      "CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc": "passed",
+      "git diff --check": "passed"
+    },
+    "model": "Run.Note / SF note_reference atoms; kind-scoped identities, unique rich definitions, stable definition order, repeated sites, invalid graph rejection and draft persistence with rendered-anchor requirement.",
+    "docx": "Standard footnote/endnote parts and per-part relationships; integer w:id with ignorable original-ID/order metadata; standard reference markers and cached repeated NOTEREF fields bound to checked bookmarks.",
+    "pdf": "Measured superscripts/internal targets, reserved text/list footnote space, labelled continuation-only pages before body flow resumes, and a separate endnote flow section.",
+    "tests": "Independent hand-authored note-part/reference OOXML; SF/JSON/DOCX structure/identity/body/relationship/asset round trips; effective settings and cached-mark diagnostics; invalid references/metadata/bookmark bindings; merge continuation atoms; direct PDF target page objects, separate adjacent annotations, and continuation content. Unmapped DOCX symbol-font glyphs reject explicitly.",
+    "independent_readers": {
+      "prosemirror-model": "34 normal-example and 28 continuation-example nodes passed, including note atoms and definition trees",
+      "python-docx_lxml": "Three note definitions, four reference sites, original scoped IDs/order, content types, part relationships, note bold/link and repeat cache targets passed",
+      "pypdf_pymupdf": "Two-page normal and five-page long-note PDFs passed actual destination pages, superscripts, note text/links, bounds/separation, footers and continuation checks"
+    },
+    "visual": {
+      "native": "All 2 normal and 5 continuation pages rendered and inspected",
+      "docx": "Both normal-example pages rendered by LibreOffice 7.6 and inspected; all note bodies retained once and repeated reference displayed without field instructions",
+      "defect_found_and_fixed": "Correct text concealed a wrong endnote destination; fixed gofpdf SetLink current-page argument and retained independent/direct page-object checks."
+    },
+    "fuzz_campaigns": {
+      "DOCX": {
+        "passed": true,
+        "executions": 15506,
+        "requested_seconds": 10,
+        "workers": 2,
+        "note_seeds": "generated rich note graph plus hand-authored parts"
+      },
+      "SF": {
+        "passed": true,
+        "executions": 172203,
+        "requested_seconds": 10,
+        "workers": 2,
+        "note_seed": true
+      }
+    },
+    "existing_checks": {
+      "accepted_corpus": "51 inputs, 12415 nodes, independent SF verification passed",
+      "report_lists_merged_tables": "All independent reader checks passed after regeneration"
+    },
+    "remaining": "PDF geometry/image/structure/provenance recovery; nontext PDF footnotes and broader numbering/separator/layout qualification; larger/richer tables; fonts/shaping/page/running settings and representative real-export corpus.",
+    "artifacts": "Generated QA output and local executable remain ignored under output/ and bin/. Hand-authored example source is examples/notes/document.sf."
+  },
+  "positioned_pdf_milestone": {
+    "status": "incomplete active rich-document goal; positioned content foundation only",
+    "scope": [
+      "page boxes/crop/rotation/UserUnit and displayed-point mapping",
+      "positioned text/form/annotation quads, baselines, matrices and font metrics",
+      "CID W/DW, per-encoded-glyph character spacing including ligatures",
+      "raster XObjects/inline framing, soft masks, stencils and PNG assets",
+      "MCID/tags, PDF text-string ActualText and contributing paint regions",
+      "SF provenance/page round trips and explicit rendered-reflow acknowledgment"
+    ],
+    "go_tests": "passed; includes hand-authored coordinate/content/asset/malformed/SF oracles and existing 200 damaged-input mutations",
+    "race": "passed",
+    "vet": "passed",
+    "cgo_disabled_host_cli": "built and executed",
+    "diff_check": "passed",
+    "fuzz": {
+      "target": "FuzzReadPDF",
+      "budget_seconds_each": 10,
+      "workers": 2,
+      "executions_final_campaign": 5572,
+      "earlier_campaign_executions": [
+        89922,
+        15205
+      ],
+      "result": "passed; budget-limited; final campaign ran after image/color changes"
+    },
+    "independent_checks": {
+      "script": "scripts/verify_pdf_recovery.py",
+      "readers": [
+        "pypdf",
+        "MuPDF",
+        "Pillow",
+        "python-docx"
+      ],
+      "source_pages": 2,
+      "raster_paint_instances": 3,
+      "checks": [
+        "text baseline and image geometry",
+        "annotation rendered placement",
+        "rotation/crop/UserUnit plus painted pixels",
+        "image color/alpha/stencils",
+        "ActualText/MCID provenance",
+        "recovered SF -> DOCX/PDF content and assets under acknowledged reflow"
+      ]
+    },
+    "prosemirror": {
+      "corpus_files": 51,
+      "corpus_nodes": 12417,
+      "targeted_nodes": 18,
+      "result": "passed"
+    },
+    "visual_inspection": {
+      "synthetic_source_pages": 2,
+      "reflow_pdf_pages": 2,
+      "result": "inspected; logical ActualText intentionally differs from painted XY; reflow does not preserve source layout"
+    },
+    "production_modules_added": false,
+    "required_remaining": [
+      "tagged logical tree reconstruction",
+      "reading order and inferred headings/lists/tables/merged cells",
+      "PDF link annotations",
+      "vertical text and broader CMaps",
+      "explicit/color-key masks, Matte, JPX and remaining inline framing/codecs",
+      "broader graphics/color/font qualification",
+      "other required model/layout/real-export work in ACCEPTANCE.md"
+    ],
+    "module_verification": "all modules verified",
+    "sf_fuzz": {
+      "target": "FuzzReadStructured",
+      "budget_seconds": 10,
+      "workers": 2,
+      "executions": 69741,
+      "result": "passed with positioned-provenance seed"
+    }
+  },
+  "tagged_pdf_milestone": {
+    "status": "incomplete full goal; common forward tagged recovery verified",
+    "implementation": [
+      "forward K graph and logical order",
+      "page/Form MCID scoping and MCR/OBJR paint ranges",
+      "RoleMap, ClassMap/local overrides, ListNumbering inheritance",
+      "paragraphs/headings, cross-page paragraphs, list starts/labels, table spans, image Alt and URI ownership",
+      "SourceInfo stream/role/element plus list-item source attributes",
+      "unclaimed painted content preservation, cycles/ownership/parent/page/grid validation",
+      "simple-font padded CMap normalization with conflict rejection",
+      "actual PDF Info title/author/subject decoding"
+    ],
+    "go_tests": "passed, including original published export and complete current-model SF round trip",
+    "race": "passed",
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host_build": "passed and executed",
+    "diff_check": "passed",
+    "pdf_fuzz": {
+      "budget_seconds": 10,
+      "workers": 2,
+      "executions": 20580,
+      "result": "passed; tagged/cycle/published seeds"
+    },
+    "sf_fuzz_initial": {
+      "budget_seconds": 10,
+      "workers": 2,
+      "executions": 37800,
+      "result": "harness context deadline exceeded at shutdown while concurrent campaigns ran; no saved failing input; separate longer rerun passed"
+    },
+    "targeted_independent": {
+      "script": "scripts/verify_pdf_structure.py",
+      "readers": [
+        "pypdf",
+        "MuPDF",
+        "python-docx",
+        "lxml",
+        "ProseMirror"
+      ],
+      "source_pages": 2,
+      "reflow_pdf_pages": 1,
+      "sf_nodes": 35,
+      "result": "passed; source/reflow PDF pages visually inspected",
+      "docx_visual": {
+        "reader": "LibreOffice 7.6",
+        "rendered_pages": 1,
+        "result": "all expected body text checked with pypdf and rendered page inspected"
+      }
+    },
+    "published_export": {
+      "path": "testdata/real/copyright-office-circular-1-2021.pdf",
+      "script": "scripts/verify_published_pdf.py",
+      "pages": 10,
+      "logical_lists": 10,
+      "list_items": 57,
+      "unique_uri_targets": 16,
+      "normalized_nonspace_characters": 20531,
+      "explicit_heading_nodes": 0,
+      "publisher_heading_roles": "mapped to P; no explicit rank invented",
+      "sf_nodes": 8941,
+      "checks": "original byte hash/metadata/K tree/RoleMap/URI set/content multiset and DOCX body/metadata passed; full model SF round trip passed",
+      "visual": "source pages 1 and 8 inspected",
+      "sf_to_pdf": "fails explicitly on U+2003 EM SPACE; required Unicode/font/layout work remains"
+    },
+    "existing_prosemirror_corpus": {
+      "files": 51,
+      "nodes": 12417,
+      "result": "passed; 64-case corpus unchanged"
+    },
+    "production_modules_added": false,
+    "required_remaining": [
+      "measured Unicode spacing/output font coverage",
+      "untagged reading order/headings/lists/tables",
+      "internal and exact partial-span links",
+      "broader roles/attributes/namespaces/revisions and inverse ParentTree validation",
+      "broader real-export corpus and generated DOCX visual qualification",
+      "other required model/layout/shaping work in ACCEPTANCE.md"
+    ],
+    "sf_fuzz_rerun": {
+      "budget_seconds": 15,
+      "workers": 2,
+      "fuzzminimizetime_seconds": 1,
+      "executions": 249815,
+      "result": "passed separately; timing failure not reproduced"
+    }
+  },
+  "unicode_typography_milestone": {
+    "status": "full rich-document goal incomplete; Unicode typography/rendering milestone verified",
+    "scope": [
+      "explicit proportional/em Unicode-space advances and zero-width controls",
+      "paragraph-wide Unicode 15 grapheme/line segmentation across styles",
+      "protected glue/joiners, emergency graphemes, discretionary hyphens and note anchors",
+      "NFC glyph selection with original ActualText, homogeneous style/font/baseline recovery",
+      "baseline grouping across BT/Td text objects and font descriptor style hints",
+      "PDF 1.4 minimum version and 14400pt default-unit page bounds"
+    ],
+    "runtime_dependencies": {
+      "new": "github.com/rivo/uniseg v0.4.7 MIT with Unicode data notices",
+      "promoted_existing": "golang.org/x/text v0.30.0 for NFC",
+      "cgo_or_runtime_executables": false
+    },
+    "go_tests": "passed, including saved fuzz failure and published PDF output",
+    "race": "passed after overflow fix",
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host": "built and executed",
+    "diff_check": "passed",
+    "layout_fuzz": {
+      "initial_budget_seconds": 15,
+      "initial_executions": 6856,
+      "discovered_failure": "consecutive soft hyphens selected an overflowing earlier discretionary candidate",
+      "saved_input": "testdata/fuzz/FuzzPDFTextLayout/07e1d9222943762c",
+      "fix": "back off all overflowing discretionary candidates",
+      "passing_budget_seconds": 20,
+      "workers": 2,
+      "passing_executions": 6898
+    },
+    "independent_typography": {
+      "script": "scripts/verify_typography.py",
+      "measured_space_control_rows": 15,
+      "native_pages": 1,
+      "docx_visual_reader": "LibreOffice 7.6",
+      "docx_rendered_pages": 1,
+      "visual": "both inspected",
+      "prosemirror_nodes": 48,
+      "checks": [
+        "proportional/em advances",
+        "standard ActualText/original Unicode and NFC",
+        "bounds",
+        "underline/strike extents",
+        "URI relationship"
+      ]
+    },
+    "published_native_pdf": {
+      "script": "scripts/verify_published_pdf.py",
+      "pages": 9,
+      "uri_targets": 16,
+      "normalized_nonspace_characters": 20531,
+      "space_counts": "original em/hair/punctuation space counts preserved",
+      "metadata_and_bounds": "passed",
+      "visual_pages_inspected": 9,
+      "limits": "tagged list-body implied paragraphs still fragment words; counts/bounds do not prove full structure or original layout"
+    },
+    "regressions": {
+      "prosemirror_corpus_files": 51,
+      "prosemirror_nodes": 12417,
+      "report": "independent checks passed, 2 PDF pages",
+      "merged_table": "independent geometry/content/link checks passed",
+      "notes": "normal 2 pages and continued 5 pages independent target/content/layout checks passed"
+    },
+    "required_next": [
+      "repair tagged LBody/implied paragraphs with inline/soft-hyphen fragments",
+      "untagged semantic recovery",
+      "nontext/nested table and footnote layout",
+      "richer fonts/shaping/page settings/internal destinations",
+      "broader real-export qualification and all remaining acceptance rows"
+    ],
+    "minimum_pdf_version": "1.4, equal-length header promotion; independent typography assertion passed",
+    "pdf_read_fuzz": {
+      "budget_seconds": 10,
+      "workers": 2,
+      "executions": 39642,
+      "result": "passed after ActualText/font/baseline changes"
+    }
+  },
+  "tagged_implied_paragraph_milestone": {
+    "status": "verified milestone; full rich-document goal remains incomplete",
+    "runtime_dependencies_added": false,
+    "changes": [
+      "consecutive direct/inline content forms inferred paragraphs in containers/cells",
+      "explicit paragraphs and child blocks remain barriers through inline wrappers",
+      "structural ActualText retains homogeneous formatting/link/font metrics with mixed-mapping diagnostics",
+      "soft-hyphen/word-boundary continuity and per-page paragraph region unions",
+      "custom labels prefix only first body paragraph"
+    ],
+    "go_test": "GOWORK=off go test ./... -count=1 passed",
+    "race": {
+      "command": "GOWORK=off go test -race ./... -count=1",
+      "result": "passed",
+      "root_seconds": 36.731,
+      "log": "output/paragraph-race.log"
+    },
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host": "built and executed through independent QA",
+    "diff_check": "passed",
+    "malformed_pdf_fuzz": {
+      "seconds": 10,
+      "workers": 2,
+      "executions": 37646,
+      "result": "passed",
+      "log": "output/paragraph-pdf-fuzz.log"
+    },
+    "independent_published": {
+      "script": "scripts/verify_published_pdf.py",
+      "source_unchanged": true,
+      "lists": 10,
+      "items": 57,
+      "implied_bodies": 57,
+      "block_membership": "every LI and LBody identity compared against original /K, including nested-list sibling",
+      "discretionary_words": "joined ownerSHYship, pantoSHYmime, panSHYtomime, dependSHYing",
+      "uri_targets": 16,
+      "normalized_nonspace_characters": 20531,
+      "native_pages": 9,
+      "bounds_content_metadata_space_counts": "passed",
+      "visual": "nine-page contact sheet plus detailed pages 1,2,6 inspected",
+      "limits": "reflow, not original layout; literal note numbers and unclaimed running content remain"
+    },
+    "independent_tagged": "scripts/verify_pdf_structure.py passed",
+    "independent_prosemirror": {
+      "corpus_files": 51,
+      "nodes": 12417,
+      "result": "passed"
+    },
+    "required_next": [
+      "untagged reading order/semantic recovery",
+      "richer layout/font/shaping/page/internal-destination support",
+      "all unfinished acceptance rows"
+    ]
+  },
+  "untagged_inference_milestone": {
+    "status": "verified geometric foundation; full rich-document goal incomplete",
+    "runtime_dependencies_added": false,
+    "default_behavior": "untagged PDF geometric inference; tagged /K interpretation unchanged",
+    "physical_inspection": {
+      "api": "ReadOptions.PDFSkipInference",
+      "cli": "-pdf-skip-inference",
+      "tagged_trees": "still applied"
+    },
+    "scope": [
+      "bounding-box whitespace cuts/columns",
+      "baseline/paragraph alignment",
+      "relative-font heading ranks",
+      "consecutive marker lists/starts/nesting/hanging continuations",
+      "aligned numeric table cells",
+      "original run formatting/URI/image/page geometry coverage",
+      "uncertain fallback for missing/nonhorizontal/bidi geometry; overlap/limit diagnostics",
+      "isolate spanning wide edge bands before first horizontal cuts",
+      "canonical WinAnsi core-font metric aliases, explicit Widths precedence"
+    ],
+    "go_tests": "GOWORK=off go test ./... -count=1 passed",
+    "race": {
+      "result": "passed",
+      "root_seconds": 41.058,
+      "log": "output/infer-race.log"
+    },
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host": "built and executed",
+    "diff_check": "passed",
+    "inference_coverage_fuzz": {
+      "seconds": 15,
+      "workers": 2,
+      "executions": 3313,
+      "result": "passed",
+      "scope": "each original token/style/source span preserved exactly once, SF roundtrip"
+    },
+    "parser_fuzz": {
+      "seconds": 10,
+      "workers": 2,
+      "executions": 29060,
+      "result": "passed with new inferred-list/table seed"
+    },
+    "original_pdf_corpus_coverage": {
+      "accepted_inputs": 28,
+      "literal_characters_assets_pages": "equal",
+      "source_spans_styles_links": "equal for non-prefix-sliced spans; list normalization disclosed",
+      "fixture_oracle_changes": false
+    },
+    "poppler_text_comparisons": {
+      "passed": 28,
+      "total": 28
+    },
+    "independent_prosemirror_corpus": {
+      "files": 51,
+      "nodes": 9027,
+      "result": "passed",
+      "reason_for_count_change": "grouped paragraphs/replaced synthetic gaps; original content and spans independently covered"
+    },
+    "independent_targeted": {
+      "script": "scripts/verify_pdf_inference.py",
+      "source_pages": 2,
+      "native_reflow_pages": 2,
+      "docx_reader": "python-docx/lxml",
+      "pdf_readers": [
+        "pypdf",
+        "MuPDF"
+      ],
+      "checks": [
+        "source coordinates",
+        "column/paragraph order",
+        "heading rank",
+        "exact cells and no invented spans",
+        "list starts/nesting/labels/continuations",
+        "URI/image/page relationships",
+        "literal coverage including labels",
+        "generated DOCX/PDF content/bounds/assets",
+        "intact Helvetica/Helvetica-Bold source advances equal MuPDF"
+      ],
+      "visual": "both source pages and both native output pages inspected",
+      "docx_visual": "LibreOffice 7.6, 2 pages content-checked and visually inspected",
+      "prosemirror_nodes_across_recovered_and_physical": 102
+    },
+    "required_next": [
+      "ruling-based/merged/empty/multiline untagged tables",
+      "more complex layout/inference and real-export qualification",
+      "rich font/shaping/table/footnote/page/destination work and every unfinished acceptance row",
+      "inline baseline shifts/running matter/typed PDF note recovery"
+    ]
+  },
+  "painted_grid_milestone": {
+    "status": "verified milestone; full rich-document goal incomplete",
+    "runtime_dependencies_added": false,
+    "scope": [
+      "path construction separate from q/Q state and paint-time consumption",
+      "axis strokes/thin rectangle fills with implicit rectangle closure and degenerate-fill rejection",
+      "rectangular path/Form/page clipping for ruling evidence",
+      "relevant opacity/neutral effect state and reset",
+      "mixed-width stroke-intersection joins and nub rejection",
+      "rectangular cell groups/merges/empty cells from painted adjacency",
+      "inside-out nested grids; original text/link/style/image/position coverage",
+      "ambiguous grids retain content and block numeric override"
+    ],
+    "go_tests": {
+      "result": "passed",
+      "log": "output/rulings-tests.log"
+    },
+    "race": {
+      "result": "passed",
+      "root_seconds": 40.785,
+      "log": "output/rulings-race.log"
+    },
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host": "built and executed through independent scripts",
+    "diff_check": "passed",
+    "grid_fuzz": {
+      "seconds": 15,
+      "workers": 2,
+      "executions": 4122,
+      "result": "passed",
+      "invariants": "authored partition origins/spans/content, translated bounds and SF semantics"
+    },
+    "parser_fuzz": {
+      "seconds": 10,
+      "workers": 2,
+      "executions": 67941,
+      "result": "passed with ruled-grid seeds"
+    },
+    "independent_hand_source": {
+      "script": "scripts/verify_pdf_rulings.py",
+      "source_pages": 2,
+      "native_pages": 2,
+      "cells_each": 7,
+      "oracle": "MuPDF table rectangles/counts/merges/empty cells independent of manydoc",
+      "checks": [
+        "exact SF cells/bounds/spans/content/formatting/URI/pages",
+        "DOCX merge XML identities/relationships",
+        "native PDF grids/content/bounds"
+      ],
+      "visual": "both source and native pages inspected"
+    },
+    "independent_office_source": {
+      "script": "scripts/verify_pdf_rulings_office.py",
+      "producer": "LibreOffice 7.6",
+      "authoring": "targeted python-docx fixture, not a published real-world document",
+      "untagged": "asserted actual StructTreeRoot absent; explicit export filter options",
+      "source_pages": 1,
+      "cell_rectangles": 7,
+      "bounds_precision": "agree with MuPDF to 0.001pt",
+      "checks": [
+        "rowspan/colspan/empty/multiline content",
+        "generated DOCX merge identity",
+        "native PDF grid/content",
+        "LibreOffice DOCX re-render"
+      ],
+      "visual": "source, native and LibreOffice output inspected"
+    },
+    "independent_prosemirror": {
+      "new_example_nodes": 83,
+      "corpus_files": 51,
+      "corpus_nodes": 9027,
+      "result": "passed"
+    },
+    "poppler_comparisons": {
+      "passed": 28,
+      "total": 28
+    },
+    "roundtrips": "supported text grids preserve declared semantics through SF -> DOCX and SF -> PDF -> SF",
+    "limitations": [
+      "native image/nested-cell layout remains required and currently rejects without output",
+      "general vector appearance/text-image clipping not preserved",
+      "more complex/double-border/occluded/rotated grid recovery and broad real-export qualification remain required",
+      "all other unfinished acceptance rows remain active"
+    ]
+  },
+  "rich_cell_layout_milestone": {
+    "date": "2026-11-23",
+    "goal_complete": false,
+    "go_tests": {
+      "result": "passed",
+      "library_seconds": 3.557
+    },
+    "race": {
+      "result": "passed",
+      "library_seconds": 41.46
+    },
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host": "built and executed",
+    "diff_check": "passed",
+    "rich_layout_fuzz": {
+      "seconds": 15,
+      "workers": 2,
+      "executions": 1498,
+      "result": "passed",
+      "invariants": [
+        "no input mutation",
+        "failure has no output",
+        "success content/assets occur exactly once",
+        "image page bounds"
+      ]
+    },
+    "independent_script": "scripts/verify_rich_cells.py",
+    "normal_example": {
+      "native_pages": 2,
+      "cell_rectangles": 6,
+      "image_placements": 3,
+      "oracle": "MuPDF physical bounds/pixels, pypdf links/targets and python-docx XML identity/media/relationships",
+      "visual": "both native pages and one-page LibreOffice 7.6 DOCX rendering inspected",
+      "preferred_image_pt": [
+        400,
+        200
+      ],
+      "pdf_fitted_image_pt": [
+        228,
+        114
+      ],
+      "docx_fitted_image_pt": [
+        232,
+        116
+      ]
+    },
+    "continued_example": {
+      "native_pages": 4,
+      "table_rows_by_page": [
+        3,
+        5,
+        4,
+        0
+      ],
+      "image_placements_by_page": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "reference_target_page": 1,
+      "body_resumes_page": 4,
+      "visual": "all four native pages inspected",
+      "row_content": "all twelve rows exactly once"
+    },
+    "regressions": {
+      "text_note_examples_pages": [
+        2,
+        5
+      ],
+      "merged_table_rectangles": 7,
+      "result": "passed"
+    },
+    "prosemirror": {
+      "new_example_nodes": 98,
+      "corpus_files": 51,
+      "corpus_nodes": 9027,
+      "result": "passed"
+    },
+    "poppler_comparisons": {
+      "passed": 28,
+      "total": 28
+    },
+    "production_dependencies_added": false,
+    "remaining": [
+      "oversized connected-row/group splitting",
+      "explicit cell/footnote page-break continuation",
+      "richer fonts/shaping/page/running-content semantics",
+      "broader real exported corpus and other ACCEPTANCE.md rows"
+    ]
+  },
+  "body_table_continuation_milestone": {
+    "date": "2026-11-23",
+    "goal_complete": false,
+    "go_tests": {
+      "result": "passed",
+      "library_seconds": 4.558
+    },
+    "race": {
+      "result": "passed",
+      "library_seconds": 47.5
+    },
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host": "built and executed",
+    "diff_check": "passed",
+    "continuation_fuzz": {
+      "seconds": 15,
+      "workers": 2,
+      "executions": 1220,
+      "result": "passed",
+      "test_oracle_correction": "tall pages may correctly share early/late note pages; preserve reference/body equality and nondecreasing order",
+      "retained_input": "testdata/fuzz/FuzzPDFTableContinuation/777cb92bf7b47ddc"
+    },
+    "rich_layout_fuzz": {
+      "seconds": 15,
+      "workers": 2,
+      "executions": 1037,
+      "result": "passed"
+    },
+    "independent_script": "scripts/verify_table_continuation.py",
+    "native": {
+      "pages": 4,
+      "table_pages": [
+        1,
+        2,
+        3
+      ],
+      "reference_and_note_pages": [
+        1,
+        3
+      ],
+      "body_resumes_page": 4,
+      "image": {
+        "page": 3,
+        "bounds_pt": [
+          26,
+          110,
+          56,
+          125
+        ],
+        "pixels": "exact source RGB"
+      },
+      "borders": "original spanning column has no internal row divider; page fragments close",
+      "cell_flows": "all original tokens once and in order, marks/URI intact",
+      "visual": "all four pages inspected"
+    },
+    "docx": {
+      "merge": "three-row/colspan-two XML identities preserved",
+      "assets": "exact bytes",
+      "independent_reader": "python-docx and LibreOffice 7.6",
+      "rendered_pages": 3,
+      "content": "all original tokens and one image",
+      "visual": "all three pages inspected; no Word fidelity claim"
+    },
+    "prosemirror": {
+      "new_example_nodes": 88,
+      "corpus_files": 51,
+      "corpus_nodes": 9027,
+      "result": "passed"
+    },
+    "poppler_comparisons": {
+      "passed": 28,
+      "total": 28
+    },
+    "regressions": "regenerated rich-cell/footnote, normal/five-page note, seven-rectangle merged-table checks passed",
+    "production_dependencies_added": false,
+    "remaining": [
+      "recursive oversized nested/footnote table-group splitting",
+      "oversized image atoms",
+      "explicit cell/footnote page-break continuation",
+      "repeated header rows",
+      "all other unfinished ACCEPTANCE.md rows"
+    ]
+  }
 }

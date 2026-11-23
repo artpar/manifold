@@ -1,0 +1,41 @@
+{
+  "type":"doc",
+  "attrs":{
+    "schema":"manydoc-prosemirror/1",
+    "metadata":{"title":"Nested and restarted lists","author":"manydoc"},
+    "layout":{"width":420,"height":600,"margin":36},
+    "footers":[{"type":"paragraph","content":[{"type":"text","text":"List hierarchy, item membership and numbering starts"}]}]
+  },
+  "content":[
+    {"type":"heading","attrs":{"level":1},"content":[{"type":"text","text":"Nested and restarted lists"}]},
+    {"type":"ordered_list","attrs":{"order":3},"content":[
+      {"type":"list_item","content":[
+        {"type":"paragraph","content":[{"type":"text","text":"Parent three has a long linked and bold sentence that wraps onto another line while preserving the item indentation.","marks":[{"type":"strong"},{"type":"link","attrs":{"href":"https://example.invalid/list"}}]}]},
+        {"type":"paragraph","content":[{"type":"text","text":"Continuation paragraph in the same item."}]},
+        {"type":"bullet_list","content":[
+          {"type":"list_item","content":[{"type":"paragraph","content":[{"type":"text","text":"Nested bullet one"}]}]},
+          {"type":"list_item","content":[
+            {"type":"paragraph","content":[{"type":"text","text":"Nested bullet two"}]},
+            {"type":"ordered_list","attrs":{"order":7},"content":[{"type":"list_item","content":[{"type":"paragraph","content":[{"type":"text","text":"Deep seven"}]}]}]}
+          ]}
+        ]},
+        {"type":"paragraph","content":[{"type":"text","text":"After nested list, still in parent three."}]}
+      ]},
+      {"type":"list_item","content":[{"type":"paragraph","content":[{"type":"text","text":"Parent four"}]}]}
+    ]},
+    {"type":"ordered_list","attrs":{"order":0},"content":[
+      {"type":"list_item","content":[{"type":"paragraph","content":[{"type":"text","text":"Restart zero"}]}]},
+      {"type":"list_item","content":[{"type":"paragraph","content":[{"type":"text","text":"Then one"}]}]}
+    ]},
+    {"type":"ordered_list","attrs":{"order":7},"content":[
+      {"type":"list_item","content":[{"type":"paragraph","content":[{"type":"text","text":"Separate seven"}]}]}
+    ]},
+    {"type":"table","content":[{"type":"table_row","content":[
+      {"type":"table_cell","content":[{"type":"ordered_list","attrs":{"order":10},"content":[
+        {"type":"list_item","content":[{"type":"paragraph","content":[{"type":"text","text":"Cell ten"}]}]},
+        {"type":"list_item","content":[{"type":"paragraph","content":[{"type":"text","text":"Cell eleven"}]}]}
+      ]}]},
+      {"type":"table_cell","content":[{"type":"paragraph","content":[{"type":"text","text":"Lists also wrap inside a table cell."}]}]}
+    ]}]}
+  ]
+}

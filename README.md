@@ -6,8 +6,10 @@ Pure-Go document extraction, generation, and conversion for embedded application
 behavior and remaining work. This is not a drop-in UniOffice/UniPDF replacement
 or a Word-compatible layout engine.
 
-The library reads and writes DOCX, extracts text from PDF, generates PDFs from
-structured content, and exchanges documents as JSON/text.
+The library reads and writes DOCX, extracts positioned text, raster images and supported tagged structure or disclosed geometric inference from PDF, generates PDFs from
+structured content, and exchanges documents as ProseMirror JSON (`.sf`), legacy JSON and text.
+The [structured-format decision](docs/STRUCTURED_FORMAT.md) records the schema,
+tradeoffs and required unfinished expansion.
 Applications retain ownership of identity, authorization, persistence and jobs.
 No external Office installation or conversion service is required.
 
@@ -29,13 +31,19 @@ dependencies. PDF output embeds licensed Go fonts.
 ```sh
 CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
 bin/manydoc extract input.docx
-bin/manydoc extract -format json -o document.json input.docx
-bin/manydoc convert -o report.docx document.json
-bin/manydoc convert -o report.pdf document.json
+bin/manydoc extract -format sf -o document.sf input.docx
+bin/manydoc convert -allow-lossy -o report.docx document.sf
+bin/manydoc convert -allow-lossy -o report.pdf document.sf
+bin/manydoc extract -format sf -o recovered.sf report.pdf
+# Inspect untagged physical paint order instead of geometric structure:
+bin/manydoc extract -pdf-skip-inference -format sf -o physical.sf report.pdf
 ```
 
-Flags precede the input filename. JSON input follows the public `Document`
-model in `document.go`; unknown fields are rejected. Text output includes page
+Flags precede the input filename. SF uses the versioned ProseMirror profile;
+`ReadStructured`/`WriteStructured` expose the tree directly, while `ToStructured`
+and `FromStructured` bridge the Go conversion engine. Legacy JSON follows the public `Document`
+model in `document.go`; unknown fields are rejected. Review diagnostics before
+using `-allow-lossy` to acknowledge them. Text output includes page
 boundaries as form-feed characters. `extract -format json` retains diagnostics.
 
 For an imported document whose editing/layout semantics cannot be preserved,
@@ -84,6 +92,19 @@ Generate a two-page example with links, formatting, a table, image and Unicode:
 GOWORK=off go run ./examples/report -out output
 ```
 
+The SF-first examples exercise merged/nested cells, images, lists and rich notes:
+
+```sh
+GOWORK=off go run ./examples/table-continuation
+GOWORK=off go run ./examples/rich-cells -out output/rich-cells
+GOWORK=off go run ./examples/rich-cells -out output/rich-cells/continued -continued
+GOWORK=off go run ./examples/merged-tables -out output/merged-tables
+GOWORK=off go run ./examples/lists -out output/lists
+GOWORK=off go run ./examples/lists -out output/lists/paginated -page-height 220
+GOWORK=off go run ./examples/notes -out output/notes
+GOWORK=off go run ./examples/notes -out output/notes/continued -page-height 220 -long-note
+```
+
 Generated files are deliberately ignored by Git. See the independent
 verification commands in [Testing](docs/TESTING.md).
 
@@ -96,7 +117,22 @@ GOWORK=off go test -race ./...
 GOWORK=off go vet ./...
 ```
 
-The public interchange model starts in `document.go`. `Read` and `Write` are
+Explicit lists use `Block{Kind: ListBlock, List: "number"}` with `Items` containing
+`ListItem{Blocks: ...}`. `Start` is an optional `*int` (nil means one, zero is
+valid); item blocks retain continuation paragraphs, nested lists and assets.
+Legacy paragraph `List` fields remain accepted as flat list runs.
+
+Inline note references use `Run{Note: &NoteReference{Kind: Footnote, ID: "source"}}`;
+define the body once in `Document.Notes`. IDs are scoped by kind and need not be
+numbers. Draft unreferenced notes may persist as SF/JSON but must be anchored
+before rendering. DOCX notes and PDF footnotes/endnotes accept rich blocks,
+including images and nested tables. PDF footnotes continue between measured
+fragments. Oversized body-table groups continue with their cell flows and note
+references; oversized nested/note row groups and explicit cell/note breaks still
+require recursive continuation support. Images fit the available container width.
+
+The Go engine model starts in `document.go`; the canonical SF tree is in
+`structured.go`. `Read` and `Write` are
 the application boundary. `errors.Is(err, manydoc.ErrUnsupported)` identifies
 unsupported output/features; `errors.Is(err, manydoc.ErrLossy)` identifies
 unacknowledged imported-document diagnostics.
@@ -108,3 +144,13 @@ unacknowledged imported-document diagnostics.
 
 This is an independent implementation using published formats and open-source
 components. No UniOffice/UniPDF implementation code is included.
+
+The Unicode typography example exercises measured spaces, logical NFC text,
+wrapping across formatting runs, decorations and note spacing:
+
+```sh
+GOWORK=off go run ./examples/typography -out output/typography
+```
+
+See the current support contract and unfinished structure/layout work in
+[COMPATIBILITY.md](docs/COMPATIBILITY.md) and [STATUS.md](docs/STATUS.md).

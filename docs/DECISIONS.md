@@ -65,3 +65,410 @@ mutates the input TTF byte slice. Each renderer now passes its own copy to
 AddUTF8FontFromBytes. Do not remove those copies or solve this by serializing
 all document generation with a global lock. sfnt glyph inspection uses the
 unchanged embedded fonts; its per-call work buffers are local.
+
+## 2026-11-23 Structured-format foundation
+
+The active user goal requires an established shared structured format and a
+broader feature set than the initial implementation. Select ProseMirror JSON
+with an explicit versioned profile (`manydoc-prosemirror/1`); the rationale,
+compared alternatives, primary sources, wire mapping and unimplemented features
+are in STRUCTURED_FORMAT.md. The executable schema declaration is
+`schema/prosemirror-v1.json`. No Colleaf schema has been verified yet.
+
+Keep the existing Document conversion engine and legacy JSON API temporarily,
+with checked bridges to/from the selected SF. Preserve assets, relationships,
+running content, notes and diagnostics through the bridge. Reject semantics the
+engine cannot represent, including separate adjacent same-kind lists, rather
+than silently flattening them. These rejections record unfinished required work;
+they do not narrow the user's completion criteria. The profile's current subset
+must expand alongside the parsers/renderers.
+
+The user permits consulting UniDoc for implementation help. Public API docs and
+examples may inform behavior/edge cases; independently authored implementation
+and the prohibition on copying proprietary source remain the project boundary.
+
+## 2026-11-23 Row spans and constrained table widths
+
+Support row spans in the engine (`Cell.RowSpan`) and the existing ProseMirror
+`rowspan` attribute. Zero/one mean a single row; covered cells are omitted from
+later model rows. No schema-version change is needed: this adds support for an
+existing attribute without changing existing encoded semantics.
+
+OOXML interpretation follows Microsoft's published
+[vMerge reference](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.verticalmerge?view=openxml-3.0.1)
+and [Val reference](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.verticalmerge.val?view=openxml-3.0.1):
+restart begins a region; omitted val continues it; continuation grid spans must
+match the origin; missing vMerge closes the region. Do not copy implementation
+code from proprietary converters. Invalid continuations reject instead of
+inventing a merge. Preserve unusual continuation content at its origin and
+report the normalized placement.
+
+Use one bounded occupancy grid for validation, DOCX writing and PDF geometry.
+PDF cells impose minimum heights over their complete row spans; connected
+row-span groups stay together during pagination. Oversized groups remain
+required future splitting work and return an explicit error today.
+
+Independent LibreOffice rendering exposed a real DOCX defect missed by XML
+structure checks: fixed 2400-twip grid columns clipped the right column on a
+small page. Constrain table/grid/cell widths to the actual page or parent-cell
+content width and use fixed table layout. Add a nested-container width regression.
+The corrected mixed-span example retains all seven cells in LibreOffice 7.6 and
+its rendered PDF was visually inspected. This is targeted evidence only.
+
+## 2026-11-23 Explicit list trees and OOXML boundary ranges
+
+Add `ListBlock` with `ListItem.Blocks` and nullable `Start` (nil = one, zero is
+valid). It mirrors ProseMirror lists rather than encoding hierarchy through flat
+paragraph flags. Keep the old flags as a checked compatibility adapter; never
+coalesce explicit adjacent list nodes. Expand item content to paragraph/heading
+plus blocks. No existing serialized meaning changes, so the SF version stays 1.
+
+OOXML behavior follows Microsoft's published references for
+[startOverride](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.startoverridenumberingvalue?view=openxml-3.0.1),
+[lvlRestart](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.levelrestart?view=openxml-3.0.1)
+and [numId cancellation](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.numberingid?view=openxml-3.0.1).
+Resolve per-instance/per-level definitions and styles; retain effective starts
+across non-list text, and do not synthesize nonexistent ancestors. Diagnose
+unsupported number formats/labels and inferred membership.
+
+Use standard numbering for DOCX rendering and invisible bookmark ranges for
+exported list/item membership. Numeric definitions alone cannot distinguish a
+continuation paragraph/table from an ordinary following block. Content-control
+wrappers were tested but LibreOffice 7.6 displayed hyperlink instructions and
+lost the run appearance inside them, even with explicit richText. Bookmarks
+preserve ordinary hyperlink/run rendering and do not add editable controls.
+Reject broken/crossed ranges, duplicate numbering identities across ranges,
+start contradictions and mixed marked/unmarked uses of an exported numbering
+identity. These checks protect semantics, not application authorization.
+
+PDF body lists measure hanging indentation from marker widths, wrap/paginate
+items, and retain nested starts and continuation paragraphs. Text-table cells
+use the same marker/indentation rules. The one-page SF list example and its
+three-page compact PDF passed independent content/position checks and visual
+inspection; DOCX rendering passed LibreOffice 7.6 inspection with no exposed
+field instructions. No general Word-fidelity claim follows from these examples.
+
+## 2026-11-23 Typed notes and reference-aware pagination
+
+Use an inline ProseMirror atom (`note_reference`) with id/kind and a unique
+side definition tree. This follows ProseMirror's
+[inline footnote approach](https://prosemirror.net/examples/footnote/) while
+separating definition ownership to support repeated references and rich block
+bodies without duplication. The Go engine uses Run.Note and Note definitions.
+IDs are scoped by kind and independent of display numbers. Invalid graphs reject;
+unanchored drafts persist but cannot render invisibly.
+
+DOCX uses standard parts, implicit relationships and reference marks, following
+Microsoft's [reference mark documentation](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.footnotereferencemark?view=openxml-3.0.1)
+and [custom-mark behavior](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.footnoteendnotereferencetype.custommarkfollows?view=openxml-3.0.1).
+Ignorable metadata retains application IDs and definition order. Repeated
+references use cached NOTEREF fields pointing to checked first-reference
+bookmarks, so ordinary readers do not create duplicate note bodies. This is a
+recognized declarative reference, not arbitrary field evaluation. Preserve rich
+note bodies and their per-part relationships; reject inconsistent metadata.
+
+Combine document-wide settings with section overrides before diagnosing note
+numbering/layout losses. The standard's decimal endnote default differs from
+[Word's lowerRoman default](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-oi29500/a910e9f7-f95f-49ad-ad23-68ea9a7922cd).
+When format is omitted, choose the published OOXML default and report ambiguity.
+Custom automatic marks and separators do not silently claim round-trip support.
+
+PDF footnote space must be reserved before painting each reference line, list
+marker or connected table-row group. Text/list bodies wrap into measured bottom
+areas; long bodies use continuation-only pages before body flow resumes. Endnotes
+use a separate normal flow section. Internal links are part of correctness:
+independent readers caught a wrong endnote page caused by using gofpdf SetLink's
+page=0 instead of page=-1 (current page). Fix it and retain a page-reference
+regression. Two-page and five-page examples passed independent bounds/content/
+reference checks and visual inspection; DOCX passed a LibreOffice render check.
+Nontext footnotes and broader layout/numbering remain unfinished, not exempted.
+
+## 2026-11-23 Positioned PDF recovery foundation
+
+Retain source geometry on the actual content tree, using SF node attributes and
+inline marks, rather than a second authoritative text/image sidecar. ProseMirror
+text nodes cannot own attrs; `source` is therefore a mark. Page boxes, rotation,
+UserUnit and physical dimensions persist independently from editable flow layout.
+Displayed coordinates are top-left physical points. Fonts/advance quads are not
+ink outlines. Source structure/evidence/confidence distinguish baseline inference
+from painted content; MCIDs alone do not establish recovered logical structure.
+ActualText follows PDF text-string encoding (including PDFDocEncoding, not the
+content font or Windows-1252) and keeps all contributing paint regions.
+
+Compose CTM, text matrices and Form/appearance transforms directly against the
+published PDF model. Read simple/CID metrics; apply character spacing per encoded
+glyph rather than Unicode rune count. Core font metrics are reused through
+pdfcpu's public API, guarded by IsCoreFont: its non-core missing-font fallback
+can exit the process and must never be reached from untrusted font names.
+
+Reuse pdfcpu raster extraction and Go codecs; normalize supported image pixels to
+PNG with explicit stencil/soft-mask handling and bounded dimensions. Unsupported
+mask/color/codec cases reject rather than disappear. Inline-image delimiters are
+binary framing, not token searching: use exact raw size or filter framing before
+accepting EI. This avoids false terminators embedded in visible image pixels.
+
+Current writers reflow and omit provenance, so imported positioned source requires
+AllowLossy even if a caller clears diagnostics. This is a fidelity contract, not
+an application permission gate. Logical tagged-tree and geometric semantic
+recovery remain required unfinished work. No broad visual fidelity is established.
+
+Primary format references used:
+
+- [PDF 1.7 / ISO 32000-1](https://opensource.adobe.com/dc-acrobat-sdk-docs/standards/pdfstandards/pdf/PDF32000_2008.pdf),
+  sections 7.9.2, 8.3, 8.9, 8.10, 9.3–9.4, 12.5 and 14.6, and Annex D.
+- [PDF Association text errata](https://pdf-issues.pdfa.org/32000-2-2020/clause09.html),
+  clarifications to text state/matrix behavior.
+- Pinned pdfcpu v0.11.1 public ExtractImage/font APIs and independently licensed
+  implementation were inspected for supported behavior. Production modules and
+  notices remain pinned; no proprietary UniDoc implementation was used.
+
+Independent qualification uses hand-authored streams, pypdf, MuPDF, Pillow,
+python-docx and actual ProseMirror. A PyMuPDF rotation_matrix translation uses an
+unscaled CropBox while raw text origins include UserUnit in the tested build;
+the verifier uses physical rendered width for the clockwise rotation and checks
+painted pixels too. pypdf lists shared page image resources even on pages that do
+not paint them; checks distinguish unique assets from actual MuPDF paint counts.
+
+## 2026-11-23 Forward tagged-PDF recovery
+
+Follow the explicit `/StructTreeRoot/K` graph, not visual paint order, when a
+logical tree exists. MCIDs are scoped by page and owner stream; an image's object
+identity differs from the stream containing the marked invocation. A page MCID
+wrapping a Form stays page-owned; an MCID inside the Form is Form-owned. Preserve
+those identities separately through SourceInfo.Stream/Role/Element. Consume actual
+painted text/image units once; reject cyclic/multiple ownership and contradictory
+parent/page/stream references. Preserve unclaimed painted content with diagnostics.
+This is forward graph interpretation, not full inverse ParentTree/conformance
+validation. A bare MCID or marked tag remains insufficient evidence of structure.
+
+Rebuild common paragraphs/headings, lists/items/labels, tables/spans and figures.
+Cross-page logical paragraphs remain single editable paragraphs with multi-page
+source regions. Do not inject fake paragraph/page breaks to simplify extraction.
+Resolve RoleMap, ClassMap/local overrides and inherited ListNumbering. Store
+list-item provenance/labels on the item, preserving paragraph provenance. Unsupported
+labels remain literal content with a semantic-loss diagnostic. Header-cell role
+TH survives in source metadata; broader table-header editing semantics remain open.
+Bind URI Link/OBJR ownership without treating nonpainted link annotations as missing
+text. Geometry supplies disclosed whole-span fallback; partial/overlapping spans,
+conflicting URI groups and internal destinations remain explicit unfinished cases.
+
+Primary reference: ISO 32000-1, 14.7–14.9, especially Tables 323–326 and 347/349;
+[PDF Association clause 14 errata](https://pdf-issues.pdfa.org/32000-2-2020/clause14.html)
+clarifies page context for MCR references. No proprietary implementation was used.
+
+Qualify against a real, original published export as well as targeted streams.
+U.S. Copyright Office Circular 1 (2021 InDesign/PDF Library export) is pinned in
+testdata/real/ with original hash/provenance/rights notes. Its simple fonts combine
+one-byte and zero-padded mapping keys with a two-byte codespace. The authoritative
+simple-font code width is one byte (9.6): normalize only numeric mappings in
+0..255, diagnose the repair and reject collisions/out-of-range values. Do not
+change source fixtures or plain-text/structural oracles to accept bad output.
+The same investigation found that pdfcpu's unvalidated read leaves convenience
+Info fields empty: read/decode the actual Info dictionary, keeping extra/XMP
+metadata omissions explicit.
+
+Independent original-tree/annotation checks prove 10 lists, 57 items, 16 URI
+targets and publisher role mappings; all 20,531 normalized nonspace characters
+match MuPDF after including stored labels. This multiset check proves content,
+not reading order; separate hierarchy/relationship tests are required. Styled
+heading names map to P in the publisher's tree, so they are not labelled explicit
+heading ranks. One internal destination and a conflicting multi-target Link group
+remain diagnosed. Current SF -> PDF rejects this publication's U+2003 EM SPACE;
+this is a required unfinished font/Unicode/layout capability, not an exemption.
+
+## 2026-11-23 Unicode typography and paragraph-wide wrapping
+
+Use Unicode segmentation across the entire paragraph, preserving run styles and
+note atoms, rather than tokenizing each formatting run with an ASCII regexp.
+Reuse uniseg v0.4.7's Unicode 15 UAX #14/#29 implementation; keep font metrics for
+proportional widths instead of its terminal-cell width facility. Greedy legal
+breaks precede emergency grapheme boundaries for ordinary long words. Protected
+no-break groups and genuinely oversized atoms reject without partial output.
+
+Common typographic spaces are advances, not missing-glyph substitutions. The
+explicit font/em table is documented in COMPATIBILITY.md. Standard ActualText
+preserves original Unicode while Tz scales a real embedded space glyph to the
+specified advance. Zero-width controls keep a zero-advance painted carrier;
+omitting that carrier made a tested reader duplicate nearby text. Some readers
+still add extraction newlines around zero-width controls; geometric positions and
+logical ActualText are separately checked. Underline/strike lengths follow the
+measured span. Standard NFC composition selects a supported visual glyph while
+retaining original decomposed text; unresolved marks/mixed-style clusters reject
+until shaping/mark positioning is implemented. This does not claim broad shaping.
+
+ActualText requires PDF 1.4. gofpdf v1.4.3 has no public minimum-version setter,
+so promote only its serialized `%PDF-1.3` header to `%PDF-1.4` with an equal-length
+byte change. This does not relocate any object/xref entry or rewrite user content.
+Existing higher versions remain untouched. Current output lacks UserUnit; enforce
+the default-unit 14400pt page limit rather than emitting invalid oversized pages.
+
+Independent spacing checks exposed eager newline inference on every Td after BT.
+Use transformed baselines to group adjacent positioned spans instead. Homogeneous
+ActualText replacements retain justified style/font/baseline information; mixed
+formatting diagnoses uncertainty. Font descriptor flags/weight/angle complement
+font-name style guesses, including gofpdf's abbreviated font names.
+
+A layout fuzz campaign discovered `000` + two soft hyphens + `0` at 22pt width:
+backing off only the last discretionary candidate left an earlier overflowing
+hyphen selected. Back off all overflowing candidates; keep the exact saved fuzz
+input and invariant that emitted line advances never exceed available width.
+The following 20-second/two-worker campaign passed 6,898 executions.
+
+Primary references: [Unicode 17 chapter 6](https://www.unicode.org/versions/Unicode17.0.0/core-spec/chapter-6/)
+for space semantics; [uniseg](https://github.com/rivo/uniseg) for its pinned UAX
+implementation; ISO 32000-1 9.3/9.10 and 14.9 for text state/ActualText. Runtime
+modules/notices are pinned. All production work still runs inside a Go process.
+
+Published reflow is now possible and independently bounded/content-checked, but
+visual review found existing tagged LBody fragments creating separate paragraphs,
+including standalone soft-hyphen paragraphs. The 20,531-character multiset alone
+cannot prove those boundaries or word flows correct. Keep this required semantic
+recovery task open; do not reinterpret successful rendering as full conversion.
+
+
+## Tagged inline runs imply paragraphs; painted lines do not
+
+ISO 32000-1 14.8.3.3 and 14.8.4.3.3/14.8.4.4 distinguish inline packing,
+paragraphlike blocks and list bodies. LBody may hold direct content or nested
+blocks. Group consecutive direct content/inline elements, preserving explicit
+paragraphs and child block containers (including blocks within inline wrappers).
+Use the same rule in table cells. Mark implied paragraph boundaries inferred;
+the enclosing LI and actual content ownership remain explicit. A Span with
+structural ActualText is still inline. Keep homogeneous formatting/links/font
+metrics on replacement; disclose mixed mappings instead of assigning arbitrary
+character formatting. Preserve original discretionary hyphens and word-boundary
+controls; do not invent spaces around them solely because baselines change.
+Union paragraph bounds per page. Prefix custom literal list labels to the first
+body paragraph only, retaining later explicit paragraphs.
+
+The original published fixture is unchanged. Its /K independently supplies 57
+inline-only LBody containers, one nested-list sibling and exact LI block order.
+The independent QA now checks each implied paragraph's source element identity
+and every item's block membership, plus joined discretionary words. The existing
+20,531-character multiset remains a content check, not a paragraph oracle.
+
+
+## Untagged inference keeps evidence separate from explicit semantics
+
+A PDF's paint order need not be reading order. Use an independently authored
+bounding-box adaptation of whitespace X-Y subdivision, not a raster/OCR service
+or proprietary implementation. Wide persistent vertical gutters identify column
+regions; horizontal bands separate spanning content before ordering columns.
+The published [Nagy/Seth X-Y tree paper](https://sites.ecse.rpi.edu/~nagy/PDF_chrono/1984_Seth_icpr84-xy-tree.pdf)
+provides the spatial-decomposition idea; our run boxes, thresholds, grouping and
+semantic rules are project code. The [PDF Association tagging introduction](https://taggedpdfschool.pdfa.org/basics)
+explains why explicit logical tags carry different evidence from visual guesses.
+
+Keep inferred blocks on `SourceInfo.Structure=inferred`; original runs/assets
+retain painted provenance, geometry and marks. Infer paragraphs from baseline
+alignment/gaps, headings from relative font sizes, lists from repeated markers
+and indentation, and numeric tables from aligned row/column evidence. Exclude
+list-marker columns from tables. Do not fabricate spans or header roles from
+numeric alignment alone. Prefix slicing retains conservative span geometry and
+labels, with disclosed normalization/precision. Preserve ambiguous content;
+missing/nonhorizontal/bidirectional geometry falls back, overlapping regions
+report uncertainty. Provide an explicit physical-inspection opt-out while
+keeping default structured conversion useful. Tagged trees remain authoritative.
+
+Primitive extraction tests use the physical-inspection option so their exact
+paint/run oracles remain valid. Default-mode tests independently check recovered
+structure, original literal/span/asset/page coverage and source geometry. The
+old generated-list marker oracle now searches structural labels as well as body
+text, retaining the same expected numbers without requiring duplicate labels.
+No reference bytes or expected numbers were changed. More complex recovery,
+including rulings and merged/multiline/empty cells, remains required work.
+
+A stronger spanning-edge regression exposed two interacting defects: selecting a
+large mid-body horizontal gap can interleave columns, and duplicate WinAnsi names
+could choose an alias byte absent from pdfcpu's CP1252 metric map, producing its
+1000-unit fallback for a normal space. Separate isolated wide top/bottom bands
+before column cuts and use the first remaining horizontal band. Canonicalize
+space/hyphen/bullet metric lookups to 32/45/149 for Latin core fonts, retaining
+explicit Widths precedence. Test the published glyph advances and independently
+compare every intact Helvetica/Helvetica-Bold source string against MuPDF. No
+source placement, expected reading order or reference fixture was weakened.
+
+
+## Painted boundaries are evidence for a table, not authored table semantics
+
+Recover ruled cells from independently interpreted PDF path operations and
+geometry. The current path is not q/Q graphics state, coordinates are captured
+under their construction CTM, fill/clip paths close implicitly, and pending clips
+apply at path termination. See ISO 32000-1 sections 8.5/8.10 and the
+[PDF Association path clarifications](https://pdf-issues.pdfa.org/32000-2-2020/clause08.html).
+Use only eligible painted axis lines and thin rectangle fills; rectangle clipping
+and relevant alpha/neutral effects are interpreted for this evidence. Retain
+existing diagnostics for vector appearance and unimplemented graphics effects.
+
+A closed grid with absent interior dividers supplies a geometric adjacency graph.
+Emit only rectangular connected slot groups with consistent perimeter/interior
+edges; validate against the shared grid. Preserve empty cells and source boundary
+rectangles explicitly as inferred values. Process small nested grids first and
+assign every content atom once to a wholly containing cell. Partial boundaries,
+nonrectangular groups and crossed content do not justify silently reassigned
+cells; retain the source content and disclose ambiguity instead. Block the weaker
+numeric inference from overriding that rejected grid. Keep finite inference
+budgets/context checks, not unbounded all-pairs allocation.
+
+Independent MuPDF table extraction verifies seven cell rectangles/merges/empty
+cells on both stroke and fill sources. A targeted python-docx document exported
+by actual LibreOffice 7.6 with UseTaggedPDF=false exposed its half-stroke corner
+endpoints. Account for crossing-line thickness, mixed widths and numeric epsilon;
+join nubs are not interior partial dividers. Zero-area retraced fills and implicit
+rectangle clips have regressions. [LibreOffice's export parameters](https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html)
+document that explicit option. These are targeted producer checks, not proof of
+professional fidelity or a representative real-world corpus. Image/nested cells
+now import, but native PDF layout remains required unfinished work.
+
+
+## Measure rich fragments before page admission or painting
+
+Use independently authored shared `pdfFragment` values for cell and footnote
+content. Measure text lines, fitted images and nested connected table-row groups
+without touching PDF pages/resources. Solve merged-cell heights first; collect
+all nested reference identities before admitting a containing group. Painting
+then uses explicit coordinates. This preserves existing text-table rectangles
+and text-only note pagination while adding rich cells and notes.
+
+Footnotes reserve actual fragment heights, including image gaps and nested cell
+padding. Continuations split between measured fragments, with connected rowspan
+groups and images atomic. Oversized groups and explicit cell/note page breaks
+remain required unfinished continuation layout; they reject before caller output.
+The old image-cell rejection regression now asserts preserved cell assets after
+successful output, retaining its original source and content oracle.
+
+Image dimensions are preferences: fit the available container width; one dimension
+preserves intrinsic ratio and neither means 96 DPI. Apply fitting before deriving
+a missing dimension so huge finite preferences do not overflow. DOCX and PDF share
+this policy with their own cell padding (4pt and 6pt per side). SF keeps requested
+sizes; rendered-format readers report physical extents. Check positive finite
+sizes and DOCX integer-EMU conversion bounds. Independent pixel/bounding-box and
+DOCX relationship/extent checks qualify the new self-contained fixture. Native
+PDF and LibreOffice pagination differ; this is not Word-equivalent layout.
+
+
+## Continue oversized body groups using per-cell ownership
+
+Keep exact existing rectangles for groups that fit with new note starts. For an
+oversized body group, plan immutable active-cell cursors row by row into page
+bands, consuming only whole measured fragments. Row-spanning cells keep their
+unconsumed flow across logical row boundaries; grow a row until its ending cells
+finish. Apply 6pt padding per band, draw internal borders only at real cell ends,
+and close page fragments. This preserves content and merge ownership without
+pretending the result matches Word pagination. A fitting nested group remains
+an atomic fragment; recursive oversized nested/note splitting is still required.
+
+Collect note keys only from the planned page's fragments. Budget all new starts
+and a separator before painting, accounting for both current-page notes and a
+possible fresh page. Replan with a smaller budget when necessary. Admission can
+then move the whole planned fragment safely. An earlier body note must not hide
+the separator needed after a page move. Independent targets and a dedicated
+regression cover both cases. The prior oversized-group rejection test now checks
+all the same original labels exactly once across continued pages; the original
+fitting seven-rectangle oracle remains unchanged.
+
+The retained fuzz input `777cb92bf7b47ddc` is a valid tall-page case. It exposed
+an overly strict new test assertion that early and late notes always occupy
+different pages. The actual contract is matching reference/body page and
+nondecreasing reference order; the fixed small-page fixture separately verifies
+distinct target pages. No document fixture or original expected content changed.

@@ -66,3 +66,25 @@ func TestCLIUsage(t *testing.T) {
 		}
 	}
 }
+
+func TestCLIStructuredPaths(t *testing.T) {
+	dir := t.TempDir()
+	sf := filepath.Join(dir, "document.sf")
+	input := filepath.Join("..", "..", "testdata", "corpus", "docx_basic.docx")
+	if err := run(context.Background(), []string{"extract", "-format", "sf", "-o", sf, input}, &bytes.Buffer{}, &bytes.Buffer{}); err != nil {
+		t.Fatal(err)
+	}
+	for _, ext := range []string{"docx", "pdf"} {
+		rendered := filepath.Join(dir, "rendered."+ext)
+		if err := run(context.Background(), []string{"convert", "-allow-lossy", "-o", rendered, sf}, &bytes.Buffer{}, &bytes.Buffer{}); err != nil {
+			t.Fatal(err)
+		}
+		var out bytes.Buffer
+		if err := run(context.Background(), []string{"extract", "-format", "sf", rendered}, &out, &bytes.Buffer{}); err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(out.String(), `"schema": "manydoc-prosemirror/1"`) {
+			t.Fatal("missing structured schema")
+		}
+	}
+}

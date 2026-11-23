@@ -1,22 +1,25 @@
 # Next capability work
 
-This list describes product work beyond the initial implementation. It is not
-evidence that the current library supports these features.
+Items 1–5 are unfinished work required by the active rich-document goal, rather
+than exemptions from it. SF foundation is in STRUCTURED_FORMAT.md and the full
+acceptance audit is in ACCEPTANCE.md. Items 6–7 concern separate application
+integration and do not authorize changes to Daptin.
 
 1. Qualify DOCX output visually in Microsoft Word/LibreOffice, using a published
    corpus of real exported documents and intended deployment fonts. Compare text,
    structure, and appearance separately.
 2. Extend the model deliberately for font families/sizes/colors, asymmetric
-   margins, sections, note references, bookmarks, comment/revision history and
-   vertical table merges. Each feature needs import, model, export and tests;
+   margins, sections, richer note numbering/separator/layout behavior, bookmarks, comment/revision history and
+   broader numbering formats. Each feature needs import, model, export and tests;
    avoid a second authoritative representation of the same content.
-3. Add Go text shaping/bidi and configurable licensed fonts for broader PDF
+3. Extend the new Unicode-space/NFC/grapheme wrapping foundation with Go text shaping/bidi and configurable licensed fonts for broader PDF
    generation. Preserve explicit missing-glyph errors while this is incomplete.
-4. Expand PDF extraction for inline images, more CMaps, coordinate-aware reading
-   order and text/graphics transforms. A successful extraction must not imply
+4. Expand forward tagged-PDF recovery and the implemented untagged whitespace/heading/list/numeric/painted-grid table inference (including merges/empty/multiline cells) with more complex/double-border/occluded/rotated layouts; validate inverse ParentTree and internal links. Expand CMaps,
+   vertical text and remaining image codecs/masks/colors. A successful extraction must not imply
    reconstruction of editable Word structure.
-5. Improve table layout: long-row splitting, repeated header rows, nested/nontext
-   cells, and measured pagination tests.
+5. Extend oversized body-group continuation to recursively split nested/footnote
+   row groups; add explicit cell/note page breaks, repeated header rows and broader
+   pagination qualification. Images/nested cells and body row splitting exist.
 6. Build the Colleaf .vdocs adapter once its actual schema and supported features
    are supplied or inspected. Do not invent a second native editor schema.
 7. Integrate thin Daptin performers around this public library. Keep Daptin's

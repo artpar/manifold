@@ -105,3 +105,432 @@ python3 scripts/record_verification.py
 Review docs/verification.json, update STATUS.md with changed limitations and
 outcomes, and retain a local Git checkpoint. Do not publish remotely unless
 requested. Never reset or clean an unfamiliar working tree to recover progress.
+
+## Structured format milestone
+
+Go tests include SF structure/attribute validation, preservation of all fields
+in every accepted corpus model, diagnostic propagation, CLI four-path wiring,
+malformed SF and cancellation. These tests establish the existing model's
+preservation, not the missing rich features in ACCEPTANCE.md.
+
+```sh
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadStructured$' -fuzztime=10s -fuzzminimizetime=1s -parallel=2 -timeout=25s .
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+npm install --prefix output/sf-qa --no-audit --no-fund prosemirror-model@1.25.13
+python3 scripts/verify_structured_corpus.py
+GOWORK=off go run ./examples/report -out output
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/report.sf
+mkdir -p output/sf-generated
+bin/manydoc convert -o output/sf-generated/report.docx output/report.sf
+bin/manydoc convert -o output/sf-generated/report.pdf output/report.sf
+output/qa-venv/bin/python scripts/verify_outputs.py output/sf-generated
+pdftoppm -f 1 -l 2 -scale-to 1000 -png output/sf-generated/report.pdf output/sf-generated/page
+```
+
+Inspect both PDF pages. ProseMirror validates the committed schema via its own
+reader, including tree shapes, text, marks and attributes. It is optional QA;
+neither npm nor JavaScript is needed to build, run or test the Go library.
+The original `record_verification.py` summarizes initial-baseline log names;
+do not rerun it over stale logs and call the result current SF evidence.
+
+## Merged tables and DOCX visual check
+
+Tests include hand-authored OOXML origins/continuations, combined row/column
+spans, fully covered rows, preserved continuation content/diagnostics, orphan and
+mismatched regions, malformed model grids, formatting/relationship round trips,
+exact PDF cell rectangles, merged-group pagination and nested DOCX width bounds.
+The DOCX and SF fuzzers include merged-table seeds.
+
+```sh
+GOWORK=off go run ./examples/merged-tables -out output/merged-tables
+output/qa-venv/bin/python scripts/verify_merged_tables.py output/merged-tables
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/merged-tables/merged-table.sf
+pdftoppm -scale-to 1200 -png output/merged-tables/merged-table.pdf output/merged-tables/page
+```
+
+On the current macOS QA host, LibreOffice 7.6 is available. Use an isolated
+profile so QA does not modify the user's normal LibreOffice session/config:
+
+```sh
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-merge-profile --headless --convert-to pdf --outdir output/merged-tables/docx-render output/merged-tables/merged-table.docx
+output/qa-venv/bin/python scripts/verify_merged_tables.py output/merged-tables --docx-render output/merged-tables/docx-render/merged-table.pdf
+pdftoppm -scale-to 1200 -png output/merged-tables/docx-render/merged-table.pdf output/merged-tables/docx-render/page
+```
+
+Inspect both the native PDF and DOCX-rendered page PNG. This caught fixed-width
+DOCX grids overflowing a small page; the corrected example retains every cell.
+This is a synthetic example visual check, not Word equivalence. LibreOffice and
+Python/Poppler remain optional QA tools, never production runtime dependencies.
+Adapt the isolated profile path if reproducing on another host.
+
+## Explicit lists
+
+The Go suite checks SF starts/boundaries/items, legacy adaptation, independent
+OOXML multilevel/startOverride/lvlRestart oracles, inherited styles and numId=0,
+continuation after non-list text, item images/tables, inline image normalization,
+invalid range metadata, and PDF marker/content preservation across pages.
+DOCX/SF fuzz seeds include both ordinary multilevel numbering and bookmarked
+list documents. Dedicated list tests compare structure and relationships; they
+are not only text-presence checks.
+
+```sh
+GOWORK=off go run ./examples/lists -out output/lists
+GOWORK=off go run ./examples/lists -out output/lists/paginated -page-height 220
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/lists/lists.sf output/lists/paginated/lists.sf
+output/qa-venv/bin/python scripts/verify_lists.py output/lists
+output/qa-venv/bin/python scripts/verify_lists.py output/lists/paginated --expected-pages 3
+pdftoppm -scale-to 1000 -png output/lists/lists.pdf output/lists/native
+pdftoppm -scale-to 1000 -png output/lists/paginated/lists.pdf output/lists/paginated/page
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-list-profile --headless --convert-to pdf --outdir output/lists/docx-render output/lists/lists.docx
+output/qa-venv/bin/python scripts/verify_lists.py output/lists --docx-render output/lists/docx-render/lists.pdf
+pdftoppm -scale-to 1000 -png output/lists/docx-render/lists.pdf output/lists/docx-render/page
+```
+
+The verifier independently checks six numbering identities/starts, ten numbered
+items, invisible boundary names, link/bold, native PDF indentation at three
+levels, continuation/cell indentation, content and PDF annotations. It rejects
+visible HYPERLINK instructions in an independent DOCX render. Inspect all five
+native/DOCX-rendered pages from these commands. Rendering is targeted synthetic
+QA, not a claim of general Word equivalence or an application runtime dependency.
+
+## Typed notes and reference-aware layout
+
+The Go suite verifies inline atom identities, graph validation, draft persistence
+vs rendered-anchor requirements, note-definition order and cross-kind IDs,
+independent OOXML note-part/reference oracles, rich note-local assets/relationships,
+repeat NOTEREF bindings/cached marks, settings/section overrides, merge-continuation
+atoms, malformed metadata, PDF note page-object destinations, separate adjacent
+annotations and continuation content. DOCX/SF fuzzers include note seeds.
+
+```sh
+GOWORK=off go run ./examples/notes -out output/notes
+GOWORK=off go run ./examples/notes -out output/notes/continued -page-height 220 -long-note
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/notes/notes.sf output/notes/continued/notes.sf
+output/qa-venv/bin/python scripts/verify_notes.py output/notes
+output/qa-venv/bin/python scripts/verify_notes.py output/notes/continued --continued
+pdftoppm -scale-to 1000 -png output/notes/notes.pdf output/notes/native
+pdftoppm -scale-to 1000 -png output/notes/continued/notes.pdf output/notes/continued/page
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-notes-profile --headless --convert-to pdf --outdir output/notes/docx-render output/notes/notes.docx
+output/qa-venv/bin/python scripts/verify_notes.py output/notes --docx-render output/notes/docx-render/notes.pdf
+pdftoppm -scale-to 1000 -png output/notes/docx-render/notes.pdf output/notes/docx-render/page
+```
+
+Inspect all seven native PDF pages and both normal DOCX-rendered pages. The
+verifier checks three definitions/four reference sites, preserved public IDs/order,
+OOXML content types and relationship targets, cached repeat fields, note formatting,
+actual PDF destination pages, superscripts, line bounds/spacing, separator/body
+separation and continuation text/footer counts. It caught the wrong SetLink page
+argument despite correct text. These are synthetic examples. Nontext PDF footnotes,
+custom numbering/separator behavior and representative real exported notes remain
+unfinished qualification/layout work.
+
+## Positioned PDF recovery
+
+```sh
+GOWORK=off go test -run 'TestPDF(Positioned|PageCoordinate|TextMatrix|FormAnd|Composite|Marked|Raster|Inline|Source|ActualText)' -count=1
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+output/qa-venv/bin/python scripts/verify_pdf_recovery.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/pdf-recovery/positioned.sf
+```
+
+The Go fixtures are hand-authored object streams independent of manydoc's writer.
+They assert actual coordinates/matrices, rotation/crop/UserUnit, q/Q and quote
+operators, CID/ligature advances, Form/annotation placement, MCID/ActualText,
+PDFDocEncoding, raster pixels/alpha, inline filter framing and strict SF provenance.
+Malformed scopes, undefined codes, truncated samples and contradictory source
+geometry reject. PDF fuzzing includes transformed, marked, inline and masked-image
+seeds. Short campaigns qualify only their recorded budgets.
+
+The independent script authors a two-page source, checks pypdf structure/assets,
+MuPDF text/image geometry and annotation pixels, raster mask samples and ActualText
+SF semantics. It exercises recovered SF through DOCX/PDF with acknowledged reflow
+and checks content/assets using independent readers. It writes source/reflow page
+PNGs for inspection. The source is a targeted synthetic fixture, not a real-export
+corpus or evidence of tagged/inferred semantic recovery or original-layout fidelity.
+The source's XY paints intentionally extract as ActualText `fi`.
+
+Do not compose PyMuPDF's unscaled rotation_matrix translation with UserUnit-scaled
+raw origins in the tested build. Use physical page dimensions and confirm pixels.
+Likewise, count unique pypdf resources separately from actual image paint instances
+because gofpdf shares its resource dictionary across pages.
+
+## Tagged structure and original published export
+
+```sh
+GOWORK=off go test -run 'TestPDF(Tagged|Published|SimpleFont)' -count=1
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+output/qa-venv/bin/python scripts/verify_pdf_structure.py
+output/qa-venv/bin/python scripts/verify_published_pdf.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/pdf-structure/tagged.sf output/published-pdf/publication.sf
+```
+
+`pdf_structure_test.go` contains independent hand-authored tree/oracle cases for
+logical order, paragraphs spanning pages, role maps, class/local merged-cell
+attributes, list labels/starts/item provenance, Form-vs-page MCID scope, Figure
+MCR/OBJR references/Alt, ActualText, empty paragraphs, URI ownership and malformed
+cycles/parents/owners/page references. Padded CMap conflicts reject. Unsupported
+labels retain literal content. The original published file/hash and its structural
+counts are verified independently of the production writer.
+
+The optional structure script creates a two-page targeted source with a real
+forward tree and ParentTree, checks its SF, then checks generated DOCX/PDF using
+pypdf, MuPDF, python-docx and lxml. Its three native PDF pages and a one-page LibreOffice 7.6 DOCX rendering were
+inspected.
+The published-export script compares original `/K`/RoleMap/annotation structure,
+all 20,531 normalized nonspace character counts, SF relationships and generated
+DOCX content/metadata. The source's pages 1/8 were inspected. Its 10 lists/57 items
+and 16 unique URI targets do not establish general tagged-PDF conformance.
+The separate 64-case corpus is unchanged; testdata/real/ adds one original export.
+
+The publication has styled headings role-mapped to P, one unresolved internal
+GoTo and a conflicting multi-target Link group; preserve those facts. Its earlier SF -> PDF U+2003 rejection is fixed by measured Unicode typography;
+see the later sections for output and corrected implied-paragraph checks.
+
+To reproduce the targeted DOCX visual check (optional QA executable only):
+
+```sh
+mkdir -p output/pdf-structure/lo
+/Applications/LibreOffice.app/Contents/MacOS/soffice '-env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-pdf-structure-profile' --headless --convert-to pdf --outdir output/pdf-structure/lo output/pdf-structure/reflow.docx
+pdftoppm -scale-to 1200 -png output/pdf-structure/lo/reflow.pdf output/pdf-structure/lo/reflow
+```
+
+Adapt the isolated profile path to your checkout. This is development verification,
+not a production executable dependency or a claim of original-PDF visual fidelity.
+
+## Unicode typography and paragraph wrapping
+
+```sh
+GOWORK=off go test -run 'TestPDF(Text|Discretionary|Typography|LineBoundary|PublishedExportNow|RejectsOversized)' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFTextLayout$' -fuzztime=20s -fuzzminimizetime=1s -parallel=2 -timeout=60s
+GOWORK=off go run ./examples/typography
+output/qa-venv/bin/python scripts/verify_typography.py
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+output/qa-venv/bin/python scripts/verify_published_pdf.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/typography/typography.sf
+```
+
+Layout tests assert word continuity across formatting runs, glue/joiner behavior,
+grapheme-safe emergencies, hard-break preservation, conditional hyphens, note
+anchors, exact logical Unicode/style and physical em advances. Overflow, remaining
+combining/shaping needs and oversized default-unit pages reject with no partial
+PDF. The saved fuzz case `07e1d9222943762c` covers consecutive soft-hyphen overflow.
+Fuzz invariants compare original logical text and measured line bounds, including
+run boundaries inside clusters and whitespace at wrapped line ends.
+
+The independent typography script checks 15 space/control advances against em
+fractions and the embedded CID metrics, original Unicode/NFC in ActualText,
+content bounds, underline/strike lengths and URI relationships. MuPDF may insert
+extraction newlines around zero-width carriers; test physical baselines separately
+from normalized extraction and inspect standard ActualText directly. The native
+one-page PDF and LibreOffice 7.6 DOCX rendering were visually inspected.
+
+The published-script PDF stage now passes nine reflowed pages: metadata, all
+16 URI targets, all 20,531 normalized nonspace characters, exact em/hair/punctuation
+space counts and bounds. All nine pages were inspected. The earlier tagged-list-body fragmentation is
+fixed and is checked structurally as described below; character/URI counts alone
+do not qualify original layout or full structural correctness.
+The 51 existing corpus SF exports still validate in ProseMirror (12,417 nodes).
+Report/merged-table and normal/five-page note independent checks pass after layout
+changes. New dependency notices are in THIRD_PARTY.md and third_party/licenses/.
+
+## Tagged implied paragraphs
+
+```sh
+GOWORK=off go test -run 'TestPDF(Tagged|CustomList|Published)' -count=1
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+output/qa-venv/bin/python scripts/verify_published_pdf.py
+output/qa-venv/bin/python scripts/verify_pdf_structure.py
+```
+
+`pdf_paragraph_test.go` checks inline/explicit block boundaries, structural
+ActualText, mixed/homogeneous formatting, links, discretionary word continuity,
+cell paragraphs and custom-label fallback. The cross-page regression checks each
+region against its original run bounds. The published checker derives LI block
+membership and 57 inline-only LBody element identities directly from the original
+/K tree, compares those against SF and asserts selected joined soft-hyphen words.
+Original source bytes, character counts, metadata, URI relationships and generated
+DOCX/PDF bounds/content remain independently checked.
+
+## Untagged geometric structure
+
+```sh
+GOWORK=off go test -run 'TestPDFUntagged' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFInferenceCoverage$' -fuzztime=15s -parallel=2 -timeout=40s
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+output/qa-venv/bin/python scripts/verify_pdf_inference.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/pdf-inference/recovered.sf output/pdf-inference/paint-order.sf
+python3 scripts/verify_structured_corpus.py
+output/qa-venv/bin/python scripts/compare_pdf_text.py
+```
+
+The targeted source deliberately interleaves/reverses paint order beneath a
+full-width title. Independent MuPDF coordinates and hand-placed intent establish
+column/paragraph/heading structure. A second page supplies aligned numeric cells,
+numbered/nested marker lists, continuation text and an image. Check exact SF
+membership/starts/relationships/geometry and literal coverage including original
+labels; then independently reopen generated DOCX/PDF for cells, links, image,
+page boundaries, content and bounds. Both source pages and both native reflow
+pages were inspected. `-pdf-skip-inference` separately checks original paint
+order. It is a physical-inspection option, not a semantic inference claim.
+
+Corpus coverage compares all original nonspace characters, source spans/styles/
+links, image bytes/placements and page records before/after inference for all
+28 accepted PDF inputs. All 28 Poppler comparisons pass. All 51 SF outputs pass
+ProseMirror at 9,027 nodes after grouping replaces spurious baseline wrappers and
+synthetic gaps; fixtures and source oracles are unchanged. Primitive positioning/
+inline-image tests use `PDFSkipInference` to keep their paint-order oracles;
+default-mode tests independently verify the changed reading-order behavior.
+
+The new coverage fuzz asserts that every original painted token appears exactly
+once with identical style/source geometry through rearrangement, including SF
+persistence. A 15-second/two-worker campaign passed 3,313 executions. Parser
+fuzz now seeds inferred lists/tables; its subsequent 10-second campaign passed
+29,060 executions. These campaigns do not establish exhaustive safety or general
+layout reconstruction. Ruling/merged/empty/multiline tables and complex layouts
+remain required work.
+
+Optional DOCX visual reproduction (QA executable only):
+
+```sh
+mkdir -p output/pdf-inference/lo
+/Applications/LibreOffice.app/Contents/MacOS/soffice '-env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-pdf-inference-profile' --headless --convert-to pdf --outdir output/pdf-inference/lo output/pdf-inference/reflow.docx
+pdftoppm -scale-to 1200 -png output/pdf-inference/lo/reflow.pdf output/pdf-inference/lo/page
+```
+
+Adapt the isolated profile path to the checkout. LibreOffice 7.6 produced two
+pages; headings, table/list text were independently checked and both pages were
+visually inspected. This qualifies this generated example, not all DOCX output.
+
+The spanning-edge regression uses a full-width title/footer and a large gap
+between upper/lower column paragraphs, asserting whole-column order. It exposed
+incorrect core-font alias advances; `TestPDFCoreFontCanonicalAliasAdvances`
+checks space/hyphen/bullet slots including WinAnsi aliases. The independent
+inference script now compares intact source Helvetica/Helvetica-Bold string
+advances against MuPDF, in addition to bounds and coordinates. All checks above
+were repeated after the whitespace-cut/metric corrections.
+
+## Painted-grid table recovery
+
+```sh
+GOWORK=off go test -run 'TestPDFRuled|FuzzPDFRuledGrid' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFRuledGrid$' -fuzztime=15s -fuzzminimizetime=1s -parallel=2 -timeout=40s
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+output/qa-venv/bin/python scripts/verify_pdf_rulings.py
+output/qa-venv/bin/python scripts/verify_pdf_rulings_office.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/pdf-rulings/ruled.sf output/pdf-rulings/office/recovered.sf
+```
+
+The first independent source has two pages: one stroked, one using thin fills,
+with rectangular clipping and explicit opaque ExtGState. MuPDF's own table finder
+supplies the seven exact cell rectangles, including colspan/rowspan/empty cells.
+SF checks compare each rectangle, membership, text, marks, links and physical
+pages. Generated DOCX checks actual merged XML identity and relationships; native
+PDF checks both table grids and content/bounds. Both source and native PDF pages
+were visually inspected. The combined SF outputs passed ProseMirror at 83 nodes.
+
+The second script independently authors a targeted python-docx table and calls
+actual LibreOffice 7.6 with UseTaggedPDF=false/PDFUACompliance=false. It asserts
+the exported PDF really lacks StructTreeRoot, compares all seven recovered cell
+bounds to MuPDF (three decimal points), then checks generated DOCX/PDF and a
+LibreOffice rendering of the generated DOCX. Source/native/LibreOffice pages were
+inspected. The isolated profile lives under output; the executable path can be
+changed with `--soffice`. These generated documents qualify a producer on targeted
+content; they are not a representative published real-world corpus. Neither
+Python nor LibreOffice is used by library/CLI runtime or ordinary Go tests.
+
+Go tests additionally cover current-path lifetime across q/Q, Form/clip transforms,
+implicit rectangle closure, degenerate fills, half-stroke joins/overhangs and
+mixed widths, opacity and unknown/reset mask state, partial/nonrectangular grids,
+crossing text, empty/nested grids and preserved cell images. Text-grid spans,
+empty cells and content survive SF -> DOCX and SF -> PDF -> SF; original runs/
+styles/positions are compared directly. Native image-cell layout still rejects
+with no partial output; SF/DOCX retain it. This remains required implementation.
+
+Fuzz input authors known rectangular partitions before drawing per-cell borders,
+then asserts exact recovered origins/spans/text, translated table bounds and SF
+persistence. It varies merge/empty choices, positions, stroke widths and paint
+mode. The latest 15-second/two-worker run passed 4,122 executions. A malformed
+PDF campaign with ruled-grid seeds passed 67,941 executions in 10 seconds.
+Full tests/race/vet/module checks and host CGO-disabled build pass; all 28 Poppler
+comparisons and 51 ProseMirror corpus files (9,027 nodes) still pass. Finite
+campaigns/budgets do not establish exhaustive safety or general layout fidelity.
+
+
+## Rich PDF cells and footnote continuation
+
+```sh
+GOWORK=off go test -run 'TestPDFRich|TestImage' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFRichLayout$' -fuzztime=15s -parallel=2 -timeout=40s
+GOWORK=off go run ./examples/rich-cells -out output/rich-cells
+GOWORK=off go run ./examples/rich-cells -out output/rich-cells/continued -continued
+output/qa-venv/bin/python scripts/verify_rich_cells.py output/rich-cells
+output/qa-venv/bin/python scripts/verify_rich_cells.py output/rich-cells/continued --continued
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/rich-cells/rich-cells.sf output/rich-cells/continued/rich-cells.sf
+```
+
+The normal hand-authored SF fixture has combined outer spans, a nested rowspan,
+three authored checkerboard PNGs, two nested-cell footnotes and a URI. Independent
+pypdf/MuPDF/python-docx checks compare all six cell rectangles, image pixels and
+placement, real DOCX merge identities/media/relationships/extents, content/marks,
+URI and both actual note destinations. Native output has two pages; preferred
+400×200 image size fits to 228×114pt in PDF and 232×116pt in DOCX. ProseMirror
+accepts both example trees (98 combined nodes); SF round trips keep preferences.
+Invisible logical column subdivisions cannot be inferred from painted boundaries
+alone, so this fixture does not claim full logical-span recovery through PDF.
+
+The continued example contains a 12-row table and image in one footnote. Its
+four native pages have row counts 3/5/4/0, with each original row exactly once,
+image only on page one and body flow resuming on page four. The internal reference
+targets page one. All six native pages across both examples were visually inspected.
+LibreOffice 7.6 rendered the normal DOCX to one visually inspected page, with all
+content/images; this independently checks readability, not matching pagination.
+Existing two/five-page text-note checks and seven-rectangle merged-table checks
+pass unchanged. Earlier image-cell rejection statements above describe the
+previous milestone; native rich-cell output now works.
+
+Tests also check cancellation, invalid assets, oversized groups/fragments,
+explicit cell/note breaks and extreme image preferences with atomic output. Rich
+layout fuzz varies page dimensions, image sizes and nested row counts while
+checking input immutability, exact content/asset occurrence and page bounds. A
+15-second/two-worker run passed 1,498 executions. Full tests/race/vet/module
+verification, CGO-disabled build, 28/28 Poppler comparisons and the existing
+51-file/9,027-node ProseMirror corpus pass. These finite checks do not establish
+exhaustive robustness or representative real-document fidelity.
+
+
+## Oversized body-table groups
+
+```sh
+GOWORK=off go test -run 'TestPDFTableContinuation|TestTableContinuation|TestPDFMerged' -count=1
+GOWORK=off go run ./examples/table-continuation
+output/qa-venv/bin/python scripts/verify_table_continuation.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/table-continuation/table-continuation.sf
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFTableContinuation$' -fuzztime=15s -parallel=2 -timeout=40s
+```
+
+The independent script checks a three-row/colspan-two cell beside a long adjoining
+cell. Original labelled paragraphs, order, formatting, URI, image pixels/position,
+DOCX merge identity and page-local note targets are asserted separately. Native
+PDF has four pages: table continuations on pages one to three, early/late notes
+on pages one/three and resumed body on page four. The image is at (26,110) with
+size 30×15pt on page three. Columns remain at x=20/206.667/300; page-fragment
+bottoms are 154/154/153pt. Only the right column has interior rules at y=46 on
+page one and y=116 on page two. No such rule divides the spanning cell.
+All four native pages were visually inspected. LibreOffice 7.6 reads/renders the
+DOCX in three visually inspected pages with every original token and one image;
+this checks independent readability, not matching pagination. The SF passes
+ProseMirror at 88 nodes; SF/DOCX tests retain spans, note/URI ownership and pixels.
+
+Continuation fuzz varies page width/height and checks immutable input, exact-once
+content/assets, physical page bounds, styles/relationships and reference/body
+ownership. An initial 15-second run passed 1,220 executions after correcting an
+invalid strict page-order assertion; taller pages may put both notes together.
+The valid input is retained under testdata/fuzz/FuzzPDFTableContinuation. Tests
+also cover a preexisting body note before the table reference. A separate rich
+layout campaign passed 1,037 executions in 15 seconds. Both used two workers.
+Full tests (library 4.558s), race (library 47.500s), vet, module verification,
+CGO-disabled host build/execution and diff checks pass. All 28 Poppler comparisons
+and 51-file/9,027-node ProseMirror corpus still pass. Regenerated rich-cell,
+normal/five-page note and seven-rectangle merged-table examples pass independent
+checks. Oversized nested groups in cells/footnotes, image atoms, repeated headers
+and explicit cell/note page breaks remain unfinished work, not accepted omissions.
