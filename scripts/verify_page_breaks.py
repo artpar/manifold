@@ -33,14 +33,16 @@ ns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
 with ZipFile(out / 'page-breaks.docx') as z:
     main = etree.fromstring(z.read('word/document.xml'))
     notes = etree.fromstring(z.read('word/footnotes.xml'))
-    assert len(notes.xpath('//w:br[@w:type="page"]', namespaces=ns)) == 2
+    assert len(notes.xpath('//w:pageBreakBefore', namespaces=ns)) == 2
+    assert not notes.xpath('//w:br[@w:type="page"]', namespaces=ns)
     assert len(main.xpath('//w:footnoteReference', namespaces=ns)) == 1
     if args.empty_note:
         assert not main.xpath('//w:br[@w:type="page"]', namespaces=ns)
     else:
-        assert len(main.xpath('//w:br[@w:type="page"]', namespaces=ns)) == 2
-        assert notes.xpath('//w:t[text()="NOTE_BEFORE"]/ancestor::w:p/following-sibling::w:p[1]//w:br[@w:type="page"]', namespaces=ns)
-        assert main.xpath('//w:t[text()="INNER_BEFORE"]/ancestor::w:p/following-sibling::w:p[1]//w:br[@w:type="page"]', namespaces=ns)
+        assert len(main.xpath('//w:pageBreakBefore', namespaces=ns)) == 2
+        assert not main.xpath('//w:br[@w:type="page"]', namespaces=ns)
+        assert notes.xpath('//w:t[text()="NOTE_AFTER"]/ancestor::w:p/w:pPr/w:pageBreakBefore', namespaces=ns)
+        assert main.xpath('//w:t[text()="INNER_AFTER"]/ancestor::w:p/w:pPr/w:pageBreakBefore', namespaces=ns)
         original_media = [z.read(n) for n in z.namelist() if n.startswith('word/media/')]
 
 with pymupdf.open(out / 'page-breaks.pdf') as doc:
@@ -114,7 +116,10 @@ if args.office and not args.empty_note:
         missing = [token for token in expected if not re.search(r'(?<![A-Z_0-9])' + re.escape(token) + r'(?![A-Z_])', text)]
         observation = {'pages': len(doc), 'missing_tokens': missing,
                        'images': sum(len(p.get_image_info()) for p in doc),
-                       'visual_acceptance': 'failed: cell/note breaks differ; qualify Word/other producers'}
+                       'visual_acceptance': 'content mitigation passed' if not missing else 'failed: content missing',
+                       'pagination': 'cell/note boundaries still differ from native; qualify Word/other producers'}
         for i, page in enumerate(doc): page.get_pixmap(matrix=pymupdf.Matrix(1.5, 1.5)).save(out / 'lo' / f'page-{i+1}.png')
         (out / 'libreoffice-observation.json').write_text(json.dumps(observation, indent=2) + '\n')
-        print('LibreOffice observation (not a pass): ' + json.dumps(observation))
+        assert not missing, ('LibreOffice omitted original content', missing)
+        assert observation['images'] == 2
+        print('LibreOffice content mitigation passed; pagination differs: ' + json.dumps(observation))

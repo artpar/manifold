@@ -528,3 +528,40 @@ fixtures or silently flatten note tables. Qualify a production paragraph-propert
 codec with SF round trips, repeated/trailing controls and broader Word behavior
 before changing encoding. The current native PDF behavior is independently
 verified; the larger goal remains incomplete.
+
+
+## Distinguish paragraph page starts from explicit page advances
+
+[Microsoft's ISO/IEC 29500 PageBreakBefore reference](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.pagebreakbefore?view=openxml-3.0.1)
+specifies a paragraph page-start property inherited through styles unless
+overridden. Keep this conditional request separate from unconditional SF controls.
+Add an optional false-default paragraph/heading attribute and Go bool; no existing
+profile meaning changes. Resolve defaults/styles/direct false overrides, reject
+invalid booleans/duplicates/cycles, and apply the property only to the first
+segment when an inline break splits an imported paragraph.
+
+Pass page-start state through pure PDF selection. Skip a conditional control at
+that position, retain unconditional controls, and move list markers/note targets
+with the paragraph. Footnote continuation area counts as a fresh page-start flow;
+a property on a first note body on the reference page can delay that body.
+
+Export controls using ordinary pageBreakBefore plus checked ignorable roles.
+Synthetic empty anchors establish a leading blank page; empty controls preserve
+repeated/trailing requests. Collapse a control before a list onto its first
+numbered paragraph and restore it outside the list range. This avoids an extra
+blank page when that paragraph also has a conditional property. Keep standard
+Word structures for readers ignoring metadata, and reject contradictory metadata
+instead of silently discarding content.
+
+Full-SF fuzzing exposed independent preservation defects: default heading bold
+became an explicit strong mark, and required empty-cell paragraphs became authored
+content. Retain original heading mark presence and identify structural empty/
+table-tail paragraphs with checked metadata. Preserve the failing empty-input
+seed 1968518a8e616e7b; do not normalize the comparison to hide extra nodes/marks.
+
+Independent producer checks now retain all mixed-example tokens and both images
+in LibreOffice. Its cell/note pagination still differs from native PDF. Existing
+XML tests assert four paragraph properties instead of four break runs because
+the encoding deliberately changed; original SF, token/page/geometry/pixel/link
+oracles are unchanged. This content mitigation does not establish Word-equivalent
+layout, broad real-export fidelity or completion of the active goal.

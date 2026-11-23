@@ -19,10 +19,10 @@ integration and do not authorize changes to Daptin.
    reconstruction of editable Word structure.
 5. Extend recursive body/nested/footnote continuation with oversized images,
    repeated headers and broader pagination qualification; native explicit breaks
-   now exist. Prioritize DOCX paragraph break-property import/export qualification:
-   a QA pageBreakBefore variant recovers note side texts omitted by LibreOffice's
-   rendering of break runs. Preserve SF control events and disclose the visual
-   failure until the mitigation and broader Word behavior are qualified.
+   and conditional paragraph starts now exist. Production DOCX encoding recovers
+   the previously omitted note side texts in LibreOffice and retains SF controls;
+   cell/note pagination still differs. Qualify broader Word/producer behavior and
+   real exports without treating that content mitigation as professional fidelity.
 6. Build the Colleaf .vdocs adapter once its actual schema and supported features
    are supplied or inspected. Do not invent a second native editor schema.
 7. Integrate thin Daptin performers around this public library. Keep Daptin's

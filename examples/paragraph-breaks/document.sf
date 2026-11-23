@@ -1,0 +1,223 @@
+{
+  "type": "doc",
+  "attrs": {
+    "schema": "manydoc-prosemirror/1",
+    "metadata": {
+      "title": "Paragraph page-start properties",
+      "author": "manydoc"
+    },
+    "layout": {
+      "width": 300,
+      "height": 180,
+      "margin": 20
+    },
+    "notes": [
+      {
+        "kind": "footnote",
+        "id": "note",
+        "content": [
+          {
+            "type": "paragraph",
+            "attrs": {
+              "pageBreakBefore": true
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "NOTE_FIRST"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "attrs": {
+              "pageBreakBefore": true
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "NOTE_SECOND"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "content": [
+    {
+      "type": "paragraph",
+      "attrs": {
+        "pageBreakBefore": true
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "FIRST"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "pageBreakBefore": true
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "SECOND",
+          "marks": [
+            {
+              "type": "strong"
+            },
+            {
+              "type": "link",
+              "attrs": {
+                "href": "https://example.invalid/paragraph"
+              }
+            }
+          ]
+        },
+        {
+          "type": "note_reference",
+          "attrs": {
+            "id": "note",
+            "kind": "footnote"
+          }
+        }
+      ]
+    },
+    {
+      "type": "page_break"
+    },
+    {
+      "type": "ordered_list",
+      "attrs": {
+        "order": 3
+      },
+      "content": [
+        {
+          "type": "list_item",
+          "content": [
+            {
+              "type": "paragraph",
+              "attrs": {
+                "pageBreakBefore": true
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "ITEM_FIRST"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "attrs": {
+                "pageBreakBefore": true
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "ITEM_CONT"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "content": [
+        {
+          "type": "table_row",
+          "content": [
+            {
+              "type": "table_cell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "pageBreakBefore": true
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CELL_FIRST"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "pageBreakBefore": true
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CELL_SECOND"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "pageBreakBefore": false
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "SIDE_ZERO"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "pageBreakBefore": false
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "SIDE_ONE"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "attrs": {
+                    "pageBreakBefore": false
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "SIDE_TWO"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "pageBreakBefore": false
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "AFTER_TABLE"
+        }
+      ]
+    }
+  ]
+}

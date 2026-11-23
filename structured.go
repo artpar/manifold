@@ -98,10 +98,15 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 		n := StructuredNode{Type: string(b.Kind)}
 		switch b.Kind {
 		case Paragraph, Heading:
-			if b.Kind == Heading {
+			if b.Kind == Heading || b.PageBreakBefore {
+				level := 0
+				if b.Kind == Heading {
+					level = b.Level
+				}
 				n.Attrs = sfAttrs(struct {
-					Level int `json:"level"`
-				}{b.Level})
+					Level           int  `json:"level,omitempty"`
+					PageBreakBefore bool `json:"pageBreakBefore,omitempty"`
+				}{level, b.PageBreakBefore})
 			}
 			for _, r := range b.Runs {
 				if r.Text == "" && r.Note == nil {
@@ -269,17 +274,26 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 		b := Block{Kind: Kind(n.Type), Source: source}
 		switch n.Type {
 		case "paragraph", "heading":
+			a := struct {
+				Level           int  `json:"level,omitempty"`
+				PageBreakBefore bool `json:"pageBreakBefore,omitempty"`
+			}{}
 			if n.Type == "heading" {
-				a := struct {
-					Level int `json:"level"`
-				}{1}
-				if err := strictSFAttrs(n.Attrs, &a); err != nil {
-					return nil, err
-				}
-				b.Level = a.Level
-			} else if err := emptySFAttrs(n.Attrs); err != nil {
+				a.Level = 1
+			}
+			if err := strictSFAttrs(n.Attrs, &a); err != nil {
 				return nil, err
 			}
+			if n.Type == "paragraph" {
+				paragraph := struct {
+					PageBreakBefore bool `json:"pageBreakBefore,omitempty"`
+				}{}
+				if err := strictSFAttrs(n.Attrs, &paragraph); err != nil {
+					return nil, err
+				}
+			}
+			b.Level = a.Level
+			b.PageBreakBefore = a.PageBreakBefore
 			for _, t := range n.Content {
 				r := Run{}
 				switch t.Type {

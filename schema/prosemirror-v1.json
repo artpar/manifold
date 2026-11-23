@@ -36,6 +36,10 @@
       "attrs": {
         "source": {
           "default": null
+        },
+        "pageBreakBefore": {
+          "default": false,
+          "validate": "boolean"
         }
       }
     },
@@ -49,6 +53,10 @@
         },
         "source": {
           "default": null
+        },
+        "pageBreakBefore": {
+          "default": false,
+          "validate": "boolean"
         }
       }
     },

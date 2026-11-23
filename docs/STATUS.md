@@ -21,7 +21,57 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: explicit cell and footnote page breaks
+## Latest milestone: paragraph page-start properties and DOCX mitigation
+
+- Public `Block.PageBreakBefore` and SF paragraph/heading attrs.pageBreakBefore
+  now preserve a conditional page-start request separately from unconditional
+  page_break controls. The optional false default leaves existing SF meanings
+  unchanged. DOCX import resolves document defaults, the default paragraph style,
+  basedOn inheritance and direct overrides, including explicit false. Invalid
+  booleans, duplicate properties and cyclic style chains reject.
+- Native PDF applies the property before body/list paragraphs and passes the
+  current page-start position through nested cell/note selection. It skips a
+  conditional boundary already at page start, without skipping explicit controls.
+  List markers move with their first paragraph; note links target the first
+  actual body page. Running-content page-start controls still reject explicitly.
+- DOCX output uses standard pageBreakBefore properties plus checked ignorable
+  metadata to restore exported unconditional controls. Empty anchors/control
+  placeholders preserve leading/repeated/trailing events; a control before a
+  list attaches to its first numbered paragraph and restores outside the list.
+  This avoids a synthetic blank page when that paragraph also has the property.
+  No page-break run is needed for the declared block controls.
+- Full-SF comparisons found two preservation defects, now fixed: default heading
+  bold styling invented an explicit mark, and required empty-cell paragraphs
+  invented authored content. Checked heading mark metadata retains the original
+  mark without changing the standard heading style. Checked empty-cell/table-tail
+  markers distinguish structural paragraphs. Contradictory metadata cannot hide
+  visible content. Fuzz regression 1968518a8e616e7b is retained unchanged.
+- `examples/paragraph-breaks` passes independent pypdf/MuPDF/python-docx/XML checks
+  across eight native pages. A separate python-docx source validates inherited
+  properties and cancellation through DOCX -> SF -> PDF across three pages.
+  All eleven native pages were visually inspected. LibreOffice 7.6 renders the
+  new example in five inspected pages, retaining every token with no synthetic
+  blank page; cell/note pagination still differs from native.
+- The earlier mixed-break DOCX now renders in two inspected LibreOffice pages
+  with all original tokens and both images, including both formerly missing
+  note side texts. Native five-page geometry/pixel/ownership checks are unchanged.
+  This is a verified content mitigation, not Word-equivalent layout. Broader
+  Word/producer and real-export qualification remain required.
+- Full tests/race/vet/module checks, host CGO-disabled build/execution and diff
+  checks pass; timings are in verification.json. Whole-SF DOCX fuzz passed
+  12,060 executions in 15 seconds; conditional table-start fuzz passed 1,720 in
+  15 seconds. Malformed DOCX fuzz with new metadata/property seeds passed 336
+  executions in 10 seconds. All used two workers; finite campaigns are not
+  exhaustive safety evidence. Existing exact layout/note checks, 28 Poppler
+  comparisons, 51 corpus SFs/9,027 nodes and the two new SFs/42 nodes pass.
+
+The goal remains incomplete. Next implement oversized image handling and repeated
+headers, followed by the remaining ACCEPTANCE.md rows. Fonts/shaping, richer
+page/running content, broader PDF recovery and real exported documents still need
+work. No external blocker exists. Prior checkpoint: `7d83b91`; commit this
+milestone with its tests, examples and aligned KT docs.
+
+## Earlier milestone: explicit cell and footnote page breaks
 
 - `pdfFragment.Break` is a zero-height control event. Break-aware table groups
   always use the planner, including groups otherwise small enough for one page.
@@ -657,19 +707,22 @@ module access. The go.mod selects Go 1.25; do not force an older local toolchain
 
 ## Next work (required for the active goal)
 
-No external blocker currently prevents development. Native cell/note page breaks
-now propagate recursively and retain blank pages. Next qualify paragraph
-pageBreakBefore import/export as a mitigation for the observed LibreOffice loss
-with break runs inside note tables. The checked experimental variant recovers
-all content but still differs in cell pagination; require SF/DOCX round-trip and
-leading/consecutive/trailing tests before changing production encoding. Then
-implement oversized images, repeated headers and the remaining acceptance rows.
-Do not hide the failed LibreOffice visual check or change original fixtures.
+No external blocker currently prevents development. Paragraph property import,
+conditional native layout and the DOCX content mitigation now exist, with whole
+SF/control round trips. Next fit oversized PDF images to available page/container
+height while preserving pixels, aspect/declared-size intent, notes and padding;
+then implement repeated headers and the other acceptance rows. Wider Word/producer
+qualification remains required: LibreOffice retains content but cell/note page
+boundaries differ. Keep historical failures and their verified fixes distinct.
 
 Next concrete commands:
 
 ```sh
-rg -n 'pageBreakBefore|case PageBreak|case .br.|pPr' docx_read.go docx_write.go pdf_pagebreak_test.go
+rg -n 'fitImageSize|measureImage|contentHeight|Height' image_layout.go pdf_cell_layout.go pdf_table_continue.go pdf_notes.go
+GOWORK=off go test -run 'TestImage|TestPDFRich|TestParagraph|TestDOCXParagraph' -count=1
+GOWORK=off go run ./examples/paragraph-breaks
+output/qa-venv/bin/python scripts/verify_paragraph_breaks.py
+GOWORK=off go test -run '^$' -fuzz '^FuzzDOCXParagraphBreakRoundtrip$' -fuzztime=15s -parallel=2 -timeout=45s
 GOWORK=off go test -run 'TestPDF.*Break|TestPageBreak' -count=1
 GOWORK=off go run ./examples/page-breaks
 GOWORK=off go run ./examples/page-breaks -empty-note -out output/page-breaks/empty

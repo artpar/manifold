@@ -55,7 +55,7 @@ func enterPDFTableRow(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCurs
 // Plan one portion of one logical row. Row-spanning cells carry their own
 // unconsumed flow forward. Content ending in this row can extend its measured
 // height to account for padding added at page continuations.
-func (r *pdfRenderer) nextPDFTableBand(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor, capacity float64) (pdfTableBand, pdfTableCursor, bool, error) {
+func (r *pdfRenderer) nextPDFTableBand(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor, capacity float64, atStart bool) (pdfTableBand, pdfTableCursor, bool, error) {
 	minimum := 22.0
 	desired := cursor.remaining
 	for _, c := range cursor.cells {
@@ -75,7 +75,7 @@ func (r *pdfRenderer) nextPDFTableBand(plan *pdfTableLayout, g pdfTableGroup, cu
 		cut := height
 		for i, c := range cursor.cells {
 			p := plan.cells[c.cell].position
-			head, tail, used, forced, err := r.takeFragments(c.flow, height-12)
+			head, tail, used, forced, err := r.takeFragments(c.flow, height-12, atStart)
 			if err != nil {
 				return band, nil, 0, err
 			}
@@ -140,13 +140,13 @@ func (r *pdfRenderer) nextPDFTableBand(plan *pdfTableLayout, g pdfTableGroup, cu
 	return band, next, true, nil
 }
 
-func (r *pdfRenderer) planTablePage(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor, capacity float64) (pdfTablePage, pdfTableCursor, error) {
+func (r *pdfRenderer) planTablePage(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor, capacity float64, atStart bool) (pdfTablePage, pdfTableCursor, error) {
 	var page pdfTablePage
 	for cursor.row < g.end {
 		if err := r.ctx.Err(); err != nil {
 			return page, cursor, err
 		}
-		band, next, ok, err := r.nextPDFTableBand(plan, g, cursor, capacity-page.height)
+		band, next, ok, err := r.nextPDFTableBand(plan, g, cursor, capacity-page.height, atStart && page.height <= 1e-7)
 		if err != nil {
 			return page, cursor, err
 		}
@@ -230,7 +230,7 @@ func (r *pdfRenderer) continueTableGroup(plan *pdfTableLayout, g pdfTableGroup, 
 		var next pdfTableCursor
 		for {
 			var err error
-			page, next, err = r.planTablePage(plan, g, cursor, budget)
+			page, next, err = r.planTablePage(plan, g, cursor, budget, r.y <= r.margin+1e-7)
 			if err != nil {
 				return err
 			}

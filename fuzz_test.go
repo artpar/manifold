@@ -53,6 +53,16 @@ func FuzzReadDOCX(f *testing.F) {
 		f.Fatal(err)
 	}
 	f.Add(notes.Bytes())
+	var paragraphs bytes.Buffer
+	if err := Write(context.Background(), &paragraphs, paragraphDocument(f), DOCX, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(paragraphs.Bytes())
+	var structural bytes.Buffer
+	if err := Write(context.Background(), &structural, &Document{Blocks: []Block{{Kind: PageBreak}, cellTable([]Block{cellTable(nil)})}}, DOCX, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(structural.Bytes())
 	f.Add(notesDOCX(f, rawNoteBody, rawFootnotes, rawEndnotes))
 	f.Add([]byte(""))
 	f.Fuzz(func(t *testing.T, b []byte) {

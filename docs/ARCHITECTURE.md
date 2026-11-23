@@ -49,6 +49,14 @@ relationships. Table cells are public model values rather than opaque objects.
 `docx_write.go` creates an OOXML package with deterministic member ordering,
 styles, numbering, metadata, relationships, links, tables, embedded PNG/JPEG
 images and page setup. The output is assembled before writing to the caller.
+`docx_breaks.go` resolves conditional paragraph page-start properties through
+pPr defaults/styles/direct overrides. The public bool/SF attribute remains
+separate from unconditional block controls. Exported controls use standard
+pageBreakBefore plus ignorable checked roles: before, beforeList, control and
+anchor. A list-boundary control restores outside the explicit list range.
+Required empty-cell/table-tail paragraphs carry checked structural markers;
+heading bold metadata preserves original mark presence despite default style
+appearance. Metadata never authorizes dropping actual runs/content.
 
 ## Notes
 
@@ -121,7 +129,11 @@ returns a forced-boundary signal. Every cell is reselected at the first cut,
 preventing siblings from painting beyond it. The flag propagates through nested
 table heads; groups with controls bypass the ordinary whole-group fast path.
 Aligned sibling breaks coalesce, while repeated controls in one flow retain
-separate pages. Remainder measurement traverses all forced segments. Oversized
+separate pages. Remainder measurement traverses all forced segments. A conditional
+control is skipped only at the first flow position of the current page; page-start
+state propagates through nested table selection and note continuation. Body/list
+paragraphs handle it before admission, keeping markers and note destinations with
+the paragraph. Oversized
 image handling and broader continuation qualification remain unfinished.
 
 `image_layout.go` fits preferred image dimensions to the current page/cell/list

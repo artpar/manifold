@@ -75,7 +75,7 @@ it cannot preserve. It is not evidence that the full requested SF is implemented
 | Semantic | Current encoding |
 | --- | --- |
 | Body | doc.content in order; an empty document is valid |
-| Paragraph/heading | paragraph/heading with text children; heading.attrs.level 1–6 |
+| Paragraph/heading | paragraph/heading with text children; heading.attrs.level 1–6; optional boolean attrs.pageBreakBefore (default false) |
 | Formatting | strong, em, underline, strike marks; link.attrs.href |
 | Lists | ordered_list (nonnegative order, default 1) or bullet_list → list_item → paragraph/heading followed by blocks, including nested lists |
 | Tables | table → table_row → table_cell; colspan 1–1000, positive rowspan bounded by remaining rows; nested blocks |
@@ -219,7 +219,8 @@ The following remain required work, even where the current bridge rejects them:
 - PDF font/shaping coverage and table pagination/cell layout expansion, including
   repeated headers and oversized images. Oversized body/nested/footnote groups
   and explicit cell/note page breaks now continue recursively. Qualify DOCX
-  paragraph break-property import/export without changing SF control semantics.
+  richer paragraph/page properties without changing SF control semantics.
+  Conditional pageBreakBefore import/export now exists separately from controls.
 
 Profile extensions must preserve existing encoded semantics. If a change alters
 meaning, use a new schema version and explicit migration. Never use a new profile
@@ -292,5 +293,25 @@ formats return physical extents. One requested dimension preserves intrinsic
 ratio; neither means 96 DPI. Oversized body/nested/note groups now continue
 recursively, including explicit cell/note boundaries. Aligned sibling breaks
 coalesce; consecutive breaks in one flow preserve distinct pages. Oversized
-images and DOCX paragraph-break interoperability still need work.
+images and broader DOCX visual/Word qualification still need work.
 No SF schema change is required.
+
+
+## Conditional paragraph page starts
+
+Paragraphs/headings can carry attrs.pageBreakBefore=true. The engine field is
+Block.PageBreakBefore (legacy JSON page_break_before). False is the default;
+existing trees retain their meaning, so this additive profile extension does not
+change the schema ID. Unknown attributes/types still reject. This is a conditional
+page-start request, not an alias for an unconditional page_break node. Native
+PDF skips it at page start and propagates that position through nested layout.
+
+DOCX property inheritance resolves to the bool, including explicit cancellation.
+Source style programs are not stored as a second authoritative representation.
+Exported explicit controls use standard paragraph properties with checked
+ignorable metadata to restore their distinct semantics. Empty structural
+paragraphs and default heading bold styling no longer invent SF authored nodes
+or strong marks on our exports. Exact SF comparisons cover controls/properties,
+notes, headings and nested cells; third-party readers can ignore metadata while
+retaining ordinary Word structures. LibreOffice content mitigation is verified,
+while cell/note pagination differs and wider Word qualification remains required.

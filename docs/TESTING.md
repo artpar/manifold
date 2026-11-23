@@ -640,3 +640,59 @@ all original tokens and both images, but cell-break pagination still differs.
 This authors an experiment only, not a production codec or round-trip claim.
 Next implement/qualify paragraph-property import/export while preserving the
 existing forced-event SF semantics. Original fixtures remain unchanged.
+
+
+## Paragraph properties and DOCX control preservation
+
+```sh
+GOWORK=off go test -run 'TestParagraph|TestDOCXParagraph|TestDOCXExplicit|TestDOCXBreakMetadata|TestDOCXHeading|TestDOCXStructural' -count=1
+GOWORK=off go run ./examples/paragraph-breaks
+output/qa-venv/bin/python scripts/verify_paragraph_breaks.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/paragraph-breaks/paragraph-breaks.sf output/paragraph-breaks/independent.sf
+GOWORK=off go test -run '^$' -fuzz '^FuzzDOCXParagraphBreakRoundtrip$' -fuzztime=15s -parallel=2 -timeout=45s
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFParagraphStarts$' -fuzztime=15s -parallel=2 -timeout=45s
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=10s -parallel=2 -timeout=35s
+```
+
+The independent script checks eight native pages: FIRST on one; SECOND on two;
+note bodies on three/four with a real destination from two to three; list first/
+continuation on five/six; cell paragraphs on seven/eight. The first conditional
+property adds no blank first page. Opposing cells stay in their source columns.
+Marks/URI/Word properties/list-boundary metadata and bounds are checked.
+A separate python-docx-authored source, with no manydoc metadata, exercises a
+base style, derived style and explicit cancellation through DOCX -> SF -> PDF.
+It yields three pages with SOURCE_BASE and SOURCE_CANCEL together on page two.
+All eight example pages and three independent-source reflows were inspected.
+Actual ProseMirror reads both SFs at 42 nodes combined.
+
+The whole-SF fuzzer compares exact canonical trees, including marks, controls,
+conditional properties, nested cells and note ownership, without mutating inputs.
+It found the retained empty-cell seed 1968518a8e616e7b; required paragraphs now
+use checked structural metadata instead of adding authored content. Heading
+marks are also retained independently of default heading appearance. Malformed
+metadata cannot hide runs. Tests cover defaults/styles/direct false overrides,
+all six on/off lexical values, duplicate/invalid properties, cyclic inheritance,
+inline split placement and paragraph-only attribute validation. The 15-second
+DOCX run passed 12,060 executions; native conditional table fuzz passed 1,720 in
+15 seconds. Malformed DOCX fuzz, including new property/metadata seeds, passed
+336 executions in 10 seconds. All used two workers. These finite campaigns do
+not establish exhaustive robustness.
+
+Render actual DOCX output using an isolated profile, then add --office to the
+independent verifier. The paragraph example renders to five inspected
+LibreOffice 7.6 pages, retaining every token with no synthetic blank page. The
+old mixed-break example now renders to two inspected pages with all original
+tokens and both images, including NOTE_SIDE_A/NOTE_SIDE_B. The current
+verify_page_breaks.py --office asserts that content mitigation. Historical failed
+three-page output is recorded above; do not rewrite that evidence as a pass.
+Cell/note pagination still differs, so broader Word/producer qualification stays
+open. The QA-only author_paragraph_break_variant.py describes the earlier
+experiment; current production output already uses paragraph properties.
+
+Full tests/race/vet/module verification, host CGO-disabled build/execution and
+diff checks pass (timings in verification.json). All earlier examples were
+regenerated and their structural/geometry/pixel/destination oracles pass; only
+DOCX's intentional property encoding assertion changed. All 28 Poppler text
+comparisons and 51 corpus SF files/9,027 nodes pass. No production dependency
+was added. Remaining acceptance rows, including oversized images, repeated
+headers, richer model/fonts/shaping and a broader real corpus, remain required.

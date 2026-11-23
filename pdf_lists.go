@@ -33,6 +33,9 @@ func (r *pdfRenderer) list(b Block, width, x float64) error {
 	for index, item := range b.Items {
 		size := 11.0
 		first := item.Blocks[0]
+		if err := r.paragraphBreakBefore(first); err != nil {
+			return err
+		}
 		if first.Kind == Heading {
 			size = 26 - float64(first.Level)*2
 		}

@@ -127,21 +127,23 @@ type docxRelation struct {
 	External     bool
 }
 type docxReader struct {
-	ctx                 context.Context
-	files               map[string]*zip.File
-	doc                 *Document
-	styles              map[string]*xmlNode
-	num                 map[string]map[int]docxListLevel
-	inTaggedList        int
-	inNote              int
-	implicitNoteLayout  bool
-	notePropertySources []*xmlNode
-	noteBookmarkIDs     map[string]bool
-	noteBookmarkEnds    map[string]bool
-	noteBookmarkNames   map[string]bool
-	cachedNoteMarks     map[string][]string
-	rangeNumIDs         map[string]bool
-	types               map[string]string
+	ctx                   context.Context
+	files                 map[string]*zip.File
+	doc                   *Document
+	styles                map[string]*xmlNode
+	defaultPPr            *xmlNode
+	defaultParagraphStyle string
+	num                   map[string]map[int]docxListLevel
+	inTaggedList          int
+	inNote                int
+	implicitNoteLayout    bool
+	notePropertySources   []*xmlNode
+	noteBookmarkIDs       map[string]bool
+	noteBookmarkEnds      map[string]bool
+	noteBookmarkNames     map[string]bool
+	cachedNoteMarks       map[string][]string
+	rangeNumIDs           map[string]bool
+	types                 map[string]string
 }
 
 func (r *docxReader) part(name string) ([]byte, error) {
@@ -296,8 +298,21 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 			if e != nil {
 				return nil, e
 			}
+			r.defaultPPr = s.child("docDefaults").child("pPrDefault").child("pPr")
 			for _, v := range s.Children {
 				if v.Name.Local == "style" {
+					if v.attr("type") == "paragraph" && v.attr("default") != "" {
+						on, err := docxOnOff(&xmlNode{Attr: []xml.Attr{{Name: xml.Name{Local: "val"}, Value: v.attr("default")}}})
+						if err != nil {
+							return nil, err
+						}
+						if on {
+							if r.defaultParagraphStyle != "" {
+								return nil, fmt.Errorf("multiple default paragraph styles")
+							}
+							r.defaultParagraphStyle = v.attr("styleId")
+						}
+					}
 					r.styles[v.attr("styleId")] = v
 				}
 			}
@@ -391,6 +406,27 @@ func (r *docxReader) blocks(n *xmlNode, rels map[string]docxRelation, depth int)
 		}
 		switch c.Name.Local {
 		case "p":
+			structural, err := docxStructuralParagraph(n, c)
+			if err != nil {
+				return nil, err
+			}
+			if structural {
+				continue
+			}
+			role, _, err := docxBreakRole(c)
+			if err != nil {
+				return nil, err
+			}
+			if role == "anchor" {
+				continue
+			}
+			if role == "control" {
+				out = append(out, Block{Kind: PageBreak})
+				continue
+			}
+			if role == "before" {
+				out = append(out, Block{Kind: PageBreak})
+			}
 			bs, err := r.paragraph(c, rels)
 			if err != nil {
 				return nil, err
@@ -441,7 +477,7 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 	if ppr != nil {
 		for _, p := range ppr.Children {
 			switch p.Name.Local {
-			case "pStyle", "numPr", "outlineLvl", "sectPr", "keepNext":
+			case "pStyle", "numPr", "outlineLvl", "sectPr", "keepNext", "pageBreakBefore":
 			case "tabs":
 				if !(r.implicitNoteLayout && len(p.Children) == 1 && p.Children[0].Name.Local == "tab" && p.Children[0].attr("val") == "left" && p.Children[0].attr("pos") == "360") {
 					r.doc.warn("paragraph_formatting", "Paragraph property not represented: tabs")
@@ -456,6 +492,19 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 		}
 	}
 	styleID := ppr.child("pStyle").attr("val")
+	before, err := r.paragraphPageBreak(ppr, styleID)
+	if err != nil {
+		return nil, err
+	}
+	role, conditional, err := docxBreakRole(n)
+	if err != nil {
+		return nil, err
+	}
+	if role == "before" || role == "beforeList" {
+		before = conditional
+	}
+	b.PageBreakBefore = before
+	b.docxBeforeList = role == "beforeList"
 	if strings.HasPrefix(strings.ToLower(styleID), "heading") {
 		level, _ := strconv.Atoi(strings.TrimPrefix(strings.ToLower(styleID), "heading"))
 		if level >= 1 && level <= 6 {
@@ -491,7 +540,7 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 		applyRunProps(&base, s.child("rPr"))
 	}
 	applyStyle(styleID)
-	flush := func() { out = append(out, b); b.Runs = nil }
+	flush := func() { out = append(out, b); b.Runs = nil; b.PageBreakBefore = false }
 	skipNoteSeparator := false
 	activeNoteBookmark := ""
 	var activeNoteReference *NoteReference
@@ -521,6 +570,16 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				}
 			}
 			applyRunProps(&style, c.child("rPr"))
+			if value := c.attributeNS(docxNotesNS, "headingBold"); value != "" {
+				if b.Kind != Heading || (value != "0" && value != "1") {
+					return fmt.Errorf("invalid heading bold metadata")
+				}
+				explicit, err := docxOnOff(c.child("rPr").child("b"))
+				if err != nil || explicit != (value == "1") {
+					return fmt.Errorf("heading bold metadata contradicts run properties")
+				}
+				style.Bold = value == "1"
+			}
 		case "hyperlink":
 			if id := c.attr("id"); id != "" {
 				rel, ok := rels[id]
@@ -546,7 +605,7 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			return nil
 		case "br", "cr":
 			if c.attr("type") == "page" {
-				if len(b.Runs) > 0 {
+				if len(b.Runs) > 0 || b.PageBreakBefore {
 					flush()
 				}
 				out = append(out, Block{Kind: PageBreak})
@@ -580,7 +639,7 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				if props := c.all("docPr"); len(props) > 0 {
 					im.Alt = props[0].attr("descr")
 				}
-				if len(b.Runs) > 0 {
+				if len(b.Runs) > 0 || b.PageBreakBefore {
 					flush()
 				}
 				out = append(out, Block{Kind: Picture, Image: im})
@@ -595,7 +654,7 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			if err != nil {
 				return err
 			}
-			if len(b.Runs) > 0 {
+			if len(b.Runs) > 0 || b.PageBreakBefore {
 				flush()
 			}
 			out = append(out, bs...)

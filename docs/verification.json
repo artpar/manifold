@@ -1087,5 +1087,103 @@
       "repeated headers",
       "all other unfinished ACCEPTANCE.md rows"
     ]
+  },
+  "paragraph_property_milestone": {
+    "date": "2026-11-23",
+    "goal_complete": false,
+    "prior_checkpoint": "7d83b91",
+    "go_tests": {
+      "result": "passed",
+      "library_seconds": 4.155
+    },
+    "race": {
+      "result": "passed",
+      "library_seconds": 48.094
+    },
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host": "built and executed",
+    "diff_check": "passed",
+    "docx_roundtrip_fuzz": {
+      "seconds": 15,
+      "workers": 2,
+      "executions": 12060,
+      "result": "passed",
+      "retained_input": "testdata/fuzz/FuzzDOCXParagraphBreakRoundtrip/1968518a8e616e7b"
+    },
+    "pdf_conditional_fuzz": {
+      "seconds": 15,
+      "workers": 2,
+      "executions": 1720,
+      "result": "passed"
+    },
+    "malformed_docx_fuzz": {
+      "seconds": 10,
+      "workers": 2,
+      "executions": 336,
+      "result": "passed with property/structural metadata seeds; finite, not exhaustive"
+    },
+    "api": "Block.PageBreakBefore; SF paragraph/heading attrs.pageBreakBefore default false; distinct from unconditional page_break",
+    "independent_script": "scripts/verify_paragraph_breaks.py",
+    "native": {
+      "pages": 8,
+      "first_page_has_no_extra_blank": true,
+      "note_source_and_target": [
+        2,
+        3
+      ],
+      "note_pages": [
+        3,
+        4
+      ],
+      "list_pages": [
+        5,
+        6
+      ],
+      "cell_pages": [
+        7,
+        8
+      ],
+      "visual": "all eight pages inspected"
+    },
+    "independent_source": {
+      "producer": "python-docx",
+      "path": "output/paragraph-breaks/independent.docx",
+      "properties": "direct/base/derived/cancelled",
+      "reflow_pages": 3,
+      "visual": "all three reflow pages inspected"
+    },
+    "docx": {
+      "controls": "standard paragraph properties with checked ignorable metadata restore unconditional intent",
+      "blank_control_roundtrips": "leading/consecutive/trailing/list boundaries passed",
+      "libreoffice_version": "7.6",
+      "paragraph_example_pages": 5,
+      "mixed_example_pages": 2,
+      "mixed_missing_tokens": [],
+      "mixed_images": 2,
+      "visual": "all seven pages inspected; content mitigation passed, cell/note pagination differs"
+    },
+    "preservation_fixes": [
+      "heading default does not invent explicit strong marks",
+      "structural empty/table-tail paragraphs do not invent authored content",
+      "metadata cannot discard actual content"
+    ],
+    "prosemirror": {
+      "new_example_nodes": 42,
+      "corpus_files": 51,
+      "corpus_nodes": 9027,
+      "result": "passed"
+    },
+    "poppler_comparisons": {
+      "passed": 28,
+      "total": 28
+    },
+    "production_dependencies_added": false,
+    "remaining": [
+      "oversized image height fitting",
+      "repeated table headers",
+      "broader Word/producer visual qualification",
+      "other unfinished ACCEPTANCE.md rows"
+    ]
   }
 }

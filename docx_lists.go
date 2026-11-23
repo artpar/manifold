@@ -43,11 +43,15 @@ func (w *docxWriter) list(b Block, depth int) (string, error) {
 	w.bookmarks++
 	listBookmark := w.bookmarks
 	fmt.Fprintf(&out, `<w:bookmarkStart w:id="%d" w:name="mdlist1_%s_%d_%d"/>`, listBookmark, b.List, listStart(b), listBookmark)
-	for _, item := range b.Items {
+	for itemIndex, item := range b.Items {
 		w.bookmarks++
 		itemBookmark := w.bookmarks
 		fmt.Fprintf(&out, `<w:bookmarkStart w:id="%d" w:name="mditem1_%d"/>`, itemBookmark, itemBookmark)
 		blocks := append([]Block(nil), item.Blocks...)
+		if itemIndex == 0 && b.docxBeforeList {
+			blocks[0].docxBeforeList = true
+			blocks[0].docxExplicitBreakBefore = true
+		}
 		blocks[0].docxNumberID = id
 		blocks[0].docxNumberLevel = depth
 		for i := 1; i < len(blocks); i++ {
@@ -121,6 +125,13 @@ func (r *docxReader) taggedList(n *xmlNode, rels map[string]docxRelation, depth 
 		}
 		if len(bs) == 0 || (bs[0].Kind != Paragraph && bs[0].Kind != Heading) || bs[0].docxList == nil || bs[0].docxList.Definition.Kind != b.List {
 			return Block{}, fmt.Errorf("list item range requires a matching numbered paragraph")
+		}
+		if bs[0].docxBeforeList {
+			if len(b.Items) > 0 {
+				return Block{}, fmt.Errorf("list break metadata requires first item")
+			}
+			b.docxBeforeList = true
+			bs[0].docxBeforeList = false
 		}
 		ref := bs[0].docxList
 		if ref.Definition.Start != start {
@@ -359,6 +370,9 @@ func (r *docxReader) foldLists(bs []Block, counters map[string]*docxListCounter,
 	var out []Block
 	for index := 0; index < len(bs); {
 		b := bs[index]
+		if b.docxBeforeList && b.Kind != ListBlock {
+			return nil, fmt.Errorf("list break metadata outside an explicit list range")
+		}
 		if b.docxList != nil {
 			if r.rangeNumIDs[b.docxList.ID] {
 				return nil, fmt.Errorf("numbering identity mixed between explicit ranges and unmarked paragraphs")
@@ -397,6 +411,10 @@ func (r *docxReader) foldLists(bs []Block, counters map[string]*docxListCounter,
 			if err != nil {
 				return nil, err
 			}
+		}
+		if b.docxBeforeList {
+			out = append(out, Block{Kind: PageBreak})
+			b.docxBeforeList = false
 		}
 		out = append(out, b)
 		index++

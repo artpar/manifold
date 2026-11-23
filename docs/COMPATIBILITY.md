@@ -4,7 +4,7 @@ This initial implementation targets explicit, testable document operations.
 Passing the included corpus is not a guarantee for arbitrary customer files.
 
 The active completion goal is broader than this initial support table. Required
-work such as PDF structured recovery, DOCX break-property interoperability and richer footnote layout is unfinished;
+work such as PDF structured recovery, broader DOCX visual qualification and richer footnote layout is unfinished;
 current rejection behavior must not be read as an exemption from that goal.
 
 ## Format support
@@ -198,9 +198,14 @@ blank page and needs no separator height. Trailing breaks create a reusable fres
 page. Standard DOCX break runs persist, but the mixed cell/note-break fixture
 failed LibreOffice 7.6 visual qualification: pagination differs and two note side
 texts disappear despite their presence in OOXML/native PDF. A QA paragraph
-pageBreakBefore variant recovers all texts/images but still differs in cell
-pagination. Production paragraph-property import/export remains required work;
-this observation is not a supported loss or a Word-fidelity claim.
+pageBreakBefore variant recovered all texts/images. Production now uses the
+standard property with checked ignorable control metadata, and the actual mixed
+DOCX retains both side texts and both images in LibreOffice. Paragraph property
+import/export preserves defaults/inheritance/false overrides separately from
+unconditional controls. Leading/repeated/trailing controls and list boundaries
+round trip; conditional requests already at page start add no blank page in
+native PDF. LibreOffice still differs in cell/note pagination. This is a content
+mitigation, not Word-equivalent layout or broad real-export qualification.
 The reader diagnoses Word's lowerRoman-vs-OOXML decimal ambiguity when endnote
 format is omitted. DOCX customMarkFollows retains marks encoded as literal text but
 normalizes the automatic reference, with a diagnostic; it is not a custom-label
@@ -269,6 +274,19 @@ bound inference. Border appearance, authorial/header semantics, arbitrary curves
 occlusion, double borders and complex orientations are not established by this
 milestone. Native PDF output now supports measured image/nested cells and
 recursive oversized body/nested/footnote group continuation and explicit
-cell/note page boundaries. Oversized images and DOCX break-property
-interoperability still need work. DOCX/SF preserve imported
+cell/note page boundaries and conditional paragraph starts. Oversized images and
+broader DOCX visual/Word qualification still need work. DOCX/SF preserve imported
 cell content, with rendered image sizes fitted to the available width.
+
+
+## Conditional paragraph starts
+
+`Block.PageBreakBefore` (SF attrs.pageBreakBefore) applies only to paragraphs and
+headings. It requests a new page unless already at the first flow position;
+page_break always advances. DOCX resolves docDefaults, default/named styles and
+direct on/off overrides. PDF propagates page-start state through body, lists,
+cells and notes. Page-start properties in PDF running content reject rather than
+changing pagination recursively. Other paragraph/page properties remain required
+expansion. Unmarked heading bold defaults and structural empty-cell paragraphs
+now round trip without inventing explicit SF marks/content; external documents
+without our metadata still import their resolved styles/content normally.

@@ -135,7 +135,7 @@ func (r *pdfRenderer) ensureWithNotes(height float64, keys []noteKey) error {
 		remainingStarts := minimumStarts
 		for _, chunk := range additions {
 			remainingStarts -= minimumPDFFragmentHeight(chunk.lines[0])
-			head, tail, used, forced, err := r.takeFragments(chunk.lines, capacity-remainingStarts)
+			head, tail, used, forced, err := r.takeFragments(chunk.lines, capacity-remainingStarts, false)
 			if err != nil {
 				return err
 			}
@@ -230,7 +230,7 @@ func (r *pdfRenderer) nextPage(bodyNeeded bool) error {
 				pending = pending[1:]
 				continue
 			}
-			head, tail, used, forced, err := r.takeFragments(chunk.lines, left)
+			head, tail, used, forced, err := r.takeFragments(chunk.lines, left, len(chunks) == 0)
 			if err != nil {
 				return err
 			}
@@ -301,6 +301,9 @@ func (r *pdfRenderer) finishNotes() error {
 		if blocks[0].Kind == Heading {
 			size = 26 - float64(blocks[0].Level)*2
 			minimum = size * 1.4 * 2
+		}
+		if err := r.paragraphBreakBefore(blocks[0]); err != nil {
+			return err
 		}
 		if err := r.ensure(minimum); err != nil {
 			return err

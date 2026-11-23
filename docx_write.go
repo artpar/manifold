@@ -90,7 +90,7 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 		}
 		w.rels = mainRels
 		id := w.addRel(strings.TrimSuffix(v.name, "1.xml"), v.name, false)
-		w.parts["word/"+v.name] = []byte(xmlHeader + `<w:` + v.root + wordNamespaces + `>` + part + `</w:` + v.root + `>`)
+		w.parts["word/"+v.name] = []byte(xmlHeader + `<w:` + v.root + wordNamespaces + docxMetadataNamespaces + `>` + part + `</w:` + v.root + `>`)
 		section += `<w:` + v.ref + ` w:type="default" r:id="` + id + `"/>`
 	}
 	if err := w.writeNoteParts(d.Notes); err != nil {
@@ -102,7 +102,7 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 		}
 	}
 	section += fmt.Sprintf(`<w:pgSz w:w="%.0f" w:h="%.0f"/><w:pgMar w:top="%.0f" w:right="%.0f" w:bottom="%.0f" w:left="%.0f" w:header="360" w:footer="360"/></w:sectPr>`, wid*20, hei*20, mar*20, mar*20, mar*20, mar*20)
-	w.parts["word/document.xml"] = []byte(xmlHeader + `<w:document` + wordNamespaces + `><w:body>` + body + section + `</w:body></w:document>`)
+	w.parts["word/document.xml"] = []byte(xmlHeader + `<w:document` + wordNamespaces + docxMetadataNamespaces + `><w:body>` + body + section + `</w:body></w:document>`)
 	w.parts["word/styles.xml"] = []byte(xmlHeader + `<w:styles xmlns:w="` + wordNS + `"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Noto Sans" w:hAnsi="Noto Sans"/><w:sz w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>` + headingStyles() + noteStyles() + `</w:styles>`)
 	w.parts["word/numbering.xml"] = []byte(w.numberingXML())
 	relsHead := xmlHeader + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`
@@ -151,17 +151,47 @@ func headingStyles() string {
 func (w *docxWriter) blocks(blocks []Block) (string, error) { return w.blocksAt(blocks, 0) }
 func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 	var out strings.Builder
-	for _, b := range legacyLists(blocks) {
+	bs := legacyLists(blocks)
+	for i := 0; i < len(bs); i++ {
+		b := bs[i]
 		if err := w.ctx.Err(); err != nil {
 			return "", err
 		}
+		if b.Kind == PageBreak {
+			if i == 0 {
+				// An initial conditional property alone cannot request an empty
+				// first page. This checked empty anchor establishes that page.
+				out.WriteString(`<w:p md:breakRole="anchor"/>`)
+			}
+			if i+1 < len(bs) && (bs[i+1].Kind == Paragraph || bs[i+1].Kind == Heading || bs[i+1].Kind == ListBlock) {
+				i++
+				b = bs[i]
+				b.docxExplicitBreakBefore = true
+				b.docxBeforeList = b.Kind == ListBlock
+			} else {
+				out.WriteString(`<w:p md:breakRole="control"><w:pPr><w:pageBreakBefore/></w:pPr></w:p>`)
+				continue
+			}
+		}
 		switch b.Kind {
-		case PageBreak:
-			out.WriteString(`<w:p><w:r><w:br w:type="page"/></w:r></w:p>`)
 		case Paragraph, Heading:
-			out.WriteString(`<w:p><w:pPr>`)
+			out.WriteString(`<w:p`)
+			if b.docxExplicitBreakBefore {
+				if b.docxBeforeList {
+					out.WriteString(` md:breakRole="beforeList"`)
+				} else {
+					out.WriteString(` md:breakRole="before"`)
+				}
+				if b.PageBreakBefore {
+					out.WriteString(` md:conditionalBefore="1"`)
+				}
+			}
+			out.WriteString(`><w:pPr>`)
 			if b.Kind == Heading {
 				fmt.Fprintf(&out, `<w:pStyle w:val="Heading%d"/>`, b.Level)
+			}
+			if b.PageBreakBefore || b.docxExplicitBreakBefore {
+				out.WriteString(`<w:pageBreakBefore/>`)
 			}
 			if b.docxNumberID > 0 {
 				fmt.Fprintf(&out, `<w:numPr><w:ilvl w:val="%d"/><w:numId w:val="%d"/></w:numPr>`, b.docxNumberLevel, b.docxNumberID)
@@ -199,7 +229,15 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 						out.WriteString(`<w:hyperlink r:id="` + id + `">`)
 					}
 				}
-				out.WriteString(`<w:r><w:rPr>`)
+				out.WriteString(`<w:r`)
+				if b.Kind == Heading {
+					if r.Bold {
+						out.WriteString(` md:headingBold="1"`)
+					} else {
+						out.WriteString(` md:headingBold="0"`)
+					}
+				}
+				out.WriteString(`><w:rPr>`)
 				if r.Note != nil {
 					out.WriteString(`<w:rStyle w:val="` + strings.Title(r.Note.Kind) + `Reference"/>`)
 				}

@@ -95,6 +95,7 @@ GOWORK=off go run ./examples/report -out output
 The SF-first examples exercise merged/nested cells, images, lists and rich notes:
 
 ```sh
+GOWORK=off go run ./examples/paragraph-breaks
 GOWORK=off go run ./examples/page-breaks
 GOWORK=off go run ./examples/page-breaks -empty-note -out output/page-breaks/empty
 GOWORK=off go run ./examples/recursive-tables
@@ -133,9 +134,11 @@ including images and nested tables. PDF footnotes continue between measured
 fragments. Oversized body-table groups continue with their cell flows and note
 references, including nested tables and oversized merged footnote tables.
 Explicit cell/note breaks propagate through native PDF layout, including blank
-pages. Oversized images still require expansion. DOCX break runs persist, but the
-mixed note-table example exposes a LibreOffice visual loss; see compatibility
-notes for the experimental paragraph-break mitigation. Images fit their container.
+pages. `Block.PageBreakBefore` requests a paragraph page start without adding a
+blank page when already at page start; it is distinct from `PageBreak`. DOCX uses
+paragraph properties with checked metadata to preserve explicit controls and
+mitigate LibreOffice content loss. Cell/note pagination still differs between
+readers. Oversized images require expansion; images currently fit their width.
 
 The Go engine model starts in `document.go`; the canonical SF tree is in
 `structured.go`. `Read` and `Write` are

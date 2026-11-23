@@ -123,7 +123,7 @@ func writePDF(ctx context.Context, out io.Writer, d *Document) error {
 	// pagination or dropping nontext content.
 	for _, blocks := range [][]Block{d.Headers, d.Footers} {
 		for _, b := range blocks {
-			if (b.Kind != Paragraph && b.Kind != Heading) || b.List != "" {
+			if (b.Kind != Paragraph && b.Kind != Heading) || b.List != "" || b.PageBreakBefore {
 				return fmt.Errorf("%w: PDF header/footer must contain paragraphs", ErrUnsupported)
 			}
 		}
@@ -187,6 +187,9 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 				return err
 			}
 		case Paragraph, Heading:
+			if err := r.paragraphBreakBefore(b); err != nil {
+				return err
+			}
 			size := 11.0
 			runs := append([]Run(nil), b.Runs...)
 			if b.Kind == Heading {
@@ -238,4 +241,11 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 		}
 	}
 	return r.pdf.Error()
+}
+
+func (r *pdfRenderer) paragraphBreakBefore(b Block) error {
+	if b.PageBreakBefore && r.y > r.margin+1e-7 {
+		return r.nextPage(true)
+	}
+	return nil
 }

@@ -63,20 +63,25 @@ const (
 )
 
 type Block struct {
-	Kind  Kind       `json:"kind"`
-	Runs  []Run      `json:"runs,omitempty"`
-	Level int        `json:"level,omitempty"`
-	List  string     `json:"list,omitempty"` // bullet or number
-	Rows  []Row      `json:"rows,omitempty"`
-	Image *Image     `json:"image,omitempty"`
-	Items []ListItem `json:"items,omitempty"`
+	// PageBreakBefore starts a paragraph/heading on a new page unless already
+	// at the page's first flow position. PageBreak blocks always advance a page.
+	PageBreakBefore bool       `json:"page_break_before,omitempty"`
+	Kind            Kind       `json:"kind"`
+	Runs            []Run      `json:"runs,omitempty"`
+	Level           int        `json:"level,omitempty"`
+	List            string     `json:"list,omitempty"` // bullet or number
+	Rows            []Row      `json:"rows,omitempty"`
+	Image           *Image     `json:"image,omitempty"`
+	Items           []ListItem `json:"items,omitempty"`
 	// Start is the first ordered-list value; nil means one. Zero is valid.
-	Start           *int        `json:"start,omitempty"`
-	Source          *SourceInfo `json:"source,omitempty"`
-	docxList        *docxListRef
-	docxNumberID    int
-	docxNumberLevel int
-	docxIndent      int
+	Start                   *int        `json:"start,omitempty"`
+	Source                  *SourceInfo `json:"source,omitempty"`
+	docxList                *docxListRef
+	docxNumberID            int
+	docxNumberLevel         int
+	docxIndent              int
+	docxExplicitBreakBefore bool
+	docxBeforeList          bool
 }
 
 // ListItem owns its ordered blocks, including continuation paragraphs and nested lists.
@@ -309,6 +314,9 @@ func (d *Document) Validate() error {
 		for _, b := range bs {
 			if err := b.Source.validate(d.Pages); err != nil {
 				return err
+			}
+			if b.PageBreakBefore && b.Kind != Paragraph && b.Kind != Heading {
+				return errors.New("page break before requires paragraph or heading")
 			}
 			if b.Kind != ListBlock && (len(b.Items) > 0 || b.Start != nil) {
 				return errors.New("list items/start require a list block")

@@ -32,12 +32,15 @@ func minimumPDFFragmentHeight(f pdfFragment) float64 {
 // Selection is pure with respect to the measured input and page state. The
 // returned tail owns its continuation cursors; retries at a smaller capacity
 // start from the same original flows, including the same nested note references.
-func (r *pdfRenderer) takeFragments(flow []pdfFragment, capacity float64) (head, tail []pdfFragment, used float64, forced bool, err error) {
+func (r *pdfRenderer) takeFragments(flow []pdfFragment, capacity float64, atStart bool) (head, tail []pdfFragment, used float64, forced bool, err error) {
 	for i, f := range flow {
 		if err = r.ctx.Err(); err != nil {
 			return nil, nil, 0, false, err
 		}
 		if f.Break {
+			if f.Conditional && atStart && used <= 1e-7 {
+				continue
+			}
 			return head, flow[i+1:], used, true, nil
 		}
 		if f.Height <= capacity-used+1e-7 && (f.Table == nil || f.Table.cursor == nil && !f.Table.group.breaks || f.Table.page != nil) {
@@ -53,9 +56,9 @@ func (r *pdfRenderer) takeFragments(flow []pdfFragment, capacity float64) (head,
 		if f.Table.group.breaks {
 			budget = capacity - used
 		}
-		page, next, e := r.planTablePage(f.Table.table, f.Table.group, cursor, budget)
+		page, next, e := r.planTablePage(f.Table.table, f.Table.group, cursor, budget, atStart && used <= 1e-7)
 		if e == nil && !page.forced && next.row == f.Table.group.end && page.height+f.Table.gap > capacity-used+1e-7 {
-			page, next, e = r.planTablePage(f.Table.table, f.Table.group, cursor, capacity-used-f.Table.gap)
+			page, next, e = r.planTablePage(f.Table.table, f.Table.group, cursor, capacity-used-f.Table.gap, atStart && used <= 1e-7)
 		}
 		if e != nil {
 			return nil, nil, 0, false, e
@@ -104,7 +107,7 @@ func (r *pdfRenderer) takeFragments(flow []pdfFragment, capacity float64) (head,
 func (r *pdfRenderer) measureTableRemainder(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor) (float64, error) {
 	height := 0.0
 	for cursor.row < g.end {
-		page, next, err := r.planTablePage(plan, g, cursor, math.Inf(1))
+		page, next, err := r.planTablePage(plan, g, cursor, math.Inf(1), true)
 		if err != nil {
 			return 0, err
 		}

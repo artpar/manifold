@@ -13,14 +13,15 @@ import (
 // measured page through recursive continuation. Text lines remain 14pt in the
 // compact cell/note style. Measurement has no drawing or page-admission effects.
 type pdfFragment struct {
-	Line    pdfLine
-	Indent  float64
-	Prefix  pdfLine
-	PrefixX float64
-	Height  float64
-	Image   *pdfImageLayout
-	Table   *pdfTableSlice
-	Break   bool
+	Line        pdfLine
+	Indent      float64
+	Prefix      pdfLine
+	PrefixX     float64
+	Height      float64
+	Image       *pdfImageLayout
+	Table       *pdfTableSlice
+	Break       bool
+	Conditional bool
 }
 type pdfImageLayout struct {
 	image         *Image
@@ -126,6 +127,9 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent float64) ([]pdfFragment
 		case PageBreak:
 			flow = append(flow, pdfFragment{Break: true})
 		case Paragraph, Heading:
+			if b.PageBreakBefore {
+				flow = append(flow, pdfFragment{Break: true, Conditional: true})
+			}
 			runs := append([]Run(nil), b.Runs...)
 			if b.Kind == Heading {
 				for i := range runs {

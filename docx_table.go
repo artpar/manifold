@@ -91,7 +91,7 @@ func (r *docxReader) table(n *xmlNode, rels map[string]docxRelation, depth int) 
 
 func emptyMergeContinuation(bs []Block) bool {
 	for _, b := range bs {
-		if b.Kind != Paragraph || b.List != "" {
+		if b.Kind != Paragraph || b.List != "" || b.PageBreakBefore {
 			return false
 		}
 		for _, run := range b.Runs {
@@ -162,8 +162,10 @@ func (w *docxWriter) table(b Block) (string, error) {
 					return "", err
 				}
 				out.WriteString(v)
-				if len(c.Blocks) == 0 || c.Blocks[len(c.Blocks)-1].Kind == Table {
-					out.WriteString(`<w:p/>`)
+				if len(c.Blocks) == 0 {
+					out.WriteString(`<w:p md:emptyCell="1"/>`)
+				} else if c.Blocks[len(c.Blocks)-1].Kind == Table {
+					out.WriteString(`<w:p md:tableTail="1"/>`)
 				}
 			} else {
 				out.WriteString(`<w:p/>`)
