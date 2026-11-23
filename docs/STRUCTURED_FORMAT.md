@@ -139,8 +139,8 @@ flow onto labelled continuation-only pages before body flow resumes; repeated
 references link to the single first body. Endnotes use a separate measured section
 and the normal block renderer. Rich endnotes inherit its table/image/layout limits.
 Footnote images/tables use shared cell fragments and continue between text lines
-or connected table-row groups. Oversized atomic fragments and explicit cell/note
-page breaks remain required continuation work. Custom separator content, nondecimal note numbering, restart/start
+or recursively split table bands. Oversized images and explicit cell/note page
+breaks remain required continuation work. Custom separator content, nondecimal note numbering, restart/start
 or placement changes are diagnosed on DOCX import; custom marks encoded as text remain literal
 text alongside the normalized reference, with an explicit diagnostic. Symbol-font
 glyph runs reject until an explicit font-to-Unicode mapping is available. The omitted
@@ -198,22 +198,24 @@ sum of their row heights. Connected groups that fit with their note starts stay
 on one page. Oversized body groups continue using per-cell flow cursors and
 page-local reference admission. Interior borders retain logical row-span
 ownership; physical page fragments close their borders and add continuation
-padding. Oversized nested groups inside cells/footnotes still need recursive
-splitting and reject today. Original SF rows/spans/blocks remain unchanged.
+padding. Oversized nested groups inside cells/footnotes now supply smaller bands
+recursively, retaining their own immutable row/cell cursors. Footnote starts use
+a minimum legal band rather than the full merged group. Original SF
+rows/spans/blocks remain unchanged; no profile version change is needed.
 
 ## Required unfinished expansion
 
 This is an initial SF milestone, not fulfillment of the active completion goal.
 The following remain required work, even where the current bridge rejects them:
 
-- Oversized rich PDF note fragments and richer note numbering/separator/layout options.
+- Oversized PDF image atoms and richer note numbering/separator/layout options.
 - Font sizes/families/colors and richer page settings.
 - Broader PDF structure recovery, internal destinations and inverse ParentTree
   validation. Positions/assets/pages and explicit/inferred provenance now exist;
   more complex layouts and broader real exports still need qualification.
 - PDF font/shaping coverage and table pagination/cell layout expansion, including
-  recursive splitting of oversized nested/footnote row groups and explicit cell
-  page breaks. Oversized ordinary body groups now continue.
+  explicit cell/note page breaks and repeated headers. Oversized body/nested/
+  footnote groups now continue recursively.
 
 Profile extensions must preserve existing encoded semantics. If a change alters
 meaning, use a new schema version and explicit migration. Never use a new profile
@@ -283,5 +285,6 @@ can carry boundary provenance without invented text. Native PDF rendering of
 image/nested cells now uses measured fragments. SF retains preferred image sizes;
 DOCX/PDF fit images to their available container width, so imported rendered
 formats return physical extents. One requested dimension preserves intrinsic
-ratio; neither means 96 DPI. Oversized body groups now continue; nested/note
-row groups and explicit cell/note page breaks still need recursive continuation. No SF schema change is required.
+ratio; neither means 96 DPI. Oversized body/nested/note groups now continue
+recursively. Explicit cell/note page breaks and oversized images still need work.
+No SF schema change is required.

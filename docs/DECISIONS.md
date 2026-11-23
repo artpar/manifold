@@ -472,3 +472,29 @@ an overly strict new test assertion that early and late notes always occupy
 different pages. The actual contract is matching reference/body page and
 nondecreasing reference order; the fixed small-page fixture separately verifies
 distinct target pages. No document fixture or original expected content changed.
+
+
+## Select nested table bands recursively before drawing
+
+Reuse the body table cursor/planner inside fragment selection. Return a measured
+head plus an immutable continuation tail; only the head's actual references
+participate in admission. Calculate a legal first-band minimum recursively so a
+note can start with an oversized merged table without reserving the whole group.
+Text/images stay atomic; final table spacing stays with the last part. No SF
+schema extension or alternate persisted layout tree is needed.
+
+Original offsets underestimate remaining height after continuation padding.
+Remeasure the remainder without a page limit before reporting its height to a
+parent. Otherwise that parent can allocate too little, producing two closed
+pieces of a nested merged frame on one physical page. Let same-row bands combine
+inside a single page plan. Independent checks require exactly one top/bottom
+pair per spanning frame/page, not just retained text. Measurement/selection uses
+context checks and no page admission or image-resource registration.
+
+The new canonical fixture has three nested body tables and two levels in a rich
+footnote. Native PDF retains frame ownership, content order, pixels and links
+across seven pages. XML/python-docx retain DOCX merges/media. LibreOffice's six
+rendered pages retain every token/image within bounds but visibly flatten note
+tables. Record that reader interoperability limit; do not flatten valid SF/OOXML
+to make a visual oracle pass. Broader Word/producer qualification remains required.
+Explicit cell/note breaks and oversized image atoms remain unfinished work.

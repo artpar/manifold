@@ -21,7 +21,49 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: oversized body-table continuation
+## Latest milestone: recursive table and footnote continuation
+
+- `pdf_fragment_continue.go` selects measured prefixes and immutable continuation
+  tails. A table fragment can supply a smaller page band to its containing cell
+  or note, recursively. Body and footnote placement use the same selection path;
+  no SF/public model change or production dependency was needed.
+- Partial tables retain their logical row/cell cursor, remaining content, final
+  spacing and original plan. Only the selected head's references enter admission.
+  Note-start reservation uses the minimum legal nested band rather than demanding
+  the whole merged group. A footnote can begin with an oversized table directly.
+- Remaining table height is remeasured without a page limit, accounting for
+  continuation padding. Parents then allocate enough space instead of drawing
+  several closed pieces of one nested merged cell on the same physical page.
+  Planning can combine same-row bands before drawing one enclosing frame.
+- `examples/recursive-tables/document.sf` exercises three body table levels with
+  combined merges, a long adjoining cell, two delayed note references and two
+  images. Its late note contains an oversized merged table and another merged
+  table inside that cell. Independent pypdf/MuPDF/python-docx checks verify seven
+  native pages, exact column ownership, one top/bottom pair for each spanning
+  frame per page, original flow order/marks/URIs, pixels/placements and actual
+  reference destinations on pages one/three. All seven native pages were inspected.
+- The generated DOCX retains all nested merges, media and note structures in
+  independent XML checks. LibreOffice 7.6 rendered six inspected pages with all
+  original tokens and two images within bounds, but flattened footnote tables.
+  That observed interoperability limit is not a note-table visual fidelity pass;
+  broader Word/producer qualification remains required. No fixtures were weakened.
+- Full tests (3.589s library), race (50.447s library), vet, module verification,
+  CGO-disabled host CLI build/execution and diff checks pass. Recursive layout
+  fuzz passed 1,100 executions in 20 seconds with two workers. Regenerated body
+  continuation, rich-cell/note, normal/five-page note and seven-rectangle merged
+  examples pass unchanged. All 28 Poppler comparisons, the 51-file/9,027-node
+  ProseMirror corpus and the new 175-node SF example pass.
+- Prior verified work and aligned knowledge-transfer docs were committed as
+  `a5657b8`. This recursive milestone is committed with its tests/examples/docs;
+  use `git log` for the current checkpoint. Generated output remains ignored.
+
+The goal remains incomplete. Next implement explicit cell/footnote page breaks,
+then oversized image handling, repeated table headers and the remaining
+ACCEPTANCE.md requirements. Rich fonts/shaping, page/running-content semantics,
+broader PDF recovery and a representative real-export corpus are still required.
+No external blocker prevents continuing.
+
+## Earlier milestone: oversized body-table continuation
 
 - `pdf_table_continue.go` plans oversized body-table groups into physical page
   bands. Each active cell owns its unconsumed flow; row/column spans, text/list
@@ -569,17 +611,23 @@ module access. The go.mod selects Go 1.25; do not force an older local toolchain
 
 ## Next work (required for the active goal)
 
-No external blocker currently prevents development. Oversized body-table groups
-now continue with per-cell flow cursors and page-local note reservations. Next
-make oversized nested table/footnote row groups recursively splittable, retaining
-cell ownership and correct note admission. Then add explicit cell/footnote page
-breaks, repeated headers and the remaining ACCEPTANCE.md rows. Oversized image
-atoms still reject explicitly. These are required unfinished capabilities.
+No external blocker currently prevents development. Nested body/footnote tables
+now split recursively, with immutable cell-flow cursors and page-local note
+reservation. Next represent explicit page breaks in the fragment flow, propagate
+forced boundaries through parent table cursors and note continuation, and verify
+other cells stay in order. Then implement oversized image handling, repeated
+headers and the other ACCEPTANCE.md rows. The LibreOffice note-table flattening
+observation needs broader producer/Word qualification, not silently changed SF
+or OOXML content. Required unfinished capabilities remain in the audit.
 
 Next concrete commands:
 
 ```sh
-rg -n 'pdfFragment|pdfTableCursor|planTablePage|ensureWithNotes' pdf_cell_layout.go pdf_table_continue.go pdf_notes.go
+rg -n 'PageBreak|takeFragments|minimumPDFFragmentHeight|planTablePage' pdf_cell_layout.go pdf_fragment_continue.go pdf_table_continue.go pdf_notes.go
+GOWORK=off go test -run 'TestPDFRecursive|TestRecursiveTable' -count=1
+GOWORK=off go run ./examples/recursive-tables
+output/qa-venv/bin/python scripts/verify_recursive_tables.py
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFRecursiveContinuation$' -fuzztime=20s -parallel=2 -timeout=50s
 GOWORK=off go test -run 'TestPDFTableContinuation|TestTableContinuation|FuzzPDFTableContinuation' -count=1
 GOWORK=off go run ./examples/table-continuation
 output/qa-venv/bin/python scripts/verify_table_continuation.py

@@ -9,9 +9,9 @@ import (
 	"github.com/phpdave11/gofpdf"
 )
 
-// A fragment is an indivisible placement unit. Text lines remain 14pt in the
-// compact cell/note style; images and connected table row groups have measured
-// heights. No drawing or page admission happens during measurement.
+// Text/image fragments are indivisible. A table fragment can supply a smaller
+// measured page through recursive continuation. Text lines remain 14pt in the
+// compact cell/note style. Measurement has no drawing or page-admission effects.
 type pdfFragment struct {
 	Line    pdfLine
 	Indent  float64
@@ -43,8 +43,11 @@ type pdfTableGroup struct {
 	keys                    []noteKey
 }
 type pdfTableSlice struct {
-	table *pdfTableLayout
-	group pdfTableGroup
+	table  *pdfTableLayout
+	group  pdfTableGroup
+	cursor *pdfTableCursor // nil for an original, unsplit group
+	page   *pdfTablePage   // an immutable, measured placement selected for drawing
+	gap    float64         // original trailing spacing, retained by the last part
 }
 
 func flowHeight(flow []pdfFragment) float64 {
@@ -59,24 +62,15 @@ func flowNoteKeys(flow []pdfFragment) []noteKey {
 	for _, f := range flow {
 		keys = append(keys, lineNoteKeys(f.Line)...)
 		if f.Table != nil {
-			keys = append(keys, f.Table.group.keys...)
+			if f.Table.page != nil {
+				keys = append(keys, f.Table.page.keys...)
+			} else {
+				keys = append(keys, f.Table.group.keys...)
+			}
 		}
 	}
 	return keys
 }
-func takePDFFragments(flow []pdfFragment, height float64) (int, float64) {
-	used := 0.0
-	n := 0
-	for _, f := range flow {
-		if used+f.Height > height+1e-7 {
-			break
-		}
-		used += f.Height
-		n++
-	}
-	return n, used
-}
-
 func (r *pdfRenderer) measureImage(im *Image, width float64) (*pdfImageLayout, error) {
 	if err := r.ctx.Err(); err != nil {
 		return nil, err
@@ -161,7 +155,7 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent float64) ([]pdfFragment
 				if i == len(plan.groups)-1 {
 					height += 8
 				}
-				flow = append(flow, pdfFragment{Table: &pdfTableSlice{plan, g}, Indent: indent, Height: height})
+				flow = append(flow, pdfFragment{Table: &pdfTableSlice{table: plan, group: g, gap: height - g.height}, Indent: indent, Height: height})
 			}
 		default:
 			return nil, fmt.Errorf("%w: explicit page breaks inside PDF cells/footnotes require cell continuation layout", ErrUnsupported)
@@ -183,7 +177,13 @@ func (r *pdfRenderer) drawFragment(f pdfFragment, x, y float64) error {
 		}
 	}
 	if f.Table != nil {
-		if err := r.paintTableGroup(f.Table.table, f.Table.group, x+f.Indent, y); err != nil {
+		var err error
+		if f.Table.page != nil {
+			err = r.paintTablePage(f.Table.table, *f.Table.page, x+f.Indent, y)
+		} else {
+			err = r.paintTableGroup(f.Table.table, f.Table.group, x+f.Indent, y)
+		}
+		if err != nil {
 			return err
 		}
 	}

@@ -53,18 +53,18 @@ func enterPDFTableRow(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCurs
 // Plan one portion of one logical row. Row-spanning cells carry their own
 // unconsumed flow forward. Content ending in this row can extend its measured
 // height to account for padding added at page continuations.
-func nextPDFTableBand(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor, capacity float64) (pdfTableBand, pdfTableCursor, bool) {
+func (r *pdfRenderer) nextPDFTableBand(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor, capacity float64) (pdfTableBand, pdfTableCursor, bool, error) {
 	minimum := 22.0
 	desired := cursor.remaining
 	for _, c := range cursor.cells {
 		p := plan.cells[c.cell].position
 		if p.Row+p.RowSpan == cursor.row+1 && len(c.flow) > 0 {
-			minimum = math.Max(minimum, c.flow[0].Height+12)
+			minimum = math.Max(minimum, minimumPDFFragmentHeight(c.flow[0])+12)
 			desired = math.Max(desired, flowHeight(c.flow)+12)
 		}
 	}
 	if capacity+1e-7 < minimum {
-		return pdfTableBand{}, cursor, false
+		return pdfTableBand{}, cursor, false, nil
 	}
 	height := math.Min(capacity, math.Max(desired, minimum))
 	band := pdfTableBand{height: height}
@@ -74,10 +74,13 @@ func nextPDFTableBand(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCurs
 	done := next.remaining <= 1e-7
 	for i, c := range cursor.cells {
 		p := plan.cells[c.cell].position
-		take, _ := takePDFFragments(c.flow, height-12)
-		next.cells[i] = pdfCellCursor{c.cell, c.flow[take:]}
-		band.cells = append(band.cells, pdfTableBandCell{position: p, flow: c.flow[:take], top: cursor.first && p.Row == cursor.row})
-		if p.Row+p.RowSpan == cursor.row+1 && take < len(c.flow) {
+		head, tail, _, err := r.takeFragments(c.flow, height-12)
+		if err != nil {
+			return pdfTableBand{}, cursor, false, err
+		}
+		next.cells[i] = pdfCellCursor{c.cell, tail}
+		band.cells = append(band.cells, pdfTableBandCell{position: p, flow: head, top: cursor.first && p.Row == cursor.row})
+		if p.Row+p.RowSpan == cursor.row+1 && len(tail) > 0 {
 			done = false
 		}
 	}
@@ -103,7 +106,7 @@ func nextPDFTableBand(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCurs
 			}
 		}
 	}
-	return band, next, true
+	return band, next, true, nil
 }
 
 func (r *pdfRenderer) planTablePage(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor, capacity float64) (pdfTablePage, pdfTableCursor, error) {
@@ -112,7 +115,10 @@ func (r *pdfRenderer) planTablePage(plan *pdfTableLayout, g pdfTableGroup, curso
 		if err := r.ctx.Err(); err != nil {
 			return page, cursor, err
 		}
-		band, next, ok := nextPDFTableBand(plan, g, cursor, capacity-page.height)
+		band, next, ok, err := r.nextPDFTableBand(plan, g, cursor, capacity-page.height)
+		if err != nil {
+			return page, cursor, err
+		}
 		if !ok {
 			break
 		}
@@ -121,11 +127,7 @@ func (r *pdfRenderer) planTablePage(plan *pdfTableLayout, g pdfTableGroup, curso
 		for _, c := range band.cells {
 			page.keys = append(page.keys, flowNoteKeys(c.flow)...)
 		}
-		row := cursor.row
 		cursor = next
-		if cursor.row == row { // A split row continues on the next page.
-			break
-		}
 	}
 	return page, cursor, nil
 }
@@ -176,11 +178,11 @@ func (r *pdfRenderer) paintTablePage(plan *pdfTableLayout, page pdfTablePage, x,
 
 func (r *pdfRenderer) continueTableGroup(plan *pdfTableLayout, g pdfTableGroup, x float64) error {
 	contentHeight := r.height - 2*r.margin
-	// Images and nested row groups remain atomic at this layer. Reject before
-	// spending pages on preceding rows if an atom cannot fit any continuation.
+	// Reject indivisible starts before spending pages on preceding rows. Nested
+	// groups can now supply a smaller band through recursive selection.
 	for _, c := range plan.cells[g.first:g.last] {
 		for _, f := range c.flow {
-			if f.Height+12 > contentHeight+1e-7 {
+			if minimumPDFFragmentHeight(f)+12 > contentHeight+1e-7 {
 				return fmt.Errorf("%w: PDF cell fragment is taller than a continuation page", ErrUnsupported)
 			}
 		}

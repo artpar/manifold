@@ -95,6 +95,7 @@ GOWORK=off go run ./examples/report -out output
 The SF-first examples exercise merged/nested cells, images, lists and rich notes:
 
 ```sh
+GOWORK=off go run ./examples/recursive-tables
 GOWORK=off go run ./examples/table-continuation
 GOWORK=off go run ./examples/rich-cells -out output/rich-cells
 GOWORK=off go run ./examples/rich-cells -out output/rich-cells/continued -continued
@@ -128,8 +129,8 @@ numbers. Draft unreferenced notes may persist as SF/JSON but must be anchored
 before rendering. DOCX notes and PDF footnotes/endnotes accept rich blocks,
 including images and nested tables. PDF footnotes continue between measured
 fragments. Oversized body-table groups continue with their cell flows and note
-references; oversized nested/note row groups and explicit cell/note breaks still
-require recursive continuation support. Images fit the available container width.
+references, including nested tables and oversized merged footnote tables.
+Explicit cell/note breaks and oversized images still require expansion. Images fit the available container width.
 
 The Go engine model starts in `document.go`; the canonical SF tree is in
 `structured.go`. `Read` and `Write` are

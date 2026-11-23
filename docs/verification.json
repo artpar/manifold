@@ -886,5 +886,98 @@
       "repeated header rows",
       "all other unfinished ACCEPTANCE.md rows"
     ]
+  },
+  "recursive_table_continuation_milestone": {
+    "date": "2026-11-23",
+    "goal_complete": false,
+    "prior_checkpoint": "a5657b8",
+    "go_tests": {
+      "result": "passed",
+      "library_seconds": 3.589
+    },
+    "race": {
+      "result": "passed",
+      "library_seconds": 50.447
+    },
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host": "built and executed",
+    "diff_check": "passed",
+    "recursive_fuzz": {
+      "seconds": 20,
+      "workers": 2,
+      "executions": 1100,
+      "result": "passed"
+    },
+    "independent_script": "scripts/verify_recursive_tables.py",
+    "native": {
+      "pages": 7,
+      "reference_and_note_pages": [
+        1,
+        3
+      ],
+      "note_continuation_only_pages": [
+        4,
+        5,
+        6
+      ],
+      "body_resumes_page": 7,
+      "frames": "source-derived columns and exactly one top/bottom pair per spanning frame per physical page",
+      "images": [
+        {
+          "page": 3,
+          "bounds_pt": [
+            38,
+            108,
+            68,
+            123
+          ]
+        },
+        {
+          "page": 6,
+          "bounds_pt": [
+            44,
+            172,
+            68,
+            184
+          ]
+        }
+      ],
+      "image_pixels": "exact source RGB",
+      "content": "all tokens once, per-cell order, bold and URI ownership",
+      "visual": "all seven pages inspected"
+    },
+    "docx": {
+      "semantic_checks": "three body levels, two note levels, combined merge identities, original media and note relationships",
+      "libreoffice_version": "7.6",
+      "rendered_pages": 6,
+      "content_and_bounds": "all original tokens and two images within margins",
+      "visual": "all six pages inspected; note tables flattened by this reader, not a visual fidelity pass"
+    },
+    "unit_checks": [
+      "footnote starts directly with oversized merged table",
+      "SF/DOCX merge/note/URI semantics",
+      "invalid oversized image fails without output",
+      "no body on continuation-only note pages"
+    ],
+    "prosemirror": {
+      "new_example_nodes": 175,
+      "corpus_files": 51,
+      "corpus_nodes": 9027,
+      "result": "passed"
+    },
+    "poppler_comparisons": {
+      "passed": 28,
+      "total": 28
+    },
+    "production_dependencies_added": false,
+    "regressions": "regenerated prior continuation, rich-cell/note, normal/five-page note and seven-rectangle merged-table examples passed",
+    "remaining": [
+      "explicit cell/footnote page breaks",
+      "oversized image atoms",
+      "repeated headers",
+      "broader Word/producer note-table visual qualification",
+      "other unfinished ACCEPTANCE.md rows"
+    ]
   }
 }

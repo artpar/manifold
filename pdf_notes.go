@@ -56,7 +56,7 @@ func (r *pdfRenderer) minimumNewFootnotes(keys []noteKey, fresh bool) (float64, 
 			height += footnoteSeparatorHeight
 		}
 		seen[key] = true
-		height += chunk.lines[0].Height
+		height += minimumPDFFragmentHeight(chunk.lines[0])
 	}
 	return height, nil
 }
@@ -82,7 +82,7 @@ func (r *pdfRenderer) ensureWithNotes(height float64, keys []noteKey) error {
 		}
 		additions = append(additions, chunk)
 		desired += flowHeight(chunk.lines)
-		minimumStarts += chunk.lines[0].Height
+		minimumStarts += minimumPDFFragmentHeight(chunk.lines[0])
 	}
 	extraSeparator := 0.0
 	if len(additions) > 0 && len(r.pageNotes) == 0 {
@@ -126,17 +126,20 @@ func (r *pdfRenderer) ensureWithNotes(height float64, keys []noteKey) error {
 		r.noteReserve += extraSeparator
 		remainingStarts := minimumStarts
 		for _, chunk := range additions {
-			remainingStarts -= chunk.lines[0].Height
-			take, used := takePDFFragments(chunk.lines, capacity-remainingStarts)
-			if take == 0 {
+			remainingStarts -= minimumPDFFragmentHeight(chunk.lines[0])
+			head, tail, used, err := r.takeFragments(chunk.lines, capacity-remainingStarts)
+			if err != nil {
+				return err
+			}
+			if len(head) == 0 {
 				return fmt.Errorf("%w: no room for footnote start", ErrUnsupported)
 			}
-			r.pageNotes = append(r.pageNotes, pdfNoteChunk{key: chunk.key, lines: chunk.lines[:take], first: true, indent: chunk.indent})
+			r.pageNotes = append(r.pageNotes, pdfNoteChunk{key: chunk.key, lines: head, first: true, indent: chunk.indent})
 			r.noteReserve += used
 			capacity -= used
 			r.seenFootnotes[chunk.key] = true
-			if take < len(chunk.lines) {
-				r.pendingNotes = append(r.pendingNotes, pdfNoteChunk{key: chunk.key, lines: chunk.lines[take:], indent: chunk.indent})
+			if len(tail) > 0 {
+				r.pendingNotes = append(r.pendingNotes, pdfNoteChunk{key: chunk.key, lines: tail, indent: chunk.indent})
 			}
 		}
 	}
@@ -198,19 +201,22 @@ func (r *pdfRenderer) nextPage(bodyNeeded bool) error {
 		var chunks []pdfNoteChunk
 		for len(pending) > 0 && left > 0 {
 			chunk := pending[0]
-			take, used := takePDFFragments(chunk.lines, left)
-			if take == 0 {
+			head, tail, used, err := r.takeFragments(chunk.lines, left)
+			if err != nil {
+				return err
+			}
+			if len(head) == 0 {
 				if len(chunks) == 0 {
 					return fmt.Errorf("%w: footnote fragment is taller than a continuation page", ErrUnsupported)
 				}
 				break
 			}
-			chunks = append(chunks, pdfNoteChunk{key: chunk.key, lines: chunk.lines[:take], first: chunk.first, indent: chunk.indent})
+			chunks = append(chunks, pdfNoteChunk{key: chunk.key, lines: head, first: chunk.first, indent: chunk.indent})
 			left -= used
-			if take == len(chunk.lines) {
+			if len(tail) == 0 {
 				pending = pending[1:]
 			} else {
-				pending[0].lines = chunk.lines[take:]
+				pending[0].lines = tail
 				pending[0].first = false
 			}
 		}

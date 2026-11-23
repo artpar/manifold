@@ -56,7 +56,7 @@ images and page setup. The output is assembled before writing to the caller.
 labels by first reference order. Definitions are unique; inline `Run.Note` atoms
 preserve reference sites independently of those labels. Draft definitions can
 persist, but rendering requires anchors. Note bodies/running content cannot
-contain note references, avoiding invalid DOCX stories and recursive layout.
+contain note references, avoiding invalid DOCX stories and recursive note references.
 
 `docx_notes.go` writes/reads standard footnote/endnote parts and per-part asset/link
 relationships. Ignorable metadata attributes retain application IDs and definition
@@ -69,8 +69,8 @@ existing cached-text/diagnostic policy.
 `pdf_notes.go` reserves measured rich footnote fragments before painting
 body/list/table references, including references inside nested cells. It draws
 separators and labelled text/list/image/table bodies, draining overlong notes onto
-continuation-only pages before resuming body flow. Continuation boundaries fall
-between text lines or connected table-row groups. Endnotes use the body renderer
+continuation-only pages before resuming body flow. Text lines/images remain
+atomic; connected table groups can supply smaller bands recursively. Endnotes use the body renderer
 in a separate section. Internal links target actual note pages; independent
 readers check destinations, not only labels/text. Oversized atomic fragments,
 explicit cell/footnote page breaks and richer numbering/separator/layout behavior
@@ -107,8 +107,14 @@ Interior borders respect rowspans; page fragments close at the page boundary.
 Each band applies 6pt top/bottom padding. Before painting, page-local reference
 keys determine minimum new-note reservation, including a fresh-page separator.
 The original group geometry remains unchanged when it fits with note starts.
-Oversized nested groups inside cells/footnotes remain atomic and still require
-recursive splitting, as do explicit cell/footnote page-break continuations.
+`pdf_fragment_continue.go` lets a table supply a smaller measured head and an
+immutable cursor tail, recursively. Footnote starts reserve the minimum legal
+band, including padding/final spacing. Only references in selected heads are
+admitted. Remeasuring a remainder without a page limit accounts for added
+continuation padding; a parent does not underestimate its child and close/reopen
+the same merged frame several times on one physical page. Same-row bands can
+combine into one page plan. Explicit cell/footnote page-break continuation and
+oversized image handling are still unfinished.
 
 `image_layout.go` fits preferred image dimensions to the current page/cell/list
 container before deriving a missing dimension, preventing overflow for extreme

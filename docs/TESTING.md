@@ -534,3 +534,52 @@ and 51-file/9,027-node ProseMirror corpus still pass. Regenerated rich-cell,
 normal/five-page note and seven-rectangle merged-table examples pass independent
 checks. Oversized nested groups in cells/footnotes, image atoms, repeated headers
 and explicit cell/note page breaks remain unfinished work, not accepted omissions.
+
+
+## Recursive nested-table and footnote continuation
+
+```sh
+GOWORK=off go test -run 'TestPDFRecursive|TestRecursiveTable' -count=1
+GOWORK=off go run ./examples/recursive-tables
+output/qa-venv/bin/python scripts/verify_recursive_tables.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/recursive-tables/recursive-tables.sf
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFRecursiveContinuation$' -fuzztime=20s -parallel=2 -timeout=50s
+/Applications/LibreOffice.app/Contents/MacOS/soffice --headless --convert-to pdf --outdir output/recursive-tables/lo output/recursive-tables/recursive-tables.docx
+output/qa-venv/bin/python scripts/verify_recursive_tables.py --office
+```
+
+Use an isolated `-env:UserInstallation=file:///absolute/output/lo-recursive-profile`
+for reproducible LibreOffice automation when another instance/profile may exist.
+The script verifies seven native pages, all original tokens and each cell's
+order, analytical column positions, exact image pixels/placements, URI and note
+destination pages, styles, DOCX merge identity and original media. For each
+spanning frame it requires exactly one top/bottom pair per physical page, catching
+fake interior dividers and repeated closed parts. The body image is at
+(38,108)-(68,123) on page three; the note image at (44,172)-(68,184) on page six.
+Early/late references and first note bodies share pages one/three. Pages four to
+six contain note continuation only; body resumes on page seven. All seven were
+visually inspected. The 175-node SF passes actual ProseMirror.
+
+Unit tests also start a footnote directly with its oversized merged table,
+compare SF/DOCX spans and note/URI ownership, check invalid oversized images
+produce no output and verify all body content stays out of continuation-only
+pages. A reference's already-admitted body fragment may contain later body text
+on that same reference page; it need not wait for the entire footnote to finish.
+The test invariant explicitly allows this correct case. No original fixtures or
+expected content were changed. Width/height fuzz checks immutable sources,
+exact-once content/assets, positions, marks/links, cell order and note starts.
+A 20-second/two-worker run passed 1,100 executions.
+
+LibreOffice 7.6 produced six inspected DOCX-rendered pages, preserving all tokens
+and both images within margins. It visibly flattened the complex footnote tables.
+`--office` reports this observation explicitly; its content/bounds pass is not a
+note-table visual fidelity pass. XML table semantics remain checked independently,
+and wider Word/producer interoperability remains required work.
+
+Full Go tests (library 3.589s), race (50.447s), vet, module verification,
+CGO-disabled host build/execution and diff checks pass. Regenerated previous
+body/rich-cell/note/merged examples pass their exact independent oracles. The
+28/28 Poppler comparisons and 51-file/9,027-node ProseMirror corpus pass. Older
+sections' nested/footnote-group rejection statements describe prior milestones;
+recursive continuation is now implemented. Explicit cell/note page breaks,
+oversized images, repeated headers and the other ACCEPTANCE.md rows remain open.
