@@ -4149,6 +4149,30 @@
       "rg -n 'ruledPDFCells|rulingCoverage' pdf_ruled_table.go"
     ],
     "kt": "docs/TAGGED_TABLE_SPANS.md",
-    "logs": "ignored output/tagged-spans/"
+    "logs": "ignored output/tagged-spans/",
+    "subsequent_diagnostic_trace": {
+      "status": "passed .462s single-page test; temporary test removed; no production change",
+      "table": 12539,
+      "page": 89,
+      "primitive_columns": 17,
+      "first_rejected_component": {
+        "zero_based_rows": [
+          6,
+          7
+        ],
+        "zero_based_columns": [
+          14,
+          16
+        ],
+        "slots": 4,
+        "bounding_slots": 6
+      },
+      "shifted_axes_example_pt": [
+        511.540005,
+        512.50002
+      ],
+      "next": "author tagged shifted-axis/gapped-border fixture; investigate explicit-row-constrained partition with separate gap provenance; preserve untagged behavior",
+      "log": "ignored output/tagged-spans/debug89.log"
+    }
   }
 }

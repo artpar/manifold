@@ -73,6 +73,28 @@ cell for byte 4 spans bytes 5–7; those three continuation tags remain explicit
 cells pending a row-dependent partition solution. Do not change the original
 oracle or casually snap these distinct axes to make this pass.
 
+A subsequent single-page native trace isolates the first rejected component:
+zero-based rows 6–7, primitive columns 14–16, four slots in a six-slot bounding
+rectangle. The 17-column axes include 511.540005 and 512.50002pt; other shifted
+pairs include 328.870005/329.82999pt. Missing small horizontal pieces connect
+neighboring rows into an L-shaped region. Raising the .25pt snap tolerance would
+hide distinct painted axes and is not the selected fix. The diagnostic trace ran
+as a temporary single-page test, passed in .462s and was removed; ignored
+`output/tagged-spans/debug89.log` retains its output. Production is unchanged.
+
+Next investigate a tagged-row-constrained partition: derive each row's physical
+intervals from vertical rulings, then join vertically only identical intervals
+with absent separating borders. Explicit TR membership and contained visible
+content can disambiguate otherwise nonrectangular missing-edge components.
+Retain all distinct global axes as span columns. Any completed horizontal gaps
+must have separate evidence/confidence and explicit gap geometry/diagnostics;
+do not call them fully painted boundaries or apply that rule to untagged input.
+Require unique logical alignment and preserve explicit span attributes. Author a
+small shifted-axis/gapped-border tagged fixture before implementation, then
+compare the original row/cell IDs, all eleven continuation tags and actual drawn
+segments independently. This is a proposed next implementation, not behavior
+already shipped by this checkpoint.
+
 The previous DOCX oracle's eleven raw continuation cells and the currently
 coalesced eight PDF tags are different counts. This checkpoint is not evidence
 that all source merges, styles, links, text runs or images are fully recovered.

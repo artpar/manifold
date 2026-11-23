@@ -44,7 +44,8 @@ verification, and host/Linux CGO-disabled builds pass; Linux was cross-built onl
 and precise unfinished work; final checks are recorded in verification.json.
 
 The full goal remains **incomplete**, with no external blocker. Page 89 Table
-12539 has small but real shifted column boundaries; its 10-row grid is uncertain
+12539 has small but real shifted column boundaries; a missing horizontal piece
+creates an L-shaped four-slot component (rows 6–7, columns 14–16). Its 10-row grid is uncertain
 and three additional empty vertical continuation tags remain explicit cells.
 The eleven raw Word continuation cells must not be confused with the eight PDF
 continuations currently coalesced. Do not broaden snapping or alter source/oracles
