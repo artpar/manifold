@@ -120,9 +120,28 @@ func TestPageLayoutInvalidAndNegativePDF(t *testing.T) {
 	}
 	d := pageTestDoc(Layout{Width: 300, Height: 400, Margins: &PageMargins{-10, 20, 30, 25}})
 	var out bytes.Buffer
-	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); !errors.Is(err, ErrUnsupported) || out.Len() != 0 {
-		t.Fatal("negative running overlap must reject atomically until qualified", err)
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal(err)
 	}
+	back, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, block := range back.Blocks {
+		for _, run := range block.Runs {
+			if run.Text == "BODY" {
+				found = true
+				if run.Source.Baseline == nil || math.Abs(run.Source.Baseline[0].Y-21) > .01 {
+					t.Fatal("fixed signed top was enlarged", run.Source)
+				}
+			}
+		}
+	}
+	if !found {
+		t.Fatal("signed body missing")
+	}
+	out.Reset()
 	d.Headers, d.Footers = nil, nil
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal("signed offsets without overlapping running content", err)

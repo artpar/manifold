@@ -9,11 +9,12 @@ import (
 
 type pdfSectionVariant struct{ header, footer *pdfRunningStory }
 type pdfSectionPlan struct {
-	section     resolvedSection
-	geometry    pageGeometry
-	bounds      pdfBodyBounds
-	minimumBody float64
-	variants    [3]pdfSectionVariant // default, first, even
+	section      resolvedSection
+	geometry     pageGeometry
+	bounds       pdfBodyBounds
+	minimumBody  float64
+	footerBehind bool
+	variants     [3]pdfSectionVariant // default, first, even
 }
 
 type pdfSectionScope struct {
@@ -183,11 +184,37 @@ func (r *pdfRenderer) planSections(d *Document, sections []resolvedSection) ([]*
 			bounds.top = math.Max(bounds.top, plan.bounds.top)
 			bounds.bottom = math.Min(bounds.bottom, plan.bounds.bottom)
 		}
-		if bounds.bottom <= bounds.top {
-			return nil, fmt.Errorf("%w: continuous running stories leave no common body", ErrUnsupported)
+		footerBehind := false
+		for _, plan := range plans[start:end] {
+			footerBehind = footerBehind || plan.geometry.margins.Bottom < 0
 		}
 		for _, plan := range plans[start:end] {
-			plan.bounds = bounds
+			plan.footerBehind = footerBehind
+		}
+		// Positive edges reserve every possible running envelope in the shared
+		// chain; signed edges retain that section's exact body offset instead.
+		for _, plan := range plans[start:end] {
+			for _, variant := range plan.variants {
+				if variant.header != nil {
+					bounds.top = math.Max(bounds.top, variant.header.y+variant.header.height)
+				}
+				if variant.footer != nil {
+					bounds.bottom = math.Min(bounds.bottom, variant.footer.y)
+				}
+			}
+		}
+		for _, plan := range plans[start:end] {
+			own := bounds
+			if plan.geometry.margins.Top < 0 {
+				own.top = math.Abs(plan.geometry.margins.Top)
+			}
+			if plan.geometry.margins.Bottom < 0 {
+				own.bottom = plan.geometry.height - math.Abs(plan.geometry.margins.Bottom)
+			}
+			if own.bottom <= own.top {
+				return nil, fmt.Errorf("%w: continuous running stories leave no common body", ErrUnsupported)
+			}
+			plan.bounds = own
 		}
 		start = end
 	}
@@ -229,10 +256,13 @@ func (r *pdfRenderer) renderSections(d *Document) error {
 		r.y = r.bodyTop()
 		if !blank {
 			r.paintRunning(r.header)
+			if owner.footerBehind {
+				r.paintRunning(ownerFooter)
+			}
 		}
 	})
 	r.pdf.SetFooterFunc(func() {
-		if !blank {
+		if !blank && !owner.footerBehind {
 			// Body frames may change on a shared page. Its running stories keep
 			// the geometry of the section that opened this physical page.
 			page, content, width, height, margin := r.page, r.content, r.width, r.height, r.margin
@@ -246,7 +276,16 @@ func (r *pdfRenderer) renderSections(d *Document) error {
 		if err := r.ctx.Err(); err != nil {
 			return err
 		}
-		if i > 0 && s.start == SectionContinuous && sameSectionCanvas(plans[i-1], plans[i]) {
+		share := i > 0 && s.start == SectionContinuous && sameSectionCanvas(plans[i-1], plans[i])
+		if share {
+			next := plans[i].bounds
+			// Already measured note fragments must finish in their old vertical
+			// interval when a new fixed frame cannot contain them.
+			if len(r.pendingNotes) > 0 && (next.top != r.bodyTop() || next.bottom != r.bodyBottom()) || r.noteReserve > 0 && math.Max(r.y, next.top)+r.noteReserve > next.bottom+1e-7 {
+				share = false
+			}
+		}
+		if share {
 			// The opened page keeps its painted header and queued footer. It is
 			// page one of the new section, so its next page selects variant two.
 			pending, pendingPage = plans[i], 1

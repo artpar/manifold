@@ -79,7 +79,6 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 	if err != nil {
 		return err
 	}
-	fullHeight := g.runningHeight(len(d.Headers) > 0, len(d.Footers) > 0)
 	w.contentHeight = bodyHeight
 	w.runningImageHeight = 0
 	w.addRel("styles", "styles.xml", false)
@@ -98,7 +97,15 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 		}
 		mainRels := w.rels
 		w.rels = nil
-		w.contentHeight, w.runningImageHeight = fullHeight, imageHeight
+		cap := imageHeight
+		header := v.root == "hdr"
+		if header && g.margins.Top < 0 || !header && g.margins.Bottom < 0 {
+			cap, err = w.fitFixedRunning(v.blocks, g, header)
+			if err != nil {
+				return err
+			}
+		}
+		w.contentHeight, w.runningImageHeight = g.runningStoryHeight(header, len(d.Headers) > 0, len(d.Footers) > 0), cap
 		part, err := w.blocks(v.blocks)
 		w.contentHeight, w.runningImageHeight = bodyHeight, 0
 		if err != nil {

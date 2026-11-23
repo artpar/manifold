@@ -21,7 +21,50 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: continuous body frames and physical canvases
+## Latest milestone: signed running overlap and foreground preservation
+
+- Negative top/bottom margins now keep the body's absolute edge while allowing
+  contained running content to overlap it. Positive edges still grow around their
+  running stories. Header/footer images fit their own page anchors, independently
+  from fixed body space; fixed DOCX stories also avoid the opposite anchor/shared
+  positive-image cap. The unchanged 370pt case that previously reimported as 368pt
+  now retains both preferred sizes exactly.
+- Overlap-page running artwork paints behind body text and notes. Raster checks
+  motivated moving fixed footer artwork to that background phase; foreground black
+  ink is retained over both transparent panels, matching the tested producer's
+  foreground behavior. Positive-only paths keep their prior order. Signed-footer
+  raw PDF paint order can change even when objects do not intersect; geometry and
+  content persist. Source margins/relationships/assets round-trip through DOCX.
+- Continuous chains retain each signed fixed edge rather than overriding it with
+  a later minimum edge. Positive edges reserve actual running envelopes. Old note
+  fragments drain in their own vertical interval when the new frame cannot contain
+  them; new first-page stories then belong to the fresh page. Impossible fixed out-of-
+  canvas text still rejects atomically in both writers; unused blank stories do
+  not reject merely because an unused anchor lies beyond the page.
+- `examples/signed-overlap` covers all four sign pairs and a large fixed case through
+  all four paths. Independent checks cover nine native pages/eighteen original RGBA
+  placements, all paragraph/note content, URI/actual note targets, signed DOCX page
+  fields, recovered image quads and raster compositing. Nine native and seven
+  producer pages were inspected; all producer content/fourteen placements remain.
+  Producer pagination, picture placement and cross-story transparency composition
+  differ (notably the large overlapping backgrounds). No Word-equivalence claim.
+- Full verification/results are in TESTING.md and verification.json. Fresh pinned
+  17c8b6c builds confirm eighteen earlier nonnegative PDF page streams and three
+  complete DOCX packages remain exact. No source/content/asset fixture oracle was
+  changed to hide a failure; the old signed-overlap rejection became positive
+  fixed-baseline and preservation assertions as the capability was implemented.
+
+The goal remains **incomplete**, with no external blocker. Next resolve continuous
+chains whose large fixed background and later minimum-margin story have no common
+vertical envelope (currently an explicit error); partition/refit/page admission
+must preserve both stories and note contexts. Then qualify controls/empty-section
+ownership, broader page/note bindings, fonts/scripts/PDF recovery and real exports.
+Next commands: `GOWORK=off go run ./examples/signed-overlap`;
+`output/qa-venv/bin/python scripts/verify_signed_overlap.py --office`;
+`GOWORK=off go test -run 'TestPDFSigned|TestFixedBlank|FuzzSignedRunning' .`;
+`rg -n 'bounds.bottom|footerBehind|share|fixed' pdf_sections.go signed_overlap_test.go`.
+
+## Previous milestone: continuous body frames and physical canvases
 
 - Continuous sections now apply changed margins and running distances rather than
   rejecting all geometry changes. Same-size paper shares a page: each section's
@@ -185,8 +228,8 @@ and representative real-export evidence. Next concrete commands:
   pictures budget against their anchors independently from already reserved body
   margins, preventing an unnecessary header-image shrink.
 - Signed top/bottom offsets persist through SF/DOCX. Native PDF supports fixed
-  signed offsets when measured running stories do not overlap the body; actual
-  overlap still rejects explicitly pending paint/layout qualification. Advanced
+  signed offsets including contained running/body overlap (qualified in the latest
+  milestone above). Advanced
   gutter/mirror/columns/first-even story settings diagnose rather than silently
   appearing supported. Current section collection now excludes revision-history,
   deleted/moved-from and text-box snapshots; a missing old relationship no longer

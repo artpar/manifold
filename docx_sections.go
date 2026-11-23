@@ -76,7 +76,15 @@ func writeSectionedDOCX(ctx context.Context, out io.Writer, d *Document) error {
 				name := fmt.Sprintf("%s%d.xml", role.kind, storyIndex[role.kind])
 				main := w.rels
 				w.rels = nil
-				w.contentHeight, w.runningImageHeight = g.runningHeight(true, true), cap
+				storyCap := cap
+				header := role.kind == "header"
+				if header && g.margins.Top < 0 || !header && g.margins.Bottom < 0 {
+					storyCap, err = w.fitFixedRunning(variant.story.Blocks, g, header)
+					if err != nil {
+						return err
+					}
+				}
+				w.contentHeight, w.runningImageHeight = g.runningStoryHeight(header, true, true), storyCap
 				xml, err := w.blocks(variant.story.Blocks)
 				w.contentHeight, w.runningImageHeight = bodyHeight, 0
 				if err != nil {

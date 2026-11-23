@@ -515,8 +515,8 @@ legacy nil settings retain prior writer defaults. DOCX's standard page attribute
 and checked ignorable metadata preserve binding presence in own round trips,
 including zero and the unused fallback. External distances remain explicit. DOCX
 physical coordinates normalize to twips; source SF remains precise. Native PDF
-uses the effective bounds throughout body/stories/tables/notes. Signed offsets
-with no actual story overlap work; overlap remains explicitly unqualified.
+uses the effective bounds throughout body/stories/tables/notes. Signed offsets permit actual contained overlap; fixed running backgrounds paint
+before body/notes. Out-of-canvas stories still reject.
 
 This is an additive optional extension of the selected ProseMirror profile, not a
 second schema or alternate canonical layout format. Current effective DOCX section
@@ -571,3 +571,14 @@ and measured footnote chunks retain their original frames. No SF field/version
 change is needed; exact source intent/settings still round-trip through DOCX.
 Paper-driven native pagination is separate from logical `continuous` start intent.
 Physical recovery records actual pages/quads, not inferred authorial section policy.
+
+
+Signed vertical margins now implement their fixed-body meaning during actual
+running overlap, without a new SF field/version. Positive margins remain minimum
+reservations. Source preferences/asset bytes remain stable; native/Word page
+placement and compositing are independently qualified. Fixed footer backgrounds
+paint before body/notes, so physical PDF paint order differs from late-footer
+paths and must not be mistaken for authored logical order. Shared-chain signed
+edges retain their own absolute bound, and incompatible measured note intervals
+finish before the new frame binds. Some large fixed/minimum continuous mixtures
+still need a less conservative admission/partition strategy; the full goal is open.

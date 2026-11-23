@@ -1167,3 +1167,29 @@ observations remain intact. Verify old footer positions, mixed-frame/RTL note
 labels/assets/links, long note continuation and narrow wrapped/table continuation
 bounds. Common vertical packing, control/empty-section ownership and signed
 running overlap remain qualification work under the original full objective.
+
+
+## Signed margins preserve fixed edges and foreground content
+
+Interpret negative vertical edges as absolute body offsets; positive edges reserve
+running extents. This follows the fixed/minimum distinction in Microsoft's
+[published section-property definitions](https://learn.microsoft.com/en-us/openspecs/office_file_formats/ms-doc/46c3ec54-53ff-4c0a-b0d6-07ad15d2546e).
+Fit fixed stories to their own page anchors, not the body or opposite anchor.
+A new exact round-trip test exposed a 370pt DOCX picture normalizing to 368pt under
+the old combined anchor budget. Independent fixed caps correct that defect without
+changing source preferences or positive fitting behavior.
+
+Preserve body/note foregrounds over overlapping running artwork. The first native
+raster probe used the legacy late-footer phase and tinted note ink; independent
+producer rendering kept that ink black. Fixed-footer chains now paint their
+running backgrounds before body/notes. This is a deliberate new overlap behavior,
+not an altered committed fixture oracle. Positive-only page streams/packages remain
+exact against a pinned prior build. Cross-story transparent-background ordering
+still differs in the large producer example; do not infer Word-equivalent color/
+layout behavior from synthetic vectors.
+
+Restore signed fixed bounds after shared-chain envelope calculation. If measured
+old notes cannot inhabit the new vertical interval, finish them before the new
+frame opens, retaining both note geometry and page owner. Out-of-canvas stories
+reject instead of clipping or disappearing. Large fixed/minimum mixtures with no
+common envelope still require partition/refit/admission work under the full goal.

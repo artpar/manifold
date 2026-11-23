@@ -169,8 +169,8 @@ than creating another canonical representation.
 `pdf_page_layout.go` centralizes body sides/width and anchor selection. Native body,
 rich stories, continuation, note gutters/separators/targets share those bounds.
 New groups use 18pt defaults and footer-bottom semantics; nil legacy bindings
-retain established output. Signed offsets with no measured overlap are supported;
-actual running/body overlap rejects pending qualification. Running images use the
+retain established output. Signed offsets now also allow contained running/body
+overlap, with fixed body edges and running artwork behind foreground content. Running images use the
 page around their anchors, not an already reduced body region. DOCX emission uses
 the same source edges and its producer envelope, with standard twip geometry and
 landscape orientation. Format serialization checks reject empty rounded containers.
@@ -743,8 +743,8 @@ share a page when paper dimensions match and may change body margins/story polic
 premeasure a common frame and shared body/note floor before painting. Opened pages
 keep their owner; pending stories install on the next page with the shared page
 counted as local page one. Changed paper dimensions drain notes and start a new physical canvas; horizontal
-body frames update immediately on shared pages. Producer story
-selection/pagination and signed running overlap remain qualification work.
+body frames update immediately on shared pages. Producer story selection/pagination and broader ownership/packing remain
+qualification work; signed running overlap is implemented as described below.
 
 
 Section planning clears stale body bounds while measuring a new geometry and
@@ -782,3 +782,27 @@ The old single-frame path remains coordinate-identical. Common vertical packing
 is deliberately conservative and still needs broader qualification, as do control/
 empty-section owners and signed overlap. Native policies are independently tested
 without claiming a Word-compatible layout engine.
+
+
+## Signed edges and overlap paint phases
+
+`prepareRunning` separates fixed signed edges from positive minimum reservations.
+Fixed stories fit their own physical anchor interval; they do not shrink merely
+to leave body space or avoid the opposite story. Out-of-canvas text still rejects.
+Positive fitting keeps its previous allocation behavior. DOCX uses independent
+fixed-story containers/caps in both flat and per-section writers; checked source
+settings and original assets remain unchanged.
+
+In continuous chains a signed edge retains its own absolute offset. Positive
+edges reserve actual possible running envelopes. Incompatible pending note
+intervals drain before a new frame binds, rather than moving already-measured note
+fragments into a smaller interval. Common-envelope packing can still reject large
+fixed/minimum mixtures; partition/refit/admission remains required work.
+
+Header backgrounds already precede body painting. A chain with a fixed footer
+also paints its opened-page footer in that background phase, preserving body/note
+foregrounds. Owner geometry is retained across continuous frame changes. Positive-
+only footer behavior is unchanged. Raw paint order may change for signed footers;
+physical source quads remain evidence, not authored running-story reconstruction.
+Raster QA checks foreground ink and alpha samples alongside source/relationship/
+asset and page checks. Producer compositing and pagination remain qualified.

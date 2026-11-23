@@ -133,3 +133,13 @@ Next exercise controls/empty-section ownership and common vertical packing, then
 signed story overlap and richer page/binding cases. Keep the unchanged controls
 and producer observations, including orientation-hint qualifications. Run
 `GOWORK=off go run ./examples/continuous-geometry` and its independent verifier.
+
+
+Signed running overlap is implemented with fixed body edges and foreground body/
+notes, with independent picture caps and contained-page checks. Next partition or
+refit continuous fixed/minimum mixtures when the global envelope is impossible;
+do not solve this by dropping a story, changing its source preference or placing
+measured notes into another interval. Controls/empty owners and the original
+font/script/recovery/real-export requirements remain open. Reproduce the current
+capability with `GOWORK=off go run ./examples/signed-overlap` and its independent
+verifier, then extend the signed-chain tests as admission changes.

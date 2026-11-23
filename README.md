@@ -15,6 +15,7 @@ Run `GOWORK=off go run ./examples/sections` for all four conversion paths; see
 [compatibility limits](docs/COMPATIBILITY.md) for shared-page and producer differences.
 `GOWORK=off go run ./examples/continuous` demonstrates story changes on shared pages.
 `GOWORK=off go run ./examples/continuous-geometry` adds margin and paper changes.
+`GOWORK=off go run ./examples/signed-overlap` covers fixed signed running overlap.
 Applications retain ownership of identity, authorization, persistence and jobs.
 No external Office installation or conversion service is required.
 

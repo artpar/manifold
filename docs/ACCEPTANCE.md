@@ -145,3 +145,14 @@ their measured widths. Paper changes open a new native canvas; shared horizontal
 margins apply immediately while vertical packing is conservative. Controls/empty
 sections, signed overlap, broader bindings/packing and the rest of the original
 acceptance rows remain unfinished; this is not full-goal completion.
+
+
+Actual signed-margin running overlap now generates native output with fixed body
+edges, independent fixed-story picture budgets and body/note foreground retention.
+Five cases preserve source SF/DOCX and original RGBA through all four paths. Nine
+native and seven producer pages were visually inspected; pixel probes, note/URI
+relationships and recovered quads supplement textual and structural checks. Eighteen
+prior nonnegative PDF streams/three DOCX packages are exact against 17c8b6c. Some
+continuous fixed/minimum mixtures still lack a common envelope, and producer
+compositing/pagination differs; broader ownership/packing, bindings, fonts/scripts,
+PDF recovery/color and representative real-export work remain required.

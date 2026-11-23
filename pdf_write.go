@@ -206,8 +206,19 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 		if err := r.prepareRunning(d.Headers, d.Footers, len(d.Blocks) > 0); err != nil {
 			return err
 		}
-		p.SetHeaderFunc(func() { r.y = r.bodyTop(); r.paintRunning(r.header) })
-		p.SetFooterFunc(func() { r.paintRunning(r.footer) })
+		footerBehind := g.margins.Bottom < 0
+		p.SetHeaderFunc(func() {
+			r.y = r.bodyTop()
+			r.paintRunning(r.header)
+			if footerBehind {
+				r.paintRunning(r.footer)
+			}
+		})
+		p.SetFooterFunc(func() {
+			if !footerBehind {
+				r.paintRunning(r.footer)
+			}
+		})
 
 		p.AddPage()
 		if err := r.blocks(d.Blocks, r.bodyWidth(), r.bodyLeft()); err != nil {

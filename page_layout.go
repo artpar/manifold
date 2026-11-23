@@ -104,3 +104,15 @@ func (g pageGeometry) runningHeight(header, footer bool) float64 {
 	}
 	return h
 }
+
+// Fixed running stories may overlap the body and the opposite story. Their
+// containers end at their own page anchor, without paying the opposite distance.
+func (g pageGeometry) runningStoryHeight(header, hasHeader, hasFooter bool) float64 {
+	if header && g.margins.Top < 0 {
+		return g.height - g.headerDistance()
+	}
+	if !header && g.margins.Bottom < 0 {
+		return g.height - g.footerDistance()
+	}
+	return g.runningHeight(hasHeader, hasFooter)
+}

@@ -1753,3 +1753,63 @@ rewriting content. Full tests pass (library 9.355s, CLI 0.472s); full race passe
 CGO-disabled builds pass. Malformed DOCX fuzz completes 500 cases in addition to
 the 1,000 valid geometry executions. Recovery docs retain unfinished common-frame,
 control/empty-section, signed-overlap and remaining full-goal requirements.
+
+
+## Signed running overlap and foreground preservation (2026-11-24)
+
+`examples/signed-overlap` exercises all four margin-sign pairs and a fifth case
+with two 100×370pt running images. The fixed case retains their exact preferred
+sizes through DOCX rather than reducing them to fit a shared positive-margin cap.
+Tests assert body coordinates, original asset/dimension ownership, atomic failure
+for fixed text outside the physical canvas, continuous fixed/minimum frames and
+old note-interval drainage. `FuzzSignedRunning` requires successful valid
+conversions, with no generic unsupported-feature escape.
+
+```sh
+GOWORK=off go run ./examples/signed-overlap
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+# Optional QA dependencies are local; none is needed at library runtime.
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-signed-overlap-qa --headless --convert-to pdf --outdir output/signed-overlap/office output/signed-overlap/*.docx
+output/qa-venv/bin/python scripts/verify_signed_overlap.py --office
+GOWORK=off go test ./...
+GOWORK=off go test -race ./...
+GOWORK=off go vet ./...
+GOWORK=off go test -run '^$' -fuzz '^FuzzSignedRunning$' -fuzztime 1000x -parallel 2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime 500x -parallel 2 .
+git diff --check
+```
+
+Fresh independent verification passes all five cases: nine native pages/eighteen
+original RGBA placements, seven producer pages/fourteen placements, all sixty
+body paragraphs/five notes in each producer, signed fields, metadata, hyperlinks,
+actual native note targets and positioned recovered image quads. All source SF
+values round-trip exactly through DOCX. Native and producer contact sheets were
+visually inspected. Black foreground pixels over both running stories and note
+ink are checked after rasterizing the PDF. Producer pagination, shifted image
+positions and large background cross-story alpha composition differ; these remain
+separate observations, with no Word-equivalence claim. All 25 generated/CLI SF
+files pass the actual ProseMirror schema (804 nodes/marks). The CGO-disabled host
+CLI passed all four paths for five cases, matching nine native page streams;
+Linux amd64/arm64 builds passed but were not executed on Linux.
+
+Full tests pass (library 6.806s, CLI 0.828s, bidi 2.347s); full race passes
+(105.206s/2.131s/14.299s). The subsequently expanded example also passes `go run
+-race ./examples/signed-overlap`. Vet/module verification and diff checks pass.
+Valid signed-running fuzz completed 1,000 executions (8.955s); malformed DOCX
+completed 500 (1.476s). Logs live in ignored `output/signed-overlap`.
+
+A fresh detached `17c8b6c` build rendered the unchanged sections, continuous and
+continuous-geometry examples. All eighteen decoded PDF page streams and all three
+complete DOCX packages match exactly; their independent verifiers also pass.
+To reproduce, add `output/signed-parent` at that commit, build the CLI from that
+worktree into `../../bin/signed-parent`, and convert each unchanged example's
+`document.sf` to `output/signed-overlap/parent-{example}.pdf` and `.docx` before
+running the signed verifier. Remove the clean worktree afterward. No page
+operators were stripped to obtain equality. Source fixtures and preservation
+oracles remain unchanged; an old deliberate overlap rejection became a positive
+fixed-baseline assertion when that capability was implemented.
+
+The overall goal remains incomplete. Continuous chains with incompatible common
+fixed/minimum story envelopes currently error, even where a fresh page could
+accommodate them. Partition/admission, control/empty-section ownership, broader
+font/script/PDF recovery and real-export requirements remain necessary work.

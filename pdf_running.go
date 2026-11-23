@@ -98,11 +98,23 @@ func (r *pdfRenderer) prepareRunning(headers, footers []Block, body bool) error 
 			budget -= r.height - end
 		}
 	}
-	header, err := r.measureRunning(headers, budget)
+	headerBudget, footerBudget := budget, budget
+	edges := r.pageEdges()
+	if edges.Top < 0 {
+		headerBudget = r.height - r.headerStart()
+	}
+	if edges.Bottom < 0 {
+		if end, explicit := r.footerEnd(); explicit {
+			footerBudget = end
+		} else {
+			footerBudget = r.height
+		}
+	}
+	header, err := r.measureRunning(headers, headerBudget)
 	if err != nil {
 		return err
 	}
-	footer, err := r.measureRunning(footers, budget)
+	footer, err := r.measureRunning(footers, footerBudget)
 	if err != nil {
 		return err
 	}
@@ -115,9 +127,17 @@ func (r *pdfRenderer) prepareRunning(headers, footers []Block, body bool) error 
 	}
 	for attempt := 0; attempt < 128; attempt++ {
 		top, bottom := r.baseTop(), r.baseBottom()
+		edges := r.pageEdges()
+		headerOverflow, footerOverflow := 0.0, 0.0
 		if header != nil {
 			header.y = r.headerStart()
-			top = math.Max(top, header.y+header.height)
+			if header.y < 0 || header.y >= r.height {
+				return fmt.Errorf("%w: PDF header anchor lies outside page", ErrUnsupported)
+			}
+			headerOverflow = math.Max(0, header.y+header.height-r.height)
+			if edges.Top >= 0 {
+				top = math.Max(top, header.y+header.height)
+			}
 		}
 		if footer != nil {
 			if end, explicit := r.footerEnd(); explicit {
@@ -125,48 +145,53 @@ func (r *pdfRenderer) prepareRunning(headers, footers []Block, body bool) error 
 			} else {
 				footer.y = math.Min(r.height-(r.height-r.baseBottom())/2, r.height-footer.height)
 			}
-			bottom = math.Min(bottom, footer.y)
-		}
-		// Signed OOXML offsets keep the body fixed. Non-overlapping stories use
-		// the ordinary geometry; actual overlap needs separate paint-order/layout
-		// qualification and must not be silently replaced by enlarged margins.
-		edges := r.pageEdges()
-		if header != nil && edges.Top < 0 {
-			if header.y+header.height > r.baseTop()+1e-7 {
-				return fmt.Errorf("%w: PDF negative top-margin running overlap requires further layout qualification", ErrUnsupported)
+			if footer.y+footer.height <= 0 || footer.y+footer.height > r.height+1e-7 {
+				return fmt.Errorf("%w: PDF footer anchor lies outside page", ErrUnsupported)
 			}
-			header.shrink = false
-		}
-		if footer != nil && edges.Bottom < 0 {
-			if footer.y < r.baseBottom()-1e-7 {
-				return fmt.Errorf("%w: PDF negative bottom-margin running overlap requires further layout qualification", ErrUnsupported)
-			}
-			footer.shrink = false
-		}
-		active := 0
-		for _, story := range []*pdfRunningStory{header, footer} {
-			if story != nil && story.shrink {
-				active++
+			footerOverflow = math.Max(0, -footer.y)
+			if edges.Bottom >= 0 {
+				bottom = math.Min(bottom, footer.y)
 			}
 		}
-		if bottom-top >= minimum-1e-7 || active == 0 && bottom > top {
+		bodyActive := 0
+		if header != nil && header.shrink && edges.Top >= 0 {
+			bodyActive++
+		}
+		if footer != nil && footer.shrink && edges.Bottom >= 0 {
+			bodyActive++
+		}
+		if headerOverflow <= 1e-7 && footerOverflow <= 1e-7 && (bottom-top >= minimum-1e-7 || bodyActive == 0 && bottom > top) {
 			r.header, r.footer = header, footer
 			r.content = &pdfBodyBounds{top: top, bottom: bottom}
 			return nil
 		}
-		if active == 0 {
+		if headerOverflow > 1e-7 && !header.shrink || footerOverflow > 1e-7 && !footer.shrink {
+			return fmt.Errorf("%w: PDF running text exceeds its physical page", ErrUnsupported)
+		}
+		deficit := math.Max(0, minimum-(bottom-top))
+		if deficit > 1e-7 && bodyActive == 0 {
 			return fmt.Errorf("%w: running content leaves no space for the PDF body", ErrUnsupported)
 		}
-		excess := math.Max(.01, minimum-(bottom-top)) / float64(active)
+		excess := 0.0
+		if bodyActive > 0 && deficit > 0 {
+			excess = math.Max(.01, deficit) / float64(bodyActive)
+		}
 		for i, story := range []*pdfRunningStory{header, footer} {
 			if story == nil || !story.shrink {
 				continue
 			}
-			blocks := headers
+			overflow, bodySide, blocks := headerOverflow, edges.Top >= 0, headers
 			if i == 1 {
-				blocks = footers
+				overflow, bodySide, blocks = footerOverflow, edges.Bottom >= 0, footers
 			}
-			next, err := r.shrinkRunning(blocks, story, story.height-excess)
+			reduction := overflow
+			if bodySide {
+				reduction = excess
+			}
+			if reduction <= 1e-7 {
+				continue
+			}
+			next, err := r.shrinkRunning(blocks, story, story.height-reduction)
 			if err != nil {
 				return err
 			}
@@ -177,6 +202,7 @@ func (r *pdfRenderer) prepareRunning(headers, footers []Block, body bool) error 
 			}
 		}
 	}
+
 	return fmt.Errorf("%w: PDF running content fitting did not converge", ErrUnsupported)
 }
 

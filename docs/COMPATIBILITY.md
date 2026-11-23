@@ -685,7 +685,7 @@ precision. Invalid/nonfinite or unrepresentable rounded containers reject atomic
 Native PDF applies all sides to body/table/image/note/story pagination and measures
 running exclusions. Reserved header pictures use the anchor region, independently
 from body capacity. Signed top/bottom offsets persist in SF/DOCX; native PDF handles
-non-overlap but rejects actual running/body overlap pending qualification.
+contained overlap with fixed body edges; see the signed-overlap qualification below.
 
 Current properties override revision snapshots; deleted/moved-from/text-box sections
 are not active main-story sections. History loss diagnoses. Mirror/gutter/columns/
@@ -753,3 +753,21 @@ paper in the rich example with explicit orientation, while the original controls
 without that hint keep earlier geometry. These qualified observations do not imply
 Word-equivalent interpretation. Common vertical packing, control/empty-section
 ownership, signed running overlap and broader page bindings remain unfinished.
+
+
+Signed top/bottom edges now keep the body fixed even when a running story extends
+into it. Positive edges retain minimum-reservation behavior. Fixed pictures fit
+independent page anchors in native PDF and DOCX, and do not compete with body space
+or the opposite story. Overlap-page headers/footers paint behind body and note
+foregrounds. Negative-footer raw operator/text order can change, including cases
+without actual intersection; original geometry/content remains. Untagged recovery
+does not recover authored margin or running-story intent from those objects.
+
+Five examples preserve exact source SF/DOCX, including the 370pt fixed images,
+with nine native pages/eighteen RGBA placements and seven inspected producer pages/
+fourteen placements. Pixel probes verify foreground black ink and translucent
+background samples. Producer pagination/positions and large cross-story alpha
+composition differ. Common-envelope errors for certain continuous fixed/minimum
+mixtures, control/empty-section ownership, richer binding/note behavior and broader
+real-export/Word qualification stay required. Fixed out-of-canvas text rejects atomically;
+intentional in-canvas overlap is no longer a generic unsupported-output exception.

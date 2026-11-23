@@ -209,16 +209,18 @@ func docxBodyFloor(bs []Block, padding float64) float64 {
 	return floor
 }
 
-// Return a common picture-height cap for both running stories and the resulting
-// body container. Zero means no cap. Smaller preferred pictures remain unchanged.
+// Return a common picture-height cap for growing running stories and the body
+// container. Signed fixed stories use their independent page-anchor cap instead.
+// Zero means no cap. Smaller preferred pictures remain unchanged.
 // The producer still controls actual line/page placement.
 func (w *docxWriter) fitRunning(d *Document, g pageGeometry) (float64, float64, error) {
-	height := g.runningHeight(len(d.Headers) > 0, len(d.Footers) > 0)
-	header, hn, err := w.runningFlow(d.Headers, w.contentWidth, height, 0, 0)
+	headerHeight := g.runningStoryHeight(true, len(d.Headers) > 0, len(d.Footers) > 0)
+	footerHeight := g.runningStoryHeight(false, len(d.Headers) > 0, len(d.Footers) > 0)
+	header, hn, err := w.runningFlow(d.Headers, w.contentWidth, headerHeight, 0, 0)
 	if err != nil {
 		return 0, 0, err
 	}
-	footer, fn, err := w.runningFlow(d.Footers, w.contentWidth, height, 0, 0)
+	footer, fn, err := w.runningFlow(d.Footers, w.contentWidth, footerHeight, 0, 0)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -245,7 +247,7 @@ func (w *docxWriter) fitRunning(d *Document, g pageGeometry) (float64, float64, 
 	}
 	largest := math.Max(header.largestImage(), footer.largestImage())
 	fits := func(limit float64, guard float64) bool {
-		return available(limit) >= minimum+guard && (len(d.Headers) == 0 || g.headerDistance()+header.height(limit) <= g.height-guard) && (len(d.Footers) == 0 || g.footerDistance()+footer.height(limit) <= g.height-guard)
+		return available(limit) >= minimum+guard && (len(d.Headers) == 0 || g.margins.Top < 0 || g.headerDistance()+header.height(limit) <= g.height-guard) && (len(d.Footers) == 0 || g.margins.Bottom < 0 || g.footerDistance()+footer.height(limit) <= g.height-guard)
 	}
 	if fits(largest, 0) {
 		return 0, available(largest), nil
@@ -269,4 +271,40 @@ func (w *docxWriter) fitRunning(d *Document, g pageGeometry) (float64, float64, 
 		return 0, 0, fmt.Errorf("%w: DOCX running images cannot fit", ErrUnsupported)
 	}
 	return low, available(low), nil
+}
+
+// Fixed stories fit independently to the canvas. A positive story's body budget
+// must not shrink an otherwise fitting negative-edge story.
+func (w *docxWriter) fitFixedRunning(blocks []Block, g pageGeometry, header bool) (float64, error) {
+	if len(blocks) == 0 {
+		return 0, nil
+	}
+	height := g.runningStoryHeight(header, true, true)
+	flow, _, err := w.runningFlow(blocks, w.contentWidth, height, 0, 0)
+	if err != nil {
+		return 0, err
+	}
+	largest := flow.largestImage()
+	if flow.height(largest) <= height {
+		return 0, nil
+	}
+	if flow.height(0) >= height || largest <= 0 {
+		return 0, fmt.Errorf("%w: DOCX fixed running text/padding exceeds page anchor", ErrUnsupported)
+	}
+	low, high := 0.0, largest
+	for range 40 {
+		if err := w.ctx.Err(); err != nil {
+			return 0, err
+		}
+		mid := (low + high) / 2
+		if flow.height(mid) <= height-.001 {
+			low = mid
+		} else {
+			high = mid
+		}
+	}
+	if low <= 0 {
+		return 0, fmt.Errorf("%w: DOCX fixed running images cannot fit page", ErrUnsupported)
+	}
+	return low, nil
 }

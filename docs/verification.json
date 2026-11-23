@@ -2154,7 +2154,7 @@
     "fixture_oracle_changed": false,
     "external_blocker": null
   },
-  "latest_milestone": "continuous_geometry",
+  "latest_milestone": "signed_running_overlap",
   "language_direction_ltr_shaping": {
     "date": "2026-11-23",
     "goal_complete": false,
@@ -2499,7 +2499,7 @@
     ],
     "external_blocker": null
   },
-  "latest_evidence": "continuous_geometry_2026_11_24",
+  "latest_evidence": "signed_running_overlap_2026_11_24",
   "paragraph_bidi_levels_2026_11_24": {
     "goal_complete": false,
     "previous_checkpoint": "658a5b0",
@@ -3752,6 +3752,75 @@
       "GOWORK=off go run ./examples/continuous-geometry",
       "output/qa-venv/bin/python scripts/verify_continuous_geometry.py --office",
       "GOWORK=off go test -run 'TestPDFContinuous|TestPDFSection|FuzzContinuousGeometry' ."
+    ]
+  },
+  "signed_running_overlap_2026_11_24": {
+    "status": "verified milestone; full rich-document goal incomplete; no external blocker",
+    "example": "examples/signed-overlap",
+    "checks": {
+      "go_test_all": "passed: library 6.806s; CLI 0.828s; bidi 2.347s",
+      "go_test_race_all": "passed: library 105.206s; CLI 2.131s; bidi 14.299s",
+      "expanded_example_race": "passed",
+      "go_vet_all": "passed",
+      "module_verify": "passed",
+      "cgo_disabled_host_build_and_four_cli_paths": "passed: five cases, nine matching page streams",
+      "cgo_disabled_linux_amd64_arm64": "builds passed; not executed",
+      "diff_check": "passed",
+      "valid_signed_fuzz": {
+        "executions": 1000,
+        "passed": true
+      },
+      "malformed_docx_fuzz": {
+        "executions": 500,
+        "passed": true
+      }
+    },
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_signed_overlap.py --office",
+      "result": "passed",
+      "cases": 5,
+      "native_pages": 9,
+      "native_rgba_placements": 18,
+      "producer_pages": 7,
+      "producer_rgba_placements": 14,
+      "source_docx_sf": "exact for all five",
+      "body_paragraphs_per_producer": 60,
+      "notes_per_producer": 5,
+      "sf_schema": {
+        "files": 25,
+        "nodes_and_marks": 804,
+        "result": "passed actual ProseMirror schema"
+      },
+      "assertions": [
+        "signed DOCX fields, title, hyperlinks",
+        "native physical positions and fixed/minimum body bounds",
+        "original RGBA assets and recovered image quads",
+        "actual URI and note targets",
+        "foreground black ink over running backgrounds and notes",
+        "translucent raster sample colors"
+      ],
+      "visual_inspection": "nine native and seven producer pages; pagination, shifted image placement and large cross-story composition differ; no Word-equivalence claim"
+    },
+    "regression": {
+      "fresh_parent": "17c8b6c",
+      "unchanged_example_page_streams": {
+        "sections": 8,
+        "continuous": 5,
+        "continuous-geometry": 5
+      },
+      "docx_packages_exact": 3,
+      "independent_example_verifiers": "passed",
+      "oracle_policy": "source/content/asset fixtures retained; old overlap rejection replaced by implemented positive fixed-baseline assertions"
+    },
+    "remaining": [
+      "incompatible continuous fixed/minimum common envelopes need safe partition/admission",
+      "control/empty-section ownership and conservative packing",
+      "broader page/note bindings and original font/script/PDF recovery/color/real-export acceptance requirements"
+    ],
+    "next_commands": [
+      "GOWORK=off go run ./examples/signed-overlap",
+      "output/qa-venv/bin/python scripts/verify_signed_overlap.py --office",
+      "GOWORK=off go test -run 'TestPDFSigned|TestFixedBlank|FuzzSignedRunning' ."
     ]
   }
 }
