@@ -412,3 +412,22 @@ editable styles, without claiming original painted evidence. PDF numeric operand
 are parsed as direct numbers; PDF object parsing of adjacent integers can otherwise
 consume an RG operator prefix as an indirect reference. SF source marks declare
 all new fields with optional defaults; prior field meanings/profile version persist.
+
+
+## DOCX theme text color calculation
+
+`docx_theme_color.go` separates Word run tint/shade from DrawingML palette
+representation. Settings clrSchemeMapping targets actual palette slots once,
+including logical text/background and accent/link mappings; swaps are valid.
+Plain sRGB or sysClr lastClr supplies the base. Tint/shade modifies HSL luminance
+while retaining hue/saturation, then rounds final RGB channels to nearest 8-bit.
+Tint wins when both modifiers exist. Checked final RGB persists through existing
+Run.Color/SF textStyle and standard DOCX RGB output; schema/API are unchanged.
+
+Theme binding, system-dependent color choice and unused modifiers diagnose.
+Calculated values take precedence over mismatched cached colors, with a warning.
+Missing/unsupported palette constructs can retain a valid stored final RGB cache
+with explicit uncertainty; they never apply theme modifiers twice. Without usable
+cache, unsupported resolution rejects. Malformed RGB/modifiers/mapping values and
+duplicate mapping nodes/attributes reject. DrawingML choices/transforms beyond
+plain sRGB/sysClr, theme editing and script/font selection remain required work.

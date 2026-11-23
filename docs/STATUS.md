@@ -21,7 +21,40 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: editable PDF text style recovery
+## Latest milestone: calculated DOCX theme colors
+
+- DOCX text colors now calculate themeTint/themeShade in HSL luminance rather
+  than blindly retaining a cached transformed RGB. Tint takes precedence when
+  both modifiers are present. Identity/extreme/gray colors, named palette aliases,
+  direct/default/paragraph/character inheritance and resolved RGB round trips have
+  targeted tests. Both modifier bytes and RGB/mapping scalar values validate.
+- Settings clrSchemeMapping applies logical text/background/accent/hyperlink
+  references to actual palette slots. Targets resolve once; valid accent swaps
+  do not recurse. Direct dark/light references address their palette slots.
+- Plain sRGB palettes and system lastClr resolve; system binding loss diagnoses.
+  Active theme values override stale final caches with a mismatch diagnostic.
+  Unsupported DrawingML palette choices/transforms or missing palettes may use a
+  valid final RGB cache with a specific uncertainty warning, never double-tint it;
+  missing usable cache rejects. These DrawingML/theme/script capabilities remain
+  required expansion. Inactive theme modifiers diagnose their omitted binding.
+- The independent python-docx/explicit-XML fixture checks eleven bindings through
+  SF, DOCX XML and native PDF. Ten source LibreOffice colors agree; the deliberate
+  stale-red-cache case renders red there while the current theme calculates blue.
+  The source observation remains separate from the RGB oracle. LibreOffice renders
+  all eleven exported RGB-only DOCX colors correctly. Source/native/exported DOCX
+  pages were visually inspected. This is synthetic QA, not Word-equivalent fidelity.
+- Runtime remains pure Go with no new dependency or public model/schema change.
+  The resolved Color scalar persists; editable theme binding still diagnoses loss.
+  Tests, race, vet, CGO-disabled build/execution, malformed/package/luminance fuzz,
+  independent reader and corpus results are recorded in verification.json.
+
+The active full goal remains incomplete. Next implement theme/script font choice,
+source-font handling and Go shaping/bidi, then remaining rich page/running-content,
+PDF structure/color and real-export acceptance work. No external blocker exists.
+Prior checkpoint: 5788954. This checkpoint groups implementation, tests and aligned
+KT docs; generated sources/renderings/binaries stay ignored.
+
+## Earlier milestone: editable PDF text style recovery
 
 - PDF → SF now populates editable family, physical point size, RGB and existing
   bold/italic marks from text/graphics state. SourceInfo separately records
@@ -899,7 +932,8 @@ module access. The go.mod selects Go 1.25; do not force an older local toolchain
 
 No external blocker currently prevents development. Editable PDF family/physical
 size/device-color recovery now exists with provenance and uncertainty diagnostics.
-Next expand theme/script/source-font handling, color management and Go shaping/bidi;
+DOCX theme tint/shade and settings color mappings now calculate resolved RGB.
+Next expand theme/script font choice, source-font handling, color management and Go shaping/bidi;
 continue page/running content, broader PDF recovery and representative real exports.
 These remain required acceptance work. Existing precision restrictions can require
 explicit caller retypesetting of imported PDFs; preserve original SF and disclose
@@ -911,7 +945,9 @@ Next concrete commands:
 GOWORK=off go test -run 'TestPDFRecovered|TestPDFActualTextRetains|TestPDFSourceStyle|TestContentNumbers' -count=1
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFEditableStyles$' -fuzztime=1000x -parallel=2 -timeout=90s
 output/qa-venv/bin/python scripts/verify_pdf_text_styles.py
-rg -n 'shaping|bidi|complex|supplement|theme' pdf_text.go pdf_font.go docx_text_style.go
+GOWORK=off go test -run 'TestDOCXTheme' -count=1
+output/qa-venv/bin/python scripts/verify_docx_theme_colors.py
+rg -n 'shaping|bidi|complex|supplement|themeFont|font_scripts' pdf_text.go pdf_font.go docx_text_style.go
 GOWORK=off go run ./examples/text-style
 output/qa-venv/bin/python scripts/verify_text_style.py --office output/text-style/lo/text-style.pdf
 GOWORK=off go test -run 'TestTextStyle|TestDOCXText|TestSuppliedNoto|TestPDFExplicitFont' -count=1

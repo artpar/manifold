@@ -354,10 +354,13 @@ DOCX resolves docDefaults, paragraph/character basedOn chains and direct fields.
 Bold/italic/strike in style definitions toggle, whereas direct values are absolute.
 Export uses rFonts, exact positive half-point sz and RGB/auto color. Checked
 textImplicit metadata preserves our unset defaults and rejects contradictions.
-Unrepresented style properties diagnose. Theme Latin names/plain palette colors
-resolve with binding-loss diagnostics; tint/shade cache values retain their cache
-with a diagnostic. Missing unresolvable theme values reject. Full transformations,
-script choices, source font-program recovery, highlighting/shading and additional
+Unrepresented style properties diagnose. Theme Latin names resolve with binding-loss
+diagnostics. Theme sRGB/system-lastClr run colors now resolve settings mappings
+and HSL tint/shade; tint wins over shade. Calculated current RGB overrides a
+mismatched final cache with a diagnostic. Unsupported/missing palette constructs
+may retain a valid final RGB cache with uncertainty; without one they reject.
+Broader DrawingML transformations, theme/script choices, source font-program
+recovery, highlighting/shading and additional
 paragraph properties remain required work. Page backgrounds/embedded fonts now
 diagnose loss. Font selection in a DOCX viewer still depends on installed faces;
 output does not embed fonts there.
@@ -414,3 +417,22 @@ or explicit mappings. Imported point sizes need not match writer precision; user
 must choose and disclose retypesetting when necessary. Neither AllowLossy nor PDF
 import silently substitutes output fonts or rounds source styles. Full rich-document
 acceptance remains unfinished, including broader source-font/color/shaping coverage.
+
+
+### DOCX theme color details
+
+Run.Color remains resolved #RRGGBB/auto, not a live theme binding. clrSchemeMapping
+maps logical text/background/accent/link references once to actual slots; accent
+swaps are valid and direct dark/light references retain slot meaning. Theme bytes
+are exactly two hex digits, RGB exactly six; invalid/duplicate mappings reject.
+Plain sRGB and system lastClr resolve; system/platform binding loss is explicit.
+Tint/shade modifies HSL luminance and rounds nearest final RGB channels. Inactive
+modifiers diagnose; stored final caches are never transformed twice. Floating
+calculations and producer quantization may differ, disclosed when cache mismatches.
+
+LibreOffice renders the deliberate stale source cache in the synthetic fixture;
+our resolved current-theme RGB differs there. Ten other source colors and all
+11 exported RGB-only DOCX colors match independent reader checks. No exact Word
+color-engine equivalence is claimed. Unsupported DrawingML palette constructs,
+editable theme bindings, theme/script font selection and broader color/real-export
+qualification remain required expansion. This is not a complete theme engine.

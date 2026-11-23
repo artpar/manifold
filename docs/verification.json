@@ -1813,5 +1813,117 @@
       "output/qa-venv/bin/python scripts/verify_pdf_text_styles.py"
     ],
     "external_blocker": null
+  },
+  "docx_theme_color_milestone": {
+    "date": "2026-11-23",
+    "prior_checkpoint": "5788954",
+    "active_goal_complete": false,
+    "exists": [
+      "HSL-equivalent luminance themeTint/themeShade calculation; tint precedence",
+      "settings clrSchemeMapping with single palette-target resolution",
+      "dark/light/text/background/accent/link aliases",
+      "sRGB and system-lastClr palette resolution",
+      "explicit cache mismatch/fallback/system/unused-binding diagnostics",
+      "typed malformed color/mapping rejection",
+      "resolved Color scalar persists through SF and standard DOCX RGB"
+    ],
+    "checks": {
+      "go_test_all": {
+        "passed": true,
+        "library_seconds": 5.547,
+        "cli_seconds": 0.341,
+        "log": "output/theme-color-tests.log"
+      },
+      "go_race_all": {
+        "passed": true,
+        "library_seconds": 65.157,
+        "cli_seconds": 2.451,
+        "log": "output/theme-color-race.log"
+      },
+      "go_vet": "passed",
+      "cgo_disabled_cli": "built darwin/arm64 and executed independent conversions",
+      "diff_check": "passed",
+      "fuzz": {
+        "DOCXThemeLuminance": {
+          "executions": 10000,
+          "passed": true,
+          "seconds": 1.261
+        },
+        "DOCXThemeColorPackage": {
+          "executions": 1000,
+          "passed": true,
+          "seconds": 1.386
+        },
+        "ReadDOCX": {
+          "executions": 500,
+          "passed": true,
+          "seconds": 1.138
+        }
+      },
+      "poppler_text": {
+        "passed": 28,
+        "total": 28
+      },
+      "prosemirror_corpus": {
+        "passed": true,
+        "files": 51,
+        "nodes": 9027
+      },
+      "prosemirror_theme": {
+        "passed": true,
+        "nodes": 23
+      }
+    },
+    "independent": {
+      "script": "scripts/verify_docx_theme_colors.py",
+      "author": "python-docx plus explicit independent XML palette/settings/runs",
+      "source_bindings": 11,
+      "checked": [
+        "source OPC theme/mapping/modifier facts",
+        "SF RGB and inherited 14pt",
+        "standard DOCX RGB properties",
+        "MuPDF native PDF span colors/sizes",
+        "pypdf metadata/one-page output"
+      ],
+      "source_libreoffice": {
+        "matching_colors": 10,
+        "total": 11,
+        "difference": "Deliberate stale red base cache renders FF0000 in LibreOffice; current-theme calculation is 4F81BD, reported via cache mismatch diagnostic",
+        "oracle_changed": false
+      },
+      "exported_RGB_DOCX_libreoffice": {
+        "matching_colors": 11,
+        "total": 11,
+        "all_tokens_sizes_checked": true,
+        "pages": 1
+      },
+      "visually_inspected": {
+        "native": 1,
+        "source_LibreOffice": 1,
+        "exported_DOCX_LibreOffice": 1
+      },
+      "Word_or_professional_fidelity_claimed": false
+    },
+    "method_limits": [
+      "floating HSL-equivalent chroma scaling and nearest 8-bit rounding; producer quantization/cache values may differ",
+      "unsupported/missing palette choices/transforms may use final RGB cache with uncertainty; no usable cache rejects",
+      "theme/system/editable bindings not retained",
+      "no new schema/API/runtime dependency"
+    ],
+    "remaining_required": [
+      "DrawingML palette representations/transforms and broader color management",
+      "theme/script font choice and source-font handling",
+      "shaping/bidi/font formats and supplementary-plane output",
+      "rich page/running content",
+      "broader PDF structure",
+      "representative real exports/Word qualification"
+    ],
+    "next_commands": [
+      "rg -n 'themeFont|font_scripts|rFonts' docx_text_style.go docx_read.go",
+      "rg -n 'shaping|bidi|complex|supplement' pdf_text.go pdf_font.go",
+      "GOWORK=off go test -run TestDOCXTheme -count=1",
+      "output/qa-venv/bin/python scripts/verify_docx_theme_colors.py"
+    ],
+    "external_blocker": null
   }
 }

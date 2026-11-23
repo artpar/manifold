@@ -200,3 +200,9 @@ reflow. Imported sizes finer than writer precision require explicit caller choic
 Optional QA: `output/qa-venv/bin/python scripts/verify_pdf_text_styles.py` checks an
 independent ReportLab source through SF, DOCX and mapped-font PDF. See the current
 recovery contract and remaining work in docs/COMPATIBILITY.md.
+
+
+DOCX imports calculate run theme tint/shade and document color mappings into RGB.
+Theme/system bindings and mismatched cached colors have explicit diagnostics;
+unsupported palette choices may use a final cached RGB with uncertainty. Optional
+QA: `output/qa-venv/bin/python scripts/verify_docx_theme_colors.py`.

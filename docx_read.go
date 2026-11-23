@@ -134,6 +134,7 @@ type docxReader struct {
 	defaultPPr            *xmlNode
 	defaultRPr            *xmlNode
 	theme                 *xmlNode
+	colorMapping          map[string]string
 	defaultParagraphStyle string
 	num                   map[string]map[int]docxListLevel
 	inTaggedList          int
@@ -345,6 +346,9 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 			}
 			if settings.Name.Local != "settings" {
 				return nil, fmt.Errorf("invalid DOCX settings root")
+			}
+			if e := r.readColorMapping(settings); e != nil {
+				return nil, e
 			}
 			r.notePropertySources = append(r.notePropertySources, settings)
 		case strings.HasSuffix(v.Type, "/numbering"):

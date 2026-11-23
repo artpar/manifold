@@ -9,7 +9,8 @@ integration and do not authorize changes to Daptin.
    corpus of real exported documents and intended deployment fonts. Compare text,
    structure, and appearance separately.
 2. Extend the implemented family/size/color fields with full theme/script/embedded
-   font recovery, shading and paragraph properties; then asymmetric
+   font recovery, shading and paragraph properties; calculated run theme tint/shade
+   and settings color mappings now exist; then asymmetric
    margins, sections, richer note numbering/separator/layout behavior, bookmarks, comment/revision history and
    broader numbering formats. Each feature needs import, model, export and tests;
    avoid a second authoritative representation of the same content.

@@ -376,3 +376,12 @@ synthetic separators claim only common editable styles and inferred provenance.
 Unknown paint omits editable color with a diagnostic; quantization/CMYK/default
 space approximations and transforms diagnose. Original SF must survive any caller
 retypesetting chosen to satisfy output font availability/precision restrictions.
+
+
+DOCX theme text colors now calculate settings mappings/HSL tint/shade before
+populating existing textStyle.color. No schema/model version changes. Editable
+theme/system bindings still diagnose loss; source caches differ from calculated
+current-theme RGB in some producers. Unsupported palette resolution uses a final
+RGB cache only with uncertainty, otherwise rejects. Broader DrawingML/theme/font
+and script features remain required expansion; resolved RGB round trips preserve
+this profile's declared scalar, not an absent live theme relationship.

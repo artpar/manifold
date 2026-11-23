@@ -961,3 +961,55 @@ The new style/recovery/inference SFs add 104 independently checked nodes. Seven
 recovery/structure/inference/ruling/office/publication/style QA scripts passed;
 verification.json holds the durable evidence and limitations. Generated fixtures,
 binaries, images, logs and QA environments remain ignored. No new runtime dependency.
+
+
+## DOCX theme text color qualification
+
+```sh
+GOWORK=off go test -run 'TestDOCXTheme' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzDOCXThemeLuminance$' -fuzztime=10000x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzDOCXThemeColorPackage$' -fuzztime=1000x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=500x -parallel=2 -timeout=90s
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+output/qa-venv/bin/python scripts/verify_docx_theme_colors.py
+mkdir -p output/docx-theme-colors/source-lo output/docx-theme-colors/reflow-lo
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/docx-theme-colors/lo-profile --headless --convert-to pdf --outdir output/docx-theme-colors/source-lo output/docx-theme-colors/source.docx
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/docx-theme-colors/lo-profile --headless --convert-to pdf --outdir output/docx-theme-colors/reflow-lo output/docx-theme-colors/reflow.docx
+output/qa-venv/bin/python scripts/verify_docx_theme_colors.py --office output/docx-theme-colors/source-lo/source.pdf --reflow-office output/docx-theme-colors/reflow-lo/reflow.pdf
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/docx-theme-colors/source.sf
+python3 scripts/verify_structured_corpus.py
+python3 scripts/compare_pdf_text.py
+GOWORK=off go test ./... -count=1
+GOWORK=off go test -race ./... -count=1
+GOWORK=off go vet ./...
+git diff --check
+```
+
+The Go source OPC parts are independently authored, not exported by manydoc.
+Cases cover stale cache, uncached calculations, HSL extremes/identity/gray,
+tint precedence, aliases, logical mappings, direct dark/light slots, nonrecursive
+accent swaps, system lastClr, inheritance, unsupported palette final-cache fallback,
+no double-transform, malformed hex/mappings and missing usable cache rejection.
+SF codec preserves resolved fields; standard DOCX RGB round trips preserve color.
+The package fuzzer drives independently authored OPC → SF and resolved DOCX.
+The luminance fuzzer checks color bounds, required luminance and identity, not
+simply a successful function return.
+
+python-docx plus explicit palette/settings/run XML authors a complete eleven-binding
+source. Independent expected RGB constants check SF, exported DOCX XML and MuPDF
+native PDF span colors/sizes; pypdf checks the one-page output/metadata. Actual
+ProseMirror validates 23 nodes/attributes. LibreOffice source rendering matches
+ten colors; its deliberately stale-cache base case remains red instead of the
+calculated blue. Keep that observation, not a rewritten oracle. Exported RGB-only
+DOCX renders all eleven colors/sizes/tokens correctly in LibreOffice. Native PDF,
+source LibreOffice and exported DOCX pages were visually inspected (three pages).
+This is targeted synthetic QA, not representative or exact Word color fidelity.
+
+Full Go tests passed (library 5.547s, CLI 0.341s); race passed (65.157s/2.451s),
+vet passed, CGO-disabled host CLI built/executed independent conversions, diff
+check passed. Luminance fuzz passed 10,000, package fuzz 1,000 and malformed DOCX
+fuzz 500 executions. All 51 accepted SF corpus files/9,027 nodes and all 28 Poppler
+text comparisons passed. verification.json records results; ignored output holds
+raw logs/generated documents/renderings. No fixture oracle or runtime dependency
+changed. Unsupported DrawingML palette transforms and broader theme/script/font,
+page/running-content, shaping/bidi and real-export work remain required.

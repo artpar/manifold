@@ -117,37 +117,11 @@ func (r *docxReader) textProperties(run *Run, pr *xmlNode) error {
 				r.doc.warn("font_scripts", "Script-specific theme font choices are not retained")
 			}
 		case "color":
-			v := p.attr("val")
-			if theme := p.attr("themeColor"); theme != "" {
-				name := theme
-				switch name {
-				case "text1":
-					name = "dk1"
-				case "text2":
-					name = "dk2"
-				case "background1":
-					name = "lt1"
-				case "background2":
-					name = "lt2"
-				}
-				c := r.theme.child("themeElements").child("clrScheme").child(name)
-				resolved := c.child("srgbClr").attr("val")
-				if resolved == "" {
-					resolved = c.child("sysClr").attr("lastClr")
-				}
-				if p.attr("themeTint") == "" && p.attr("themeShade") == "" && resolved != "" {
-					v = resolved
-				}
-				r.doc.warn("color_theme", "Theme color is resolved to RGB/cache; editable theme binding and tint/shade calculations are not retained")
-				if v == "" {
-					return fmt.Errorf("%w: unresolved DOCX theme color", ErrUnsupported)
-				}
+			value, err := r.textColor(p)
+			if err != nil {
+				return err
 			}
-			if v == "auto" {
-				run.Color = "auto"
-			} else {
-				run.Color = "#" + strings.ToUpper(v)
-			}
+			run.Color = value
 		}
 	}
 	return validateTextStyle(*run)

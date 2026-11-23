@@ -722,3 +722,31 @@ and the current build produced identical image order/pixels. Bind unchanged red,
 inline and blue pixel oracles to source objects (8 0 R), inline:page:1:6 and
 (12 0 R); no image fixture or expected pixel changed. Source-mark checks use mark
 identity, independent of ordering beside the new textStyle mark.
+
+
+## 2026-11-23 Theme color calculation and cached values
+
+Resolve Word theme text to the existing RGB scalar instead of inventing another
+canonical color format. Calculate HSL luminance tint/shade and apply settings
+mappings before resolving the palette. Preserve current inherited/direct precedence.
+Mapping targets are palette indices, not recursively remapped logical names.
+
+[Microsoft MS-OI29500 2.1.72](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-oi29500/8229a077-7fc8-4fba-96cc-c77b6a4fc768)
+documents HSL luminance calculations and tint precedence. The implementation uses
+floating HSL-equivalent chroma scaling and nearest 8-bit channel rounding; producer
+quantization and cached values can differ. [ColorSchemeMapping documentation](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.colorschememapping?view=openxml-3.0.1)
+defines settings mappings. These are format/behavior references, not copied
+implementation code. No proprietary UniDoc source or new runtime dependency.
+
+A source fixture intentionally supplies a stale red cache for a blue palette
+entry. LibreOffice renders the cache, while this reader calculates the active
+palette color and reports mismatch. Preserve both observations; do not change the
+RGB oracle to fit that producer. Ten other source colors agree, and all eleven
+exported RGB-only DOCX colors render correctly in LibreOffice. This targeted QA
+does not establish exact Word/producer color equivalence or professional fidelity.
+
+Unsupported DrawingML palette choices/transforms may retain an already-final RGB
+cache with explicit uncertainty. Do not ignore their children or tint that cache
+a second time. No usable final cache means unsupported resolution rejects.
+These constructs, theme bindings and script/font handling remain unfinished work;
+this milestone does not turn remaining required capabilities into exclusions.
