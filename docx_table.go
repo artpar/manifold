@@ -37,7 +37,15 @@ func (r *docxReader) table(n *xmlNode, rels map[string]docxRelation, depth int) 
 			}
 		}
 		ri := len(b.Rows)
-		b.Rows = append(b.Rows, Row{})
+		repeat, err := docxTableHeader(row.child("trPr"))
+		if err != nil {
+			return Block{}, err
+		}
+		if repeat && (ri > 0 && !b.Rows[ri-1].RepeatHeader) {
+			r.doc.warn("table_header_ignored", "Noncontiguous DOCX table header property is ignored according to OOXML")
+			repeat = false
+		}
+		b.Rows = append(b.Rows, Row{RepeatHeader: repeat})
 		next := map[int]origin{}
 		column := 0
 		for _, cell := range row.Children {
@@ -82,6 +90,18 @@ func (r *docxReader) table(n *xmlNode, rels map[string]docxRelation, depth int) 
 			column += width
 		}
 		active = next
+	}
+	headers, _ := tableHeaderRows(b.Rows)
+	for ri := 0; ri < headers; ri++ {
+		for _, c := range b.Rows[ri].Cells {
+			if ri+max(1, c.RowSpan) > headers {
+				for i := range b.Rows {
+					b.Rows[i].RepeatHeader = false
+				}
+				r.doc.warn("table_header_merge", "DOCX merge crosses the repeating-header boundary; content and merge retained, header repetition disabled")
+				break
+			}
+		}
 	}
 	if _, err := tableGrid(b.Rows); err != nil {
 		return Block{}, err
@@ -134,6 +154,9 @@ func (w *docxWriter) table(b Block) (string, error) {
 			return "", err
 		}
 		out.WriteString(`<w:tr>`)
+		if b.Rows[ri].RepeatHeader {
+			out.WriteString(`<w:trPr><w:tblHeader/></w:trPr>`)
+		}
 		for col := 0; col < len(slots); {
 			p := slots[col]
 			c := b.Rows[p.Row].Cells[p.Cell]
@@ -180,4 +203,19 @@ func (w *docxWriter) table(b Block) (string, error) {
 	}
 	out.WriteString(`</w:tbl>`)
 	return out.String(), nil
+}
+
+func docxTableHeader(pr *xmlNode) (bool, error) {
+	var found *xmlNode
+	if pr != nil {
+		for _, c := range pr.Children {
+			if c.Name.Local == "tblHeader" {
+				if found != nil {
+					return false, fmt.Errorf("duplicate DOCX tblHeader property")
+				}
+				found = c
+			}
+		}
+	}
+	return docxOnOff(found)
 }

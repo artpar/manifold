@@ -266,6 +266,11 @@ func FuzzReadStructured(f *testing.F) {
 		f.Fatal(err)
 	}
 	f.Add(b)
+	headers, err := os.ReadFile("examples/repeated-headers/document.sf")
+	if err != nil {
+		f.Fatal(err)
+	}
+	f.Add(headers)
 	lists, err := os.ReadFile("examples/lists/document.sf")
 	if err != nil {
 		f.Fatal(err)

@@ -28,6 +28,7 @@ type pdfTableBandCell struct {
 	top, bottom bool
 }
 type pdfTablePage struct {
+	header *pdfTableHeader
 	forced bool
 	bands  []pdfTableBand
 	height float64
@@ -140,7 +141,7 @@ func (r *pdfRenderer) nextPDFTableBand(plan *pdfTableLayout, g pdfTableGroup, cu
 	return band, next, true, nil
 }
 
-func (r *pdfRenderer) planTablePage(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor, capacity float64, atStart bool) (pdfTablePage, pdfTableCursor, error) {
+func (r *pdfRenderer) planTablePageRaw(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor, capacity float64, atStart bool) (pdfTablePage, pdfTableCursor, error) {
 	var page pdfTablePage
 	for cursor.row < g.end {
 		if err := r.ctx.Err(); err != nil {
@@ -167,8 +168,39 @@ func (r *pdfRenderer) planTablePage(plan *pdfTableLayout, g pdfTableGroup, curso
 	return page, cursor, nil
 }
 
+// A repeating prefix is an immutable physical copy. Keep it with a body band;
+// it never consumes authored body flow or creates new note identities.
+func (r *pdfRenderer) planTablePage(plan *pdfTableLayout, g pdfTableGroup, cursor pdfTableCursor, capacity float64, atStart bool) (pdfTablePage, pdfTableCursor, error) {
+	if plan.header == nil {
+		return r.planTablePageRaw(plan, g, cursor, capacity, atStart)
+	}
+	original := cursor
+	if cursor.row < plan.headerRows {
+		cursor = enterPDFTableRow(plan, g, pdfTableCursor{row: plan.headerRows, next: plan.headerLast})
+	}
+	if cursor.row >= g.end || capacity+1e-7 < plan.header.height {
+		return pdfTablePage{}, original, nil
+	}
+	body, next, err := r.planTablePageRaw(plan, g, cursor, capacity-plan.header.height, false)
+	if err != nil || len(body.bands) == 0 {
+		return pdfTablePage{}, original, err
+	}
+	page := pdfTablePage{height: plan.header.height + body.height, forced: body.forced, header: plan.header}
+	page.bands = append(page.bands, body.bands...)
+	page.keys = append(page.keys, plan.header.keys...)
+	page.keys = append(page.keys, body.keys...)
+	return page, next, nil
+}
+
 func (r *pdfRenderer) paintTablePage(plan *pdfTableLayout, page pdfTablePage, x, top float64) error {
 	y := top
+	if page.header != nil {
+		if err := r.paintTableGroup(plan, page.header.group, x, y); err != nil {
+			return err
+		}
+		y += page.header.height
+	}
+	bodyTop := y
 	r.pdf.SetDrawColor(120, 120, 120)
 	for _, band := range page.bands {
 		for _, c := range band.cells {
@@ -201,7 +233,7 @@ func (r *pdfRenderer) paintTablePage(plan *pdfTableLayout, page pdfTablePage, x,
 	for _, edge := range []struct {
 		band pdfTableBand
 		y    float64
-	}{{page.bands[0], top}, {page.bands[len(page.bands)-1], y}} {
+	}{{page.bands[0], bodyTop}, {page.bands[len(page.bands)-1], y}} {
 		for _, c := range edge.band.cells {
 			p := c.position
 			cx := x + float64(p.Column)*plan.unit

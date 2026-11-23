@@ -60,6 +60,16 @@ func imageBoundStart(f pdfFragment) bool {
 		return false
 	}
 	cursor := tableFragmentCursor(f)
+	if plan := f.Table.table; plan.header != nil {
+		for _, c := range plan.cells[:plan.headerLast] {
+			if flowHasImage(c.flow) {
+				return true
+			}
+		}
+	}
+	if plan := f.Table.table; plan.header != nil && cursor.row < plan.headerRows {
+		cursor = enterPDFTableRow(plan, f.Table.group, pdfTableCursor{row: plan.headerRows, next: plan.headerLast})
+	}
 	maximum := 22.0
 	bound := false
 	for _, c := range cursor.cells {

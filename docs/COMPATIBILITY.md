@@ -11,8 +11,8 @@ current rejection behavior must not be read as an exemption from that goal.
 
 | Operation | Implemented behavior | Important limits |
 | --- | --- | --- |
-| DOCX read | Paragraphs/headings, bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
-| DOCX write | Paragraphs/headings/runs/links, lists, tables/nesting/row and column spans, PNG/JPEG images, metadata, one page layout and header/footer, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
+| DOCX read | Paragraphs/headings, bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans/repeating header prefixes, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
+| DOCX write | Paragraphs/headings/runs/links, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, one page layout and header/footer, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
 | PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; more complex inference, internal destinations and OCR unfinished; unsupported codecs/encodings/operators reject |
 | PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, text headers/footers, linked rich footnotes/endnotes with continuation | Embedded Go font coverage; complex shaping/bidi rejected; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
 | SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; richer required features remain unfinished |
@@ -309,3 +309,33 @@ return physical fitted dimensions. Geometries rounding to zero in PDF's matrix
 or DOCX's EMU serialization reject atomically. Ancestor padding must leave actual
 image space. Codec variants/color qualification and the wider acceptance rows
 remain open; these containment checks do not establish professional fidelity.
+
+
+## Repeating table headers
+
+SF/Go retain a contiguous prefix using row repeatHeader/RepeatHeader, distinct
+from semantic header cells. DOCX reads/writes ordinary tblHeader with standard
+boolean forms. Noncontiguous imported flags have no OOXML effect and diagnose
+normalization; merges crossing into body rows retain content/span and diagnose
+disabled repetition. Invalid booleans/duplicate properties reject. Authored
+SF/Go reject non-prefix flags and crossing merges.
+
+Native PDF repeats original merged header geometry, text, links and rasters in
+body/nested/footnote continuation. It admits the prefix with a body band, reserves
+its height before fitting body figures, and reuses note identities/destinations.
+Header image budgets adapt to measured legal body starts, including nested tables
+and other prefix rows; no text or pixels are removed. Figure-bearing note prefixes
+can defer to a later page using the linked notice.
+Header-only tables render once. Repeating prefixes are indivisible; page controls
+inside them or a prefix exceeding full container height reject atomically. Native
+explicit body breaks also repeat headers on resumed table pages; Word suppresses
+repetition for manual breaks. PDF import does not infer authorial repetition from
+similar painted rows on different pages. Broader role/recovery/layout qualification
+remains required.
+
+The targeted example passes independent native five-page geometry, exact pixels,
+unique body content and note/URI checks. DOCX retains original assets/merge/header
+flags. LibreOffice 7.6 renders four inspected pages with all body text/images and
+both header rows, but reduces the small header raster to 5×50 from 64×640. This
+is a failed producer exact-pixel check recorded in office-observation.json;
+containment does not imply exact pixel/Word-layout qualification.

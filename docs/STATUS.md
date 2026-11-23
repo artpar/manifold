@@ -21,7 +21,57 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: image height fitting and raster validation
+## Latest milestone: repeating table headers
+
+- Public `Row.RepeatHeader` and optional SF `table_row.attrs.repeatHeader`
+  preserve a pagination property separately from semantic header-cell roles.
+  True rows must form a contiguous prefix. Merges within that prefix are supported;
+  a merge crossing into body rows is invalid in authored SF/Go. Existing false/
+  omitted attributes retain their meaning; the profile version is unchanged.
+- DOCX imports/exports standard `w:trPr/w:tblHeader`, including all standard
+  on/off forms. Invalid booleans/duplicates reject. OOXML says noncontiguous
+  flags have no effect: import normalizes them off with a diagnostic. A merge
+  crossing the prefix boundary retains its content/span and diagnoses disabled
+  repetition. No visible content is discarded.
+- PDF uses an immutable measured header prefix and a single body continuation
+  cursor. Header copies retain original merged geometry, rich fragments and assets;
+  selecting cells row by row would incorrectly add padding inside a spanning
+  header. The prefix shares admission with a body band, repeats on body/nested/
+  footnote continuation pages and reserves space before fitting body figures.
+  Header image budgets remeasure against actual legal body minima, including
+  nested starts and extra prefix rows. Figure-bearing note headers can defer
+  using the linked continuation notice; authored dimensions/pixels remain intact.
+  Repeated note markers reuse their original identity/body/destination. Native
+  explicit body breaks also repeat the header; Word's manual-break behavior differs.
+- Repeating prefixes are indivisible in PDF. A prefix that cannot fit its container after image fitting,
+  or containing page controls, rejects atomically; SF/DOCX retain those requests.
+  Header-only tables render once. Other page/running-content controls and broader
+  pagination qualification remain open work, not claims of professional fidelity.
+- `examples/repeated-headers` has two vertically/horizontally merged header rows,
+  a repeated raster, an oversized body merge, a body image and two note references.
+  Independent pypdf/MuPDF/python-docx checks verify five native pages, original
+  header rectangles/pixels, unique body flow, notes/URI targets and DOCX flags/
+  merge identities/media. Actual ProseMirror checks all 100 nodes/attributes.
+  All five native and four LibreOffice-rendered pages were visually inspected.
+  LibreOffice retains all body text/images and repeats both header rows, but
+  fails exact header pixel preservation (64×640 reduced to 5×50), recorded in
+  ignored office-observation.json, and paginates differently.
+  Native pixels and DOCX original media remain exact; no producer pixel-fidelity
+  claim is made. This is targeted synthetic qualification.
+- Go tests/race/vet, malformed-input checks, CGO-disabled build/execution, layout/
+  DOCX fuzzing and independent regression/corpus comparisons are recorded in
+  verification.json. Tests include nesting through four levels, footnotes,
+  header note destinations on every table page, partial-page starts, fitted
+  figures, forced body boundaries, malformed flags and crossing merges.
+
+The active goal remains incomplete. Next extend rich text font family/size/color
+semantics across SF/Go/DOCX/PDF, then broader font/shaping coverage and the other
+ACCEPTANCE.md rows. Page/running-content semantics, broader PDF recovery and
+representative real exports remain required. No external blocker exists.
+Prior checkpoint: `ff123a6`; this milestone groups implementation, tests, example
+and aligned KT docs in one commit.
+
+## Earlier milestone: image height fitting and raster validation
 
 - `fitImageBox` now fits the preferred image rectangle to full container width
   and height, without cropping or resampling. One missing dimension retains the
@@ -757,17 +807,23 @@ module access. The go.mod selects Go 1.25; do not force an older local toolchain
 
 ## Next work (required for the active goal)
 
-No external blocker currently prevents development. Image height fitting,
-figure-note deferral and bounded full-raster validation now exist. Next establish
-repeatable table-header semantics across SF/Go, DOCX tblHeader and PDF continuation;
-keep authored header content distinct from repeated physical appearances and
-preserve note/reference identity. Then the other acceptance rows remain required.
-Broader Word/producer and real-export qualification stays open; current native and
-LibreOffice pagination differences are documented, not hidden.
+No external blocker currently prevents development. Repeating headers now share
+SF/Go/DOCX semantics and native body/nested/note continuation. Next establish
+font family/size/color semantics, import/style resolution and PDF measurement/
+painting, then configurable fonts and shaping/bidi. Keep exact missing-glyph
+outcomes while expanding support. Rich page/running-content semantics, broader
+PDF recovery, note-layout/Word qualification and representative real exports
+remain required; see ACCEPTANCE.md.
 
 Next concrete commands:
 
 ```sh
+rg -n 'type Run|rFonts|font|sz|color|size|SetFont|pdfAtom|text_style' document.go structured.go docx_read.go docx_write.go pdf_text.go pdf_write.go
+GOWORK=off go run ./examples/repeated-headers
+output/qa-venv/bin/python scripts/verify_repeated_headers.py --office output/repeated-headers/lo/repeated-headers.pdf
+GOWORK=off go test -run 'TestRepeating|TestDOCX.*Header|TestInvalidRepeat' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzRepeatingTableHeaders$' -fuzztime=20s -parallel=2 -timeout=50s
+
 rg -n 'type Row|table_row|tblHeader|pdfTableGroup|continueTableGroup' document.go structured.go docx_table.go pdf_cell_layout.go pdf_table_continue.go
 GOWORK=off go run ./examples/image-fit
 output/qa-venv/bin/python scripts/verify_image_fit.py

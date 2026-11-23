@@ -78,7 +78,7 @@ it cannot preserve. It is not evidence that the full requested SF is implemented
 | Paragraph/heading | paragraph/heading with text children; heading.attrs.level 1–6; optional boolean attrs.pageBreakBefore (default false) |
 | Formatting | strong, em, underline, strike marks; link.attrs.href |
 | Lists | ordered_list (nonnegative order, default 1) or bullet_list → list_item → paragraph/heading followed by blocks, including nested lists |
-| Tables | table → table_row → table_cell; colspan 1–1000, positive rowspan bounded by remaining rows; nested blocks |
+| Tables | table → table_row → table_cell; colspan 1–1000, positive rowspan bounded by remaining rows; nested blocks; optional row attrs.repeatHeader (false default) |
 | Images | block image; src is an embedded `data:<media-type>;base64,...` URI; alt, width, height |
 | Page breaks | page_break block |
 | PDF recovery | doc.attrs.pages; source node/cell/list-item attributes and source text/reference marks preserve positioned provenance |
@@ -221,7 +221,7 @@ The following remain required work, even where the current bridge rejects them:
   validation. Positions/assets/pages and explicit/inferred provenance now exist;
   more complex layouts and broader real exports still need qualification.
 - PDF font/shaping coverage and table pagination/cell layout expansion, including
-  repeated headers and broader image/layout qualification. Oversized body/nested/footnote groups
+  broader image/layout qualification; repeated prefixes now exist. Oversized body/nested/footnote groups
   and explicit cell/note page breaks now continue recursively. Qualify DOCX
   richer paragraph/page properties without changing SF control semantics.
   Conditional pageBreakBefore import/export now exists separately from controls.
@@ -328,3 +328,19 @@ change the ordinary figure size. PDF and DOCX use their own padding/reference
 budgets, so physical sizes can differ. A later DOCX/PDF import reports those
 physical extents; exact preferred-size persistence is established through SF,
 not claimed through a fitted rendering. No profile schema change was required.
+
+
+## Repeating table rows
+
+`table_row.attrs.repeatHeader` is an optional boolean with false default. True
+rows form a contiguous prefix; merged cells may span within it but not into body
+rows. The attribute requests repeated physical rows on continuation pages, without
+inventing semantic table_header cells or duplicating authored content. Existing
+profile meanings are unchanged. DOCX maps it to tblHeader. Native PDF supports
+body, nested and footnote tables, reserving the measured prefix before body
+selection/image fitting; header figure budgets also account for legal nested
+body starts. Repeated references link to one original note body.
+Header-only tables appear once. Native explicit body page boundaries repeat the
+prefix on resumed table pages. PDF prefixes are indivisible; taller-than-container
+prefixes and page controls inside a prefix reject, while persistence/DOCX retain
+the requests. Broader page/layout qualification remains required work.

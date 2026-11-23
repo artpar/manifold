@@ -16,6 +16,10 @@ type tableGeometry struct {
 
 func tableGrid(rows []Row) (*tableGeometry, error) {
 	g := &tableGeometry{Slots: make([][]*tableCellPosition, len(rows))}
+	headers, err := tableHeaderRows(rows)
+	if err != nil {
+		return nil, err
+	}
 	const maxSlots = 1_000_000
 	allocated := 0
 	for ri, row := range rows {
@@ -25,6 +29,9 @@ func tableGrid(rows []Row) (*tableGeometry, error) {
 				return nil, fmt.Errorf("invalid table span at row %d cell %d", ri+1, ci+1)
 			}
 			cs, rs := max(1, c.ColSpan), max(1, c.RowSpan)
+			if ri < headers && ri+rs > headers {
+				return nil, fmt.Errorf("table cell crosses repeating header boundary at row %d", ri+1)
+			}
 			for column < len(g.Slots[ri]) && g.Slots[ri][column] != nil {
 				column++
 			}
@@ -62,4 +69,17 @@ func tableGrid(rows []Row) (*tableGeometry, error) {
 		}
 	}
 	return g, nil
+}
+
+func tableHeaderRows(rows []Row) (int, error) {
+	count := 0
+	for i, row := range rows {
+		if row.RepeatHeader {
+			if i != count {
+				return 0, fmt.Errorf("repeating table headers must form a contiguous prefix")
+			}
+			count++
+		}
+	}
+	return count, nil
 }

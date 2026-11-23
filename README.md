@@ -167,3 +167,10 @@ GOWORK=off go run ./examples/typography -out output/typography
 
 See the current support contract and unfinished structure/layout work in
 [COMPATIBILITY.md](docs/COMPATIBILITY.md) and [STATUS.md](docs/STATUS.md).
+
+
+Run `GOWORK=off go run ./examples/repeated-headers` for SF/DOCX/PDF outputs with
+repeating merged table headers, original raster assets, oversized body cells and
+linked footnotes. `Row.RepeatHeader` marks a contiguous row prefix; native PDF
+continues body/nested/footnote tables with that prefix and preserves authored SF.
+See docs/COMPATIBILITY.md for page-control and producer qualification limits.

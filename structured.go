@@ -153,6 +153,11 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 		case Table:
 			for _, row := range b.Rows {
 				rn := StructuredNode{Type: "table_row"}
+				if row.RepeatHeader {
+					rn.Attrs = sfAttrs(struct {
+						RepeatHeader bool `json:"repeatHeader"`
+					}{true})
+				}
 				for _, c := range row.Cells {
 					content, err := encodeSFBlocks(c.Blocks)
 					if err != nil {
@@ -401,10 +406,23 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 				if row.Type != "table_row" || row.Text != "" || len(row.Marks) > 0 {
 					return nil, fmt.Errorf("table requires table_row children")
 				}
-				if err := emptySFAttrs(row.Attrs); err != nil {
+				a := struct {
+					RepeatHeader json.RawMessage `json:"repeatHeader"`
+				}{}
+				if err := strictSFAttrs(row.Attrs, &a); err != nil {
 					return nil, err
 				}
-				r := Row{}
+				repeat := false
+				if len(a.RepeatHeader) > 0 {
+					switch string(bytes.TrimSpace(a.RepeatHeader)) {
+					case "true":
+						repeat = true
+					case "false":
+					default:
+						return nil, fmt.Errorf("repeatHeader must be a boolean")
+					}
+				}
+				r := Row{RepeatHeader: repeat}
 				for _, cell := range row.Content {
 					cellAttrs, cellSource, err := decodeSourceAttrs(cell.Attrs)
 					if err != nil {

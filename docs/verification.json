@@ -1321,5 +1321,160 @@
       "richer font/shaping/page/running content",
       "other unfinished ACCEPTANCE.md rows"
     ]
+  },
+  "repeating_table_headers_milestone": {
+    "date": "2026-11-23",
+    "goal_complete": false,
+    "prior_checkpoint": "ff123a6",
+    "go_tests": {
+      "result": "passed",
+      "library_seconds": 7.672,
+      "cli_seconds": 0.481
+    },
+    "race": {
+      "result": "passed",
+      "library_seconds": 63.019,
+      "cli_seconds": 2.422
+    },
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host": "built and executed CLI; whole SF DOCX round trip, equivalent PDF text/geometry/image hashes/links",
+    "diff_check": "passed",
+    "new_runtime_dependencies": [],
+    "sf": {
+      "profile": "manydoc-prosemirror/1",
+      "row_attribute": "repeatHeader",
+      "go_field": "Row.RepeatHeader",
+      "default": false,
+      "prefix_only": true,
+      "merge_crossing_boundary": "invalid authored input; DOCX normalization diagnostic retains content/span"
+    },
+    "layout_fuzz": {
+      "seconds": 20,
+      "workers": 2,
+      "executions": 1666,
+      "result": "passed"
+    },
+    "malformed_docx_fuzz": {
+      "seconds_requested": 10,
+      "workers": 2,
+      "executions": 199,
+      "result": "passed",
+      "new_seeds": [
+        "generated merged/repeating header DOCX",
+        "invalid tblHeader on/off"
+      ]
+    },
+    "structured_input_fuzz": {
+      "seconds_requested": 10,
+      "workers": 2,
+      "executions": 45481,
+      "result": "passed",
+      "new_seed": "repeated-headers/document.sf"
+    },
+    "independent_script": "scripts/verify_repeated_headers.py",
+    "native": {
+      "pages": 5,
+      "header_original_pixels": "passed on every table page",
+      "header_rectangles_pt": [
+        [
+          20,
+          20,
+          206.6667,
+          72
+        ],
+        [
+          206.6667,
+          20,
+          300,
+          46
+        ],
+        [
+          206.6667,
+          46,
+          300,
+          72
+        ]
+      ],
+      "header_image_bbox_pt": [
+        26,
+        40,
+        38,
+        52
+      ],
+      "last_body_image_bbox_pt": [
+        26,
+        92,
+        56,
+        107
+      ],
+      "body_tokens": "every original token once",
+      "note_page_destinations": [
+        [
+          1,
+          1
+        ],
+        [
+          4,
+          4
+        ]
+      ],
+      "uri_page": 5,
+      "all_bounds": "passed",
+      "visual_pages_inspected": 5
+    },
+    "docx": {
+      "tblHeader_rows": [
+        1,
+        2
+      ],
+      "header_merge": "2 rows x 2 columns",
+      "body_merge": "3 rows x 2 columns",
+      "original_media": "exact bytes",
+      "whole_sf_roundtrip": "passed"
+    },
+    "libreoffice": {
+      "producer_version": "7.6",
+      "pages": 4,
+      "repeated_header_rows": "both on every table page",
+      "all_body_tokens_and_image_placements": "passed",
+      "bounds": "passed",
+      "visual_pages_inspected": 4,
+      "exact_header_pixels": "failed: source 64x640 reduced to 5x50",
+      "body_image_pixels": "passed",
+      "observation": "output/repeated-headers/office-observation.json",
+      "same_pagination_as_native": false,
+      "scope": "targeted synthetic qualification, not Word-equivalent fidelity"
+    },
+    "prosemirror": {
+      "example_nodes": 100,
+      "corpus_files": 51,
+      "corpus_nodes": 9027,
+      "result": "passed",
+      "example_and_cli_roundtrip_nodes": 376
+    },
+    "poppler_text_comparisons": {
+      "passed": 28,
+      "total": 28
+    },
+    "regenerated_independent_regressions": [
+      "table-continuation",
+      "recursive-tables",
+      "image-fit",
+      "paragraph-breaks",
+      "page-breaks"
+    ],
+    "control_policy": {
+      "header_prefix": "indivisible, PDF rejects over-height prefix or internal page controls; SF/DOCX preserve requests",
+      "body_explicit_break": "native repeats header on resumed table pages, differs from Word manual-break policy",
+      "header_only_table": "authored rows appear once"
+    },
+    "next_required_work": "Rich text font family/size/color across shared representation, DOCX styles/import/export and PDF measurement/painting, then configurable fonts/shaping and remaining ACCEPTANCE.md rows",
+    "header_figure_regression": {
+      "before": "body/note could not fit a legal start, output/repeated-header-figure-before.log",
+      "after": "24 combinations of prefix rows/nesting/story pass exact pixels/bounds/preferences/actual note targets",
+      "policy": "reserve compact line, remeasure against legal body starts, shrink only header image budget; figure note headers can defer",
+      "header_only_large_figure": "passed"
+    }
   }
 }

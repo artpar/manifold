@@ -19,6 +19,13 @@ func minimumPDFFragmentHeight(f pdfFragment) float64 {
 		return f.Height
 	}
 	cursor := tableFragmentCursor(f)
+	header := 0.0
+	if plan := f.Table.table; plan.header != nil {
+		header = plan.header.height
+		if cursor.row < plan.headerRows {
+			cursor = enterPDFTableRow(plan, f.Table.group, pdfTableCursor{row: plan.headerRows, next: plan.headerLast})
+		}
+	}
 	minimum := 22.0
 	for _, c := range cursor.cells {
 		p := f.Table.table.cells[c.cell].position
@@ -26,7 +33,7 @@ func minimumPDFFragmentHeight(f pdfFragment) float64 {
 			minimum = math.Max(minimum, minimumPDFFragmentHeight(c.flow[0])+12)
 		}
 	}
-	return minimum + f.Table.gap
+	return header + minimum + f.Table.gap
 }
 
 // Selection is pure with respect to the measured input and page state. The

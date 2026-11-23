@@ -138,7 +138,7 @@ control is skipped only at the first flow position of the current page; page-sta
 state propagates through nested table selection and note continuation. Body/list
 paragraphs handle it before admission, keeping markers and note destinations with
 the paragraph. Images now fit the full ancestor-constrained height; broader
-continuation qualification and repeated headers remain unfinished.
+continuation qualification remains unfinished. Repeating headers are described below.
 
 `image_layout.go` fits preferred image dimensions to full container width/height,
 without cropping/resampling or enlarging that preferred rectangle. One dimension
@@ -324,3 +324,33 @@ original positions. Failed grids block numeric reclassification of their content
 The SF profile already represents these values; no new canonical schema is added.
 Border appearance, arbitrary curves/occlusion, complex grids and richer native
 PDF cell layout remain required expansion/qualification.
+
+
+## Repeating table prefixes
+
+`Row.RepeatHeader` / SF `table_row.attrs.repeatHeader` mark a contiguous prefix,
+independently of semantic header-cell roles. Shared grid validation rejects gaps
+and merges crossing the prefix/body boundary. DOCX uses standard tblHeader on/off
+properties; noncontiguous flags and boundary-crossing merges import with explicit
+normalization diagnostics, retaining visible content and merges.
+
+For PDF, a table with a repeating prefix and body has one combined continuation
+group. The measured header has original row offsets and cell fragments; copies
+paint using those offsets rather than splitting spanning cells into row bands.
+The pure planner selects a body band from an immutable cursor after reserving
+header height, then includes header keys in page-local note admission. The
+minimum nested fragment includes a header and a legal body band. Remainder
+measurement includes one prefix for the next selected page. Body image fitting
+subtracts measured header height before applying cell/ancestor padding. Header
+images initially reserve a compact body line, then measured fragment minima can
+reduce their budget and remeasure the table. Each retry requires a decreasing
+header height and positive budget; unshrinkable text fails explicitly. Figure-
+bearing prefixes qualify a first note for the linked deferral notice. No
+repeated content is inserted into persisted SF or the caller's tree. Header note
+markers retain their authored identity and link to one actual note body.
+
+Repeating prefixes are indivisible; PDF rejects page controls inside them or a
+prefix taller than the full container. Header-only tables paint once. Native
+explicit body breaks repeat prefixes on resumed table pages, while Word suppresses
+repetition for manual breaks. Real-producer/pagination qualification remains
+required. Runtime dependencies and application admission boundaries are unchanged.

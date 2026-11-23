@@ -101,7 +101,10 @@ type Run struct {
 	Source    *SourceInfo    `json:"source,omitempty"`
 }
 type Row struct {
-	Cells []Cell `json:"cells"`
+	// RepeatHeader repeats a contiguous prefix of rows on table continuation pages.
+	// It is a pagination property, separate from semantic header-cell roles.
+	RepeatHeader bool   `json:"repeat_header,omitempty"`
+	Cells        []Cell `json:"cells"`
 }
 type Cell struct {
 	Blocks  []Block `json:"blocks"`

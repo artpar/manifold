@@ -103,7 +103,13 @@
       }
     },
     "table_row": {
-      "content": "table_cell*"
+      "content": "table_cell*",
+      "attrs": {
+        "repeatHeader": {
+          "default": false,
+          "validate": "boolean"
+        }
+      }
     },
     "table_cell": {
       "content": "block*",

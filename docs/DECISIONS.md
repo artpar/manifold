@@ -598,3 +598,45 @@ atomic output for malformed, excessive and unrepresentable assets. Positive
 oversized cases now assert preserved content/pixels; original fixtures and
 expected source text/assets remain unchanged. Native seven-page and LibreOffice
 five-page qualification is targeted synthetic evidence, not professional fidelity.
+
+
+## Keep repeating prefixes separate from semantic table header roles
+
+Use optional `Row.RepeatHeader` / SF row `attrs.repeatHeader` for pagination.
+A ProseMirror table_header cell describes a semantic cell role, not necessarily
+repeatable rows; do not infer one from the other. OOXML tblHeader requires a
+contiguous prefix ([published property reference](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.tableheader?view=openxml-3.0.1)).
+Reject non-prefix authored flags and boundary-crossing spans. On DOCX import,
+normalize ignored noncontiguous flags and ambiguous crossing spans with explicit
+diagnostics, retaining their text/assets and merge geometry.
+
+Plan the header plus a legal body band as one admission unit in all native table
+contexts. Keep copies out of authored SF. Repeated note references share original
+identity/destination and do not create duplicate definitions. Reserve measured
+header space before fitting body images. A repeated header paints from original
+row offsets: an initial row-band implementation added continuation padding inside
+a spanning header, detected through independent pixel/rectangle checks and fixed
+before acceptance. Copies are indivisible and cannot contain page controls in
+PDF; SF/DOCX preserve such requests, while PDF rejects atomically. Native explicit
+body boundaries repeat a prefix when the table resumes; this differs from
+[Word's documented manual-break policy](https://support.microsoft.com/en-us/word/repeat-table-header-on-subsequent-pages).
+
+Keep native exact-pixel/media oracles. LibreOffice's four-page rendering retains
+all original text/images and both header rows, but reduces a tiny header raster
+from 64×640 to 5×50. Record that failed exact-pixel producer check in office-observation.json; passing containment/visual
+checks does not assert producer pixel equivalence. The five native pages and
+four LibreOffice pages are synthetic qualification, not representative real-export
+or Word-equivalent fidelity. Rich fonts/shaping and other acceptance work remain.
+
+
+A final adversarial case found that a header figure's initial 22pt body allowance
+was smaller than a real 14pt compact line plus 12pt cell padding. Reserve 26pt,
+then compare every measured body fragment minimum (including nested starts)
+against the remaining container. Reduce only the header image budget and remeasure
+when necessary; require decreasing header height/positive budget instead of
+shrinking text or looping on an unchangeable prefix. Header-only tables can fit
+figures against the other prefix rows. Figure-bearing headers also qualify a
+first note for its linked continuation notice. The original body/note failures
+are reproducible in output/repeated-header-figure-before.log; the unchanged
+content/placement tests now pass, including 24 prefix/depth/story combinations
+with exact pixels, bounds and actual note targets. No source preferences change.

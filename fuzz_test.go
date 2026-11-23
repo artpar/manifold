@@ -63,6 +63,12 @@ func FuzzReadDOCX(f *testing.F) {
 		f.Fatal(err)
 	}
 	f.Add(structural.Bytes())
+	var headers bytes.Buffer
+	if err := Write(context.Background(), &headers, repeatedHeaderDocument(f), DOCX, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(headers.Bytes())
+	f.Add(docxWithBody(f, `<w:tbl><w:tr><w:trPr><w:tblHeader w:val="maybe"/></w:trPr><w:tc><w:p/></w:tc></w:tr></w:tbl>`))
 	f.Add(notesDOCX(f, rawNoteBody, rawFootnotes, rawEndnotes))
 	f.Add([]byte(""))
 	f.Fuzz(func(t *testing.T, b []byte) {

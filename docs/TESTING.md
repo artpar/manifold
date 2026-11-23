@@ -747,3 +747,78 @@ atomic. Older sections' oversized-image rejection statements describe earlier
 milestones; valid tall figures now work, while no-space/precision/resource/codec
 limits remain explicit. Full tests/race/vet/module/CGO-disabled build/diff checks
 pass; current measured results are in verification.json.
+
+
+## Repeating merged table headers
+
+```sh
+GOWORK=off go run ./examples/repeated-headers
+output/qa-venv/bin/python scripts/verify_repeated_headers.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/repeated-headers/repeated-headers.sf
+GOWORK=off go test -run 'TestRepeating|TestDOCX.*Header|TestInvalidRepeat' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzRepeatingTableHeaders$' -fuzztime=20s -parallel=2 -timeout=50s
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=10s -parallel=2 -timeout=40s
+mkdir -p output/repeated-headers/lo
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-repeated-headers-profile --headless --convert-to pdf --outdir output/repeated-headers/lo output/repeated-headers/repeated-headers.docx
+output/qa-venv/bin/python scripts/verify_repeated_headers.py --office output/repeated-headers/lo/repeated-headers.pdf --cli
+```
+
+The Go example writes SF/DOCX/PDF in-process. External readers/renderers above
+are optional developer QA. The source is independently authored SF with one
+header-prefix copy, two merged header rows, a 64×640 source raster requested at
+12×12pt, a three-row/two-column oversized body merge, a body image, two note
+references and a URI. No existing fixture or content/geometry oracle changed.
+
+Independent native checks assert five pages; header merged rectangles
+(20,20,206.6667,72), (206.6667,20,300,46), (206.6667,46,300,72); no false interior
+border through the header rowspan; exact header pixels at (26,40,38,52) on each
+page; unique ordered body tokens/assets; final body image at (26,92,56,107);
+actual note targets 1→1 and 4→4; URI on page five; all text within margins. DOCX
+checks exact original media, first-two-row tblHeader flags and both header/body
+merge identities. Actual ProseMirror checks the new 100-node SF tree/attributes.
+All five native pages and four LibreOffice pages were visually inspected.
+
+LibreOffice repeats both header rows on all four pages and retains every body
+token/image. Its pagination differs and it reduces the header raster to 5×50;
+this is recorded separately from native exact-pixel acceptance. The independent
+script's office branch checks that observed normalization and containment, not
+pixel equivalence. Broader real exports and Word qualification remain required.
+
+Whole-SF Go round trips cover body/nested/note row flags, merges, assets and
+relationships. Tests include four nesting levels, all-page header note links to
+one actual body, partial-page keep with the first fitted figure, explicit native
+body boundaries, standard DOCX booleans, duplicate/bad flags, non-prefix imports
+and boundary-crossing merge diagnostics. Indivisible over-height/control-bearing
+PDF prefixes fail atomically while SF/DOCX preserve the requests. Fuzz varies
+prefix length, body count, nested depth, page height and body/note placement,
+checking every prefix row count, body uniqueness, bounds and no mutation plus
+whole-SF DOCX round trips. Malformed DOCX seeds include a real generated header
+package and an invalid on/off property. Finite campaigns are not exhaustive
+safety evidence.
+
+CGO-disabled CLI extraction of the example DOCX reproduces the entire authored
+SF; converting that SF produces identical PDF text, geometry, raster hashes and links
+through MuPDF (generation timestamps differ). PDF→SF independently
+checks recovered physical content/geometry but diagnoses inferred rows/header
+semantics and unsupported editable internal destinations; authorial repetition
+is not invented from repeated paint. Existing table/recursive/image/break
+examples, 28/28 Poppler comparisons and 51 corpus SFs/9,027 nodes still pass.
+Exact command outcomes/timings are in verification.json. No production dependency
+or runtime executable was added. The full goal remains incomplete.
+
+The repeated-header LibreOffice exact-header-pixel check failed because its export
+reduced the raster dimensions. `verify_repeated_headers.py --office ...` records
+that failure separately in ignored `office-observation.json`; its containment pass
+does not turn that pixel-fidelity failure into acceptance. Native PDF and DOCX
+original-media checks remain exact.
+
+
+`TestRepeatingHeaderFigureLeavesLegalBodyStart` reproduces two original failures
+in output/repeated-header-figure-before.log (body fragment could not fit, and a
+note had no room for its start). The final 24-case test varies one to three
+header rows, zero to three nested body levels and body/note placement. It checks
+original SF preferences, exact source pixels, real page bounds/body location and
+both note/notice destinations. Header image fitting reserves a real compact line
+and remeasures for deeper legal starts; figure-bearing prefixes can defer with a
+notice. `TestHeaderOnlyTablePaintsEachAuthoredRowOnce` also checks a large figure
+with two additional header rows. These extend rather than relax the native oracle.

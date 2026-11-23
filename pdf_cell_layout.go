@@ -28,10 +28,19 @@ type pdfImageLayout struct {
 	width, height float64
 }
 type pdfTableLayout struct {
-	width, height, unit float64
-	offsets             []float64
-	cells               []pdfMeasuredCell
-	groups              []pdfTableGroup
+	width, height, unit    float64
+	offsets                []float64
+	cells                  []pdfMeasuredCell
+	groups                 []pdfTableGroup
+	header                 *pdfTableHeader
+	headerRows, headerLast int
+}
+
+// Header copies share original measured geometry; they never own body cursors.
+type pdfTableHeader struct {
+	group  pdfTableGroup
+	height float64
+	keys   []noteKey
 }
 type pdfMeasuredCell struct {
 	position *tableCellPosition
@@ -64,6 +73,21 @@ func flowHasBreak(flow []pdfFragment) bool {
 	for _, f := range flow {
 		if f.Break || f.Table != nil && f.Table.group.breaks {
 			return true
+		}
+	}
+	return false
+}
+func flowHasImage(flow []pdfFragment) bool {
+	for _, f := range flow {
+		if f.Image != nil {
+			return true
+		}
+		if f.Table != nil {
+			for _, c := range f.Table.table.cells[f.Table.group.first:f.Table.group.last] {
+				if flowHasImage(c.flow) {
+					return true
+				}
+			}
 		}
 	}
 	return false
@@ -214,6 +238,10 @@ func (r *pdfRenderer) drawFragment(f pdfFragment, x, y float64) error {
 }
 
 func (r *pdfRenderer) measureTable(b Block, width, height float64) (*pdfTableLayout, error) {
+	return r.measureTableHeaderBudget(b, width, height, height, math.Inf(1))
+}
+
+func (r *pdfRenderer) measureTableHeaderBudget(b Block, width, height, headerBudget, previousHeaderHeight float64) (*pdfTableLayout, error) {
 	g, err := tableGrid(b.Rows)
 	if err != nil {
 		return nil, err
@@ -225,18 +253,49 @@ func (r *pdfRenderer) measureTable(b Block, width, height float64) (*pdfTableLay
 	if !finite(width) || width <= 0 {
 		return nil, fmt.Errorf("%w: no width for PDF table", ErrUnsupported)
 	}
+	headers, _ := tableHeaderRows(b.Rows)
+	plan.headerRows = headers
 	plan.unit = width / float64(g.Columns)
 	heights := make([]float64, len(b.Rows))
 	for i := range heights {
 		heights[i] = 22
 	}
+	headerHeight := 0.0
 	for _, p := range g.Origins {
+		if p.Row >= headers && headers > 0 && headerHeight == 0 {
+			for _, c := range plan.cells {
+				pos := c.position
+				total := 0.0
+				for _, h := range heights[pos.Row : pos.Row+pos.RowSpan] {
+					total += h
+				}
+				if total < c.height {
+					heights[pos.Row+pos.RowSpan-1] += c.height - total
+				}
+			}
+			for _, h := range heights[:headers] {
+				headerHeight += h
+			}
+		}
 		if err := r.ctx.Err(); err != nil {
 			return nil, err
 		}
-		flow, err := r.cellFlow(b.Rows[p.Row].Cells[p.Cell].Blocks, plan.unit*float64(p.ColSpan)-12, 0, height-12)
+		cellHeight := height - headerHeight - 12
+		if p.Row < headers {
+			cellHeight = math.Min(height, headerBudget) - 12
+			if headers < len(b.Rows) {
+				cellHeight -= 26
+			} // one compact body line plus padding
+		}
+		flow, err := r.cellFlow(b.Rows[p.Row].Cells[p.Cell].Blocks, plan.unit*float64(p.ColSpan)-12, 0, cellHeight)
 		if err != nil {
 			return nil, err
+		}
+		if p.Row < headers && flowHasBreak(flow) {
+			return nil, fmt.Errorf("%w: page controls inside repeating table headers", ErrUnsupported)
+		}
+		if p.Row < headers {
+			plan.headerLast++
 		}
 		h := math.Max(22, flowHeight(flow)+12)
 		if !finite(h) {
@@ -283,6 +342,45 @@ func (r *pdfRenderer) measureTable(b Block, width, height float64) (*pdfTableLay
 		}
 		plan.groups = append(plan.groups, g)
 		cursor, start = last, end
+	}
+
+	if headers > 0 {
+		if headers == len(b.Rows) && plan.offsets[headers] > height+1e-7 {
+			excess := plan.offsets[headers] - height
+			if plan.offsets[headers] >= previousHeaderHeight-1e-7 || headerBudget-excess <= 0 {
+				return nil, fmt.Errorf("%w: repeating table header exceeds full container height", ErrUnsupported)
+			}
+			return r.measureTableHeaderBudget(b, width, height, headerBudget-excess, plan.offsets[headers])
+		}
+		if headers < len(b.Rows) {
+			hg := pdfTableGroup{start: 0, end: headers, first: 0, last: plan.headerLast}
+			header := pdfTableHeader{group: hg, height: plan.offsets[headers]}
+			for _, c := range plan.cells[:plan.headerLast] {
+				header.keys = append(header.keys, flowNoteKeys(c.flow)...)
+			}
+			plan.header = &header
+			combined := pdfTableGroup{start: 0, end: len(b.Rows), first: 0, last: len(plan.cells), height: plan.height}
+			for _, group := range plan.groups {
+				combined.keys = append(combined.keys, group.keys...)
+				combined.breaks = combined.breaks || group.breaks
+			}
+			plan.groups = []pdfTableGroup{combined}
+			minimum := 0.0
+			for _, cell := range plan.cells[plan.headerLast:] {
+				for _, f := range cell.flow {
+					minimum = math.Max(minimum, minimumPDFFragmentHeight(f)+12)
+				}
+			}
+			if excess := header.height + minimum - height; excess > 1e-7 {
+				// A deeper body start needs more than the default single-line reservation.
+				// Reduce only the header's image budget, then remeasure the whole table;
+				// body figures keep the full remaining container. Text cannot be shrunk.
+				if header.height >= previousHeaderHeight-1e-7 || headerBudget-excess <= 0 {
+					return nil, fmt.Errorf("%w: repeating header leaves no legal body fragment", ErrUnsupported)
+				}
+				return r.measureTableHeaderBudget(b, width, height, headerBudget-excess, header.height)
+			}
+		}
 	}
 	return plan, nil
 }
