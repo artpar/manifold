@@ -226,7 +226,8 @@ explicit. See docs/COMPATIBILITY.md for the current glyph/font contract.
 language bindings and independent paragraph/run direction in SF/DOCX. Native PDF
 examples qualify language-tagged LTR localization, kerning, ligatures and re-shaping
 after wrapping. Optional QA: `output/qa-venv/bin/python scripts/verify_language.py`.
-RTL PDF and broader contextual/script/style shaping remain unfinished.
+Directional Hebrew/Arabic PDF now exists; broader contextual/script/style
+shaping and qualification remain unfinished.
 
 
 `GOWORK=off go run ./examples/shaping` demonstrates ordinary default text with
@@ -241,4 +242,20 @@ across color, decoration and link boundaries, with emergency line re-shaping.
 QA: `output/qa-venv/bin/python scripts/verify_paint_context.py` after extracting
 `paint.pdf` to `output/paint-context/recovered.sf` (see docs/TESTING.md). Split
 ligatures retain original outlines and explicit invisible logical carriers.
-Paragraph bidi/joining and remaining font/size/language context are unfinished.
+Hebrew/Arabic bidi now has the targeted support below; broader script and
+font/size/language context remains unfinished.
+
+
+`GOWORK=off go run ./examples/bidi` exercises Hebrew/Arabic direction, marks,
+joining, brackets, wrapping, colored ligatures, links, lists, notes and running
+content with the test-only supplied DejaVu font. It writes source/DOCX/PDF and
+checked recovered SF. QA: `output/qa-venv/bin/python scripts/verify_bidi_output.py`.
+Paragraph flow defaults LTR; explicit rtl aligns and orders within its content
+area. Source exposes invisible logical carriers alongside original visible
+outlines. Broader scripts/context, source fonts/layout/recovery and real-export
+qualification remain required; see docs/STATUS.md.
+
+The bidi example also writes context.sf/docx/pdf with regular/bold DejaVu faces
+and font/size/language/transparent-control boundaries. Additional native QA:
+`output/qa-venv/bin/python scripts/verify_bidi_context.py`. Item context is supplied;
+full itemization, cross-item positioning and within-grapheme styles remain open.

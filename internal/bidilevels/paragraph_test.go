@@ -254,3 +254,37 @@ func FuzzParagraphLines(f *testing.F) {
 		}
 	})
 }
+
+func TestHigherLevelClassOverrides(t *testing.T) {
+	text := "first second"
+	types := make([]Class, len(text))
+	for i, ch := range text {
+		p, _ := bidi.LookupRune(ch)
+		types[i] = Class(p.Class())
+		if ch == ' ' {
+			types[i] = R
+		}
+	}
+	p, err := ResolveWithTypes(context.Background(), text, 1, types)
+	if err != nil {
+		t.Fatal(err)
+	}
+	line, err := p.Line(0, p.Len())
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []int{6, 7, 8, 9, 10, 11, 5, 0, 1, 2, 3, 4}
+	if !slices.Equal(line.Order, want) {
+		t.Fatalf("higher-level rtl space order %v want %v", line.Order, want)
+	}
+	for _, types := range [][]Class{nil, {Control}, {Control + 1}, {PDI + 1}} {
+		if _, err := ResolveWithTypes(context.Background(), "x", 0, types); err == nil {
+			t.Fatal("invalid class override accepted")
+		}
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := ResolveWithTypes(ctx, text, 1, types); err != context.Canceled {
+		t.Fatal(err)
+	}
+}

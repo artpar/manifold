@@ -65,3 +65,18 @@ textAtoms, split shaping contexts by resolved level/script/font, shape final
 lines in their resolved direction, and place units using L2 while retaining logical
 extraction. Qualify L3/L4/paint/link/note behavior before removing existing RTL/
 joining guards. Unicode 15 algorithm conformance is not renderer qualification.
+
+
+Paragraph levels/source ranges now reach final directional shaping and L2
+placement, with supplied-font Hebrew/Arabic glyph/layout and logical-carrier
+qualification. Next provide context across different faces/sizes/languages and
+within-grapheme styles, then full script itemization/joining and broader
+Word/producer/font qualification. Retain the native 29-group bidi oracle and two
+invented-space fuzz seeds. Other layout/recovery/real-export acceptance rows remain.
+
+
+HarfBuzz item context now crosses face/size/language and transparent-control
+boundaries, with fourteen native contextual vectors and seven actual two-font
+rows. Next extend full itemization/cross-item positioning and within-grapheme
+styles, then broaden script/font/producer coverage. Do not regress decimal note
+labels' independent LTR glyph direction at RTL anchors.

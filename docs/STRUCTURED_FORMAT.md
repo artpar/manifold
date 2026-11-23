@@ -445,3 +445,12 @@ canonical representation. Existing paragraph/run direction bindings persist as
 before. PDF integration is unfinished; algorithm conformance does not imply that
 RTL SF now renders. Original source scalar ranges must remain separate from any
 normalization or visual order during the next renderer implementation.
+
+
+The directional-PDF milestone adds no SF schema. Existing paragraph dir/run
+textStyle direction/language values now feed layout. Checked source/DOCX/PDF SF
+examples validate 123 nodes. Original scalar ranges are internal, separate from
+NFC/HB/visual indices. Nonzero-level logical carriers expose existing render_mode
+3, replacement_span_bounds and invisible-text diagnostics. pdf_bidi_spacing warns
+when geometric gaps are not inferred between logical bidi spans. Unsupported
+scripts/contexts and PDF inferred structure/note recovery remain explicit open work.

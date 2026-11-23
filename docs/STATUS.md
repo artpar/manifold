@@ -21,7 +21,66 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: qualified paragraph levels for bidi integration
+## Latest milestone: paragraph bidi reaches native PDF layout
+
+- PDF layout now carries original scalar ranges through NFC glyph shaping, note
+  substitution, graphemes, wrapping and final-line re-shaping. P1 separates hard
+  paragraphs (CRLF stays one boundary); U+2028 keeps paragraph context. Explicit
+  rtl/ltr paragraph flow is honored; unset flow defaults LTR. L1 applies before
+  coalescing, and L2 places uniform-level spans while operators stay logical.
+- Supplied-font Hebrew and Arabic now have directional GIDs/GPOS, marks, joining,
+  mirrored brackets and lam-alef ligatures. Run rtl reclassifies neutral/selected
+  weak characters using the published OOXML policy, retaining strong/numeric
+  exceptions; it selects complex language. Embeddings/isolates/directional marks
+  retain logical strings at zero advance. ZWJ/ZWNJ reach the shaper. Other scripts and
+  full itemization still need implementation/qualification; mixed styles inside
+  a grapheme still reject.
+- Headers/footers/cells/lists/note bodies use the same paragraph path. RTL list
+  items reserve the marker gutter on the right using their first paragraph;
+  footnote first-paragraph flow places labels/gutters/separator accordingly.
+  Inline notes stay atomic with their anchor. URI/note links and decorations use
+  physical placement offsets. There is no public schema/API/module change; an
+  original test-only DejaVu Sans Bold program extends font-context qualification.
+- Nonzero-level spans use visible artifact outlines plus unmodified-font invisible
+  logical carriers, including zero-advance carriers. This fixes observed MuPDF
+  dropped RTL words and reversed Arabic numerals under positioned ActualText.
+  Source explicitly records render mode 3/logical span bounds. RTL paint bands use
+  GDEF carets or the existing equal-grapheme allocation, including reversed sides.
+- Reader gap inference no longer inserts spaces between ActualText spans on a
+  bidi line; pdf_bidi_spacing reports the uncertainty. Empty logical replacements
+  do not move logical gap/line state. Two fuzz failures (invented spaces before
+  punctuation/after a leading mark) remain as exact regression seeds. Geometry,
+  styles and actual logical controls survive checked SF recovery; complex reading
+  order/table/note recovery remains incomplete and diagnosed.
+- HarfBuzz item context now retains neighboring text across face/size/language
+  boundaries and transparent controls, while each final line is its own boundary.
+  Fourteen native contextual vectors/seven actual PDF rows qualify regular/bold
+  faces, sizes, languages, RLM/ZWSP/WJ/FEFF. Decimal note labels remain LTR inline
+  objects even at RTL anchors; a two-digit test prevents 10 becoming 01.
+- Eleven original-font native HarfBuzz vectors and 29 actual PDF shaping groups
+  pass GID/GPOS/program/advance checks. C FriBidi checks L2 order and physical
+  continuity; RTL ligature clips/colors, URI/note bounds and both-reader words
+  pass. Actual ProseMirror checks 141 source/DOCX/PDF SF nodes. Two native pages and
+  two LibreOffice DOCX pages were visually inspected. LibreOffice keeps first second
+  where the documented RTL-space rule displays second first natively; both
+  observations remain separate, with no Word-equivalence claim.
+- Full tests pass (library 6.753s, CLI 0.361s, bidi 2.419s); race passes
+  (89.003s/2.025s/13.853s). Vet/module verification/CGO-disabled CLI build pass.
+  Bidi round-trip fuzz: 1,036 executions; bidi-font mutations: 500; malformed PDF:
+  500; core line fuzz: 20,000. All 51 corpus files/9,031 nodes and 28 Poppler
+  comparisons pass. Default shaping/paint-context/typography/PDF style regressions
+  pass, preserving fixture/content oracles. See TESTING.md and verification.json.
+
+The full goal remains **incomplete**, with no external blocker. Next expand
+within-grapheme styles, full script itemization/joining, cross-item positioning
+and broader bidi/font/Word/producer qualification. Broader source
+fonts, pages/running content, PDF structure/color and representative real exports
+remain required. Previous checkpoint: a0e9f31. Next concrete commands:
+GOWORK=off go run ./examples/bidi;
+output/qa-venv/bin/python scripts/verify_bidi_output.py;
+rg -n 'AddRunes|shapeGlyphTextLevel|sameShapingContext|sourceRange' pdf_glyph.go pdf_shaping.go pdf_paint_context.go pdf_bidi.go.
+
+## Earlier milestone: qualified paragraph levels for bidi integration
 
 - internal/bidilevels now resolves explicit/automatic paragraph base direction,
   weak/neutral/bracket/isolate levels and per-line L1/L2 maps in pure Go. It retains

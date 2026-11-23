@@ -1347,3 +1347,72 @@ versions; system ICU 76.1 reproduces them too. Logs use output/bidi-*. The exist
 unchanged, so no new document visual-fidelity claim is made and prior reader/
 corpus evidence remains at its earlier checkpoint. PDF bidi/joining integration,
 L3/L4 glyph behavior and the broader acceptance rows remain unfinished.
+
+
+## Native paragraph bidi and item context (2026-11-24)
+
+```sh
+GOWORK=off go run ./examples/bidi
+output/qa-venv/bin/python scripts/verify_bidi_output.py
+output/qa-venv/bin/python scripts/verify_bidi_context.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/bidi/bidi.sf output/bidi/pdf-recovered.sf output/bidi/docx-recovered.sf output/bidi/context.sf
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFBidiRoundTrip$' -fuzztime=1000x -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFBidiFont$' -fuzztime=500x -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=500x -parallel=2 .
+GOWORK=off go test ./internal/bidilevels -run '^$' -fuzz '^FuzzParagraphLines$' -fuzztime=20000x -parallel=2
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+bin/manydoc convert -pdf-font 'DejaVu=testdata/assets/DejaVuSans.ttf' -o output/bidi/cli.pdf output/bidi/bidi.sf
+bin/manydoc convert -pdf-font 'DejaVu=testdata/assets/DejaVuSans.ttf' -pdf-font 'DejaVu/B=testdata/assets/DejaVuSans-Bold.ttf' -o output/bidi/context-cli.pdf output/bidi/context.sf
+output/qa-venv/bin/python scripts/verify_bidi_output.py output/bidi/cli.pdf
+output/qa-venv/bin/python scripts/verify_bidi_context.py output/bidi/context-cli.pdf
+```
+
+The complete original Unicode 15 core corpus still runs in ordinary Go tests.
+Eleven authored native-HarfBuzz 15.0.0/uharfbuzz 0.57.0 vectors check original-font
+RTL/LTR GIDs/GPOS, marks, joining, brackets, ligatures and original logical byte
+intervals. testdata/rtl-item-context.json adds fourteen native items across genuine
+regular/bold DejaVu faces, sizes, languages and RLM/ZWSP/WJ/FEFF boundaries.
+AddRunes receives the complete normalized paragraph/final line and item offset;
+returned clusters stay local. A focused test checks LTR decimal label 10 at an
+RTL anchor, avoiding an otherwise reversed 01. Missing-glyph all-story writes
+remain atomic; previously blanket RTL-rejection tests now exercise implemented
+empty/run/body/cell/list/running/note direction handling.
+
+Actual PDF QA checks 29 original-font native shaping groups with C FriBidi 1.0.16
+levels/L2 order, physical continuity, GIDs/GPOS/carrier advances, RTL color clip
+sides and URI/note rectangles. Seven additional PDF rows independently check all
+fourteen item-context vectors with both original programs. The CGO-disabled CLI
+executes both SF conversions and passes the same native checks. Its process uses
+no native helper; native libraries are optional independent Python QA only.
+Actual ProseMirror validates 141 nodes across source/DOCX/PDF/context SF files.
+
+Two native pages and two LibreOffice-rendered DOCX pages were visually inspected.
+LibreOffice keeps first second in the authored RTL-space case while the documented
+OOXML weak/neutral override displays second first natively. Both observations
+remain separate in output/bidi/office-observation.json. Context/size/font variants
+are authored tests; no Word-equivalent or representative-producer fidelity claim.
+Third-party text APIs may omit controls/add physical newlines; ActualText/ToUnicode
+and checked Go recovery retain original scalars and explicit carrier provenance.
+
+Fuzzing first found two invented-space bugs, preserved as original inputs under
+testdata/fuzz/FuzzPDFBidiRoundTrip and literal-string tests. Reader logical-line
+bidi state suppresses uncertain ActualText gap insertion with pdf_bidi_spacing;
+empty logical replacements cannot move logical gap/line state. The unchanged text
+expectations pass; two literal-string assertions also pass under race (2.341s),
+independent of future fuzz-alphabet ordering. No corpus/oracle was weakened. Nonzero-level visible glyphs
+remain original artifacts plus explicitly invisible logical carriers (including
+zero advance), fixing independently observed MuPDF dropped words/reversed numerals.
+
+Final tests pass: library 6.753s, CLI 0.361s, bidi core 2.419s. Full race passes:
+89.003s/2.025s/13.853s. Vet/module verification/CGO-disabled build and execution
+pass. CGO-disabled Linux amd64/arm64 cross-builds pass (compilation only). Final bidi round-trip fuzz: 1,036 executions in 36.017s (1,000x target);
+bidi-font mutations: 500 in 12.625s; malformed PDF: 500 in 3.867s; core line
+fuzz: 20,000 in 0.630s. Logs use output/bidi-context-final-* plus named fuzz/CLI
+logs. All 51 corpus files/9,031 nodes and 28 Poppler comparisons pass. Regenerated
+default shaping, paint-context and typography independent oracles pass; PDF style
+recovery also passes. Generated output, binaries and QA environments stay ignored.
+
+This narrows required bidi/context work, without completing the full goal. Full
+itemization/cross-item positioning, within-grapheme styles, other guarded scripts,
+broader source fonts/layout/running content/PDF recovery and real-export
+qualification remain unfinished. See STATUS.md for the next concrete work.

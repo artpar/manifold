@@ -185,6 +185,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 }
 
 type pdfReader struct {
+	logicalBidiLine          bool
 	ctx                      context.Context
 	pdf                      *model.Context
 	doc                      *Document
@@ -225,6 +226,7 @@ type pdfTextState struct {
 }
 
 func (r *pdfReader) newline() {
+	r.logicalBidiLine = false
 	r.havePosition = false
 	if len(r.current) > 0 {
 		r.lines = append(r.lines, Block{Kind: Paragraph, Runs: r.current, Source: sourceForRuns(r.current)})
@@ -319,14 +321,23 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 	}
 	// Component glyph backtracking/mark offsets do not establish logical line
 	// breaks inside one ActualText replacement.
-	if r.havePosition && (actual == nil || actual.source == nil) {
+	logicalEmpty := actual != nil && *actual.actual == ""
+	if !logicalEmpty && r.havePosition && (actual == nil || actual.source == nil) {
 		cross := r.lastDirection.X*direction.Y - r.lastDirection.Y*direction.X
 		dx, dy := begin.X-r.lastPoint.X, begin.Y-r.lastPoint.Y
 		perpendicular := math.Abs(dx*r.lastDirection.Y - dy*r.lastDirection.X)
 		if r.lastDirection.X*direction.X+r.lastDirection.Y*direction.Y < .95 || math.Abs(cross) > .02 || perpendicular > max(1, source.FontSize*.4) {
 			r.newline()
 		} else if dx*r.lastDirection.X+dy*r.lastDirection.Y > max(.5, source.FontSize*.15) {
-			r.space(style)
+			uncertain := false
+			if actual != nil {
+				uncertain = pdfHasBidiText(*actual.actual) || r.logicalBidiLine
+			}
+			if uncertain {
+				r.warnPage("pdf_bidi_spacing", "Whitespace is not inferred between adjacent ActualText bidi spans; original logical strings are retained")
+			} else {
+				r.space(style)
+			}
 		}
 	}
 	if actual != nil {
@@ -376,14 +387,17 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 		actual.source.Regions = append(actual.source.Regions, SourceRegion{Page: r.page, Quad: *source.Quad})
 	}
 	if text != "" {
+		r.logicalBidiLine = r.logicalBidiLine || pdfHasBidiText(text)
 		r.current = append(r.current, Run{Text: text, Bold: style.Bold, Italic: style.Italic, FontFamily: style.FontFamily, FontSize: style.FontSize, Color: style.Color, Source: source})
 	}
 	s.advanceText(advance)
 	s.metricEstimate = s.metricEstimate || estimated
-	r.lastPoint = end
-	r.lastDirection = direction
-	r.lastSize = source.FontSize
-	r.havePosition = true
+	if !logicalEmpty {
+		r.lastPoint = end
+		r.lastDirection = direction
+		r.lastSize = source.FontSize
+		r.havePosition = true
+	}
 	return nil
 }
 

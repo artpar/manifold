@@ -922,3 +922,49 @@ Do not remove PDF RTL/joining guards based on algorithm tests alone. Carry scala
 mapping and paragraph levels into directional shaping/wrapping/placement first,
 then qualify GIDs/GPOS/visual order/marks/mirroring and logical/paint/link/note
 preservation. This checkpoint introduces no renderer behavior or public schema.
+
+
+## 2026-11-24 Connect paragraph resolution to directional glyph layout
+
+Carry original scalar intervals through segmentation/normalization rather than
+reconstructing them from shaped strings. Keep P1 hard boundaries separate from
+line boundaries, apply L1 before coalescing, and use numeric levels for L2 span
+placement. Keep operators logical so editable styles/ActualText/links retain
+ownership. Native HarfBuzz and C FriBidi independently qualify tested output;
+algorithm conformance alone did not justify the earlier removal of RTL guards.
+Hebrew/Arabic now have that glyph/order/layout evidence; other required scripts
+and broader contexts remain unfinished.
+
+Apply the published [OOXML rtl weak/neutral policy](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.righttolefttext)
+through class overrides, preserving strong letters and numeric exceptions. Explicit
+ltr is not a strong-letter override. The authored first/RTL-space/second example
+renders second first under this rule; LibreOffice displays first second. Retain
+both observations, not a changed oracle or a Word-equivalence claim. Unset
+paragraph flow stays the model's standard LTR default, not first-strong auto flow.
+
+MuPDF initially dropped most words when full logical ActualText wrapped positioned
+RTL glyphs. Reuse the artifact/logical-carrier pattern and extend it to nonzero
+even levels too: Arabic numerals otherwise reversed there. Original fonts/GIDs/
+GPOS still determine visible appearance; logical carriers expose their render mode
+and advance-bound provenance. Zero-width marks need explicit zero CID widths,
+separate from the nominal-width sentinel. ToUnicode and ActualText retain original
+Unicode; third-party APIs may omit controls/add physical newlines.
+
+Two real fuzz inputs found reader-invented spaces around bidi punctuation and a
+leading mark. Preserve both seeds and exact text expectations. Track bidi state
+per logical line, diagnose un-inferred gaps, and exclude empty logical replacements
+from logical position state. Do not weaken text oracles. Existing generic RTL
+rejection tests now verify implemented all-story output; unsupported-glyph all-story
+atomic tests remain, alongside independent new glyph/layout evidence.
+
+
+The first directional integration also exposed missing Arabic item context at
+font/size/language and transparent-control boundaries. Pass the full normalized
+paragraph or actual line to AddRunes with its item offset/length, as the
+[HarfBuzz buffer API](https://harfbuzz.github.io/harfbuzz-hb-buffer.html#hb-buffer-add-codepoints)
+recommends. Keep local returned clusters by subtracting the item offset. Do not
+borrow a neighboring line or form cross-face ligatures. Fourteen native vectors
+and seven actual PDF rows now check these cases, including a genuine original
+DejaVu Sans Bold face. Its asset/license/hash are attributed; no new Go module.
+Generated decimal note labels use LTR glyph direction independently of RTL anchor
+placement; otherwise a multi-digit label can reverse. A focused 10/01 test pins it.

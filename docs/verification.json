@@ -2499,7 +2499,7 @@
     ],
     "external_blocker": null
   },
-  "latest_evidence": "paragraph_bidi_levels_2026_11_24",
+  "latest_evidence": "paragraph_bidi_layout_2026_11_24",
   "paragraph_bidi_levels_2026_11_24": {
     "goal_complete": false,
     "previous_checkpoint": "658a5b0",
@@ -2596,5 +2596,137 @@
       "rg -n 'textAtoms|emitFit|shapeTextLine|drawLine' pdf_text.go pdf_shaping.go"
     ],
     "external_blocker": null
+  },
+  "baseline_summary_scope": "Top-level coverage/test-count figures are initial checkpoint measurements; named milestone entries and latest_evidence contain current results.",
+  "paragraph_bidi_layout_2026_11_24": {
+    "goal_complete": false,
+    "previous_checkpoint": "a0e9f31",
+    "renderer_integrated": true,
+    "public_api_or_sf_schema_or_module_change": false,
+    "implementation": [
+      "original scalar ranges through P1/CRLF/line breaks/NFC/note labels",
+      "L1 before coalescing; directional final-line re-shaping and L2 physical placement with logical operators",
+      "OOXML selected weak/neutral run rtl overrides and complex-language selection",
+      "Hebrew/Arabic marks/joining/mirroring/ligatures with supplied fonts",
+      "HB full paragraph/final-line item context across faces/sizes/languages/transparent controls",
+      "RTL list/footnote gutter/marker placement; atomic anchors and independent LTR decimal labels",
+      "unmodified visible glyph artifacts and nonzero-level logical carriers with explicit render mode/advance bounds including zero",
+      "diagnosed bidi ActualText gap uncertainty and empty-replacement logical-state isolation"
+    ],
+    "independent": {
+      "native_harfbuzz": "15.0.0 / uharfbuzz 0.57.0",
+      "direct_glyph_vectors": 11,
+      "item_context_vectors": 14,
+      "actual_pdf_shaping_groups": 29,
+      "actual_item_context_pdf_rows": 7,
+      "original_font_programs_gids_gpos_advances": "passed",
+      "c_fribidi": "1.0.16 levels/L2 order and physical continuity passed",
+      "rtl_color_clip_sides": "passed",
+      "uri_and_note_bounds": "passed",
+      "mupdf_pypdf_tested_words": "passed; controls/physical newlines may differ in third-party APIs",
+      "prosemirror_nodes": 141,
+      "prosemirror_files": 4,
+      "native_pages_visually_inspected": 2,
+      "libreoffice_docx_pages_visually_inspected": 2,
+      "libreoffice_difference": "RTL-space example keeps first second; documented override renders second first natively. Both observations preserved.",
+      "scripts": [
+        "scripts/verify_bidi_output.py",
+        "scripts/verify_bidi_context.py"
+      ],
+      "standard_docx_properties": "body/list/cell/header/footer/footnote bidi and explicit rtl-space properties passed"
+    },
+    "required_checks": {
+      "tests": {
+        "library_seconds": 6.753,
+        "cli_seconds": 0.361,
+        "bidi_seconds": 2.419,
+        "result": "passed"
+      },
+      "race": {
+        "library_seconds": 89.003,
+        "cli_seconds": 2.025,
+        "bidi_seconds": 13.853,
+        "result": "passed"
+      },
+      "vet": "passed",
+      "module_verification": "passed",
+      "cgo_disabled_cli_build_and_execution": "both main/context SF conversions pass the same native glyph/layout oracles",
+      "literal_space_regression_race": {
+        "seconds": 2.341,
+        "result": "passed",
+        "scope": "two exact fixed LTR strings, independent of fuzz alphabet order"
+      },
+      "cgo_disabled_linux_cross_builds": {
+        "amd64": "passed, compilation only",
+        "arm64": "passed, compilation only"
+      }
+    },
+    "fuzz": {
+      "bidi_roundtrip": {
+        "executions": 1036,
+        "seconds": 36.017,
+        "target": "1000x",
+        "result": "passed"
+      },
+      "bidi_font_mutations": {
+        "executions": 500,
+        "seconds": 12.625,
+        "result": "passed"
+      },
+      "malformed_pdf": {
+        "executions": 500,
+        "seconds": 3.867,
+        "result": "passed"
+      },
+      "core_lines": {
+        "executions": 20000,
+        "seconds": 0.63,
+        "result": "passed"
+      }
+    },
+    "oracle_preservation": {
+      "two_invented_space_fuzz_inputs": "preserved with original/literal expectations; production fixed",
+      "fixture_or_visible_content_oracles_weakened": false,
+      "old_generic_rtl_rejection_tests": "updated for implemented all-story behavior, with missing-glyph all-story atomic tests and independent new output evidence",
+      "reader_raw_byte_access": "uses original_bytes, avoiding pypdf get_original_bytes BOM re-encoding; content expectations unchanged"
+    },
+    "test_asset": {
+      "path": "testdata/assets/DejaVuSans-Bold.ttf",
+      "source": "official DejaVu 2.37 release ZIP, same pinned archive as regular face",
+      "sha256": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
+      "license": "testdata/assets/DejaVu-LICENSE.txt",
+      "embedded_in_binary": false
+    },
+    "corpus": {
+      "accepted_files": 51,
+      "prosemirror_nodes": 9031,
+      "poppler": "28/28",
+      "fixtures_changed": false
+    },
+    "independent_regressions": [
+      "regenerated default shaping 24 runs/6 ligatures",
+      "regenerated paint-context 8 rows/6 GDEF bands",
+      "regenerated typography 15 spacing/control checks",
+      "PDF style recovery 10 independent spans"
+    ],
+    "limitations": [
+      "full itemization/cross-item positioning and broader bidi/Word/producer/font qualification",
+      "within-grapheme paint/style boundaries",
+      "other guarded scripts and broader font formats/source-font handling",
+      "logical carriers provide advance-band rather than per-character ink geometry",
+      "untagged bidi structure/note/table recovery remains diagnosed fallback",
+      "richer page/running content/PDF structure/color and representative real exports remain required"
+    ],
+    "next_commands": [
+      "GOWORK=off go run ./examples/bidi",
+      "output/qa-venv/bin/python scripts/verify_bidi_output.py",
+      "output/qa-venv/bin/python scripts/verify_bidi_context.py",
+      "rg -n 'AddRunes|shapeGlyphTextContext|sameShapingContext' pdf_glyph.go pdf_shaping.go pdf_paint_context.go"
+    ],
+    "external_blocker": null,
+    "native_vector_hashes": {
+      "rtl-shaping.json": "228c9fed946ec3b8644b68f45ed6d8256738dcb54cef397da15eccf6233e6c4f",
+      "rtl-item-context.json": "0a17e3001ca21e3ea615f88a98bd599a03e0bece575fcdf64f595262968ebcec"
+    }
   }
 }

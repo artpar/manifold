@@ -113,18 +113,18 @@ func TestLanguageDirectionInvalidAtomic(t *testing.T) {
 		}
 	}
 }
-func TestPDFDirectionAllStoriesAtomic(t *testing.T) {
+func TestPDFDirectionAllStories(t *testing.T) {
 	rtl := Block{Kind: Paragraph, Direction: "rtl"}
 	cases := []*Document{{Blocks: []Block{rtl}}, {Headers: []Block{rtl}}, {Footers: []Block{rtl}}, {Blocks: []Block{{Kind: Table, Rows: []Row{{Cells: []Cell{{Blocks: []Block{rtl}}}}}}}}, {Blocks: []Block{{Kind: ListBlock, List: "bullet", Items: []ListItem{{Blocks: []Block{rtl}}}}}}, {Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "V", Direction: "rtl"}}}}}}
 	for i, d := range cases {
 		var out bytes.Buffer
-		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); !errors.Is(err, ErrUnsupported) || out.Len() != 0 {
+		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil || out.Len() == 0 {
 			t.Fatalf("story %d: %v bytes=%d", i, err, out.Len())
 		}
 	}
 	d := &Document{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Note: &NoteReference{Kind: Footnote, ID: "n"}}}}}, Notes: []Note{{Kind: Footnote, ID: "n", Blocks: []Block{rtl}}}}
 	var out bytes.Buffer
-	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); !errors.Is(err, ErrUnsupported) || out.Len() != 0 {
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil || out.Len() == 0 {
 		t.Fatalf("note %v", err)
 	}
 }

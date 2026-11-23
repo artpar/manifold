@@ -14,10 +14,10 @@ import (
 // Paint and annotation changes do not change the font, size or language used
 // for shaping. Compare resolved faces, including explicit family mappings.
 func sameShapingContext(a, b pdfSpan, size float64) bool {
-	if a.glyphs == nil || b.glyphs == nil || a.run.Note != nil || b.run.Note != nil {
+	if a.glyphs == nil || b.glyphs == nil || a.run.Note != nil || b.run.Note != nil || a.bidi.paragraph != b.bidi.paragraph || a.bidi.level != b.bidi.level {
 		return false
 	}
-	if a.glyphs.face != b.glyphs.face || textSize(a.run, size) != textSize(b.run, size) || a.run.ComplexScript != b.run.ComplexScript {
+	if a.glyphs.face != b.glyphs.face || textSize(a.run, size) != textSize(b.run, size) || (a.run.ComplexScript || a.run.Direction == "rtl") != (b.run.ComplexScript || b.run.Direction == "rtl") {
 		return false
 	}
 	tag := func(s string) language.Language {
@@ -52,7 +52,12 @@ func paintClusters(text string, c *pdfGlyphCluster) (out []pdfPaintCluster, err 
 		for last < len(c.positions) && c.positions[last].cluster == c.positions[first].cluster {
 			last++
 		}
-		end := consumed + len(c.positions[first].logical)
+		start, end := c.positions[first].textStart, c.positions[first].textEnd
+		if c.positions[first].logical != "" {
+			// The logical string is authoritative for independently assembled
+			// clusters too; production shaping also records its original start.
+			end = start + len(c.positions[first].logical)
+		}
 		width := 0.0
 		for _, g := range c.positions[first:last] {
 			width += g.advance
@@ -60,20 +65,30 @@ func paintClusters(text string, c *pdfGlyphCluster) (out []pdfPaintCluster, err 
 		if !finite(width) || width < 0 {
 			return nil, fmt.Errorf("%w: invalid paint cluster advance", ErrUnsupported)
 		}
-		cluster := pdfPaintCluster{first: first, last: last, start: consumed, end: end, pen: pen, width: width, edges: map[int]float64{consumed: pen, end: pen + width}}
+		cluster := pdfPaintCluster{first: first, last: last, start: start, end: end, pen: pen, width: width, edges: map[int]float64{start: pen, end: pen + width}}
+		if c.rtl {
+			cluster.edges[start], cluster.edges[end] = pen+width, pen
+		}
 		var ends []int
-		graphemes := uniseg.NewGraphemes(text[consumed:end])
+		graphemes := uniseg.NewGraphemes(text[start:end])
 		for graphemes.Next() {
 			_, b := graphemes.Positions()
-			ends = append(ends, consumed+b)
+			ends = append(ends, start+b)
 		}
 		points := make([]float64, max(0, len(ends)-1))
 		for i := range points {
 			points[i] = pen + width*float64(i+1)/float64(len(ends))
+			if c.rtl {
+				points[i] = pen + width - width*float64(i+1)/float64(len(ends))
+			}
 		}
 		if last == first+1 && len(points) > 0 {
 			g := c.positions[first]
-			carets := c.face.shaper.GetOTLigatureCarets(harfbuzz.LeftToRight, fonts.GID(g.glyph))
+			direction := harfbuzz.LeftToRight
+			if c.rtl {
+				direction = harfbuzz.RightToLeft
+			}
+			carets := c.face.shaper.GetOTLigatureCarets(direction, fonts.GID(g.glyph))
 			if len(carets) == len(points) {
 				candidate := make([]float64, len(points))
 				previous := pen
@@ -88,6 +103,11 @@ func paintClusters(text string, c *pdfGlyphCluster) (out []pdfPaintCluster, err 
 					previous = x
 				}
 				if valid {
+					if c.rtl {
+						for i, j := 0, len(candidate)-1; i < j; i, j = i+1, j-1 {
+							candidate[i], candidate[j] = candidate[j], candidate[i]
+						}
+					}
 					points = candidate
 				}
 			}
@@ -97,7 +117,7 @@ func paintClusters(text string, c *pdfGlyphCluster) (out []pdfPaintCluster, err 
 		}
 		out = append(out, cluster)
 		pen += width
-		consumed = end
+		consumed = max(consumed, end)
 		first = last
 	}
 	if consumed != len(text) {
@@ -115,7 +135,11 @@ func splitShapedPaint(input pdfLine, text string, c *pdfGlyphCluster, size float
 	if uniform {
 		span := input[0]
 		span.text = text
+		span.bidi = extendPDFBidiRange(span.bidi, input[len(input)-1].bidi)
 		span.glyphs = c
+		if c.level > 0 {
+			c.logicalCarrier = true
+		}
 		span.width = c.width * textSize(span.run, size)
 		for _, s := range input {
 			span.ascent = math.Max(span.ascent, s.ascent)
@@ -157,7 +181,10 @@ func splitShapedPaint(input pdfLine, text string, c *pdfGlyphCluster, size float
 		if err != nil {
 			return nil, err
 		}
-		part := &pdfGlyphCluster{actualGroup: group, script: c.script, face: c.face, width: right - left, ascent: c.ascent, descent: c.descent, origin: left}
+		if c.rtl {
+			left, right = right, left
+		}
+		part := &pdfGlyphCluster{rtl: c.rtl, level: c.level, actualGroup: group, script: c.script, face: c.face, width: right - left, ascent: c.ascent, descent: c.descent, origin: left}
 		if part.width < 0 {
 			return nil, fmt.Errorf("%w: invalid glyph paint interval", ErrUnsupported)
 		}
@@ -172,8 +199,13 @@ func splitShapedPaint(input pdfLine, text string, c *pdfGlyphCluster, size float
 				continue
 			}
 			a, b := max(offset, cluster.start), min(finish, cluster.end)
-			part.clipLeft = part.clipLeft || offset > cluster.start && offset < cluster.end
-			part.clipRight = part.clipRight || finish > cluster.start && finish < cluster.end
+			clipStart := offset > cluster.start && offset < cluster.end
+			clipEnd := finish > cluster.start && finish < cluster.end
+			if c.rtl {
+				clipStart, clipEnd = clipEnd, clipStart
+			}
+			part.clipLeft = part.clipLeft || clipStart
+			part.clipRight = part.clipRight || clipEnd
 			for i, g := range c.positions[cluster.first:cluster.last] {
 				g.x -= left
 				g.logical = ""
@@ -185,6 +217,7 @@ func splitShapedPaint(input pdfLine, text string, c *pdfGlyphCluster, size float
 		}
 		span := input[start]
 		span.text = content.String()
+		span.bidi = extendPDFBidiRange(span.bidi, input[end-1].bidi)
 		span.glyphs = part
 		span.width = part.width * textSize(span.run, size)
 		for _, s := range input[start:end] {
@@ -197,7 +230,7 @@ func splitShapedPaint(input pdfLine, text string, c *pdfGlyphCluster, size float
 		offset = finish
 		start = end
 	}
-	needsCarrier := false
+	needsCarrier := c.level > 0
 	for _, span := range result {
 		needsCarrier = needsCarrier || span.glyphs.clipLeft || span.glyphs.clipRight
 	}
@@ -205,7 +238,7 @@ func splitShapedPaint(input pdfLine, text string, c *pdfGlyphCluster, size float
 		for i := range result {
 			c := result[i].glyphs
 			c.actualGroup = nil
-			c.logicalCarrier = c.clipLeft || c.clipRight
+			c.logicalCarrier = c.level > 0 || c.clipLeft || c.clipRight
 		}
 	}
 	return result, nil

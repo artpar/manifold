@@ -162,7 +162,7 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent, height float64) ([]pdf
 					runs[i].Bold = true
 				}
 			}
-			lines, err := r.lines(runs, width-indent, 10)
+			lines, err := r.linesDirection(runs, width-indent, 10, b.Direction)
 			if err != nil {
 				return nil, err
 			}
@@ -175,11 +175,15 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent, height float64) ([]pdf
 				if err != nil {
 					return nil, err
 				}
-				children, err := r.cellFlow(item.Blocks, width, indent+step, height)
+				childWidth, childIndent, prefixX := width, indent+step, indent
+				if item.Blocks[0].Direction == "rtl" {
+					childWidth, childIndent, prefixX = width-step, indent, width-pdfAdvance(marker)
+				}
+				children, err := r.cellFlow(item.Blocks, childWidth, childIndent, height)
 				if err != nil {
 					return nil, err
 				}
-				children[0].Prefix, children[0].PrefixX = marker, indent
+				children[0].Prefix, children[0].PrefixX = marker, prefixX
 				flow = append(flow, children...)
 			}
 		case Picture:

@@ -1,51 +1,19 @@
 package manydoc
 
-import (
-	"context"
-	"fmt"
-)
+import "golang.org/x/text/unicode/bidi"
 
-// Check every story before layout, including empty paragraphs and table/note
-// content. Direction must not be silently ignored merely because text is empty.
-func validatePDFDirections(ctx context.Context, d *Document) error {
-	var walk func([]Block) error
-	walk = func(blocks []Block) error {
-		for _, b := range blocks {
-			if err := ctx.Err(); err != nil {
-				return err
-			}
-			if b.Direction == "rtl" {
-				return fmt.Errorf("%w: PDF paragraph direction needs bidirectional layout", ErrUnsupported)
-			}
-			for _, run := range b.Runs {
-				if run.Direction == "rtl" {
-					return fmt.Errorf("%w: PDF run direction needs bidirectional layout", ErrUnsupported)
-				}
-			}
-			for _, item := range b.Items {
-				if err := walk(item.Blocks); err != nil {
-					return err
-				}
-			}
-			for _, row := range b.Rows {
-				for _, cell := range row.Cells {
-					if err := walk(cell.Blocks); err != nil {
-						return err
-					}
-				}
-			}
-		}
-		return nil
-	}
-	for _, blocks := range [][]Block{d.Blocks, d.Headers, d.Footers} {
-		if err := walk(blocks); err != nil {
-			return err
+// Bidi format/mark controls affect paragraph levels but have no visible advance.
+// Keep their original logical text using the existing zero-width ActualText path.
+func pdfBidiControl(ch rune) bool {
+	return ch == 0x061c || ch == 0x200e || ch == 0x200f || ch >= 0x202a && ch <= 0x202e || ch >= 0x2066 && ch <= 0x2069
+}
+
+func pdfHasBidiText(text string) bool {
+	for _, ch := range text {
+		p, _ := bidi.LookupRune(ch)
+		if p.Class() == bidi.R || p.Class() == bidi.AL || p.Class() == bidi.AN || pdfBidiControl(ch) {
+			return true
 		}
 	}
-	for _, note := range d.Notes {
-		if err := walk(note.Blocks); err != nil {
-			return err
-		}
-	}
-	return nil
+	return false
 }

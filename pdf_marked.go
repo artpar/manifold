@@ -79,6 +79,7 @@ func (r *pdfReader) endMarked() {
 		return
 	}
 	if frame.styleMixed && !frame.alignmentUnavailable && string(frame.decoded) == *frame.actual && len(frame.fragments) > 0 {
+		r.logicalBidiLine = r.logicalBidiLine || pdfHasBidiText(*frame.actual)
 		r.current = append(r.current, alignedActualTextRuns(frame.fragments)...)
 		return
 	}
@@ -125,6 +126,7 @@ func (r *pdfReader) endMarked() {
 		run := frame.style
 		run.Text = *frame.actual
 		run.Source = frame.source
+		r.logicalBidiLine = r.logicalBidiLine || pdfHasBidiText(run.Text)
 		r.current = append(r.current, run)
 	}
 }

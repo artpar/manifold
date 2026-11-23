@@ -451,7 +451,7 @@ specific Chinese hint exception. Missing used theme faces reject without a usabl
 stored family; unknown application-default slots diagnose unresolved defaults.
 Only used text needs a resolvable theme slot. Explicit cs/rtl selects complex
 bold/italic/size; source RTL direction now persists through the later language/direction model;
-native bidi layout is still unfinished.
+native bidi now has targeted qualification below; broader coverage is unfinished.
 DOCX output writes b/bCs, i/iCs and sz/szCs twins for explicit public values.
 
 This is not a complete Word font-selection/layout engine: modern Unicode range
@@ -468,8 +468,8 @@ primitives could not express. Supported LTR graphemes retaining marks after NFC,
 or containing supplementary codepoints, use pinned textlayout HarfBuzz. Positions
 are em-normalized; advance and actual glyph extents feed the shared layout engine.
 Fonts and buffers are renderer-owned, default shaping language is und, and no
-process-global configuration is changed. Unsupported paragraph scripts/directions
-stay guarded until paragraph bidi/joining is qualified. A 1,024-scalar grapheme and 65,535-CID
+process-global configuration is changed. Other unsupported paragraph scripts stay guarded; Hebrew/Arabic directional
+shaping is now qualified below. A 1,024-scalar grapheme and 65,535-CID
 per-face inventory are explicit resource bounds; offset coordinates are checked.
 
 Painting uses explicit glyph origins under a shared quantized baseline, preserving
@@ -504,8 +504,8 @@ DOCX properties flatten defaults/style/direct inheritance; explicit false values
 become ltr, independently from absent properties. Do not treat ltr as a bidi
 override. Retained flags no longer independently trigger selector-loss diagnostics.
 
-pdf_direction.go preflights all stories before writing unsupported RTL. The
-LTR path in pdf_shaping.go resolves adjacent weak scripts, shapes
+pdf_bidi.go now resolves paragraph levels in every story. The
+path in pdf_shaping.go resolves adjacent weak scripts, shapes
 compatible-face/size/language/script segments and measures actual HB clusters. Ligature advances are
 apportioned among source graphemes only to estimate emergency breaks. Final lines
 are freshly shaped and width checked, backing off on overflow; stale sliced glyphs
@@ -513,8 +513,8 @@ never paint. Notes remain attached to their preceding atomic anchor. Distinct
 faces/sizes/language bindings/scripts/controls bound segments. pdf_glyph.go maps each resulting cluster
 to its original logical text for ToUnicode while retaining complete-span ActualText.
 General/EA/forced-CS language reaches the shaping buffer; empty language uses
-deterministic und, with the same contextual shaping for ordinary authored text. This remains a staged LTR implementation; bidi levels,
-joining, context across different faces/sizes/languages and broader scripts are unfinished.
+deterministic und, with the same contextual shaping for ordinary authored text. Directional shaping and L1/L2 placement now exist as described below; context
+across different faces/sizes/languages and broader scripts remain unfinished.
 
 
 Decoration painting is independent of glyph/control segmentation: adjacent spans
@@ -549,7 +549,7 @@ pdf_actualtext_align.go preserves mixed styles only on exact decoded/replacement
 agreement; otherwise the conservative replacement path retains loss diagnostics.
 
 
-## Paragraph bidi foundation (not yet used by PDF layout)
+## Paragraph bidi foundation and renderer integration
 
 internal/bidilevels adapts the attributed x/text v0.30.0 BSD reference core to
 retain resolved paragraph levels and expose line L1/L2 maps. The existing public
@@ -559,10 +559,62 @@ published Unicode 15 bracket data supply classes/canonical pair IDs. A stack
 replaces quadratic isolate matching. Results use original scalar indices, are
 owned copies, and allow concurrent queries. The adapter performs no normalization.
 
-The current PDF pipeline still rejects RTL/joining. Next connect levels and source
-ranges through textAtoms, shaping segments, final-line re-shaping and placement;
-keep glyph direction/L3/L4, logical extraction and paint/link/note geometry separate.
+The PDF pipeline now carries levels/source ranges through textAtoms, shaping
+segments, final-line re-shaping and placement. Glyph direction/L3/L4, logical
+extraction and paint/link/note geometry remain separate.
 The internal resolver's complete Unicode 15 ordering tests do not qualify glyph
 rendering, script coverage or end-to-end bidi output. See internal/bidilevels/
 README.md for source provenance, bounds, cancellation granularity and native-oracle
-disagreements. No module/schema/public API or current conversion behavior changes.
+disagreements. No module/schema/public API change. Renderer behavior is qualified below.
+
+
+## Directional PDF shaping and logical ownership
+
+pdf_bidi.go records original scalar intervals, with separate P1 paragraph objects.
+CRLF belongs to one preceding boundary; line separator U+2028 does not restart
+paragraph resolution. NFC occurs only inside the shaper; normalized HB clusters
+map back to original UTF-8 intervals. Notes occupy one U+FFFC source scalar before
+label substitution. L1 is applied while spans are individual graphemes; complete
+numeric levels bound shaping contexts. Final-line shaping remains fresh, including
+emergency breaks. L2 computes physical span offsets, while content operators stay
+in original logical order. Decoration runs sort by physical offsets; links use
+the same placement. RTL paragraphs align within their admitted content width.
+
+Run rtl supplies selected weak/neutral class overrides through the internal
+ResolveWithTypes API; strong letters/numeric exceptions keep intrinsic classes.
+It does not become a strong-letter override. Source run rtl also selects the
+complex-language binding. Arabic/Hebrew glyph/mark/ligature/mirror output reuses
+the pinned shaper and original TTF/CID transport; other script guards remain
+required work. Script resolution is still adjacent-strong resolution within
+compatible level/face/size/language contexts, not a complete itemizer.
+
+For nonzero levels, visible glyphs are empty-logical artifacts and unclipped
+render-mode-3 carriers hold complete logical text with allocated CID widths
+(including zero). This avoids MuPDF losing words/reversing numerals under a
+positioned multi-glyph ActualText. Source spans are logical advance bounds, not
+per-character visible ink. RTL ligature paint allocation reverses clip sides and
+logical caret order. Font programs are unmodified; no new dependency is introduced.
+
+A list item's first paragraph chooses its marker side; an RTL footnote's first
+paragraph chooses label/gutter/separator placement. Continuations retain that
+choice. Inline reference labels stay atomic with the preceding anchor. Fixed-Go
+note captions and broader note/layout/producer behavior remain separately limited.
+
+Reader logical line state tracks bidi text. Adjacent ActualText spans on such a
+line keep encoded strings without invented gap spaces, with pdf_bidi_spacing
+uncertainty. Empty ActualText painting does not create logical gaps or line breaks.
+Two exact fuzz regressions pin these rules. Untagged bidi structure still falls
+back to paint-order groups with explicit uncertainty; general structure/note/table
+recovery is not supplied by logical carriers.
+
+
+Shaping items now pass the complete normalized paragraph/actual-line text and
+item offset to HarfBuzz AddRunes. HB pre/post context selects joining forms across
+face/size/language and transparent-control boundaries without forming cross-face
+ligatures. Returned clusters subtract the item offset before original-byte mapping.
+Notes remain U+FFFC in context; generated decimal label glyphs are always LTR while
+placement follows the anchor level. Fourteen native vectors and seven two-font
+PDF rows qualify these paths; cross-item positioning, full itemization and broader
+font/script qualification remain unfinished. The existing LTR spacing/control
+policy stays intact. The original DejaVu Sans Bold test-only asset has a pinned
+hash and the existing license, not a new runtime dependency.

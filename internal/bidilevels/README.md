@@ -1,14 +1,15 @@
 # Paragraph embedding levels for layout
 
 This is an internal, pure-Go paragraph resolver and line reorderer, qualified
-against Unicode 15.0.0. It is **not yet connected to the PDF renderer**. The current
-PDF RTL/joining rejection remains until glyph order, contextual shaping, marks,
-mirroring, paint/link/note placement and wrapped layout have independent evidence.
-Do not treat this package's conformance as proof of PDF bidi output support.
+against Unicode 15.0.0. It is connected through pdf_bidi.go to original scalar
+ranges, directional shaping and final-line placement. The renderer separately
+qualifies supplied-font Hebrew/Arabic glyphs/marks/mirrors, logical text and links;
+algorithm conformance is not evidence of complete script or Word support.
 
 `Resolve(ctx, text, base)` accepts exactly one paragraph and an automatic (-1),
 explicit LTR (0) or explicit RTL (1) base. It retains original Unicode scalar
-indices without normalization. `Levels` supplies paragraph levels for shaping;
+indices without normalization. `ResolveWithTypes` accepts validated higher-level-protocol class overrides (used
+for run rtl weak/neutral characteristics). `Levels` supplies levels for shaping;
 `Line(start,end)` applies L1/L2 from those resolved levels, without re-running P2,
 weak/neutral resolution or isolates on the sliced line. Results are owned copies,
 allowing concurrent line queries. X9 controls remain in the returned map, with
@@ -73,9 +74,10 @@ FriBidi difference. ICU also lowers even levels on two unidirectional line slice
 tests compare its direction parity and visual order, consistent with UAX #9
 conformance, while the original Unicode corpus checks exact specified levels.
 
-The next implementation must carry paragraph scalar ranges/levels through
-normalization, grapheme segmentation, run/script/font itemization and wrapping,
-shape final lines in their resolved direction, apply L2 to placement units, and
-preserve logical extraction independently of paint order. Existing LTR font/GID/
-GPOS, paint/ligature and URI/note oracles must stay intact. Full PDF bidi, joining,
-within-grapheme styles and context across fonts/sizes/languages remain unfinished.
+The PDF implementation now carries paragraph scalar ranges/levels through
+normalization, grapheme segmentation, current run/script/font segmentation and wrapping,
+shapes final lines in their resolved direction, applies L2 to placement units, and
+preserves logical extraction independently of paint order. Existing LTR font/GID/
+GPOS, paint/ligature and URI/note oracles must stay intact. Broader PDF bidi/joining/itemization, within-grapheme styles and context across
+fonts/sizes/languages still need broader qualification. Full HarfBuzz item context
+now crosses these boundaries; see the root PDF architecture and context oracles.

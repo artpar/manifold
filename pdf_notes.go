@@ -9,6 +9,7 @@ import (
 const footnoteSeparatorHeight = 12.0
 
 type pdfNoteChunk struct {
+	rtl      bool
 	key      noteKey
 	lines    []pdfFragment
 	first    bool
@@ -41,7 +42,7 @@ func (r *pdfRenderer) measureFootnote(key noteKey) (pdfNoteChunk, error) {
 	if err != nil {
 		return pdfNoteChunk{}, fmt.Errorf("footnote %q: %w", key.id, err)
 	}
-	chunk := pdfNoteChunk{key: key, lines: lines, first: true, indent: indent}
+	chunk := pdfNoteChunk{key: key, lines: lines, first: true, indent: indent, rtl: len(definition.Blocks) > 0 && definition.Blocks[0].Direction == "rtl"}
 	if imageBoundStart(lines[0]) {
 		chunk.notice, err = r.cellFlow([]Block{{Kind: Paragraph, Runs: []Run{{Text: "Continued on a later page"}}}}, r.width-2*r.margin-indent, 0, r.height-2*r.margin-footnoteSeparatorHeight-10)
 		if err != nil {
@@ -214,13 +215,13 @@ func (r *pdfRenderer) ensureWithNotes(height float64, keys []noteKey) error {
 				return fmt.Errorf("%w: no room for footnote start", ErrUnsupported)
 			}
 			if len(head) > 0 {
-				r.pageNotes = append(r.pageNotes, pdfNoteChunk{key: chunk.key, lines: head, first: !deferred, indent: chunk.indent, deferred: deferred})
+				r.pageNotes = append(r.pageNotes, pdfNoteChunk{rtl: chunk.rtl, key: chunk.key, lines: head, first: !deferred, indent: chunk.indent, deferred: deferred})
 			}
 			r.noteReserve += used
 			capacity -= used
 			r.seenFootnotes[chunk.key] = true
 			if len(tail) > 0 || forced {
-				r.pendingNotes = append(r.pendingNotes, pdfNoteChunk{key: chunk.key, lines: tail, first: deferred || len(head) == 0, indent: chunk.indent})
+				r.pendingNotes = append(r.pendingNotes, pdfNoteChunk{rtl: chunk.rtl, key: chunk.key, lines: tail, first: deferred || len(head) == 0, indent: chunk.indent})
 			}
 		}
 		if len(r.pageNotes) == 0 {
@@ -239,7 +240,11 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 	}
 	top := r.height - r.margin - footnoteSeparatorHeight - height
 	r.pdf.SetDrawColor(90, 90, 90)
-	r.pdf.Line(r.margin, top, r.margin+math.Min(90, r.width-2*r.margin), top)
+	separatorX := r.margin
+	if len(chunks) > 0 && chunks[0].rtl {
+		separatorX = r.width - r.margin - math.Min(90, r.width-2*r.margin)
+	}
+	r.pdf.Line(separatorX, top, separatorX+math.Min(90, r.width-2*r.margin), top)
 	if continued {
 		r.pdf.SetFont("Go", "", 7)
 		r.pdf.SetTextColor(0, 0, 0)
@@ -252,16 +257,21 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 		}
 		r.pdf.SetFont("Go", "", 8)
 		r.pdf.SetTextColor(0, 0, 0)
-		r.pdf.Text(r.margin, y+8, r.notes.labels[chunk.key])
+		labelX, bodyX := r.margin, r.margin+chunk.indent
+		if chunk.rtl {
+			labelX = r.width - r.margin - r.pdf.GetStringWidth(r.notes.labels[chunk.key])
+			bodyX = r.margin
+		}
+		r.pdf.Text(labelX, y+8, r.notes.labels[chunk.key])
 		noticeTop := y
 		for _, fragment := range chunk.lines {
-			if err := r.drawFragment(fragment, r.margin+chunk.indent, y); err != nil {
+			if err := r.drawFragment(fragment, bodyX, y); err != nil {
 				return err
 			}
 			y += fragment.Height
 		}
 		if chunk.deferred {
-			r.pdf.Link(r.margin+chunk.indent, noticeTop, r.width-2*r.margin-chunk.indent, y-noticeTop, r.noteLinks[chunk.key])
+			r.pdf.Link(bodyX, noticeTop, r.width-2*r.margin-chunk.indent, y-noticeTop, r.noteLinks[chunk.key])
 		}
 	}
 	return r.pdf.Error()
@@ -318,7 +328,7 @@ func (r *pdfRenderer) nextPage(bodyNeeded bool) error {
 				break
 			}
 			if len(head) > 0 {
-				chunks = append(chunks, pdfNoteChunk{key: chunk.key, lines: head, first: chunk.first, indent: chunk.indent})
+				chunks = append(chunks, pdfNoteChunk{rtl: chunk.rtl, key: chunk.key, lines: head, first: chunk.first, indent: chunk.indent})
 			}
 			left -= used
 			if len(tail) == 0 {
@@ -329,7 +339,7 @@ func (r *pdfRenderer) nextPage(bodyNeeded bool) error {
 			}
 			if forced {
 				if len(tail) == 0 {
-					pending = append([]pdfNoteChunk{{key: chunk.key, first: chunk.first && len(head) == 0}}, pending...)
+					pending = append([]pdfNoteChunk{{rtl: chunk.rtl, key: chunk.key, first: chunk.first && len(head) == 0}}, pending...)
 				}
 				break
 			}

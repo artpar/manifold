@@ -61,7 +61,27 @@ type Paragraph struct {
 // 0 (explicit LTR) or 1 (explicit RTL). An explicit base is not a fallback and is
 // not overridden by the first strong character. A B-class separator is accepted
 // only at the end; callers must split paragraphs before resolution.
-func Resolve(ctx context.Context, text string, base int) (result *Paragraph, err error) {
+func Resolve(ctx context.Context, text string, base int) (*Paragraph, error) {
+	return resolve(ctx, text, base, nil)
+}
+
+// ResolveWithTypes supplies higher-level-protocol bidi classes while retaining
+// the original runes for bracket identity. Classes use original scalar indices.
+func ResolveWithTypes(ctx context.Context, text string, base int, types []Class) (*Paragraph, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if len(types) != utf8.RuneCountInString(text) {
+		return nil, fmt.Errorf("bidi class override length mismatch")
+	}
+	for _, c := range types {
+		if c > PDI || c >= Control && c < LRO {
+			return nil, fmt.Errorf("invalid bidi class override")
+		}
+	}
+	return resolve(ctx, text, base, types)
+}
+func resolve(ctx context.Context, text string, base int, overrides []Class) (result *Paragraph, err error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -91,6 +111,9 @@ func Resolve(ctx context.Context, text string, base int) (result *Paragraph, err
 		}
 		properties, _ := bidi.LookupRune(r)
 		types[i] = Class(properties.Class())
+		if overrides != nil {
+			types[i] = overrides[i]
+		}
 		if open, ok := pairedBracketValues[r]; ok {
 			values[i] = open
 			pairs[i] = bpClose

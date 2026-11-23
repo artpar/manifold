@@ -80,3 +80,21 @@ Their canonical URLs, original hashes and sizes are pinned in the manifest; the
 existing third_party/licenses/Unicode-V3.txt applies. Authored line scenarios retain
 native FriBidi 1.0.16 and ICU 78.3 observations. Those native libraries are optional
 QA tools only; neither native nor Go textprocessing/fribidi is a runtime dependency.
+
+
+`testdata/rtl-shaping.json` contains authored Hebrew/Arabic/LTR vectors measured
+with optional native HarfBuzz 15.0.0 / uharfbuzz 0.57.0 against the existing original
+DejaVu Sans asset. `scripts/verify_bidi_output.py` independently compares actual
+PDF groups with native HarfBuzz and C FriBidi; these are optional QA tools only.
+The two FuzzPDFBidiRoundTrip inputs are exact synthetic invented-space regressions.
+No additional font/module/service/CGO or proprietary code is introduced.
+
+
+`testdata/assets/DejaVuSans-Bold.ttf` is the original DejaVu Sans Bold 2.37 from
+the same pinned official release ZIP (SHA256 7576310b219e04159d35ff61dd4a4ec4cdba4f35c00e002a136f00e96a908b0a).
+The existing testdata/assets/DejaVu-LICENSE.txt applies. TTF SHA256:
+`e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724`.
+It is test/example data, not embedded into the library/CLI. The authored
+`testdata/rtl-item-context.json` records fourteen original-font native HarfBuzz
+item-context measurements; optional scripts/verify_bidi_context.py checks actual
+regular/bold PDF glyphs/positions. No proprietary implementation or new module.

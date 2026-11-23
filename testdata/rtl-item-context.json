@@ -1,0 +1,283 @@
+{
+  "oracle": "native HarfBuzz 15.0.0 / uharfbuzz 0.57.0",
+  "fonts": {
+    "regular": {
+      "path": "testdata/assets/DejaVuSans.ttf",
+      "sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+      "upem": 2048
+    },
+    "bold": {
+      "path": "testdata/assets/DejaVuSans-Bold.ttf",
+      "sha256": "e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724",
+      "upem": 2048
+    }
+  },
+  "items": [
+    {
+      "row": "font",
+      "context": "بب",
+      "start": 0,
+      "end": 1,
+      "font": "regular",
+      "size": 18,
+      "language": "ar",
+      "advance": 570,
+      "glyphs": [
+        {
+          "gid": 5259,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 570
+        }
+      ]
+    },
+    {
+      "row": "font",
+      "context": "بب",
+      "start": 1,
+      "end": 2,
+      "font": "bold",
+      "size": 18,
+      "language": "ar",
+      "advance": 2168,
+      "glyphs": [
+        {
+          "gid": 5254,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 2168
+        }
+      ]
+    },
+    {
+      "row": "size",
+      "context": "بب",
+      "start": 0,
+      "end": 1,
+      "font": "regular",
+      "size": 12,
+      "language": "ar",
+      "advance": 570,
+      "glyphs": [
+        {
+          "gid": 5259,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 570
+        }
+      ]
+    },
+    {
+      "row": "size",
+      "context": "بب",
+      "start": 1,
+      "end": 2,
+      "font": "regular",
+      "size": 24,
+      "language": "ar",
+      "advance": 2011,
+      "glyphs": [
+        {
+          "gid": 5258,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 2011
+        }
+      ]
+    },
+    {
+      "row": "language",
+      "context": "بب",
+      "start": 0,
+      "end": 1,
+      "font": "regular",
+      "size": 18,
+      "language": "ar",
+      "advance": 570,
+      "glyphs": [
+        {
+          "gid": 5259,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 570
+        }
+      ]
+    },
+    {
+      "row": "language",
+      "context": "بب",
+      "start": 1,
+      "end": 2,
+      "font": "regular",
+      "size": 18,
+      "language": "fa",
+      "advance": 2011,
+      "glyphs": [
+        {
+          "gid": 5258,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 2011
+        }
+      ]
+    },
+    {
+      "row": "rlm",
+      "context": "ب‏ب",
+      "start": 0,
+      "end": 1,
+      "font": "regular",
+      "size": 18,
+      "language": "ar",
+      "advance": 570,
+      "glyphs": [
+        {
+          "gid": 5259,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 570
+        }
+      ]
+    },
+    {
+      "row": "rlm",
+      "context": "ب‏ب",
+      "start": 2,
+      "end": 3,
+      "font": "regular",
+      "size": 18,
+      "language": "ar",
+      "advance": 2011,
+      "glyphs": [
+        {
+          "gid": 5258,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 2011
+        }
+      ]
+    },
+    {
+      "row": "zwsp",
+      "context": "ب​ب",
+      "start": 0,
+      "end": 1,
+      "font": "regular",
+      "size": 18,
+      "language": "ar",
+      "advance": 570,
+      "glyphs": [
+        {
+          "gid": 5259,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 570
+        }
+      ]
+    },
+    {
+      "row": "zwsp",
+      "context": "ب​ب",
+      "start": 2,
+      "end": 3,
+      "font": "regular",
+      "size": 18,
+      "language": "ar",
+      "advance": 2011,
+      "glyphs": [
+        {
+          "gid": 5258,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 2011
+        }
+      ]
+    },
+    {
+      "row": "wj",
+      "context": "ب⁠ب",
+      "start": 0,
+      "end": 1,
+      "font": "regular",
+      "size": 18,
+      "language": "ar",
+      "advance": 570,
+      "glyphs": [
+        {
+          "gid": 5259,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 570
+        }
+      ]
+    },
+    {
+      "row": "wj",
+      "context": "ب⁠ب",
+      "start": 2,
+      "end": 3,
+      "font": "regular",
+      "size": 18,
+      "language": "ar",
+      "advance": 2011,
+      "glyphs": [
+        {
+          "gid": 5258,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 2011
+        }
+      ]
+    },
+    {
+      "row": "bom",
+      "context": "ب﻿ب",
+      "start": 0,
+      "end": 1,
+      "font": "regular",
+      "size": 18,
+      "language": "ar",
+      "advance": 570,
+      "glyphs": [
+        {
+          "gid": 5259,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 570
+        }
+      ]
+    },
+    {
+      "row": "bom",
+      "context": "ب﻿ب",
+      "start": 2,
+      "end": 3,
+      "font": "regular",
+      "size": 18,
+      "language": "ar",
+      "advance": 2011,
+      "glyphs": [
+        {
+          "gid": 5258,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 2011
+        }
+      ]
+    }
+  ]
+}

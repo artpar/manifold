@@ -18,6 +18,9 @@ import (
 // Unicode-defined advances use the current em. Thin/hair/narrow spaces use the
 // declared 1/5, 1/10 and 1/5 em defaults; figure/punctuation spaces use font metrics.
 func pdfSpecial(ch rune) bool {
+	if pdfBidiControl(ch) {
+		return true
+	}
 	switch ch {
 	case '\t', '\r', '\n', 0x85, 0xa0, 0xad, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006, 0x2007, 0x2008, 0x2009, 0x200a, 0x200b, 0x2010, 0x2011, 0x2028, 0x2029, 0x202f, 0x205f, 0x2060, 0x3000, 0xfeff:
 		return true
@@ -88,10 +91,11 @@ func samePDFStyle(a, b Run) bool {
 }
 func appendPDFSpan(line pdfLine, span pdfSpan) pdfLine {
 	zeroControl := span.width == 0 && span.text != "\u00ad" && !pdfHardBreak(span.text) && !pdfTrimSpace(span.text)
-	if span.glyphs == nil && len(line) > 0 && line[len(line)-1].glyphs == nil && span.text != "\u00ad" && line[len(line)-1].text != "\u00ad" && (span.width > 0 || zeroControl) && line[len(line)-1].width > 0 && samePDFStyle(line[len(line)-1].run, span.run) {
+	if span.glyphs == nil && len(line) > 0 && line[len(line)-1].glyphs == nil && span.text != "\u00ad" && line[len(line)-1].text != "\u00ad" && (span.width > 0 || zeroControl) && line[len(line)-1].width > 0 && samePDFStyle(line[len(line)-1].run, span.run) && samePDFBidiContext(line[len(line)-1].bidi, span.bidi) {
 		last := &line[len(line)-1]
 		last.text += span.text
 		last.width += span.width
+		last.bidi = extendPDFBidiRange(last.bidi, span.bidi)
 		return line
 	}
 	return append(line, span)
@@ -111,6 +115,9 @@ type pdfRunRange struct {
 // Segment the whole paragraph, not each formatting run. A grapheme and a word
 // can cross run boundaries. Note markers form an atom with the preceding cluster.
 func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error) {
+	return r.textAtomsDirection(runs, size, "")
+}
+func (r *pdfRenderer) textAtomsDirection(runs []Run, size float64, direction string) ([]pdfTextAtom, error) {
 	var text strings.Builder
 	var ranges []pdfRunRange
 	for _, run := range runs {
@@ -124,6 +131,11 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 			ranges = append(ranges, pdfRunRange{start, text.Len(), run})
 		}
 	}
+	paragraphs, err := pdfBidiParagraphsRuns(r.ctx, text.String(), direction, ranges)
+	if err != nil {
+		return nil, err
+	}
+	paragraphIndex, scalarOffset := 0, 0
 	var atoms []pdfTextAtom
 	rangeIndex := 0
 	graphemes := uniseg.NewGraphemes(text.String())
@@ -143,6 +155,15 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 		}
 		atom := pdfTextAtom{breaking: graphemes.LineBreak()}
 		cluster := graphemes.Str()
+		scalarEnd := scalarOffset + originalScalarLength(cluster)
+		for paragraphIndex+1 < len(paragraphs) && paragraphs[paragraphIndex].end <= scalarOffset {
+			paragraphIndex++
+		}
+		sourceRange, err := paragraphs[paragraphIndex].sourceRange(scalarOffset, scalarEnd)
+		if err != nil {
+			return nil, err
+		}
+		scalarOffset = scalarEnd
 		if full := textSize(run, size); full > 14400 || fmt.Sprintf("%.2f", full) == "0.00" || math.Abs(full-math.Round(full*100)/100) > 1e-9 {
 			return nil, fmt.Errorf("%w: PDF font size exceeds coordinate range or 0.01pt precision", ErrUnsupported)
 		}
@@ -169,7 +190,13 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 		}
 		var glyphs *pdfGlyphCluster
 		if needsGlyphOutput(cluster) || pdfShapableText(cluster) {
-			glyphs, err = r.glyphClusterLanguage(face, cluster, run)
+			glyphLevel := sourceRange.level
+			// Generated decimal note labels are an LTR inline object even in
+			// an RTL source context. Placement still follows the anchor level.
+			if run.Note != nil {
+				glyphLevel = 0
+			}
+			glyphs, err = r.shapeGlyphTextLevel(face, cluster, run, 1024, 0, glyphLevel)
 			if err != nil {
 				return nil, err
 			}
@@ -202,7 +229,7 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 		if run.Note != nil {
 			rise = fullSize * .3
 		}
-		atom.spans = pdfLine{{run: run, text: cluster, width: atom.width, ascent: math.Max(fullSize, float64(metrics.Ascent)/64+rise), descent: float64(metrics.Descent)/64 - rise, glyphs: glyphs}}
+		atom.spans = pdfLine{{bidi: sourceRange, run: run, text: cluster, width: atom.width, ascent: math.Max(fullSize, float64(metrics.Ascent)/64+rise), descent: float64(metrics.Descent)/64 - rise, glyphs: glyphs}}
 		if glyphs != nil {
 			atom.spans[0].ascent = math.Max(atom.spans[0].ascent, glyphs.ascent*drawSize+rise)
 			atom.spans[0].descent = math.Max(atom.spans[0].descent, glyphs.descent*drawSize-rise)
@@ -232,13 +259,16 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 }
 
 func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) {
+	return r.linesDirection(runs, width, size, "")
+}
+func (r *pdfRenderer) linesDirection(runs []Run, width, size float64, direction string) ([]pdfLine, error) {
 	if err := r.ctx.Err(); err != nil {
 		return nil, err
 	}
 	if !finite(width) || width <= 0 || !finite(size) || size <= 0 {
 		return nil, fmt.Errorf("invalid PDF text dimensions")
 	}
-	atoms, err := r.textAtoms(runs, size)
+	atoms, err := r.textAtomsDirection(runs, size, direction)
 	if err != nil {
 		return nil, err
 	}
@@ -271,9 +301,12 @@ func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) 
 					span.width = 0
 					span.glyphs = nil
 				}
-				line = appendPDFSpan(line, span)
+				line = append(line, span)
 				used += span.width
 			}
+		}
+		if err := applyPDFLineLevels(line); err != nil {
+			return false, err
 		}
 		shaped, err := r.shapeTextLine(line, size)
 		if err != nil {
@@ -300,6 +333,7 @@ func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) 
 		if pdfAdvance(shaped) > width+1e-7 {
 			return false, nil
 		}
+		placePDFLine(shaped, width)
 		lines = append(lines, shaped)
 		return true, nil
 	}
@@ -344,6 +378,7 @@ func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) 
 				if start == len(atoms) {
 					blank := atom.spans[len(atom.spans)-1]
 					blank.text, blank.width = "", 0
+					blank.bidi.start = blank.bidi.end
 					lines = append(lines, pdfLine{blank})
 				}
 				break
@@ -476,8 +511,13 @@ func (r *pdfRenderer) paintSpan(span pdfSpan, x, y, size float64) {
 func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 	baseline := pdfLineSize(line, size)
 	origin := x
+	cursor := x
 	var actualGroup *pdfPaintActualGroup
 	for _, span := range line {
+		x = cursor
+		if span.placed {
+			x = origin + span.visualX
+		}
 		var group *pdfPaintActualGroup
 		if span.glyphs != nil {
 			group = span.glyphs.actualGroup
@@ -514,12 +554,16 @@ func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 			r.pdf.LinkString(x, y+baseline-span.ascent, span.width, math.Max(textSize(span.run, size)*1.3, span.ascent+span.descent), span.run.Link)
 		}
 
-		x += span.width
+		cursor += span.width
 	}
 	if actualGroup != nil {
 		r.pdf.RawWriteStr("EMC")
 	}
-	r.drawLineDecorations(line, origin, y, baseline, size)
+	visual := visualPDFLine(line)
+	if len(visual) > 0 && visual[0].placed {
+		origin += visual[0].visualX
+	}
+	r.drawLineDecorations(visual, origin, y, baseline, size)
 }
 
 // Shaping/control/script boundaries do not break a continuous decoration.

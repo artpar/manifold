@@ -15,7 +15,6 @@ import (
 	"golang.org/x/image/font/gofont/goitalic"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/font/sfnt"
-	"golang.org/x/text/unicode/bidi"
 	"golang.org/x/text/unicode/norm"
 )
 
@@ -55,11 +54,12 @@ func validatePDFText(r Run) error {
 	return validateFontText(r, parsedPDFFonts[runStyle(r)])
 }
 func validateFontText(r Run, font *sfnt.Font) error {
-	if r.Direction == "rtl" {
-		return fmt.Errorf("%w: PDF run direction needs bidirectional layout", ErrUnsupported)
-	}
+
 	var buf sfnt.Buffer
 	for _, ch := range norm.NFC.String(r.Text) {
+		if ch == 0x200c || ch == 0x200d {
+			continue
+		}
 		if pdfSpecial(ch) {
 			required := []rune{' '}
 			switch ch {
@@ -81,11 +81,10 @@ func validateFontText(r Run, font *sfnt.Font) error {
 			}
 			continue
 		}
-		prop, _ := bidi.LookupRune(ch)
-		class := prop.Class()
-		if ch == 0x200c || ch == 0x200d || class == bidi.R || class == bidi.AL || class == bidi.AN || class == bidi.RLE || class == bidi.LRE || class == bidi.RLO || class == bidi.LRO || class == bidi.PDF || class == bidi.RLI || class == bidi.LRI || class == bidi.FSI || class == bidi.PDI || unicode.In(ch, unicode.Arabic, unicode.Devanagari, unicode.Hebrew, unicode.Bengali, unicode.Gurmukhi, unicode.Gujarati, unicode.Oriya, unicode.Tamil, unicode.Telugu, unicode.Kannada, unicode.Malayalam, unicode.Sinhala, unicode.Myanmar, unicode.Khmer, unicode.Thai, unicode.Lao, unicode.Tibetan, unicode.Mongolian) {
-			return fmt.Errorf("%w: PDF output needs shaping/bidirectional layout for %U", ErrUnsupported, ch)
+		if unicode.In(ch, unicode.Devanagari, unicode.Bengali, unicode.Gurmukhi, unicode.Gujarati, unicode.Oriya, unicode.Tamil, unicode.Telugu, unicode.Kannada, unicode.Malayalam, unicode.Sinhala, unicode.Myanmar, unicode.Khmer, unicode.Thai, unicode.Lao, unicode.Tibetan, unicode.Mongolian) {
+			return fmt.Errorf("%w: PDF output needs broader script shaping for %U", ErrUnsupported, ch)
 		}
+
 		g, err := font.GlyphIndex(&buf, ch)
 		if err != nil {
 			return err
@@ -98,6 +97,9 @@ func validateFontText(r Run, font *sfnt.Font) error {
 }
 
 type pdfSpan struct {
+	bidi            pdfBidiRange
+	placed          bool
+	visualX         float64
 	run             Run
 	text            string
 	width           float64
@@ -126,7 +128,7 @@ func writePDF(ctx context.Context, out io.Writer, d *Document) error {
 	return writePDFWithFonts(ctx, out, d, nil, nil)
 }
 func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []FontFace, fontMap map[string]string) error {
-	if err := validatePDFDirections(ctx, d); err != nil {
+	if err := ctx.Err(); err != nil {
 		return err
 	}
 	notes, err := catalogNotes(d, true)
@@ -223,7 +225,7 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 func (r *pdfRenderer) headerFooter(bs []Block, y float64) {
 	header := y < r.margin
 	for _, b := range bs {
-		lines, err := r.lines(b.Runs, r.width-2*r.margin, 8)
+		lines, err := r.linesDirection(b.Runs, r.width-2*r.margin, 8, b.Direction)
 		if err != nil {
 			r.pdf.SetError(err)
 			return
@@ -264,7 +266,7 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 				}
 			}
 
-			lines, err := r.lines(runs, width, size)
+			lines, err := r.linesDirection(runs, width, size, b.Direction)
 			if err != nil {
 				return err
 			}

@@ -1,0 +1,324 @@
+{
+  "oracle": "native HarfBuzz 15.0.0 / uharfbuzz 0.57.0",
+  "font": "DejaVu Sans 2.37 original asset",
+  "font_sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+  "upem": 2048,
+  "cases": [
+    {
+      "text": "שלום",
+      "level": 1,
+      "script": "Hebr",
+      "language": "he",
+      "advance": 4532,
+      "glyphs": [
+        {
+          "gid": 1332,
+          "cluster": 3,
+          "x": 0,
+          "y": 0,
+          "advance": 1359
+        },
+        {
+          "gid": 1324,
+          "cluster": 2,
+          "x": 1359,
+          "y": 0,
+          "advance": 558
+        },
+        {
+          "gid": 1331,
+          "cluster": 1,
+          "x": 1917,
+          "y": 0,
+          "advance": 1164
+        },
+        {
+          "gid": 1344,
+          "cluster": 0,
+          "x": 3081,
+          "y": 0,
+          "advance": 1451
+        }
+      ]
+    },
+    {
+      "text": "אבְג",
+      "level": 1,
+      "script": "Hebr",
+      "language": "he",
+      "advance": 3397,
+      "glyphs": [
+        {
+          "gid": 1321,
+          "cluster": 3,
+          "x": 0,
+          "y": 0,
+          "advance": 844
+        },
+        {
+          "gid": 1297,
+          "cluster": 1,
+          "x": 786,
+          "y": 0,
+          "advance": 0
+        },
+        {
+          "gid": 1320,
+          "cluster": 1,
+          "x": 844,
+          "y": 0,
+          "advance": 1184
+        },
+        {
+          "gid": 1319,
+          "cluster": 0,
+          "x": 2028,
+          "y": 0,
+          "advance": 1369
+        }
+      ]
+    },
+    {
+      "text": "(אבג)",
+      "level": 1,
+      "script": "Hebr",
+      "language": "he",
+      "advance": 4995,
+      "glyphs": [
+        {
+          "gid": 11,
+          "cluster": 4,
+          "x": 0,
+          "y": 0,
+          "advance": 799
+        },
+        {
+          "gid": 1321,
+          "cluster": 3,
+          "x": 799,
+          "y": 0,
+          "advance": 844
+        },
+        {
+          "gid": 1320,
+          "cluster": 2,
+          "x": 1643,
+          "y": 0,
+          "advance": 1184
+        },
+        {
+          "gid": 1319,
+          "cluster": 1,
+          "x": 2827,
+          "y": 0,
+          "advance": 1369
+        },
+        {
+          "gid": 12,
+          "cluster": 0,
+          "x": 4196,
+          "y": 0,
+          "advance": 799
+        }
+      ]
+    },
+    {
+      "text": "سلام",
+      "level": 1,
+      "script": "Arab",
+      "language": "ar",
+      "advance": 4206,
+      "glyphs": [
+        {
+          "gid": 1390,
+          "cluster": 3,
+          "x": 0,
+          "y": 0,
+          "advance": 1268
+        },
+        {
+          "gid": 5366,
+          "cluster": 1,
+          "x": 1268,
+          "y": 0,
+          "advance": 1222
+        },
+        {
+          "gid": 5293,
+          "cluster": 0,
+          "x": 2490,
+          "y": 0,
+          "advance": 1716
+        }
+      ]
+    },
+    {
+      "text": "لا",
+      "level": 1,
+      "script": "Arab",
+      "language": "ar",
+      "advance": 1168,
+      "glyphs": [
+        {
+          "gid": 5365,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 1168
+        }
+      ]
+    },
+    {
+      "text": "بب",
+      "level": 1,
+      "script": "Arab",
+      "language": "ar",
+      "advance": 2581,
+      "glyphs": [
+        {
+          "gid": 5258,
+          "cluster": 1,
+          "x": 0,
+          "y": 0,
+          "advance": 2011
+        },
+        {
+          "gid": 5259,
+          "cluster": 0,
+          "x": 2011,
+          "y": 0,
+          "advance": 570
+        }
+      ]
+    },
+    {
+      "text": "سَلَام",
+      "level": 1,
+      "script": "Arab",
+      "language": "ar",
+      "advance": 4206,
+      "glyphs": [
+        {
+          "gid": 1390,
+          "cluster": 5,
+          "x": 0,
+          "y": 0,
+          "advance": 1268
+        },
+        {
+          "gid": 1399,
+          "cluster": 2,
+          "x": 1623,
+          "y": 450,
+          "advance": 0
+        },
+        {
+          "gid": 5366,
+          "cluster": 2,
+          "x": 1268,
+          "y": 0,
+          "advance": 1222
+        },
+        {
+          "gid": 1399,
+          "cluster": 0,
+          "x": 2628,
+          "y": -300,
+          "advance": 0
+        },
+        {
+          "gid": 5293,
+          "cluster": 0,
+          "x": 2490,
+          "y": 0,
+          "advance": 1716
+        }
+      ]
+    },
+    {
+      "text": "בֿ",
+      "level": 1,
+      "script": "Hebr",
+      "language": "he",
+      "advance": 1184,
+      "glyphs": [
+        {
+          "gid": 1312,
+          "cluster": 0,
+          "x": -61,
+          "y": 0,
+          "advance": 0
+        },
+        {
+          "gid": 1320,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 1184
+        }
+      ]
+    },
+    {
+      "text": "é",
+      "level": 1,
+      "script": "Latn",
+      "language": "fr",
+      "advance": 1260,
+      "glyphs": [
+        {
+          "gid": 171,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 1260
+        }
+      ]
+    },
+    {
+      "text": "ffi",
+      "level": 0,
+      "script": "Latn",
+      "language": "en",
+      "advance": 1980,
+      "glyphs": [
+        {
+          "gid": 5044,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 1980
+        }
+      ]
+    },
+    {
+      "text": "אבג",
+      "level": 0,
+      "script": "Hebr",
+      "language": "he",
+      "advance": 3397,
+      "glyphs": [
+        {
+          "gid": 1319,
+          "cluster": 0,
+          "x": 0,
+          "y": 0,
+          "advance": 1369
+        },
+        {
+          "gid": 1320,
+          "cluster": 1,
+          "x": 1369,
+          "y": 0,
+          "advance": 1184
+        },
+        {
+          "gid": 1321,
+          "cluster": 2,
+          "x": 2553,
+          "y": 0,
+          "advance": 844
+        }
+      ]
+    }
+  ]
+}

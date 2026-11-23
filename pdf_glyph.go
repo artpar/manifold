@@ -27,13 +27,16 @@ import (
 )
 
 type pdfGlyphPosition struct {
-	glyph         uint16
-	cluster       int
-	logical       string
-	x, y, advance float64
+	glyph              uint16
+	cluster            int
+	logical            string
+	textStart, textEnd int // original UTF-8 interval for the shaped cluster
+	x, y, advance      float64
 }
 type pdfPaintActualGroup struct{ text string }
 type pdfGlyphCluster struct {
+	rtl                    bool
+	level                  uint8
 	actualGroup            *pdfPaintActualGroup
 	script                 language.Script
 	face                   *pdfGlyphFace
@@ -44,9 +47,10 @@ type pdfGlyphCluster struct {
 	logicalCarrier         bool
 }
 type pdfGlyphCode struct {
-	glyph       uint16
-	text        string
-	metricWidth float64 // em; zero uses nominal font advance
+	glyph         uint16
+	text          string
+	metricWidth   float64 // em when widthOverride is true
+	widthOverride bool
 }
 type pdfGlyphFace struct {
 	name     string
@@ -82,12 +86,13 @@ func pdfShapableText(text string) bool {
 }
 func pdfGlyphLocale(run Run, script language.Script) language.Language {
 	locale := run.Language
-	if run.ComplexScript && run.ComplexLanguage != "" {
+	complex := run.ComplexScript || run.Direction == "rtl"
+	if complex && run.ComplexLanguage != "" {
 		locale = run.ComplexLanguage
 	}
 	switch script {
 	case language.Han, language.Hiragana, language.Katakana, language.Hangul, language.Bopomofo, language.Yi:
-		if !run.ComplexScript && run.EastAsiaLanguage != "" {
+		if !complex && run.EastAsiaLanguage != "" {
 			locale = run.EastAsiaLanguage
 		}
 	}
@@ -106,7 +111,13 @@ func (r *pdfRenderer) glyphClusterLanguage(face pdfFontFace, text string, run Ru
 func (r *pdfRenderer) shapeGlyphText(face pdfFontFace, text string, run Run, limit int) (*pdfGlyphCluster, error) {
 	return r.shapeGlyphTextScript(face, text, run, limit, 0)
 }
-func (r *pdfRenderer) shapeGlyphTextScript(face pdfFontFace, text string, run Run, limit int, script language.Script) (cluster *pdfGlyphCluster, err error) {
+func (r *pdfRenderer) shapeGlyphTextScript(face pdfFontFace, text string, run Run, limit int, script language.Script) (*pdfGlyphCluster, error) {
+	return r.shapeGlyphTextLevel(face, text, run, limit, script, 0)
+}
+func (r *pdfRenderer) shapeGlyphTextLevel(face pdfFontFace, text string, run Run, limit int, script language.Script, level uint8) (*pdfGlyphCluster, error) {
+	return r.shapeGlyphTextContext(face, text, run, limit, script, level, nil, 0)
+}
+func (r *pdfRenderer) shapeGlyphTextContext(face pdfFontFace, text string, run Run, limit int, script language.Script, level uint8, context []rune, offset int) (cluster *pdfGlyphCluster, err error) {
 	defer func() {
 		if p := recover(); p != nil {
 			cluster = nil
@@ -135,23 +146,31 @@ func (r *pdfRenderer) shapeGlyphTextScript(face pdfFontFace, text string, run Ru
 	b := harfbuzz.NewBuffer()
 	b.Props.Language = "und"
 	b.Flags = harfbuzz.DoNotinsertDottedCircle
-	b.AddRunes([]rune(norm.NFC.String(text)), 0, -1)
+	normalized := []rune(norm.NFC.String(text))
+	if context == nil {
+		context = normalized
+		offset = 0
+	}
+	if offset < 0 || offset+len(normalized) > len(context) || string(context[offset:offset+len(normalized)]) != string(normalized) {
+		return nil, fmt.Errorf("%w: shaping item/context mapping mismatch", ErrUnsupported)
+	}
+	b.AddRunes(context, offset, len(normalized))
 	b.GuessSegmentProperties()
 	if script != 0 {
 		b.Props.Script = script
 	}
 	b.Props.Language = pdfGlyphLocale(run, b.Props.Script)
-	// Current run shaping supports LTR. Paragraph joining/bidi still needs a
-	// qualified implementation; existing script/direction guards remain active.
-	if b.Props.Direction != harfbuzz.LeftToRight {
-		return nil, fmt.Errorf("%w: glyph cluster requires paragraph direction layout", ErrUnsupported)
+	b.Props.Direction = harfbuzz.LeftToRight
+	if level%2 != 0 {
+		b.Props.Direction = harfbuzz.RightToLeft
 	}
+
 	b.Shape(gf.shaper, nil)
 	if len(b.Info) != len(b.Pos) || len(b.Info) == 0 {
 		return nil, fmt.Errorf("%w: empty/invalid shaping result", ErrUnsupported)
 	}
 	upem := float64(face.parsed.UnitsPerEm())
-	c := &pdfGlyphCluster{face: gf, script: b.Props.Script}
+	c := &pdfGlyphCluster{face: gf, script: b.Props.Script, rtl: level%2 != 0, level: level}
 	var buf sfnt.Buffer
 	x, y := 0.0, 0.0
 	for i, info := range b.Info {
@@ -162,7 +181,7 @@ func (r *pdfRenderer) shapeGlyphTextScript(face pdfFontFace, text string, run Ru
 		if pos.YAdvance != 0 {
 			return nil, fmt.Errorf("%w: vertical glyph advances", ErrUnsupported)
 		}
-		g := pdfGlyphPosition{glyph: uint16(info.Glyph), cluster: info.Cluster, x: x + float64(pos.XOffset)/upem, y: y + float64(pos.YOffset)/upem, advance: float64(pos.XAdvance) / upem}
+		g := pdfGlyphPosition{glyph: uint16(info.Glyph), cluster: info.Cluster - offset, x: x + float64(pos.XOffset)/upem, y: y + float64(pos.YOffset)/upem, advance: float64(pos.XAdvance) / upem}
 		bounds, _, e := face.parsed.GlyphBounds(&buf, sfnt.GlyphIndex(g.glyph), fixed.I(1000), font.HintingNone)
 		if e != nil {
 			return nil, e
@@ -173,7 +192,7 @@ func (r *pdfRenderer) shapeGlyphTextScript(face pdfFontFace, text string, run Ru
 		x += g.advance
 	}
 	if !finite(x) || x < 0 {
-		return nil, fmt.Errorf("%w: invalid LTR glyph advance", ErrUnsupported)
+		return nil, fmt.Errorf("%w: invalid horizontal glyph advance", ErrUnsupported)
 	}
 	// ToUnicode maps each shaped cluster, including ligatures, to its own
 	// original text. ActualText can then wrap a whole painted run without
@@ -186,29 +205,48 @@ func (r *pdfRenderer) shapeGlyphTextScript(face pdfFontFace, text string, run Ru
 			originalEnds = append(originalEnds, end)
 		}
 	}
-	consumed := 0
-	for first := 0; first < len(c.positions); {
-		last := first + 1
-		for last < len(c.positions) && c.positions[last].cluster == c.positions[first].cluster {
-			last++
+	// HarfBuzz returns monotonically descending cluster indices for RTL.
+	// Assign original logical intervals in ascending input order, independently
+	// of visual glyph order. Keep repeated glyphs in each cluster together.
+	starts := make([]int, 0)
+	for i, g := range c.positions {
+		if i > 0 {
+			previous := c.positions[i-1].cluster
+			if (!c.rtl && g.cluster < previous) || (c.rtl && g.cluster > previous) {
+				return nil, fmt.Errorf("%w: nonmonotone shaping clusters", ErrUnsupported)
+			}
 		}
-		from, to := c.positions[first].cluster, len(originalEnds)
-		if last < len(c.positions) {
-			to = c.positions[last].cluster
+		if i == 0 || g.cluster != c.positions[i-1].cluster {
+			starts = append(starts, g.cluster)
+		}
+	}
+	sort.Ints(starts)
+	intervals := make(map[int][2]int, len(starts))
+	consumed := 0
+	for i, from := range starts {
+		to := len(originalEnds)
+		if i+1 < len(starts) {
+			to = starts[i+1]
 		}
 		if from < 0 || from >= to || to > len(originalEnds) {
-			return nil, fmt.Errorf("%w: invalid LTR shaping cluster order", ErrUnsupported)
+			return nil, fmt.Errorf("%w: invalid horizontal shaping cluster order", ErrUnsupported)
 		}
-		end := originalEnds[to-1]
-		if end > consumed {
-			c.positions[first].logical = text[consumed:end]
-			consumed = end
+		end := max(consumed, originalEnds[to-1])
+		intervals[from] = [2]int{consumed, end}
+		consumed = end
+	}
+	for i := range c.positions {
+		g := &c.positions[i]
+		interval := intervals[g.cluster]
+		g.textStart, g.textEnd = interval[0], interval[1]
+		if i == 0 || c.positions[i-1].cluster != g.cluster {
+			g.logical = text[g.textStart:g.textEnd]
 		}
-		first = last
 	}
 	if consumed != len(text) {
 		return nil, fmt.Errorf("%w: shaping omitted logical text", ErrUnsupported)
 	}
+
 	c.width = x
 	if err = r.ctx.Err(); err != nil {
 		return nil, err
@@ -234,10 +272,10 @@ func (f *pdfGlyphFace) carrierCID(text string, width float64) (uint16, error) {
 	if err != nil || gid == 0 {
 		return 0, fmt.Errorf("%w: logical glyph carrier needs a space glyph", ErrUnsupported)
 	}
-	if !finite(width) || width <= 0 {
+	if !finite(width) || width < 0 {
 		return 0, fmt.Errorf("%w: invalid logical carrier advance", ErrUnsupported)
 	}
-	key := pdfGlyphCode{glyph: uint16(gid), text: text, metricWidth: width}
+	key := pdfGlyphCode{glyph: uint16(gid), text: text, metricWidth: width, widthOverride: true}
 	if code, ok := f.codes[key]; ok {
 		return code, nil
 	}
@@ -394,7 +432,7 @@ func (f *pdfGlyphFace) embed(p *model.Context) (*types.IndirectRef, error) {
 				return nil, err
 			}
 			metric := float64(width) / 64
-			if e.metricWidth > 0 {
+			if e.widthOverride {
 				metric = e.metricWidth * 1000
 			}
 			widths = append(widths, types.Integer(code), types.Array{types.Float(metric)})

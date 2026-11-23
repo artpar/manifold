@@ -14,7 +14,7 @@ current rejection behavior must not be read as an exemption from that goal.
 | DOCX read | Paragraphs/headings, family/size/RGB/auto plus bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans/repeating header prefixes, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
 | DOCX write | Paragraphs/headings/runs/links with named families/half-point sizes/RGB/auto, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, one page layout and header/footer, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
 | PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; more complex inference, internal destinations and OCR unfinished; unsupported codecs/encodings/operators reject |
-| PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, text headers/footers, linked rich footnotes/endnotes with continuation | Embedded Go font coverage; complex shaping/bidi rejected; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
+| PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, text headers/footers, linked rich footnotes/endnotes with continuation | Built-in Go coverage plus explicit supplied TTFs; qualified Hebrew/Arabic bidi below, broader scripts unfinished; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
 | SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; richer required features remain unfinished |
 | Legacy JSON | Public model with base64 image data and diagnostics | Unknown JSON fields rejected; this is manydoc's model, not Colleaf's .vdocs schema |
 | Text | Body/table/note text; form feeds represent page breaks | Formatting and binary image data are not represented |
@@ -92,8 +92,9 @@ PDF output lays out the model anew. It does not preserve imported DOCX line/page
 positions. The built-in Go fonts support the tested Latin/Greek/Cyrillic output;
 missing glyphs return errors before output. CJK can be extracted from supported
 PDF encodings but cannot currently be generated with these built-in fonts.
-Arabic/Hebrew/Devanagari output needs a shaping/bidi implementation and is
-explicitly rejected. The output is not claimed to be PDF/A or tagged PDF. Common typographic spaces
+Hebrew/Arabic directional output now works with suitable caller-supplied TTFs
+(qualified below). Built-in Go faces lack that coverage; missing glyphs still reject.
+Devanagari and other guarded scripts remain required unfinished work. The output is not claimed to be PDF/A or tagged PDF. Common typographic spaces
 now use measured font/em advances with standard ActualText, so the published
 InDesign source renders to nine bounded pages. The earlier implied-paragraph
 fragmentation in tagged list-body import is fixed, with original /K membership
@@ -237,7 +238,8 @@ code point preserved. Widths are deterministic defaults, not source-font fidelit
 Supported NFC composition renders the composed font glyph while ActualText retains
 original decomposed Unicode. Remaining marks use positioned LTR glyph clusters
 when supported by the chosen font. Mixed formatting inside one cluster, missing
-glyphs and paragraph shaping/bidi needs still reject, with no partial PDF output. Spaces/controls
+glyphs still reject atomically. Directional Hebrew/Arabic now use the paragraph
+path below; broader script/context needs remain unfinished. Spaces/controls
 at soft line boundaries retain logical text at zero advance. Independent readers
 may normalize whitespace or add extraction newlines around zero-width controls;
 actual geometry and standard ActualText remain available. PDF reads retain
@@ -381,9 +383,9 @@ baselines and paragraph/list/cell/note/running-content line reserves. Explicit
 small fonts and their trailing empty lines retain their metrics. Decorations use
 run colors. PDF sizes require 0.01pt precision and fit the page coordinate range;
 derived 70% note sizes round to 0.01pt. DOCX requires exact half-points; unsupported
-precision returns an error. NFC/Unicode ActualText behavior remains; bidi controls,
-joining controls and common complex scripts reject until paragraph shaping/bidi
-is implemented. Supported LTR marks use HarfBuzz positioning. Broader scripts/font formats remain required.
+precision returns an error. NFC/Unicode ActualText behavior remains; bidi/joining controls and Hebrew/Arabic
+now use the directional path below. Other common complex scripts still need shaping/itemization qualification.
+Supported LTR/RTL marks use HarfBuzz positioning. Broader scripts/font formats remain required.
 
 The four-page authored native example passes independent size/color/baseline/
 advance/font-program/link/bounds tests; its four pages were inspected. A supplied
@@ -482,7 +484,7 @@ requirements even though glyph transport itself uses full programs.
 The original path supports LTR graphemes. Language-tagged text now also uses
 contextual LTR runs and line re-shaping, as detailed below. Bidi, arbitrary script/
 language support, color fonts and supplementary fallback remain unfinished. Existing explicit
-joining/bidi/complex-script/cross-style-grapheme errors remain until implemented.
+broader complex-script/cross-style-grapheme errors remain until implemented.
 These are required expansion work, not completion exemptions. Independent evidence
 uses Noto Sans marks and DejaVu Sans monochrome U+1F600, full program hashes and
 MuPDF reference GIDs/offsets; it does not qualify all fonts or Word-equivalent layout.
@@ -513,8 +515,8 @@ ActualText covers each final shaped span. Terminal overflowing whitespace retain
 logical text at zero advance. Shaping segments have a 65,536-scalar resource bound;
 individual graphemes retain the 1,024-scalar bound. Full original TTF cost remains.
 
-RTL paragraphs/runs reject atomically in every story, including empty paragraphs,
-tables, nested lists, headers/footers and notes. Paragraph-wide bidi/joining,
+RTL paragraph/run handling now exists in every story, as detailed below. Broader
+script joining,
 context across differing fonts/sizes/languages and within-grapheme styles, full script itemization and broader fonts remain required implementation and
 qualification. Empty language now selects und without changing the shaping path.
 This milestone does not satisfy the broader Unicode acceptance criterion.
@@ -556,9 +558,54 @@ raster image clipping remain unresolved with explicit diagnostics.
 
 An internal pure-Go resolver now passes the complete original Unicode 15.0.0
 level/order corpus and independent wrapped-line checks. It retains paragraph
-context and exposes L1/L2 maps. It is not connected to PDF layout yet; current RTL/
-joining rejection and all output limitations remain. No API/SF support claim is
-added. Directional shaping/itemization, L3/L4, paint/link/note placement and logical
+context and exposes L1/L2 maps. It is now connected to PDF layout, with the targeted support below. No API/SF
+schema change is added. Directional shaping/itemization, L3/L4, paint/link/note placement and logical
 text recovery still require implementation and independent glyph/layout evidence.
 The internal README records the native FriBidi/ICU difference without discarding
 either observation. Qualification is Unicode 15, not a claim of Unicode 18 coverage.
+
+
+### Directional PDF layout (2026-11-24)
+
+Explicit rtl/ltr paragraph flow reaches body, cell, list, running and note text;
+unset flow defaults LTR. Original scalar ranges survive normalization and note
+substitution. Line L1 resets retain paragraph context, final lines re-shape, and
+L2 places level-uniform spans. Suitable supplied DejaVu Sans qualifies Hebrew and
+Arabic marks, joining, brackets and ligatures; the font remains caller-supplied,
+with no automatic fallback or synthesized styles. Run rtl applies selected
+weak/neutral overrides with numeric exceptions and complex-language selection.
+Embeddings/isolates/directional marks retain logical zero-advance text; ZWJ/ZWNJ
+reach shaping. Other guarded scripts, full script itemization, cross-item positioning and
+styles inside a grapheme remain unfinished requirements.
+
+RTL list item gutter/marker placement follows its first paragraph; RTL footnotes
+choose their label/gutter/separator side from their first paragraph, preserving
+continuation choice. Inline labels stay atomic with their anchor. Physical offsets
+also determine URI/note rectangles and decorations. Richer direction/producer/
+section/note qualification remains open.
+
+Nonzero-level spans retain original visible glyph outlines as empty-logical
+artifacts plus invisible logical carriers with allocated widths. Source exposes
+render mode 3 and logical span bounds; it is not per-character ink evidence.
+This avoids observed MuPDF dropped-word/numeral-reversal behavior. Both native
+readers recover the tested words; invisible controls/physical newlines may differ
+in their text APIs. ActualText/ToUnicode and checked Go SF retain original scalars.
+Reader gaps on bidi ActualText lines are not guessed; pdf_bidi_spacing reports
+uncertainty. Empty replacements do not establish logical spacing/line boundaries.
+Untagged bidi reading order/table/note recovery still uses diagnosed fallback.
+
+The native example has independent original-program/GID/GPOS/advance, C FriBidi L2
+order/continuity, RTL color clips and link checks. Two native and two LibreOffice
+DOCX pages were visually inspected. LibreOffice differs on the authored RTL-space
+example; this evidence does not establish Word-equivalent behavior or complete
+Unicode coverage. The full acceptance audit remains incomplete.
+
+
+Item context now crosses font/size/language and transparent-control boundaries
+using full paragraph/final-line text with explicit offsets. Fourteen native
+vectors and seven PDF rows qualify regular/bold DejaVu faces, differing sizes,
+Arabic/Persian language bindings and RLM/ZWSP/WJ/FEFF. This supplies contextual
+forms without cross-face ligatures; broader font/script/cross-item positioning
+qualification remains open. Decimal note labels keep LTR glyph direction even
+when RTL placement puts them left of the anchor. Existing explicit LTR spacing
+and controls retain their prior policy.

@@ -3,6 +3,7 @@ package manydoc
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strings"
 
 	"github.com/benoitkugler/textlayout/language"
@@ -78,6 +79,13 @@ func resolveShapingScripts(atoms []pdfTextAtom, size float64) {
 // afresh. Never split or paint a previously shaped ligature at a guessed offset.
 func (r *pdfRenderer) measureShapedAtoms(atoms []pdfTextAtom, size float64) error {
 	resolveShapingScripts(atoms, size)
+	var paragraph pdfLine
+	atomSpan := make([]int, len(atoms))
+	for i, a := range atoms {
+		atomSpan[i] = len(paragraph)
+		paragraph = append(paragraph, a.spans...)
+	}
+	context, offsets := pdfShapingContext(paragraph)
 	for start := 0; start < len(atoms); {
 		if !shapingAtom(atoms[start]) {
 			start++
@@ -101,12 +109,16 @@ func (r *pdfRenderer) measureShapedAtoms(atoms []pdfTextAtom, size float64) erro
 		if err != nil {
 			return err
 		}
-		shaped, err := r.shapeGlyphTextScript(face, text.String(), run, pdfShapingSegmentLimit, atoms[start].spans[0].glyphs.script)
+		shaped, err := r.shapeGlyphTextContext(face, text.String(), run, pdfShapingSegmentLimit, atoms[start].spans[0].glyphs.script, atoms[start].spans[0].bidi.level, context, offsets[atomSpan[start]])
 		if err != nil {
 			return err
 		}
 		widths := make([]float64, end-start)
 		positions := shaped.positions
+		if shaped.rtl {
+			positions = append([]pdfGlyphPosition(nil), positions...)
+			sort.SliceStable(positions, func(i, j int) bool { return positions[i].cluster < positions[j].cluster })
+		}
 		for first := 0; first < len(positions); {
 			last := first + 1
 			for last < len(positions) && positions[last].cluster == positions[first].cluster {
@@ -153,6 +165,7 @@ func (r *pdfRenderer) measureShapedAtoms(atoms []pdfTextAtom, size float64) erro
 // ink extents and advances before committing a line. The caller backs off and
 // retries if its paragraph measurement underestimated the final line width.
 func (r *pdfRenderer) shapeTextLine(line pdfLine, size float64) (pdfLine, error) {
+	context, offsets := pdfShapingContext(line)
 	var result pdfLine
 	for start := 0; start < len(line); {
 		if !shapingSpan(line[start]) {
@@ -175,7 +188,7 @@ func (r *pdfRenderer) shapeTextLine(line pdfLine, size float64) (pdfLine, error)
 		if err != nil {
 			return nil, err
 		}
-		shaped, err := r.shapeGlyphTextScript(face, text.String(), span.run, pdfShapingSegmentLimit, span.glyphs.script)
+		shaped, err := r.shapeGlyphTextContext(face, text.String(), span.run, pdfShapingSegmentLimit, span.glyphs.script, span.bidi.level, context, offsets[start])
 		if err != nil {
 			return nil, err
 		}
@@ -193,4 +206,21 @@ func (r *pdfRenderer) shapeTextLine(line pdfLine, size float64) (pdfLine, error)
 		start = end
 	}
 	return result, nil
+}
+
+// HarfBuzz item context selects joining forms across style/font/size/language
+// and transparent-control boundaries without forming cross-face ligatures.
+// The actual final line is the context boundary; no adjacent line is borrowed.
+func pdfShapingContext(line pdfLine) ([]rune, []int) {
+	var context []rune
+	offsets := make([]int, len(line))
+	for i, s := range line {
+		offsets[i] = len(context)
+		if s.run.Note != nil {
+			context = append(context, '\ufffc')
+		} else {
+			context = append(context, []rune(norm.NFC.String(s.text))...)
+		}
+	}
+	return context, offsets
 }

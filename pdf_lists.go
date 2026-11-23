@@ -47,7 +47,7 @@ func (r *pdfRenderer) list(b Block, width, x float64) error {
 		if first.Kind == Heading {
 			minimum *= 2
 		}
-		firstLines, err := r.lines(first.Runs, width-indent, size)
+		firstLines, err := r.linesDirection(first.Runs, width-indent, size, first.Direction)
 		if err != nil {
 			return err
 		}
@@ -58,8 +58,13 @@ func (r *pdfRenderer) list(b Block, width, x float64) error {
 		if err := r.ensureWithNotes(minimum, lineNoteKeys(firstLines[0])); err != nil {
 			return err
 		}
-		r.drawLine(marker, x, r.y+pdfLineSize(firstLines[0], size)-size, size)
-		if err := r.blocks(item.Blocks, width-indent, x+indent); err != nil {
+		markerX, bodyX := x, x+indent
+		if first.Direction == "rtl" {
+			markerX = x + width - pdfAdvance(marker)
+			bodyX = x
+		}
+		r.drawLine(marker, markerX, r.y+pdfLineSize(firstLines[0], size)-size, size)
+		if err := r.blocks(item.Blocks, width-indent, bodyX); err != nil {
 			return err
 		}
 	}
