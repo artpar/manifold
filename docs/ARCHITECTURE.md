@@ -547,3 +547,22 @@ quads, retaining precision prefixes and baseline intersections. It diagnoses
 complex/non-axis-aligned text, image clipping and fully clipped operator strings.
 pdf_actualtext_align.go preserves mixed styles only on exact decoded/replacement
 agreement; otherwise the conservative replacement path retains loss diagnostics.
+
+
+## Paragraph bidi foundation (not yet used by PDF layout)
+
+internal/bidilevels adapts the attributed x/text v0.30.0 BSD reference core to
+retain resolved paragraph levels and expose line L1/L2 maps. The existing public
+bidi API hides full levels and its Line method re-resolves sliced text, so it
+cannot directly supply this layout contract. Existing x/text property lookup and
+published Unicode 15 bracket data supply classes/canonical pair IDs. A stack
+replaces quadratic isolate matching. Results use original scalar indices, are
+owned copies, and allow concurrent queries. The adapter performs no normalization.
+
+The current PDF pipeline still rejects RTL/joining. Next connect levels and source
+ranges through textAtoms, shaping segments, final-line re-shaping and placement;
+keep glyph direction/L3/L4, logical extraction and paint/link/note geometry separate.
+The internal resolver's complete Unicode 15 ordering tests do not qualify glyph
+rendering, script coverage or end-to-end bidi output. See internal/bidilevels/
+README.md for source provenance, bounds, cancellation granularity and native-oracle
+disagreements. No module/schema/public API or current conversion behavior changes.

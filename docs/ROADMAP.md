@@ -57,3 +57,11 @@ colors, exact logical carriers and URI geometry. Keep the eight-row independent
 paint-context oracle while implementing paragraph bidi/itemization. Broader
 font/size/language and within-grapheme style context remain open; do not reintroduce
 paint-based shaping segments or the observed MuPDF missing-f defect.
+
+
+The qualified internal/bidilevels resolver now supplies paragraph levels and
+line L1/L2 maps. Next carry original scalar ranges through normalization and
+textAtoms, split shaping contexts by resolved level/script/font, shape final
+lines in their resolved direction, and place units using L2 while retaining logical
+extraction. Qualify L3/L4/paint/link/note behavior before removing existing RTL/
+joining guards. Unicode 15 algorithm conformance is not renderer qualification.

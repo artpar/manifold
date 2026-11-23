@@ -1305,3 +1305,45 @@ also pass the race detector (2.124s). Fuzz campaigns: paint context 525 executio
 Generated output/QA environments remain ignored. Bidi/joining, remaining font/size/
 language and within-grapheme style context, broader recovery/layout/fonts and real
 exports remain unfinished; this is a verified milestone, not goal completion.
+
+
+## Paragraph bidi foundation (2026-11-24)
+
+```sh
+GOWORK=off go test ./internal/bidilevels -v
+GOWORK=off go test -race ./...
+CGO_ENABLED=0 GOWORK=off go test ./internal/bidilevels -count=1
+GOWORK=off go test ./internal/bidilevels -run '^$' -fuzz '^FuzzParagraphLines$' -fuzztime=20000x -parallel=2
+python3 scripts/verify_bidi_levels.py
+# To select the exact ICU oracle used to capture the line observations on macOS:
+MANYDOC_QA_ICU_LIBRARY=/opt/homebrew/opt/icu4c/lib/libicuuc.dylib python3 scripts/verify_bidi_levels.py
+```
+
+internal/bidilevels/README.md records the attributed BSD x/text v0.30.0 core,
+linear isolate matcher, published bracket data and integration boundary. The full
+ordinary offline suite verifies original Unicode 15.0.0 BidiCharacterTest (91,707
+cases) and BidiTest (770,241 class/direction combinations), including original
+X9 exclusions and exact required levels/order. Hashes/sizes and expected counts
+pin the original compressed reference fixtures. A separate hash pins authored
+line observations. Bidi properties stay at Unicode 15; no Unicode 18 claim.
+
+Twelve authored paragraphs/34 wrapped lines preserve native FriBidi 1.0.16 and
+ICU 78.3 results. The read-only optional script rechecks both original native
+observations. FriBidi leaves a trailing PDI at its old level; Unicode L1 and ICU
+reset it to paragraph level. That difference remains explicit in the fixture and
+Go test. ICU lowers even levels on two unidirectional slices; direction parity
+and visual order remain equivalent. Neither observation was changed to pass.
+The tests also distinguish retained paragraph context from re-resolving a sliced
+neutral line. Validation, empty input, cancellation, ownership/concurrent queries,
+65,536 unmatched isolates and invalid ranges/UTF-8 have focused coverage.
+
+Final full tests pass (library 7.204s, CLI 0.781s, bidi package 2.610s). Full
+race, vet, module verification and CGO-disabled CLI build pass. The latest targeted
+line/hash/version/context tests also pass under race (1.319s). The new internal package also executes its entire conformance suite with CGO
+disabled (1.997s). Full race reports library 102.127s, CLI 2.170s and bidi package
+19.095s. Paragraph-line fuzz completes 20,001 executions in 1.010s (20,000x target).
+Native read-only verification passes all 34 observations under the pinned oracle
+versions; system ICU 76.1 reproduces them too. Logs use output/bidi-*. The existing PDF output code and schemas are
+unchanged, so no new document visual-fidelity claim is made and prior reader/
+corpus evidence remains at its earlier checkpoint. PDF bidi/joining integration,
+L3/L4 glyph behavior and the broader acceptance rows remain unfinished.

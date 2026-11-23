@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-23",
+  "date": "2026-11-24",
   "project": "github.com/artpar/manydoc",
   "go": "go version go1.25.0 darwin/arm64",
   "host": "macOS-15.4-arm64-arm-64bit-Mach-O",
@@ -2496,6 +2496,104 @@
       "bin/manydoc extract -format sf -o output/paint-context/recovered.sf output/paint-context/paint.pdf",
       "output/qa-venv/bin/python scripts/verify_paint_context.py",
       "GOWORK=off go doc golang.org/x/text/unicode/bidi"
+    ],
+    "external_blocker": null
+  },
+  "latest_evidence": "paragraph_bidi_levels_2026_11_24",
+  "paragraph_bidi_levels_2026_11_24": {
+    "goal_complete": false,
+    "previous_checkpoint": "658a5b0",
+    "renderer_integrated": false,
+    "public_api_schema_or_conversion_behavior_changed": false,
+    "implementation": {
+      "package": "internal/bidilevels",
+      "upstream": "golang.org/x/text v0.30.0 core.go/bracket.go, attributed BSD reuse",
+      "source_hashes": "internal/bidilevels/testdata/manifest.json",
+      "changes": [
+        "package name",
+        "linear isolate matcher",
+        "independent paragraph/line wrapper using original scalar indices and copied results",
+        "published canonical paired-bracket data"
+      ],
+      "unicode_version": "15.0.0",
+      "new_module_dependency": false,
+      "lgpl_runtime_code": false,
+      "paragraph_scalar_bound": 65536,
+      "cancellation": "preprocessing checkpoints and pre/post bounded synchronous core resolution"
+    },
+    "unicode_conformance": {
+      "original_character_cases": 91707,
+      "original_class_direction_cases": 770241,
+      "hash_size_and_case_counts_checked": true,
+      "levels_and_order": "exact original expectations with original X9 exclusions",
+      "ordinary_offline_tests": true
+    },
+    "native_wrapped_lines": {
+      "paragraphs": 12,
+      "lines": 34,
+      "fribidi": "1.0.16",
+      "icu": "78.3",
+      "readonly_script": "scripts/verify_bidi_levels.py",
+      "fixture": "internal/bidilevels/testdata/lines.json",
+      "original_observations_preserved": true,
+      "trailing_pdi": "FriBidi keeps prior level; Unicode L1 and ICU reset to paragraph level; resolver follows Unicode/ICU",
+      "icu_even_level_optimization": "compare parity and visual order; original Unicode corpus levels remain exact",
+      "result": "passed",
+      "additional_reader": "system ICU 76.1 also reproduces the captured observations"
+    },
+    "checks": {
+      "full_tests": {
+        "library_seconds": 7.204,
+        "cli_seconds": 0.781,
+        "bidi_seconds": 2.61,
+        "result": "passed"
+      },
+      "full_race": {
+        "library_seconds": 102.127,
+        "cli_seconds": 2.17,
+        "bidi_seconds": 19.095,
+        "result": "passed"
+      },
+      "vet": "passed",
+      "module_verification": "passed",
+      "cgo_disabled_cli_build": "passed",
+      "cgo_disabled_conformance_execution": {
+        "seconds": 1.997,
+        "result": "passed"
+      },
+      "fuzz": {
+        "target": "FuzzParagraphLines",
+        "executions": 20001,
+        "seconds": 1.01,
+        "requested": "20000x",
+        "result": "passed"
+      },
+      "supplemental_targeted_race": {
+        "seconds": 1.319,
+        "scope": "latest native-line/hash/version and retained-context tests",
+        "result": "passed"
+      }
+    },
+    "other_tests": [
+      "invalid base/UTF-8/interior paragraph boundaries/ranges",
+      "empty/cancelled input",
+      "ownership/concurrent line queries",
+      "65536 unmatched isolates",
+      "retained paragraph context versus sliced-line resolution",
+      "published bracket version/hash and canonical pairs"
+    ],
+    "limitations": [
+      "not connected to PDF renderer; existing RTL/joining rejection remains",
+      "L3/L4 and directional glyph shaping/mark/mirroring behavior unfinished",
+      "source-scalar mapping through normalization/graphemes/wrapping and L2 placement unfinished",
+      "logical extraction plus paint/link/note placement need independent qualification",
+      "no new visual/corpus claim; preceding checkpoint evidence retained",
+      "other source-font/rich-layout/PDF recovery/real-export requirements remain"
+    ],
+    "next_commands": [
+      "GOWORK=off go test ./internal/bidilevels -v",
+      "python3 scripts/verify_bidi_levels.py",
+      "rg -n 'textAtoms|emitFit|shapeTextLine|drawLine' pdf_text.go pdf_shaping.go"
     ],
     "external_blocker": null
   }

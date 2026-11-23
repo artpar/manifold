@@ -1,0 +1,1130 @@
+{
+  "oracle": "native FriBidi 1.0.16, reorder flags 0 (L1/L2; no L3 glyph/mark reordering)",
+  "cases": [
+    {
+      "name": "auto-rtl-with-latin",
+      "text": "אבג abc 123",
+      "base": -1,
+      "resolved_base": 1,
+      "lines": [
+        {
+          "start": 0,
+          "end": 4,
+          "levels": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "order": [
+            3,
+            2,
+            1,
+            0
+          ],
+          "icu": {
+            "levels": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "order": [
+              3,
+              2,
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "start": 4,
+          "end": 8,
+          "levels": [
+            2,
+            2,
+            2,
+            1
+          ],
+          "order": [
+            7,
+            4,
+            5,
+            6
+          ],
+          "icu": {
+            "levels": [
+              2,
+              2,
+              2,
+              1
+            ],
+            "order": [
+              7,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        {
+          "start": 8,
+          "end": 11,
+          "levels": [
+            2,
+            2,
+            2
+          ],
+          "order": [
+            8,
+            9,
+            10
+          ],
+          "icu": {
+            "levels": [
+              2,
+              2,
+              2
+            ],
+            "order": [
+              8,
+              9,
+              10
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "explicit-ltr-hebrew",
+      "text": "אבג abc",
+      "base": 0,
+      "resolved_base": 0,
+      "lines": [
+        {
+          "start": 0,
+          "end": 4,
+          "levels": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "order": [
+            2,
+            1,
+            0,
+            3
+          ],
+          "icu": {
+            "levels": [
+              1,
+              1,
+              1,
+              0
+            ],
+            "order": [
+              2,
+              1,
+              0,
+              3
+            ]
+          }
+        },
+        {
+          "start": 4,
+          "end": 7,
+          "levels": [
+            0,
+            0,
+            0
+          ],
+          "order": [
+            4,
+            5,
+            6
+          ],
+          "icu": {
+            "levels": [
+              0,
+              0,
+              0
+            ],
+            "order": [
+              4,
+              5,
+              6
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "explicit-rtl-latin",
+      "text": "abc אבג",
+      "base": 1,
+      "resolved_base": 1,
+      "lines": [
+        {
+          "start": 0,
+          "end": 4,
+          "levels": [
+            2,
+            2,
+            2,
+            1
+          ],
+          "order": [
+            3,
+            0,
+            1,
+            2
+          ],
+          "icu": {
+            "levels": [
+              2,
+              2,
+              2,
+              1
+            ],
+            "order": [
+              3,
+              0,
+              1,
+              2
+            ]
+          }
+        },
+        {
+          "start": 4,
+          "end": 7,
+          "levels": [
+            1,
+            1,
+            1
+          ],
+          "order": [
+            6,
+            5,
+            4
+          ],
+          "icu": {
+            "levels": [
+              1,
+              1,
+              1
+            ],
+            "order": [
+              6,
+              5,
+              4
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "wrapped-neutral",
+      "text": "א - xyz",
+      "base": -1,
+      "resolved_base": 1,
+      "lines": [
+        {
+          "start": 0,
+          "end": 2,
+          "levels": [
+            1,
+            1
+          ],
+          "order": [
+            1,
+            0
+          ],
+          "icu": {
+            "levels": [
+              1,
+              1
+            ],
+            "order": [
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "start": 2,
+          "end": 4,
+          "levels": [
+            1,
+            1
+          ],
+          "order": [
+            3,
+            2
+          ],
+          "icu": {
+            "levels": [
+              1,
+              1
+            ],
+            "order": [
+              3,
+              2
+            ]
+          }
+        },
+        {
+          "start": 4,
+          "end": 7,
+          "levels": [
+            2,
+            2,
+            2
+          ],
+          "order": [
+            4,
+            5,
+            6
+          ],
+          "icu": {
+            "levels": [
+              2,
+              2,
+              2
+            ],
+            "order": [
+              4,
+              5,
+              6
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "line-whitespace-reset",
+      "text": "abc אבג   123  ",
+      "base": 0,
+      "resolved_base": 0,
+      "lines": [
+        {
+          "start": 0,
+          "end": 8,
+          "levels": [
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            6,
+            5,
+            4,
+            7
+          ],
+          "icu": {
+            "levels": [
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              1,
+              0
+            ],
+            "order": [
+              0,
+              1,
+              2,
+              3,
+              6,
+              5,
+              4,
+              7
+            ]
+          }
+        },
+        {
+          "start": 8,
+          "end": 11,
+          "levels": [
+            1,
+            1,
+            2
+          ],
+          "order": [
+            10,
+            9,
+            8
+          ],
+          "icu": {
+            "levels": [
+              1,
+              1,
+              2
+            ],
+            "order": [
+              10,
+              9,
+              8
+            ]
+          }
+        },
+        {
+          "start": 11,
+          "end": 15,
+          "levels": [
+            2,
+            2,
+            0,
+            0
+          ],
+          "order": [
+            11,
+            12,
+            13,
+            14
+          ],
+          "icu": {
+            "levels": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "order": [
+              11,
+              12,
+              13,
+              14
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "bracket-nesting",
+      "text": "abc (אבג [123]) end",
+      "base": 0,
+      "resolved_base": 0,
+      "lines": [
+        {
+          "start": 0,
+          "end": 9,
+          "levels": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            1,
+            0
+          ],
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            7,
+            6,
+            5,
+            8
+          ],
+          "icu": {
+            "levels": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              1,
+              0
+            ],
+            "order": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              7,
+              6,
+              5,
+              8
+            ]
+          }
+        },
+        {
+          "start": 9,
+          "end": 15,
+          "levels": [
+            1,
+            2,
+            2,
+            2,
+            1,
+            0
+          ],
+          "order": [
+            13,
+            10,
+            11,
+            12,
+            9,
+            14
+          ],
+          "icu": {
+            "levels": [
+              1,
+              2,
+              2,
+              2,
+              1,
+              0
+            ],
+            "order": [
+              13,
+              10,
+              11,
+              12,
+              9,
+              14
+            ]
+          }
+        },
+        {
+          "start": 15,
+          "end": 19,
+          "levels": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "order": [
+            15,
+            16,
+            17,
+            18
+          ],
+          "icu": {
+            "levels": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "order": [
+              15,
+              16,
+              17,
+              18
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "canonical-brackets",
+      "text": "א 〈abc〉 ב",
+      "base": 1,
+      "resolved_base": 1,
+      "lines": [
+        {
+          "start": 0,
+          "end": 8,
+          "levels": [
+            1,
+            1,
+            1,
+            2,
+            2,
+            2,
+            1,
+            1
+          ],
+          "order": [
+            7,
+            6,
+            3,
+            4,
+            5,
+            2,
+            1,
+            0
+          ],
+          "icu": {
+            "levels": [
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              1,
+              1
+            ],
+            "order": [
+              7,
+              6,
+              3,
+              4,
+              5,
+              2,
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "start": 8,
+          "end": 9,
+          "levels": [
+            1
+          ],
+          "order": [
+            8
+          ],
+          "icu": {
+            "levels": [
+              1
+            ],
+            "order": [
+              8
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "arabic-numerals",
+      "text": "سلام ١٢٣ test 45",
+      "base": -1,
+      "resolved_base": 1,
+      "lines": [
+        {
+          "start": 0,
+          "end": 5,
+          "levels": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "order": [
+            4,
+            3,
+            2,
+            1,
+            0
+          ],
+          "icu": {
+            "levels": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "order": [
+              4,
+              3,
+              2,
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "start": 5,
+          "end": 9,
+          "levels": [
+            2,
+            2,
+            2,
+            1
+          ],
+          "order": [
+            8,
+            5,
+            6,
+            7
+          ],
+          "icu": {
+            "levels": [
+              2,
+              2,
+              2,
+              1
+            ],
+            "order": [
+              8,
+              5,
+              6,
+              7
+            ]
+          }
+        },
+        {
+          "start": 9,
+          "end": 14,
+          "levels": [
+            2,
+            2,
+            2,
+            2,
+            1
+          ],
+          "order": [
+            13,
+            9,
+            10,
+            11,
+            12
+          ],
+          "icu": {
+            "levels": [
+              2,
+              2,
+              2,
+              2,
+              1
+            ],
+            "order": [
+              13,
+              9,
+              10,
+              11,
+              12
+            ]
+          }
+        },
+        {
+          "start": 14,
+          "end": 16,
+          "levels": [
+            2,
+            2
+          ],
+          "order": [
+            14,
+            15
+          ],
+          "icu": {
+            "levels": [
+              2,
+              2
+            ],
+            "order": [
+              14,
+              15
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "nested-isolates",
+      "text": "A⁧אבג ⁦xy⁩ ז⁩ Z",
+      "base": 0,
+      "resolved_base": 0,
+      "lines": [
+        {
+          "start": 0,
+          "end": 6,
+          "levels": [
+            0,
+            0,
+            1,
+            1,
+            1,
+            0
+          ],
+          "order": [
+            0,
+            1,
+            4,
+            3,
+            2,
+            5
+          ],
+          "icu": {
+            "levels": [
+              0,
+              0,
+              1,
+              1,
+              1,
+              0
+            ],
+            "order": [
+              0,
+              1,
+              4,
+              3,
+              2,
+              5
+            ]
+          }
+        },
+        {
+          "start": 6,
+          "end": 10,
+          "levels": [
+            1,
+            2,
+            2,
+            1
+          ],
+          "order": [
+            9,
+            7,
+            8,
+            6
+          ],
+          "icu": {
+            "levels": [
+              1,
+              2,
+              2,
+              0
+            ],
+            "order": [
+              7,
+              8,
+              6,
+              9
+            ]
+          }
+        },
+        {
+          "start": 10,
+          "end": 15,
+          "levels": [
+            1,
+            1,
+            0,
+            0,
+            0
+          ],
+          "order": [
+            11,
+            10,
+            12,
+            13,
+            14
+          ],
+          "icu": {
+            "levels": [
+              1,
+              1,
+              0,
+              0,
+              0
+            ],
+            "order": [
+              11,
+              10,
+              12,
+              13,
+              14
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "explicit-embeddings",
+      "text": "A‫אבג ‪XY‬ ז‬ Z",
+      "base": 0,
+      "resolved_base": 0,
+      "lines": [
+        {
+          "start": 0,
+          "end": 6,
+          "levels": [
+            0,
+            -1,
+            1,
+            1,
+            1,
+            0
+          ],
+          "order": [
+            0,
+            4,
+            3,
+            2,
+            5
+          ],
+          "icu": {
+            "levels": [
+              0,
+              -1,
+              1,
+              1,
+              1,
+              0
+            ],
+            "order": [
+              0,
+              4,
+              3,
+              2,
+              5
+            ]
+          }
+        },
+        {
+          "start": 6,
+          "end": 11,
+          "levels": [
+            -1,
+            2,
+            2,
+            -1,
+            0
+          ],
+          "order": [
+            7,
+            8,
+            10
+          ],
+          "icu": {
+            "levels": [
+              -1,
+              0,
+              0,
+              -1,
+              0
+            ],
+            "order": [
+              7,
+              8,
+              10
+            ]
+          }
+        },
+        {
+          "start": 11,
+          "end": 15,
+          "levels": [
+            1,
+            -1,
+            0,
+            0
+          ],
+          "order": [
+            11,
+            13,
+            14
+          ],
+          "icu": {
+            "levels": [
+              1,
+              -1,
+              0,
+              0
+            ],
+            "order": [
+              11,
+              13,
+              14
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "tabs-separators",
+      "text": "אב\t12 xy z",
+      "base": 1,
+      "resolved_base": 1,
+      "lines": [
+        {
+          "start": 0,
+          "end": 3,
+          "levels": [
+            1,
+            1,
+            1
+          ],
+          "order": [
+            2,
+            1,
+            0
+          ],
+          "icu": {
+            "levels": [
+              1,
+              1,
+              1
+            ],
+            "order": [
+              2,
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "start": 3,
+          "end": 6,
+          "levels": [
+            2,
+            2,
+            1
+          ],
+          "order": [
+            5,
+            3,
+            4
+          ],
+          "icu": {
+            "levels": [
+              2,
+              2,
+              1
+            ],
+            "order": [
+              5,
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "start": 6,
+          "end": 9,
+          "levels": [
+            2,
+            2,
+            1
+          ],
+          "order": [
+            8,
+            6,
+            7
+          ],
+          "icu": {
+            "levels": [
+              2,
+              2,
+              1
+            ],
+            "order": [
+              8,
+              6,
+              7
+            ]
+          }
+        },
+        {
+          "start": 9,
+          "end": 10,
+          "levels": [
+            2
+          ],
+          "order": [
+            9
+          ],
+          "icu": {
+            "levels": [
+              2
+            ],
+            "order": [
+              9
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "marks",
+      "text": "אבְג test",
+      "base": -1,
+      "resolved_base": 1,
+      "lines": [
+        {
+          "start": 0,
+          "end": 5,
+          "levels": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "order": [
+            4,
+            3,
+            2,
+            1,
+            0
+          ],
+          "icu": {
+            "levels": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "order": [
+              4,
+              3,
+              2,
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "start": 5,
+          "end": 9,
+          "levels": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "order": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "icu": {
+            "levels": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "order": [
+              5,
+              6,
+              7,
+              8
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "icu_oracle": "ICU 78.3 ubidi_setPara / ubidi_setLine / ubidi_getLevels / ubidi_getVisualMap, default options"
+}

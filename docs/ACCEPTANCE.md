@@ -59,3 +59,10 @@ This narrows the style-context gap. It does not complete paragraph bidi/joining,
 within-grapheme style changes, cross-face/size/language context or the other rows.
 Known rectangular text/font-box clip recovery and exact mixed ActualText alignment
 also exist; complex/image clips and broader source/structure recovery remain open.
+
+
+The internal paragraph bidi foundation (2026-11-24) now passes complete original
+Unicode 15 level/order conformance plus native wrapped-line observations. PDF
+integration, directional shaping/L3/L4, logical extraction and paint/link/note
+placement are unfinished. No acceptance row becomes complete from those algorithm
+tests alone. Original Unicode/native observations remain reference fixtures.

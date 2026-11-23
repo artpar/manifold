@@ -438,3 +438,10 @@ pdf_invisible_text diagnostic; their replacement_span_bounds are logical advance
 bands, not visible glyph ink. Checked SF preserves these values and paint/link
 marks. Broader bidi/font/language context and within-grapheme style changes remain
 required, unfinished capabilities.
+
+
+The 2026-11-24 internal paragraph bidi resolver adds no SF attributes or new
+canonical representation. Existing paragraph/run direction bindings persist as
+before. PDF integration is unfinished; algorithm conformance does not imply that
+RTL SF now renders. Original source scalar ranges must remain separate from any
+normalization or visual order during the next renderer implementation.

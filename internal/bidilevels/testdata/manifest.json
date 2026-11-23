@@ -1,0 +1,32 @@
+{
+  "BidiBrackets.txt": {
+    "source": "https://www.unicode.org/Public/15.0.0/ucd/BidiBrackets.txt",
+    "sha256": "333ae1e99db0504ca8a046a07dc45b5e7aa91869c685e6bf955ebe674804827a",
+    "bytes": 8950
+  },
+  "BidiTest.txt": {
+    "source": "https://www.unicode.org/Public/15.0.0/ucd/BidiTest.txt",
+    "sha256": "72a7a509dba0e147322c17997fb5159431042ff4a49fa08c7c25ccc1e291bbfe",
+    "bytes": 7959974
+  },
+  "BidiCharacterTest.txt": {
+    "source": "https://www.unicode.org/Public/15.0.0/ucd/BidiCharacterTest.txt",
+    "sha256": "3c423c301f7b8dc41b879062cbf01fd1b4ec2ea4826e20d276c44b52129a01b6",
+    "bytes": 6880549
+  },
+  "upstream_core.go": {
+    "source": "https://github.com/golang/text/blob/v0.30.0/unicode/bidi/core.go",
+    "sha256": "1d375d88eeae31f2496e081df73c0004b5c4b4a800ec6f4aea989d18fee8ec92",
+    "bytes": 30013
+  },
+  "upstream_bracket.go": {
+    "source": "https://github.com/golang/text/blob/v0.30.0/unicode/bidi/bracket.go",
+    "sha256": "5caa24f9c4e04a54d18875468f976b4b7c09c8700e88286f2fd96828f134107e",
+    "bytes": 11492
+  },
+  "lines.json": {
+    "source": "authored scenarios; native FriBidi 1.0.16 and ICU 78.3 observations",
+    "sha256": "275b41110085e739bd51e752b5c1389ea4e36abbbc46d7a987d7162a5ef074da",
+    "bytes": 18924
+  }
+}

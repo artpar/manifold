@@ -1,6 +1,6 @@
 # Current status and handoff
 
-Updated 2026-11-23. Read this first, then the root AGENTS.md and the architecture,
+Updated 2026-11-24. Read this first, then the root AGENTS.md and the architecture,
 decision, compatibility and testing documents in this directory.
 
 Commit verified milestones with their tests and knowledge-transfer documents as
@@ -21,7 +21,49 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: shaping survives paint and annotation changes
+## Latest milestone: qualified paragraph levels for bidi integration
+
+- internal/bidilevels now resolves explicit/automatic paragraph base direction,
+  weak/neutral/bracket/isolate levels and per-line L1/L2 maps in pure Go. It retains
+  original scalar indices and paragraph context across line slices. This is an
+  internal foundation, **not yet connected to PDF layout**. Existing RTL/joining
+  guards remain; no public SF/API or current output behavior change.
+- Reuses attributed BSD x/text v0.30.0 core/bracket code with original headers,
+  adjacent LICENSE and pinned upstream hashes. The isolate matcher is now linear
+  instead of repeatedly scanning suffixes. Published Unicode 15 BidiBrackets data
+  supplies canonical pair identifiers, including U+2329/U+232A equivalence. No new
+  module dependency, LGPL code or proprietary implementation is introduced.
+- Ordinary offline tests verify all 91,707 original BidiCharacterTest cases and
+  770,241 class/direction combinations. Original files are hash-checked compressed
+  fixtures, with Unicode notices retained. Twelve authored paragraphs/34 wrapped
+  lines preserve native FriBidi 1.0.16 and ICU 78.3 observations. A trailing-PDI L1
+  disagreement remains recorded: Unicode/ICU reset to paragraph level; FriBidi
+  retains the old level. ICU's even-level optimization compares by direction
+  parity and visual order. Original observations/oracles were not rewritten.
+- Input/range/UTF-8/empty/cancellation/ownership/concurrency tests and a 65,536-
+  unmatched-isolate case pass. Line queries copy only their selected range and
+  never re-resolve paragraph types. Fuzz completed 20,001 executions (20,000x
+  target). Current implementation is bounded synchronous work between cancellation
+  checks; it is not interruptible inside every rule. See internal/bidilevels/
+  README.md, TESTING.md and verification.json for commands/evidence.
+- Full tests/race/vet/module verification and CGO-disabled CLI build pass. The
+  complete new conformance suite also executes with CGO disabled. Full race:
+  library 102.127s, CLI 2.170s, bidi package 19.095s. Native line verification
+  passes; current PDF output behavior and its prior visual/corpus evidence stay
+  at the preceding checkpoint.
+
+The full goal remains **incomplete**, with no external blocker. Next implementation
+must carry original scalar ranges/levels through normalization, graphemes, run/
+script/font itemization and wrapping; shape final directional lines, use L2 for
+placement, and preserve logical text and paint/link/note geometry independently.
+L3/L4 glyph/mark/mirroring and bidi output need independent qualification before
+removing rejection. The other source-font/layout/recovery/real-export acceptance
+rows remain open. Previous checkpoint: 658a5b0. Next concrete commands:
+GOWORK=off go test ./internal/bidilevels -v;
+python3 scripts/verify_bidi_levels.py;
+rg -n 'textAtoms|emitFit|shapeTextLine|drawLine' pdf_text.go pdf_shaping.go.
+
+## Earlier milestone: shaping survives paint and annotation changes
 
 - Compatible resolved faces, effective sizes and canonical language bindings now
   shape together across color, underline, strike and link boundaries. Final lines

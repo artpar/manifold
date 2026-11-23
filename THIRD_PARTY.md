@@ -9,7 +9,7 @@ included. Third-party components remain under their respective licenses.
 | github.com/phpdave11/gofpdf | v1.4.3 | PDF primitives and embedded fonts | MIT |
 | github.com/benoitkugler/textlayout | v0.3.2 | Adobe glyph names/encodings, TrueType layout and HarfBuzz glyph shaping | MIT |
 | github.com/rivo/uniseg | v0.4.7 | Unicode 15 grapheme/line segmentation (not terminal-cell width) | MIT; Unicode data terms |
-| golang.org/x/text | v0.30.0 | NFC normalization, font-name case folding and BCP47/script metadata | BSD-3-Clause; Unicode data terms |
+| golang.org/x/text | v0.30.0 | NFC normalization, font-name case folding, BCP47/script metadata and bidi properties | BSD-3-Clause; Unicode data terms |
 | golang.org/x/image | v0.32.0 | Go/Go Mono fonts, font glyph inspection and TIFF decoding | BSD-3-Clause; additional Go font notice |
 
 The embedded Go fonts are copyright 2016 Bigelow & Holmes Inc. Their full
@@ -65,3 +65,18 @@ reader/oracle, not a Go runtime dependency or required conversion executable.
 `scripts/font_oracles.py` records SHA256 values of original Go programs from the
 pinned x/image v0.32.0 byte constants. These QA facts qualify actual embedded
 programs independently of PDF resource aliases; no new font asset is vendored.
+
+
+internal/bidilevels/core.go and bracket.go adapt the Go Authors' BSD-licensed
+x/text v0.30.0 reference bidi core; their original headers and adjacent LICENSE
+are preserved. The internal README and testdata/manifest.json identify upstream
+sources/hashes and changes (package name, linear isolate matcher). The wrapper
+uses existing x/text property tables, not another new module. This is attributed
+reusable open-source code, not independently authored algorithm code.
+
+internal/bidilevels/data/BidiBrackets.txt and compressed original BidiTest/
+BidiCharacterTest fixtures are Unicode 15.0.0 data with original notices retained.
+Their canonical URLs, original hashes and sizes are pinned in the manifest; the
+existing third_party/licenses/Unicode-V3.txt applies. Authored line scenarios retain
+native FriBidi 1.0.16 and ICU 78.3 observations. Those native libraries are optional
+QA tools only; neither native nor Go textprocessing/fribidi is a runtime dependency.

@@ -550,3 +550,15 @@ or replacement-span prefixes; these are not ink-outline bounds. Fully clipped te
 retains operator strings/original bounds with fully_clipped_ precision and warning;
 raw partial clips warn of hidden character ink. Complex/non-axis-aligned text and
 raster image clipping remain unresolved with explicit diagnostics.
+
+
+### Paragraph bidi preparation (2026-11-24)
+
+An internal pure-Go resolver now passes the complete original Unicode 15.0.0
+level/order corpus and independent wrapped-line checks. It retains paragraph
+context and exposes L1/L2 maps. It is not connected to PDF layout yet; current RTL/
+joining rejection and all output limitations remain. No API/SF support claim is
+added. Directional shaping/itemization, L3/L4, paint/link/note placement and logical
+text recovery still require implementation and independent glyph/layout evidence.
+The internal README records the native FriBidi/ICU difference without discarding
+either observation. Qualification is Unicode 15, not a claim of Unicode 18 coverage.

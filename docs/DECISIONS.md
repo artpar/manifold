@@ -892,3 +892,33 @@ does not justify claiming arbitrary clipping/ink recovery. Retain fully clipped
 operator strings with uncertainty. For mixed-style ActualText, align only on exact
 decoded concatenation equality, never equal rune count. Existing genuinely
 different replacement tests remain unchanged. No dependency or fixture change.
+
+
+## 2026-11-24 Retain paragraph levels for line bidi layout
+
+UAX #9 resolves paragraph context before wrapping; each line then applies L1/L2.
+The current public x/text API hides embedding levels and re-resolves line slices.
+Keep an attributed internal adaptation of its BSD v0.30.0 reference core/bracket
+implementation, with original headers/LICENSE and pinned source hashes. Reuse the
+existing module's Unicode class lookup rather than duplicating the tables. Use
+published BidiBrackets canonical opening IDs and U+2329/U+232A normalization.
+Sources: [x/text bidi](https://github.com/golang/text/tree/v0.30.0/unicode/bidi),
+[Unicode 15 UAX #9](https://www.unicode.org/reports/tr9/tr9-46.html),
+[paired brackets](https://www.unicode.org/Public/15.0.0/ucd/BidiBrackets.txt).
+This is reusable open-source implementation code, not an independently authored
+bidi algorithm. textprocessing/fribidi was inspected but not adopted; no LGPL
+code or dependency enters manydoc.
+
+Replace the reference's quadratic isolate suffix searches with a stack; retain
+all original Unicode conformance expectations. Check 91,707 character cases and
+770,241 class/direction combinations offline from original hash-checked data.
+Preserve both FriBidi and ICU wrapped-line observations. FriBidi 1.0.16 leaves a
+trailing PDI at its old level; UAX L1 and ICU 78.3 reset it to paragraph level.
+The production resolver follows that rule, while tests preserve the exact native
+disagreement. ICU may lower even levels in unidirectional lines; compare its
+parity/order as allowed by UAX conformance, while original corpus levels stay exact.
+
+Do not remove PDF RTL/joining guards based on algorithm tests alone. Carry scalar
+mapping and paragraph levels into directional shaping/wrapping/placement first,
+then qualify GIDs/GPOS/visual order/marks/mirroring and logical/paint/link/note
+preservation. This checkpoint introduces no renderer behavior or public schema.
