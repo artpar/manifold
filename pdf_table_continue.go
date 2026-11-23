@@ -244,7 +244,7 @@ func (r *pdfRenderer) paintTablePage(plan *pdfTableLayout, page pdfTablePage, x,
 }
 
 func (r *pdfRenderer) continueTableGroup(plan *pdfTableLayout, g pdfTableGroup, x float64) error {
-	contentHeight := r.height - 2*r.margin
+	contentHeight := r.bodyHeight()
 	// Reject indivisible starts before spending pages on preceding rows. Nested
 	// groups can now supply a smaller band through recursive selection.
 	for _, c := range plan.cells[g.first:g.last] {
@@ -256,13 +256,13 @@ func (r *pdfRenderer) continueTableGroup(plan *pdfTableLayout, g pdfTableGroup, 
 	}
 	cursor := enterPDFTableRow(plan, g, pdfTableCursor{row: g.start, next: g.first})
 	for cursor.row < g.end {
-		available := r.height - r.margin - r.y - r.noteReserve
+		available := r.bodyBottom() - r.y - r.noteReserve
 		budget := available
 		var page pdfTablePage
 		var next pdfTableCursor
 		for {
 			var err error
-			page, next, err = r.planTablePage(plan, g, cursor, budget, r.y <= r.margin+1e-7)
+			page, next, err = r.planTablePage(plan, g, cursor, budget, r.y <= r.bodyTop()+1e-7)
 			if err != nil {
 				return err
 			}
@@ -283,7 +283,7 @@ func (r *pdfRenderer) continueTableGroup(plan *pdfTableLayout, g pdfTableGroup, 
 			budget = math.Min(budget-1e-6, math.Min(available-minimum, contentHeight-freshMinimum))
 		}
 		if len(page.bands) == 0 {
-			if r.y <= r.margin+1e-7 && r.noteReserve == 0 {
+			if r.y <= r.bodyTop()+1e-7 && r.noteReserve == 0 {
 				return fmt.Errorf("%w: PDF table continuation cannot fit a cell fragment and its footnote start", ErrUnsupported)
 			}
 			if err := r.nextPage(true); err != nil {

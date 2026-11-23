@@ -91,6 +91,43 @@ that destination. Larger figures fit the full continuation container, not leftov
 reference-page space. Richer numbering/separator/layout behavior remains required
 expansion.
 
+## PDF running stories and body rectangle
+
+`pdf_running.go` measures immutable header/footer flows once through the shared
+cell/table planner with an explicit running style (8pt/1.25 default). Tables,
+spans, nested lists, links and validated images share normal text/font handling.
+The full story repeats, so table RepeatHeader flags are cleared only on temporary
+measurement copies. Page controls reject; note graph validation already forbids
+running anchors. No body cursor or pagination state changes during painting.
+
+The header begins at margin/2; bodyTop is the larger of margin and its measured
+end. Short footers retain height-margin/2; larger footers move upward to end at
+page height. bodyBottom is the smaller of height-margin and footer start. Body
+lines, images, headings, table continuations, note reservations/separators and
+note-only continuation pages all use these bounds. There is still one symmetric
+page geometry, with no section-specific running stories/distances yet.
+
+When running images compete, binary-search their measured budgets including each
+ancestor's padding (up to forty probes per story); freeze plans that reach a real
+image-space floor and continue with the other story. Never shrink text or mutate source assets/preferences.
+A measurement-only body copy minimizes body-image preferences, materializes text
+defaults and finds indivisible line/table/header/note starts, including later
+note fragments. Running fitting reserves that floor plus .001pt for serialized
+coordinate rounding. Initial validation errors/cancellation propagate; only the
+specific too-small-image sentinel establishes the invalid low-budget bound.
+Serial/nested images amplify budget reductions, so direct subtraction of the
+whole story-height excess is incorrect. The bounded solver rejects nonmonotone/
+nonconvergent or impossible layouts atomically.
+Running-image SHA256 names reuse resources across callbacks; body image semantics
+remain unchanged. The PDF backend can also deduplicate identical byte assets.
+
+DOCX uses its separate producer layout and existing physical image-fit contract.
+It does not yet share this measured running-body reservation: the tight example
+exposes an oversized footer omitted by LibreOffice. Preserve that observation and
+source fixture while fixing DOCX containment; do not infer Word layout equivalence
+from native PDF success. PDF recovery retains placed content/positions/inferred
+structures; generated PDFs do not encode authored header/footer roles.
+
 ## Lists
 
 `lists.go` normalizes the legacy flat paragraph encoding without mutating callers.

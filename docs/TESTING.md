@@ -1416,3 +1416,63 @@ This narrows required bidi/context work, without completing the full goal. Full
 itemization/cross-item positioning, within-grapheme styles, other guarded scripts,
 broader source fonts/layout/running content/PDF recovery and real-export
 qualification remain unfinished. See STATUS.md for the next concrete work.
+
+## Rich PDF running stories (2026-11-24)
+
+```sh
+GOWORK=off go run ./examples/running-content
+output/qa-venv/bin/python scripts/verify_running_content.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/running-content/letterhead.sf output/running-content/letterhead-docx.sf output/running-content/letterhead-pdf.sf output/running-content/tight.sf output/running-content/tight-docx.sf output/running-content/tight-pdf.sf
+GOWORK=off go test -run 'TestPDF(RichRunning|Running)' -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFRunningRegions$' -fuzztime=2000x -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=500x -parallel=2 .
+mkdir -p output/running-content/lo
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file://"$PWD"/output/running-content/lo-profile --headless --convert-to pdf --outdir output/running-content/lo output/running-content/letterhead.docx output/running-content/tight.docx
+output/qa-venv/bin/python scripts/verify_running_content.py --office
+pdftoppm -f 2 -l 3 -scale-to 700 -png output/running-content/letterhead.pdf output/running-content/native-poppler
+pdftoppm -f 2 -l 2 -scale-to 700 -png -singlefile output/running-content/lo/letterhead.pdf output/running-content/lo/letterhead-poppler2
+```
+
+The new native example is four letterhead pages plus one tight-image page.
+Independent pypdf/MuPDF/Pillow checks eleven exact RGBA placements, reused running
+resources, measured body/note containment, merged/nested table borders, physical
+font/size/color, per-page URI relationships and real footnote targets. python-docx
+and original XML verify merged/nested tables, row-prefix flags, media and scoped
+hyperlink parts; exact source SF survives letterhead DOCX reimport. Six files/925
+nodes pass actual ProseMirror. PDF recovery preserves all eleven placed rasters
+with positions; inferred grids remain explicitly inferred and repeated content
+is not promoted to authored running roles.
+
+Five native pages and three LibreOffice-rendered DOCX pages were visually
+inspected, with additional Poppler page rendering. LibreOffice's two-page
+letterhead retains all thirty rows, running tokens, five image placements and
+note content. It ignores the table-cell paragraph-start property. The native
+letterhead contains a sparse note-only continuation page. Tight native PDF retains
+both images; tight.docx fits each independently to 21.5×172pt and LibreOffice
+paints only one. The verifier records expected two/observed one and unqualified
+status; this is an open DOCX containment/producer gap, not a changed oracle or
+passing fidelity assertion. Source SF's preferred dimensions are preserved; the
+DOCX reimport dimension normalization is separately verified and documented.
+
+The first valid-image fuzz harness permitted ErrUnsupported. Strengthening it to
+require actual successful output exposed cancellation of two fitted edges leaving
+a 15.4pt line a few ulps taller than the body. The .001pt guard and deterministic
+three-page/six-image regression fix it; bounded budget bisection additionally
+handles amplified height changes from serial/nested images. Their authored
+six-placement test requires successful output and source immutability; the strict final campaign completes 2,000
+executions. It is a short robustness/layout sample, not exhaustive acceptance.
+Malformed-PDF fuzz completes 500 executions. Existing content/corpus oracles remain
+unchanged. The CGO-disabled CLI also converts letterhead.sf to DOCX/PDF and extracts both
+back to SF: exact DOCX tree equality and matching native PDF operator streams pass.
+Required full checks and refreshed regression results are recorded in
+verification.json and ignored output/running-* logs. Source is still pure Go;
+Python/LibreOffice/Poppler/ProseMirror are optional developer QA only.
+
+Final full checks: library/CLI/bidi tests 7.065s/0.797s/2.685s; race
+96.015s/2.065s/14.199s. Vet/module verification and CGO-disabled CLI build pass.
+The final strict-running fuzz is 2,000 executions in 10.558s package time;
+malformed PDF is 500 in 2.690s. Default shaping, paint context, typography,
+bidi/context, repeating headers, image-fit, table-continuation, notes, text styles
+and independent PDF-style recovery regressions pass. Corpus: 51 files/9,031 SF
+nodes and 28/28 Poppler text comparisons pass. git diff --check passes. Existing
+fixtures and content oracles remain unchanged; broader acceptance remains open.

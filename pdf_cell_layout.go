@@ -2,6 +2,8 @@ package manydoc
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"errors"
 	"fmt"
 	"math"
 
@@ -9,9 +11,11 @@ import (
 )
 
 // Text/image fragments are indivisible. A table fragment can supply a smaller
-// measured page through recursive continuation. Text lines remain 14pt in the
-// compact cell/note style. Measurement has no drawing or page-admission effects.
+// measured page through recursive continuation. Text defaults to 10pt/1.4 in the
+// compact cell/note style; running stories carry their measured style.
+// Measurement has no drawing or page-admission effects.
 type pdfFragment struct {
+	TextSize    float64 // zero keeps the compact 10pt default
 	Line        pdfLine
 	Indent      float64
 	Prefix      pdfLine
@@ -106,12 +110,15 @@ func flowNoteKeys(flow []pdfFragment) []noteKey {
 	}
 	return keys
 }
+
+var errPDFImageSpace = errors.New("image container is too small")
+
 func (r *pdfRenderer) measureImage(im *Image, width, height float64) (*pdfImageLayout, error) {
 	if err := r.ctx.Err(); err != nil {
 		return nil, err
 	}
 	if im == nil || !finite(width) || width <= 0 || !finite(height) || height <= 0 {
-		return nil, fmt.Errorf("%w: no space for PDF image", ErrUnsupported)
+		return nil, fmt.Errorf("%w: no space for PDF image: %w", ErrUnsupported, errPDFImageSpace)
 	}
 	config, kind, err := decodeOutputImage(r.ctx, im.Data, r.validatedImages)
 	if err != nil {
@@ -125,7 +132,7 @@ func (r *pdfRenderer) measureImage(im *Image, width, height float64) (*pdfImageL
 		return nil, err
 	}
 	if fmt.Sprintf("%.5f", iw) == "0.00000" || fmt.Sprintf("%.5f", ih) == "0.00000" {
-		return nil, fmt.Errorf("%w: fitted PDF image is below coordinate precision", ErrUnsupported)
+		return nil, fmt.Errorf("%w: fitted PDF image is below coordinate precision: %w", ErrUnsupported, errPDFImageSpace)
 	}
 	return &pdfImageLayout{im, kind, iw, ih}, nil
 }
@@ -133,14 +140,36 @@ func (r *pdfRenderer) drawImage(im *pdfImageLayout, x, y float64) error {
 	if err := r.ctx.Err(); err != nil {
 		return err
 	}
-	r.images++
-	name := fmt.Sprintf("image%d", r.images)
-	r.pdf.RegisterImageOptionsReader(name, gofpdf.ImageOptions{ImageType: im.kind}, bytes.NewReader(im.image.Data))
+	name := ""
+	var digest [32]byte
+	if r.paintingRunning {
+		digest = sha256.Sum256(im.image.Data)
+		name = r.runningImages[digest]
+	}
+	if name == "" {
+		r.images++
+		name = fmt.Sprintf("image%d", r.images)
+		r.pdf.RegisterImageOptionsReader(name, gofpdf.ImageOptions{ImageType: im.kind}, bytes.NewReader(im.image.Data))
+		if r.paintingRunning {
+			if r.runningImages == nil {
+				r.runningImages = make(map[[32]byte]string)
+			}
+			r.runningImages[digest] = name
+		}
+	}
 	r.pdf.ImageOptions(name, x, y, im.width, im.height, false, gofpdf.ImageOptions{ImageType: im.kind}, 0, "")
 	return r.pdf.Error()
 }
 
+type pdfFlowStyle struct {
+	size, leading float64
+	running       bool
+}
+
 func (r *pdfRenderer) cellFlow(bs []Block, width, indent, height float64) ([]pdfFragment, error) {
+	return r.cellFlowStyle(bs, width, indent, height, pdfFlowStyle{size: 10, leading: 1.4})
+}
+func (r *pdfRenderer) cellFlowStyle(bs []Block, width, indent, height float64, style pdfFlowStyle) ([]pdfFragment, error) {
 	if !finite(width) || width <= indent {
 		return nil, fmt.Errorf("%w: PDF cell indentation/padding leaves no content width", ErrUnsupported)
 	}
@@ -162,16 +191,16 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent, height float64) ([]pdf
 					runs[i].Bold = true
 				}
 			}
-			lines, err := r.linesDirection(runs, width-indent, 10, b.Direction)
+			lines, err := r.linesDirection(runs, width-indent, style.size, b.Direction)
 			if err != nil {
 				return nil, err
 			}
 			for _, line := range lines {
-				flow = append(flow, pdfFragment{Line: line, Indent: indent, Height: pdfLineHeight(line, 10, 1.4)})
+				flow = append(flow, pdfFragment{Line: line, Indent: indent, TextSize: style.size, Height: pdfLineHeight(line, style.size, style.leading)})
 			}
 		case ListBlock:
 			for index, item := range b.Items {
-				marker, step, err := r.listMarker(b, index, width-indent, 10)
+				marker, step, err := r.listMarker(b, index, width-indent, style.size)
 				if err != nil {
 					return nil, err
 				}
@@ -179,7 +208,7 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent, height float64) ([]pdf
 				if item.Blocks[0].Direction == "rtl" {
 					childWidth, childIndent, prefixX = width-step, indent, width-pdfAdvance(marker)
 				}
-				children, err := r.cellFlow(item.Blocks, childWidth, childIndent, height)
+				children, err := r.cellFlowStyle(item.Blocks, childWidth, childIndent, height, style)
 				if err != nil {
 					return nil, err
 				}
@@ -193,7 +222,7 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent, height float64) ([]pdf
 			}
 			flow = append(flow, pdfFragment{Image: im, Indent: indent, Height: im.height + 8})
 		case Table:
-			plan, err := r.measureTable(b, width-indent, height-8)
+			plan, err := r.measureTableStyle(b, width-indent, height-8, style)
 			if err != nil {
 				return nil, err
 			}
@@ -209,7 +238,7 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent, height float64) ([]pdf
 		}
 	}
 	if len(flow) == 0 {
-		flow = append(flow, pdfFragment{Height: 14})
+		flow = append(flow, pdfFragment{TextSize: style.size, Height: style.size * style.leading})
 	}
 	return flow, nil
 }
@@ -234,18 +263,32 @@ func (r *pdfRenderer) drawFragment(f pdfFragment, x, y float64) error {
 			return err
 		}
 	}
-	r.drawLine(f.Line, x+f.Indent, y, 10)
+	size := f.TextSize
+	if size == 0 {
+		size = 10
+	}
+	r.drawLine(f.Line, x+f.Indent, y, size)
 	if len(f.Prefix) > 0 {
-		r.drawLine(f.Prefix, x+f.PrefixX, y, 10)
+		r.drawLine(f.Prefix, x+f.PrefixX, y, size)
 	}
 	return r.pdf.Error()
 }
 
 func (r *pdfRenderer) measureTable(b Block, width, height float64) (*pdfTableLayout, error) {
-	return r.measureTableHeaderBudget(b, width, height, height, math.Inf(1))
+	return r.measureTableStyle(b, width, height, pdfFlowStyle{size: 10, leading: 1.4})
+}
+func (r *pdfRenderer) measureTableStyle(b Block, width, height float64, style pdfFlowStyle) (*pdfTableLayout, error) {
+	if style.running {
+		// The whole story repeats; continuation-prefix admission is inapplicable.
+		b.Rows = append([]Row(nil), b.Rows...)
+		for i := range b.Rows {
+			b.Rows[i].RepeatHeader = false
+		}
+	}
+	return r.measureTableHeaderBudget(b, width, height, height, math.Inf(1), style)
 }
 
-func (r *pdfRenderer) measureTableHeaderBudget(b Block, width, height, headerBudget, previousHeaderHeight float64) (*pdfTableLayout, error) {
+func (r *pdfRenderer) measureTableHeaderBudget(b Block, width, height, headerBudget, previousHeaderHeight float64, style pdfFlowStyle) (*pdfTableLayout, error) {
 	g, err := tableGrid(b.Rows)
 	if err != nil {
 		return nil, err
@@ -291,7 +334,7 @@ func (r *pdfRenderer) measureTableHeaderBudget(b Block, width, height, headerBud
 				cellHeight -= 26
 			} // one compact body line plus padding
 		}
-		flow, err := r.cellFlow(b.Rows[p.Row].Cells[p.Cell].Blocks, plan.unit*float64(p.ColSpan)-12, 0, cellHeight)
+		flow, err := r.cellFlowStyle(b.Rows[p.Row].Cells[p.Cell].Blocks, plan.unit*float64(p.ColSpan)-12, 0, cellHeight, style)
 		if err != nil {
 			return nil, err
 		}
@@ -354,7 +397,7 @@ func (r *pdfRenderer) measureTableHeaderBudget(b Block, width, height, headerBud
 			if plan.offsets[headers] >= previousHeaderHeight-1e-7 || headerBudget-excess <= 0 {
 				return nil, fmt.Errorf("%w: repeating table header exceeds full container height", ErrUnsupported)
 			}
-			return r.measureTableHeaderBudget(b, width, height, headerBudget-excess, plan.offsets[headers])
+			return r.measureTableHeaderBudget(b, width, height, headerBudget-excess, plan.offsets[headers], style)
 		}
 		if headers < len(b.Rows) {
 			hg := pdfTableGroup{start: 0, end: headers, first: 0, last: plan.headerLast}
@@ -382,7 +425,7 @@ func (r *pdfRenderer) measureTableHeaderBudget(b Block, width, height, headerBud
 				if header.height >= previousHeaderHeight-1e-7 || headerBudget-excess <= 0 {
 					return nil, fmt.Errorf("%w: repeating header leaves no legal body fragment", ErrUnsupported)
 				}
-				return r.measureTableHeaderBudget(b, width, height, headerBudget-excess, header.height)
+				return r.measureTableHeaderBudget(b, width, height, headerBudget-excess, header.height, style)
 			}
 		}
 	}
@@ -410,7 +453,7 @@ func (r *pdfRenderer) paintTableGroup(plan *pdfTableLayout, g pdfTableGroup, x, 
 	return r.pdf.Error()
 }
 func (r *pdfRenderer) table(b Block, width, x float64) error {
-	plan, err := r.measureTable(b, width, r.height-2*r.margin)
+	plan, err := r.measureTable(b, width, r.bodyHeight())
 	if err != nil {
 		return err
 	}
@@ -419,7 +462,7 @@ func (r *pdfRenderer) table(b Block, width, x float64) error {
 		if err != nil {
 			return err
 		}
-		if g.breaks || g.height+minimum > r.height-2*r.margin {
+		if g.breaks || g.height+minimum > r.bodyHeight() {
 			if err := r.continueTableGroup(plan, g, x); err != nil {
 				return fmt.Errorf("PDF table row group %d-%d: %w", g.start+1, g.end, err)
 			}

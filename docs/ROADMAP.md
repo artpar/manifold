@@ -80,3 +80,12 @@ boundaries, with fourteen native contextual vectors and seven actual two-font
 rows. Next extend full itemization/cross-item positioning and within-grapheme
 styles, then broaden script/font/producer coverage. Do not regress decimal note
 labels' independent LTR glyph direction at RTL anchors.
+
+
+Rich PDF header/footer stories now support merged/nested tables, images, lists,
+links and reserved body/note bounds. Next fix independently reproduced oversized
+DOCX running-image containment (tight.docx has two source placements; LibreOffice
+paints one), preserving the fixture and actual observations. Then add asymmetric
+page margins/distances and section-specific stories through SF/model/import/export.
+Qualify the sparse native note-only page and producer cell-break differences,
+alongside the remaining script/font/PDF-recovery/real-export acceptance work.

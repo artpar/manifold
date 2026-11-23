@@ -185,7 +185,7 @@ trees within the overall nesting bound; PDF supports them while indentation
 leaves measurable text space. PDF rendering uses hanging item indentation,
 wraps/paginates item text and nested content, and measures list indentation and
 markers inside rich table cells. Images and nested tables use measured fragments;
-richer running content remains unfinished.
+PDF running stories now use the same measurement with their compact style.
 
 ## Table span semantics
 
@@ -454,3 +454,23 @@ NFC/HB/visual indices. Nonzero-level logical carriers expose existing render_mod
 3, replacement_span_bounds and invisible-text diagnostics. pdf_bidi_spacing warns
 when geometric gaps are not inferred between logical bidi spans. Unsupported
 scripts/contexts and PDF inferred structure/note recovery remain explicit open work.
+
+
+## Running-story rendering without a second schema
+
+Existing doc.attrs.headers/footers block arrays now render rich tables/merged
+cells, images, lists and links in native PDF. Default text is 8pt/1.25; semantic
+headings are bold. The renderer measures immutable stories, expands their body
+exclusion area, fits competing image preferences and repeats them on every page.
+Canonical nodes/assets/dimensions/row-prefix flags remain unchanged; no schema
+revision or new editor representation is introduced. Page controls in running
+stories reject, and existing graph rules forbid note anchors there. Page geometry
+is still symmetric/single-section. DOCX independently emits its standard parts.
+
+A native PDF reimport retains placed text/assets and page geometry with existing
+explicit/inferred provenance; it must not label repeated untagged content as
+source-authored headers/footers. The letterhead example exactly preserves SF
+through DOCX. Tight oversized image preferences return physical DOCX dimensions
+per the existing rendered-format contract, and LibreOffice omits one of its two
+placements. This remains required DOCX containment/producer work, separately
+recorded from successful native PDF fitting.

@@ -112,7 +112,11 @@ type pdfRenderer struct {
 	pdf                      *gofpdf.Fpdf
 	width, height, margin, y float64
 	images                   int
-	headers, footers         []Block
+	header, footer           *pdfRunningStory
+	content                  *pdfBodyBounds
+	paintingRunning          bool
+	minimumBody              float64
+	runningImages            map[[32]byte]string
 	notes                    *noteCatalog
 	noteLinks                map[noteKey]int
 	seenFootnotes            map[noteKey]bool
@@ -145,7 +149,7 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 	p.SetTitle(d.Metadata.Title, true)
 	p.SetAuthor(d.Metadata.Author, true)
 	p.SetSubject(d.Metadata.Subject, true)
-	r := &pdfRenderer{ctx: ctx, pdf: p, width: w, height: h, margin: m, y: m, headers: d.Headers, footers: d.Footers, validatedImages: make(outputImageCache)}
+	r := &pdfRenderer{ctx: ctx, pdf: p, width: w, height: h, margin: m, y: m, validatedImages: make(outputImageCache)}
 	r.fontMap = map[string]string{}
 	for from, to := range fontMap {
 		if from == "" || to == "" {
@@ -178,17 +182,19 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 	for _, key := range notes.order {
 		r.noteLinks[key] = p.AddLink()
 	}
-	// Headers and footers use an explicit small-text contract to avoid recursive
-	// pagination or dropping nontext content.
-	for _, blocks := range [][]Block{d.Headers, d.Footers} {
-		for _, b := range blocks {
-			if (b.Kind != Paragraph && b.Kind != Heading) || b.List != "" || b.PageBreakBefore {
-				return fmt.Errorf("%w: PDF header/footer must contain paragraphs", ErrUnsupported)
-			}
+	if len(d.Headers) > 0 || len(d.Footers) > 0 {
+		minimum, err := r.minimumRunningBody(d.Blocks)
+		if err != nil {
+			return err
 		}
+		r.minimumBody = minimum
 	}
-	p.SetHeaderFunc(func() { r.y = m; r.headerFooter(d.Headers, m/2) })
-	p.SetFooterFunc(func() { r.headerFooter(d.Footers, h-m/2) })
+	if err := r.prepareRunning(d.Headers, d.Footers, len(d.Blocks) > 0); err != nil {
+		return err
+	}
+	p.SetHeaderFunc(func() { r.y = r.bodyTop(); r.paintRunning(r.header) })
+	p.SetFooterFunc(func() { r.paintRunning(r.footer) })
+
 	p.AddPage()
 	if err := r.blocks(d.Blocks, w-2*m, m); err != nil {
 		return err
@@ -222,25 +228,6 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 	_, err = io.Copy(out, bytes.NewReader(complete))
 	return err
 }
-func (r *pdfRenderer) headerFooter(bs []Block, y float64) {
-	header := y < r.margin
-	for _, b := range bs {
-		lines, err := r.linesDirection(b.Runs, r.width-2*r.margin, 8, b.Direction)
-		if err != nil {
-			r.pdf.SetError(err)
-			return
-		}
-		for _, line := range lines {
-			leading := pdfLineHeight(line, 8, 1.25)
-			if (header && y+leading > r.margin) || (!header && y+leading > r.height) {
-				r.pdf.SetError(fmt.Errorf("%w: PDF header/footer exceeds reserved area", ErrUnsupported))
-				return
-			}
-			r.drawLine(line, r.margin, y, 8)
-			y += leading
-		}
-	}
-}
 func (r *pdfRenderer) ensure(height float64) error { return r.ensureWithNotes(height, nil) }
 
 func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
@@ -272,7 +259,7 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 			}
 			leading := pdfLineHeight(lines[0], size, 1.4)
 			if b.Kind == Heading {
-				if err := r.ensure(math.Min(leading*2, r.height-2*r.margin)); err != nil {
+				if err := r.ensure(math.Min(leading*2, r.bodyHeight())); err != nil {
 					return err
 				}
 			}
@@ -295,7 +282,7 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 			}
 			r.y += 8
 		case Picture:
-			im, err := r.measureImage(b.Image, width, r.height-2*r.margin-8)
+			im, err := r.measureImage(b.Image, width, r.bodyHeight()-8)
 			if err != nil {
 				return err
 			}
@@ -312,7 +299,7 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 }
 
 func (r *pdfRenderer) paragraphBreakBefore(b Block) error {
-	if b.PageBreakBefore && r.y > r.margin+1e-7 {
+	if b.PageBreakBefore && r.y > r.bodyTop()+1e-7 {
 		return r.nextPage(true)
 	}
 	return nil

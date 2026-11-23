@@ -53,7 +53,7 @@ func (r *pdfRenderer) list(b Block, width, x float64) error {
 		}
 		minimum = pdfLineHeight(firstLines[0], size, 1.4)
 		if first.Kind == Heading {
-			minimum = math.Min(minimum*2, r.height-2*r.margin)
+			minimum = math.Min(minimum*2, r.bodyHeight())
 		}
 		if err := r.ensureWithNotes(minimum, lineNoteKeys(firstLines[0])); err != nil {
 			return err

@@ -14,7 +14,7 @@ current rejection behavior must not be read as an exemption from that goal.
 | DOCX read | Paragraphs/headings, family/size/RGB/auto plus bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans/repeating header prefixes, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
 | DOCX write | Paragraphs/headings/runs/links with named families/half-point sizes/RGB/auto, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, one page layout and header/footer, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
 | PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; more complex inference, internal destinations and OCR unfinished; unsupported codecs/encodings/operators reject |
-| PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, text headers/footers, linked rich footnotes/endnotes with continuation | Built-in Go coverage plus explicit supplied TTFs; qualified Hebrew/Arabic bidi below, broader scripts unfinished; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
+| PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, rich measured headers/footers, linked rich footnotes/endnotes with continuation | Built-in Go coverage plus explicit supplied TTFs; qualified Hebrew/Arabic bidi below, broader scripts unfinished; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
 | SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; richer required features remain unfinished |
 | Legacy JSON | Public model with base64 image data and diagnostics | Unknown JSON fields rejected; this is manydoc's model, not Colleaf's .vdocs schema |
 | Text | Body/table/note text; form feeds represent page breaks | Formatting and binary image data are not represented |
@@ -609,3 +609,33 @@ forms without cross-face ligatures; broader font/script/cross-item positioning
 qualification remains open. Decimal note labels keep LTR glyph direction even
 when RTL placement puts them left of the anchor. Existing explicit LTR spacing
 and controls retain their prior policy.
+
+
+## Rich PDF running content
+
+Native PDF supports formatted paragraphs/headings, links, nested explicit lists,
+PNG/JPEG images and merged/nested tables in its single header/footer pair. Running
+default text is 8pt with 1.25 leading; explicit styles/font/shaping rules apply,
+and headings are bold. The whole story repeats on body, blank and note-only
+pages. Row-prefix flags remain in SF/DOCX but do not cause extra repetition inside
+an already repeating story. No schema or public API change is needed.
+
+Short stories keep the existing half-margin anchors. Taller headers extend body
+start; taller footers move up to fit the page. All body/table/note placement honors
+that measured rectangle. Competing images scale without changing aspect/pixels;
+text sizes remain intact. The fitter reserves indivisible body/note minima and a
+.001pt rounding guard. Content that cannot fit, and page controls anywhere in a
+running story, reject atomically. Running note references still reject by the
+existing graph contract. Asymmetric distances, multiple sections, first/even/odd
+stories and fields remain unfinished required expansion, not completion exceptions.
+
+The new native example passes independent geometry/pixel/URI/note/merge checks.
+Its source letterhead survives exact SF→DOCX→SF; tight oversized image preferences
+normalize to physical dimensions on DOCX reimport, per the existing image contract.
+LibreOffice paints five letterhead image placements on two pages, versus four
+native pages with a sparse note-only continuation page. It ignores the table-cell
+paragraph start. For tight.docx it paints only one of two oversized running images;
+that DOCX containment/producer issue remains open. Native PDF paints both. Source
+PDF positions/inferred grids recover, but authored running roles are not encoded
+by the writer or claimed by the reader. Synthetic evidence is not Word-equivalent
+fidelity or a representative real-export corpus.

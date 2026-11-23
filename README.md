@@ -259,3 +259,10 @@ The bidi example also writes context.sf/docx/pdf with regular/bold DejaVu faces
 and font/size/language/transparent-control boundaries. Additional native QA:
 `output/qa-venv/bin/python scripts/verify_bidi_context.py`. Item context is supplied;
 full itemization, cross-item positioning and within-grapheme styles remain open.
+
+`GOWORK=off go run ./examples/running-content` demonstrates rich native PDF
+headers/footers with merged/nested tables, links, images, lists and measured body/
+note containment. Optional QA: `output/qa-venv/bin/python scripts/verify_running_content.py`.
+The source SF stays unchanged. The example README and compatibility notes record
+the distinct native/LibreOffice pagination and an open oversized DOCX running-image
+containment issue; this milestone does not complete the broader rich-document goal.

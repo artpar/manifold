@@ -21,7 +21,65 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: paragraph bidi reaches native PDF layout
+## Latest milestone: rich PDF running stories reserve body space
+
+- Native PDF now measures and repeats paragraphs/headings, formatted links,
+  explicit/nested lists, original PNG/JPEG images and merged/nested tables in
+  headers/footers. Shared immutable cell flows carry the compact running default
+  (8pt/1.25); headings apply their semantic bold. Existing small text positions
+  remain unchanged when they fit. No public API/SF/schema/module change.
+- Headers start at half the symmetric margin; larger stories expand the body top.
+  Footers retain the old half-margin start when short, otherwise move up to fit
+  the page. Body, nested table, note-start and note-continuation admission all use
+  the measured body rectangle. Running content never paginates recursively.
+- Competing running images shrink proportionally to their measured containers,
+  accounting for ancestor table padding and indivisible body/note needs. Bounded
+  budget bisection also handles several serial/nested pictures. Text is
+  never reduced. A .001pt body-floor guard prevents fitted-edge rounding from
+  rejecting a feasible line. The initial fuzz harness allowed ErrUnsupported;
+  strengthening it found that real defect. Valid image/text fuzz cases now require
+  successful output. Oversize text/page controls reject atomically, not disappear.
+- Running images reuse resources across pages/stories; source assets, original
+  preferred dimensions, row-prefix flags and SF trees remain unchanged. The whole
+  running table repeats, so its row-prefix continuation metadata has no separate
+  pagination effect. Running note anchors remain outside the existing contract.
+- New examples/running-content exercises a merged/nested letterhead, URI links,
+  footer list/images, body table continuation, an explicit cell paragraph start,
+  and a split rich footnote. Native output is four pages plus one tight-image
+  page. Independent pypdf/MuPDF/python-docx/XML checks cover eleven exact RGBA
+  placements, geometry, links/targets, merges, roles and SF/DOCX relationships.
+  Actual ProseMirror checks six SF files/925 nodes. The CGO-disabled CLI
+  converts SF to DOCX/PDF and extracts both back to checked SF. Five native pages
+  and three LibreOffice-rendered DOCX pages were visually inspected. Native page-2/3 and
+  LibreOffice page-2 also have Poppler rendering checks.
+- The letterhead retains its exact source SF after DOCX reimport; oversized image
+  preferences in tight.docx return the documented physical fitted dimensions.
+  LibreOffice renders letterhead on two pages, retaining its five image placements
+  and content, but ignores the cell paragraph start. It paints only one of two
+  oversized tight.docx running images. That existing DOCX containment/producer
+  gap remains required work; it is explicitly recorded, not qualified as passing.
+  Native PDF retains both. A sparse native note-continuation-only page also remains
+  a pagination qualification gap. Neither output establishes Word equivalence.
+- Full tests pass (library 7.065s, CLI 0.797s, bidi 2.685s); race passes
+  (96.015s/2.065s/14.199s). Vet/module verification/CGO-disabled CLI build pass.
+  Malformed PDF fuzz completes 500 executions; see TESTING.md and verification.json
+  for results. The stricter valid-running fit fuzz completed 2,000 successful executions. Default shaping,
+  paint context, bidi/context, typography, repeating headers, image fitting, body
+  continuation, notes, text/PDF styles and 51-file/9,031-node corpus plus 28
+  Poppler comparisons pass without weakened content or fixture oracles.
+
+The full goal remains **incomplete**, with no external blocker. Next fix DOCX
+running-story image containment and qualify it in independent producers, then
+extend page settings (asymmetric margins/distances/sections) through SF/DOCX/PDF.
+Remaining script/itemization/within-grapheme/source-font, PDF recovery/color and
+representative real-export work stays required. Previous checkpoint: 233fd8d.
+Next concrete commands:
+GOWORK=off go run ./examples/running-content;
+output/qa-venv/bin/python scripts/verify_running_content.py --office;
+rg -n 'contentHeight|fitImageBox|header|footer' docx_write.go;
+GOWORK=off go test -run 'TestPDF(RichRunning|Running)' .
+
+## Earlier milestone: paragraph bidi reaches native PDF layout
 
 - PDF layout now carries original scalar ranges through NFC glyph shaping, note
   substitution, graphemes, wrapping and final-line re-shaping. P1 separates hard

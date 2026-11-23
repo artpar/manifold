@@ -2017,7 +2017,7 @@
         "docx_unicode.docx"
       ],
       "before": "one Cambria span",
-      "after": "Cambria text interleaved with declared \uff2d\uff33 \u660e\u671d Chinese and supplementary spans",
+      "after": "Cambria text interleaved with declared ＭＳ 明朝 Chinese and supplementary spans",
       "node_increase": 4,
       "fixture_or_content_oracle_changed": false,
       "comparison": "output/script-font-corpus-differences.json"
@@ -2154,7 +2154,7 @@
     "fixture_oracle_changed": false,
     "external_blocker": null
   },
-  "latest_milestone": "default_text_shaping",
+  "latest_milestone": "rich_pdf_running_content",
   "language_direction_ltr_shaping": {
     "date": "2026-11-23",
     "goal_complete": false,
@@ -2499,7 +2499,7 @@
     ],
     "external_blocker": null
   },
-  "latest_evidence": "paragraph_bidi_layout_2026_11_24",
+  "latest_evidence": "rich_pdf_running_content_2026_11_24",
   "paragraph_bidi_levels_2026_11_24": {
     "goal_complete": false,
     "previous_checkpoint": "658a5b0",
@@ -2728,5 +2728,152 @@
       "rtl-shaping.json": "228c9fed946ec3b8644b68f45ed6d8256738dcb54cef397da15eccf6233e6c4f",
       "rtl-item-context.json": "0a17e3001ca21e3ea615f88a98bd599a03e0bece575fcdf64f595262968ebcec"
     }
+  },
+  "rich_pdf_running_content_2026_11_24": {
+    "goal_complete": false,
+    "previous_checkpoint": "233fd8d",
+    "public_api_sf_schema_module_dependency_change": false,
+    "implementation": [
+      "immutable compact 8pt/1.25 running flows for paragraphs/headings/links/lists/images/merged and nested tables",
+      "measured header/footer bounds shared by body/table/note reservation and continuation",
+      "bounded monotone image-budget bisection including serial/nested images and ancestor padding",
+      "indivisible body/table/note floors with .001pt rounding guard",
+      "unchanged source SF/assets/preferences/row-prefix metadata; reusable running-image resources",
+      "atomic rejection of impossible unshrinkable running text/page controls"
+    ],
+    "tests": {
+      "rich_running_sf_docx_equality": true,
+      "exact_pixels_and_placements": true,
+      "large_body_font_heading_repeated_table_and_note_minima": true,
+      "legacy_small_text_coordinates": true,
+      "serial_nested_six_image_output_and_source_immutability": true,
+      "rounding_floor_three_pages_six_images": true,
+      "unsupported_atomic_output": true
+    },
+    "independent": {
+      "letterhead": {
+        "native_pages": 4,
+        "raster_placements": 9,
+        "exact_rgba": true,
+        "running_font_size_color": "passed",
+        "sf_docx_equal": true,
+        "pdf_recovery_positions": 9,
+        "office_pages": 2,
+        "office_raster_placements": 5
+      },
+      "tight": {
+        "native_pages": 1,
+        "raster_placements": 2,
+        "exact_rgba": true,
+        "running_font_size_color": "not applicable",
+        "sf_docx_equal": false,
+        "pdf_recovery_positions": 2,
+        "office_pages": 1,
+        "office_raster_placements": 1,
+        "office_expected_raster_placements": 2,
+        "office_qualified": false
+      }
+    },
+    "independent_summary": {
+      "readers": [
+        "pypdf 7.1.1 strict",
+        "PyMuPDF 1.28.2",
+        "python-docx 1.2.0",
+        "lxml",
+        "Pillow 13.0.0"
+      ],
+      "prosemirror_files": 6,
+      "prosemirror_nodes": 925,
+      "native_pages_visually_inspected": 5,
+      "libreoffice_pages_visually_inspected": 3,
+      "additional_poppler_pages": 3,
+      "cgo_disabled_cli": "SF to DOCX/PDF and both outputs to SF; exact letterhead DOCX tree and equal native PDF operator streams",
+      "recovered_sf": "all eleven raster placements retain pixels/page/quad provenance; untagged repeated content is not falsely promoted to authored running roles"
+    },
+    "required_checks": {
+      "tests_seconds": {
+        "github.com/artpar/manydoc": 7.065,
+        "github.com/artpar/manydoc/cmd/manydoc": 0.797,
+        "github.com/artpar/manydoc/internal/bidilevels": 2.685
+      },
+      "race_seconds": {
+        "github.com/artpar/manydoc": 96.015,
+        "github.com/artpar/manydoc/cmd/manydoc": 2.065,
+        "github.com/artpar/manydoc/internal/bidilevels": 14.199
+      },
+      "vet": "passed",
+      "module_verification": "all modules verified",
+      "cgo_disabled_cli_build": "passed; executed",
+      "git_diff_check": "passed"
+    },
+    "fuzz": {
+      "valid_running_images_require_output": {
+        "executions": 2000,
+        "package_seconds": 10.558,
+        "result": "passed"
+      },
+      "malformed_pdf": {
+        "executions": 500,
+        "package_seconds": 2.69,
+        "result": "passed"
+      },
+      "initial_harness_gap": "ErrUnsupported acceptance hid valid two-edge rounding failure; strengthened oracle and deterministic regression preserve required actual success"
+    },
+    "regressions": [
+      "default shaping",
+      "paint context",
+      "typography",
+      "paragraph bidi and cross-font item context",
+      "repeating table headers",
+      "image fitting",
+      "body table continuation",
+      "notes",
+      "rich text styles",
+      "PDF editable text styles"
+    ],
+    "corpus": {
+      "files": 51,
+      "prosemirror_nodes": 9031,
+      "poppler_matches": 28,
+      "poppler_total": 28,
+      "original_fixture_and_content_oracles_unchanged": true
+    },
+    "open_required_work": [
+      "oversized DOCX running-image containment: tight.docx has two placements, LibreOffice paints one",
+      "native sparse note-only continuation page and producer cell paragraph-start differences",
+      "asymmetric page settings/distances/sections and section-specific running stories",
+      "within-grapheme styles, full script itemization/cross-item positioning, broader font/script/producer qualification",
+      "source-font/PDF semantic/internal-link/color/image recovery expansion",
+      "representative real-export corpus and professional fidelity qualification"
+    ],
+    "commands": [
+      "GOWORK=off go test ./... -count=1",
+      "GOWORK=off go test -race ./... -count=1",
+      "GOWORK=off go vet ./...",
+      "GOWORK=off go mod verify",
+      "CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc",
+      "GOWORK=off go run ./examples/running-content",
+      "output/qa-venv/bin/python scripts/verify_running_content.py --office",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzPDFRunningRegions$' -fuzztime=2000x -parallel=2 .",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=500x -parallel=2 .",
+      "output/qa-venv/bin/python scripts/verify_structured_corpus.py",
+      "output/qa-venv/bin/python scripts/compare_pdf_text.py bin/manydoc output/running-poppler-comparison.json",
+      "git diff --check"
+    ],
+    "logs": [
+      "output/running-final3-tests.log",
+      "output/running-final3-race.log",
+      "output/running-final3-vet.log",
+      "output/running-final3-modules.log",
+      "output/running-bisection-fuzz.log",
+      "output/running-final3-malformed.log",
+      "output/running-independent.log",
+      "output/running-prosemirror.log",
+      "output/running-cli.log",
+      "output/running-layout-regressions.log",
+      "output/running-corpus-sf.log",
+      "output/running-corpus-poppler.log",
+      "output/running-pdf-styles.log"
+    ]
   }
 }

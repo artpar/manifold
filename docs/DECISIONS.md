@@ -968,3 +968,37 @@ and seven actual PDF rows now check these cases, including a genuine original
 DejaVu Sans Bold face. Its asset/license/hash are attributed; no new Go module.
 Generated decimal note labels use LTR glyph direction independently of RTL anchor
 placement; otherwise a multi-digit label can reverse. A focused 10/01 test pins it.
+
+
+## 2026-11-24: measure rich running stories before body pagination
+
+Reuse the independent cell/table/text planner for headers and footers rather
+than introduce separate drawing rules or drop non-paragraph content. Carry the
+8pt/1.25 running default through nested measurement and drawing; semantic headings
+are bold. Preserve legacy small-text anchors, grow the body exclusion rectangle
+for larger stories, and apply it consistently to body/table/note continuations.
+Whole-story repetition makes row-prefix continuation flags inapplicable there;
+clear them on temporary copies only. Page controls reject instead of recursively
+creating pages from callbacks. The existing note-reference graph restriction is
+unchanged. There is no public schema/API/module/dependency change.
+
+Fit image preferences against actual measured competition, preserving text sizes,
+source assets and canonical SF. Account for minimum body fragments and ancestor
+padding; a .001pt floor guard prevents opposing fitted edges rounding a legal
+line below its height. Strengthening the fuzz oracle from allowed unsupported
+errors to required success for feasible image/text cases found that defect.
+Keep the deterministic three-page floor test and exact content/pixel expectations.
+Use bounded monotone budget bisection: serial image heights amplify budget
+changes, making direct excess subtraction reject feasible stories. Nested/serial
+image tests require six exact placements and unchanged SF. Only a specific
+too-small-image failure establishes the invalid low-budget bound; never swallow font,
+content or cancellation errors as a layout retry.
+
+Independent source/native/producer checks remain separate. The four-page native
+letterhead has a sparse footnote-only continuation page; LibreOffice uses two pages
+and ignores a paragraph start in its table cell. Tight native PDF fits both
+running images; existing DOCX encoding fits each independently to the full body
+height, and LibreOffice paints only one of two placements. The new verifier
+records that observed omission as unqualified required work. It also verifies the
+existing rendered-format preferred-to-physical dimension normalization, not a
+false lossless image-preference round trip. No old corpus/oracle was modified.
