@@ -163,3 +163,12 @@ span evidence, handling empty vertical continuation cells and inference provenan
 Then qualify an actual supplementary CJK font and address concrete numbering,
 width/shading and layout gaps. Preserve original sources instead of normalizing
 away failures; broader corpus and every original acceptance item remain required.
+
+
+## Tagged span recovery next step
+
+Implement row-dependent painted partitions for original MQTT page 89 Table 12539,
+preserving all distinct axes and explicit continuation identities. The other 41
+omitted-span grids now recover with independently checked painted boundaries. Then
+qualify the supplementary CJK source example and continue the full acceptance work. See
+TAGGED_TABLE_SPANS.md.

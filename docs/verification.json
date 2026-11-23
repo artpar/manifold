@@ -4077,5 +4077,78 @@
       "nodes_checked": 46798,
       "marks_and_attributes": "validated with actual ProseMirror"
     }
+  },
+  "tagged_table_spans": {
+    "date": "2026-11-24",
+    "status": "reader milestone; full goal incomplete; no external blocker",
+    "original_sources_unchanged": true,
+    "evidence": {
+      "pages": 137,
+      "tables": 90,
+      "rows": 756,
+      "explicit_cell_identities": 3020,
+      "editable_origins": 3012,
+      "retained_empty_continuations": 8,
+      "inferred_tables": 41,
+      "painted_boundaries_checked": 5536,
+      "uncertain_tables": [
+        "(12539 0 R)"
+      ],
+      "limitation": "Page 89 has shifted column edges; no guessed grid. Other recovery diagnostics remain. This is not visual equivalence or full-goal completion."
+    },
+    "independent_readers": {
+      "pypdf": "7.1.1",
+      "PyMuPDF": "1.28.2"
+    },
+    "prosemirror": "passed: three-table SF sample; 964 nodes, marks and attributes; not full-source SF",
+    "checks": {
+      "go_test_all": "passed: library 14.769s; CLI 0.375s; all packages passed",
+      "go_test_race_all": "passed: library 183.787s; CLI 2.032s; all packages passed",
+      "go_vet_all": "passed",
+      "module_verify": "passed: all modules verified",
+      "cgo_disabled_darwin_arm64": "passed build and original PDF TXT extraction",
+      "cgo_disabled_linux_amd64": "passed cross-build; not executed on Linux",
+      "malformed_pdf": "passed: FuzzReadPDF 500 executions, two workers, 3.069s",
+      "ruled_grid_fuzz": "passed: FuzzPDFRuledGrid 500 executions, two workers, 3.971s",
+      "original_pdf_oracle": "exact regenerated pypdf oracle matches committed oracle",
+      "diff_check": "passed"
+    },
+    "visual": {
+      "original_pages_inspected": [
+        17,
+        25,
+        53,
+        69,
+        89
+      ],
+      "detailed_crop": "page 89 shifted-column grid; byte 4 description visibly spans bytes 5\u20137",
+      "claim": "reader geometry qualification; no generated-output or Word-equivalence claim"
+    },
+    "limitations": [
+      "page 89 Table 12539 unresolved shifted axes; three additional empty continuation cells retained explicitly",
+      "other original source diagnostics and broader required recovery/layout/font work remain",
+      "full-source pretty SF about 451 MB; provenance/codec performance remains required"
+    ],
+    "commands": [
+      "GOWORK=off go run ./examples/tagged-spans",
+      "output/qa-venv/bin/python scripts/verify_tagged_spans.py",
+      "NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/tagged-spans/sample.sf",
+      "GOWORK=off go test -run 'TestPDFTagged|TestRealPDFMQTT|TestRulingJoin' -v .",
+      "GOWORK=off go test ./...",
+      "GOWORK=off go test -race ./...",
+      "GOWORK=off go vet ./...",
+      "GOWORK=off go mod verify",
+      "CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc",
+      "CGO_ENABLED=0 GOWORK=off GOOS=linux GOARCH=amd64 go build -o bin/manydoc-linux-amd64 ./cmd/manydoc",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=500x -parallel=2 -timeout=90s",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzPDFRuledGrid$' -fuzztime=500x -parallel=2 -timeout=90s"
+    ],
+    "next_commands": [
+      "GOWORK=off go run ./examples/tagged-spans",
+      "output/qa-venv/bin/python scripts/verify_tagged_spans.py",
+      "rg -n 'ruledPDFCells|rulingCoverage' pdf_ruled_table.go"
+    ],
+    "kt": "docs/TAGGED_TABLE_SPANS.md",
+    "logs": "ignored output/tagged-spans/"
   }
 }

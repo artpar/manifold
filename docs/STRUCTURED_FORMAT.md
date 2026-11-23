@@ -606,3 +606,13 @@ of all original numbering/layout/field semantics. No schema change is introduced
 by the corpus checkpoint. Tagged PDF cells with missing spans still need
 geometry-backed inference and per-attribute/continuation provenance; original
 logical membership must remain distinguishable from inferred geometry.
+
+
+## Additive table-span provenance
+
+Cell source attributes can include `table_spans` with `colspan`/`rowspan` values
+`explicit` or `inferred`, evidence, confidence, painted bounds and empty continuation
+references (`element`, `role`, `tag`, `page`, zero-based `row`). Source content quads
+remain unchanged. Logical membership remains explicit. These values round-trip through
+SF and are validated by Go; the schema already permits the source attribute. See
+TAGGED_TABLE_SPANS.md.

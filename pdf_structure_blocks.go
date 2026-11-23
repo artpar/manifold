@@ -376,16 +376,27 @@ func (s *pdfStructureRecovery) table(n *pdfStructureNode) ([]Block, error) {
 		}
 		table.Rows = append(table.Rows, rr)
 	}
+	table.Source = sourceFromBlocks([]Block{table}, n)
+	if recovered, ok := s.recoverTableSpans(table, rows); ok {
+		table = recovered
+	}
+	if err := s.reader.ctx.Err(); err != nil {
+		return nil, err
+	}
 	grid, err := tableGrid(table.Rows)
 	if err != nil {
 		return nil, fmt.Errorf("tagged table grid: %w", err)
 	}
 	for _, slots := range grid.Slots {
 		if len(slots) != grid.Columns {
-			return nil, fmt.Errorf("tagged table rows do not cover the declared grid")
+			// PDF logical rows may omit merge attributes. Keep their explicit
+			// membership if painted evidence cannot uniquely recover the grid;
+			// do not invent empty cells or discard the table's structure/content.
+			table.Source.Evidence = "pdf_structure_tree_ragged_grid"
+			s.warn("pdf_structure_table_grid_uncertain", fmt.Sprintf("Tagged table %s has unequal default-span row widths; explicit cells and positions are retained without inventing unproven merged spans", n.id))
+			break
 		}
 	}
-	table.Source = sourceFromBlocks([]Block{table}, n)
 	return []Block{table}, nil
 }
 

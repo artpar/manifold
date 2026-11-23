@@ -51,6 +51,7 @@ type pdfStructureRecovery struct {
 	marked         map[pdfContentKey][]int
 	active, seen   map[string]bool
 	nodes          int
+	grids          map[int][]pdfGridRegion
 }
 
 func (r *pdfReader) recoverStructure(root types.Object) error {

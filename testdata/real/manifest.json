@@ -85,7 +85,7 @@
         ]
       },
       "current_conversion_evidence": {
-        "PDF_to_SF": "currently rejects: PDF logical structure: tagged table rows do not cover the declared grid. Independent pypdf/MuPDF read the original; painted borders recover the first omitted spans. This is an implementation gap, not a malformed-input oracle or a completion exemption."
+        "PDF_to_SF": "Imports all 90 tables/756 rows/3020 cell identities and roles/rows. Forty-one grids infer missing spans with separate provenance; 3012 origins plus eight empty continuation references. Page 89 Table 12539 remains explicitly uncertain with three continuation cells pending row-dependent grid recovery; other extraction diagnostics remain. Original oracles unchanged. See docs/TAGGED_TABLE_SPANS.md."
       }
     }
   ]

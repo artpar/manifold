@@ -7,6 +7,10 @@ import (
 
 const pdfRulingTolerance = .25
 
+// PDF path operands are commonly rounded to five decimal places. Keep the
+// geometric tolerance stable while allowing one such quantization unit at joins.
+const pdfRulingEpsilon = 1e-5
+
 type pdfGridRegion struct {
 	rect   pdfRulingRect
 	xs, ys []float64
@@ -88,29 +92,30 @@ func rulingCoordinates(values []float64) []float64 {
 func rulingCoverage(lines []pdfRuling, horizontal bool, pos, start, end float64) int {
 	startJoin, endJoin := pdfRulingTolerance, pdfRulingTolerance
 	for _, l := range lines {
-		if l.horizontal == horizontal || pos < l.start-pdfRulingTolerance || pos > l.end+pdfRulingTolerance {
+		if l.horizontal == horizontal || pos < l.start-pdfRulingTolerance-pdfRulingEpsilon || pos > l.end+pdfRulingTolerance+pdfRulingEpsilon {
 			continue
 		}
-		if math.Abs(l.pos-start) <= pdfRulingTolerance+1e-7 {
-			startJoin = max(startJoin, l.width/2)
+		if math.Abs(l.pos-start) <= pdfRulingTolerance+pdfRulingEpsilon {
+			startJoin = max(startJoin, l.width/2+pdfRulingTolerance)
 		}
-		if math.Abs(l.pos-end) <= pdfRulingTolerance+1e-7 {
-			endJoin = max(endJoin, l.width/2)
+		if math.Abs(l.pos-end) <= pdfRulingTolerance+pdfRulingEpsilon {
+			endJoin = max(endJoin, l.width/2+pdfRulingTolerance)
 		}
 	}
 	var intervals [][2]float64
 	for _, l := range lines {
-		if l.horizontal == horizontal && math.Abs(l.pos-pos) <= pdfRulingTolerance+1e-7 && l.end > start && l.start < end {
-			if l.start >= end-max(endJoin, l.width/2)-1e-7 || l.end <= start+max(startJoin, l.width/2)+1e-7 {
+		if l.horizontal == horizontal && math.Abs(l.pos-pos) <= pdfRulingTolerance+pdfRulingEpsilon && l.end > start && l.start < end {
+			if l.start >= end-max(endJoin, l.width/2)-pdfRulingEpsilon || l.end <= start+max(startJoin, l.width/2)+pdfRulingEpsilon {
 				continue
 			}
 			// At an intersection, the crossing stroke contributes half its
-			// thickness. Writer exports commonly stop centerlines at that edge.
+			// thickness, in addition to the coordinate tolerance. Writer exports
+			// commonly stop centerlines at that edge with separately rounded caps.
 			a, b := max(start, l.start), min(end, l.end)
-			if a <= start+max(startJoin, l.width/2)+1e-7 {
+			if a <= start+max(startJoin, l.width/2)+pdfRulingEpsilon {
 				a = start
 			}
-			if b >= end-max(endJoin, l.width/2)-1e-7 {
+			if b >= end-max(endJoin, l.width/2)-pdfRulingEpsilon {
 				b = end
 			}
 			intervals = append(intervals, [2]float64{a, b})
@@ -123,7 +128,7 @@ func rulingCoverage(lines []pdfRuling, horizontal bool, pos, start, end float64)
 			continue
 		}
 		covered = true
-		if v[0] > reach+pdfRulingTolerance+1e-7 {
+		if v[0] > reach+pdfRulingTolerance+pdfRulingEpsilon {
 			return -1
 		}
 		reach = max(reach, v[1])

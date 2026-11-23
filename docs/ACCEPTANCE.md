@@ -183,3 +183,13 @@ advances the real-corpus requirement without claiming four-path completion: its
 paired PDF still fails tagged-span recovery, and native output still needs a
 font for its supplementary CJK character. Source formatting/numbering and visual
 normalization differences remain explicit. Original files/oracles are retained.
+
+
+## 2026-11-24 Tagged spans: verified progress, incomplete goal
+
+The original MQTT PDF now imports with every table/cell identity/role/row preserved.
+Forty-one grids infer missing spans with separate provenance; eight empty continuation
+tags survive on origins. Independent readers audit all memberships and 5,536 painted
+cell sides. Page 89 remains uncertain with three visible-merge continuations still
+represented as explicit cells. Broader source/font/style/link/content/asset recovery and
+all remaining acceptance work stay required; see TAGGED_TABLE_SPANS.md.

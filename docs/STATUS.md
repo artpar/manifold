@@ -21,7 +21,44 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: original Word corpus and independent structural oracles
+## Latest milestone: tagged membership with inferred painted spans
+
+Native import now reads the original 137-page MQTT PDF rather than rejecting its
+first tagged table. All 90 table identities, 756 rows and 3,020 cell identities/
+roles/row memberships survive. Forty-one tables gain geometry-backed missing
+spans; 3,012 editable origins plus eight empty continuation references account
+for every original logical cell. Explicit attributes remain authoritative.
+
+Cell `SourceInfo.TableSpans` distinguishes inferred/explicit span attributes from
+explicit logical membership, retaining painted bounds, confidence and continuation
+IDs/tags/pages/original zero-based rows. Ambiguous/incomplete geometry retains the
+original logical rows/cells and positions with `pdf_structure_table_grid_uncertain`;
+it neither pads nor guesses a grid. Malformed explicit spans still reject.
+
+Independent pypdf/MuPDF checks verify all memberships and 5,536 painted cell sides.
+The selected SF sample passes actual ProseMirror (964 nodes/marks/attributes).
+Five original pages and a detailed page-89 table crop were visually inspected.
+Tests, race, vet, 500 malformed-PDF and 500 valid-grid fuzz executions, module
+verification, and host/Linux CGO-disabled builds pass; Linux was cross-built only.
+[TAGGED_TABLE_SPANS.md](TAGGED_TABLE_SPANS.md) records design, commands, evidence
+and precise unfinished work; final checks are recorded in verification.json.
+
+The full goal remains **incomplete**, with no external blocker. Page 89 Table
+12539 has small but real shifted column boundaries; its 10-row grid is uncertain
+and three additional empty vertical continuation tags remain explicit cells.
+The eleven raw Word continuation cells must not be confused with the eight PDF
+continuations currently coalesced. Do not broaden snapping or alter source/oracles
+to force success. Next resolve row-dependent border partitions, then qualify the
+actual supplementary CJK example/font and remaining numbering/shading/widths,
+source text/style/link recovery and broader layout/corpus work. Large full-source
+pretty SF is about 451 MB; bounded representation/codec performance also needs work.
+
+Next commands: `GOWORK=off go run ./examples/tagged-spans`;
+`output/qa-venv/bin/python scripts/verify_tagged_spans.py`;
+`GOWORK=off go test -run 'TestPDFTagged|TestRealPDFMQTT|TestRulingJoin' -v .`;
+`rg -n 'ruledPDFCells|rulingCoverage' pdf_ruled_table.go`.
+
+## Previous milestone: original Word corpus and independent structural oracles
 
 - The real corpus now includes the unmodified authoritative OASIS MQTT 5.0 Word
   source and its paired 137-page Microsoft Word 2016 PDF. Original copyright and

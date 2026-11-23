@@ -32,34 +32,57 @@ type SourceRegion struct {
 	Quad Quad `json:"quad"`
 }
 
+// SourceElementReference retains an explicit logical cell that was an empty
+// continuation of a geometrically recovered merged cell.
+type SourceElementReference struct {
+	Row     int    `json:"row"` // zero-based row in the explicit table
+	Element string `json:"element"`
+	Role    string `json:"role"`
+	Tag     string `json:"tag"`
+	Page    int    `json:"page,omitempty"`
+}
+
+// TableSpanSource separates explicit logical membership from recovered spans.
+// ColSpan and RowSpan are "explicit" or "inferred". Bounds records the painted
+// cell boundary; SourceInfo.Quad continues to record its content bounds.
+type TableSpanSource struct {
+	ColSpan       string                   `json:"colspan"`
+	RowSpan       string                   `json:"rowspan"`
+	Evidence      string                   `json:"evidence"`
+	Confidence    float64                  `json:"confidence"`
+	Bounds        Quad                     `json:"bounds"`
+	Continuations []SourceElementReference `json:"continuations,omitempty"`
+}
+
 // SourceInfo records provenance, not an alternative copy of content. Quads use
 // advance/font metrics, not glyph ink outlines. Precision discloses estimates.
 // Confidence is a heuristic ranking, not a calibrated probability.
 type SourceInfo struct {
-	Format             Format         `json:"format"`
-	Page               int            `json:"page,omitempty"`
-	Object             string         `json:"object,omitempty"`
-	Stream             string         `json:"stream,omitempty"`
-	Role               string         `json:"role,omitempty"`
-	Element            string         `json:"element,omitempty"`
-	Order              int            `json:"order,omitempty"`
-	Quad               *Quad          `json:"quad,omitempty"`
-	Baseline           *[2]Point      `json:"baseline,omitempty"`
-	Matrix             *Matrix        `json:"matrix,omitempty"`
-	Regions            []SourceRegion `json:"regions,omitempty"`
-	Font               string         `json:"font,omitempty"`
-	FontFamilyEvidence string         `json:"font_family_evidence,omitempty"`
-	ColorSpace         string         `json:"color_space,omitempty"`
-	ColorComponents    []float64      `json:"color_components,omitempty"`
-	FontSize           float64        `json:"font_size,omitempty"`
-	MCID               *int           `json:"mcid,omitempty"`
-	Tag                string         `json:"tag,omitempty"`
-	Structure          string         `json:"structure"` // explicit, inferred or unstructured
-	Evidence           string         `json:"evidence"`
-	Confidence         float64        `json:"confidence"`
-	Precision          string         `json:"precision,omitempty"`
-	Label              string         `json:"label,omitempty"`
-	RenderMode         int            `json:"render_mode,omitempty"`
+	Format             Format           `json:"format"`
+	Page               int              `json:"page,omitempty"`
+	Object             string           `json:"object,omitempty"`
+	Stream             string           `json:"stream,omitempty"`
+	Role               string           `json:"role,omitempty"`
+	Element            string           `json:"element,omitempty"`
+	Order              int              `json:"order,omitempty"`
+	Quad               *Quad            `json:"quad,omitempty"`
+	Baseline           *[2]Point        `json:"baseline,omitempty"`
+	Matrix             *Matrix          `json:"matrix,omitempty"`
+	Regions            []SourceRegion   `json:"regions,omitempty"`
+	Font               string           `json:"font,omitempty"`
+	FontFamilyEvidence string           `json:"font_family_evidence,omitempty"`
+	ColorSpace         string           `json:"color_space,omitempty"`
+	ColorComponents    []float64        `json:"color_components,omitempty"`
+	FontSize           float64          `json:"font_size,omitempty"`
+	MCID               *int             `json:"mcid,omitempty"`
+	Tag                string           `json:"tag,omitempty"`
+	Structure          string           `json:"structure"` // explicit, inferred or unstructured
+	Evidence           string           `json:"evidence"`
+	Confidence         float64          `json:"confidence"`
+	Precision          string           `json:"precision,omitempty"`
+	Label              string           `json:"label,omitempty"`
+	RenderMode         int              `json:"render_mode,omitempty"`
+	TableSpans         *TableSpanSource `json:"table_spans,omitempty"`
 }
 
 // PDFPage records physical page boundaries even when a logical tagged paragraph
@@ -157,6 +180,33 @@ func (s *SourceInfo) validate(pages []PDFPage) error {
 		}
 		if err := check(region.Quad); err != nil {
 			return err
+		}
+	}
+	if span := s.TableSpans; span != nil {
+		if s.Page < 1 || s.Structure != "explicit" || (s.Role != "TD" && s.Role != "TH") {
+			return fmt.Errorf("table span provenance requires a page-local explicit cell")
+		}
+		if (span.ColSpan != "explicit" && span.ColSpan != "inferred") || (span.RowSpan != "explicit" && span.RowSpan != "inferred") || span.Evidence != "painted_grid_adjacency" || !finite(span.Confidence) || span.Confidence < 0 || span.Confidence > 1 {
+			return fmt.Errorf("invalid table span provenance")
+		}
+		if err := check(span.Bounds); err != nil {
+			return err
+		}
+		x0, y0, x1, y1 := quadBounds(span.Bounds)
+		if x1 <= x0 || y1 <= y0 || len(span.Continuations) > 1000 {
+			return fmt.Errorf("invalid table span bounds or continuation count")
+		}
+		seen := map[string]bool{s.Element: true}
+		for _, ref := range span.Continuations {
+			if ref.Row < 0 || ref.Row > 1000 || ref.Element == "" || seen[ref.Element] || (ref.Role != "TD" && ref.Role != "TH") || ref.Tag == "" || ref.Page < 0 || (ref.Page != 0 && ref.Page != s.Page) {
+				return fmt.Errorf("invalid or duplicate table continuation reference")
+			}
+			seen[ref.Element] = true
+			for _, value := range []string{ref.Element, ref.Role, ref.Tag} {
+				if err := validateString(value); err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil

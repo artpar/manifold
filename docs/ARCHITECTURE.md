@@ -871,9 +871,19 @@ and default spans, not inferred geometry. Its 90 tables/3,020 cells include empt
 vertical continuation cells omitted from Word origin lists. Forty-two tables lack
 span attributes, making current strict rectangular-grid recovery fail. Existing
 painted-grid inference demonstrates recovery on an untagged local page-17 control;
-merging that geometric evidence with authoritative tagged membership remains the
-next required implementation. Missing span attributes must not be confused with
+merging that geometric evidence with authoritative tagged membership is now
+implemented for unique page-local grids (see TAGGED_TABLE_SPANS.md). Missing
+span attributes must not be confused with
 invalid PDF objects, nor should the whole logical table be discarded to obtain a
-passing plain-text extraction. Cell/attribute provenance and empty continuations
-need explicit treatment. Native output also needs a font covering actual U+2A6D4;
+passing plain-text extraction. Cell/attribute provenance and empty continuations now have explicit treatment;
+row-dependent partitions remain unfinished. Native output also needs a font covering actual U+2A6D4;
 missing-glyph rejection currently preserves atomicity, not full-goal completion.
+
+
+## Tagged membership and painted span inference
+
+`pdf_tagged_spans.go` reconciles explicit page-local logical cells with a unique painted
+grid. Span provenance is separate from membership and keeps empty continuation
+identities/original rows. Candidates use copies, bounded alignment and per-page grid
+caching. Ambiguous grids retain explicit cells with uncertainty, not guessed padding.
+See TAGGED_TABLE_SPANS.md for contracts and remaining row-dependent grid work.

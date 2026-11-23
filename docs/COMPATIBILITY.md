@@ -821,3 +821,13 @@ unsupported-feature exemption. Original tags and painted grids provide evidence
 for recovery with explicit/inferred provenance. The source's actual U+2A6D4 also
 requires a suitable font; mapping all families to Go fails explicitly/atomically
 rather than discarding it. All four paths are not yet qualified for this source.
+
+
+## Tagged missing-span recovery checkpoint
+
+Page-local tagged tables can infer absent merges from unique painted grids while
+retaining explicit membership and separate span provenance. Empty continuation tags
+retain identities/rows on origins. Unequal unresolved row widths remain explicit with a
+grid-uncertainty diagnostic. Original MQTT import now retains all 90 tables/3,020 cell
+identities; 41 inferred grids and one page-89 uncertain grid are not a full-source
+fidelity claim. See TAGGED_TABLE_SPANS.md.

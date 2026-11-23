@@ -2033,3 +2033,17 @@ fuzz completes 500 executions (1.532s). Host and Linux amd64/arm64 CGO-disabled
 builds pass; only the host CLI was executed. These checks cover the implemented
 subset and the new normalized Word regression; they do not turn the failing
 original-PDF/native-font paths into achieved capabilities.
+
+
+## 2026-11-24 Tagged spans and original PDF membership
+
+Run `GOWORK=off go run ./examples/tagged-spans`, `output/qa-venv/bin/python
+scripts/verify_tagged_spans.py`, and `NODE_PATH=output/sf-qa/node_modules node
+scripts/verify_structured.cjs output/tagged-spans/sample.sf`. The Go tests check every
+original table/cell role and row identity, proven page-17 spans,
+no-evidence/explicit-unit/visible-continuation refusal, interleaved continuation tags,
+gap bounds, invalid provenance and exact SF. Independent checks cover all memberships,
+eight truly empty references and 5,536 painted sides; actual ProseMirror checks 964
+nodes/marks/attributes. Five original pages plus a page-89 crop were visually inspected.
+Full final checks/logs are recorded under tagged_table_spans in verification.json. Page
+89 remains an explicit required gap; see TAGGED_TABLE_SPANS.md.

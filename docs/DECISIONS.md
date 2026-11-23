@@ -1260,3 +1260,14 @@ painted merges. Word raw continuation cells also remain explicit PDF members.
 Use both sources to qualify future inferred spans and provenance; do not remove
 the character, simplify tables, flatten logical structure or edit an oracle to
 turn this source into an artificial passing example.
+
+
+## 2026-11-24 Keep explicit table ownership separate from inferred spans
+
+Use painted borders as evidence for missing attributes without overriding present
+attributes or relabelling explicit membership as inferred. Keep truly empty continuation
+IDs and row ownership on origins rather than deleting their logical identity. Refuse
+ambiguous alignment and retain ragged explicit tables with diagnostics. Original MQTT
+tables drive the tests; page 89 remains a required grid gap. The measured joins account
+for crossing stroke thickness plus coordinate tolerance, without widening axis snapping.
+See TAGGED_TABLE_SPANS.md; no proprietary converter source was used.
