@@ -1,7 +1,7 @@
 """Optional independent rich-running-content QA; runtime remains pure Go.
 
-Run after go run ./examples/running-content. --office also records the known
-oversized-DOCX-footer producer gap; it does not qualify that case as preserved.
+Run after go run ./examples/running-content. --office also checks the repaired
+oversized-DOCX-footer case: both placements must be visible and contained.
 """
 import argparse
 import base64
@@ -56,7 +56,7 @@ for name, count in [('letterhead', 4), ('tight', 1)]:
         for part in ('headers', 'footers'):
             assert expected['attrs'][part][0]['attrs']['height'] == 1000
             assert expected['attrs'][part][0]['attrs']['width'] == 0
-            expected['attrs'][part][0]['attrs'].update(width=21.5, height=172)
+            expected['attrs'][part][0]['attrs'].update(width=104774/12700, height=838194/12700)
         assert expected == docx_sf, 'unexpected DOCX normalization beyond fitted dimensions'
     original = rgba(next(n for root in sf['attrs']['headers'] for n in nodes(root) if n['type'] == 'image'))
     recovered = json.loads((out / (name + '-pdf.sf')).read_text())
@@ -196,9 +196,20 @@ for name, count in [('letterhead', 4), ('tight', 1)]:
                     assert text.count(token) == 1
             else:
                 report[name]['office_expected_raster_placements'] = 2
-                report[name]['office_qualified'] = len(images) == 2
-                if len(images) != 2:
-                    print('OPEN: oversized DOCX running images: LibreOffice paints one of two source placements; native PDF paints both')
+                assert len(office) == 1 and len(images) == 2, 'both repaired running placements must render'
+                page = office[0]
+                boxes = [pymupdf.Rect(im['bbox']) for im in images]
+                assert all(box.x0 >= 19.9 and box.y0 >= 17.9 and box.x1 <= 200.1 and box.y1 <= 202.1 for box in boxes), boxes
+                for word in page.get_text('words'):
+                    assert not any(box.intersects(pymupdf.Rect(word[:4])) for box in boxes), word
+                for im in images:
+                    close((im['bbox'][2]-im['bbox'][0], im['bbox'][3]-im['bbox'][1]), (104774/12700, 838194/12700))
+                report[name]['office_qualified'] = True
+                report[name]['office_body_and_running_bounds'] = 'passed'
+                original_office = PdfReader(path, strict=True)
+                for image in original_office.pages[0].images:
+                    pixels = image.image.convert('RGBA')
+                    assert pixels.size == original.size and pixels.tobytes() == original.tobytes(), 'producer changed RGBA pixels'
         for i in range(report[name]['office_pages']):
             with pymupdf.open(path) as fresh:
                 fresh[i].get_pixmap(matrix=pymupdf.Matrix(1.5,1.5)).save(out / 'lo' / f'{name}-fresh-{i+1}.png')

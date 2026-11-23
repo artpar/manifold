@@ -1476,3 +1476,67 @@ bidi/context, repeating headers, image-fit, table-continuation, notes, text styl
 and independent PDF-style recovery regressions pass. Corpus: 51 files/9,031 SF
 nodes and 28/28 Poppler text comparisons pass. git diff --check passes. Existing
 fixtures and content oracles remain unchanged; broader acceptance remains open.
+
+## Shared DOCX running-image budget (2026-11-24)
+
+```sh
+GOWORK=off go run ./examples/running-content
+GOWORK=off go run ./examples/running-images
+mkdir -p output/running-images/lo
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file://"$PWD"/output/running-images/lo-profile --headless --convert-to pdf --outdir output/running-images/lo output/running-images/serial.docx output/running-images/nested.docx output/running-images/body.docx output/running-images/jpeg.docx
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file://"$PWD"/output/running-content/lo-profile --headless --convert-to pdf --outdir output/running-content/lo output/running-content/letterhead.docx output/running-content/tight.docx
+output/qa-venv/bin/python scripts/verify_running_content.py --office
+output/qa-venv/bin/python scripts/verify_docx_running_images.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/running-images/serial.sf output/running-images/serial-docx.sf output/running-images/nested.sf output/running-images/nested-docx.sf output/running-images/body.sf output/running-images/body-docx.sf output/running-images/jpeg.sf output/running-images/jpeg-docx.sf output/running-content/letterhead.sf output/running-content/letterhead-docx.sf output/running-content/letterhead-pdf.sf output/running-content/tight.sf output/running-content/tight-docx.sf output/running-content/tight-pdf.sf
+GOWORK=off go test -run 'TestDOCXRunning|TestPDF(RichRunning|Running)' -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzDOCXRunningImages$' -fuzztime=2000x -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=500x -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzImageContainerFitting$' -fuzztime=1000x -parallel=2 .
+```
+
+The old tight fixture is unchanged. Its repaired DOCX pictures are about
+8.25×66pt instead of the prior independent 21.5×172pt fits. In LibreOffice 7.6.0.3
+both now paint with exact RGBA, inside page bounds and without body overlap.
+Four new producer pages add seventeen contained exact-pixel placements: serial
+pictures, nested/merged running tables, JPEG, an unchanged small logo and a nested
+body figure. Five new producer pages were visually inspected. Fourteen SF files/
+1,055 nodes pass ProseMirror. Source byte assets, formatting, lists/merge flags,
+links and note relationships remain independently checked; only physical picture
+dimensions normalize on DOCX reimport. Source nominal page twips are exact while
+LibreOffice slightly normalizes paper dimensions; both observations are retained.
+
+The first line-floor implementation failed the serial-image bounds oracle.
+DECISIONS.md links the pinned producer policy that explains it. The resulting
+compatibility allowance fixes the actual off-page picture; source/content/pixel
+oracles remain unchanged. Text budgeting is conservative and does not establish
+Word/font-metric equivalence. Broader qualification and page settings stay open.
+
+Source URI relationships pass XML/python-docx, but the tested producer exports
+zero of two expected URI annotations in the nested PDF. An independent python-docx
+control isolates that environment/producer issue:
+
+```sh
+output/qa-venv/bin/python scripts/verify_docx_running_images.py --write-uri-control
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file://"$PWD"/output/running-images/lo-profile --headless --convert-to pdf --outdir output/running-images/lo output/running-images/uri-control.docx
+output/qa-venv/bin/python scripts/verify_docx_running_images.py
+output/qa-venv/bin/python scripts/verify_docx_running_images.py --require-uri-annotations
+```
+
+The last strict gate currently fails deliberately at the unchanged expectation;
+the control produces zero of one expected URI too. The default image verifier
+reports URI export as **unqualified**, with expected/observed counts in its JSON;
+it does not declare all producer relationships passed. Native PDF URI verification
+still passes. No runtime external converter, font service, CGO or upload was added.
+
+CGO-disabled CLI verification also ran SF→DOCX→SF for all four image cases and
+then repeated DOCX generation from the fitted SF: exact physical trees stayed
+stable. The refreshed letterhead SF→DOCX/PDF and both inputs→SF paths pass; DOCX
+returns exact source SF and native PDF operator streams match API output.
+
+Full tests pass: library 8.438s, CLI 0.791s, bidi 2.903s. Race passes:
+98.530s/2.587s/16.540s. Vet/module verification and CGO-disabled CLI build/execution
+pass. Valid running fuzz: 2,000 executions/5.476s package time; malformed DOCX:
+500/1.833s; image-container fuzz: 1,000/17.790s. Relevant image/note/table/style/
+bidi/context/paint regressions pass. Corpus: 51 files/9,031 nodes, and 28/28
+Poppler comparisons pass. Logs use output/docx-running-*; verification.json records
+current evidence and retains the earlier failed layout observations as historical.

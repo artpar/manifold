@@ -23,19 +23,20 @@ const xmlHeader = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`
 const wordNamespaces = ` xmlns:w="` + wordNS + `" xmlns:r="` + relNS + `" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"`
 
 type docxWriter struct {
-	ctx             context.Context
-	parts           map[string][]byte
-	rels            []string
-	next            int
-	images          int
-	contentWidth    float64
-	contentHeight   float64
-	validatedImages outputImageCache
-	numberings      []docxNumbering
-	bookmarks       int
-	noteIDs         map[noteKey]int
-	noteLabels      map[noteKey]string
-	seenNoteRefs    map[noteKey]bool
+	ctx                context.Context
+	parts              map[string][]byte
+	rels               []string
+	next               int
+	images             int
+	contentWidth       float64
+	contentHeight      float64
+	runningImageHeight float64
+	validatedImages    outputImageCache
+	numberings         []docxNumbering
+	bookmarks          int
+	noteIDs            map[noteKey]int
+	noteLabels         map[noteKey]string
+	seenNoteRefs       map[noteKey]bool
 }
 
 func (w *docxWriter) addRel(kind, target string, external bool) string {
@@ -64,6 +65,13 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 		noteCounts[n.Kind]++
 		w.noteIDs[noteIdentity(n)] = noteCounts[n.Kind]
 	}
+	imageHeight, bodyHeight, err := w.fitRunning(d, hei, mar)
+	if err != nil {
+		return err
+	}
+	fullHeight := w.contentHeight
+	w.contentHeight = bodyHeight
+	w.runningImageHeight = 0
 	w.addRel("styles", "styles.xml", false)
 	w.addRel("numbering", "numbering.xml", false)
 	body, err := w.blocks(d.Blocks)
@@ -80,7 +88,9 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 		}
 		mainRels := w.rels
 		w.rels = nil
+		w.contentHeight, w.runningImageHeight = fullHeight, imageHeight
 		part, err := w.blocks(v.blocks)
+		w.contentHeight, w.runningImageHeight = bodyHeight, 0
 		if err != nil {
 			return err
 		}
@@ -333,6 +343,10 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 			width, height, err := fitImageBox(im, config.Width, config.Height, available, w.contentHeight-8)
 			if err != nil {
 				return "", err
+			}
+			if w.runningImageHeight > 0 && height > w.runningImageHeight {
+				width *= w.runningImageHeight / height
+				height = w.runningImageHeight
 			}
 			if width > float64(math.MaxInt64)/12700 || height > float64(math.MaxInt64)/12700 || fmt.Sprintf("%.0f", width*12700) == "0" || fmt.Sprintf("%.0f", height*12700) == "0" {
 				return "", fmt.Errorf("%w: DOCX image exceeds EMU coordinate range", ErrUnsupported)

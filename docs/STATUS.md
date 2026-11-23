@@ -21,7 +21,64 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: rich PDF running stories reserve body space
+## Latest milestone: DOCX running images share a body budget
+
+- docx_running.go now plans both running stories before emitting the package.
+  A common maximum image height is selected with bounded monotone bisection;
+  smaller preferred logos remain unchanged. Original bytes/aspect rectangles/SF
+  preferences, formatting, links and table/list identities stay intact. No new
+  public API, SF/schema version, module/dependency or Daptin change.
+- Conservative text envelopes include explicit hard lines, estimated wrapping,
+  effective sizes, list indents, merged row constraints, nested cells and required
+  tail paragraphs. Emission and planning share exact integer column widths.
+  Body/notes/nested body images then use the remaining full container. Text-only
+  stories retain existing output. DOCX remains producer-laid-out; estimates do
+  not constitute a Word/font-metric layout engine or proof of impossibility in
+  every consumer when the conservative budget rejects a story.
+- Independent probes found that a body-line floor alone fixed tight.docx but
+  still left the last serial footer image off-page. The tested producer's growth
+  policy explains that failure; the compatibility allowance now prevents it.
+  DECISIONS.md links the pinned published source and distinguishes consultation
+  from adopted code. No proprietary code or new runtime dependency was used.
+- The original tight source fixture is unchanged: two preferred 1000pt images now
+  fit to about 8.25×66pt in DOCX instead of the prior independent 21.5×172pt
+  rectangles. LibreOffice 7.6.0.3 paints both completely inside the page, with exact
+  RGBA and no body overlap. The original letterhead retains exact SF/DOCX semantics
+  and its five producer placements. Native PDF remains unchanged. This is a
+  justified output-geometry fix, not a changed source/content/pixel oracle.
+- New examples/running-images covers serial pictures, merged/nested tables,
+  JPEG, an unchanged small footer logo, and a nested body figure. Four producer
+  pages/seventeen exact-pixel placements pass containment, formatting, source/XML/
+  python-docx relationships and declared SF semantics. Five new producer pages
+  including tight.docx were visually inspected. Actual ProseMirror validates
+  fourteen source/reimported files/1,055 nodes. CGO-disabled CLI tests all four paths
+  and verifies exact stable physical SF on the second DOCX round trip in all four
+  new cases. Source SF keeps its preferred dimensions throughout.
+- URI annotations in the LibreOffice-exported PDF remain unqualified: expected
+  two, observed zero, despite correct source XML and python-docx hyperlink targets.
+  An independently authored python-docx control also exports zero of one expected
+  URI. The verifier preserves both expectations and exposes an optional strict
+  gate, rather than reporting producer URI preservation as passing. New producer
+  paper observations are recorded separately from exact source page twips.
+- Full tests pass (library 8.438s, CLI 0.791s, bidi 2.903s); race passes
+  (98.530s/2.587s/16.540s). Vet/module verification/CGO-disabled CLI build pass.
+  Valid running-image fuzz: 2,000 executions; malformed DOCX: 500; image-container
+  fuzz: 1,000. Image-fit/notes/repeated-header/rich-cell/recursive-table/text-style/
+  bidi/context/paint-context regressions pass, as do 51 corpus files/9,031 nodes
+  and 28/28 Poppler comparisons. See TESTING.md and verification.json.
+
+The full goal remains **incomplete**, with no external blocker. Next implement
+asymmetric margins and header/footer distances through the shared SF/model and
+both writers/readers, then section-specific stories. Conservative DOCX font/body/
+producer qualification, URI-export qualification, sparse native note-only pages,
+remaining script/source-font/PDF recovery/color and representative real-export
+work stay required. Previous checkpoint: 25ee5f7. Next concrete commands:
+GOWORK=off go run ./examples/running-images;
+output/qa-venv/bin/python scripts/verify_docx_running_images.py;
+rg -n 'type Layout|pgMar|layout\(|bodyTop|bodyBottom' document.go docx_read.go docx_write.go pdf_running.go;
+GOWORK=off go test -run 'TestDOCXRunning|TestPDF(RichRunning|Running)' .
+
+## Earlier milestone: rich PDF running stories reserve body space
 
 - Native PDF now measures and repeats paragraphs/headings, formatted links,
   explicit/nested lists, original PNG/JPEG images and merged/nested tables in
@@ -1188,7 +1245,7 @@ coverage percentages and cross-platform builds have not been refreshed for SF.
 | lists.go / docx_lists.go / pdf_lists.go | Legacy adapter, explicit list boundaries, numbering and PDF indentation/layout |
 | table_grid.go / docx_table.go | Shared span geometry, DOCX merge import/export and constrained widths |
 | docx_read.go | OOXML package/XML reader, relationships and visible content |
-| docx_write.go | OOXML generation, styles/numbering, images and part-local relationships |
+| docx_write.go / docx_running.go | OOXML generation, scoped relationships and shared running-image/body budgets |
 | pdf_tokens.go | PDF operands and ToUnicode code maps |
 | pdf_text.go | Unicode atom measurement, paragraph-wide segmentation, proportional wrapping and ActualText painting |
 | pdf_read.go / pdf_geometry.go / pdf_font_metrics.go | PDF interpreter, positioned page/form/annotation text and font metrics |

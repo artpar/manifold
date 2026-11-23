@@ -471,6 +471,24 @@ A native PDF reimport retains placed text/assets and page geometry with existing
 explicit/inferred provenance; it must not label repeated untagged content as
 source-authored headers/footers. The letterhead example exactly preserves SF
 through DOCX. Tight oversized image preferences return physical DOCX dimensions
-per the existing rendered-format contract, and LibreOffice omits one of its two
-placements. This remains required DOCX containment/producer work, separately
-recorded from successful native PDF fitting.
+per the existing rendered-format contract, and the initial LibreOffice output omitted one of its two placements. The shared
+DOCX budget described below now repairs that omission. Broader DOCX font/producer
+qualification remains required, separately from successful native PDF fitting.
+
+
+## Shared DOCX running-image budgets
+
+Existing header/footer block arrays now share a conservative DOCX raster cap and
+body reservation. Smaller logos stay unchanged; larger rectangles fit without
+altering original bytes, alt text, source preferences or structured relationships.
+Body/note rasters use the remaining container. The source letterhead retains exact
+SF/DOCX semantics; oversized picture preferences normalize to physical dimensions
+on DOCX reimport under the existing rendered-format contract. Four new examples
+have exact stable physical second round trips. No second schema or version change
+is introduced. Fourteen new/refreshed SF files pass actual ProseMirror checks.
+
+DOCX text envelopes use estimates and producer compatibility allowances, unlike
+native PDF's actual glyph measurement. Broader font/producer/section qualification
+remains required. Producer URI-export limitations are recorded separately from
+preserved SF/DOCX links; neither fitted pixels nor plain text alone proves complete
+rich-document conversion.

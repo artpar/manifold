@@ -121,12 +121,38 @@ nonconvergent or impossible layouts atomically.
 Running-image SHA256 names reuse resources across callbacks; body image semantics
 remain unchanged. The PDF backend can also deduplicate identical byte assets.
 
-DOCX uses its separate producer layout and existing physical image-fit contract.
-It does not yet share this measured running-body reservation: the tight example
-exposes an oversized footer omitted by LibreOffice. Preserve that observation and
-source fixture while fixing DOCX containment; do not infer Word layout equivalence
-from native PDF success. PDF recovery retains placed content/positions/inferred
-structures; generated PDFs do not encode authored header/footer roles.
+DOCX now has a separate conservative running-image planner; see below. PDF
+recovery retains placed content/positions/inferred structures; generated PDFs do
+not encode authored header/footer roles.
+
+## DOCX running-image budget
+
+`docx_running.go` builds immutable envelopes for both running stories, then selects
+one maximum raster height using up to forty monotone probes. Images below the cap
+retain their preferences; larger rectangles scale proportionally. Shared
+`docxTableColumns` supplies the same integer widths as emission, and end-indexed
+cell constraints solve merged rows without summing parallel columns. Per-cell
+work is linear per probe; nested tables/required tail paragraphs and list indents
+are retained. Text uses em-column/grapheme width estimates, hard lines and effective
+sizes; it does not load or substitute PDF fonts. Foreign-font/Unicode DOCX export
+therefore remains independent of PDF coverage. Cancellation is checked during
+text/envelope traversal and fitting.
+
+Existing image padding/note allowances and a producer compatibility floor reserve
+body capacity; DECISIONS.md records its evidence. Body/note rasters consume the
+resulting full container. Running parts temporarily use their original container
+and the selected cap. No caller tree or asset is mutated. Geometry is validated
+before package bytes reach the caller. Source SF persists preferences; DOCX
+reimport returns physical fitted sizes, which remain stable on a second round trip.
+Text-only stories retain existing serialization. Public page geometry remains one
+symmetric layout; asymmetry/distances/sections still require model expansion.
+
+This is conservative raster budgeting, not a Word layout/shaping engine. Rejecting
+an exhausted envelope is not proof that every producer/font could never place it.
+Broader font/producer qualification remains required. Native PDF uses its separate
+actual font/glyph planner. The tested LibreOffice exporter emits no URI annotations
+from an independent python-docx control either; source DOCX relationships pass,
+while producer PDF URI preservation remains explicitly unqualified.
 
 ## Lists
 

@@ -634,8 +634,35 @@ Its source letterhead survives exact SF→DOCX→SF; tight oversized image prefe
 normalize to physical dimensions on DOCX reimport, per the existing image contract.
 LibreOffice paints five letterhead image placements on two pages, versus four
 native pages with a sparse note-only continuation page. It ignores the table-cell
-paragraph start. For tight.docx it paints only one of two oversized running images;
-that DOCX containment/producer issue remains open. Native PDF paints both. Source
+paragraph start. The initial tight.docx independently fitted both running pictures too large and
+LibreOffice painted only one. The shared DOCX running-image budget below now
+repairs that omission while native PDF stays unchanged. Source
 PDF positions/inferred grids recover, but authored running roles are not encoded
 by the writer or claimed by the reader. Synthetic evidence is not Word-equivalent
 fidelity or a representative real-export corpus.
+
+
+## DOCX running-image containment
+
+Both running stories now share a conservative picture-height budget before
+emission. Smaller logos keep their sizes; larger images preserve aspect, media
+bytes and alt text while fitting. Merged/nested table constraints, list indents,
+hard lines, estimated text wrapping and default/explicit sizes participate.
+Body/note/nested body rasters fit the remaining container. Text-only stories and
+native PDF behavior remain unchanged. Exhausted envelopes reject atomically.
+SF keeps preferences, while DOCX reimport returns physical dimensions; the tested
+second physical round trips are exact. No public schema/API expansion occurs.
+
+The repaired tight fixture paints both images in LibreOffice 7.6.0.3. Four new
+producer pages preserve seventeen exact-pixel placements, nested/merged geometry,
+JPEG, body content and an unchanged small logo. The compatibility allowance has
+pinned evidence in DECISIONS.md. Text envelopes are estimates, not Word font/layout
+metrics or proof of producer impossibility; broader fonts/producer behavior and
+asymmetric pages/distances/sections remain required work. Source page twips are
+exact; the tested producer slightly normalizes paper width.
+
+Source DOCX links pass scoped XML and independent python-docx checks. Producer
+PDF URI preservation remains unqualified: the nested example exports zero of two
+expected links, and an independent python-docx control exports zero of one. The
+strict verifier gate intentionally still fails there. Native PDF URI checks pass.
+This does not turn the full rich-document goal into a completed subset.

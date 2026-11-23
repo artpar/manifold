@@ -1002,3 +1002,42 @@ height, and LibreOffice paints only one of two placements. The new verifier
 records that observed omission as unqualified required work. It also verifies the
 existing rendered-format preferred-to-physical dimension normalization, not a
 false lossless image-preference round trip. No old corpus/oracle was modified.
+
+
+## 2026-11-24: couple DOCX running-image and body containers
+
+Independently fitting each running picture to a full body page let the tight
+fixture's footer disappear in LibreOffice. Plan both stories together, keep their
+text/styles/relationships intact, and cap only pictures taller than the selected
+shared height. Share exact DOCX integer column geometry; solve row-span constraints
+with per-end-row buckets, include tail paragraphs and existing cell/note allowances,
+and fit body/note images to the remaining container. Use an em-column estimate for
+text without introducing PDF-font gates into DOCX. Preserve source preferences
+and exact media bytes; verify physical normalization separately and require stable
+second round trips. No schema/API/module/dependency change is needed here.
+
+A body-line floor alone was insufficient: six serial pictures exposed an off-page
+last footer. The tested LibreOffice 7.6.0.3 keeps a fifth of its original page text
+area available when limiting frame growth. Consulted its pinned published
+[GetVarSpace policy](https://github.com/LibreOffice/core/blob/69edd8b8ebc41d00b4de3915dc82f8f0fc3b6265/sw/source/core/layout/ftnfrm.cxx#L2411)
+and [frame-growth caller](https://github.com/LibreOffice/core/blob/69edd8b8ebc41d00b4de3915dc82f8f0fc3b6265/sw/source/core/layout/wsfrm.cxx#L1744).
+Reserve that allowance proactively. This is an independently authored compatibility
+budget; no implementation code or dependency was adopted. Other producer/font/
+section policies remain qualification work, not an assumed Word-equivalence claim.
+
+The original source/pixel/content oracle stays fixed. The repaired tight DOCX
+rectangles are about 8.25×66pt, and both now render fully. Four additional producer
+pages preserve seventeen exact-pixel placements, including serial/nested/merged
+stories, JPEG and nested body images. Source nominal paper twips remain exact;
+LibreOffice maps the 420pt width to about 419.556pt. Preserve both observations.
+The earlier independently fitted rectangles and initial body-floor failure remain
+historical evidence, not passing behavior or revised source fixtures.
+
+The new producer URI expectation initially failed. An independent python-docx
+control with a valid external URL also emits zero annotations in this environment.
+Keep expected two/observed zero for the new nested case and expected one/observed
+zero for the control, with a reproducible optional strict gate. XML and python-docx
+resolve the original standard DOCX links correctly; do not change writer semantics
+or the reference URLs merely to make that producer PDF assertion pass. Native
+manydoc PDF URI behavior remains independently verified. Producer URI export and
+broader DOCX visual/font qualification stay open in the active goal.

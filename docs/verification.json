@@ -2154,7 +2154,7 @@
     "fixture_oracle_changed": false,
     "external_blocker": null
   },
-  "latest_milestone": "rich_pdf_running_content",
+  "latest_milestone": "docx_running_image_budget",
   "language_direction_ltr_shaping": {
     "date": "2026-11-23",
     "goal_complete": false,
@@ -2499,7 +2499,7 @@
     ],
     "external_blocker": null
   },
-  "latest_evidence": "rich_pdf_running_content_2026_11_24",
+  "latest_evidence": "docx_running_image_budget_2026_11_24",
   "paragraph_bidi_levels_2026_11_24": {
     "goal_complete": false,
     "previous_checkpoint": "658a5b0",
@@ -2874,6 +2874,251 @@
       "output/running-corpus-sf.log",
       "output/running-corpus-poppler.log",
       "output/running-pdf-styles.log"
+    ]
+  },
+  "docx_running_image_budget_2026_11_24": {
+    "goal_complete": false,
+    "previous_checkpoint": "25ee5f7",
+    "public_api_sf_schema_module_dependency_change": false,
+    "implementation": [
+      "immutable shared running-story envelopes and monotone common image-height cap",
+      "smaller logos retain their preferences; original source SF/assets/styles/links/merge metadata stay intact",
+      "shared exact integer table widths and end-indexed merged-row constraints",
+      "grapheme/em-column text estimates with hard lines/effective sizes/list indents and nested/tail-paragraph allowances",
+      "body/note rasters use remaining container; bounded/cancellable preflight and atomic unsupported envelopes"
+    ],
+    "scope": "Conservative DOCX raster budgeting, not Word-compatible font metrics or proof of placement impossibility in all consumers. Wider producer/font/page/section qualification is unfinished.",
+    "producer_policy_evidence": {
+      "producer": "LibreOffice 7.6.0.3 69edd8b8ebc41d00b4de3915dc82f8f0fc3b6265",
+      "reference": "https://github.com/LibreOffice/core/blob/69edd8b8ebc41d00b4de3915dc82f8f0fc3b6265/sw/source/core/layout/ftnfrm.cxx#L2411",
+      "caller": "https://github.com/LibreOffice/core/blob/69edd8b8ebc41d00b4de3915dc82f8f0fc3b6265/sw/source/core/layout/wsfrm.cxx#L1744",
+      "adopted_code_or_dependency": false,
+      "observation": "initial line-floor fit left the final serial footer off-page; compatibility allowance prevents the observed failure"
+    },
+    "tests": [
+      "shared tight header/footer capacity and exact media bytes",
+      "small preferred logo unchanged; nested body image containment",
+      "six nested/merged pictures plus exact SF styles/links/repeat flags and non-PDF-font Unicode",
+      "impossible-budget atomic output",
+      "valid fuzz cases require successful serialization, source immutability, all placements and media"
+    ],
+    "independent_image_cases": {
+      "serial": {
+        "pages": 1,
+        "placements": 6,
+        "exact_rgba": true,
+        "all_bounds_contained": true,
+        "body_no_picture_overlap": true,
+        "sf_semantics_except_physical_dimensions": "preserved",
+        "source_paper_twips": "exact",
+        "producer_paper": [
+          0.0,
+          0.0,
+          419.555908203125,
+          560.0125732421875
+        ]
+      },
+      "nested": {
+        "pages": 1,
+        "placements": 6,
+        "exact_rgba": true,
+        "all_bounds_contained": true,
+        "body_no_picture_overlap": true,
+        "sf_semantics_except_physical_dimensions": "preserved",
+        "source_paper_twips": "exact",
+        "producer_paper": [
+          0.0,
+          0.0,
+          419.555908203125,
+          560.0125732421875
+        ],
+        "expected_uri_annotations": 2,
+        "observed_uri_annotations": 0,
+        "producer_uri_qualified": false
+      },
+      "body": {
+        "pages": 1,
+        "placements": 3,
+        "exact_rgba": true,
+        "all_bounds_contained": true,
+        "body_no_picture_overlap": true,
+        "sf_semantics_except_physical_dimensions": "preserved",
+        "source_paper_twips": "exact",
+        "producer_paper": [
+          0.0,
+          0.0,
+          299.99053955078125,
+          399.9968566894531
+        ]
+      },
+      "jpeg": {
+        "pages": 1,
+        "placements": 2,
+        "exact_rgba": true,
+        "all_bounds_contained": true,
+        "body_no_picture_overlap": true,
+        "sf_semantics_except_physical_dimensions": "preserved",
+        "source_paper_twips": "exact",
+        "producer_paper": [
+          0.0,
+          0.0,
+          219.99685668945312,
+          219.99685668945312
+        ]
+      },
+      "independent_uri_control": {
+        "expected": 1,
+        "observed": 0,
+        "qualified": false
+      }
+    },
+    "refreshed_original_cases": {
+      "letterhead": {
+        "native_pages": 4,
+        "raster_placements": 9,
+        "exact_rgba": true,
+        "running_font_size_color": "passed",
+        "sf_docx_equal": true,
+        "pdf_recovery_positions": 9,
+        "office_pages": 2,
+        "office_raster_placements": 5
+      },
+      "tight": {
+        "native_pages": 1,
+        "raster_placements": 2,
+        "exact_rgba": true,
+        "running_font_size_color": "not applicable",
+        "sf_docx_equal": false,
+        "pdf_recovery_positions": 2,
+        "office_pages": 1,
+        "office_raster_placements": 2,
+        "office_expected_raster_placements": 2,
+        "office_qualified": true,
+        "office_body_and_running_bounds": "passed"
+      }
+    },
+    "independent_summary": {
+      "script": "scripts/verify_docx_running_images.py",
+      "new_producer_pages": 4,
+      "new_exact_pixel_placements": 17,
+      "new_producer_pages_visually_inspected_including_tight": 5,
+      "prosemirror_files": 14,
+      "prosemirror_nodes": 1055,
+      "readers": [
+        "python-docx 1.2.0",
+        "pypdf 7.1.1 strict",
+        "PyMuPDF 1.28.2",
+        "lxml",
+        "Pillow 13.0.0"
+      ],
+      "source_content_pixel_oracles_unchanged": true,
+      "changed_rendered_geometry": "tight DOCX independently fitted 21.5x172pt rectangles now fit to about 8.25x66pt; original preferred 1000pt heights/source pixels unchanged",
+      "source_twips": "exact",
+      "producer_paper": "420pt nominal width becomes approximately 419.556pt; independently retained, not normalized source oracle",
+      "stable_physical_second_roundtrips": 4,
+      "cli": "CGO-disabled SF to DOCX/PDF and both formats to SF; all four image-budget cases and exact stable physical second round trips; unchanged letterhead native PDF operator streams"
+    },
+    "producer_uri_qualification": {
+      "source_xml_and_python_docx_targets": "passed",
+      "expected_nested_annotations": 2,
+      "observed_nested_annotations": 0,
+      "independent_python_docx_control_expected": 1,
+      "independent_control_observed": 0,
+      "strict_gate_exit": 1,
+      "status": "unqualified; expected targets retained; no all-relationships producer pass claimed",
+      "strict_command": "output/qa-venv/bin/python scripts/verify_docx_running_images.py --require-uri-annotations"
+    },
+    "required_checks": {
+      "tests_seconds": {
+        "github.com/artpar/manydoc": 8.438,
+        "github.com/artpar/manydoc/cmd/manydoc": 0.791,
+        "github.com/artpar/manydoc/internal/bidilevels": 2.903
+      },
+      "race_seconds": {
+        "github.com/artpar/manydoc": 98.53,
+        "github.com/artpar/manydoc/cmd/manydoc": 2.587,
+        "github.com/artpar/manydoc/internal/bidilevels": 16.54
+      },
+      "vet": "passed",
+      "module_verification": "all modules verified",
+      "cgo_disabled_cli_build_execution": "passed",
+      "git_diff_check": "passed"
+    },
+    "fuzz": {
+      "valid_running_images": {
+        "executions": 2000,
+        "package_seconds": 5.476,
+        "result": "passed"
+      },
+      "malformed_docx": {
+        "executions": 500,
+        "package_seconds": 1.833,
+        "result": "passed"
+      },
+      "image_containers": {
+        "executions": 1000,
+        "package_seconds": 17.79,
+        "result": "passed"
+      }
+    },
+    "regressions": [
+      "image fitting",
+      "notes",
+      "repeating table headers",
+      "rich cells",
+      "recursive tables",
+      "text styles",
+      "paragraph bidi and item context",
+      "paint context"
+    ],
+    "corpus": {
+      "files": 51,
+      "prosemirror_nodes": 9031,
+      "poppler_matches": 28,
+      "poppler_total": 28,
+      "original_fixtures_and_content_oracles_unchanged": true
+    },
+    "open_required_work": [
+      "asymmetric margins and header/footer distances through shared SF/model/readers/writers, then section-specific settings/stories",
+      "broader DOCX font-metric and producer containment qualification",
+      "producer URI export qualification retains failing expectation and independent control",
+      "sparse native note-only pages and broader note/table/producer pagination",
+      "within-grapheme styles/full script itemization/cross-item positioning and broader fonts",
+      "source-font/PDF structure/internal-link/color/image expansion",
+      "representative real exported corpus and professional fidelity qualification"
+    ],
+    "commands": [
+      "GOWORK=off go test ./... -count=1",
+      "GOWORK=off go test -race ./... -count=1",
+      "GOWORK=off go vet ./...",
+      "GOWORK=off go mod verify",
+      "CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc",
+      "GOWORK=off go run ./examples/running-images",
+      "output/qa-venv/bin/python scripts/verify_docx_running_images.py",
+      "output/qa-venv/bin/python scripts/verify_running_content.py --office",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzDOCXRunningImages$' -fuzztime=2000x -parallel=2 .",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=500x -parallel=2 .",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzImageContainerFitting$' -fuzztime=1000x -parallel=2 .",
+      "output/qa-venv/bin/python scripts/verify_structured_corpus.py",
+      "output/qa-venv/bin/python scripts/compare_pdf_text.py bin/manydoc output/docx-running-poppler.json",
+      "git diff --check"
+    ],
+    "logs": [
+      "output/docx-running-final-tests.log",
+      "output/docx-running-final-race.log",
+      "output/docx-running-final-vet.log",
+      "output/docx-running-final-modules.log",
+      "output/docx-running-final-fuzz.log",
+      "output/docx-running-malformed.log",
+      "output/docx-running-container-fuzz.log",
+      "output/docx-running-independent.log",
+      "output/docx-running-images-independent.log",
+      "output/docx-running-uri-strict.log",
+      "output/docx-running-prosemirror.log",
+      "output/docx-running-cli.log",
+      "output/docx-running-regressions.log",
+      "output/docx-running-corpus.log",
+      "output/docx-running-poppler.log"
     ]
   }
 }

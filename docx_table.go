@@ -123,14 +123,14 @@ func emptyMergeContinuation(bs []Block) bool {
 	return true
 }
 
-func (w *docxWriter) table(b Block) (string, error) {
+func docxTableColumns(b Block, width float64) (*tableGeometry, []int, error) {
 	g, err := tableGrid(b.Rows)
 	if err != nil {
-		return "", err
+		return nil, nil, err
 	}
-	total := int(math.Round(w.contentWidth*20) - float64(b.docxIndent))
+	total := int(math.Round(width*20) - float64(b.docxIndent))
 	if total < max(1, g.Columns) {
-		return "", fmt.Errorf("%w: DOCX table too narrow for %d columns", ErrUnsupported, g.Columns)
+		return nil, nil, fmt.Errorf("%w: DOCX table too narrow for %d columns", ErrUnsupported, g.Columns)
 	}
 	widths := make([]int, g.Columns)
 	for col := range widths {
@@ -138,6 +138,18 @@ func (w *docxWriter) table(b Block) (string, error) {
 		if col < total%g.Columns {
 			widths[col]++
 		}
+	}
+	return g, widths, nil
+}
+
+func (w *docxWriter) table(b Block) (string, error) {
+	g, widths, err := docxTableColumns(b, w.contentWidth)
+	if err != nil {
+		return "", err
+	}
+	total := 0
+	for _, width := range widths {
+		total += width
 	}
 	var out strings.Builder
 	fmt.Fprintf(&out, `<w:tbl><w:tblPr><w:tblW w:w="%d" w:type="dxa"/>`, total)

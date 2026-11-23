@@ -264,5 +264,11 @@ full itemization, cross-item positioning and within-grapheme styles remain open.
 headers/footers with merged/nested tables, links, images, lists and measured body/
 note containment. Optional QA: `output/qa-venv/bin/python scripts/verify_running_content.py`.
 The source SF stays unchanged. The example README and compatibility notes record
-the distinct native/LibreOffice pagination and an open oversized DOCX running-image
-containment issue; this milestone does not complete the broader rich-document goal.
+the distinct native/LibreOffice pagination and broader producer/font qualification;
+this milestone does not complete the rich-document goal.
+
+`GOWORK=off go run ./examples/running-images` exercises the repaired shared DOCX
+running-image budget with serial/nested/merged PNG/JPEG content and body images.
+Optional QA: `output/qa-venv/bin/python scripts/verify_docx_running_images.py`.
+Original SF/asset bytes stay intact; rendered dimensions are checked separately.
+The verifier explicitly records the tested producer's URI-export qualification gap.

@@ -14,7 +14,7 @@ prevents continuing implementation.
 | PDF → SF with geometry/assets/structure | Positioned runs/raster assets and page geometry/transforms; MCIDs/ActualText; editable family/physical size/device-color fields with provenance and ten independent span checks; strict SF provenance round trips; independent two-page baselines/pixels/placement checks | Checked forward tagged trees now recover common blocks/merges/URI ownership, implied LBody/cell paragraphs and cross-page regions; original /K proves all 57 published body memberships. Untagged whitespace-cut reading order, aligned paragraphs, relative headings, marker lists and numeric tables now have independent geometry/membership/coverage checks. Painted rectilinear grids now have exact independent cell/merge/empty bounds plus targeted actual Writer-export qualification. Remaining: broader untagged/occlusion/double-border/complex-layout recovery, internal/partial-span links, broader roles/attributes/images/fonts and inverse ParentTree validation; current path still does not fulfill the full requirement |
 | Paragraphs/headings/text formatting/links | Current declared boolean marks and link destinations covered structurally | Font size/family/color now persist through textStyle and DOCX defaults/style/character/direct resolution; PDF measures actual selected faces/sizes/colors. DOCX theme text tint/shade/mappings now calculate RGB with independent eleven-binding checks. Font-slot/theme-language normalization now preserves used span choices, with independent eight-span checks. Remaining selection qualification, DrawingML/theme binding/shading/paragraph properties and broader PDF style/color/source-font coverage; conditional paragraph starts now preserve inheritance/cancellation and SF/DOCX semantics |
 | Lists/tables including merged cells | Explicit nested lists, starts, multi-block membership, ordinary DOCX numbering/restarts and PDF body/cell lists; nested tables; row/column spans across SF, DOCX import/export and PDF rich-table layout, with exact geometry/pixel/nested-note tests | Broader numbering formats and external continuation inference/qualification; broader rich-cell/header-role qualification; repeating prefixes now preserve SF/DOCX semantics and native continuation |
-| Images/metadata/page settings/running content/notes | Images, metadata, one symmetric page layout, rich measured PDF running content; typed references and rich note definitions survive SF/DOCX, PDF rich footnotes/endnotes render with links/continuations, including images and tables | Rich page settings/section-specific running stories and oversized DOCX running-image containment; typed PDF note recovery, broader image variants and note numbering/layout; LibreOffice flattened complex note tables in the inspected DOCX, requiring broader visual/Word qualification |
+| Images/metadata/page settings/running content/notes | Images, metadata, one symmetric page layout, rich measured PDF running content; typed references and rich note definitions survive SF/DOCX, PDF rich footnotes/endnotes render with links/continuations, including images and tables | Rich page settings/section-specific running stories and broader DOCX font/producer containment qualification; typed PDF note recovery, broader image variants and note numbering/layout; LibreOffice flattened complex note tables in the inspected DOCX, requiring broader visual/Word qualification |
 | Revisions/comments/fields/unsupported behavior | Final-visible-view extraction and explicit loss diagnostics; strict output rejection | Qualify/document complete policy against real exports; do not disguise required gaps as unsupported exclusions |
 | Supported SF round-trip semantics | Current engine fields compared across 51 accepted inputs, targeted rich tree regression, unsafe separate-list collapse rejected | Expand preservation coverage as required semantics are implemented |
 | Stable public Go API and CLI | Existing Read/Write, new public structured tree/codecs, CLI atomic output and four-path tests | Reassess/finalize rich API contract after missing semantics land |
@@ -91,7 +91,19 @@ immutability and declared SF/DOCX semantics. Six SF files/925 nodes pass actual
 ProseMirror checks. Five native and three LibreOffice-rendered pages were inspected.
 The letterhead producer preserves content on two pages; native layout uses four,
 including a sparse note-only page. LibreOffice ignores the cell paragraph start
-and omits the oversized footer image in tight.docx (one of two source placements).
-These DOCX/pagination issues, richer page/section settings, source-font/script/
+and initially omitted the oversized footer image in tight.docx. The shared DOCX
+budget below now repairs that omission. Broader DOCX/pagination qualification, richer page/section settings, source-font/script/
 recovery work and representative real exports remain required. No completion claim
 is justified by the new native running-content feature alone.
+
+
+DOCX running pictures now share a body budget, including nested/merged tables,
+serial images, JPEG and nested body figures. The unchanged tight source fixture
+now produces both visible contained images. Four new producer pages/seventeen
+placements pass exact-pixel, geometry and source-DOCX relationship checks. Source
+SF remains unchanged, and physical second round trips are exact. This narrows the
+running-image gap without completing conservative font/producer/page qualification.
+The tested exporter produces zero URI annotations even for an independent
+python-docx control; expected targets remain intact and producer URI preservation
+is explicitly unqualified. Asymmetric margins/distances/sections, remaining script/
+source-font/PDF recovery/color and representative real-export evidence stay required.

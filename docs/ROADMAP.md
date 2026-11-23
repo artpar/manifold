@@ -83,9 +83,18 @@ labels' independent LTR glyph direction at RTL anchors.
 
 
 Rich PDF header/footer stories now support merged/nested tables, images, lists,
-links and reserved body/note bounds. Next fix independently reproduced oversized
-DOCX running-image containment (tight.docx has two source placements; LibreOffice
-paints one), preserving the fixture and actual observations. Then add asymmetric
+links and reserved body/note bounds. The shared DOCX budget now repairs the
+previously reproduced oversized-image omission, preserving the fixture and actual observations. Next add asymmetric
 page margins/distances and section-specific stories through SF/model/import/export.
 Qualify the sparse native note-only page and producer cell-break differences,
 alongside the remaining script/font/PDF-recovery/real-export acceptance work.
+
+
+The tight DOCX running-image omission is now repaired with a shared raster/body
+budget; four additional producer pages qualify serial/nested/merged/JPEG/body
+placements. Keep the original fixtures, exact pixels and stable physical second
+round trips. Next establish asymmetric page margins and running distances in the
+shared SF/model, then add section-specific settings/stories. DOCX text estimation,
+broader font/producer containment and producer URI-export qualification still need
+work; a python-docx control currently exports zero of one expected URI too. Do not
+remove these or the remaining script/font/recovery/real-export acceptance rows.
