@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math"
 	"sync"
 	"unicode"
 
@@ -14,6 +15,7 @@ import (
 	"golang.org/x/image/font/gofont/goitalic"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/font/sfnt"
+	"golang.org/x/text/unicode/bidi"
 	"golang.org/x/text/unicode/norm"
 )
 
@@ -50,13 +52,38 @@ func validatePDFText(r Run) error {
 	if pdfFontError != nil {
 		return pdfFontError
 	}
-	font := parsedPDFFonts[runStyle(r)]
+	return validateFontText(r, parsedPDFFonts[runStyle(r)])
+}
+func validateFontText(r Run, font *sfnt.Font) error {
 	var buf sfnt.Buffer
 	for _, ch := range norm.NFC.String(r.Text) {
+		if ch > 0xffff {
+			return fmt.Errorf("%w: PDF TrueType output requires BMP characters", ErrUnsupported)
+		}
 		if pdfSpecial(ch) {
+			required := []rune{' '}
+			switch ch {
+			case 0xad, 0x2010, 0x2011:
+				required = append(required, '-')
+			case 0x2007:
+				required = append(required, '0')
+			case 0x2008:
+				required = append(required, '.')
+			}
+			for _, value := range required {
+				glyph, err := font.GlyphIndex(&buf, value)
+				if err != nil {
+					return err
+				}
+				if glyph == 0 {
+					return fmt.Errorf("%w: font lacks replacement/advance glyph %U for %U", ErrUnsupported, value, ch)
+				}
+			}
 			continue
 		}
-		if unicode.Is(unicode.Arabic, ch) || unicode.Is(unicode.Devanagari, ch) || unicode.Is(unicode.Hebrew, ch) {
+		prop, _ := bidi.LookupRune(ch)
+		class := prop.Class()
+		if ch == 0x200c || ch == 0x200d || class == bidi.R || class == bidi.AL || class == bidi.AN || class == bidi.RLE || class == bidi.LRE || class == bidi.RLO || class == bidi.LRO || class == bidi.PDF || class == bidi.RLI || class == bidi.LRI || class == bidi.FSI || class == bidi.PDI || unicode.In(ch, unicode.Arabic, unicode.Devanagari, unicode.Hebrew, unicode.Bengali, unicode.Gurmukhi, unicode.Gujarati, unicode.Oriya, unicode.Tamil, unicode.Telugu, unicode.Kannada, unicode.Malayalam, unicode.Sinhala, unicode.Myanmar, unicode.Khmer, unicode.Thai, unicode.Lao, unicode.Tibetan, unicode.Mongolian) {
 			return fmt.Errorf("%w: PDF output needs shaping/bidirectional layout for %U", ErrUnsupported, ch)
 		}
 		if unicode.Is(unicode.Mn, ch) || unicode.Is(unicode.Mc, ch) || unicode.Is(unicode.Me, ch) {
@@ -74,9 +101,10 @@ func validatePDFText(r Run) error {
 }
 
 type pdfSpan struct {
-	run   Run
-	text  string
-	width float64
+	run             Run
+	text            string
+	width           float64
+	ascent, descent float64
 }
 type pdfLine []pdfSpan
 type pdfRenderer struct {
@@ -91,9 +119,14 @@ type pdfRenderer struct {
 	pageNotes, pendingNotes  []pdfNoteChunk
 	noteReserve              float64
 	validatedImages          outputImageCache
+	fonts                    map[string]pdfFontFace
+	fontMap                  map[string]string
 }
 
 func writePDF(ctx context.Context, out io.Writer, d *Document) error {
+	return writePDFWithFonts(ctx, out, d, nil, nil)
+}
+func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []FontFace, fontMap map[string]string) error {
 	notes, err := catalogNotes(d, true)
 	if err != nil {
 		return err
@@ -108,12 +141,33 @@ func writePDF(ctx context.Context, out io.Writer, d *Document) error {
 	p.SetTitle(d.Metadata.Title, true)
 	p.SetAuthor(d.Metadata.Author, true)
 	p.SetSubject(d.Metadata.Subject, true)
-	for _, f := range pdfFonts {
-		// gofpdf's subset/checksum implementation mutates the supplied TTF bytes.
-		// Each renderer owns its buffer; sharing embedded font slices races.
-		p.AddUTF8FontFromBytes("Go", f.style, append([]byte(nil), f.data...))
-	}
 	r := &pdfRenderer{ctx: ctx, pdf: p, width: w, height: h, margin: m, y: m, headers: d.Headers, footers: d.Footers, validatedImages: make(outputImageCache)}
+	r.fontMap = map[string]string{}
+	for from, to := range fontMap {
+		if from == "" || to == "" {
+			return fmt.Errorf("empty PDF font mapping")
+		}
+		if err := validateTextStyle(Run{FontFamily: from}); err != nil {
+			return err
+		}
+		if err := validateTextStyle(Run{FontFamily: to}); err != nil {
+			return err
+		}
+		key := fontFamilyKey(from)
+		if _, ok := r.fontMap[key]; ok {
+			return fmt.Errorf("duplicate PDF font mapping")
+		}
+		r.fontMap[key] = to
+	}
+	if err := r.addFonts(fonts); err != nil {
+		return err
+	}
+
+	if len(notes.order) > 0 {
+		if _, err := r.registerFont(fontKey("Go", "")); err != nil {
+			return err
+		}
+	}
 	r.notes = notes
 	r.noteLinks = map[noteKey]int{}
 	r.seenFootnotes = map[noteKey]bool{}
@@ -148,6 +202,9 @@ func writePDF(ctx context.Context, out io.Writer, d *Document) error {
 	if err := p.Output(&b); err != nil {
 		return err
 	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	// ActualText was introduced in PDF 1.4. gofpdf has no public minimum
 	// version setter and otherwise emits 1.3 for opaque documents. This
 	// equal-length header promotion leaves every object/xref offset unchanged.
@@ -166,12 +223,13 @@ func (r *pdfRenderer) headerFooter(bs []Block, y float64) {
 			return
 		}
 		for _, line := range lines {
-			if (header && y+10 > r.margin) || (!header && y+10 > r.height) {
+			leading := pdfLineHeight(line, 8, 1.25)
+			if (header && y+leading > r.margin) || (!header && y+leading > r.height) {
 				r.pdf.SetError(fmt.Errorf("%w: PDF header/footer exceeds reserved area", ErrUnsupported))
 				return
 			}
 			r.drawLine(line, r.margin, y, 8)
-			y += 10
+			y += leading
 		}
 	}
 }
@@ -204,13 +262,14 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 			if err != nil {
 				return err
 			}
-			leading := size * 1.4
+			leading := pdfLineHeight(lines[0], size, 1.4)
 			if b.Kind == Heading {
-				if err := r.ensure(leading * 2); err != nil {
+				if err := r.ensure(math.Min(leading*2, r.height-2*r.margin)); err != nil {
 					return err
 				}
 			}
 			for _, line := range lines {
+				leading = pdfLineHeight(line, size, 1.4)
 				if err := r.ensureWithNotes(leading, lineNoteKeys(line)); err != nil {
 					return err
 				}

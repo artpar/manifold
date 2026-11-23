@@ -56,7 +56,7 @@ source.add_paragraph('SOURCE_BASE','StartPage')
 source.add_paragraph('SOURCE_CANCEL','InheritedStart').paragraph_format.page_break_before=False
 source.add_paragraph('SOURCE_INHERIT','InheritedStart')
 path=out/'independent.docx';source.save(path)
-def convert(a,b):subprocess.run([str(args.binary.resolve()),'convert','-allow-lossy','-o',str(b),str(a)],check=True,capture_output=True)
+def convert(a,b):subprocess.run([str(args.binary.resolve()),'convert','-allow-lossy','-pdf-font-map','Calibri=Go','-pdf-font-map','Cambria=Go','-o',str(b),str(a)],check=True,capture_output=True)
 convert(path,out/'independent.sf');convert(out/'independent.sf',out/'independent.pdf')
 sf=json.loads((out/'independent.sf').read_text())
 assert [n.get('attrs',{}).get('pageBreakBefore',False) for n in sf['content']]==[True,True,False,True]

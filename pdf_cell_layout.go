@@ -167,7 +167,7 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent, height float64) ([]pdf
 				return nil, err
 			}
 			for _, line := range lines {
-				flow = append(flow, pdfFragment{Line: line, Indent: indent, Height: 14})
+				flow = append(flow, pdfFragment{Line: line, Indent: indent, Height: pdfLineHeight(line, 10, 1.4)})
 			}
 		case ListBlock:
 			for index, item := range b.Items {

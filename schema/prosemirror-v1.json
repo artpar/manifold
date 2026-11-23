@@ -264,6 +264,22 @@
           "validate": "string"
         }
       }
+    },
+    "textStyle": {
+      "attrs": {
+        "fontFamily": {
+          "default": "",
+          "validate": "string"
+        },
+        "fontSize": {
+          "default": 0,
+          "validate": "number"
+        },
+        "color": {
+          "default": "",
+          "validate": "string"
+        }
+      }
     }
   }
 }

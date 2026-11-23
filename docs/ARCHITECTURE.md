@@ -354,3 +354,36 @@ prefix taller than the full container. Header-only tables paint once. Native
 explicit body breaks repeat prefixes on resumed table pages, while Word suppresses
 repetition for manual breaks. Real-producer/pagination qualification remains
 required. Runtime dependencies and application admission boundaries are unchanged.
+
+
+## Rich text style values and font resources
+
+Run.FontFamily/FontSize/Color are primary style values; PDF Source.Font/FontSize
+remain source evidence, not editable font decisions. SF textStyle attributes use
+one family name, numeric point size and #RRGGBB/auto. Existing defaults remain
+unset; no global font substitution or Daptin admission rule is introduced.
+
+DOCX resolves rich properties through docDefaults, paragraph basedOn chains,
+character chains and direct properties. Export uses standard rFonts/sz/color.
+Checked textImplicit flags f/s/c retain unset values on generated runs; readers
+verify canonical inherited defaults and absence of contradictory direct properties
+before restoring them. Word still sees normal styles/properties. Theme binding,
+script-specific choices and embedded font omissions diagnose remaining losses.
+
+Each PDF renderer owns a face registry and copied TTF buffers. Font programs
+register/embed only on first use; generated note labels register their fixed Go
+face when notes exist. All supplied programs still validate before layout. Go and Go Mono
+provide regular/bold/italic/bold-italic; application data adds named faces through
+WriteOptions.PDFFonts. PDFFontMap is explicit family selection, not an automatic
+fallback. Missing actual styles/glyphs fail before caller output. sfnt validation
+checks custom table bounds/name strings/cmap agreement and all glyph outlines
+before the existing subsetter consumes data. No font files/services are fetched.
+
+Text atoms use selected face advances and actual effective sizes. sfnt ascent/
+descent can enlarge baseline/line reserves beyond normal em defaults. Mixed spans
+share a line baseline; wrapping retains original logical Unicode. Paragraph/list/
+cell/note/running-content placement admits measured heights. Decorations inherit
+run color, then restore surrounding drawing state. PDF sizes match the engine's
+0.01pt serialization; derived note sizes are rounded to that layout precision.
+DOCX requires exact half-points. Header/table/image planners consume the same
+fragment heights, including rich text inside repeated prefixes.

@@ -132,6 +132,8 @@ type docxReader struct {
 	doc                   *Document
 	styles                map[string]*xmlNode
 	defaultPPr            *xmlNode
+	defaultRPr            *xmlNode
+	theme                 *xmlNode
 	defaultParagraphStyle string
 	num                   map[string]map[int]docxListLevel
 	inTaggedList          int
@@ -284,6 +286,9 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 	if n.Name.Local != "document" || (n.Name.Space != wordNS && n.Name.Space != strictWordNS) || n.child("body") == nil {
 		return nil, errors.New("invalid WordprocessingML document root or body")
 	}
+	if n.child("background") != nil {
+		r.doc.warn("page_background", "Page background is not represented; retained text colors may require that background")
+	}
 	mainRels, err := r.rels(main)
 	if err != nil {
 		return nil, err
@@ -293,11 +298,28 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 			continue
 		}
 		switch {
+		case strings.HasSuffix(v.Type, "/fontTable"):
+			table, e := r.xml(v.Target)
+			if e != nil {
+				return nil, e
+			}
+			for _, name := range []string{"embedRegular", "embedBold", "embedItalic", "embedBoldItalic"} {
+				if len(table.all(name)) > 0 {
+					r.doc.warn("font_embedding", "Embedded DOCX font programs are not retained; named families require application-supplied output fonts")
+				}
+			}
+		case strings.HasSuffix(v.Type, "/theme"):
+			var e error
+			r.theme, e = r.xml(v.Target)
+			if e != nil {
+				return nil, e
+			}
 		case strings.HasSuffix(v.Type, "/styles"):
 			s, e := r.xml(v.Target)
 			if e != nil {
 				return nil, e
 			}
+			r.defaultRPr = s.child("docDefaults").child("rPrDefault").child("rPr")
 			r.defaultPPr = s.child("docDefaults").child("pPrDefault").child("pPr")
 			for _, v := range s.Children {
 				if v.Name.Local == "style" {
@@ -524,22 +546,10 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 	}
 	originalList := b.docxList
 	out := []Block{}
-	base := Run{}
-	seen := map[string]bool{}
-	var applyStyle func(string)
-	applyStyle = func(id string) {
-		if id == "" || seen[id] {
-			return
-		}
-		seen[id] = true
-		s := r.styles[id]
-		if s == nil {
-			return
-		}
-		applyStyle(s.child("basedOn").attr("val"))
-		applyRunProps(&base, s.child("rPr"))
+	base, err := r.paragraphTextStyle(styleID)
+	if err != nil {
+		return nil, err
 	}
-	applyStyle(styleID)
 	flush := func() { out = append(out, b); b.Runs = nil; b.PageBreakBefore = false }
 	skipNoteSeparator := false
 	activeNoteBookmark := ""
@@ -559,15 +569,24 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			if props := c.child("rPr"); props != nil {
 				for _, p := range props.Children {
 					switch p.Name.Local {
-					case "b", "i", "u", "strike":
+					case "b", "i", "u", "strike", "rFonts", "sz", "color":
 					case "rStyle":
-						if p.attr("val") != "FootnoteReference" && p.attr("val") != "EndnoteReference" {
+						if r.styles[p.attr("val")] == nil && p.attr("val") != "FootnoteReference" && p.attr("val") != "EndnoteReference" {
 							r.doc.warn("run_formatting", "Run property not represented: rStyle")
 						}
 					default:
 						r.doc.warn("run_formatting", "Run property not represented: "+p.Name.Local)
 					}
 				}
+			}
+			if err := r.textStyleChain(&style, c.child("rPr").child("rStyle").attr("val")); err != nil {
+				return err
+			}
+			if err := r.textProperties(&style, c.child("rPr")); err != nil {
+				return err
+			}
+			if err := restoreDocxTextImplicit(&style, c, b.Level); err != nil {
+				return err
 			}
 			applyRunProps(&style, c.child("rPr"))
 			if value := c.attributeNS(docxNotesNS, "headingBold"); value != "" {
@@ -663,6 +682,15 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			if strings.HasPrefix(strings.TrimSpace(c.attr("instr")), "NOTEREF mdnote1_") {
 				ref, err := r.noteField(c)
 				if err != nil {
+					return err
+				}
+				if err := r.textStyleChain(&style, c.child("r").child("rPr").child("rStyle").attr("val")); err != nil {
+					return err
+				}
+				if err := r.textProperties(&style, c.child("r").child("rPr")); err != nil {
+					return err
+				}
+				if err := restoreDocxTextImplicit(&style, c.child("r"), b.Level); err != nil {
 					return err
 				}
 				applyRunProps(&style, c.child("r").child("rPr"))

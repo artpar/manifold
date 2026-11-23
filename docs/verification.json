@@ -1476,5 +1476,206 @@
       "policy": "reserve compact line, remeasure against legal body starts, shrink only header image budget; figure note headers can defer",
       "header_only_large_figure": "passed"
     }
+  },
+  "rich_text_style_milestone": {
+    "date": "2026-11-23",
+    "goal_complete": false,
+    "prior_checkpoint": "b8afa7c",
+    "go_tests": {
+      "result": "passed",
+      "library_seconds": 4.346,
+      "cli_seconds": 0.643
+    },
+    "race": {
+      "result": "passed",
+      "library_seconds": 58.492,
+      "cli_seconds": 2.087
+    },
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host": "built and executed; configured-font CLI PDF matches API text/geometry/colors/links; full SF DOCX round trip",
+    "diff_check": "passed",
+    "new_runtime_modules": [],
+    "public_values": [
+      "Run.FontFamily",
+      "Run.FontSize (points)",
+      "Run.Color (#RRGGBB/auto)",
+      "WriteOptions.PDFFonts",
+      "WriteOptions.PDFFontMap"
+    ],
+    "sf": {
+      "profile": "manydoc-prosemirror/1",
+      "mark": "textStyle",
+      "attrs": [
+        "fontFamily",
+        "fontSize",
+        "color"
+      ],
+      "font_size_unit": "numeric points",
+      "strict_null_and_type_checks": "passed",
+      "old_omitted_defaults": "unchanged"
+    },
+    "docx": {
+      "resolved": "document defaults, paragraph/character chains, direct overrides",
+      "standard_properties": [
+        "rFonts",
+        "sz",
+        "color"
+      ],
+      "unset_values": "checked textImplicit metadata; tampering rejects",
+      "style_toggles": "paragraph/character versus absolute direct values tested",
+      "precision": "positive exact half-points",
+      "theme_policy": "Latin family/plain palette resolution; bindings/transforms/script choices diagnose remaining loss",
+      "embedded_fonts": "omission diagnosed; no program recovery"
+    },
+    "pdf": {
+      "builtin_families": [
+        "Go",
+        "Go Mono"
+      ],
+      "actual_styles": [
+        "regular",
+        "bold",
+        "italic",
+        "bolditalic"
+      ],
+      "provided_ttf": "validated, copied, registered only on use",
+      "family_lookup": "NFC plus Unicode case folding; Greek final sigma test passed",
+      "missing_family_style_glyph": "atomic errors, no automatic substitution",
+      "font_precision": "0.01pt; derived note sizes round to that precision",
+      "layout": "selected face/size advances and metrics; shared baselines and all-story line reserves",
+      "color": "RGB/auto text and decorations; note labels reset to black",
+      "trailing_small_empty_line": "6pt ascent/8.4pt leading preserved"
+    },
+    "custom_font_validation": [
+      "required table/name/cmap bounds",
+      "Unicode BMP mapping agreement with sfnt",
+      "every glyph outline",
+      "embedding/subsetting flags",
+      "cancellation",
+      "caller buffers unchanged",
+      "color/bitmap/CFF/collection/name-format-1 and supplementary-plane limits explicit"
+    ],
+    "supplied_noto_test": {
+      "font": "testdata/assets/NotoSans-Regular.ttf",
+      "result": "passed Unicode, metrics/bounds and immutable caller data"
+    },
+    "layout_fuzz": {
+      "requested_executions": 1000,
+      "executions": 1000,
+      "workers": 2,
+      "seconds": 10.743,
+      "result": "passed",
+      "earlier_timed_campaign": "1037 executions then framework deadline failure, no saved failing input; replaced by completed count campaign"
+    },
+    "font_fuzz": {
+      "requested_executions": 500,
+      "result": "passed",
+      "workers": 2,
+      "seed_text": "ASCII plus figure space and nonbreaking hyphen",
+      "executions": 500,
+      "seconds": 0.726
+    },
+    "malformed_docx_fuzz": {
+      "executions": 500,
+      "workers": 2,
+      "result": "passed",
+      "new_seed": "generated text-style DOCX"
+    },
+    "structured_input_fuzz": {
+      "executions": 1000,
+      "workers": 2,
+      "result": "passed",
+      "new_seed": "examples/text-style/document.sf"
+    },
+    "independent_script": "scripts/verify_text_style.py",
+    "native": {
+      "pages": 4,
+      "used_embedded_font_programs": 4,
+      "configured_face_choices": 9,
+      "shared_baseline_pt": 101.2,
+      "mixed_sizes_pt": [
+        28,
+        10,
+        18
+      ],
+      "fixed_pitch_advance_pt_at_10pt": 6,
+      "wrapped_leading_pt_at_18pt": 25.2,
+      "underline_y_pt": 103,
+      "note_page_destination": [
+        1,
+        1
+      ],
+      "all_sizes_colors_fonts_links_bounds": "passed",
+      "visual_pages_inspected": 4
+    },
+    "libreoffice": {
+      "version": "7.6",
+      "pages": 2,
+      "all_original_tokens": "passed",
+      "visual_pages_inspected": 2,
+      "observed_fonts": [
+        "LiberationSerif",
+        "LiberationSerif-Bold",
+        "NotoSans-Regular"
+      ],
+      "font_and_pagination_match_native": false,
+      "observation": "output/text-style/office-observation.json",
+      "scope": "targeted authored content, not Word-equivalent fidelity"
+    },
+    "prosemirror": {
+      "example_nodes": 72,
+      "example_and_cli_roundtrip_nodes": 253,
+      "corpus_files": 51,
+      "corpus_nodes": 9027,
+      "result": "passed"
+    },
+    "poppler": {
+      "passed": 28,
+      "total": 28
+    },
+    "independent_regressions": [
+      "typography",
+      "repeated-headers",
+      "table-continuation",
+      "recursive-tables",
+      "image-fit",
+      "paragraph-breaks",
+      "page-breaks"
+    ],
+    "explicit_existing_font_maps": "Calibri/Cambria=Go in existing concurrency/four-path/CLI and independent paragraph fixture pipeline; original fixtures/content/geometry oracles unchanged",
+    "font_registration_benchmark": {
+      "goos": "darwin",
+      "goarch": "arm64",
+      "cpu": "Apple M1 Max",
+      "iterations": 20,
+      "case": "one paragraph using the regular default face only",
+      "before": {
+        "ns_per_op": 11945006,
+        "bytes_per_pdf": 63031,
+        "bytes_allocated_per_op": 38286343,
+        "allocations_per_op": 16538
+      },
+      "after": {
+        "ns_per_op": 2307788,
+        "bytes_per_pdf": 10896,
+        "bytes_allocated_per_op": 7583290,
+        "allocations_per_op": 3205
+      },
+      "scope": "controlled single case, not a general throughput claim"
+    },
+    "remaining_required": [
+      "PDF editable font/size/color recovery (pdf_editable_text_style diagnostic)",
+      "full theme/script/source-font handling",
+      "broader shaping/bidi/font formats/qualification",
+      "rich page/running content",
+      "broader PDF structure recovery",
+      "representative real exported corpus"
+    ],
+    "next_commands": [
+      "rg -n \"Run\\{Text|actual|FontFamily|FontSize|fillUnknown|state.fill|structureReplacement\" pdf_read.go pdf_marked.go pdf_structure_blocks.go pdf_infer.go",
+      "GOWORK=off go run ./examples/text-style",
+      "output/qa-venv/bin/python scripts/verify_text_style.py"
+    ]
   }
 }

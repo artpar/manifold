@@ -76,7 +76,7 @@ it cannot preserve. It is not evidence that the full requested SF is implemented
 | --- | --- |
 | Body | doc.content in order; an empty document is valid |
 | Paragraph/heading | paragraph/heading with text children; heading.attrs.level 1–6; optional boolean attrs.pageBreakBefore (default false) |
-| Formatting | strong, em, underline, strike marks; link.attrs.href |
+| Formatting | strong, em, underline, strike marks; link.attrs.href; textStyle with fontFamily, numeric point fontSize, color (#RRGGBB/auto) |
 | Lists | ordered_list (nonnegative order, default 1) or bullet_list → list_item → paragraph/heading followed by blocks, including nested lists |
 | Tables | table → table_row → table_cell; colspan 1–1000, positive rowspan bounded by remaining rows; nested blocks; optional row attrs.repeatHeader (false default) |
 | Images | block image; src is an embedded `data:<media-type>;base64,...` URI; alt, width, height |
@@ -216,7 +216,8 @@ This is an initial SF milestone, not fulfillment of the active completion goal.
 The following remain required work, even where the current bridge rejects them:
 
 - Broader note numbering/separator/layout qualification and image-codec/color variants.
-- Font sizes/families/colors and richer page settings.
+- Full theme/script formatting, embedded font recovery and richer page settings;
+  font sizes/families/colors now persist explicitly.
 - Broader PDF structure recovery, internal destinations and inverse ParentTree
   validation. Positions/assets/pages and explicit/inferred provenance now exist;
   more complex layouts and broader real exports still need qualification.
@@ -344,3 +345,21 @@ Header-only tables appear once. Native explicit body page boundaries repeat the
 prefix on resumed table pages. PDF prefixes are indivisible; taller-than-container
 prefixes and page controls inside a prefix reject, while persistence/DOCX retain
 the requests. Broader page/layout qualification remains required work.
+
+
+## Text style mark
+
+`textStyle` is an optional formatting mark with `fontFamily` (string, default
+empty), `fontSize` (nonnegative finite numeric points, default zero) and `color`
+(empty/default, #RRGGBB or auto). Null/wrongly typed attributes reject. Hex spelling
+canonicalizes while semantic values persist. Font family names are single lookup
+names, not CSS fallback lists. The established TextStyle editor pattern is reused,
+with this profile's point-unit contract; native Tiptap/Colleaf compatibility is not
+implied. Existing omitted styles and profile version meanings are unchanged.
+
+DOCX resolves inherited/direct fields and preserves our unset values via checked
+metadata. PDF uses actual configured face programs and effective metrics in all
+stories; caller font data/mappings are output configuration rather than customer
+identity/permissions or required services. Missing glyph/style/family and unsafe
+precision reject. PDF provenance remains separate from editable fields; broader
+PDF style recovery, theme/script handling, shading and shaping/bidi remain required.

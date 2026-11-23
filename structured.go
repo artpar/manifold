@@ -125,6 +125,14 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 						t.Marks = append(t.Marks, StructuredMark{Type: m.name})
 					}
 				}
+				if r.FontFamily != "" || r.FontSize != 0 || r.Color != "" {
+					t.Marks = append(t.Marks, StructuredMark{Type: "textStyle", Attrs: sfAttrs(struct {
+						FontFamily string  `json:"fontFamily,omitempty"`
+						FontSize   float64 `json:"fontSize,omitempty"`
+						Color      string  `json:"color,omitempty"`
+					}{r.FontFamily, r.FontSize, canonicalTextColor(r.Color)})})
+
+				}
 				if r.Link != "" {
 					t.Marks = append(t.Marks, StructuredMark{Type: "link", Attrs: sfAttrs(struct {
 						Href string `json:"href"`
@@ -328,12 +336,36 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 						return nil, fmt.Errorf("duplicate mark %q", m.Type)
 					}
 					seen[m.Type] = true
-					if m.Type != "link" && m.Type != "source" {
+					if m.Type != "link" && m.Type != "source" && m.Type != "textStyle" {
 						if err := emptySFAttrs(m.Attrs); err != nil {
 							return nil, err
 						}
 					}
 					switch m.Type {
+					case "textStyle":
+						var values map[string]json.RawMessage
+						if len(m.Attrs) > 0 {
+							if err := json.Unmarshal(m.Attrs, &values); err != nil {
+								return nil, err
+							}
+							for _, v := range values {
+								if bytes.Equal(bytes.TrimSpace(v), []byte("null")) {
+									return nil, fmt.Errorf("textStyle attributes cannot be null")
+								}
+							}
+						}
+						a := struct {
+							FontFamily string  `json:"fontFamily"`
+							FontSize   float64 `json:"fontSize"`
+							Color      string  `json:"color"`
+						}{}
+						if err := strictSFAttrs(m.Attrs, &a); err != nil {
+							return nil, err
+						}
+						r.FontFamily, r.FontSize, r.Color = a.FontFamily, a.FontSize, a.Color
+						if err := validateTextStyle(r); err != nil {
+							return nil, err
+						}
 					case "source":
 						src := SourceInfo{}
 						if err := strictSFAttrs(m.Attrs, &src); err != nil {

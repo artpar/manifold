@@ -269,6 +269,7 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 	if s.font.vertical {
 		return fmt.Errorf("%w: vertical PDF font positioning", ErrUnsupported)
 	}
+	r.doc.warn("pdf_editable_text_style", "Font names/sizes remain source evidence; editable font/color reconstruction is unfinished")
 	text := ""
 	actual := r.actualFrame()
 	if actual == nil {

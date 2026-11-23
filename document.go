@@ -91,6 +91,11 @@ type ListItem struct {
 }
 
 type Run struct {
+	// Empty family/color and zero size use the renderer default. Sizes are points.
+	FontFamily string  `json:"font_family,omitempty"`
+	FontSize   float64 `json:"font_size,omitempty"`
+	Color      string  `json:"color,omitempty"` // #RRGGBB or auto
+
 	Text      string         `json:"text"`
 	Bold      bool           `json:"bold,omitempty"`
 	Italic    bool           `json:"italic,omitempty"`
@@ -145,6 +150,10 @@ type WriteOptions struct {
 	// AllowLossy acknowledges diagnostics on an imported document. Unsupported
 	// writer features still return errors rather than silently producing bad output.
 	AllowLossy bool
+	// PDFFonts supplies in-memory TTF faces; missing families/styles never substitute.
+	PDFFonts []FontFace
+	// PDFFontMap explicitly maps requested families to supplied/built-in families.
+	PDFFontMap map[string]string
 }
 
 func FormatFromName(name string) (Format, error) {
@@ -220,7 +229,7 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 	case DOCX:
 		return writeDOCX(ctx, w, d)
 	case PDF:
-		return writePDF(ctx, w, d)
+		return writePDFWithFonts(ctx, w, d, opts.PDFFonts, opts.PDFFontMap)
 	case SF:
 		s, err := ToStructured(d)
 		if err != nil {
@@ -325,6 +334,9 @@ func (d *Document) Validate() error {
 				return errors.New("list items/start require a list block")
 			}
 			for _, r := range b.Runs {
+				if err := validateTextStyle(r); err != nil {
+					return err
+				}
 				if err := r.Source.validate(d.Pages); err != nil {
 					return err
 				}

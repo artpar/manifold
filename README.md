@@ -174,3 +174,20 @@ repeating merged table headers, original raster assets, oversized body cells and
 linked footnotes. `Row.RepeatHeader` marks a contiguous row prefix; native PDF
 continues body/nested/footnote tables with that prefix and preserves authored SF.
 See docs/COMPATIBILITY.md for page-control and producer qualification limits.
+
+
+`GOWORK=off go run ./examples/text-style` writes a rich SF/DOCX/PDF example and
+an output-only TTF for the CLI example. Runs support FontFamily, FontSize in
+points and Color (#RRGGBB/auto). PDF has Go and Go Mono styles built in; supply
+FontFace values with WriteOptions.PDFFonts for additional TTF faces. Missing
+families/styles/glyphs return errors. PDFFontMap explicitly selects alternatives.
+
+```sh
+bin/manydoc convert -pdf-font 'App Sans=output/text-style/app-sans.ttf' -o output/text-style/cli.pdf output/text-style/text-style.sf
+# An explicit alternative for a retained source font, when desired:
+bin/manydoc convert -allow-lossy -pdf-font-map 'Calibri=Go' -pdf-font-map 'Cambria=Go' -o output/converted.pdf input.docx
+```
+
+DOCX sizes require half-points; PDF sizes require 0.01pt precision. Theme/script
+choices, shaping/bidi, broader PDF recovery and real-export qualification remain
+unfinished; see docs/COMPATIBILITY.md and docs/STATUS.md.

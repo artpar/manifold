@@ -9,6 +9,9 @@ import (
 	"unicode/utf16"
 
 	"github.com/rivo/uniseg"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/sfnt"
+	"golang.org/x/image/math/fixed"
 	"golang.org/x/text/unicode/norm"
 )
 
@@ -81,7 +84,7 @@ func (r *pdfRenderer) textAdvance(text string, size float64) float64 {
 	return width
 }
 func samePDFStyle(a, b Run) bool {
-	return a.Bold == b.Bold && a.Italic == b.Italic && a.Underline == b.Underline && a.Strike == b.Strike && a.Link == b.Link && a.Note == nil && b.Note == nil
+	return a.Bold == b.Bold && a.Italic == b.Italic && a.Underline == b.Underline && a.Strike == b.Strike && a.Link == b.Link && a.Note == nil && b.Note == nil && a.FontFamily == b.FontFamily && a.FontSize == b.FontSize && canonicalTextColor(a.Color) == canonicalTextColor(b.Color)
 }
 func appendPDFSpan(line pdfLine, span pdfSpan) pdfLine {
 	zeroControl := span.width == 0 && span.text != "\u00ad" && !pdfHardBreak(span.text) && !pdfTrimSpace(span.text)
@@ -140,7 +143,10 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 		}
 		atom := pdfTextAtom{breaking: graphemes.LineBreak()}
 		cluster := graphemes.Str()
-		drawSize := size
+		if full := textSize(run, size); full > 14400 || fmt.Sprintf("%.2f", full) == "0.00" || math.Abs(full-math.Round(full*100)/100) > 1e-9 {
+			return nil, fmt.Errorf("%w: PDF font size exceeds coordinate range or 0.01pt precision", ErrUnsupported)
+		}
+		drawSize := textSize(run, size)
 		if run.Note != nil {
 			if r.notes == nil {
 				return nil, fmt.Errorf("missing note catalog")
@@ -150,16 +156,33 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 				return nil, fmt.Errorf("missing note reference label")
 			}
 			cluster = label
-			drawSize = size * .7
+			drawSize = math.Round(drawSize*.7*100) / 100
 		}
 		checked := run
 		checked.Text = cluster
-		if err := validatePDFText(checked); err != nil {
+		face, err := r.font(run)
+		if err != nil {
 			return nil, err
 		}
-		r.pdf.SetFont("Go", runStyle(run), drawSize)
+		if err := validateFontText(checked, face.parsed); err != nil {
+			return nil, err
+		}
+		r.pdf.SetFont(face.id, runStyle(run), drawSize)
 		atom.width = r.textAdvance(cluster, drawSize)
-		atom.spans = pdfLine{{run: run, text: cluster, width: atom.width}}
+		fullSize := textSize(run, size)
+		if fullSize > 14400 {
+			return nil, fmt.Errorf("%w: PDF font size exceeds page coordinate range", ErrUnsupported)
+		}
+		var buffer sfnt.Buffer
+		metrics, err := face.parsed.Metrics(&buffer, fixed.Int26_6(drawSize*64), font.HintingNone)
+		if err != nil {
+			return nil, err
+		}
+		rise := 0.0
+		if run.Note != nil {
+			rise = fullSize * .3
+		}
+		atom.spans = pdfLine{{run: run, text: cluster, width: atom.width, ascent: math.Max(fullSize, float64(metrics.Ascent)/64+rise), descent: float64(metrics.Descent)/64 - rise}}
 		atom.hard = run.Note == nil && pdfHardBreak(cluster)
 		atom.trim = run.Note == nil && pdfTrimSpace(cluster)
 		atom.protected = run.Note == nil && pdfGlue(cluster)
@@ -240,7 +263,9 @@ func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) 
 				start = i + 1
 				finished = true
 				if start == len(atoms) {
-					lines = append(lines, pdfLine{})
+					blank := atom.spans[len(atom.spans)-1]
+					blank.text, blank.width = "", 0
+					lines = append(lines, pdfLine{blank})
 				}
 				break
 			}
@@ -357,31 +382,63 @@ func (r *pdfRenderer) paintSpan(span pdfSpan, x, y, size float64) {
 	flush()
 }
 func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
+	baseline := pdfLineSize(line, size)
 	for _, span := range line {
-		drawSize, rise := size, 0.0
+		drawSize, rise := textSize(span.run, size), 0.0
 		if span.run.Note != nil {
-			drawSize = size * .7
-			rise = size * .3
+			drawSize = math.Round(drawSize*.7*100) / 100
+			rise = textSize(span.run, size) * .3
 		}
-		r.pdf.SetFont("Go", runStyle(span.run), drawSize)
-		r.paintSpan(span, x, y+size-rise, drawSize)
+		face, err := r.font(span.run)
+		if err != nil {
+			r.pdf.SetError(err)
+			return
+		}
+		r.pdf.SetFont(face.id, runStyle(span.run), drawSize)
+		red, green, blue := textRGB(span.run.Color)
+		r.pdf.SetTextColor(red, green, blue)
+		r.paintSpan(span, x, y+baseline-rise, drawSize)
 		if span.run.Note != nil {
-			r.pdf.Link(x, y, span.width, size, r.noteLinks[referenceKey(span.run.Note)])
+			r.pdf.Link(x, y+baseline-span.ascent, span.width, math.Max(textSize(span.run, size), span.ascent+span.descent), r.noteLinks[referenceKey(span.run.Note)])
 		}
 		if span.run.Link != "" && span.width > 0 {
-			r.pdf.LinkString(x, y, span.width, size*1.3, span.run.Link)
+			r.pdf.LinkString(x, y+baseline-span.ascent, span.width, math.Max(textSize(span.run, size)*1.3, span.ascent+span.descent), span.run.Link)
 		}
 		if span.run.Underline || span.run.Strike {
 			old := r.pdf.GetLineWidth()
+			or, og, ob := r.pdf.GetDrawColor()
+			r.pdf.SetDrawColor(red, green, blue)
 			r.pdf.SetLineWidth(math.Max(.3, drawSize*.05))
 			if span.run.Underline {
-				r.pdf.Line(x, y+size-rise+drawSize*.1, x+span.width, y+size-rise+drawSize*.1)
+				r.pdf.Line(x, y+baseline-rise+drawSize*.1, x+span.width, y+baseline-rise+drawSize*.1)
 			}
 			if span.run.Strike {
-				r.pdf.Line(x, y+size-rise-drawSize*.4, x+span.width, y+size-rise-drawSize*.4)
+				r.pdf.Line(x, y+baseline-rise-drawSize*.4, x+span.width, y+baseline-rise-drawSize*.4)
 			}
 			r.pdf.SetLineWidth(old)
+			r.pdf.SetDrawColor(or, og, ob)
 		}
 		x += span.width
 	}
+}
+
+func pdfLineSize(line pdfLine, fallback float64) float64 {
+	size := fallback
+	if len(line) > 0 {
+		size = 0
+	}
+	for _, span := range line {
+		size = math.Max(size, math.Max(textSize(span.run, fallback), span.ascent))
+	}
+	return size
+}
+func pdfLineHeight(line pdfLine, fallback, factor float64) float64 {
+	below := fallback * (factor - 1)
+	if len(line) > 0 {
+		below = 0
+	}
+	for _, span := range line {
+		below = math.Max(below, math.Max(textSize(span.run, fallback)*(factor-1), span.descent))
+	}
+	return pdfLineSize(line, fallback) + below
 }

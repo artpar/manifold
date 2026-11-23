@@ -199,7 +199,7 @@ func TestStructuredFourPaths(t *testing.T) {
 	}
 	for _, f := range []Format{DOCX, PDF} {
 		var out bytes.Buffer
-		if err := Write(ctx, &out, shared, f, WriteOptions{AllowLossy: true}); err != nil {
+		if err := Write(ctx, &out, shared, f, WriteOptions{AllowLossy: true, PDFFontMap: map[string]string{"Calibri": "Go", "Cambria": "Go"}}); err != nil {
 			t.Fatal(err)
 		}
 		imported, err := Read(ctx, &out, f, ReadOptions{})
@@ -271,6 +271,11 @@ func FuzzReadStructured(f *testing.F) {
 		f.Fatal(err)
 	}
 	f.Add(headers)
+	styled, err := os.ReadFile("examples/text-style/document.sf")
+	if err != nil {
+		f.Fatal(err)
+	}
+	f.Add(styled)
 	lists, err := os.ReadFile("examples/lists/document.sf")
 	if err != nil {
 		f.Fatal(err)

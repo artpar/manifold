@@ -1,0 +1,671 @@
+{
+  "type": "doc",
+  "attrs": {
+    "schema": "manydoc-prosemirror/1",
+    "metadata": {
+      "title": "Rich text styles",
+      "author": "manydoc example"
+    },
+    "layout": {
+      "width": 400,
+      "height": 300,
+      "margin": 30
+    },
+    "headers": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "RUNNING_HEADER",
+            "marks": [
+              {
+                "type": "textStyle",
+                "attrs": {
+                  "fontSize": 8,
+                  "color": "#666666"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "footers": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "RUNNING_FOOTER",
+            "marks": [
+              {
+                "type": "textStyle",
+                "attrs": {
+                  "fontSize": 8,
+                  "color": "#666666"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "notes": [
+      {
+        "id": "style-note",
+        "kind": "footnote",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "STYLED_NOTE",
+                "marks": [
+                  {
+                    "type": "textStyle",
+                    "attrs": {
+                      "fontFamily": "Go Mono",
+                      "fontSize": 14,
+                      "color": "#006633"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "content": [
+    {
+      "type": "heading",
+      "attrs": {
+        "level": 1
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "COLOR_AND_SIZE",
+          "marks": [
+            {
+              "type": "textStyle",
+              "attrs": {
+                "fontFamily": "Go",
+                "fontSize": 24,
+                "color": "#224488"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "LARGE ",
+          "marks": [
+            {
+              "type": "textStyle",
+              "attrs": {
+                "fontSize": 28,
+                "color": "#BB2233"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": "small ",
+          "marks": [
+            {
+              "type": "textStyle",
+              "attrs": {
+                "fontFamily": "Go Mono",
+                "fontSize": 10,
+                "color": "#333333"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "text": "linked",
+          "marks": [
+            {
+              "type": "textStyle",
+              "attrs": {
+                "fontSize": 18,
+                "color": "#2255CC"
+              }
+            },
+            {
+              "type": "link",
+              "attrs": {
+                "href": "https://example.invalid/styles"
+              }
+            },
+            {
+              "type": "underline"
+            }
+          ]
+        },
+        {
+          "type": "note_reference",
+          "attrs": {
+            "id": "style-note",
+            "kind": "footnote"
+          },
+          "marks": [
+            {
+              "type": "textStyle",
+              "attrs": {
+                "fontSize": 16,
+                "color": "#006633"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "WRAPPED_TEXT crosses formatting boundaries with measured advances and larger line heights. WRAPPED_TEXT crosses formatting boundaries with measured advances and larger line heights. WRAPPED_TEXT crosses formatting boundaries with measured advances and larger line heights. ",
+          "marks": [
+            {
+              "type": "textStyle",
+              "attrs": {
+                "fontFamily": "Go Mono",
+                "fontSize": 18,
+                "color": "#552277"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "bullet_list",
+      "content": [
+        {
+          "type": "list_item",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "LARGE_LIST",
+                  "marks": [
+                    {
+                      "type": "textStyle",
+                      "attrs": {
+                        "fontFamily": "Go Mono",
+                        "fontSize": 18,
+                        "color": "#007777"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "content": [
+        {
+          "type": "table_row",
+          "attrs": {
+            "repeatHeader": true
+          },
+          "content": [
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "STYLE_HEADER",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontFamily": "Go Mono",
+                            "fontSize": 16,
+                            "color": "#225588"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "VALUES",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontSize": 18,
+                            "color": "#881122"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table_row",
+          "content": [
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CELL_00",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontFamily": "Go Mono",
+                            "fontSize": 18,
+                            "color": "#336600"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "VALUE_00",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontSize": 14,
+                            "color": "#663399"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table_row",
+          "content": [
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CELL_01",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontFamily": "Go Mono",
+                            "fontSize": 18,
+                            "color": "#336600"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "VALUE_01",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontSize": 14,
+                            "color": "#663399"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table_row",
+          "content": [
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CELL_02",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontFamily": "Go Mono",
+                            "fontSize": 18,
+                            "color": "#336600"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "VALUE_02",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontSize": 14,
+                            "color": "#663399"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table_row",
+          "content": [
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CELL_03",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontFamily": "Go Mono",
+                            "fontSize": 18,
+                            "color": "#336600"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "VALUE_03",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontSize": 14,
+                            "color": "#663399"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table_row",
+          "content": [
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CELL_04",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontFamily": "Go Mono",
+                            "fontSize": 18,
+                            "color": "#336600"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "VALUE_04",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontSize": 14,
+                            "color": "#663399"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "table_row",
+          "content": [
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "CELL_05",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontFamily": "Go Mono",
+                            "fontSize": 18,
+                            "color": "#336600"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "table_cell",
+              "attrs": {
+                "colspan": 1,
+                "rowspan": 1
+              },
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "VALUE_05",
+                      "marks": [
+                        {
+                          "type": "textStyle",
+                          "attrs": {
+                            "fontSize": 14,
+                            "color": "#663399"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "CUSTOM_FACE",
+          "marks": [
+            {
+              "type": "textStyle",
+              "attrs": {
+                "fontFamily": "App Sans",
+                "fontSize": 14,
+                "color": "#225588"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

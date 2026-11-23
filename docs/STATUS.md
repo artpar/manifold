@@ -21,7 +21,55 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: repeating table headers
+## Latest milestone: rich text styles and configurable PDF fonts
+
+- Public runs now retain FontFamily, FontSize (points) and Color (#RRGGBB/auto).
+  SF uses a textStyle mark with fontFamily/fontSize/color attributes, following
+  the established editor pattern while declaring numeric points in this profile.
+  Existing omitted attributes retain default rendering; schema version is unchanged.
+- DOCX resolves document defaults, paragraph style chains, character styles and
+  direct overrides for these fields. Standard rFonts/sz/color output retains
+  families, exact half-point sizes and RGB/auto. Checked ignorable textImplicit
+  metadata preserves unset fields for our own exported runs without hiding
+  changed properties. Theme Latin names and plain theme colors resolve with
+  binding-loss diagnostics; cached tinted/shaded colors retain their cache with
+  a diagnostic. Full theme transform/script selection remains required work.
+  Embedded DOCX font programs now diagnose their omission rather than disappearing.
+- Native PDF measures selected actual faces/sizes, aligns mixed-size baselines,
+  reserves actual line heights in paragraphs/lists/cells/notes/running content,
+  and applies run colors to text/decorations. Small explicit sizes and trailing
+  blank lines retain their metrics. Built-in Go/Go Mono have four actual styles.
+  WriteOptions.PDFFonts supplies in-memory TTF faces; PDFFontMap explicitly maps
+  families. No missing family/style substitutes implicitly; glyph/shaping errors
+  remain atomic. CLI -pdf-font and -pdf-font-map expose the same configuration.
+- Custom TTF checks cover consumed table bounds, name records, Unicode BMP cmap
+  agreement and every outline before subset registration. Font flags must permit
+  the embedding/subsetting mode. Registration is lazy, avoiding unused font programs/CW allocations in ordinary
+  PDFs. Buffers are write-owned and validation observes
+  cancellation. CFF/collections, supplementary-plane output, broader shaping/bidi
+  and additional font formats remain required expansion, not completion exemptions.
+  PDF sizes require 0.01pt precision; derived note marker sizes use that precision.
+  DOCX sizes must be exact positive half-points. Unsupported precision rejects.
+- examples/text-style supplies four native pages with mixed sizes/families/colors,
+  links/decorations, a styled note/list, repeated table headers and a caller-supplied
+  face. Independent pypdf/MuPDF/python-docx checks sizes/colors/baselines, fixed-pitch
+  advances, embedded font programs, URI/note destinations, wrapping and DOCX XML.
+  LibreOffice retains every token in two pages but substitutes installed fonts;
+  exact native/producer font or pagination equivalence is not claimed.
+- Existing source fixtures/content oracles remain unchanged. Three old pipeline/
+  concurrency tests now explicitly map retained Calibri/Cambria requests to Go;
+  previously those properties were discarded. Actual check results and
+  visual/fuzz evidence are recorded in verification.json. Used-face registration
+  also avoids embedding/allocating unused catalog entries; a controlled default
+  case dropped from 63,031 to 10,896 PDF bytes and about 38.3MB to 7.6MB B/op.
+
+The full goal remains incomplete. Next finish font/theme/script/recovery details
+and expand shaping/bidi/configurable font qualification, then the remaining
+ACCEPTANCE.md rows: rich page/running content, broader PDF recovery and a
+representative real-export corpus. Prior checkpoint: b8afa7c. This milestone groups code, tests, example and KT docs in one commit; no external
+blocker exists.
+
+## Earlier milestone: repeating table headers
 
 - Public `Row.RepeatHeader` and optional SF `table_row.attrs.repeatHeader`
   preserve a pagination property separately from semantic header-cell roles.
@@ -807,17 +855,24 @@ module access. The go.mod selects Go 1.25; do not force an older local toolchain
 
 ## Next work (required for the active goal)
 
-No external blocker currently prevents development. Repeating headers now share
-SF/Go/DOCX semantics and native body/nested/note continuation. Next establish
-font family/size/color semantics, import/style resolution and PDF measurement/
-painting, then configurable fonts and shaping/bidi. Keep exact missing-glyph
-outcomes while expanding support. Rich page/running-content semantics, broader
-PDF recovery, note-layout/Word qualification and representative real exports
-remain required; see ACCEPTANCE.md.
+No external blocker currently prevents development. Rich text family/size/color,
+configured PDF TTF faces and explicit mappings now exist. Next recover editable
+font/size/color from PDF evidence (including homogeneous ActualText and mixed-style
+diagnostics), then finish theme/script/source-font handling and Go shaping/bidi.
+The new pdf_editable_text_style diagnostic makes that remaining recovery loss
+explicit. Rich page/running content, broader PDF recovery, note-layout/Word
+qualification and representative real exports remain required; see ACCEPTANCE.md.
 
 Next concrete commands:
 
 ```sh
+rg -n 'Run\{Text|actual|FontFamily|FontSize|fillUnknown|state.fill|structureReplacement' pdf_read.go pdf_marked.go pdf_structure_blocks.go pdf_infer.go pdf_geometry.go
+GOWORK=off go run ./examples/text-style
+output/qa-venv/bin/python scripts/verify_text_style.py --office output/text-style/lo/text-style.pdf
+GOWORK=off go test -run 'TestTextStyle|TestDOCXText|TestSuppliedNoto|TestPDFExplicitFont' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzRichTextStyles$' -fuzztime=1000x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzCustomPDFFont$' -fuzztime=500x -parallel=2 -timeout=90s
+
 rg -n 'type Run|rFonts|font|sz|color|size|SetFont|pdfAtom|text_style' document.go structured.go docx_read.go docx_write.go pdf_text.go pdf_write.go
 GOWORK=off go run ./examples/repeated-headers
 output/qa-venv/bin/python scripts/verify_repeated_headers.py --office output/repeated-headers/lo/repeated-headers.pdf

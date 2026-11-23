@@ -822,3 +822,78 @@ both note/notice destinations. Header image fitting reserves a real compact line
 and remeasures for deeper legal starts; figure-bearing prefixes can defer with a
 notice. `TestHeaderOnlyTablePaintsEachAuthoredRowOnce` also checks a large figure
 with two additional header rows. These extend rather than relax the native oracle.
+
+
+## Rich text styles and configured PDF fonts
+
+```sh
+GOWORK=off go run ./examples/text-style
+output/qa-venv/bin/python scripts/verify_text_style.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/text-style/text-style.sf
+GOWORK=off go test -run 'TestTextStyle|TestDOCXText|TestSuppliedNoto|TestPDFExplicitFont|TestCustomFont|TestExplicitSmallFont|TestSFTextStyle|TestPDFTextStylePrecision' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzRichTextStyles$' -fuzztime=1000x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzCustomPDFFont$' -fuzztime=500x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=500x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadStructured$' -fuzztime=1000x -parallel=2 -timeout=90s
+mkdir -p output/text-style/lo
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-text-style-profile --headless --convert-to pdf --outdir output/text-style/lo output/text-style/text-style.docx
+output/qa-venv/bin/python scripts/verify_text_style.py --office output/text-style/lo/text-style.pdf
+bin/manydoc convert -pdf-font 'App Sans=output/text-style/app-sans.ttf' -o output/text-style/cli.pdf output/text-style/text-style.sf
+```
+
+All runtime paths remain in Go; external commands/readers above are optional QA.
+The authored 72-node SF source covers mixed families/sizes/colors, shared baseline,
+Unicode wrapping, a styled list/note, repeated table headers and a supplied face.
+MuPDF/pypdf independently verify four native pages; exact sizes/colors; baseline
+101.2pt shared by 28pt, 10pt and 18pt spans; 6pt fixed-pitch advances at 10pt;
+25.2pt wrapped-line advances at 18pt; four used embedded font programs; fixed-pitch
+font flag; separate custom font resource; colored underline at y=103pt; glyph/
+link bounds; note destination 1→1; repeated header rows and unique body tokens.
+python-docx/XML verify named families, point/half-point sizes and RGB values,
+including the note part. All four native pages and two LibreOffice pages were
+visually inspected. LibreOffice retains every token but substitutes installed
+faces and changes pagination; office-observation.json records observed fonts.
+This remains targeted authored evidence, not representative Word fidelity.
+
+Whole-SF tests cover these fields through DOCX; strict mark types, contradictory
+implicit metadata, invalid scalar values and unsupported precision reject.
+Supplied NotoSans-Regular.ttf independently differs from the Go family and checks
+Unicode, metrics/page bounds and immutable caller data. Missing families/styles,
+cyclic/unknown mappings and malformed/truncated/missing-table fonts fail atomically.
+TTF validation checks the subsetter's consumed table/name/cmap bounds, consistency
+with sfnt's mapping, all glyph outlines and embedding/subsetting flags. Color/
+bitmap/CFF/collection/name-format-1 and supplementary-plane output remain unsupported coverage.
+Complex scripts/bidi controls/joining controls reject until proper shaping/bidi.
+Special space/hyphen replacements also require their real metric/display glyphs.
+
+Style resolution tests cover defaults, paragraph/character inheritance, absolute
+direct cancellation and style toggle behavior. The trailing empty line of a 6pt
+run retains 6pt/8.4pt metrics rather than reverting to the 11pt default. Existing
+source fixtures and content oracles are unchanged; old concurrency/four-path/CLI
+tests explicitly map the retained Calibri/Cambria requests to Go. That conversion
+previously discarded those properties. No implicit substitution was introduced.
+
+The initial timed rich-style fuzz run reached 1,037 executions but ended with a
+framework context-deadline failure, without a saved failing input. The completed
+execution-count campaign uses 1,000 cases, two workers and a 90-second deadline.
+Record actual final counts in verification.json, including worker overshoot.
+Custom-font and malformed DOCX/SF fuzzing include new style/font seeds. Finite
+campaigns are not exhaustive malformed-input/resource safety evidence. Final Go,
+race, vet, CGO-disabled, independent-reader and corpus checks are recorded there.
+PDF import currently retains font names/sizes as source evidence and diagnoses
+unfinished editable font/color reconstruction via pdf_editable_text_style; that
+and the remaining acceptance rows are still required work.
+
+
+Used-face registration was measured with BenchmarkPDFUsedFontRegistration (20
+iterations on darwin/arm64, Apple M1 Max). The default-only case changed from
+63,031 to 10,896 PDF bytes and about 38.3MB to 7.6MB allocated/op; ns/op changed
+from 11,945,006 to 2,307,788. These are controlled single-case observations, not
+a general throughput claim. The font catalog still validates every supplied
+program. The example embeds its four used programs from nine configured choices;
+its original glyph/size/color/geometry/link oracles remain unchanged. Font family
+lookup now uses NFC plus Unicode case folding, including Greek final sigma.
+
+The independent paragraph-property fixture's retained Cambria request also needs
+an explicit Go mapping in its CLI conversion. Its authored source, token pages,
+break inheritance/cancellation and geometry/content assertions are unchanged.

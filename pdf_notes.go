@@ -35,6 +35,7 @@ func (r *pdfRenderer) measureFootnote(key noteKey) (pdfNoteChunk, error) {
 		return pdfNoteChunk{}, fmt.Errorf("missing PDF note")
 	}
 	r.pdf.SetFont("Go", "", 8)
+	r.pdf.SetTextColor(0, 0, 0)
 	indent := math.Max(18, r.pdf.GetStringWidth(r.notes.labels[key])+6)
 	lines, err := r.cellFlow(definition.Blocks, r.width-2*r.margin-indent, 0, r.height-2*r.margin-footnoteSeparatorHeight-10)
 	if err != nil {
@@ -241,6 +242,7 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 	r.pdf.Line(r.margin, top, r.margin+math.Min(90, r.width-2*r.margin), top)
 	if continued {
 		r.pdf.SetFont("Go", "", 7)
+		r.pdf.SetTextColor(0, 0, 0)
 		r.pdf.Text(r.margin, top-3, "Footnotes continued")
 	}
 	y := top + footnoteSeparatorHeight
@@ -249,6 +251,7 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 			r.pdf.SetLink(r.noteLinks[chunk.key], y, -1)
 		}
 		r.pdf.SetFont("Go", "", 8)
+		r.pdf.SetTextColor(0, 0, 0)
 		r.pdf.Text(r.margin, y+8, r.notes.labels[chunk.key])
 		noticeTop := y
 		for _, fragment := range chunk.lines {

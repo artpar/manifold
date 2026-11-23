@@ -640,3 +640,52 @@ first note for its linked continuation notice. The original body/note failures
 are reproducible in output/repeated-header-figure-before.log; the unchanged
 content/placement tests now pass, including 24 prefix/depth/story combinations
 with exact pixels, bounds and actual note targets. No source preferences change.
+
+
+## Represent text styles explicitly and make font selection reviewable
+
+Use the established ProseMirror/Tiptap textStyle pattern, with this profile's
+numeric point size convention (not arbitrary CSS strings). See
+[Tiptap TextStyle](https://tiptap.dev/docs/editor/extensions/marks/text-style) and
+[OOXML half-point sizes](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.fontsize?view=openxml-3.0.1).
+Keep family/size/color independent of bold/italic/decorations and source provenance.
+
+Retain resolved DOCX values from defaults/styles/character overrides. For our own
+exports, checked metadata preserves unset values without inventing explicit font
+requests from renderer defaults. A changed property must invalidate that metadata.
+Materializing foreign font requests exposes previously discarded Calibri/Cambria;
+old content/concurrency/CLI tests now select explicit Go mappings, with their
+original source fixtures and content oracles intact. Never silently alias them.
+
+Provide real built-in Go/Go Mono faces and in-memory TTF registration with explicit
+family maps. Validate tables, cmap agreement and all outlines before registration,
+using copied write-owned buffers and cancellation. Do not synthesize missing styles,
+fetch fonts or hide shaping/glyph/precision errors. Measure selected advances and
+metrics, align shared baselines and reserve full line height in every story.
+An explicit smaller run must not inherit an unrelated renderer minimum, including
+its trailing empty line. Keep declared PDF 0.01pt and DOCX half-point precision;
+reject unsupported values instead of silently rounding source requests.
+
+The four-page native example and two-page LibreOffice observation qualify only
+targeted authored content. Font substitution/pagination in LibreOffice remains
+explicit. Theme/script transformations, embedded source fonts, supplementary
+planes, broader shaping/bidi and the other acceptance rows remain unfinished.
+
+
+Unifying rich style resolution also applies OOXML style toggles correctly:
+style b/i/strike enablement toggles inherited values, while direct run values
+remain absolute ([published Bold reference](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.bold?view=openxml-3.0.1)).
+Tests distinguish paragraph, character and direct cases. Unknown style properties,
+source page backgrounds and embedded font omission diagnose representation loss.
+The new pdf_editable_text_style diagnostic explicitly identifies the remaining
+PDF editable-font/color reconstruction gap while preserving source evidence.
+
+
+Register font programs lazily rather than preloading the whole face catalog.
+A default-face benchmark exposed eight registered faces for a document using one;
+that inflated output and allocations. Catalog validation remains eager, including
+unused supplied programs, while font/CW/subset registration occurs once on use.
+Generated note labels register their fixed Go face only when notes exist. The
+four-page example now embeds its four used faces from nine configured choices;
+its original glyph/size/color/geometry/link checks remain unchanged. The controlled
+before/after benchmark records actual allocation/output effects in verification.json.

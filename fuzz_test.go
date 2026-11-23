@@ -68,6 +68,11 @@ func FuzzReadDOCX(f *testing.F) {
 		f.Fatal(err)
 	}
 	f.Add(headers.Bytes())
+	var styled bytes.Buffer
+	if err := Write(context.Background(), &styled, textStyleDocument(f), DOCX, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(styled.Bytes())
 	f.Add(docxWithBody(f, `<w:tbl><w:tr><w:trPr><w:tblHeader w:val="maybe"/></w:trPr><w:tc><w:p/></w:tc></w:tr></w:tbl>`))
 	f.Add(notesDOCX(f, rawNoteBody, rawFootnotes, rawEndnotes))
 	f.Add([]byte(""))

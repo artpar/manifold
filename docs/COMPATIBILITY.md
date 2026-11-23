@@ -11,8 +11,8 @@ current rejection behavior must not be read as an exemption from that goal.
 
 | Operation | Implemented behavior | Important limits |
 | --- | --- | --- |
-| DOCX read | Paragraphs/headings, bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans/repeating header prefixes, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
-| DOCX write | Paragraphs/headings/runs/links, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, one page layout and header/footer, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
+| DOCX read | Paragraphs/headings, family/size/RGB/auto plus bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans/repeating header prefixes, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
+| DOCX write | Paragraphs/headings/runs/links with named families/half-point sizes/RGB/auto, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, one page layout and header/footer, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
 | PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; more complex inference, internal destinations and OCR unfinished; unsupported codecs/encodings/operators reject |
 | PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, text headers/footers, linked rich footnotes/endnotes with continuation | Embedded Go font coverage; complex shaping/bidi rejected; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
 | SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; richer required features remain unfinished |
@@ -36,10 +36,10 @@ extracted with typed inline identities and separate rich definitions. Automatic
 reference labels normalize to continuous decimal values; nondecimal/custom note
 marks, numbering/restart/placement changes and custom separator content have
 explicit diagnostics. Unknown body blocks are reported as unsupported, rather than claimed
-as supported. The reader is not a lossless OOXML editor: fonts, sizes, colors,
-themes, paragraph positioning and arbitrary style properties are outside the
-current model. The declared formatting subset is bold/italic/underline/strike,
-headings, lists and links.
+as supported. The reader is not a lossless OOXML editor. Resolved font family, point size and
+RGB/auto now persist through defaults/styles/direct overrides alongside boolean
+marks and links. Theme bindings/transforms, script-specific faces, paragraph
+positioning and arbitrary style properties remain incomplete with diagnostics.
 
 External relationships are never fetched. DOCX/PDF output never executes macros,
 scripts or field programs. DOCX font substitution depends on the reader's fonts;
@@ -339,3 +339,51 @@ flags. LibreOffice 7.6 renders four inspected pages with all body text/images an
 both header rows, but reduces the small header raster to 5×50 from 64×640. This
 is a failed producer exact-pixel check recorded in office-observation.json;
 containment does not imply exact pixel/Word-layout qualification.
+
+
+## Font family, point size and color
+
+Run.FontFamily/FontSize/Color use one family name, points (zero means renderer
+default) and #RRGGBB/auto (empty means default). SF textStyle carries the same
+semantics. RGB hex spelling canonicalizes; actual scalar values persist. This
+profile uses numeric points, not arbitrary Tiptap CSS strings. Imported PDF
+Source.Font/FontSize remain physical provenance; editable PDF font/color recovery
+still needs expansion. No Colleaf/Tiptap drop-in schema compatibility is asserted.
+
+DOCX resolves docDefaults, paragraph/character basedOn chains and direct fields.
+Bold/italic/strike in style definitions toggle, whereas direct values are absolute.
+Export uses rFonts, exact positive half-point sz and RGB/auto color. Checked
+textImplicit metadata preserves our unset defaults and rejects contradictions.
+Unrepresented style properties diagnose. Theme Latin names/plain palette colors
+resolve with binding-loss diagnostics; tint/shade cache values retain their cache
+with a diagnostic. Missing unresolvable theme values reject. Full transformations,
+script choices, source font-program recovery, highlighting/shading and additional
+paragraph properties remain required work. Page backgrounds/embedded fonts now
+diagnose loss. Font selection in a DOCX viewer still depends on installed faces;
+output does not embed fonts there.
+
+PDF has real Go/Go Mono regular/bold/italic/bold-italic faces. PDFFonts supplies
+TTF programs in memory; PDFFontMap explicitly maps requested family names to
+configured/built-in names. Family lookup is case-insensitive. The CLI exposes
+repeatable -pdf-font 'Family[/B|I|BI]=path.ttf' and -pdf-font-map 'Requested=Target'.
+No font is fetched or substituted implicitly; missing families/styles/glyphs
+reject atomically. Supplied data is copied before subset operations. Required
+TrueType table/name/cmap bounds, BMP mapping agreement and all outlines validate
+before registration; font flags must permit this embedding/subsetting mode.
+CFF/collections/color/bitmap fonts and name-table format 1 and supplementary-plane output are currently
+unsupported. This is unfinished coverage, not an exemption from the active goal.
+
+Selected advances, effective sizes and font metrics drive wrapping, shared
+baselines and paragraph/list/cell/note/running-content line reserves. Explicit
+small fonts and their trailing empty lines retain their metrics. Decorations use
+run colors. PDF sizes require 0.01pt precision and fit the page coordinate range;
+derived 70% note sizes round to 0.01pt. DOCX requires exact half-points; unsupported
+precision returns an error. NFC/Unicode ActualText behavior remains; bidi controls,
+joining controls, common complex scripts and unpositioned combining marks reject
+until shaping/bidi is implemented. Broader scripts/font formats remain required.
+
+The four-page authored native example passes independent size/color/baseline/
+advance/font-program/link/bounds tests; its four pages were inspected. A supplied
+Noto face also passes Unicode/metrics/ownership checks. LibreOffice's two inspected
+pages retain all tokens but use installed substitutes and different pagination;
+that observation does not establish matching fonts or Word-equivalent layout.

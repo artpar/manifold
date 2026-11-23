@@ -265,7 +265,7 @@ func TestConcurrentOperations(t *testing.T) {
 				d := readFixture(t, "docx_basic.docx")
 				for _, f := range []Format{DOCX, PDF} {
 					var out bytes.Buffer
-					if e := Write(context.Background(), &out, d, f, WriteOptions{AllowLossy: true}); e != nil {
+					if e := Write(context.Background(), &out, d, f, WriteOptions{AllowLossy: true, PDFFontMap: map[string]string{"Calibri": "Go", "Cambria": "Go"}}); e != nil {
 						t.Error(e)
 					}
 				}

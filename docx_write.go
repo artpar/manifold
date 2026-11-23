@@ -229,6 +229,7 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 					}
 				}
 				out.WriteString(`<w:r`)
+				out.WriteString(docxTextImplicit(r))
 				if b.Kind == Heading {
 					if r.Bold {
 						out.WriteString(` md:headingBold="1"`)
@@ -237,6 +238,11 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 					}
 				}
 				out.WriteString(`><w:rPr>`)
+				textStyle, err := docxTextStyle(r)
+				if err != nil {
+					return "", err
+				}
+				out.WriteString(textStyle)
 				if r.Note != nil {
 					out.WriteString(`<w:rStyle w:val="` + strings.Title(r.Note.Kind) + `Reference"/>`)
 				}

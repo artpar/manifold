@@ -76,7 +76,7 @@ func TestCLIStructuredPaths(t *testing.T) {
 	}
 	for _, ext := range []string{"docx", "pdf"} {
 		rendered := filepath.Join(dir, "rendered."+ext)
-		if err := run(context.Background(), []string{"convert", "-allow-lossy", "-o", rendered, sf}, &bytes.Buffer{}, &bytes.Buffer{}); err != nil {
+		if err := run(context.Background(), []string{"convert", "-allow-lossy", "-pdf-font-map", "Calibri=Go", "-pdf-font-map", "Cambria=Go", "-o", rendered, sf}, &bytes.Buffer{}, &bytes.Buffer{}); err != nil {
 			t.Fatal(err)
 		}
 		var out bytes.Buffer

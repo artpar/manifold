@@ -51,10 +51,14 @@ func (r *pdfRenderer) list(b Block, width, x float64) error {
 		if err != nil {
 			return err
 		}
+		minimum = pdfLineHeight(firstLines[0], size, 1.4)
+		if first.Kind == Heading {
+			minimum = math.Min(minimum*2, r.height-2*r.margin)
+		}
 		if err := r.ensureWithNotes(minimum, lineNoteKeys(firstLines[0])); err != nil {
 			return err
 		}
-		r.drawLine(marker, x, r.y, size)
+		r.drawLine(marker, x, r.y+pdfLineSize(firstLines[0], size)-size, size)
 		if err := r.blocks(item.Blocks, width-indent, x+indent); err != nil {
 			return err
 		}
