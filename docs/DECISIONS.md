@@ -1110,3 +1110,32 @@ frames explicit unfinished work. Shared DOCX note parts use minimum section
 containers; broader reference-specific fitting and producer/layout qualification
 remain required. Independent source/asset/reader checks and visual review support
 this milestone, not a Word-equivalence or full-goal completion claim.
+
+
+## Continuous stories retain the opened page's owner
+
+Allow independent story changes inside a continuous chain with identical physical
+geometry. Keep its already-opened header and queued footer, and select the new
+stories on the next page. Count the shared page as the new section's first page;
+the next page is its second, even when the earlier section has a different local
+count. The old identical-policy shortcut skipped that counter reset. A new exact
+five-page sequence pins both distinct and inherited variants without rewriting
+existing fixture oracles.
+
+Premeasure continuous-chain body bounds and the largest body/note floor before
+painting. Refitting running images against a later section's floor prevents a
+feasible large body line from being rejected by an earlier image budget. Clear
+stale body bounds between geometries; scope note floors to actual section anchors,
+prior materialization and the final endnote frame. These fixes preserve rich
+content and source preferences while keeping already-shaped continuation widths
+stable within the chain.
+
+The [published section-type description](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.sectiontype?view=openxml-3.0.1)
+distinguishes paragraph-continuous starts from page-level properties, but does not
+supply a complete page ownership/layout algorithm. Eight original python-docx
+controls and the LibreOffice export confirm deferred stories in the tested cases;
+that producer keeps earlier geometry even when later input changes it. Preserve
+these observations, not a silent geometry-loss workaround. Changed continuous
+geometry still rejects pending physical-page/body-frame resolution. Common-frame
+packing and control/empty-section ownership remain qualification work. No Word-
+equivalence or full-goal completion follows from this narrower milestone.

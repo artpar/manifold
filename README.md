@@ -13,6 +13,7 @@ tradeoffs and required unfinished expansion.
 Sectioned SF supports separate body frames and default/first/even running stories.
 Run `GOWORK=off go run ./examples/sections` for all four conversion paths; see
 [compatibility limits](docs/COMPATIBILITY.md) for shared-page and producer differences.
+`GOWORK=off go run ./examples/continuous` demonstrates story changes on shared pages.
 Applications retain ownership of identity, authorization, persistence and jobs.
 No external Office installation or conversion service is required.
 

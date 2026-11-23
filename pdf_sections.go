@@ -10,10 +10,16 @@ import (
 
 type pdfSectionVariant struct{ header, footer *pdfRunningStory }
 type pdfSectionPlan struct {
-	section  resolvedSection
-	geometry pageGeometry
-	bounds   pdfBodyBounds
-	variants [3]pdfSectionVariant // default, first, even
+	section     resolvedSection
+	geometry    pageGeometry
+	bounds      pdfBodyBounds
+	minimumBody float64
+	variants    [3]pdfSectionVariant // default, first, even
+}
+
+type pdfSectionScope struct {
+	index, total   int
+	firstFootnotes map[noteKey]int
 }
 
 func (r *pdfRenderer) addPDFPage() {
@@ -27,7 +33,7 @@ func (r *pdfRenderer) addPDFPage() {
 		r.pdf.AddPage()
 	}
 }
-func (r *pdfRenderer) planSection(d *Document, s resolvedSection) (*pdfSectionPlan, error) {
+func (r *pdfRenderer) planSection(d *Document, s resolvedSection, minimumFloor float64, scope pdfSectionScope) (*pdfSectionPlan, error) {
 	oldPage, oldWidth, oldHeight, oldMargin := r.page, r.width, r.height, r.margin
 	oldHeader, oldFooter, oldContent, oldMinimum := r.header, r.footer, r.content, r.minimumBody
 	defer func() {
@@ -39,28 +45,29 @@ func (r *pdfRenderer) planSection(d *Document, s resolvedSection) (*pdfSectionPl
 		return nil, fmt.Errorf("%w: invalid PDF section page dimensions", ErrUnsupported)
 	}
 	r.page, r.width, r.height, r.margin = &g, g.width, g.height, g.margins.Left
-	r.minimumBody = 0
-	running := false
-	for _, story := range []*RunningStory{s.headers.Default, s.headers.First, s.headers.Even, s.footers.Default, s.footers.First, s.footers.Even} {
-		if story != nil && len(story.Blocks) > 0 {
-			running = true
+	r.content = nil
+	minimum, err := r.minimumSectionBody(s.blocks, scope)
+	if err != nil {
+		return nil, err
+	}
+	r.minimumBody = math.Max(minimum, minimumFloor)
+	bodyNeeded := len(s.blocks) > 0
+	if scope.index == scope.total-1 {
+		for _, key := range r.notes.order {
+			if key.kind == Endnote {
+				bodyNeeded = true
+				break
+			}
 		}
 	}
-	if running {
-		minimum, err := r.minimumRunningBody(s.blocks)
-		if err != nil {
-			return nil, err
-		}
-		r.minimumBody = minimum
-	}
-	plan := &pdfSectionPlan{section: s, geometry: g, bounds: pdfBodyBounds{top: r.baseTop(), bottom: r.baseBottom()}}
+	plan := &pdfSectionPlan{section: s, geometry: g, minimumBody: r.minimumBody, bounds: pdfBodyBounds{top: r.baseTop(), bottom: r.baseBottom()}}
 	for i := range plan.variants {
 		if i == 1 && !s.firstPage || i == 2 && !d.EvenAndOddHeaders {
 			continue
 		}
 		header := selectStory(s.headers, i == 1, i == 2, s.firstPage, d.EvenAndOddHeaders)
 		footer := selectStory(s.footers, i == 1, i == 2, s.firstPage, d.EvenAndOddHeaders)
-		if err := r.prepareRunning(header, footer, len(s.blocks) > 0); err != nil {
+		if err := r.prepareRunning(header, footer, bodyNeeded); err != nil {
 			return nil, err
 		}
 		plan.variants[i] = pdfSectionVariant{r.header, r.footer}
@@ -72,10 +79,127 @@ func (r *pdfRenderer) planSection(d *Document, s resolvedSection) (*pdfSectionPl
 	}
 	return plan, nil
 }
+
+// Definitions remain globally addressable, but unrelated notes must not impose
+// their dimensions on a different section. Endnotes render in the final frame.
+func (r *pdfRenderer) minimumSectionBody(blocks []Block, scope pdfSectionScope) (float64, error) {
+	references := map[noteKey]bool{}
+	var order []noteKey
+	if err := walkNoteRuns(blocks, func(run Run) error {
+		if run.Note != nil {
+			key := referenceKey(run.Note)
+			if !references[key] {
+				references[key] = true
+				order = append(order, key)
+			}
+		}
+		return r.ctx.Err()
+	}); err != nil {
+		return 0, err
+	}
+	original, originalSeen := r.notes, r.seenFootnotes
+	seen := make(map[noteKey]bool, len(originalSeen)+len(references))
+	for key, value := range originalSeen {
+		seen[key] = value
+	}
+	for _, key := range order {
+		if first, ok := scope.firstFootnotes[key]; ok && first < scope.index {
+			seen[key] = true
+		}
+	}
+	local := *original
+	local.order = nil
+	for _, key := range order {
+		if key.kind == Footnote && !seen[key] {
+			local.order = append(local.order, key)
+		}
+	}
+	if scope.index == scope.total-1 {
+		for _, key := range original.order {
+			if key.kind == Endnote {
+				local.order = append(local.order, key)
+			}
+		}
+	}
+	r.notes, r.seenFootnotes = &local, seen
+	defer func() { r.notes, r.seenFootnotes = original, originalSeen }()
+	return r.minimumRunningBody(blocks)
+}
+
+// Plan a common body for each chain of continuous sections before painting any
+// of it. Already-painted content cannot be moved when a later story is taller.
+func (r *pdfRenderer) planSections(d *Document, sections []resolvedSection) ([]*pdfSectionPlan, error) {
+	firstFootnotes := map[noteKey]int{}
+	for i, s := range sections {
+		if err := walkNoteRuns(s.blocks, func(run Run) error {
+			if run.Note != nil && run.Note.Kind == Footnote {
+				key := referenceKey(run.Note)
+				if _, ok := firstFootnotes[key]; !ok {
+					firstFootnotes[key] = i
+				}
+			}
+			return r.ctx.Err()
+		}); err != nil {
+			return nil, err
+		}
+	}
+	scope := func(i int) pdfSectionScope {
+		return pdfSectionScope{index: i, total: len(sections), firstFootnotes: firstFootnotes}
+	}
+	plans := make([]*pdfSectionPlan, len(sections))
+	for i, s := range sections {
+		if err := r.ctx.Err(); err != nil {
+			return nil, err
+		}
+		if i > 0 && s.start == SectionContinuous && !reflect.DeepEqual(pageLayout(s.layout), pageLayout(sections[i-1].layout)) {
+			return nil, fmt.Errorf("%w: continuous section changes page geometry; shared-page resolution is unfinished", ErrUnsupported)
+		}
+		plan, err := r.planSection(d, s, 0, scope(i))
+		if err != nil {
+			return nil, err
+		}
+		plans[i] = plan
+	}
+	for start := 0; start < len(plans); {
+		end := start + 1
+		minimum := plans[start].minimumBody
+		for end < len(plans) && sections[end].start == SectionContinuous {
+			minimum = math.Max(minimum, plans[end].minimumBody)
+			end++
+		}
+		for i := start; i < end; i++ {
+			if plans[i].minimumBody < minimum {
+				plan, err := r.planSection(d, sections[i], minimum, scope(i))
+				if err != nil {
+					return nil, err
+				}
+				plans[i] = plan
+			}
+		}
+		bounds := plans[start].bounds
+		for _, plan := range plans[start+1 : end] {
+			bounds.top = math.Max(bounds.top, plan.bounds.top)
+			bounds.bottom = math.Min(bounds.bottom, plan.bounds.bottom)
+		}
+		if bounds.bottom <= bounds.top {
+			return nil, fmt.Errorf("%w: continuous running stories leave no common body", ErrUnsupported)
+		}
+		for _, plan := range plans[start:end] {
+			plan.bounds = bounds
+		}
+		start = end
+	}
+	return plans, nil
+}
 func (r *pdfRenderer) renderSections(d *Document) error {
+	sections := documentSections(d)
+	plans, err := r.planSections(d, sections)
+	if err != nil {
+		return err
+	}
 	r.sectioned = true
 	var active, pending *pdfSectionPlan
-	localPage := 0
+	localPage, pendingPage := 0, 0
 	blank, nextBlank := false, false
 	r.pdf.SetHeaderFunc(func() {
 		blank = nextBlank
@@ -83,7 +207,7 @@ func (r *pdfRenderer) renderSections(d *Document) error {
 		if pending != nil {
 			active = pending
 			pending = nil
-			localPage = 0
+			localPage = pendingPage
 			r.page = &active.geometry
 			r.width, r.height, r.margin = r.page.width, r.page.height, r.page.margins.Left
 			r.content = &active.bounds
@@ -108,16 +232,14 @@ func (r *pdfRenderer) renderSections(d *Document) error {
 			r.paintRunning(r.footer)
 		}
 	})
-	sections := documentSections(d)
 	for i, s := range sections {
 		if err := r.ctx.Err(); err != nil {
 			return err
 		}
 		if i > 0 && s.start == SectionContinuous {
-			previous := sections[i-1]
-			if !reflect.DeepEqual(pageLayout(s.layout), pageLayout(previous.layout)) || !reflect.DeepEqual(s.headers, previous.headers) || !reflect.DeepEqual(s.footers, previous.footers) || s.firstPage != previous.firstPage {
-				return fmt.Errorf("%w: continuous section changes page geometry or running stories; shared-page resolution is unfinished", ErrUnsupported)
-			}
+			// The opened page keeps its painted header and queued footer. It is
+			// page one of the new section, so its next page selects variant two.
+			pending, pendingPage = plans[i], 1
 			if err := r.blocks(s.blocks, r.bodyWidth(), r.bodyLeft()); err != nil {
 				return err
 			}
@@ -132,11 +254,8 @@ func (r *pdfRenderer) renderSections(d *Document) error {
 			nextBlank = true
 			r.addPDFPage()
 		}
-		plan, err := r.planSection(d, s)
-		if err != nil {
-			return err
-		}
-		pending = plan
+		plan := plans[i]
+		pending, pendingPage = plan, 0
 		// gofpdf runs the old footer before invoking the new header. Only the
 		// header installs the new geometry, so the old footer keeps its frame.
 		orientation := "P"

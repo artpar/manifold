@@ -705,8 +705,8 @@ is established by this targeted evidence.
 
 Sectioned SF/DOCX preserves body membership, full layout overrides, same-variant
 inheritance and explicit blank stories. Native PDF supports next/odd/even starts
-and identical-policy continuous flow, changes page size/margins, and selects first/
-even/default stories. Changed continuous geometry/stories still reject explicitly;
+and same-geometry continuous flow with changed running stories, changes page size/margins, and selects first/
+even/default stories. Changed continuous geometry still rejects explicitly;
 this is a required gap, not a completed-page-support exclusion. Body frames reserve
 all active variants conservatively. Footnotes drain before a section transition;
 endnotes use the final section. DOCX note parts fit minimum section containers.
@@ -715,3 +715,16 @@ URI/note links. LibreOffice produces seven pages, suppresses the parity blank an
 differs in story selection/inheritance. A separate python-docx control demonstrates
 physical versus section-local parity differences. Preserve these observations;
 Word and broader real-export section behavior remain unqualified.
+
+
+Continuous story changes keep the opened page's header/footer; the next page uses
+new bindings with the shared page counted as local page one. A common premeasured
+chain body reserves later stories and body/note minimums. Independent five-page
+checks cover merged running cells, six body rows, two original-pixel image
+placements, URI and note destinations. LibreOffice keeps shared-page owners in
+these cases but selects subsequent parity differently and packs body text higher.
+Eight producer controls retain earlier geometry despite changed input margins/
+size/orientation. Native output still rejects such geometry changes explicitly;
+physical-page/body-frame resolution and control/empty-section qualification remain
+required. Notes are measured in their applicable section; later wide notes and
+already-materialized cross-references no longer impose unrelated bounds.

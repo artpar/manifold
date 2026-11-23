@@ -13,7 +13,7 @@ integration and do not authorize changes to Daptin.
    theme-language resolution now preserves current spans, while broader selection
    qualification/modern ranges remain required; calculated run theme tint/shade
    and settings color mappings now exist; four-edge margins/running distances now
-   exist; section bodies and default/first/even bindings now exist; next changed continuous frames, producer parity/inheritance qualification, richer note numbering/separator/layout behavior, bookmarks, comment/revision history and
+   exist; section bodies and default/first/even bindings now exist; next changed continuous geometry, producer parity/inheritance qualification, richer note numbering/separator/layout behavior, bookmarks, comment/revision history and
    broader numbering formats. Each feature needs import, model, export and tests;
    avoid a second authoritative representation of the same content.
 3. Extend the new Unicode-space/NFC/grapheme wrapping foundation with Go text shaping/bidi and configurable licensed fonts for broader PDF
@@ -112,7 +112,16 @@ single-frame page support.
 
 After the section checkpoint, run `GOWORK=off go run ./examples/sections` and
 `output/qa-venv/bin/python scripts/verify_sections.py --office`. Next resolve changed
-continuous section frames and qualify producer parity/inheritance against primary
+continuous page geometry and qualify producer parity/inheritance against primary
 specification evidence and independent controls. Keep source and observed producer
 oracles separate. Signed overlap and all remaining font/script/PDF recovery/real-
 export requirements remain active; this checkpoint does not narrow the full goal.
+
+
+Continuous story changes and section-local counter resets now exist. Next establish
+physical-page versus body-frame ownership for changed continuous geometry, starting
+with the eight controls from `scripts/verify_continuous.py --make-controls`; do not
+silently discard their margins/sizes because one producer does. Keep already-shaped
+line/table continuation widths valid and account for notes and page controls.
+Run `GOWORK=off go run ./examples/continuous` and the independent verifier before
+repeating final tests. The full acceptance audit remains active.

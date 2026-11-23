@@ -21,7 +21,53 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: section bodies and conditional running stories
+## Latest milestone: continuous story transitions and local measurement
+
+- Native PDF now supports changed default/first/even running bindings across
+  continuous sections with the same effective page geometry. The opened page keeps
+  its earlier header/footer; the next page uses the new bindings. The shared page
+  counts as page one of the new section, fixing the previous identical-policy
+  boundary's failure to restart its local parity. Several continuous boundaries
+  can share a page without repainting or mixing the earlier footer.
+- Continuous chains premeasure a common body before painting, including later
+  body/note minimums. Large running pictures are refitted against that shared
+  minimum. A later taller story cannot cover already-painted body text. Planning
+  clears the previous body's bounds before measuring new geometry. Footnote floors
+  are scoped to their referencing section and prior anchors; unrelated/later wide
+  notes do not constrain narrow pages or get materialized at a cross-reference.
+  Endnote floors and body admission also cover an otherwise empty final section.
+- `examples/continuous` exercises all four paths with exact source DOCX SF, merged
+  running cells, a six-row body table, original PNG, URI and linked shared-page
+  note. Independent readers check five native pages, two exact RGBA placements,
+  correct page owners, bounds, destinations and retained physical PDF page records.
+  Thirteen SF files/584 nodes (including CLI and control extraction) pass actual
+  ProseMirror. Five native and five producer
+  pages were inspected. LibreOffice preserves shared-page owners but differs on
+  subsequent parity and conservative body packing; observations remain separate.
+- Eight independently authored python-docx controls isolate story/first-page,
+  margin, size and orientation changes. The tested producer defers changed stories
+  to the next page but keeps the earlier geometry in these controls, even after a
+  manual break. Do not silently imitate that ignored geometry. Native changed
+  continuous geometry still rejects explicitly; full page ownership/layout
+  resolution remains required, including controls/empty-section edge cases.
+- Full tests pass (library 6.490s, CLI 0.659s, bidi 2.317s); full race passes
+  (98.674s/2.042s/13.540s), with the added inherited-parity regression also raced
+  separately (1.474s). Vet, module verification and host/Linux CGO-disabled builds
+  pass. Valid continuous fuzz completes 1,000 executions and malformed DOCX 500.
+  The existing eight-page/four-placement independent section regression also passes.
+  Verification commands/results are in TESTING.md and verification.json.
+  Previous checkpoint: 17fa263. No new dependency or proprietary implementation.
+
+The goal remains **incomplete**, with no external blocker. Next resolve changed
+continuous page geometry with explicit physical-page/body-frame ownership and
+qualify producer/Word behavior, then continue signed overlap, note/page bindings,
+font/scripts/PDF recovery and representative real exports. Next commands:
+`GOWORK=off go run ./examples/continuous`;
+`output/qa-venv/bin/python scripts/verify_continuous.py --make-controls`;
+`output/qa-venv/bin/python scripts/verify_continuous.py --office`;
+`GOWORK=off go test -run 'TestPDFContinuous|TestPDFSection' .`.
+
+## Previous milestone: section bodies and conditional running stories
 
 - The existing SF profile now adds root-only `section` containers, each with body,
   inherited or explicit layout, start kind and distinct default/first/even header

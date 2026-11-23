@@ -340,3 +340,218 @@ func TestDOCXEmptySectionStoryCannotHideContent(t *testing.T) {
 		t.Fatal("empty story metadata hid visible content")
 	}
 }
+
+func TestPDFContinuousStoriesAndSectionCount(t *testing.T) {
+	a := &Section{Headers: RunningStories{Default: sectionStory("A DEFAULT"), Even: sectionStory("A EVEN")}, Footers: RunningStories{Default: sectionStory("A FOOT"), Even: sectionStory("A FOOT")}, Blocks: []Block{sectionParagraph("A ONE"), {Kind: PageBreak}, sectionParagraph("A TWO")}}
+	b := &Section{Start: SectionContinuous, FirstPage: true, Headers: RunningStories{Default: sectionStory("B DEFAULT"), Even: sectionStory("B EVEN"), First: sectionStory("B FIRST")}, Footers: RunningStories{Default: sectionStory("B FOOT"), Even: sectionStory("B FOOT")}, Blocks: []Block{sectionParagraph("B SHARED"), {Kind: PageBreak}, sectionParagraph("B TWO"), {Kind: PageBreak}, sectionParagraph("B THREE")}}
+	c := &Section{Start: SectionContinuous, Headers: RunningStories{Default: sectionStory("C DEFAULT"), Even: sectionStory("C EVEN")}, Footers: RunningStories{Default: sectionStory("C FOOT"), Even: sectionStory("C FOOT")}, Blocks: []Block{sectionParagraph("C SHARED"), {Kind: PageBreak}, sectionParagraph("C TWO")}}
+	d := &Document{Layout: Layout{Width: 300, Height: 400, Margin: 40}, EvenAndOddHeaders: true, Blocks: []Block{{Kind: SectionBlock, Section: a}, {Kind: SectionBlock, Section: b}, {Kind: SectionBlock, Section: c}}}
+	before := canonicalSF(t, d)
+	var out bytes.Buffer
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(back.Pages) != 5 {
+		t.Fatalf("pages=%d text=%q", len(back.Pages), back.Text())
+	}
+	texts := make([]string, 5)
+	for _, b := range back.Blocks {
+		if b.Source != nil && len(b.Source.Regions) > 0 {
+			texts[b.Source.Regions[0].Page-1] += (&Document{Blocks: []Block{b}}).Text() + "\n"
+		}
+	}
+	for i, wants := range [][]string{{"A DEFAULT", "A ONE", "A FOOT"}, {"A EVEN", "A TWO", "B SHARED", "A FOOT"}, {"B EVEN", "B TWO", "B FOOT"}, {"B DEFAULT", "B THREE", "C SHARED", "B FOOT"}, {"C EVEN", "C TWO", "C FOOT"}} {
+		for _, want := range wants {
+			if !strings.Contains(texts[i], want) {
+				t.Fatalf("page %d missing %q: %q", i+1, want, texts[i])
+			}
+		}
+		for _, token := range []string{"B FIRST", "C DEFAULT"} {
+			if strings.Contains(texts[i], token) {
+				t.Fatal("midpage story retroactively selected", texts[i])
+			}
+		}
+	}
+	if !bytes.Equal(before, canonicalSF(t, d)) {
+		t.Fatal("source mutated")
+	}
+	checkParagraphRoundtrip(t, d)
+}
+
+func TestPDFContinuousStoriesReserveFutureBounds(t *testing.T) {
+	a := &Section{Headers: RunningStories{Default: sectionStory("SHORT HEADER")}, Footers: RunningStories{Default: sectionStory("SHORT FOOTER")}, Blocks: []Block{sectionParagraph("FIRST BODY")}}
+	b := &Section{Start: SectionContinuous, Headers: RunningStories{Default: &RunningStory{Blocks: []Block{sectionParagraph("LATER ONE"), sectionParagraph("LATER TWO"), sectionParagraph("LATER THREE"), sectionParagraph("LATER FOUR")}}}, Footers: RunningStories{Default: &RunningStory{Blocks: []Block{sectionParagraph("BOTTOM ONE"), sectionParagraph("BOTTOM TWO"), sectionParagraph("BOTTOM THREE")}}}, Blocks: []Block{sectionParagraph("SHARED BODY"), {Kind: PageBreak}, sectionParagraph("LATER BODY")}}
+	d := &Document{Layout: Layout{Width: 300, Height: 400, Margin: 30}, Blocks: []Block{{Kind: SectionBlock, Section: a}, {Kind: SectionBlock, Section: b}}}
+	var out bytes.Buffer
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(back.Pages) != 2 {
+		t.Fatal("shared story added an unnecessary page", len(back.Pages))
+	}
+	top, futureBottom := 0.0, 0.0
+	for _, block := range back.Blocks {
+		for _, run := range block.Runs {
+			if run.Text == "FIRST BODY" {
+				top = run.Source.Quad[0].Y
+			}
+			if run.Text == "LATER FOUR" {
+				for _, p := range *run.Source.Quad {
+					if p.Y > futureBottom {
+						futureBottom = p.Y
+					}
+				}
+			}
+		}
+	}
+	if top <= 30 || futureBottom == 0 || top < futureBottom {
+		t.Fatalf("first body at %.3f overlaps later header ending %.3f", top, futureBottom)
+	}
+	if strings.Count(back.Text(), "SHORT FOOTER") != 1 || strings.Count(back.Text(), "BOTTOM THREE") != 1 {
+		t.Fatal("shared footer owner changed", back.Text())
+	}
+}
+
+func TestPDFContinuousRunningBudgetIncludesLaterBody(t *testing.T) {
+	figure := Block{Kind: Picture, Image: &Image{MediaType: "image/png", Data: runningPNG(t, false), Width: 30, Height: 190}}
+	a := &Section{Headers: RunningStories{Default: &RunningStory{Blocks: []Block{figure}}}, Blocks: []Block{sectionParagraph("SMALL BODY")}}
+	b := &Section{Start: SectionContinuous, Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "LARGE", FontSize: 60}}}}}
+	d := &Document{Layout: Layout{Width: 300, Height: 260, Margin: 20}, Blocks: []Block{{Kind: SectionBlock, Section: a}, {Kind: SectionBlock, Section: b}}}
+	var out bytes.Buffer
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal("later large line must participate in the shared image budget", err)
+	}
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(back.Text(), "SMALL BODY") || !strings.Contains(back.Text(), "LARGE") {
+		t.Fatal("shared body content lost", back.Text())
+	}
+}
+
+func TestPDFSectionNoteMeasurementUsesLocalFrame(t *testing.T) {
+	narrow := Layout{Width: 120, Height: 120, Margin: 20}
+	wide := Layout{Width: 480, Height: 500, Margin: 40}
+	a := &Section{Layout: &narrow, Headers: RunningStories{Default: sectionStory("HEADER")}, Blocks: []Block{sectionParagraph("SMALL BODY")}}
+	anchor := sectionParagraph("LARGE BODY")
+	anchor.Runs = append(anchor.Runs, Run{Note: &NoteReference{ID: "wide", Kind: Footnote}})
+	b := &Section{Layout: &wide, Blocks: []Block{anchor}}
+	d := &Document{Blocks: []Block{{Kind: SectionBlock, Section: a}, {Kind: SectionBlock, Section: b}}, Notes: []Note{{ID: "wide", Kind: Footnote, Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "W", FontSize: 100}}}}}}}
+	var out bytes.Buffer
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(back.Pages) != 2 || back.Pages[0].Width != 120 || back.Pages[1].Width != 480 || !strings.Contains(back.Text(), "W") {
+		t.Fatal("unrelated note or previous body frame constrained section", len(back.Pages), back.Text())
+	}
+}
+
+func TestPDFSectionRepeatedNoteDoesNotRefitInLaterFrame(t *testing.T) {
+	wide := Layout{Width: 480, Height: 500, Margin: 40}
+	narrow := Layout{Width: 120, Height: 120, Margin: 20}
+	anchor := sectionParagraph("ANCHOR")
+	anchor.Runs = append(anchor.Runs, Run{Note: &NoteReference{ID: "wide", Kind: Footnote}})
+	d := &Document{Blocks: []Block{{Kind: SectionBlock, Section: &Section{Layout: &wide, Blocks: []Block{anchor}}}, {Kind: SectionBlock, Section: &Section{Layout: &narrow, Blocks: []Block{anchor}}}}, Notes: []Note{{ID: "wide", Kind: Footnote, Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "W", FontSize: 100}}}}}}}
+	var out bytes.Buffer
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(back.Pages) != 2 || strings.Count(back.Text(), "W") != 1 || strings.Count(back.Text(), "ANCHOR") != 2 {
+		t.Fatal("cross-reference rematerialized a note", back.Text())
+	}
+}
+
+func FuzzContinuousStories(f *testing.F) {
+	f.Add(byte(0), uint16(360), uint16(440))
+	f.Add(byte(7), uint16(300), uint16(400))
+	f.Fuzz(func(t *testing.T, flags byte, width, height uint16) {
+		a := &Section{FirstPage: flags&1 != 0, Headers: RunningStories{Default: sectionStory("A DEFAULT"), Even: sectionStory("A EVEN"), First: sectionStory("A FIRST")}, Blocks: []Block{sectionParagraph("A ONE"), {Kind: PageBreak}, sectionParagraph("A TWO")}}
+		b := &Section{Start: SectionContinuous, FirstPage: flags&2 != 0, Headers: RunningStories{Default: sectionStory("B DEFAULT"), Even: sectionStory("B EVEN"), First: sectionStory("B FIRST")}, Blocks: []Block{sectionParagraph("B SHARED"), {Kind: PageBreak}, sectionParagraph("B TWO")}}
+		c := &Section{Start: SectionContinuous, FirstPage: flags&4 != 0, Headers: RunningStories{Default: sectionStory("C DEFAULT"), Even: sectionStory("C EVEN"), First: sectionStory("C FIRST")}, Blocks: []Block{sectionParagraph("C SHARED"), {Kind: PageBreak}, sectionParagraph("C TWO")}}
+		d := &Document{Layout: Layout{Width: float64(width%201 + 300), Height: float64(height%201 + 400), Margin: 40}, EvenAndOddHeaders: true, Blocks: []Block{{Kind: SectionBlock, Section: a}, {Kind: SectionBlock, Section: b}, {Kind: SectionBlock, Section: c}}}
+		before := canonicalSF(t, d)
+		var out bytes.Buffer
+		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+			t.Fatal(err)
+		}
+		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(back.Pages) != 4 || strings.Count(back.Text(), "B EVEN") != 1 || strings.Count(back.Text(), "C EVEN") != 1 || strings.Contains(back.Text(), "B FIRST") || strings.Contains(back.Text(), "C FIRST") {
+			t.Fatal("continuous section page/story ownership changed", back.Text())
+		}
+		if !bytes.Equal(before, canonicalSF(t, d)) {
+			t.Fatal("PDF source changed")
+		}
+		out.Reset()
+		if err := Write(context.Background(), &out, d, DOCX, WriteOptions{}); err != nil {
+			t.Fatal(err)
+		}
+		back, err = ReadDOCX(context.Background(), &out)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(before, canonicalSF(t, back)) {
+			t.Fatal("continuous DOCX source semantics changed")
+		}
+	})
+}
+
+func TestPDFEmptyFinalSectionReservesEndnoteBody(t *testing.T) {
+	anchor := sectionParagraph("ANCHOR")
+	anchor.Runs = append(anchor.Runs, Run{Note: &NoteReference{ID: "ending", Kind: Endnote}})
+	figure := Block{Kind: Picture, Image: &Image{MediaType: "image/png", Data: runningPNG(t, false), Width: 30, Height: 210}}
+	final := Layout{Width: 300, Height: 300, Margin: 30}
+	d := &Document{Layout: Layout{Width: 300, Height: 400, Margin: 30}, Blocks: []Block{{Kind: SectionBlock, Section: &Section{Blocks: []Block{anchor}}}, {Kind: SectionBlock, Section: &Section{Layout: &final, Headers: RunningStories{Default: &RunningStory{Blocks: []Block{figure}}}}}}, Notes: []Note{{ID: "ending", Kind: Endnote, Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "W", FontSize: 70}}}}}}}
+	var out bytes.Buffer
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(back.Text(), "W") != 1 || !strings.Contains(back.Text(), "Endnotes") {
+		t.Fatal("empty final section dropped endnote", back.Text())
+	}
+	for _, page := range back.Pages[1:] {
+		if page.Width != 300 || page.Height != 300 {
+			t.Fatal("endnote left final section frame", page)
+		}
+	}
+}
+
+func TestPDFContinuousInheritedStoriesRestartParity(t *testing.T) {
+	a := &Section{Headers: RunningStories{Default: sectionStory("DEFAULT"), Even: sectionStory("EVEN")}, Blocks: []Block{sectionParagraph("A ONE"), {Kind: PageBreak}, sectionParagraph("A TWO")}}
+	b := &Section{Start: SectionContinuous, Blocks: []Block{sectionParagraph("B SHARED"), {Kind: PageBreak}, sectionParagraph("B TWO")}}
+	d := &Document{Layout: Layout{Width: 300, Height: 400, Margin: 40}, EvenAndOddHeaders: true, Blocks: []Block{{Kind: SectionBlock, Section: a}, {Kind: SectionBlock, Section: b}}}
+	var out bytes.Buffer
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(back.Pages) != 3 || strings.Count(back.Text(), "DEFAULT") != 1 || strings.Count(back.Text(), "EVEN") != 2 {
+		t.Fatal("identical inherited policy kept the preceding local count", back.Text())
+	}
+}

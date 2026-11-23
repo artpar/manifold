@@ -2154,7 +2154,7 @@
     "fixture_oracle_changed": false,
     "external_blocker": null
   },
-  "latest_milestone": "sections",
+  "latest_milestone": "continuous_stories",
   "language_direction_ltr_shaping": {
     "date": "2026-11-23",
     "goal_complete": false,
@@ -2499,7 +2499,7 @@
     ],
     "external_blocker": null
   },
-  "latest_evidence": "sections_2026_11_24",
+  "latest_evidence": "continuous_stories_2026_11_24",
   "paragraph_bidi_levels_2026_11_24": {
     "goal_complete": false,
     "previous_checkpoint": "658a5b0",
@@ -3378,6 +3378,100 @@
       "GOWORK=off go run ./examples/sections",
       "output/qa-venv/bin/python scripts/verify_sections.py --office",
       "GOWORK=off go test -run 'TestSection|TestDOCX.*Section|TestPDFSection|TestPDFContinuous' ."
+    ]
+  },
+  "continuous_stories_2026_11_24": {
+    "previous_checkpoint": "17fa263",
+    "goal_complete": false,
+    "external_blocker": null,
+    "implemented": [
+      "Changed running stories across same-geometry continuous sections",
+      "Opened-page owner retention and new section-local parity count",
+      "Premeasured continuous-chain body bounds and later body/note floors",
+      "Earlier running images refit against later body floor",
+      "Fresh geometry bounds and section/prior-reference scoped footnote measurement",
+      "Endnote floor and admission in an otherwise empty final section"
+    ],
+    "independent": {
+      "source_docx_sf": "exact",
+      "native_pages": 5,
+      "exact_pixel_placements": 2,
+      "uri_annotations": [
+        [
+          2,
+          "https://example.com/continuous"
+        ]
+      ],
+      "note_destinations": [
+        [
+          2,
+          2
+        ]
+      ],
+      "prosemirror_files": 13,
+      "prosemirror_nodes": 584,
+      "producer_pages": 5,
+      "producer_pixel_placements": 2,
+      "producer_controls": [
+        "stories",
+        "left",
+        "top",
+        "bottom",
+        "width",
+        "orientation",
+        "first",
+        "same"
+      ],
+      "native_and_producer_pages_visually_inspected": [
+        5,
+        5
+      ],
+      "existing_section_regression": "eight native pages/four exact placements passed",
+      "source_control_layouts": "eight independent DOCX controls retain all specified margins/sizes/continuous boundaries"
+    },
+    "cli": {
+      "cgo_disabled": true,
+      "four_paths": "passed",
+      "source_docx_sf": "exact",
+      "native_page_operator_streams_matched": 5,
+      "pdf_physical_pages": 5
+    },
+    "fuzz": {
+      "FuzzContinuousStories": {
+        "executions": 1000,
+        "passed": true
+      },
+      "FuzzReadDOCX": {
+        "executions": 500,
+        "passed": true
+      }
+    },
+    "checks": {
+      "go_test_all": "passed: library 6.490s; CLI 0.659s; bidi 2.317s",
+      "race": "passed: library 98.674s; CLI 2.042s; bidi 13.540s",
+      "go_vet": "passed",
+      "go_mod_verify": "passed",
+      "cgo_disabled_host_build": "passed and executed",
+      "cgo_disabled_linux_amd64": "passed cross-build",
+      "cgo_disabled_linux_arm64": "passed cross-build",
+      "git_diff_check": "passed",
+      "added_inherited_parity_regression_race": "passed 1.474s after test-only addition"
+    },
+    "producer_observations": [
+      "Shared-page owners retained; subsequent parity differs from native section-local counting",
+      "Both original images remain visible; body packing is higher than the common native frame",
+      "Eight controls retain earlier physical page size/margins despite changed geometry input; changed stories defer to the next page"
+    ],
+    "remaining": [
+      "Continuous changed physical geometry and explicit page/body frame ownership",
+      "Control/empty-section page ownership, common-frame packing and broader producer/Word qualification",
+      "Signed running overlap and all other active font/script/PDF recovery/color/real-export requirements"
+    ],
+    "next_commands": [
+      "GOWORK=off go run ./examples/continuous",
+      "output/qa-venv/bin/python scripts/verify_continuous.py --make-controls",
+      "output/qa-venv/bin/python scripts/verify_continuous.py --office",
+      "GOWORK=off go test -run 'TestPDFContinuous|TestPDFSection' ."
     ]
   }
 }

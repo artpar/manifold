@@ -737,8 +737,29 @@ story parts decode once. Shared note parts use minimum section image containers.
 `pdf_sections.go` measures active story variants into a conservative common body
 frame, starts physical parity pages, and selects stories by section-local count.
 Pending plans install in the new page header callback after the old footer runs.
-Automatic body/note pages retain current size/orientation. Footnotes finish before
-section transitions; endnotes use the final section. Continuous sections currently
-share a page only with identical effective geometry/story policy. Changed shared
-frames are a required unfinished capability and reject atomically. Producer story
+Automatic body/note pages retain current size/orientation. Footnotes finish before paged
+section transitions; endnotes use the final section. Continuous sections
+share a page with identical effective geometry and may change story policy. Chains
+premeasure a common frame and shared body/note floor before painting. Opened pages
+keep their owner; pending stories install on the next page with the shared page
+counted as local page one. Changed physical geometry is still required unfinished
+work and rejects atomically. Producer story
 selection/pagination and signed running overlap remain qualification work.
+
+
+Section planning clears stale body bounds while measuring a new geometry and
+filters measurement note order by reference scope. Prior section anchors mark
+cross-references as already materialized; unrelated note definitions cannot impose
+another section's minimum. Endnotes contribute floors only to the final section.
+Definitions/labels stay global, and temporary measurement state restores on error.
+Continuous-chain body floors refit earlier pictures before unioning story bounds.
+This remains conservative: every active variant contributes to the common frame.
+Physical page/body ownership for changed geometry and control/empty-section edge
+cases still needs implementation/qualification rather than a Word-fidelity claim.
+
+Section-note collection follows local reference order and a single first-anchor
+index, avoiding a scan of every global footnote for each section.
+
+Reference collection preserves encounter order and scopes measurement notes without
+rescanning every global footnote for every section; the global endnote order is
+needed only in the final scope. Measurement maps and geometry restore on errors.

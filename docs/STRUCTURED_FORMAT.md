@@ -546,10 +546,20 @@ be mixed with sections. Legacy flat content remains supported.
 Both bridges preserve and validate body/story nodes, assets, marks, notes and
 layout pointers. Native PDF selects even stories using section pages counted from
 one, while physical parity governs starts. Body packing uses a common conservative
-frame across active variants. Changed continuous frames/stories and advanced page
+frame across active variants. Changed continuous geometry and advanced page
 bindings remain unfinished. DOCX preserves section intent through standard parts;
 checked ignorable metadata restores implicit presence, never replaces conflicting
 physical content. PDF recovery retains physical pages and source regions and does
 not fabricate authorial section/layout/story bindings from untagged output.
 `examples/sections` and `scripts/verify_sections.py` expose the four paths and
 independent checks, with producer differences recorded separately.
+
+
+Same-geometry continuous sections may now change story bindings without a new SF
+field. The opened page keeps its earlier stories; subsequent pages use the new
+bindings, counting the shared page as local page one. Continuous chains reserve a
+common body plus their greatest body/note floor before painting. This affects
+native packing, not source semantics or preference values. Changed physical
+geometry and control/empty-section page ownership remain required unfinished
+work. `examples/continuous` preserves exact source SF through DOCX and exposes
+physical PDF recovery separately; untagged PDFs do not establish authored sections.

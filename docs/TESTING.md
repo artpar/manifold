@@ -1641,3 +1641,55 @@ qualified by this milestone. These are disclosed differences, not adjusted nativ
 or source oracles. Shared-page continuous changes, signed overlap, common-variant
 packing and broader Word/real-export qualification remain required work. See
 verification.json for final full-suite/race timings and the latest evidence key.
+
+## Continuous story transitions and measurement scope (2026-11-24)
+
+The new tests pin five-page owner/parity sequences across continuous boundaries,
+future taller story bounds, later body floors refitting earlier running pictures,
+local geometry/footnote measurement, cross-section references without a second note
+body, and endnotes in an otherwise empty final section. Changed physical geometry
+continues to reject atomically under its existing regression; that capability is
+still required, not waived. Flat documents retain their previous renderer path.
+
+```sh
+GOWORK=off go run ./examples/continuous
+output/qa-venv/bin/python scripts/verify_continuous.py --make-controls
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+for continuous_case in stories left top bottom width orientation first same; do bin/manydoc extract -format sf -o "output/continuous/control-${continuous_case}.sf" "output/continuous/${continuous_case}.docx"; done
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-continuous-qa --headless --convert-to pdf --outdir output/continuous/office output/continuous/document.docx output/continuous/stories.docx output/continuous/left.docx output/continuous/top.docx output/continuous/bottom.docx output/continuous/width.docx output/continuous/orientation.docx output/continuous/first.docx output/continuous/same.docx
+output/qa-venv/bin/python scripts/verify_continuous.py --office
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/continuous/document.sf output/continuous/docx.sf output/continuous/pdf.sf
+GOWORK=off go test -run 'TestPDFContinuous|TestPDFSection|TestPDFEmptyFinal' .
+GOWORK=off go test -run '^$' -fuzz '^FuzzContinuousStories$' -fuzztime=1000x -parallel=2 .
+```
+
+Independent python-docx checks section types, title-page policy, a merged running
+cell, source hyperlink relationship and six body rows. pypdf and MuPDF verify five
+native pages, exact source RGBA, two placements, old shared-page owners, new next-
+page stories, common body containment, URI and actual note destination on page two.
+Source SF/DOCX is exact; PDF recovery retains five physical pages without invented
+authorial sections. The CGO-disabled CLI exercises all four paths, compares exact
+source DOCX SF and all five native page operator streams. Five SF files/458 nodes
+including CLI output pass actual ProseMirror. With eight independently extracted
+control SF files, thirteen files/584 nodes pass; their specified later margins,
+sizes and continuous boundaries survive extraction despite the producer ignoring
+geometry in its separate export.
+
+Five native and five LibreOffice-rendered pages were visually inspected. The
+producer retains shared-page owners and both images but follows a different
+subsequent parity and packs body content higher. Eight independent python-docx
+controls record both pages' physical sizes, body rectangles and actual text.
+Changed-story controls defer their new stories until page two; geometry controls
+retain the earlier page size/margins in this producer. Preserve those observations
+separately from source/standard/native oracles. Broader Word, changed geometry,
+control/empty-section ownership and common-frame packing remain unfinished.
+The original eight-page section example also passes its independent regression.
+See verification.json for full test/race/build results and remaining work.
+
+Final checks for this checkpoint: `GOWORK=off go test ./... -count=1` passed
+(6.490s/0.659s/2.317s library/CLI/bidi). `GOWORK=off go test -race ./... -count=1`
+passed (98.674s/2.042s/13.540s); the subsequently added inherited-policy regression
+also passed focused race (1.474s), with no production change after the full race
+run. Vet/module verification/host and Linux CGO-disabled builds/diff checks pass.
+Valid continuous fuzz completed 1,000 executions; malformed DOCX completed 500.
+The full objective remains incomplete, particularly changed continuous geometry.
