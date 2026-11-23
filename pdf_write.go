@@ -57,9 +57,6 @@ func validatePDFText(r Run) error {
 func validateFontText(r Run, font *sfnt.Font) error {
 	var buf sfnt.Buffer
 	for _, ch := range norm.NFC.String(r.Text) {
-		if ch > 0xffff {
-			return fmt.Errorf("%w: PDF TrueType output requires BMP characters", ErrUnsupported)
-		}
 		if pdfSpecial(ch) {
 			required := []rune{' '}
 			switch ch {
@@ -86,9 +83,6 @@ func validateFontText(r Run, font *sfnt.Font) error {
 		if ch == 0x200c || ch == 0x200d || class == bidi.R || class == bidi.AL || class == bidi.AN || class == bidi.RLE || class == bidi.LRE || class == bidi.RLO || class == bidi.LRO || class == bidi.PDF || class == bidi.RLI || class == bidi.LRI || class == bidi.FSI || class == bidi.PDI || unicode.In(ch, unicode.Arabic, unicode.Devanagari, unicode.Hebrew, unicode.Bengali, unicode.Gurmukhi, unicode.Gujarati, unicode.Oriya, unicode.Tamil, unicode.Telugu, unicode.Kannada, unicode.Malayalam, unicode.Sinhala, unicode.Myanmar, unicode.Khmer, unicode.Thai, unicode.Lao, unicode.Tibetan, unicode.Mongolian) {
 			return fmt.Errorf("%w: PDF output needs shaping/bidirectional layout for %U", ErrUnsupported, ch)
 		}
-		if unicode.Is(unicode.Mn, ch) || unicode.Is(unicode.Mc, ch) || unicode.Is(unicode.Me, ch) {
-			return fmt.Errorf("%w: PDF text needs combining-mark positioning for %U", ErrUnsupported, ch)
-		}
 		g, err := font.GlyphIndex(&buf, ch)
 		if err != nil {
 			return err
@@ -105,6 +99,7 @@ type pdfSpan struct {
 	text            string
 	width           float64
 	ascent, descent float64
+	glyphs          *pdfGlyphCluster
 }
 type pdfLine []pdfSpan
 type pdfRenderer struct {
@@ -121,6 +116,7 @@ type pdfRenderer struct {
 	validatedImages          outputImageCache
 	fonts                    map[string]pdfFontFace
 	fontMap                  map[string]string
+	glyphFaces               map[string]*pdfGlyphFace
 }
 
 func writePDF(ctx context.Context, out io.Writer, d *Document) error {
@@ -211,7 +207,11 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 	if bytes.HasPrefix(b.Bytes(), []byte("%PDF-1.3")) {
 		b.Bytes()[7] = '4'
 	}
-	_, err = io.Copy(out, &b)
+	complete, err := r.finishGlyphFonts(b.Bytes())
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(out, bytes.NewReader(complete))
 	return err
 }
 func (r *pdfRenderer) headerFooter(bs []Block, y float64) {

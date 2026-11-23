@@ -39,10 +39,11 @@ Record compatibility changes and reference-corpus results before claiming a
 broader professional-document contract.
 
 
-The next shaping slice needs glyph-ID output as well as HarfBuzz shaping. Inspect
-pinned textlayout/harfbuzz and current gofpdf font/ToUnicode paths before changing
-validation. A glyph bridge must preserve actual outlines/advances/offsets,
-ToUnicode or ActualText logical text, bidi ordering, embedding rights and atomic
-errors. In-process PDF font dictionary/stream generation may avoid the existing
-BMP-only primitive path; qualify this with independent readers before relaxing
-any shaping/missing-glyph guard. This is unfinished implementation, not evidence.
+Glyph-ID output now exists for supported LTR graphemes, using full TrueType
+programs, shared CID resources, ActualText/ToUnicode and checked GPOS offsets.
+The next slice needs paragraph-wide segmentation/joining/bidi and language/direction
+semantics. Reuse the transport; keep current unsupported-script guards until
+independent glyph/order/layout evidence qualifies their replacement. Full-font
+cost, contextual re-shaping at line boundaries, style/font segmentation and
+internal text/link/note order need deliberate handling. Source-font recovery,
+broader formats/qualification and other acceptance rows remain required.

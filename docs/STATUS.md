@@ -21,7 +21,49 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: DOCX font slots and theme languages
+## Latest milestone: positioned glyph transport and LTR graphemes
+
+- SF → PDF now has a real glyph-ID path for supported left-to-right graphemes.
+  Pinned pure-Go HarfBuzz computes glyphs/GPOS positions; Type0/CIDFontType2
+  resources map document CIDs to original TrueType glyphs. ActualText and ToUnicode
+  preserve original logical UTF-16, including surrogate pairs and multi-glyph
+  graphemes. CID identity includes logical text, avoiding glyph/Unicode collisions.
+- Remaining combining marks after NFC and supplementary outline glyphs use this
+  path when the selected font contains them. Advances and ink extents participate
+  in existing wrapping/line/cell/note/header layout. Missing glyphs, unsupported
+  scripts/directions/joining controls and cross-style graphemes still reject
+  atomically. This is not paragraph-wide joining/bidi shaping and does not complete
+  the required broader Unicode capability.
+- Glyph faces embed their original, unmodified TTF once and share resources across
+  pages. The in-memory PDF finalization uses the existing pdfcpu object writer;
+  no service/executable/CGO or new module dependency. Legacy simple text bypasses
+  this finalization. Catalog lookup retains constant-time lazy registration.
+- Primitive/glyph baselines share 0.01pt placement precision while relative GPOS
+  offsets retain higher precision. Reader grouping no longer interprets component
+  movement inside ActualText as logical breaks; noncollinear replacement baselines
+  remain uncertain and keep paint order rather than inventing geometric order.
+  General inferred note/paragraph semantics remain unfinished.
+- examples/glyphs exercises marks, monochrome supplementary glyphs, tables, linked
+  notes/URI and running content across two pages. Independent pypdf/MuPDF checks
+  verify original font hashes/shared CID resources, actual supplementary GID and
+  GPOS offsets against MuPDF's independent HTML/Story shaper, logical extraction
+  through both ActualText and ToUnicode, relationships and DOCX package contents.
+  Both native pages were visually inspected; 75 SF/recovered nodes validate in
+  actual ProseMirror. This remains targeted synthetic QA, not Word equivalence.
+- DejaVu Sans 2.37 is a pinned original test-only asset with its license/hash.
+  HarfBuzz/Graphite/font-package notices are preserved for the newly used packages.
+  Generated PDFs, probes and outputs stay ignored. Put Go probes under output/_*
+  directories: plain output/*.go participates in go test ./... and can conflict.
+
+Full tests/race/vet/CGO-disabled build/execution, glyph/font/PDF malformed fuzz,
+51 accepted corpus files/9,031 nodes, 28 Poppler comparisons and independent
+recovery/inference/publication/rich-style regressions passed. verification.json
+records actual commands/counts and scope. The active full goal remains incomplete.
+Next implement paragraph-wide glyph shaping/bidi and language/direction semantics,
+then source-font handling, remaining rich pages/running content/PDF recovery/color
+and representative real exports. Prior checkpoint: 7fc0c6a. No external blocker.
+
+## Earlier milestone: DOCX font slots and theme languages
 
 - DOCX keeps ASCII/high-ANSI/East-Asian/complex font slots in private import
   state until text is known, then resolves ordinary public Run/SF textStyle spans.
@@ -976,8 +1018,9 @@ No external blocker currently prevents development. Editable PDF family/physical
 size/device-color recovery now exists with provenance and uncertainty diagnostics.
 DOCX theme tint/shade and settings color mappings now calculate resolved RGB.
 DOCX font-slot and theme-language selection now resolves current spans with explicit
-uncertainty/binding-loss diagnostics. Next implement Go shaping/bidi/glyph output
-and source-font handling, and continue color management/selection qualification;
+uncertainty/binding-loss diagnostics. Glyph-ID transport plus supported LTR grapheme shaping now exists. Next implement
+paragraph-wide shaping/bidi and language/direction semantics, source-font handling
+and continued color management/selection qualification;
 continue page/running content, broader PDF recovery and representative real exports.
 These remain required acceptance work. Existing precision restrictions can require
 explicit caller retypesetting of imported PDFs; preserve original SF and disclose
@@ -993,7 +1036,10 @@ GOWORK=off go test -run 'TestDOCXTheme' -count=1
 output/qa-venv/bin/python scripts/verify_docx_theme_colors.py
 GOWORK=off go test -run 'TestDOCXFont|TestDOCXScript' -count=1
 output/qa-venv/bin/python scripts/verify_docx_font_selection.py
-rg -n 'validateFontText|textAtoms|CID|ToUnicode' pdf_write.go pdf_text.go pdf_font.go
+GOWORK=off go run ./examples/glyphs
+output/qa-venv/bin/python scripts/verify_glyphs.py
+GOWORK=off go test -run 'TestPDF.*Glyph|TestPDFNoncollinear' -count=1
+rg -n 'validateFontText|textAtoms|CID|ToUnicode|glyph' pdf_write.go pdf_text.go pdf_font.go pdf_glyph.go
 GOWORK=off go doc github.com/benoitkugler/textlayout/harfbuzz
 GOWORK=off go run ./examples/text-style
 output/qa-venv/bin/python scripts/verify_text_style.py --office output/text-style/lo/text-style.pdf

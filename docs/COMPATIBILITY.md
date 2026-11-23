@@ -235,9 +235,9 @@ space advances. NB hyphen uses the font's hyphen glyph with its original logical
 code point preserved. Widths are deterministic defaults, not source-font fidelity.
 
 Supported NFC composition renders the composed font glyph while ActualText retains
-original decomposed Unicode. Remaining combining marks or mixed formatting inside
-one cluster reject until proper mark positioning is implemented. Missing glyphs
-and shaping/bidi needs still reject, with no partial PDF output. Spaces/controls
+original decomposed Unicode. Remaining marks use positioned LTR glyph clusters
+when supported by the chosen font. Mixed formatting inside one cluster, missing
+glyphs and paragraph shaping/bidi needs still reject, with no partial PDF output. Spaces/controls
 at soft line boundaries retain logical text at zero advance. Independent readers
 may normalize whitespace or add extraction newlines around zero-width controls;
 actual geometry and standard ActualText remain available. PDF reads retain
@@ -373,8 +373,8 @@ No font is fetched or substituted implicitly; missing families/styles/glyphs
 reject atomically. Supplied data is copied before subset operations. Required
 TrueType table/name/cmap bounds, BMP mapping agreement and all outlines validate
 before registration; font flags must permit this embedding/subsetting mode.
-CFF/collections/color/bitmap fonts and name-table format 1 and supplementary-plane output are currently
-unsupported. This is unfinished coverage, not an exemption from the active goal.
+CFF/collections/color/bitmap fonts and name-table format 1 are currently
+unsupported. Supplementary outline glyphs use original-font CID transport. This is unfinished coverage, not an exemption from the active goal.
 
 Selected advances, effective sizes and font metrics drive wrapping, shared
 baselines and paragraph/list/cell/note/running-content line reserves. Explicit
@@ -382,8 +382,8 @@ small fonts and their trailing empty lines retain their metrics. Decorations use
 run colors. PDF sizes require 0.01pt precision and fit the page coordinate range;
 derived 70% note sizes round to 0.01pt. DOCX requires exact half-points; unsupported
 precision returns an error. NFC/Unicode ActualText behavior remains; bidi controls,
-joining controls, common complex scripts and unpositioned combining marks reject
-until shaping/bidi is implemented. Broader scripts/font formats remain required.
+joining controls and common complex scripts reject until paragraph shaping/bidi
+is implemented. Supported LTR marks use HarfBuzz positioning. Broader scripts/font formats remain required.
 
 The four-page authored native example passes independent size/color/baseline/
 advance/font-program/link/bounds tests; its four pages were inspected. A supplied
@@ -460,5 +460,30 @@ preserve current declared family/mark/size/links and nested block ownership.
 Modern Unicode updates, automatic complex-script assignment without explicit
 cs/rtl, cs hints, font substitution and broader real-export/Word qualification
 remain required. The published deterministic policy is not a Word layout engine.
-Native PDF missing glyph/shaping/cross-font-grapheme rejection stays atomic until
-proper Go shaping/bidi/glyph output exists; that required capability is incomplete.
+Native PDF missing glyph/unsupported shaping/cross-font-grapheme rejection stays
+atomic. CID glyph transport and supported LTR graphemes now exist; paragraph-wide
+joining/bidi and broader Unicode qualification remain incomplete.
+
+
+### Native glyph rendering support
+
+Admitted TTF faces can now render LTR supplementary outline glyphs and combining
+marks remaining after NFC via glyph IDs/GPOS. No fallback face is selected implicitly.
+The original full font is embedded, once per used glyph face; ordinary text retains
+its existing subset path. PDFs using this graph serialize as PDF 1.7. CIDToGIDMap,
+nominal widths, original descriptors/TTF and ActualText/ToUnicode preserve visual
+and logical glyph relationships. Baseline placement matches the primitive writer's
+0.01pt precision; relative offsets retain finer precision. Ink extents reserve
+vertical layout space. Graphemes over 1,024 scalars, per-face inventories over 65,535
+CIDs, invalid glyphs or offsets outside PDF coordinate bounds reject atomically.
+Font admission remains conservative, including the existing BMP cmap/embedding-flag
+requirements even though glyph transport itself uses full programs.
+
+This is LTR grapheme shaping, not word/paragraph contextual shaping, bidi, arbitrary
+script/language support, color fonts or supplementary fallback. Existing explicit
+joining/bidi/complex-script/cross-style-grapheme errors remain until implemented.
+These are required expansion work, not completion exemptions. Independent evidence
+uses Noto Sans marks and DejaVu Sans monochrome U+1F600, full program hashes and
+MuPDF reference GIDs/offsets; it does not qualify all fonts or Word-equivalent layout.
+PDF recovery preserves actual span positions and logical text with source precision;
+ambiguous noncollinear replacement paragraphs retain paint order and diagnostics.

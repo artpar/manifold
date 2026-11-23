@@ -213,3 +213,10 @@ one family for an entire mixed-script run. Selector/direction/language losses an
 uncertain defaults have diagnostics. Optional QA:
 `output/qa-venv/bin/python scripts/verify_docx_font_selection.py`. Broader font
 selection and native shaping/bidi remain required work; see docs/STATUS.md.
+
+
+`GOWORK=off go run ./examples/glyphs` exercises native positioned marks and
+monochrome supplementary glyphs with caller-supplied TTFs, tables, links, notes
+and running content. Optional QA: `output/qa-venv/bin/python scripts/verify_glyphs.py`.
+Native joining/bidi/complex-script support is still unfinished; errors remain
+explicit. See docs/COMPATIBILITY.md for the current glyph/font contract.

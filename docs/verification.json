@@ -2041,5 +2041,117 @@
       "output/qa-venv/bin/python scripts/verify_docx_font_selection.py"
     ],
     "external_blocker": null
+  },
+  "glyph_transport_milestone": {
+    "date": "2026-11-23",
+    "goal_complete": false,
+    "prior_checkpoint": "7fc0c6a",
+    "runtime": "pure Go; existing pinned textlayout HarfBuzz and pdfcpu; no new module",
+    "implemented": [
+      "original TTF glyph-ID transport via Type0/CIDFontType2/CIDToGIDMap",
+      "LTR grapheme mark positions and supplementary outline glyphs",
+      "per logical-text CID mappings, ToUnicode and ActualText",
+      "shared font resources, actual ink metrics and bounded atomic errors",
+      "ActualText component motion and uncertain noncollinear baseline handling"
+    ],
+    "checks": {
+      "go_test_all": {
+        "passed": true,
+        "library_seconds": 15.404,
+        "cli_seconds": 0.85,
+        "log": "output/glyph-tests-final.log"
+      },
+      "go_race_all": {
+        "passed": true,
+        "library_seconds": 79.422,
+        "cli_seconds": 2.744,
+        "log": "output/glyph-race.log"
+      },
+      "go_vet": "passed",
+      "cgo_disabled_cli": "built darwin/arm64 and executed PDF to SF",
+      "diff_check": "passed",
+      "fuzz": {
+        "PDFGlyphClusters": {
+          "passed": true,
+          "executions": 1000,
+          "seconds": 38.734
+        },
+        "PDFGlyphFont": {
+          "passed": true,
+          "executions": 500,
+          "seconds": 2.492
+        },
+        "ReadPDF": {
+          "passed": true,
+          "executions": 500,
+          "seconds": 1.683
+        }
+      },
+      "prosemirror_glyph_fixture": {
+        "passed": true,
+        "nodes": 75
+      },
+      "prosemirror_corpus": {
+        "passed": true,
+        "files": 51,
+        "nodes": 9031
+      },
+      "poppler_text": {
+        "passed": 28,
+        "total": 28
+      },
+      "independent_regressions": [
+        "PDF recovery",
+        "PDF inference",
+        "published nine-page oracle",
+        "rich text-style four-page oracle"
+      ],
+      "default_font_benchmark": {
+        "passed": true,
+        "iterations": 5,
+        "bytes_per_pdf": 10896,
+        "ns_per_op": 3121650,
+        "log": "output/glyph-default-benchmark.log"
+      }
+    },
+    "independent": {
+      "script": "scripts/verify_glyphs.py",
+      "native_pages": 2,
+      "visually_inspected": 2,
+      "checks": [
+        "DOCX body/table/header/footer/note/URI via python-docx/XML",
+        "pypdf strict and MuPDF actual full-font SHA256/shared resources",
+        "original supplementary GID",
+        "MuPDF Story reference GIDs/GPOS within 0.01pt",
+        "exact ActualText and ToUnicode logical strings",
+        "URI/note destinations and running content"
+      ],
+      "pdfcpu_strict": "new pure-glyph font graph only; hybrid legacy descriptors omit optional FontFamily required by this validator",
+      "new_office_visual_qualification": false,
+      "Word_equivalence_claimed": false
+    },
+    "asset": {
+      "path": "testdata/assets/DejaVuSans.ttf",
+      "release": "2.37",
+      "sha256": "7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954",
+      "license": "testdata/assets/DejaVu-LICENSE.txt",
+      "runtime_embedded_by_library": false
+    },
+    "harness_correction": "Two ignored output/*.go main probes conflicted in initial suite; moved under output/_probes before final full/race suites.",
+    "limitations": [
+      "LTR per-grapheme, not paragraph-wide joining/contextual shaping/bidi",
+      "full unmodified TTF embedding size",
+      "existing conservative font admission and script guards",
+      "general inferred note/paragraph semantics",
+      "broader fonts/pages/running content/PDF structure/color and real-export qualification"
+    ],
+    "next_commands": [
+      "rg -n \"glyphCluster|textAtoms|validateFontText\" pdf_glyph.go pdf_text.go pdf_write.go",
+      "GOWORK=off go doc golang.org/x/text/unicode/bidi",
+      "GOWORK=off go run ./examples/glyphs",
+      "output/qa-venv/bin/python scripts/verify_glyphs.py"
+    ],
+    "fixture_oracle_changed": false,
+    "external_blocker": null
   }
 }

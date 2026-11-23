@@ -393,3 +393,12 @@ SF; binding/uncertainty losses diagnose. Exact source spans may split, while equ
 effective families coalesce within a leaf. Public schema/version meanings remain
 unchanged. Script/layout selector retention and broader qualification remain
 unfinished; native unsupported shaping/glyph errors are not completion exemptions.
+
+
+Native PDF glyph-ID transport expands supported output without changing SF:
+LTR supplementary outlines and residual combining marks use configured/admitted
+fonts and preserve original logical text through ActualText/ToUnicode. Glyph IDs
+are output implementation data, not another canonical text representation. Full
+source/font relationships remain in ordinary textStyle/link/note/table values.
+Paragraph joining/bidi/language semantics and broader Unicode support remain
+required; atomic unsupported-script errors must not be used as completion evidence.

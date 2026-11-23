@@ -778,3 +778,33 @@ than requiring the source SF's exact span partition. The SF eight-span oracle
 remains exact. A new table/link test initially used a PDF-specific raw Go helper;
 DOCX default cell spans zero and SF explicit one are equivalent by contract. The
 fixed test compares canonical SF and unchanged font/link/table ownership facts.
+
+
+## 2026-11-23 Real glyph output before relaxing Unicode guards
+
+HarfBuzz returns glyph IDs/offsets rather than Unicode codes. Add CID transport
+and original TTF embedding instead of reverse-mapping substitutions to guessed
+Unicode, changing cmap data or rendering text as images. Use standard CIDToGIDMap,
+ToUnicode and ActualText ([ISO 32000-1 reference](https://opensource.adobe.com/dc-acrobat-sdk-docs/standards/pdfstandards/pdf/PDF32000_2008.pdf), sections 9.7/9.10/14.9).
+This is independent implementation against the format, not proprietary UniDoc code.
+
+The existing primitive path and font validation remain for ordinary text; glyph
+resources finalize only affected PDFs, in memory using the existing object writer.
+Full unmodified fonts cost more bytes than subsetting, but preserve actual GIDs
+and embedding correctness while a qualified glyph subsetter is absent. Per-face
+CIDs distinguish logical mappings as well as glyphs. Grapheme and inventory bounds,
+no implicit font substitution and atomic failures remain explicit.
+
+Integrate supported LTR graphemes first with real glyphs/marks/supplementary text;
+joining/bidi scripts remain required work, not simulated by per-grapheme shaping.
+Default language und avoids host-locale dependence. Independent MuPDF Story shaping
+supplies GID/GPOS reference evidence; exact font-byte hashes and pypdf fallback
+extraction verify that correct plain text is not the only success criterion.
+
+Tiny baseline precision differences reordered glyphs next to primitives in the
+existing geometric inference. Quantize shared baseline placement consistently while
+retaining GPOS offsets. Component movement inside ActualText must not create logical
+breaks; noncollinear replacements keep uncertainty/paint order. Strict pdfcpu checks
+cover the new pure-glyph font graph; hybrid legacy descriptors omit optional
+FontFamily, which that validator's strict mode requires. Hybrid outputs instead
+retain independent strict pypdf/MuPDF checks; no required PDF/A/UA claim is made.

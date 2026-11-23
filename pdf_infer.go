@@ -93,6 +93,12 @@ func (r *pdfReader) inferStructure() error {
 						eligible = false
 						break
 					}
+				} else if run.Source.Precision == "replacement_span_bounds" {
+					// A noncollinear replacement has bounds, but no established
+					// logical baseline. Keep paint order instead of sorting it by
+					// its bounding-box bottom as though it were an ordinary line.
+					eligible = false
+					break
 				}
 				for _, ch := range run.Text {
 					if unicode.Is(unicode.Arabic, ch) || unicode.Is(unicode.Hebrew, ch) {

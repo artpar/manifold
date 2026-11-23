@@ -314,7 +314,9 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 		direction.X /= norm
 		direction.Y /= norm
 	}
-	if r.havePosition {
+	// Component glyph backtracking/mark offsets do not establish logical line
+	// breaks inside one ActualText replacement.
+	if r.havePosition && (actual == nil || actual.source == nil) {
 		cross := r.lastDirection.X*direction.Y - r.lastDirection.Y*direction.X
 		dx, dy := begin.X-r.lastPoint.X, begin.Y-r.lastPoint.Y
 		perpendicular := math.Abs(dx*r.lastDirection.Y - dy*r.lastDirection.X)

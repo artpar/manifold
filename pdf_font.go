@@ -21,6 +21,7 @@ type FontFace struct {
 	Data         []byte
 }
 type pdfFontFace struct {
+	key        string
 	id         string
 	parsed     *sfnt.Font
 	style      string
@@ -63,7 +64,7 @@ func (r *pdfRenderer) addFonts(extra []FontFace) error {
 		if family == "Go" {
 			id = "Go"
 		} // retain established default output metrics/resources
-		r.fonts[key] = pdfFontFace{id: id, parsed: parsed, style: style, data: data}
+		r.fonts[key] = pdfFontFace{key: key, id: id, parsed: parsed, style: style, data: data}
 		return nil
 	}
 	for _, f := range pdfFonts {
@@ -89,7 +90,7 @@ func (r *pdfRenderer) addFonts(extra []FontFace) error {
 	}
 	return nil
 }
-func (r *pdfRenderer) font(run Run) (pdfFontFace, error) {
+func (r *pdfRenderer) resolveFont(run Run) (pdfFontFace, error) {
 	seen := map[string]bool{}
 	for {
 		family := run.FontFamily
@@ -114,13 +115,29 @@ func (r *pdfRenderer) font(run Run) (pdfFontFace, error) {
 		if err := validatePDFText(Run{}); err != nil {
 			return pdfFontFace{}, err
 		}
-		return pdfFontFace{id: "Go", parsed: parsedPDFFonts[runStyle(run)]}, nil
+		for _, f := range pdfFonts {
+			if f.style == runStyle(run) {
+				return pdfFontFace{id: "Go", style: f.style, parsed: parsedPDFFonts[f.style], data: f.data}, nil
+			}
+		}
+		return pdfFontFace{}, fmt.Errorf("missing default font")
 	}
 	face, ok := r.fonts[fontKey(run.FontFamily, runStyle(run))]
 	if !ok {
 		return face, fmt.Errorf("%w: unavailable PDF font family/style %q %s", ErrUnsupported, run.FontFamily, runStyle(run))
 	}
-	return r.registerFont(fontKey(run.FontFamily, runStyle(run)))
+	return face, nil
+}
+
+func (r *pdfRenderer) font(run Run) (pdfFontFace, error) {
+	face, err := r.resolveFont(run)
+	if err != nil {
+		return face, err
+	}
+	if r.fonts == nil {
+		return face, nil
+	}
+	return r.registerFont(face.key)
 }
 
 // Register only used faces; the catalog still validates every supplied program.

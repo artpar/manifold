@@ -88,7 +88,7 @@ func samePDFStyle(a, b Run) bool {
 }
 func appendPDFSpan(line pdfLine, span pdfSpan) pdfLine {
 	zeroControl := span.width == 0 && span.text != "\u00ad" && !pdfHardBreak(span.text) && !pdfTrimSpace(span.text)
-	if len(line) > 0 && span.text != "\u00ad" && line[len(line)-1].text != "\u00ad" && (span.width > 0 || zeroControl) && line[len(line)-1].width > 0 && samePDFStyle(line[len(line)-1].run, span.run) {
+	if span.glyphs == nil && len(line) > 0 && line[len(line)-1].glyphs == nil && span.text != "\u00ad" && line[len(line)-1].text != "\u00ad" && (span.width > 0 || zeroControl) && line[len(line)-1].width > 0 && samePDFStyle(line[len(line)-1].run, span.run) {
 		last := &line[len(line)-1]
 		last.text += span.text
 		last.width += span.width
@@ -160,15 +160,35 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 		}
 		checked := run
 		checked.Text = cluster
-		face, err := r.font(run)
+		face, err := r.resolveFont(run)
 		if err != nil {
 			return nil, err
 		}
 		if err := validateFontText(checked, face.parsed); err != nil {
 			return nil, err
 		}
-		r.pdf.SetFont(face.id, runStyle(run), drawSize)
-		atom.width = r.textAdvance(cluster, drawSize)
+		var glyphs *pdfGlyphCluster
+		if needsGlyphOutput(cluster) {
+			glyphs, err = r.glyphCluster(face, cluster)
+			if err != nil {
+				return nil, err
+			}
+			atom.width = glyphs.width * drawSize
+			for _, position := range glyphs.positions {
+				if !finite(position.x) || !finite(position.y) || math.Abs(position.x*drawSize) > 14400 || math.Abs(position.y*drawSize) > 14400 {
+					return nil, fmt.Errorf("%w: glyph offsets exceed PDF coordinate bounds", ErrUnsupported)
+				}
+			}
+		} else {
+			if r.fonts != nil {
+				face, err = r.registerFont(face.key)
+				if err != nil {
+					return nil, err
+				}
+			}
+			r.pdf.SetFont(face.id, runStyle(run), drawSize)
+			atom.width = r.textAdvance(cluster, drawSize)
+		}
 		fullSize := textSize(run, size)
 		if fullSize > 14400 {
 			return nil, fmt.Errorf("%w: PDF font size exceeds page coordinate range", ErrUnsupported)
@@ -182,7 +202,11 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 		if run.Note != nil {
 			rise = fullSize * .3
 		}
-		atom.spans = pdfLine{{run: run, text: cluster, width: atom.width, ascent: math.Max(fullSize, float64(metrics.Ascent)/64+rise), descent: float64(metrics.Descent)/64 - rise}}
+		atom.spans = pdfLine{{run: run, text: cluster, width: atom.width, ascent: math.Max(fullSize, float64(metrics.Ascent)/64+rise), descent: float64(metrics.Descent)/64 - rise, glyphs: glyphs}}
+		if glyphs != nil {
+			atom.spans[0].ascent = math.Max(atom.spans[0].ascent, glyphs.ascent*drawSize+rise)
+			atom.spans[0].descent = math.Max(atom.spans[0].descent, glyphs.descent*drawSize-rise)
+		}
 		atom.hard = run.Note == nil && pdfHardBreak(cluster)
 		atom.trim = run.Note == nil && pdfTrimSpace(cluster)
 		atom.protected = run.Note == nil && pdfGlue(cluster)
@@ -341,6 +365,10 @@ func (r *pdfRenderer) replacementText(x, y float64, display string, width float6
 	r.pdf.RawWriteStr("Q")
 }
 func (r *pdfRenderer) paintSpan(span pdfSpan, x, y, size float64) {
+	if span.glyphs != nil {
+		r.paintGlyphSpan(span, x, y, size)
+		return
+	}
 	logical := norm.NFC.String(span.text) != span.text
 	for _, ch := range span.text {
 		logical = logical || pdfSpecial(ch)
@@ -389,12 +417,14 @@ func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 			drawSize = math.Round(drawSize*.7*100) / 100
 			rise = textSize(span.run, size) * .3
 		}
-		face, err := r.font(span.run)
-		if err != nil {
-			r.pdf.SetError(err)
-			return
+		if span.glyphs == nil {
+			face, err := r.font(span.run)
+			if err != nil {
+				r.pdf.SetError(err)
+				return
+			}
+			r.pdf.SetFont(face.id, runStyle(span.run), drawSize)
 		}
-		r.pdf.SetFont(face.id, runStyle(span.run), drawSize)
 		red, green, blue := textRGB(span.run.Color)
 		r.pdf.SetTextColor(red, green, blue)
 		r.paintSpan(span, x, y+baseline-rise, drawSize)

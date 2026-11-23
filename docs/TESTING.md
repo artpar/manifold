@@ -1073,5 +1073,56 @@ failed on equivalent default span spellings; final semantic checks and race pass
 Current policy uses the cited MS character/hint table, not a completed modern
 Word selection engine. Automatic complex-script selection without cs/rtl, modern
 ranges, ambiguous cs hints, direction/language bindings, source fonts and broader
-producer qualification remain required. Native shaping/bidi/glyph output must be
-implemented; atomic rejection is not its completion evidence.
+producer qualification remain required. Paragraph shaping/bidi remains required; the subsequent glyph milestone qualifies
+LTR mark positioning and supplementary outline transport only.
+
+
+## Positioned glyph transport qualification
+
+```sh
+GOWORK=off go run ./examples/glyphs
+output/qa-venv/bin/python scripts/verify_glyphs.py
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+bin/manydoc extract -format sf output/glyphs/glyphs.pdf > output/glyphs/recovered.sf
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/glyphs/glyphs.sf output/glyphs/recovered.sf
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFGlyphClusters$' -fuzztime=1000x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFGlyphFont$' -fuzztime=500x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=500x -parallel=2 -timeout=90s
+GOWORK=off go test ./... -count=1
+GOWORK=off go test -race ./... -count=1
+GOWORK=off go vet ./...
+python3 scripts/verify_structured_corpus.py
+python3 scripts/compare_pdf_text.py
+git diff --check
+```
+
+The two-page authored example covers LTR marks remaining after NFC, a monochrome
+supplementary emoji, table cells, URI/note relationships and running content.
+Independent python-docx/XML checks DOCX content and relationships; no new Office
+visual qualification is claimed. pypdf strict and MuPDF verify both native pages,
+exact font hashes/unmodified programs/shared resources, supplementary original GID,
+ActualText and ToUnicode extraction, and URI/note links. MuPDF's independent
+HTML/Story shaper supplies actual GID/GPOS offsets for the Noto mark case, compared
+to native positions within 0.01pt. Both native pages were visually inspected.
+Actual ProseMirror validates 75 source/recovered nodes; inferred note/paragraph
+semantics remain unfinished. This is targeted synthetic evidence.
+
+Go tests cover strict validation of the new pure-glyph font graph, CID mapping
+collisions/inventory, cancellation, semantic style/source relationships, inline
+order and noncollinear ActualText uncertainty. pdfcpu strict's legacy FontFamily
+requirement prevents using that mode as the hybrid-font oracle; hybrid outputs
+retain independent pypdf/MuPDF checks. Full unmodified TTF embedding has a size
+cost; font admission still requires the existing conservative cmap/flag contract.
+No paragraph-wide contextual shaping, bidi or implicit fallback is qualified.
+
+Full tests passed (library 15.404s, CLI 0.850s); race passed (79.422s/2.744s), vet
+and CGO-disabled build/execution passed. Cluster fuzz passed 1,000 executions
+(38.734s), mutated glyph-font fuzz 500 (2.492s), malformed-PDF fuzz 500 (1.683s).
+All 51 accepted corpus files/9,031 nodes and 28 Poppler comparisons passed.
+Independent recovery, inference, published nine-page and rich-style four-page
+regressions passed. Default-only font-registration benchmark (5 iterations)
+retains 10,896 bytes/PDF; timing is observational, not a performance guarantee.
+An initial suite invocation encountered two ignored probe main functions under
+output; moving those probes into output/_probes fixes the harness. Keep Go probes
+under underscore directories so go test ./... does not compile them. Final full
+and race suites passed after this correction. No fixture oracle changed.

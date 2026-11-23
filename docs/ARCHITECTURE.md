@@ -458,3 +458,35 @@ extensions, automatic complex-script assignment, ambiguous cs hints and producer
 variants remain required expansion/qualification. Native PDF still rejects
 unsupported shaping, supplementary glyphs and cross-style graphemes atomically;
 source normalized spans survive SF/DOCX independently of that output limitation.
+
+
+## Glyph-ID PDF transport
+
+`pdf_glyph.go` provides the glyph resource/paint path that Unicode-codepoint
+primitives could not express. Supported LTR graphemes retaining marks after NFC,
+or containing supplementary codepoints, use pinned textlayout HarfBuzz. Positions
+are em-normalized; advance and actual glyph extents feed the shared layout engine.
+Fonts and buffers are renderer-owned, default shaping language is und, and no
+process-global configuration is changed. Unsupported paragraph scripts/directions
+stay guarded until a paragraph shaper exists. A 1,024-scalar grapheme and 65,535-CID
+per-face inventory are explicit resource bounds; offset coordinates are checked.
+
+Painting uses explicit glyph origins under a shared quantized baseline, preserving
+relative GPOS offsets. ActualText spans retain original logical text; CID keys
+include glyph ID and logical mapping. The first component maps the grapheme's
+UTF-16 string and continuation components map empty strings. Both ActualText-aware
+and ToUnicode-fallback readers are independently checked. Full original TTF,
+CIDToGIDMap, nominal widths, descriptors and ToUnicode streams are installed into
+page resources by the existing in-process pdfcpu writer. Shared programs/resources
+are not duplicated per page. Existing font admission/embedding restrictions remain
+conservative; color/CFF/collection/font-variation expansion is still required.
+
+Simple text keeps its existing subset/primitives and skips PDF rewriting entirely.
+Renderer font entries retain their catalog key to avoid linear lookup while choosing
+between paths. Errors, cancellation and recovered dependency panics occur before
+writing caller output. Dependency shaping observes bounded graphemes and context
+checks at phase boundaries, not a claim of exhaustive adversarial-font safety.
+
+ActualText component movement is not a logical line break. Noncollinear replacements
+lack an established baseline; untagged inference retains paint order with uncertainty.
+General PDF note/paragraph/reading-order recovery remains separate and incomplete.
