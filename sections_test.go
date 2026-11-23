@@ -4,7 +4,9 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"fmt"
 	"io"
+	"math"
 	"strings"
 	"testing"
 )
@@ -177,8 +179,15 @@ func TestPDFContinuousSectionContract(t *testing.T) {
 	}
 	d.Blocks[1].Section.Layout = &Layout{Width: 400, Height: 300, Margin: 30}
 	out.Reset()
-	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err == nil || out.Len() != 0 {
-		t.Fatal("unqualified shared-page geometry accepted or partial output")
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	got, err = ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got.Pages) != 2 || got.Pages[0].Width != 300 || got.Pages[0].Height != 400 || got.Pages[1].Width != 400 || got.Pages[1].Height != 300 {
+		t.Fatal("changed paper canvas was discarded", got.Pages)
 	}
 }
 
@@ -553,5 +562,236 @@ func TestPDFContinuousInheritedStoriesRestartParity(t *testing.T) {
 	}
 	if len(back.Pages) != 3 || strings.Count(back.Text(), "DEFAULT") != 1 || strings.Count(back.Text(), "EVEN") != 2 {
 		t.Fatal("identical inherited policy kept the preceding local count", back.Text())
+	}
+}
+
+func TestPDFContinuousFramesRetainRunningAndNoteOwners(t *testing.T) {
+	first := sectionParagraph("OLD BODY")
+	first.Runs = append(first.Runs, Run{Note: &NoteReference{ID: "old", Kind: Footnote}})
+	second := sectionParagraph("NEW BODY")
+	second.Runs = append(second.Runs, Run{Note: &NoteReference{ID: "new", Kind: Footnote}})
+	old := &Section{Headers: RunningStories{Default: sectionStory("OLD HEADER")}, Footers: RunningStories{Default: sectionStory("OLD FOOT")}, Blocks: []Block{first}}
+	l := Layout{Width: 360, Height: 440, Margins: &PageMargins{Top: 60, Right: 20, Bottom: 70, Left: 100}, HeaderDistance: pagePoint(10), FooterDistance: pagePoint(15)}
+	next := &Section{Layout: &l, Start: SectionContinuous, Headers: RunningStories{Default: sectionStory("NEW HEADER")}, Footers: RunningStories{Default: sectionStory("NEW FOOT")}, Blocks: []Block{second, {Kind: PageBreak}, sectionParagraph("NEW SECOND")}}
+	blob := runningPNG(t, false)
+	figure := func(w float64) Block {
+		return Block{Kind: Picture, Image: &Image{MediaType: "image/png", Data: blob, Width: w, Height: 12}}
+	}
+	rtl := sectionParagraph("SECOND NOTE")
+	rtl.Direction = "rtl"
+	d := &Document{Layout: Layout{Width: 360, Height: 440, Margin: 40}, Blocks: []Block{{Kind: SectionBlock, Section: old}, {Kind: SectionBlock, Section: next}}, Notes: []Note{{ID: "old", Kind: Footnote, Blocks: []Block{sectionParagraph("FIRST NOTE"), figure(120)}}, {ID: "new", Kind: Footnote, Blocks: []Block{rtl, figure(80)}}}}
+	before := canonicalSF(t, d)
+	var out bytes.Buffer
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(back.Pages) != 2 {
+		t.Fatal("same canvas forced a page", len(back.Pages), back.Text())
+	}
+	positions := map[string]Point{}
+	var imageX []float64
+	for _, b := range back.Blocks {
+		if b.Image != nil {
+			imageX = append(imageX, b.Source.Quad[0].X)
+		}
+		for _, run := range b.Runs {
+			if run.Source != nil && run.Source.Quad != nil {
+				positions[run.Text] = run.Source.Quad[0]
+			}
+		}
+	}
+	for token, want := range map[string]float64{"OLD BODY": 40, "NEW BODY": 100, "NEW SECOND": 100, "OLD HEADER": 40, "NEW HEADER": 100, "OLD FOOT": 40, "NEW FOOT": 100} {
+		if math.Abs(positions[token].X-want) > .02 {
+			t.Fatal("frame owner changed", token, positions[token])
+		}
+	}
+	if len(imageX) != 2 || math.Abs(imageX[0]-58) > .02 || math.Abs(imageX[1]-100) > .02 {
+		t.Fatal("note re-used current body horizontal frame", imageX)
+	}
+	if !bytes.Equal(before, canonicalSF(t, d)) {
+		t.Fatal("source layout changed")
+	}
+	checkParagraphRoundtrip(t, d)
+}
+
+func FuzzContinuousGeometry(f *testing.F) {
+	f.Add(byte(0), byte(20), byte(30), uint16(360), uint16(440))
+	f.Add(byte(1), byte(80), byte(50), uint16(480), uint16(360))
+	image := runningPNG(f, false)
+	f.Fuzz(func(t *testing.T, flags, left, right byte, width, height uint16) {
+		l := Layout{Width: 360, Height: 440, Margins: &PageMargins{Top: 50, Right: float64(right % 61), Bottom: 60, Left: float64(left % 101)}, HeaderDistance: pagePoint(float64(flags % 21)), FooterDistance: pagePoint(12)}
+		if flags&1 != 0 {
+			l.Width = float64(width%201 + 300)
+			l.Height = float64(height%201 + 350)
+		}
+		aBody := sectionParagraph("OLD BODY")
+		aBody.Runs = append(aBody.Runs, Run{Note: &NoteReference{Kind: Footnote, ID: "old"}})
+		bBody := sectionParagraph("NEW BODY")
+		bBody.Runs = append(bBody.Runs, Run{Note: &NoteReference{Kind: Footnote, ID: "new"}})
+		a := &Section{Headers: RunningStories{Default: sectionStory("OLD HEADER")}, Footers: RunningStories{Default: sectionStory("OLD FOOTER")}, Blocks: []Block{aBody}}
+		b := &Section{Start: SectionContinuous, Layout: &l, Headers: RunningStories{Default: sectionStory("NEW HEADER")}, Footers: RunningStories{Default: sectionStory("NEW FOOTER")}, Blocks: []Block{bBody, {Kind: PageBreak}, sectionParagraph("FINAL BODY")}}
+		figure := Block{Kind: Picture, Image: &Image{MediaType: "image/png", Data: image, Width: 24, Height: 12}}
+		d := &Document{Layout: Layout{Width: 360, Height: 440, Margin: 40}, Blocks: []Block{{Kind: SectionBlock, Section: a}, {Kind: SectionBlock, Section: b}}, Notes: []Note{{ID: "old", Kind: Footnote, Blocks: []Block{sectionParagraph("OLD NOTE"), figure}}, {ID: "new", Kind: Footnote, Blocks: []Block{sectionParagraph("NEW NOTE"), figure}}}}
+		before := canonicalSF(t, d)
+		var out bytes.Buffer
+		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+			t.Fatal(err)
+		}
+		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+		pages := 2
+		if l.Width != 360 || l.Height != 440 {
+			pages = 3
+		}
+		if len(back.Pages) != pages {
+			t.Fatalf("paper transition produced %d rather than %d pages", len(back.Pages), pages)
+		}
+		pictures := 0
+		for _, block := range back.Blocks {
+			if block.Image != nil {
+				want := 58.0
+				if pictures == 1 {
+					want = l.Margins.Left + 18
+				}
+				if block.Source == nil || block.Source.Quad == nil || math.Abs(block.Source.Quad[0].X-want) > .03 {
+					t.Fatal("note frame not preserved", block.Source)
+				}
+				pictures++
+			}
+		}
+		if pictures != 2 || strings.Count(back.Text(), "OLD FOOTER") != 1 || !strings.Contains(back.Text(), "FINAL BODY") {
+			t.Fatal("changed geometry lost content", back.Text())
+		}
+		for _, p := range back.Pages[1:] {
+			if p.Width != l.Width || p.Height != l.Height {
+				t.Fatal("paper settings lost", p)
+			}
+		}
+		if !bytes.Equal(before, canonicalSF(t, d)) {
+			t.Fatal("source mutated")
+		}
+		out.Reset()
+		if err := Write(context.Background(), &out, d, DOCX, WriteOptions{}); err != nil {
+			t.Fatal(err)
+		}
+		back, err = ReadDOCX(context.Background(), &out)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(before, canonicalSF(t, back)) {
+			t.Fatal("DOCX section semantics changed")
+		}
+	})
+}
+
+func TestPDFContinuousMarginChangeKeepsNoteContinuationsInTheirFrame(t *testing.T) {
+	blob := runningPNG(t, false)
+	var oldNote []Block
+	for i := 0; i < 18; i++ {
+		oldNote = append(oldNote, sectionParagraph(fmt.Sprintf("OLD NOTE LINE %02d", i)))
+		if i%3 == 0 {
+			oldNote = append(oldNote, Block{Kind: Picture, Image: &Image{MediaType: "image/png", Data: blob, Width: 40, Height: 8}})
+		}
+	}
+	aBody := sectionParagraph("OLD ANCHOR")
+	aBody.Runs = append(aBody.Runs, Run{Note: &NoteReference{ID: "old", Kind: Footnote}})
+	bBody := sectionParagraph("NEW ANCHOR")
+	bBody.Runs = append(bBody.Runs, Run{Note: &NoteReference{ID: "new", Kind: Footnote}})
+	l := Layout{Width: 360, Height: 440, Margins: &PageMargins{Top: 50, Right: 20, Bottom: 60, Left: 100}}
+	d := &Document{Layout: Layout{Width: 360, Height: 440, Margin: 40}, Blocks: []Block{{Kind: SectionBlock, Section: &Section{Blocks: []Block{aBody}}}, {Kind: SectionBlock, Section: &Section{Start: SectionContinuous, Layout: &l, Blocks: []Block{bBody}}}}, Notes: []Note{{ID: "old", Kind: Footnote, Blocks: oldNote}, {ID: "new", Kind: Footnote, Blocks: []Block{sectionParagraph("NEW NOTE"), {Kind: Picture, Image: &Image{MediaType: "image/png", Data: blob, Width: 20, Height: 8}}}}}}
+	var out bytes.Buffer
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(back.Pages) < 3 {
+		t.Fatal("note did not exercise continuation", len(back.Pages))
+	}
+	oldImages, newImages := 0, 0
+	for _, b := range back.Blocks {
+		if b.Image == nil {
+			continue
+		}
+		q := b.Source.Quad
+		w := q[1].X - q[0].X
+		if math.Abs(w-40) < .03 {
+			oldImages++
+			if math.Abs(q[0].X-58) > .03 {
+				t.Fatal("old continuation adopted new margin", q)
+			}
+		} else if math.Abs(w-20) < .03 {
+			newImages++
+			if math.Abs(q[0].X-118) > .03 {
+				t.Fatal("new note kept old margin", q)
+			}
+		}
+	}
+	if oldImages != 6 || newImages != 1 {
+		t.Fatal("note images lost", oldImages, newImages)
+	}
+	for i := 0; i < 18; i++ {
+		if strings.Count(back.Text(), fmt.Sprintf("OLD NOTE LINE %02d", i)) != 1 {
+			t.Fatal("note text lost or repeated", i)
+		}
+	}
+	if strings.Count(back.Text(), "NEW ANCHOR") != 1 || strings.Count(back.Text(), "NEW NOTE") != 1 {
+		t.Fatal("new content lost", back.Text())
+	}
+}
+
+func TestPDFContinuousMarginsKeepWrappedParagraphAndTableWidth(t *testing.T) {
+	a := &Section{Headers: RunningStories{Default: sectionStory("OLD HEADER")}, Footers: RunningStories{Default: sectionStory("OLD FOOT")}, Blocks: []Block{sectionParagraph("OLD BODY")}}
+	l := Layout{Width: 360, Height: 440, Margins: &PageMargins{Top: 50, Right: 70, Bottom: 60, Left: 110}}
+	b := &Section{Start: SectionContinuous, Layout: &l, Headers: RunningStories{Default: sectionStory("NEW HEADER")}, Footers: RunningStories{Default: sectionStory("NEW FOOT")}}
+	for i := 0; i < 12; i++ {
+		b.Blocks = append(b.Blocks, sectionParagraph(fmt.Sprintf("PARA-%02d wrapping words must stay inside the new narrower body frame on every continuation page", i)))
+	}
+	table := Block{Kind: Table, Rows: []Row{{RepeatHeader: true, Cells: []Cell{{ColSpan: 2, Blocks: []Block{sectionParagraph("TABLE HEADER")}}}}}}
+	for i := 0; i < 24; i++ {
+		table.Rows = append(table.Rows, Row{Cells: []Cell{{Blocks: []Block{sectionParagraph(fmt.Sprintf("ROW-%02d", i))}}, {Blocks: []Block{sectionParagraph(fmt.Sprintf("VALUE-%02d", i))}}}})
+	}
+	b.Blocks = append(b.Blocks, table)
+	d := &Document{Layout: Layout{Width: 360, Height: 440, Margin: 40}, Blocks: []Block{{Kind: SectionBlock, Section: a}, {Kind: SectionBlock, Section: b}}}
+	var out bytes.Buffer
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(back.Pages) < 4 {
+		t.Fatal("did not exercise multi-page paragraphs and table", len(back.Pages))
+	}
+	for _, block := range back.Blocks {
+		for _, run := range block.Runs {
+			if run.Source == nil || run.Source.Quad == nil || run.Text == "OLD BODY" || run.Source.FontSize < 10 {
+				continue
+			}
+			for _, p := range *run.Source.Quad {
+				if p.X < 109.99 || p.X > 290.01 {
+					t.Fatal("continuation reused old body width", run.Text, run.Source)
+				}
+			}
+		}
+	}
+	for i := 0; i < 12; i++ {
+		if strings.Count(back.Text(), fmt.Sprintf("PARA-%02d", i)) != 1 {
+			t.Fatal("paragraph lost or repeated", i)
+		}
+	}
+	for i := 0; i < 24; i++ {
+		if strings.Count(back.Text(), fmt.Sprintf("ROW-%02d", i)) != 1 || strings.Count(back.Text(), fmt.Sprintf("VALUE-%02d", i)) != 1 {
+			t.Fatal("table row lost or repeated", i)
+		}
 	}
 }

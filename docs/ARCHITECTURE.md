@@ -739,11 +739,11 @@ frame, starts physical parity pages, and selects stories by section-local count.
 Pending plans install in the new page header callback after the old footer runs.
 Automatic body/note pages retain current size/orientation. Footnotes finish before paged
 section transitions; endnotes use the final section. Continuous sections
-share a page with identical effective geometry and may change story policy. Chains
+share a page when paper dimensions match and may change body margins/story policy. Chains
 premeasure a common frame and shared body/note floor before painting. Opened pages
 keep their owner; pending stories install on the next page with the shared page
-counted as local page one. Changed physical geometry is still required unfinished
-work and rejects atomically. Producer story
+counted as local page one. Changed paper dimensions drain notes and start a new physical canvas; horizontal
+body frames update immediately on shared pages. Producer story
 selection/pagination and signed running overlap remain qualification work.
 
 
@@ -754,8 +754,8 @@ another section's minimum. Endnotes contribute floors only to the final section.
 Definitions/labels stay global, and temporary measurement state restores on error.
 Continuous-chain body floors refit earlier pictures before unioning story bounds.
 This remains conservative: every active variant contributes to the common frame.
-Physical page/body ownership for changed geometry and control/empty-section edge
-cases still needs implementation/qualification rather than a Word-fidelity claim.
+Changed paper/body frames now have separate ownership as described below.
+Control/empty-section edge cases still need qualification, without a Word-fidelity claim.
 
 Section-note collection follows local reference order and a single first-anchor
 index, avoiding a scan of every global footnote for each section.
@@ -763,3 +763,22 @@ index, avoiding a scan of every global footnote for each section.
 Reference collection preserves encounter order and scopes measurement notes without
 rescanning every global footnote for every section; the global endnote order is
 needed only in the final scope. Measurement maps and geometry restore on errors.
+
+
+## Physical page ownership and body frames
+
+`sameSectionCanvas` groups continuous chains by width/height, not by all margin
+or running bindings. Group bounds reserve vertical stories/body floors; horizontal
+body coordinates remain section-specific and stable across a section's paragraph/
+table continuations. Changed paper dimensions begin a physical page after old
+notes drain. The native renderer never paints two page canvases into one page.
+
+Each opened page captures its running-story owner. Footer painting temporarily
+restores that plan's geometry before restoring the current body frame, so a later
+shared-page margin cannot move an earlier footer. `pdfNoteChunk` carries measured
+left/width through every split/deferred/continuation path. Notes use those values
+for labels, content and links; their separator spans the participating frames.
+The old single-frame path remains coordinate-identical. Common vertical packing
+is deliberately conservative and still needs broader qualification, as do control/
+empty-section owners and signed overlap. Native policies are independently tested
+without claiming a Word-compatible layout engine.

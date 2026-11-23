@@ -546,8 +546,7 @@ be mixed with sections. Legacy flat content remains supported.
 Both bridges preserve and validate body/story nodes, assets, marks, notes and
 layout pointers. Native PDF selects even stories using section pages counted from
 one, while physical parity governs starts. Body packing uses a common conservative
-frame across active variants. Changed continuous geometry and advanced page
-bindings remain unfinished. DOCX preserves section intent through standard parts;
+frame across active variants. Advanced page bindings and broader packing/ownership qualification remain unfinished. DOCX preserves section intent through standard parts;
 checked ignorable metadata restores implicit presence, never replaces conflicting
 physical content. PDF recovery retains physical pages and source regions and does
 not fabricate authorial section/layout/story bindings from untagged output.
@@ -559,7 +558,16 @@ Same-geometry continuous sections may now change story bindings without a new SF
 field. The opened page keeps its earlier stories; subsequent pages use the new
 bindings, counting the shared page as local page one. Continuous chains reserve a
 common body plus their greatest body/note floor before painting. This affects
-native packing, not source semantics or preference values. Changed physical
-geometry and control/empty-section page ownership remain required unfinished
-work. `examples/continuous` preserves exact source SF through DOCX and exposes
+native packing, not source semantics or preference values. Changed paper dimensions now start a physical canvas, and same-paper horizontal
+body frames may change within a shared page. Control/empty-section ownership and
+conservative vertical packing still need qualification. `examples/continuous` preserves exact source SF through DOCX and exposes
 physical PDF recovery separately; untagged PDFs do not establish authored sections.
+
+
+Continuous layout overrides no longer reject for geometry alone. Native PDF uses
+each section's horizontal body margins, retains common vertical reservations, and
+opens a physical page when paper dimensions change. Already-opened running stories
+and measured footnote chunks retain their original frames. No SF field/version
+change is needed; exact source intent/settings still round-trip through DOCX.
+Paper-driven native pagination is separate from logical `continuous` start intent.
+Physical recovery records actual pages/quads, not inferred authorial section policy.

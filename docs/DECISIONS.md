@@ -1139,3 +1139,31 @@ these observations, not a silent geometry-loss workaround. Changed continuous
 geometry still rejects pending physical-page/body-frame resolution. Common-frame
 packing and control/empty-section ownership remain qualification work. No Word-
 equivalence or full-goal completion follows from this narrower milestone.
+
+
+## Separate body frames from physical page canvases
+
+Allow continuous margins/distances to change on a shared physical page. Keep each
+body's horizontal width/left edge and its already-measured note flows; keep running
+stories attached to the section that opened the page. Reserve a conservative
+common vertical body before painting the chain. Flush notes and open a new canvas
+when paper dimensions differ. This supports requested geometry without discarding
+settings or trying to resize already-painted physical pages.
+
+The published [page-size description](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.pagesize?view=openxml-2.8.1)
+defines width and height as section page dimensions. Microsoft's [orientation
+example](https://learn.microsoft.com/en-us/office/open-xml/word/how-to-change-the-print-orientation-of-a-word-processing-document)
+sets the orientation hint and dimensions separately. Native PDF uses the canonical
+physical dimensions; DOCX emits a landscape hint from those dimensions. Keep the
+original eight independently authored controls intact, including absent hints.
+The tested producer retains their earlier geometry, while the rich example with
+an explicit landscape hint switches paper. It also defers shared-page margins
+where native horizontal frames change immediately. Record those observations,
+not an unsupported claim that all producers or Word behave identically.
+
+Replace the old unsupported-geometry assertion with positive page-size checks now
+that the capability exists. Source fixtures, content and expected producer
+observations remain intact. Verify old footer positions, mixed-frame/RTL note
+labels/assets/links, long note continuation and narrow wrapped/table continuation
+bounds. Common vertical packing, control/empty-section ownership and signed
+running overlap remain qualification work under the original full objective.

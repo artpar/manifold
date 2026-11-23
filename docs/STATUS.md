@@ -21,7 +21,55 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: continuous story transitions and local measurement
+## Latest milestone: continuous body frames and physical canvases
+
+- Continuous sections now apply changed margins and running distances rather than
+  rejecting all geometry changes. Same-size paper shares a page: each section's
+  body uses its own horizontal frame, while the chain reserves common vertical
+  story/body bounds. Already-opened headers/footers keep their original geometry;
+  new running settings apply when the next physical page opens.
+- Different paper dimensions drain the old notes and start a new physical canvas.
+  New pages and automatic continuations keep the requested size. Source continuous
+  start intent still survives SF/DOCX; native reflow does not silently discard the
+  requested paper size to force incompatible canvases onto one physical page.
+- Footnote chunks retain their measured horizontal frame across shared-page changes,
+  deferral and continuation. Mixed-width note areas use a union separator; RTL
+  labels, images, notice links and destinations keep their own reference context.
+  Tests cover long note continuation, narrow wrapped paragraphs and repeated-header
+  tables as well as old footer positions. Existing no-change paths keep the same
+  generated page streams.
+- `examples/continuous-geometry` exercises all four paths. Exact source DOCX SF,
+  five native pages, three original RGBA placements, actual URI/three note targets,
+  body columns and old/new running positions pass independent checks. Five native
+  and five producer pages were inspected. Eight original independent controls now
+  also generate native PDFs with their specified later margins and paper sizes.
+  Caller-explicit Cambria/Calibri-to-Go mappings qualify those control exports.
+- LibreOffice preserves all rich-example content/three images and switches its
+  paper when the explicit landscape hint is emitted. It defers shared-page margin
+  changes to the next page; native bodies apply new horizontal margins immediately
+  and reserve vertical space conservatively. Earlier controls without an explicit
+  orientation hint retain earlier paper in that producer. Preserve these separate
+  observations; they do not establish Word equivalence or a general producer bug.
+- The previous unsupported-geometry test now positively verifies both requested
+  physical canvases because the restriction was implemented away. No reference
+  fixture/source/content oracle was changed to hide a failure. Full checks and
+  command evidence are in TESTING.md and verification.json. Tests pass
+  (9.355s/0.472s/2.979s library/CLI/bidi); race passes
+  (102.983s/2.251s/15.650s). Vet/module verification/CGO-disabled host and Linux
+  builds pass. Valid geometry fuzz completes 1,000 executions; malformed DOCX 500.
+  Five SF files/387 nodes pass ProseMirror. Fresh d1b6c96 baseline builds confirm
+  all thirteen earlier section/continuous page streams remain exact. Prior
+  checkpoint d1b6c96.
+
+The goal remains **incomplete**, with no external blocker. Next qualify controls/
+empty-section page ownership and conservative shared vertical packing, then signed
+running overlap, broader page/note bindings, fonts/scripts/PDF recovery and real-
+export coverage. Next commands:
+`GOWORK=off go run ./examples/continuous-geometry`;
+`output/qa-venv/bin/python scripts/verify_continuous_geometry.py --office`;
+`GOWORK=off go test -run 'TestPDFContinuous|TestPDFSection|FuzzContinuousGeometry' .`.
+
+## Previous milestone: continuous story transitions and local measurement
 
 - Native PDF now supports changed default/first/even running bindings across
   continuous sections with the same effective page geometry. The opened page keeps

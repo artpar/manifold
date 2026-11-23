@@ -13,7 +13,7 @@ integration and do not authorize changes to Daptin.
    theme-language resolution now preserves current spans, while broader selection
    qualification/modern ranges remain required; calculated run theme tint/shade
    and settings color mappings now exist; four-edge margins/running distances now
-   exist; section bodies and default/first/even bindings now exist; next changed continuous geometry, producer parity/inheritance qualification, richer note numbering/separator/layout behavior, bookmarks, comment/revision history and
+   exist; section bodies and default/first/even bindings now exist; next controls/empty-section ownership, signed overlap and producer parity/inheritance qualification, richer note numbering/separator/layout behavior, bookmarks, comment/revision history and
    broader numbering formats. Each feature needs import, model, export and tests;
    avoid a second authoritative representation of the same content.
 3. Extend the new Unicode-space/NFC/grapheme wrapping foundation with Go text shaping/bidi and configurable licensed fonts for broader PDF
@@ -125,3 +125,11 @@ silently discard their margins/sizes because one producer does. Keep already-sha
 line/table continuation widths valid and account for notes and page controls.
 Run `GOWORK=off go run ./examples/continuous` and the independent verifier before
 repeating final tests. The full acceptance audit remains active.
+
+
+Changed continuous geometry now generates output: same-paper sections retain their
+own horizontal frames, and different paper starts a new canvas after notes drain.
+Next exercise controls/empty-section ownership and common vertical packing, then
+signed story overlap and richer page/binding cases. Keep the unchanged controls
+and producer observations, including orientation-hint qualifications. Run
+`GOWORK=off go run ./examples/continuous-geometry` and its independent verifier.

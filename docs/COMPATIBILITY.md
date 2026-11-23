@@ -14,7 +14,7 @@ current rejection behavior must not be read as an exemption from that goal.
 | DOCX read | Paragraphs/headings, family/size/RGB/auto plus bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans/repeating header prefixes, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
 | DOCX write | Paragraphs/headings/runs/links with named families/half-point sizes/RGB/auto, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, section boundaries, four-edge layouts/distances and default/first/even header/footer variants, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
 | PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; more complex inference, internal destinations and OCR unfinished; unsupported codecs/encodings/operators reject |
-| PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, rich measured headers/footers, linked rich footnotes/endnotes with continuation | Built-in Go coverage plus explicit supplied TTFs; qualified Hebrew/Arabic bidi below, broader scripts unfinished; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
+| PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, per-section body margins/paper settings, metadata, rich measured headers/footers, linked rich footnotes/endnotes with continuation | Built-in Go coverage plus explicit supplied TTFs; qualified Hebrew/Arabic bidi below, broader scripts unfinished; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
 | SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; richer required features remain unfinished |
 | Legacy JSON | Public model with base64 image data and diagnostics | Unknown JSON fields rejected; this is manydoc's model, not Colleaf's .vdocs schema |
 | Text | Body/table/note text; form feeds represent page breaks | Formatting and binary image data are not represented |
@@ -705,8 +705,8 @@ is established by this targeted evidence.
 
 Sectioned SF/DOCX preserves body membership, full layout overrides, same-variant
 inheritance and explicit blank stories. Native PDF supports next/odd/even starts
-and same-geometry continuous flow with changed running stories, changes page size/margins, and selects first/
-even/default stories. Changed continuous geometry still rejects explicitly;
+and continuous flow with changed running stories/body margins, changes page size/margins, and selects first/
+even/default stories. Changed continuous paper dimensions now start a new physical page;
 this is a required gap, not a completed-page-support exclusion. Body frames reserve
 all active variants conservatively. Footnotes drain before a section transition;
 endnotes use the final section. DOCX note parts fit minimum section containers.
@@ -724,7 +724,32 @@ checks cover merged running cells, six body rows, two original-pixel image
 placements, URI and note destinations. LibreOffice keeps shared-page owners in
 these cases but selects subsequent parity differently and packs body text higher.
 Eight producer controls retain earlier geometry despite changed input margins/
-size/orientation. Native output still rejects such geometry changes explicitly;
-physical-page/body-frame resolution and control/empty-section qualification remain
-required. Notes are measured in their applicable section; later wide notes and
+size/orientation. Native output now preserves those dimensions and margins: paper changes open a
+new canvas, while same-paper horizontal margins apply on shared pages. Control/
+empty-section ownership and conservative vertical packing still need qualification. Notes are measured in their applicable section; later wide notes and
 already-materialized cross-references no longer impose unrelated bounds.
+
+
+Continuous geometry now has explicit native behavior: same-size paper may share
+pages with section-specific horizontal bodies and common conservative vertical
+bounds; different paper sizes open new physical pages after notes drain. The
+opened page's running stories keep their original geometry. Notes retain their
+reference frame through deferral/continuation, including RTL labels and notice
+links. The five-page geometry example and eight unchanged independent controls
+verify settings, positions and assets. LibreOffice switches the rich example's
+explicitly hinted paper and preserves content/images, but defers shared-page
+margin changes and retains earlier paper in the original hint-free controls.
+These are observations, not Word-equivalent pagination. Signed overlap, control/
+empty-section ownership and broader binding/packing remain required work.
+
+
+`examples/continuous-geometry` additionally qualifies changed margins/distances on
+shared paper and automatic page starts for different paper dimensions. Footers keep
+the opened page's original frame; note chunks retain reference-context widths even
+through deferral/continuation. Five native/producer pages preserve all rich-example
+content and three original RGBA placements. Native bodies change horizontal margins
+immediately; the tested producer defers them to the next page. The producer switches
+paper in the rich example with explicit orientation, while the original controls
+without that hint keep earlier geometry. These qualified observations do not imply
+Word-equivalent interpretation. Common vertical packing, control/empty-section
+ownership, signed running overlap and broader page bindings remain unfinished.

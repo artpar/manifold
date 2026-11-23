@@ -9,13 +9,14 @@ import (
 const footnoteSeparatorHeight = 12.0
 
 type pdfNoteChunk struct {
-	rtl      bool
-	key      noteKey
-	lines    []pdfFragment
-	first    bool
-	indent   float64
-	notice   []pdfFragment
-	deferred bool
+	left, width float64
+	rtl         bool
+	key         noteKey
+	lines       []pdfFragment
+	first       bool
+	indent      float64
+	notice      []pdfFragment
+	deferred    bool
 }
 
 func lineNoteKeys(line pdfLine) []noteKey {
@@ -42,7 +43,7 @@ func (r *pdfRenderer) measureFootnote(key noteKey) (pdfNoteChunk, error) {
 	if err != nil {
 		return pdfNoteChunk{}, fmt.Errorf("footnote %q: %w", key.id, err)
 	}
-	chunk := pdfNoteChunk{key: key, lines: lines, first: true, indent: indent, rtl: len(definition.Blocks) > 0 && definition.Blocks[0].Direction == "rtl"}
+	chunk := pdfNoteChunk{left: r.bodyLeft(), width: r.bodyWidth(), key: key, lines: lines, first: true, indent: indent, rtl: len(definition.Blocks) > 0 && definition.Blocks[0].Direction == "rtl"}
 	if imageBoundStart(lines[0]) {
 		chunk.notice, err = r.cellFlow([]Block{{Kind: Paragraph, Runs: []Run{{Text: "Continued on a later page"}}}}, r.bodyWidth()-indent, 0, r.bodyHeight()-footnoteSeparatorHeight-10)
 		if err != nil {
@@ -215,13 +216,13 @@ func (r *pdfRenderer) ensureWithNotes(height float64, keys []noteKey) error {
 				return fmt.Errorf("%w: no room for footnote start", ErrUnsupported)
 			}
 			if len(head) > 0 {
-				r.pageNotes = append(r.pageNotes, pdfNoteChunk{rtl: chunk.rtl, key: chunk.key, lines: head, first: !deferred, indent: chunk.indent, deferred: deferred})
+				r.pageNotes = append(r.pageNotes, pdfNoteChunk{left: chunk.left, width: chunk.width, rtl: chunk.rtl, key: chunk.key, lines: head, first: !deferred, indent: chunk.indent, deferred: deferred})
 			}
 			r.noteReserve += used
 			capacity -= used
 			r.seenFootnotes[chunk.key] = true
 			if len(tail) > 0 || forced {
-				r.pendingNotes = append(r.pendingNotes, pdfNoteChunk{rtl: chunk.rtl, key: chunk.key, lines: tail, first: deferred || len(head) == 0, indent: chunk.indent})
+				r.pendingNotes = append(r.pendingNotes, pdfNoteChunk{left: chunk.left, width: chunk.width, rtl: chunk.rtl, key: chunk.key, lines: tail, first: deferred || len(head) == 0, indent: chunk.indent})
 			}
 		}
 		if len(r.pageNotes) == 0 {
@@ -240,15 +241,21 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 	}
 	top := r.bodyBottom() - footnoteSeparatorHeight - height
 	r.pdf.SetDrawColor(90, 90, 90)
-	separatorX := r.bodyLeft()
-	if len(chunks) > 0 && chunks[0].rtl {
-		separatorX = r.bodyRight() - math.Min(90, r.bodyWidth())
+	left, right := chunks[0].left, chunks[0].left+chunks[0].width
+	for _, chunk := range chunks[1:] {
+		left = math.Min(left, chunk.left)
+		right = math.Max(right, chunk.left+chunk.width)
 	}
-	r.pdf.Line(separatorX, top, separatorX+math.Min(90, r.bodyWidth()), top)
+	separatorWidth := math.Min(90, right-left)
+	separatorX := left
+	if chunks[0].rtl {
+		separatorX = right - separatorWidth
+	}
+	r.pdf.Line(separatorX, top, separatorX+separatorWidth, top)
 	if continued {
 		r.pdf.SetFont("Go", "", 7)
 		r.pdf.SetTextColor(0, 0, 0)
-		r.pdf.Text(r.bodyLeft(), top-3, "Footnotes continued")
+		r.pdf.Text(left, top-3, "Footnotes continued")
 	}
 	y := top + footnoteSeparatorHeight
 	for _, chunk := range chunks {
@@ -257,10 +264,10 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 		}
 		r.pdf.SetFont("Go", "", 8)
 		r.pdf.SetTextColor(0, 0, 0)
-		labelX, bodyX := r.bodyLeft(), r.bodyLeft()+chunk.indent
+		labelX, bodyX := chunk.left, chunk.left+chunk.indent
 		if chunk.rtl {
-			labelX = r.bodyRight() - r.pdf.GetStringWidth(r.notes.labels[chunk.key])
-			bodyX = r.bodyLeft()
+			labelX = chunk.left + chunk.width - r.pdf.GetStringWidth(r.notes.labels[chunk.key])
+			bodyX = chunk.left
 		}
 		r.pdf.Text(labelX, y+8, r.notes.labels[chunk.key])
 		noticeTop := y
@@ -271,7 +278,7 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 			y += fragment.Height
 		}
 		if chunk.deferred {
-			r.pdf.Link(bodyX, noticeTop, r.bodyWidth()-chunk.indent, y-noticeTop, r.noteLinks[chunk.key])
+			r.pdf.Link(bodyX, noticeTop, chunk.width-chunk.indent, y-noticeTop, r.noteLinks[chunk.key])
 		}
 	}
 	return r.pdf.Error()
@@ -328,7 +335,7 @@ func (r *pdfRenderer) nextPage(bodyNeeded bool) error {
 				break
 			}
 			if len(head) > 0 {
-				chunks = append(chunks, pdfNoteChunk{rtl: chunk.rtl, key: chunk.key, lines: head, first: chunk.first, indent: chunk.indent})
+				chunks = append(chunks, pdfNoteChunk{left: chunk.left, width: chunk.width, rtl: chunk.rtl, key: chunk.key, lines: head, first: chunk.first, indent: chunk.indent})
 			}
 			left -= used
 			if len(tail) == 0 {
@@ -339,7 +346,7 @@ func (r *pdfRenderer) nextPage(bodyNeeded bool) error {
 			}
 			if forced {
 				if len(tail) == 0 {
-					pending = append([]pdfNoteChunk{{rtl: chunk.rtl, key: chunk.key, first: chunk.first && len(head) == 0}}, pending...)
+					pending = append([]pdfNoteChunk{{left: chunk.left, width: chunk.width, rtl: chunk.rtl, key: chunk.key, first: chunk.first && len(head) == 0}}, pending...)
 				}
 				break
 			}

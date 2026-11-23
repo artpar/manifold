@@ -1693,3 +1693,63 @@ also passed focused race (1.474s), with no production change after the full race
 run. Vet/module verification/host and Linux CGO-disabled builds/diff checks pass.
 Valid continuous fuzz completed 1,000 executions; malformed DOCX completed 500.
 The full objective remains incomplete, particularly changed continuous geometry.
+
+## Continuous body geometry and physical page canvases (2026-11-24)
+
+`TestPDFContinuousFramesRetainRunningAndNoteOwners` checks changed horizontal
+frames, old footer geometry and distinct LTR/RTL note image positions. Additional
+regressions exercise long note continuation and multi-page wrapped paragraphs/
+repeated-header tables inside new margins. The previous unsupported-geometry test
+now verifies requested page boxes: its intentional rejection was removed by the
+implementation. No fixture content/asset oracle was rewritten to hide a failure.
+`FuzzContinuousGeometry` requires successful SF/DOCX/native paths and actual note
+positions across 1,000 valid margin/paper combinations, without accepting an
+ErrUnsupported escape for those cases.
+
+```sh
+GOWORK=off go run ./examples/continuous-geometry
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+# Extract the original controls first, as documented in the preceding checkpoint.
+for continuous_case in stories left top bottom width orientation first same; do bin/manydoc convert -allow-lossy -pdf-font-map 'Cambria=Go' -pdf-font-map 'Calibri=Go' -o "output/continuous-geometry/controls/${continuous_case}.pdf" "output/continuous/control-${continuous_case}.sf"; done
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-continuous-geometry-qa --headless --convert-to pdf --outdir output/continuous-geometry/office output/continuous-geometry/document.docx
+output/qa-venv/bin/python scripts/verify_continuous_geometry.py --office
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/continuous-geometry/document.sf output/continuous-geometry/docx.sf output/continuous-geometry/pdf.sf output/continuous-geometry/cli-docx.sf output/continuous-geometry/cli-pdf.sf
+GOWORK=off go test -run 'TestPDFContinuous|TestPDFSection|FuzzContinuousGeometry' .
+GOWORK=off go test -run '^$' -fuzz '^FuzzContinuousGeometry$' -fuzztime=1000x -parallel=2 .
+```
+
+Independent python-docx checks all four section settings/continuous types, source
+hyperlinks, body rows and exact source SF. pypdf/MuPDF check five native pages,
+three exact RGBA placements, all body/table content, the URI and three note targets,
+old/new running positions and column bounds. Eight unchanged producer controls
+also generate native output with the specified later margins/canvases: explicit
+caller mappings to the Go family qualify those outputs rather than silently
+claiming source-font reproduction. Their paper-driven native pages total eighteen.
+The CGO-disabled CLI exercises all four rich paths, exact source DOCX SF and five
+matched native operator streams. Five SF files/387 nodes pass actual ProseMirror.
+Five native and five producer pages were visually inspected. Both retain all
+content and three images. The producer defers shared-page horizontal margins to
+its next page, while native frames change immediately and reserve vertical space
+conservatively. Explicit orientation in the rich DOCX produces the requested paper
+switch; the original controls without the hint preserve the earlier producer paper.
+Do not generalize this into a Word-equivalence or general producer-bug claim.
+
+A stale older CLI artifact differs in redundant font-selection operators, so it
+is not the checkpoint baseline. A fresh detached `d1b6c96` build instead proves all
+eight section and five same-geometry continuous page streams exactly unchanged:
+
+```sh
+git worktree add --detach output/geometry-parent d1b6c96
+(cd output/geometry-parent && GOWORK=off go build -o ../../bin/geometry-parent ./cmd/manydoc)
+bin/geometry-parent convert -o output/continuous-geometry/parent-sections.pdf output/sections/document.sf
+bin/geometry-parent convert -o output/continuous-geometry/parent-continuous.pdf output/continuous/document.sf
+output/qa-venv/bin/python scripts/verify_continuous_geometry.py --office
+git worktree remove output/geometry-parent
+```
+
+The comparison preserves raw page operators without stripping font selections or
+rewriting content. Full tests pass (library 9.355s, CLI 0.472s); full race passes
+(102.983s/2.251s/15.650s library/CLI/bidi). Vet/module verification/host and Linux
+CGO-disabled builds pass. Malformed DOCX fuzz completes 500 cases in addition to
+the 1,000 valid geometry executions. Recovery docs retain unfinished common-frame,
+control/empty-section, signed-overlap and remaining full-goal requirements.

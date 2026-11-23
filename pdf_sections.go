@@ -3,7 +3,6 @@ package manydoc
 import (
 	"fmt"
 	"math"
-	"reflect"
 
 	"github.com/phpdave11/gofpdf"
 )
@@ -20,6 +19,11 @@ type pdfSectionPlan struct {
 type pdfSectionScope struct {
 	index, total   int
 	firstFootnotes map[noteKey]int
+}
+
+// A physical PDF page has one canvas; a changed paper size starts a new page.
+func sameSectionCanvas(a, b *pdfSectionPlan) bool {
+	return a.geometry.width == b.geometry.width && a.geometry.height == b.geometry.height
 }
 
 func (r *pdfRenderer) addPDFPage() {
@@ -151,9 +155,7 @@ func (r *pdfRenderer) planSections(d *Document, sections []resolvedSection) ([]*
 		if err := r.ctx.Err(); err != nil {
 			return nil, err
 		}
-		if i > 0 && s.start == SectionContinuous && !reflect.DeepEqual(pageLayout(s.layout), pageLayout(sections[i-1].layout)) {
-			return nil, fmt.Errorf("%w: continuous section changes page geometry; shared-page resolution is unfinished", ErrUnsupported)
-		}
+
 		plan, err := r.planSection(d, s, 0, scope(i))
 		if err != nil {
 			return nil, err
@@ -163,7 +165,7 @@ func (r *pdfRenderer) planSections(d *Document, sections []resolvedSection) ([]*
 	for start := 0; start < len(plans); {
 		end := start + 1
 		minimum := plans[start].minimumBody
-		for end < len(plans) && sections[end].start == SectionContinuous {
+		for end < len(plans) && sections[end].start == SectionContinuous && sameSectionCanvas(plans[end-1], plans[end]) {
 			minimum = math.Max(minimum, plans[end].minimumBody)
 			end++
 		}
@@ -198,7 +200,8 @@ func (r *pdfRenderer) renderSections(d *Document) error {
 		return err
 	}
 	r.sectioned = true
-	var active, pending *pdfSectionPlan
+	var active, pending, owner *pdfSectionPlan
+	var ownerFooter *pdfRunningStory
 	localPage, pendingPage := 0, 0
 	blank, nextBlank := false, false
 	r.pdf.SetHeaderFunc(func() {
@@ -222,6 +225,7 @@ func (r *pdfRenderer) renderSections(d *Document) error {
 			variant = 2
 		}
 		r.header, r.footer = active.variants[variant].header, active.variants[variant].footer
+		owner, ownerFooter = active, r.footer
 		r.y = r.bodyTop()
 		if !blank {
 			r.paintRunning(r.header)
@@ -229,17 +233,29 @@ func (r *pdfRenderer) renderSections(d *Document) error {
 	})
 	r.pdf.SetFooterFunc(func() {
 		if !blank {
-			r.paintRunning(r.footer)
+			// Body frames may change on a shared page. Its running stories keep
+			// the geometry of the section that opened this physical page.
+			page, content, width, height, margin := r.page, r.content, r.width, r.height, r.margin
+			r.page, r.content = &owner.geometry, &owner.bounds
+			r.width, r.height, r.margin = owner.geometry.width, owner.geometry.height, owner.geometry.margins.Left
+			r.paintRunning(ownerFooter)
+			r.page, r.content, r.width, r.height, r.margin = page, content, width, height, margin
 		}
 	})
 	for i, s := range sections {
 		if err := r.ctx.Err(); err != nil {
 			return err
 		}
-		if i > 0 && s.start == SectionContinuous {
+		if i > 0 && s.start == SectionContinuous && sameSectionCanvas(plans[i-1], plans[i]) {
 			// The opened page keeps its painted header and queued footer. It is
 			// page one of the new section, so its next page selects variant two.
 			pending, pendingPage = plans[i], 1
+			plan := plans[i]
+			r.page, r.content = &plan.geometry, &plan.bounds
+			r.margin = plan.geometry.margins.Left
+			r.y = math.Max(r.y, r.bodyTop())
+			r.pdf.SetMargins(r.bodyLeft(), r.bodyTop(), plan.geometry.margins.Right)
+			r.pdf.SetAutoPageBreak(false, r.height-r.bodyBottom())
 			if err := r.blocks(s.blocks, r.bodyWidth(), r.bodyLeft()); err != nil {
 				return err
 			}
