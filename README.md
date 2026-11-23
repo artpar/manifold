@@ -272,3 +272,10 @@ running-image budget with serial/nested/merged PNG/JPEG content and body images.
 Optional QA: `output/qa-venv/bin/python scripts/verify_docx_running_images.py`.
 Original SF/asset bytes stay intact; rendered dimensions are checked separately.
 The verifier explicitly records the tested producer's URI-export qualification gap.
+
+`GOWORK=off go run ./examples/page-layout` exercises four-edge page settings,
+zero margins, independent header-top/footer-bottom distances and landscape output
+through SF/DOCX/PDF. Set `Layout.Margins` to override the scalar fallback and use
+optional distance pointers to retain explicit zero. The source SF/DOCX round trip
+and independent bounds/assets checks are in `scripts/verify_page_layout.py`.
+Section-specific stories and signed running/body overlap remain unfinished.

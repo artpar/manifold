@@ -12,8 +12,8 @@ integration and do not authorize changes to Daptin.
    font recovery, shaping/bidi/glyph output and paragraph properties; font-slot/
    theme-language resolution now preserves current spans, while broader selection
    qualification/modern ranges remain required; calculated run theme tint/shade
-   and settings color mappings now exist; then asymmetric
-   margins, sections, richer note numbering/separator/layout behavior, bookmarks, comment/revision history and
+   and settings color mappings now exist; four-edge margins/running distances now
+   exist; next sections, richer note numbering/separator/layout behavior, bookmarks, comment/revision history and
    broader numbering formats. Each feature needs import, model, export and tests;
    avoid a second authoritative representation of the same content.
 3. Extend the new Unicode-space/NFC/grapheme wrapping foundation with Go text shaping/bidi and configurable licensed fonts for broader PDF
@@ -84,8 +84,8 @@ labels' independent LTR glyph direction at RTL anchors.
 
 Rich PDF header/footer stories now support merged/nested tables, images, lists,
 links and reserved body/note bounds. The shared DOCX budget now repairs the
-previously reproduced oversized-image omission, preserving the fixture and actual observations. Next add asymmetric
-page margins/distances and section-specific stories through SF/model/import/export.
+previously reproduced oversized-image omission, preserving the fixture and actual observations. Four-edge margins/distances now exist; next add section-specific stories through
+SF/model/import/export.
 Qualify the sparse native note-only page and producer cell-break differences,
 alongside the remaining script/font/PDF-recovery/real-export acceptance work.
 
@@ -93,8 +93,18 @@ alongside the remaining script/font/PDF-recovery/real-export acceptance work.
 The tight DOCX running-image omission is now repaired with a shared raster/body
 budget; four additional producer pages qualify serial/nested/merged/JPEG/body
 placements. Keep the original fixtures, exact pixels and stable physical second
-round trips. Next establish asymmetric page margins and running distances in the
-shared SF/model, then add section-specific settings/stories. DOCX text estimation,
+round trips. Four-edge page margins and running distances now exist in the shared SF/model;
+next add section-specific settings/stories. DOCX text estimation,
 broader font/producer containment and producer URI-export qualification still need
 work; a python-docx control currently exports zero of one expected URI too. Do not
 remove these or the remaining script/font/recovery/real-export acceptance rows.
+
+
+Asymmetric/zero frames and independent running anchors now span SF/DOCX/PDF with
+current-property selection and explicit advanced-setting losses. Next establish
+section boundaries and default/first/even story selection within the same canonical
+SF, then implement import/export and native paper/story transitions. Preserve the
+new coordinate/pixel/destination oracles and legacy nil behavior. Signed overlap,
+advanced page/binding settings, sparse note/table packing, broader producer/font
+and real-export qualification remain required; no completion claim follows from
+single-frame page support.

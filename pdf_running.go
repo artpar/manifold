@@ -18,13 +18,13 @@ func (r *pdfRenderer) bodyTop() float64 {
 	if r.content != nil {
 		return r.content.top
 	}
-	return r.margin
+	return r.baseTop()
 }
 func (r *pdfRenderer) bodyBottom() float64 {
 	if r.content != nil {
 		return r.content.bottom
 	}
-	return r.height - r.margin
+	return r.baseBottom()
 }
 func (r *pdfRenderer) bodyHeight() float64 { return r.bodyBottom() - r.bodyTop() }
 
@@ -76,7 +76,7 @@ func (r *pdfRenderer) measureRunning(bs []Block, budget float64) (*pdfRunningSto
 	if err := validatePDFRunning(bs); err != nil {
 		return nil, err
 	}
-	flow, err := r.cellFlowStyle(bs, r.width-2*r.margin, 0, budget, pdfFlowStyle{size: 8, leading: 1.25, running: true})
+	flow, err := r.cellFlowStyle(bs, r.bodyWidth(), 0, budget, pdfFlowStyle{size: 8, leading: 1.25, running: true})
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,16 @@ func (r *pdfRenderer) measureRunning(bs []Block, budget float64) (*pdfRunningSto
 	return &pdfRunningStory{flow: flow, height: height, budget: budget, imageBudget: imageBudget, shrink: imageBudget > 0}, nil
 }
 func (r *pdfRenderer) prepareRunning(headers, footers []Block, body bool) error {
-	budget := r.height - 2*r.margin
+	budget := r.baseBottom() - r.baseTop()
+	if r.page != nil && (r.page.explicitMargins || r.page.header != nil || r.page.footer != nil) {
+		budget = r.height
+		if len(headers) > 0 {
+			budget -= r.headerStart()
+		}
+		if end, explicit := r.footerEnd(); explicit && len(footers) > 0 {
+			budget -= r.height - end
+		}
+	}
 	header, err := r.measureRunning(headers, budget)
 	if err != nil {
 		return err
@@ -105,14 +114,34 @@ func (r *pdfRenderer) prepareRunning(headers, footers []Block, body bool) error 
 		minimum = math.Max(11*1.4, r.minimumBody) + .001
 	}
 	for attempt := 0; attempt < 128; attempt++ {
-		top, bottom := r.margin, r.height-r.margin
+		top, bottom := r.baseTop(), r.baseBottom()
 		if header != nil {
-			header.y = r.margin / 2
+			header.y = r.headerStart()
 			top = math.Max(top, header.y+header.height)
 		}
 		if footer != nil {
-			footer.y = math.Min(r.height-r.margin/2, r.height-footer.height)
+			if end, explicit := r.footerEnd(); explicit {
+				footer.y = end - footer.height
+			} else {
+				footer.y = math.Min(r.height-(r.height-r.baseBottom())/2, r.height-footer.height)
+			}
 			bottom = math.Min(bottom, footer.y)
+		}
+		// Signed OOXML offsets keep the body fixed. Non-overlapping stories use
+		// the ordinary geometry; actual overlap needs separate paint-order/layout
+		// qualification and must not be silently replaced by enlarged margins.
+		edges := r.pageEdges()
+		if header != nil && edges.Top < 0 {
+			if header.y+header.height > r.baseTop()+1e-7 {
+				return fmt.Errorf("%w: PDF negative top-margin running overlap requires further layout qualification", ErrUnsupported)
+			}
+			header.shrink = false
+		}
+		if footer != nil && edges.Bottom < 0 {
+			if footer.y < r.baseBottom()-1e-7 {
+				return fmt.Errorf("%w: PDF negative bottom-margin running overlap requires further layout qualification", ErrUnsupported)
+			}
+			footer.shrink = false
 		}
 		active := 0
 		for _, story := range []*pdfRunningStory{header, footer} {
@@ -203,7 +232,7 @@ func (r *pdfRenderer) paintRunning(story *pdfRunningStory) {
 	defer func() { r.paintingRunning = before }()
 	y := story.y
 	for _, fragment := range story.flow {
-		if err := r.drawFragment(fragment, r.margin, y); err != nil {
+		if err := r.drawFragment(fragment, r.bodyLeft(), y); err != nil {
 			r.pdf.SetError(err)
 			return
 		}
@@ -266,7 +295,7 @@ func (r *pdfRenderer) minimumRunningBody(blocks []Block) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	flow, err := r.cellFlow(compact, r.width-2*r.margin, 0, r.bodyHeight())
+	flow, err := r.cellFlow(compact, r.bodyWidth(), 0, r.bodyHeight())
 	if err != nil {
 		return 0, err
 	}
@@ -323,7 +352,7 @@ func (r *pdfRenderer) minimumRunningBody(blocks []Block) (float64, error) {
 		if err != nil {
 			return 0, err
 		}
-		noteFlow, err := r.cellFlow(bs, r.width-2*r.margin-18, 0, r.bodyHeight())
+		noteFlow, err := r.cellFlow(bs, r.bodyWidth()-18, 0, r.bodyHeight())
 		if err != nil {
 			return 0, err
 		}

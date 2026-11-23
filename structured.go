@@ -60,7 +60,7 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 		return nil, err
 	}
 	s := &StructuredDocument{Type: "doc", Attrs: StructuredAttributes{
-		Schema: StructuredSchema, Metadata: d.Metadata, Layout: d.Layout,
+		Schema: StructuredSchema, Metadata: d.Metadata, Layout: cloneLayout(d.Layout),
 		Diagnostics: append([]Diagnostic(nil), d.Diagnostics...), Pages: append([]PDFPage(nil), d.Pages...),
 	}}
 	var err error
@@ -215,7 +215,7 @@ func FromStructured(s *StructuredDocument) (*Document, error) {
 	if s.Attrs.Schema != StructuredSchema {
 		return nil, fmt.Errorf("%w: structured schema %q", ErrUnsupported, s.Attrs.Schema)
 	}
-	d := &Document{Metadata: s.Attrs.Metadata, Layout: s.Attrs.Layout, Diagnostics: append([]Diagnostic(nil), s.Attrs.Diagnostics...), Pages: append([]PDFPage(nil), s.Attrs.Pages...)}
+	d := &Document{Metadata: s.Attrs.Metadata, Layout: cloneLayout(s.Attrs.Layout), Diagnostics: append([]Diagnostic(nil), s.Attrs.Diagnostics...), Pages: append([]PDFPage(nil), s.Attrs.Pages...)}
 	var err error
 	if d.Blocks, err = decodeSFBlocks(s.Content, 0); err != nil {
 		return nil, err

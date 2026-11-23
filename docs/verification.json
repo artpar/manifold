@@ -2154,7 +2154,7 @@
     "fixture_oracle_changed": false,
     "external_blocker": null
   },
-  "latest_milestone": "docx_running_image_budget",
+  "latest_milestone": "page_geometry",
   "language_direction_ltr_shaping": {
     "date": "2026-11-23",
     "goal_complete": false,
@@ -2499,7 +2499,7 @@
     ],
     "external_blocker": null
   },
-  "latest_evidence": "docx_running_image_budget_2026_11_24",
+  "latest_evidence": "page_geometry_2026_11_24",
   "paragraph_bidi_levels_2026_11_24": {
     "goal_complete": false,
     "previous_checkpoint": "658a5b0",
@@ -3119,6 +3119,184 @@
       "output/docx-running-regressions.log",
       "output/docx-running-corpus.log",
       "output/docx-running-poppler.log"
+    ]
+  },
+  "page_geometry_2026_11_24": {
+    "goal_complete": false,
+    "previous_checkpoint": "d6feaca",
+    "public_api_additions": [
+      "PageMargins",
+      "Layout.Margins",
+      "Layout.HeaderDistance",
+      "Layout.FooterDistance"
+    ],
+    "sf_profile": "additive optional fields in existing layout object; version unchanged",
+    "module_dependency_change": false,
+    "implementation": [
+      "finite four-edge geometry with explicit zero versus legacy fallback and independent running anchors",
+      "deep ownership across SF bridges; all fallback data retained per original whole-model oracle",
+      "standard DOCX page edges/distances/universal units and landscape orientation",
+      "checked ignorable binding-presence metadata; foreign physical distances explicit",
+      "current section properties exclude revision/deleted/moved-from/text-box snapshots; advanced/conditional settings diagnose",
+      "shared native body/table/note/story sides/width and footer-bottom anchors; legacy nil coordinates retained",
+      "reserved running images use page anchor region rather than reduced body container",
+      "signed SF/DOCX persistence and native non-overlap offsets; actual overlap explicitly unqualified",
+      "atomic rounded-zero/empty/signed-offset and out-of-page-story output rejection; unused far distances persist"
+    ],
+    "independent": {
+      "asymmetric": {
+        "native_pages": 6,
+        "native_raster_placements": 13,
+        "source_sf_docx_exact": true,
+        "source_xml_settings": "exact",
+        "native_layout_geometry": "passed",
+        "recovered_sf_positions_rgba": "passed",
+        "office_pages": 3,
+        "office_raster_placements": 7,
+        "office_visible_content": "passed"
+      },
+      "zero": {
+        "native_pages": 2,
+        "native_raster_placements": 1,
+        "source_sf_docx_exact": true,
+        "source_xml_settings": "exact",
+        "native_layout_geometry": "passed",
+        "recovered_sf_positions_rgba": "passed",
+        "office_pages": 2,
+        "office_raster_placements": 1,
+        "office_visible_content": "passed"
+      },
+      "offsets": {
+        "native_pages": 1,
+        "native_raster_placements": 0,
+        "source_sf_docx_exact": true,
+        "source_xml_settings": "exact",
+        "native_layout_geometry": "passed",
+        "recovered_sf_positions_rgba": "passed",
+        "office_pages": 1,
+        "office_raster_placements": 0,
+        "office_visible_content": "passed"
+      }
+    },
+    "independent_summary": {
+      "native_pages_visually_inspected": 9,
+      "libreoffice_docx_pages_visually_inspected": 6,
+      "native_raster_placements_exact_rgba_and_geometry": 14,
+      "producer_raster_placements_exact_rgba": 8,
+      "prosemirror_files": 9,
+      "prosemirror_nodes": 770,
+      "native_uri_annotations": 6,
+      "real_footnote_target": "page index 1; within asymmetric body bounds",
+      "rtl_note_separator": "330..420pt follows right edge",
+      "source_sf_docx_trees_settings_assets": "exact",
+      "source_pdf_recovery": "placed images/page quads retained; no invented authored margins/anchors",
+      "cli_cgo_disabled": "all four paths in three cases; exact source DOCX SF and equal native PDF operator streams",
+      "readers": [
+        "python-docx 1.2.0",
+        "pypdf 7.1.1 strict",
+        "PyMuPDF 1.28.2",
+        "lxml",
+        "Pillow 13.0.0"
+      ],
+      "scripts": [
+        "scripts/verify_page_layout.py",
+        "scripts/verify_structured.cjs"
+      ]
+    },
+    "required_checks": {
+      "tests_seconds": {
+        "github.com/artpar/manydoc": 6.437,
+        "github.com/artpar/manydoc/cmd/manydoc": 0.662,
+        "github.com/artpar/manydoc/internal/bidilevels": 2.205
+      },
+      "race_seconds": {
+        "github.com/artpar/manydoc": 100.346,
+        "github.com/artpar/manydoc/cmd/manydoc": 2.086,
+        "github.com/artpar/manydoc/internal/bidilevels": 13.867
+      },
+      "vet": "passed",
+      "module_verification": "all modules verified",
+      "cgo_disabled_cli_build_execution": "passed",
+      "focused_signed_serialization": "passed; source baseline rather than font-quad origin asserted",
+      "git_diff_check": "passed"
+    },
+    "fuzz": {
+      "valid_layout_roundtrips": {
+        "executions": 1000,
+        "package_seconds": 18.411,
+        "result": "passed; output required and source SF/geometry/assets checked"
+      },
+      "malformed_docx": {
+        "executions": 500,
+        "package_seconds": 1.385,
+        "result": "passed"
+      }
+    },
+    "regressions": [
+      "running content",
+      "DOCX running-image budgets",
+      "repeating headers",
+      "image fitting",
+      "notes",
+      "text styles",
+      "paragraph bidi and cross-font context",
+      "paint context"
+    ],
+    "corpus": {
+      "files": 51,
+      "prosemirror_nodes": 9031,
+      "poppler_matches": 28,
+      "poppler_total": 28,
+      "original_source_content_pixel_oracles_unchanged": true
+    },
+    "observations": {
+      "native_rich_pages": 6,
+      "producer_rich_pages": 3,
+      "native_sparse_first_page": "selected table page plus whole-note admission prefers a fresh page; packing remains qualification work",
+      "producer_cell_page_start": "ignored, source SF/DOCX and native transition retained",
+      "producer_note_separator": "left; native paragraph direction drives right separator",
+      "initial_new_test_failure": "font-bound quad top was incorrectly compared with paragraph origin; corrected test uses explicit baseline y=60+11 without changing renderer or existing oracle"
+    },
+    "open_required_work": [
+      "section-specific layout/body boundaries and default/first/even running stories",
+      "actual signed running/body overlap and advanced gutter/mirror/columns/page settings",
+      "native note/table packing and broader producer/font qualification",
+      "producer URI export remains unqualified in prior independent control",
+      "remaining within-grapheme/full script itemization/cross-item positioning/source-font work",
+      "broader PDF structure/internal-link/color/image/source-font recovery",
+      "representative real-export corpus and final full-goal audit"
+    ],
+    "commands": [
+      "GOWORK=off go test ./... -count=1",
+      "GOWORK=off go test -race ./... -count=1",
+      "GOWORK=off go vet ./...",
+      "GOWORK=off go mod verify",
+      "CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc",
+      "GOWORK=off go run ./examples/page-layout",
+      "output/qa-venv/bin/python scripts/verify_page_layout.py --office",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzPageLayoutRoundTrips$' -fuzztime=1000x -parallel=2 .",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=500x -parallel=2 .",
+      "output/qa-venv/bin/python scripts/verify_structured_corpus.py",
+      "output/qa-venv/bin/python scripts/compare_pdf_text.py bin/manydoc output/page-layout-poppler.json",
+      "git diff --check"
+    ],
+    "logs": [
+      "output/page-layout-final4-tests.log",
+      "output/page-layout-final4-race.log",
+      "output/page-layout-final4-vet.log",
+      "output/page-layout-final4-modules.log",
+      "output/page-layout-final-fuzz.log",
+      "output/page-layout-malformed.log",
+      "output/page-layout-final-focused.log",
+      "output/page-layout-signed-final-race.log",
+      "output/page-layout-independent.log",
+      "output/page-layout-prosemirror.log",
+      "output/page-layout-cli.log",
+      "output/page-layout-regressions.log",
+      "output/page-layout-corpus.log",
+      "output/page-layout-poppler.log",
+      "output/page-layout-malformed-final.log",
+      "output/page-layout-cli-final.log"
     ]
   }
 }

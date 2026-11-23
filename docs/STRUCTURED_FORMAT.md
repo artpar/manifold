@@ -82,7 +82,7 @@ it cannot preserve. It is not evidence that the full requested SF is implemented
 | Images | block image; src is an embedded `data:<media-type>;base64,...` URI; alt, width, height |
 | Page breaks | page_break block |
 | PDF recovery | doc.attrs.pages; source node/cell/list-item attributes and source text/reference marks preserve positioned provenance |
-| Metadata/layout | doc.attrs.metadata and doc.attrs.layout, dimensions in points |
+| Metadata/layout | doc.attrs.metadata and layout; point width/height/margin, optional four-edge margins and header_distance/footer_distance |
 | Running content | doc.attrs.headers and footers contain block arrays |
 | Notes | doc.attrs.notes contains id, kind, content block arrays; inline note_reference atoms carry id/kind |
 | Representation losses | doc.attrs.diagnostics contains code/message objects |
@@ -464,8 +464,8 @@ headings are bold. The renderer measures immutable stories, expands their body
 exclusion area, fits competing image preferences and repeats them on every page.
 Canonical nodes/assets/dimensions/row-prefix flags remain unchanged; no schema
 revision or new editor representation is introduced. Page controls in running
-stories reject, and existing graph rules forbid note anchors there. Page geometry
-is still symmetric/single-section. DOCX independently emits its standard parts.
+stories reject, and existing graph rules forbid note anchors there. Page geometry now has four edges and running distances in one effective frame;
+section-specific layouts/stories remain unfinished. DOCX emits standard parts.
 
 A native PDF reimport retains placed text/assets and page geometry with existing
 explicit/inferred provenance; it must not label repeated untagged content as
@@ -492,3 +492,34 @@ native PDF's actual glyph measurement. Broader font/producer/section qualificati
 remains required. Producer URI-export limitations are recorded separately from
 preserved SF/DOCX links; neither fitted pixels nor plain text alone proves complete
 rich-document conversion.
+
+
+## Explicit page edges and anchors
+
+The existing doc.attrs.layout object adds optional `margins` (top/right/bottom/left)
+and `header_distance`/`footer_distance` point values. A present margins object
+replaces all four scalar-margin edges; omitted members mean explicit zero, not
+inheritance. A missing object retains the scalar fallback. Distance presence
+similarly distinguishes zero from unspecified. Left/right and distances are finite
+and nonnegative; top/bottom may be signed fixed body offsets. Width/height and
+absolute vertical edges must leave a positive body area. Unused distances beyond
+the canvas can persist, while an actual out-of-page running story rejects output.
+
+```json
+{"width":480,"height":420,"margin":17,"margins":{"top":70,"right":60,"bottom":55,"left":30},"header_distance":12,"footer_distance":16}
+```
+
+Here the retained scalar 17 is ignored for geometry. Both bridges deep-copy all
+new pointers and preserve every field. New groups use 18pt default edge anchors;
+legacy nil settings retain prior writer defaults. DOCX's standard page attributes
+and checked ignorable metadata preserve binding presence in own round trips,
+including zero and the unused fallback. External distances remain explicit. DOCX
+physical coordinates normalize to twips; source SF remains precise. Native PDF
+uses the effective bounds throughout body/stories/tables/notes. Signed offsets
+with no actual story overlap work; overlap remains explicitly unqualified.
+
+This is an additive optional extension of the selected ProseMirror profile, not a
+second schema or alternate canonical layout format. Current effective DOCX section
+properties are read separately from revision snapshots. Unsupported advanced page/
+story settings and multiple-section flattening diagnose. PDF provenance preserves
+physical pages/quads, not inferred authorial margin preferences or anchor intent.

@@ -212,12 +212,13 @@ func docxBodyFloor(bs []Block, padding float64) float64 {
 // Return a common picture-height cap for both running stories and the resulting
 // body container. Zero means no cap. Smaller preferred pictures remain unchanged.
 // The producer still controls actual line/page placement.
-func (w *docxWriter) fitRunning(d *Document, pageHeight, margin float64) (float64, float64, error) {
-	header, hn, err := w.runningFlow(d.Headers, w.contentWidth, w.contentHeight, 0, 0)
+func (w *docxWriter) fitRunning(d *Document, g pageGeometry) (float64, float64, error) {
+	height := g.runningHeight(len(d.Headers) > 0, len(d.Footers) > 0)
+	header, hn, err := w.runningFlow(d.Headers, w.contentWidth, height, 0, 0)
 	if err != nil {
 		return 0, 0, err
 	}
-	footer, fn, err := w.runningFlow(d.Footers, w.contentWidth, w.contentHeight, 0, 0)
+	footer, fn, err := w.runningFlow(d.Footers, w.contentWidth, height, 0, 0)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -225,14 +226,14 @@ func (w *docxWriter) fitRunning(d *Document, pageHeight, margin float64) (float6
 		return 0, w.contentHeight, nil
 	}
 	available := func(limit float64) float64 {
-		top, bottom := margin, margin
-		if len(d.Headers) > 0 {
-			top = math.Max(top, docxRunningDistance+header.height(limit))
+		top, bottom := math.Abs(g.margins.Top), math.Abs(g.margins.Bottom)
+		if len(d.Headers) > 0 && g.margins.Top >= 0 {
+			top = math.Max(top, g.headerDistance()+header.height(limit))
 		}
-		if len(d.Footers) > 0 {
-			bottom = math.Max(bottom, docxRunningDistance+footer.height(limit))
+		if len(d.Footers) > 0 && g.margins.Bottom >= 0 {
+			bottom = math.Max(bottom, g.footerDistance()+footer.height(limit))
 		}
-		return pageHeight - top - bottom
+		return g.height - top - bottom
 	}
 	// LibreOffice limits header/footer growth while retaining one fifth of the
 	// original page text area. Reserve that space proactively, instead of relying
@@ -243,10 +244,13 @@ func (w *docxWriter) fitRunning(d *Document, pageHeight, margin float64) (float6
 		minimum = math.Max(minimum, docxBodyFloor(note.Blocks, docxImageNoteHeightAllowance))
 	}
 	largest := math.Max(header.largestImage(), footer.largestImage())
-	if available(largest) >= minimum {
+	fits := func(limit float64, guard float64) bool {
+		return available(limit) >= minimum+guard && (len(d.Headers) == 0 || g.headerDistance()+header.height(limit) <= g.height-guard) && (len(d.Footers) == 0 || g.footerDistance()+footer.height(limit) <= g.height-guard)
+	}
+	if fits(largest, 0) {
 		return 0, available(largest), nil
 	}
-	if available(0) <= minimum {
+	if !fits(0, 0) {
 		return 0, 0, fmt.Errorf("%w: DOCX running text/padding leaves no image and body space", ErrUnsupported)
 	}
 	low, high := 0.0, largest
@@ -255,7 +259,7 @@ func (w *docxWriter) fitRunning(d *Document, pageHeight, margin float64) (float6
 			return 0, 0, err
 		}
 		mid := (low + high) / 2
-		if available(mid) >= minimum+.001 {
+		if fits(mid, .001) {
 			low = mid
 		} else {
 			high = mid

@@ -359,6 +359,9 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 			if e := r.readColorMapping(settings); e != nil {
 				return nil, e
 			}
+			if err := r.pageSettings(settings, false); err != nil {
+				return nil, err
+			}
 			r.notePropertySources = append(r.notePropertySources, settings)
 		case strings.HasSuffix(v.Type, "/numbering"):
 			s, e := r.xml(v.Target)
@@ -374,21 +377,34 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, s := range n.all("sectPr") {
+	sections := docxActiveSections(n.child("body"))
+	for _, s := range sections {
+		if err := r.pageSettings(s, true); err != nil {
+			return nil, err
+		}
 		r.notePropertySources = append(r.notePropertySources, s)
 		if p := s.child("pgSz"); p != nil {
-			r.doc.Layout.Width = number(p.attr("w")) / 20
-			r.doc.Layout.Height = number(p.attr("h")) / 20
+			width, err := docxPageNumber(p, "w", 0)
+			if err != nil {
+				return nil, err
+			}
+			height, err := docxPageNumber(p, "h", 0)
+			if err != nil {
+				return nil, err
+			}
+			r.doc.Layout.Width, r.doc.Layout.Height = width, height
 		}
 		if m := s.child("pgMar"); m != nil {
-			r.doc.Layout.Margin = number(m.attr("left")) / 20
-			if m.attr("left") != m.attr("right") || m.attr("top") != m.attr("bottom") || m.attr("left") != m.attr("top") {
-				r.doc.warn("asymmetric_margins", "Asymmetric page margins are represented by the left margin")
+			if err := r.pageMargins(m); err != nil {
+				return nil, err
 			}
 		}
 		for _, c := range s.Children {
 			if c.Name.Local != "headerReference" && c.Name.Local != "footerReference" {
 				continue
+			}
+			if selector := c.attr("type"); selector != "" && selector != "default" {
+				r.doc.warn("docx_running_variants", "Conditional running stories are retained together without page selection: "+selector)
 			}
 			rel, ok := mainRels[c.attr("id")]
 			if !ok || rel.External {
@@ -413,7 +429,7 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 			}
 		}
 	}
-	if len(n.all("sectPr")) > 1 {
+	if len(sections) > 1 {
 		r.doc.warn("multiple_sections", "Multiple sections are flattened to one page layout")
 	}
 	if err := r.readNoteParts(mainRels); err != nil {

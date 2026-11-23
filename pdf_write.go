@@ -114,6 +114,7 @@ type pdfRenderer struct {
 	images                   int
 	header, footer           *pdfRunningStory
 	content                  *pdfBodyBounds
+	page                     *pageGeometry
 	paintingRunning          bool
 	minimumBody              float64
 	runningImages            map[[32]byte]string
@@ -139,17 +140,21 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 	if err != nil {
 		return err
 	}
-	w, h, m := layout(d.Layout)
+	g := pageLayout(d.Layout)
+	w, h, m := g.width, g.height, g.margins.Left
+	if fmt.Sprintf("%.2f", w) == "0.00" || fmt.Sprintf("%.2f", h) == "0.00" {
+		return fmt.Errorf("%w: PDF page dimensions round to zero", ErrUnsupported)
+	}
 	if w > 14400 || h > 14400 {
 		return fmt.Errorf("%w: PDF page dimensions exceed 14400pt without UserUnit", ErrUnsupported)
 	}
 	p := gofpdf.NewCustom(&gofpdf.InitType{UnitStr: "pt", Size: gofpdf.SizeType{Wd: w, Ht: h}})
-	p.SetMargins(m, m, m)
-	p.SetAutoPageBreak(false, m)
+	p.SetMargins(g.margins.Left, math.Abs(g.margins.Top), g.margins.Right)
+	p.SetAutoPageBreak(false, math.Abs(g.margins.Bottom))
 	p.SetTitle(d.Metadata.Title, true)
 	p.SetAuthor(d.Metadata.Author, true)
 	p.SetSubject(d.Metadata.Subject, true)
-	r := &pdfRenderer{ctx: ctx, pdf: p, width: w, height: h, margin: m, y: m, validatedImages: make(outputImageCache)}
+	r := &pdfRenderer{ctx: ctx, pdf: p, width: w, height: h, margin: m, page: &g, y: math.Abs(g.margins.Top), validatedImages: make(outputImageCache)}
 	r.fontMap = map[string]string{}
 	for from, to := range fontMap {
 		if from == "" || to == "" {
@@ -196,7 +201,7 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 	p.SetFooterFunc(func() { r.paintRunning(r.footer) })
 
 	p.AddPage()
-	if err := r.blocks(d.Blocks, w-2*m, m); err != nil {
+	if err := r.blocks(d.Blocks, r.bodyWidth(), r.bodyLeft()); err != nil {
 		return err
 	}
 	if err := r.finishNotes(); err != nil {

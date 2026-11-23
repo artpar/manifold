@@ -38,13 +38,13 @@ func (r *pdfRenderer) measureFootnote(key noteKey) (pdfNoteChunk, error) {
 	r.pdf.SetFont("Go", "", 8)
 	r.pdf.SetTextColor(0, 0, 0)
 	indent := math.Max(18, r.pdf.GetStringWidth(r.notes.labels[key])+6)
-	lines, err := r.cellFlow(definition.Blocks, r.width-2*r.margin-indent, 0, r.bodyHeight()-footnoteSeparatorHeight-10)
+	lines, err := r.cellFlow(definition.Blocks, r.bodyWidth()-indent, 0, r.bodyHeight()-footnoteSeparatorHeight-10)
 	if err != nil {
 		return pdfNoteChunk{}, fmt.Errorf("footnote %q: %w", key.id, err)
 	}
 	chunk := pdfNoteChunk{key: key, lines: lines, first: true, indent: indent, rtl: len(definition.Blocks) > 0 && definition.Blocks[0].Direction == "rtl"}
 	if imageBoundStart(lines[0]) {
-		chunk.notice, err = r.cellFlow([]Block{{Kind: Paragraph, Runs: []Run{{Text: "Continued on a later page"}}}}, r.width-2*r.margin-indent, 0, r.bodyHeight()-footnoteSeparatorHeight-10)
+		chunk.notice, err = r.cellFlow([]Block{{Kind: Paragraph, Runs: []Run{{Text: "Continued on a later page"}}}}, r.bodyWidth()-indent, 0, r.bodyHeight()-footnoteSeparatorHeight-10)
 		if err != nil {
 			return pdfNoteChunk{}, err
 		}
@@ -240,15 +240,15 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 	}
 	top := r.bodyBottom() - footnoteSeparatorHeight - height
 	r.pdf.SetDrawColor(90, 90, 90)
-	separatorX := r.margin
+	separatorX := r.bodyLeft()
 	if len(chunks) > 0 && chunks[0].rtl {
-		separatorX = r.width - r.margin - math.Min(90, r.width-2*r.margin)
+		separatorX = r.bodyRight() - math.Min(90, r.bodyWidth())
 	}
-	r.pdf.Line(separatorX, top, separatorX+math.Min(90, r.width-2*r.margin), top)
+	r.pdf.Line(separatorX, top, separatorX+math.Min(90, r.bodyWidth()), top)
 	if continued {
 		r.pdf.SetFont("Go", "", 7)
 		r.pdf.SetTextColor(0, 0, 0)
-		r.pdf.Text(r.margin, top-3, "Footnotes continued")
+		r.pdf.Text(r.bodyLeft(), top-3, "Footnotes continued")
 	}
 	y := top + footnoteSeparatorHeight
 	for _, chunk := range chunks {
@@ -257,10 +257,10 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 		}
 		r.pdf.SetFont("Go", "", 8)
 		r.pdf.SetTextColor(0, 0, 0)
-		labelX, bodyX := r.margin, r.margin+chunk.indent
+		labelX, bodyX := r.bodyLeft(), r.bodyLeft()+chunk.indent
 		if chunk.rtl {
-			labelX = r.width - r.margin - r.pdf.GetStringWidth(r.notes.labels[chunk.key])
-			bodyX = r.margin
+			labelX = r.bodyRight() - r.pdf.GetStringWidth(r.notes.labels[chunk.key])
+			bodyX = r.bodyLeft()
 		}
 		r.pdf.Text(labelX, y+8, r.notes.labels[chunk.key])
 		noticeTop := y
@@ -271,7 +271,7 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 			y += fragment.Height
 		}
 		if chunk.deferred {
-			r.pdf.Link(bodyX, noticeTop, r.width-2*r.margin-chunk.indent, y-noticeTop, r.noteLinks[chunk.key])
+			r.pdf.Link(bodyX, noticeTop, r.bodyWidth()-chunk.indent, y-noticeTop, r.noteLinks[chunk.key])
 		}
 	}
 	return r.pdf.Error()
@@ -371,7 +371,7 @@ func (r *pdfRenderer) finishNotes() error {
 	if err := r.nextPage(true); err != nil {
 		return err
 	}
-	if err := r.blocks([]Block{{Kind: Heading, Level: 1, Runs: []Run{{Text: "Endnotes"}}}}, r.width-2*r.margin, r.margin); err != nil {
+	if err := r.blocks([]Block{{Kind: Heading, Level: 1, Runs: []Run{{Text: "Endnotes"}}}}, r.bodyWidth(), r.bodyLeft()); err != nil {
 		return err
 	}
 	for _, key := range r.notes.order {
@@ -398,7 +398,7 @@ func (r *pdfRenderer) finishNotes() error {
 		r.pdf.SetLink(r.noteLinks[key], r.y, -1)
 		start, _ := strconv.Atoi(r.notes.labels[key])
 		list := Block{Kind: ListBlock, List: "number", Start: listStartPointer(start), Items: []ListItem{{Blocks: blocks}}}
-		if err := r.list(list, r.width-2*r.margin, r.margin); err != nil {
+		if err := r.list(list, r.bodyWidth(), r.bodyLeft()); err != nil {
 			return err
 		}
 	}

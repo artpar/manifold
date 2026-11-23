@@ -1540,3 +1540,58 @@ pass. Valid running fuzz: 2,000 executions/5.476s package time; malformed DOCX:
 bidi/context/paint regressions pass. Corpus: 51 files/9,031 nodes, and 28/28
 Poppler comparisons pass. Logs use output/docx-running-*; verification.json records
 current evidence and retains the earlier failed layout observations as historical.
+
+## Four-edge page geometry and running distances (2026-11-24)
+
+```sh
+GOWORK=off go run ./examples/page-layout
+GOWORK=off go test -run 'TestPage|TestDOCXPage' -count=1 .
+GOWORK=off go test -race -run 'TestPageLayoutSignedNonoverlapPDF|TestPageMarginsDoNotShrinkReservedRunningImages' -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzPageLayoutRoundTrips$' -fuzztime=1000x -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=500x -parallel=2 .
+mkdir -p output/page-layout/lo
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file://"$PWD"/output/page-layout/lo-profile --headless --convert-to pdf --outdir output/page-layout/lo output/page-layout/asymmetric.docx output/page-layout/zero.docx output/page-layout/offsets.docx
+output/qa-venv/bin/python scripts/verify_page_layout.py --office
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/page-layout/asymmetric.sf output/page-layout/asymmetric-docx.sf output/page-layout/asymmetric-pdf.sf output/page-layout/zero.sf output/page-layout/zero-docx.sf output/page-layout/zero-pdf.sf output/page-layout/offsets.sf output/page-layout/offsets-docx.sf output/page-layout/offsets-pdf.sf
+```
+
+Nine native pages/fourteen placed raster assets pass exact decoded RGBA, measured
+body/running/merged-frame bounds, all 24 unique rows/values, six URI annotations,
+real footnote destination and RTL label/separator checks. Recovered SF retains
+all physical page/image quads without inventing margin/anchor intent. Source SF
+and DOCX trees/settings/assets compare exactly. python-docx and original XML verify
+all six page settings, explicit zeros, landscape size and merged relationships.
+Nine SF files/770 nodes pass actual ProseMirror.
+
+Six LibreOffice DOCX pages retain all text/eight placed rasters and exact pixels.
+All fifteen native/producer pages were visually inspected. Native rich output
+uses six pages, including a sparse first page; table selection plus whole-note
+admission prefers a fresh page. The producer uses three pages, ignores the cell
+start and draws a left note separator. These observations remain separate from
+structural/pixel assertions and are not Word-equivalent fidelity. Conditional
+story variants, multiple sections, actual signed overlap and advanced binding
+settings are still unfinished. Current-property tests explicitly exclude old
+revision/deleted/text-box section snapshots and preserve their loss diagnostics.
+
+Valid page fuzz requires successful output, exact SF/DOCX semantics, two native
+pages, source immutability and contained exact-pixel body images. It completes
+1,000 executions in 18.411s package time; malformed DOCX completes 500/1.385s.
+Targeted tests cover pointer ownership, unused distances, zero versus nil,
+contradictory metadata, common universal units, reserved header images, signed
+non-overlap and atomic overlap/serialization rejection. One new test wrongly used
+a font-bound top as a paragraph origin; it now checks the actual 11pt baseline
+at y=60+11, keeping the renderer and existing oracle unchanged.
+
+The CGO-disabled CLI runs all four paths for all three cases: DOCX returns exact
+source SF and PDF operator streams match direct API output. Full tests/race/vet,
+module verification and build results are in verification.json. Existing running/
+image/table/note/style/bidi/context/paint regressions, all 51 corpus files/9,031
+nodes and 28/28 Poppler comparisons pass. No source/content/pixel corpus oracle
+was rewritten. Logs are output/page-layout-*; generated binaries, documents,
+page PNGs, QA environments and logs remain ignored.
+
+Final full results: library/CLI/bidi 6.437s/0.662s/2.205s; race
+100.346s/2.086s/13.867s. Vet/module verification and CGO-disabled build pass.
+Focused signed, unused-distance and physical-serialization tests/race checks pass.
+The final full checks include the corrected baseline test; earlier logs retain
+its initial mistaken assertion as development evidence, not a passing result.

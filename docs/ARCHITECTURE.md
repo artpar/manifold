@@ -100,12 +100,13 @@ The full story repeats, so table RepeatHeader flags are cleared only on temporar
 measurement copies. Page controls reject; note graph validation already forbids
 running anchors. No body cursor or pagination state changes during painting.
 
-The header begins at margin/2; bodyTop is the larger of margin and its measured
-end. Short footers retain height-margin/2; larger footers move upward to end at
-page height. bodyBottom is the smaller of height-margin and footer start. Body
+Legacy nil bindings retain header start margin/2 and footer start height-margin/2
+(moved upward when necessary). Explicit bindings instead anchor header top and
+footer bottom to page-edge distances. bodyTop/bodyBottom combine the effective
+edge margins with measured story exclusions. Body
 lines, images, headings, table continuations, note reservations/separators and
-note-only continuation pages all use these bounds. There is still one symmetric
-page geometry, with no section-specific running stories/distances yet.
+note-only continuation pages all use these bounds. There is one effective page geometry with four edges and optional running
+anchors; section-specific stories are not yet modeled.
 
 When running images compete, binary-search their measured budgets including each
 ancestor's padding (up to forty probes per story); freeze plans that reach a real
@@ -144,8 +145,8 @@ resulting full container. Running parts temporarily use their original container
 and the selected cap. No caller tree or asset is mutated. Geometry is validated
 before package bytes reach the caller. Source SF persists preferences; DOCX
 reimport returns physical fitted sizes, which remain stable on a second round trip.
-Text-only stories retain existing serialization. Public page geometry remains one
-symmetric layout; asymmetry/distances/sections still require model expansion.
+Text-only stories retain existing serialization. Public geometry now supports four edges/distances through the shared page
+resolver; section-specific body/stories still require model expansion.
 
 This is conservative raster budgeting, not a Word layout/shaping engine. Rejecting
 an exhausted envelope is not proof that every producer/font could never place it.
@@ -153,6 +154,40 @@ Broader font/producer qualification remains required. Native PDF uses its separa
 actual font/glyph planner. The tested LibreOffice exporter emits no URI annotations
 from an independent python-docx control either; source DOCX relationships pass,
 while producer PDF URI preservation remains explicitly unqualified.
+
+## Page geometry and provenance
+
+`page_layout.go` resolves legacy Width/Height/Margin plus optional PageMargins and
+HeaderDistance/FooterDistance. Group edges are explicit (zero included), override
+the scalar fallback, and retain that fallback as persistent data. Top/bottom may
+be signed OOXML fixed offsets; left/right and distances are nonnegative. Validation
+requires finite settings and positive physical body area. Unused far distances can
+persist; an actual out-of-page running story rejects at output. SF bridges clone
+all new pointers. This extends the existing ProseMirror layout attribute rather
+than creating another canonical representation.
+
+`pdf_page_layout.go` centralizes body sides/width and anchor selection. Native body,
+rich stories, continuation, note gutters/separators/targets share those bounds.
+New groups use 18pt defaults and footer-bottom semantics; nil legacy bindings
+retain established output. Signed offsets with no measured overlap are supported;
+actual running/body overlap rejects pending qualification. Running images use the
+page around their anchors, not an already reduced body region. DOCX emission uses
+the same source edges and its producer envelope, with standard twip geometry and
+landscape orientation. Format serialization checks reject empty rounded containers.
+
+`docx_page_layout.go` reads standard numeric/universal measures and current section
+properties. It ignores history/deleted/text-box snapshots as active sections and
+reports editing losses. Advanced page/conditional-story properties diagnose their
+missing representation. Checked md:layoutMargins/layoutMargin/layoutImplicit
+attributes preserve binding presence and the unused fallback in own files; actual
+standard edge/distance values remain authoritative. Foreign physical distances
+are explicit. Optional metadata is never permission or authority over content.
+
+PDF page/crop/source quads remain physical evidence. They do not establish original
+margin preferences, header/footer roles or running-anchor intent; recovery must not
+invent those settings. Asymmetric example bounds/rasters/targets are independently
+verified, while the sparse native first page and producer pagination/separator
+choices remain separate observations. This is not a Word-compatible layout engine.
 
 ## Lists
 

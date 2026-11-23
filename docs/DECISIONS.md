@@ -1041,3 +1041,45 @@ resolve the original standard DOCX links correctly; do not change writer semanti
 or the reference URLs merely to make that producer PDF assertion pass. Native
 manydoc PDF URI behavior remains independently verified. Producer URI export and
 broader DOCX visual/font qualification stay open in the active goal.
+
+
+## 2026-11-24: explicit four-edge page geometry in the existing SF
+
+Extend Layout with Margins *PageMargins and HeaderDistance/FooterDistance pointers.
+A group overrides all edges; pointer presence distinguishes real zero from the
+legacy fallback. Retain even the ignored scalar value as persisted data, because
+the existing whole-model SF preservation oracle correctly exposed its removal.
+Clone these pointers on both bridges. The established ProseMirror layout object
+remains canonical, with optional fields and no schema-version/dependency change.
+
+DOCX follows the standard [header-top distance](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.pagemargin.header)
+and [footer-bottom distance](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.pagemargin.footer)
+properties. [pgMar signed/unsigned constraints](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-oi29500/c13857a6-6aa5-4b53-a2a8-a8498e62085b)
+inform the model; it does not claim Word's full page-layout limits. Import standard
+twips and universal measures; export twips and explicit landscape orientation.
+Use checked ignorable metadata only to preserve implicit/explicit distinctions,
+not to overwrite physical settings. Own explicit groups retain the unused legacy
+scalar; foreign standard distances are recovered explicitly. New groups use the
+existing 18pt DOCX default in both writers. Legacy nil PDF bindings retain prior
+anchors, avoiding an unrequested global change to existing examples/oracles.
+
+Resolve geometry centrally and use all four sides for PDF body/table/note/running
+placement. Header top and footer bottom are independent edge anchors. A running
+picture already fitting a reserved header region must not be shrunk to the much
+smaller body region. Signed offsets persist fully through SF/DOCX and work in PDF
+when no running overlap occurs. Actual overlap still needs paint-order/layout
+qualification and rejects explicitly; this is unfinished work, not completion proof.
+Rounded empty containers and signed offsets becoming zero reject before output.
+A new test initially compared a font-quad top with a paragraph origin; source
+baseline evidence (60+11pt) fixes that mistaken test, not renderer coordinates.
+
+Current section collection excludes history/deleted/text-box snapshots. A targeted
+independent OPC case proves old missing relationships cannot override current page
+properties. Unsupported mirror/columns/gutter/conditional story presentation has
+explicit diagnostics; multiple-section flattening remains unfinished. Independent
+page tests preserve source/pixel/content oracles and distinguish nine native from
+six producer pages. The rich case uses a sparse native first page because table
+selection and whole-note admission prefer a fresh page; the producer ignores its
+cell start and draws a left note separator. Keep these observations while expanding
+sections and pagination. Do not infer authored margin/anchor intent from untagged
+PDF coordinates or claim Word equivalence from the new synthetic cases.

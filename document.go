@@ -45,11 +45,18 @@ type Metadata struct {
 	PageCount int    `json:"page_count,omitempty"`
 }
 
-// Layout dimensions are points, 72 per inch. Zero values use A4 and 54pt margins.
+// Layout dimensions are points, 72 per inch. Zero Width/Height/Margin use A4
+// and the legacy 54pt fallback. Margins and distance pointers retain explicit zeros.
 type Layout struct {
 	Width  float64 `json:"width,omitempty"`
 	Height float64 `json:"height,omitempty"`
 	Margin float64 `json:"margin,omitempty"`
+	// Margins overrides Margin; its zero edges are explicit, including all zero.
+	Margins *PageMargins `json:"margins,omitempty"`
+	// Distances are page-edge to header top/footer bottom, in points. Nil retains
+	// writer defaults; a nonnil zero selects the actual edge.
+	HeaderDistance *float64 `json:"header_distance,omitempty"`
+	FooterDistance *float64 `json:"footer_distance,omitempty"`
 }
 type Kind string
 
@@ -321,14 +328,8 @@ func (d *Document) Validate() error {
 			return err
 		}
 	}
-	for _, n := range []float64{d.Layout.Width, d.Layout.Height, d.Layout.Margin} {
-		if n < 0 || math.IsNaN(n) || math.IsInf(n, 0) {
-			return errors.New("layout dimensions must be finite and nonnegative")
-		}
-	}
-	w, h, m := layout(d.Layout)
-	if w <= 2*m || h <= 2*m {
-		return errors.New("page margins leave no content area")
+	if err := validateLayout(d.Layout); err != nil {
+		return err
 	}
 	var walk func([]Block, int) error
 	walk = func(bs []Block, depth int) error {

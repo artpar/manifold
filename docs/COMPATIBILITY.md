@@ -12,7 +12,7 @@ current rejection behavior must not be read as an exemption from that goal.
 | Operation | Implemented behavior | Important limits |
 | --- | --- | --- |
 | DOCX read | Paragraphs/headings, family/size/RGB/auto plus bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans/repeating header prefixes, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
-| DOCX write | Paragraphs/headings/runs/links with named families/half-point sizes/RGB/auto, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, one page layout and header/footer, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
+| DOCX write | Paragraphs/headings/runs/links with named families/half-point sizes/RGB/auto, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, one effective page layout with four margins/running distances and header/footer, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
 | PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; more complex inference, internal destinations and OCR unfinished; unsupported codecs/encodings/operators reject |
 | PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, rich measured headers/footers, linked rich footnotes/endnotes with continuation | Built-in Go coverage plus explicit supplied TTFs; qualified Hebrew/Arabic bidi below, broader scripts unfinished; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
 | SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; richer required features remain unfinished |
@@ -31,7 +31,8 @@ cached field results and text-box text are retained, with diagnostics for their
 unrepresented control/evaluation/layout semantics.
 
 Bookmark destinations, comment annotations, multiple
-section layouts and asymmetric margins are not fully represented. Notes are
+section-specific layouts, binding rules and conditional running variants are not
+fully represented. Static asymmetric edges and running distances are retained. Notes are
 extracted with typed inline identities and separate rich definitions. Automatic
 reference labels normalize to continuous decimal values; nondecimal/custom note
 marks, numbering/restart/placement changes and custom separator content have
@@ -626,7 +627,7 @@ that measured rectangle. Competing images scale without changing aspect/pixels;
 text sizes remain intact. The fitter reserves indivisible body/note minima and a
 .001pt rounding guard. Content that cannot fit, and page controls anywhere in a
 running story, reject atomically. Running note references still reject by the
-existing graph contract. Asymmetric distances, multiple sections, first/even/odd
+existing graph contract. Static asymmetric edges/distances now exist; multiple sections, first/even/odd
 stories and fields remain unfinished required expansion, not completion exceptions.
 
 The new native example passes independent geometry/pixel/URI/note/merge checks.
@@ -658,7 +659,8 @@ producer pages preserve seventeen exact-pixel placements, nested/merged geometry
 JPEG, body content and an unchanged small logo. The compatibility allowance has
 pinned evidence in DECISIONS.md. Text envelopes are estimates, not Word font/layout
 metrics or proof of producer impossibility; broader fonts/producer behavior and
-asymmetric pages/distances/sections remain required work. Source page twips are
+section-specific pages/stories, advanced binding and actual overlap remain required
+work. Source page twips are
 exact; the tested producer slightly normalizes paper width.
 
 Source DOCX links pass scoped XML and independent python-docx checks. Producer
@@ -666,3 +668,37 @@ PDF URI preservation remains unqualified: the nested example exports zero of two
 expected links, and an independent python-docx control exports zero of one. The
 strict verifier gate intentionally still fails there. Native PDF URI checks pass.
 This does not turn the full rich-document goal into a completed subset.
+
+
+## Four-edge pages and running distances
+
+Layout.Margins (*PageMargins) overrides all four scalar Margin edges, including
+zeros. HeaderDistance/FooterDistance pointers are points from page edge to header
+top/footer bottom. Explicit zero is retained; nil retains defaults. Explicit groups
+use 18pt default anchors in both writers, while legacy nil bindings keep their
+established per-writer behavior. The unused scalar value persists as data. SF/JSON
+retain settings and bridge ownership is independent. No new SF version is needed.
+
+DOCX reads/writes standard edges/anchors, numeric twips/universal-unit input and
+landscape size. Own files use checked ignorable metadata for binding presence;
+external physical distances remain explicit. Values normalize to rendered twip
+precision. Invalid/nonfinite or unrepresentable rounded containers reject atomically.
+Native PDF applies all sides to body/table/image/note/story pagination and measures
+running exclusions. Reserved header pictures use the anchor region, independently
+from body capacity. Signed top/bottom offsets persist in SF/DOCX; native PDF handles
+non-overlap but rejects actual running/body overlap pending qualification.
+
+Current properties override revision snapshots; deleted/moved-from/text-box sections
+are not active main-story sections. History loss diagnoses. Mirror/gutter/columns/
+first-even story/page presentation is not yet represented and diagnoses rather than
+silently appearing supported. Multiple active sections still flatten with a loss
+diagnostic. Those features, signed overlap and wider producer qualification remain
+required work. PDF recovery keeps physical pages/positions, without inventing
+original margin/anchor intent.
+
+Nine native pages/fourteen exact-pixel placements and six producer pages/eight
+placements verify the new common frames independently. Source SF/DOCX settings,
+formatting/relationships and assets compare exactly at represented precision.
+Native links/RTL note bounds and merged frames pass; native packing and producer
+cell-start/separator differences remain explicit. No professional/Word equivalence
+is established by this targeted evidence.

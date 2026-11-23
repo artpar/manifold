@@ -21,7 +21,69 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: DOCX running images share a body budget
+## Latest milestone: asymmetric frames and running distances
+
+- Public Layout now adds Margins *PageMargins and optional HeaderDistance/
+  FooterDistance point values. A nil group retains the legacy scalar fallback;
+  an explicit group overrides all four edges, including zero. Distance pointers
+  distinguish zero from unspecified. SF/JSON persist every setting and deep-copy
+  new pointers across both bridges. The existing whole-model corpus oracle caught
+  an attempted removal of the unused fallback value; implementation now preserves
+  it, without changing that oracle. No new schema version/module/dependency.
+- DOCX reads/writes standard pgMar edges and running distances, with numeric twips
+  and universal-unit input. Landscape dimensions emit orient=landscape. Checked
+  ignorable metadata preserves explicit groups/unused fallback/nil bindings in
+  own round trips; external physical distances remain explicit. Contradictory
+  metadata and invalid numbers reject. Rounding that empties a page/body or
+  erases a signed offset rejects atomically instead of creating invalid output.
+- Native PDF uses left/right/top/bottom consistently in body, running stories,
+  table continuation, notes, labels, separators, links and endnotes. Explicit
+  header distance anchors the top; footer distance anchors the story's bottom.
+  Explicit margin groups default to the common 18pt anchors. Legacy nil bindings
+  retain the old per-writer behavior and its existing coordinate oracles. Running
+  pictures budget against their anchors independently from already reserved body
+  margins, preventing an unnecessary header-image shrink.
+- Signed top/bottom offsets persist through SF/DOCX. Native PDF supports fixed
+  signed offsets when measured running stories do not overlap the body; actual
+  overlap still rejects explicitly pending paint/layout qualification. Advanced
+  gutter/mirror/columns/first-even story settings diagnose rather than silently
+  appearing supported. Current section collection now excludes revision-history,
+  deleted/moved-from and text-box snapshots; a missing old relationship no longer
+  overrides current properties or invents a section. Revision loss is explicit.
+- New examples/page-layout has asymmetric landscape, explicit zero edges, and
+  independent distance cases. All source SF/DOCX trees/settings/assets compare
+  exactly. Independent readers check nine native pages/fourteen exact-pixel
+  placements, merged running geometry, all 24 table rows, six URI annotations,
+  actual note destinations, RTL right-edge placement and recovered SF positions.
+  Nine native and six LibreOffice DOCX pages were visually inspected. The latter
+  keep all content/eight rasters but use three rich-example pages versus six
+  natively, ignore the cell start, and use a left note separator. Native note
+  admission leaves a sparse first page; these pagination/producer differences
+  remain qualified observations, not Word-equivalent fidelity.
+- Actual ProseMirror validates nine files/770 nodes. The CGO-disabled CLI exercises
+  all four paths in three cases, preserving exact source DOCX SF and matching
+  native PDF operator streams. PDF recovery retains physical page/canvas positions;
+  it does not falsely recover authorial margins or running-distance intent.
+  Full tests pass (library 6.437s, CLI 0.662s, bidi 2.205s); race passes
+  (100.346s/2.086s/13.867s). Vet/module verification/CGO-disabled build and focused
+  signed/serialization tests pass; see TESTING.md and verification.json. Page-layout fuzz
+  completes 1,000 executions; malformed DOCX completes 500. Existing running/
+  image/table/note/style/bidi/context/paint regressions and the 51-file/9,031-node
+  corpus plus 28/28 Poppler comparisons pass without changed source/content oracles.
+
+The full goal remains **incomplete**, with no external blocker. Next establish
+section-specific layout/body boundaries and default/first/even running stories in
+this same SF/model, then implement both readers/writers and native transitions.
+Actual signed overlap, advanced page/binding settings, note/table packing,
+font/producer qualification, producer URI-export qualification, remaining script/
+source-font/PDF recovery/color and representative real-export work stay required.
+Previous checkpoint: d6feaca. Next concrete commands:
+GOWORK=off go run ./examples/page-layout;
+output/qa-venv/bin/python scripts/verify_page_layout.py --office;
+rg -n 'docxActiveSections|sectPr|type Layout|type Block|prepareRunning' docx_page_layout.go docx_read.go docx_write.go document.go pdf_running.go;
+GOWORK=off go test -run 'TestPage|TestDOCXPage' .
+
+## Earlier milestone: DOCX running images share a body budget
 
 - docx_running.go now plans both running stories before emitting the package.
   A common maximum image height is selected with bounded monotone bisection;

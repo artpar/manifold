@@ -55,8 +55,15 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 	if err != nil {
 		return err
 	}
-	wid, hei, mar := layout(d.Layout)
-	w := &docxWriter{ctx: ctx, parts: map[string][]byte{}, next: 1, contentWidth: wid - 2*mar, contentHeight: hei - 2*mar, validatedImages: make(outputImageCache)}
+	g := pageLayout(d.Layout)
+	if err := validateDOCXPageGeometry(g); err != nil {
+		return err
+	}
+	if len(d.Headers) > 0 && g.headerDistance() >= g.height || len(d.Footers) > 0 && g.footerDistance() >= g.height {
+		return fmt.Errorf("%w: DOCX running anchor lies outside the page", ErrUnsupported)
+	}
+	wid, hei := g.width, g.height
+	w := &docxWriter{ctx: ctx, parts: map[string][]byte{}, next: 1, contentWidth: g.contentWidth(), contentHeight: g.contentHeight(), validatedImages: make(outputImageCache)}
 	w.noteIDs = map[noteKey]int{}
 	w.noteLabels = notes.labels
 	w.seenNoteRefs = map[noteKey]bool{}
@@ -65,11 +72,11 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 		noteCounts[n.Kind]++
 		w.noteIDs[noteIdentity(n)] = noteCounts[n.Kind]
 	}
-	imageHeight, bodyHeight, err := w.fitRunning(d, hei, mar)
+	imageHeight, bodyHeight, err := w.fitRunning(d, g)
 	if err != nil {
 		return err
 	}
-	fullHeight := w.contentHeight
+	fullHeight := g.runningHeight(len(d.Headers) > 0, len(d.Footers) > 0)
 	w.contentHeight = bodyHeight
 	w.runningImageHeight = 0
 	w.addRel("styles", "styles.xml", false)
@@ -110,7 +117,11 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 			section += `<w:` + kind + `Pr><w:numFmt w:val="decimal"/><w:numRestart w:val="continuous"/></w:` + kind + `Pr>`
 		}
 	}
-	section += fmt.Sprintf(`<w:pgSz w:w="%.0f" w:h="%.0f"/><w:pgMar w:top="%.0f" w:right="%.0f" w:bottom="%.0f" w:left="%.0f" w:header="360" w:footer="360"/></w:sectPr>`, wid*20, hei*20, mar*20, mar*20, mar*20, mar*20)
+	orientation := ""
+	if wid > hei {
+		orientation = ` w:orient="landscape"`
+	}
+	section += fmt.Sprintf(`<w:pgSz w:w="%.0f" w:h="%.0f"%s/>`, wid*20, hei*20, orientation) + docxPageMargins(d.Layout) + `</w:sectPr>`
 	w.parts["word/document.xml"] = []byte(xmlHeader + `<w:document` + wordNamespaces + docxMetadataNamespaces + `><w:body>` + body + section + `</w:body></w:document>`)
 	w.parts["word/styles.xml"] = []byte(xmlHeader + `<w:styles xmlns:w="` + wordNS + `"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Noto Sans" w:hAnsi="Noto Sans"/><w:sz w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>` + headingStyles() + noteStyles() + `</w:styles>`)
 	w.parts["word/numbering.xml"] = []byte(w.numberingXML())
