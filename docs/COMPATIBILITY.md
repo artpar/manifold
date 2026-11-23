@@ -354,12 +354,12 @@ DOCX resolves docDefaults, paragraph/character basedOn chains and direct fields.
 Bold/italic/strike in style definitions toggle, whereas direct values are absolute.
 Export uses rFonts, exact positive half-point sz and RGB/auto color. Checked
 textImplicit metadata preserves our unset defaults and rejects contradictions.
-Unrepresented style properties diagnose. Theme Latin names resolve with binding-loss
-diagnostics. Theme sRGB/system-lastClr run colors now resolve settings mappings
+Unrepresented style properties diagnose. Four font slots and theme language/script
+choices now resolve to explicit text spans with binding-loss/uncertainty diagnostics. Theme sRGB/system-lastClr run colors now resolve settings mappings
 and HSL tint/shade; tint wins over shade. Calculated current RGB overrides a
 mismatched final cache with a diagnostic. Unsupported/missing palette constructs
 may retain a valid final RGB cache with uncertainty; without one they reject.
-Broader DrawingML transformations, theme/script choices, source font-program
+Broader DrawingML transformations, font-selection qualification and source font-program
 recovery, highlighting/shading and additional
 paragraph properties remain required work. Page backgrounds/embedded fonts now
 diagnose loss. Font selection in a DOCX viewer still depends on installed faces;
@@ -436,3 +436,29 @@ our resolved current-theme RGB differs there. Ten other source colors and all
 color-engine equivalence is claimed. Unsupported DrawingML palette constructs,
 editable theme bindings, theme/script font selection and broader color/real-export
 qualification remain required expansion. This is not a complete theme engine.
+
+
+### DOCX per-script font slots
+
+ASCII/high-ANSI/East-Asian/complex slot/theme pairs inherit independently through
+all supported run style levels. Resolved families become textStyle spans; equal
+effective families do not create extra spans. The deterministic policy follows
+the cited MS-OI29500 character/hint table, including Times New Roman, Chinese
+hint/charset and UTF-16 surrogate rules. themeFontLang BCP47 scripts select matching
+supplemental major/minor entries; absent languages use the appropriate default
+region. Cached theme fallback, low-confidence scripts, unknown application defaults
+and unavailable charset decisions diagnose. A used unresolved theme with no family
+cache rejects. Unused unresolved theme slots do not discard unrelated content.
+
+Explicit cs/rtl selects complex font and bCs/iCs/szCs. Style bCs/iCs toggle;
+direct values override. DOCX output writes complex twins for public explicit
+bold/italic/size. Run editing/direction/language bindings and latent selectors
+are not retained, with diagnostics. Checked implicit-default metadata cannot
+conceal contradictory script families/complex size. Normalized SF/DOCX spans
+preserve current declared family/mark/size/links and nested block ownership.
+
+Modern Unicode updates, automatic complex-script assignment without explicit
+cs/rtl, cs hints, font substitution and broader real-export/Word qualification
+remain required. The published deterministic policy is not a Word layout engine.
+Native PDF missing glyph/shaping/cross-font-grapheme rejection stays atomic until
+proper Go shaping/bidi/glyph output exists; that required capability is incomplete.

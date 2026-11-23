@@ -134,6 +134,9 @@ type docxReader struct {
 	defaultPPr            *xmlNode
 	defaultRPr            *xmlNode
 	theme                 *xmlNode
+	themeLanguages        [3]string
+	themeLanguagesSet     bool
+	fontCharsets          map[string]string
 	colorMapping          map[string]string
 	defaultParagraphStyle string
 	num                   map[string]map[int]docxListLevel
@@ -304,6 +307,9 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 			if e != nil {
 				return nil, e
 			}
+			if e := r.readFontCharsets(table); e != nil {
+				return nil, e
+			}
 			for _, name := range []string{"embedRegular", "embedBold", "embedItalic", "embedBoldItalic"} {
 				if len(table.all(name)) > 0 {
 					r.doc.warn("font_embedding", "Embedded DOCX font programs are not retained; named families require application-supplied output fonts")
@@ -346,6 +352,9 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 			}
 			if settings.Name.Local != "settings" {
 				return nil, fmt.Errorf("invalid DOCX settings root")
+			}
+			if e := r.readThemeLanguages(settings); e != nil {
+				return nil, e
 			}
 			if e := r.readColorMapping(settings); e != nil {
 				return nil, e
@@ -559,8 +568,8 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 	activeNoteBookmark := ""
 	var activeNoteReference *NoteReference
 	seenNoteReference := false
-	var walk func(*xmlNode, Run) error
-	walk = func(c *xmlNode, style Run) error {
+	var walk func(*xmlNode, docxRunStyle) error
+	walk = func(c *xmlNode, style docxRunStyle) error {
 		switch c.Name.Local {
 		case "pPr", "rPr":
 			return nil
@@ -573,7 +582,9 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			if props := c.child("rPr"); props != nil {
 				for _, p := range props.Children {
 					switch p.Name.Local {
-					case "b", "i", "u", "strike", "rFonts", "sz", "color":
+					case "b", "i", "u", "strike", "rFonts", "sz", "szCs", "bCs", "iCs", "cs", "lang", "color":
+					case "rtl":
+						r.doc.warn("run_direction", "Run direction informs font selection; bidirectional layout control is not retained")
 					case "rStyle":
 						if r.styles[p.attr("val")] == nil && p.attr("val") != "FootnoteReference" && p.attr("val") != "EndnoteReference" {
 							r.doc.warn("run_formatting", "Run property not represented: rStyle")
@@ -586,13 +597,13 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			if err := r.textStyleChain(&style, c.child("rPr").child("rStyle").attr("val")); err != nil {
 				return err
 			}
-			if err := r.textProperties(&style, c.child("rPr")); err != nil {
+			if err := r.textProperties(&style, c.child("rPr"), false); err != nil {
 				return err
 			}
-			if err := restoreDocxTextImplicit(&style, c, b.Level); err != nil {
+			if err := r.restoreTextImplicit(&style, c, b.Level); err != nil {
 				return err
 			}
-			applyRunProps(&style, c.child("rPr"))
+			applyRunProps(&style.Run, c.child("rPr"))
 			if value := c.attributeNS(docxNotesNS, "headingBold"); value != "" {
 				if b.Kind != Heading || (value != "0" && value != "1") {
 					return fmt.Errorf("invalid heading bold metadata")
@@ -616,7 +627,11 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 		case "t":
 			skipNoteSeparator = false
 			style.Text = c.content()
-			b.Runs = append(b.Runs, style)
+			parts, err := r.textRuns(style)
+			if err != nil {
+				return err
+			}
+			b.Runs = append(b.Runs, parts...)
 			return nil
 		case "tab":
 			if skipNoteSeparator {
@@ -624,7 +639,11 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				return nil
 			}
 			style.Text = "\t"
-			b.Runs = append(b.Runs, style)
+			parts, err := r.textRuns(style)
+			if err != nil {
+				return err
+			}
+			b.Runs = append(b.Runs, parts...)
 			return nil
 		case "br", "cr":
 			if c.attr("type") == "page" {
@@ -634,7 +653,11 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				out = append(out, Block{Kind: PageBreak})
 			} else {
 				style.Text = "\n"
-				b.Runs = append(b.Runs, style)
+				parts, err := r.textRuns(style)
+				if err != nil {
+					return err
+				}
+				b.Runs = append(b.Runs, parts...)
 			}
 			return nil
 		case "drawing":
@@ -691,16 +714,20 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				if err := r.textStyleChain(&style, c.child("r").child("rPr").child("rStyle").attr("val")); err != nil {
 					return err
 				}
-				if err := r.textProperties(&style, c.child("r").child("rPr")); err != nil {
+				if err := r.textProperties(&style, c.child("r").child("rPr"), false); err != nil {
 					return err
 				}
-				if err := restoreDocxTextImplicit(&style, c.child("r"), b.Level); err != nil {
+				if err := r.restoreTextImplicit(&style, c.child("r"), b.Level); err != nil {
 					return err
 				}
-				applyRunProps(&style, c.child("r").child("rPr"))
+				applyRunProps(&style.Run, c.child("r").child("rPr"))
 				style.Text = ""
 				style.Note = ref
-				b.Runs = append(b.Runs, style)
+				parts, err := r.textRuns(style)
+				if err != nil {
+					return err
+				}
+				b.Runs = append(b.Runs, parts...)
 				return nil
 			}
 			r.doc.warn("field", "Cached field text is retained; field evaluation is not supported")
@@ -768,7 +795,11 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			if c.attr("customMarkFollows") != "" && c.attr("customMarkFollows") != "0" && c.attr("customMarkFollows") != "false" && c.attr("customMarkFollows") != "off" {
 				r.doc.warn("note_custom_mark", "Custom note mark semantics are not preserved; automatic reference numbering normalized")
 			}
-			b.Runs = append(b.Runs, style)
+			parts, err := r.textRuns(style)
+			if err != nil {
+				return err
+			}
+			b.Runs = append(b.Runs, parts...)
 			return nil
 		case "footnoteRef", "endnoteRef":
 			skipNoteSeparator = r.inNote > 0
@@ -780,11 +811,19 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			return fmt.Errorf("%w: DOCX symbol-font glyph requires an explicit font-to-Unicode mapping", ErrUnsupported)
 		case "noBreakHyphen":
 			style.Text = "\u2011"
-			b.Runs = append(b.Runs, style)
+			parts, err := r.textRuns(style)
+			if err != nil {
+				return err
+			}
+			b.Runs = append(b.Runs, parts...)
 			return nil
 		case "softHyphen":
 			style.Text = "\u00ad"
-			b.Runs = append(b.Runs, style)
+			parts, err := r.textRuns(style)
+			if err != nil {
+				return err
+			}
+			b.Runs = append(b.Runs, parts...)
 			return nil
 		}
 		for _, cc := range c.Children {

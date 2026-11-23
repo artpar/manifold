@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func (r *docxReader) textStyleChain(run *Run, id string) error {
+func (r *docxReader) textStyleChain(run *docxRunStyle, id string) error {
 	seen := map[string]bool{}
 	var chain []*xmlNode
 	for id != "" {
@@ -27,20 +27,20 @@ func (r *docxReader) textStyleChain(run *Run, id string) error {
 	}
 	for i := len(chain) - 1; i >= 0; i-- {
 		r.warnTextStyleProperties(chain[i].child("rPr"), chain[i].attr("styleId"))
-		if err := applyStyleRunProps(run, chain[i].child("rPr")); err != nil {
+		if err := applyStyleRunProps(&run.Run, chain[i].child("rPr")); err != nil {
 			return err
 		}
-		if err := r.textProperties(run, chain[i].child("rPr")); err != nil {
+		if err := r.textProperties(run, chain[i].child("rPr"), true); err != nil {
 			return err
 		}
 	}
 	return nil
 }
-func (r *docxReader) paragraphTextStyle(id string) (Run, error) {
-	run := Run{}
+func (r *docxReader) paragraphTextStyle(id string) (docxRunStyle, error) {
+	run := docxRunStyle{}
 	r.warnTextStyleProperties(r.defaultRPr, "")
-	applyRunProps(&run, r.defaultRPr)
-	if err := r.textProperties(&run, r.defaultRPr); err != nil {
+	applyRunProps(&run.Run, r.defaultRPr)
+	if err := r.textProperties(&run, r.defaultRPr, false); err != nil {
 		return run, err
 	}
 	if id == "" {
@@ -49,20 +49,7 @@ func (r *docxReader) paragraphTextStyle(id string) (Run, error) {
 	err := r.textStyleChain(&run, id)
 	return run, err
 }
-func (r *docxReader) themeFont(value string) string {
-	name := ""
-	if strings.HasPrefix(value, "major") {
-		name = "majorFont"
-	}
-	if strings.HasPrefix(value, "minor") {
-		name = "minorFont"
-	}
-	if name == "" {
-		return ""
-	}
-	return r.theme.child("themeElements").child("fontScheme").child(name).child("latin").attr("typeface")
-}
-func (r *docxReader) textProperties(run *Run, pr *xmlNode) error {
+func (r *docxReader) textProperties(run *docxRunStyle, pr *xmlNode, styleDefinition bool) error {
 	if pr == nil {
 		return nil
 	}
@@ -72,7 +59,7 @@ func (r *docxReader) textProperties(run *Run, pr *xmlNode) error {
 			return err
 		}
 		kind := p.Name.Local
-		if kind != "rFonts" && kind != "sz" && kind != "color" {
+		if kind != "rFonts" && kind != "sz" && kind != "szCs" && kind != "bCs" && kind != "iCs" && kind != "cs" && kind != "rtl" && kind != "lang" && kind != "color" {
 			continue
 		}
 		if seen[kind] {
@@ -87,34 +74,44 @@ func (r *docxReader) textProperties(run *Run, pr *xmlNode) error {
 			}
 			run.FontSize = float64(v) / 2
 		case "rFonts":
-			family := p.attr("ascii")
-			if family == "" {
-				family = p.attr("hAnsi")
+			if err := r.applyFontProperties(run, p); err != nil {
+				return err
 			}
-			theme := p.attr("asciiTheme")
-			if theme == "" {
-				theme = p.attr("hAnsiTheme")
+		case "lang":
+			if value := p.attr("eastAsia"); value != "" {
+				run.eastAsiaLanguage = value
 			}
-			if theme != "" {
-				resolved := r.themeFont(theme)
-				if resolved != "" {
-					family = resolved
+			r.doc.warn("run_language", "Run language informs font selection; editing/spelling language binding is not retained")
+		case "szCs":
+			v, err := strconv.ParseUint(p.attr("val"), 10, 32)
+			if err != nil || v == 0 {
+				return fmt.Errorf("invalid DOCX complex font size")
+			}
+			run.sizeCS = float64(v) / 2
+			run.hasCSStyle = true
+		case "bCs", "iCs", "cs", "rtl":
+			on, err := docxOnOff(p)
+			if err != nil {
+				return err
+			}
+			if kind == "bCs" || kind == "iCs" {
+				run.hasCSStyle = true
+			}
+			target := &run.cs
+			switch kind {
+			case "rtl":
+				target = &run.rtl
+			case "bCs":
+				target = &run.boldCS
+			case "iCs":
+				target = &run.italicCS
+			}
+			if styleDefinition && (kind == "bCs" || kind == "iCs") {
+				if on {
+					*target = !*target
 				}
-				r.doc.warn("font_theme", "Theme font is resolved to a family; editable theme binding is not retained")
-				if family == "" {
-					return fmt.Errorf("%w: unresolved DOCX theme font %q", ErrUnsupported, theme)
-				}
-			}
-			if family != "" {
-				run.FontFamily = family
-			}
-			for _, name := range []string{"hAnsi", "eastAsia", "cs"} {
-				if v := p.attr(name); v != "" && v != family {
-					r.doc.warn("font_scripts", "Distinct script font choices are normalized to the primary family")
-				}
-			}
-			if p.attr("eastAsiaTheme") != "" || p.attr("cstheme") != "" || p.attr("csTheme") != "" {
-				r.doc.warn("font_scripts", "Script-specific theme font choices are not retained")
+			} else {
+				*target = on
 			}
 		case "color":
 			value, err := r.textColor(p)
@@ -124,7 +121,7 @@ func (r *docxReader) textProperties(run *Run, pr *xmlNode) error {
 			run.Color = value
 		}
 	}
-	return validateTextStyle(*run)
+	return validateTextStyle(run.Run)
 }
 func docxTextStyle(run Run) (string, error) {
 	var out strings.Builder
@@ -136,7 +133,7 @@ func docxTextStyle(run Run) (string, error) {
 		if h != math.Trunc(h) || h < 1 || h > math.MaxUint32 {
 			return "", fmt.Errorf("%w: DOCX font size requires positive half-points", ErrUnsupported)
 		}
-		fmt.Fprintf(&out, `<w:sz w:val="%.0f"/>`, h)
+		fmt.Fprintf(&out, `<w:sz w:val="%.0f"/><w:szCs w:val="%.0f"/>`, h, h)
 	}
 	if run.Color != "" {
 		value := strings.TrimPrefix(canonicalTextColor(run.Color), "#")
@@ -244,7 +241,9 @@ func (r *docxReader) warnTextStyleProperties(pr *xmlNode, id string) {
 			return
 		}
 		switch p.Name.Local {
-		case "b", "i", "strike", "u", "rFonts", "sz", "color", "rStyle":
+		case "b", "i", "strike", "u", "rFonts", "sz", "szCs", "bCs", "iCs", "cs", "lang", "color", "rStyle":
+		case "rtl":
+			r.doc.warn("run_direction", "Run direction informs font selection; bidirectional layout control is not retained")
 		case "vertAlign":
 			if id != "FootnoteReference" && id != "EndnoteReference" {
 				r.doc.warn("run_formatting", "Style property not represented: vertAlign")

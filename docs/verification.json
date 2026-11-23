@@ -1925,5 +1925,121 @@
       "output/qa-venv/bin/python scripts/verify_docx_theme_colors.py"
     ],
     "external_blocker": null
+  },
+  "docx_font_slot_milestone": {
+    "date": "2026-11-23",
+    "prior_checkpoint": "5b92a20",
+    "active_goal_complete": false,
+    "exists": [
+      "reader-private four font slots and independent family/theme inheritance",
+      "normalized existing SF textStyle spans, equal-family leaf coalescing",
+      "themeFontLang supplemental BCP47 script matching and region defaults",
+      "published MS character/hint table, Chinese charset and TNR exceptions",
+      "explicit cs/rtl complex font/style selection with bCs/iCs/szCs",
+      "normal/complex output property twins",
+      "uncertainty/unused selector/language/direction/cache diagnostics",
+      "checked implicit-default metadata and nested link/table preservation",
+      "inherited complex-size contradictions cannot be concealed by implicit-default metadata"
+    ],
+    "checks": {
+      "go_test_all": {
+        "passed": true,
+        "library_seconds": 9.288,
+        "cli_seconds": 1.035,
+        "log": "output/script-font-tests-final.log"
+      },
+      "go_race_all": {
+        "passed": true,
+        "library_seconds": 79.122,
+        "cli_seconds": 2.116,
+        "log": "output/script-font-race-final.log"
+      },
+      "go_vet": "passed",
+      "cgo_disabled_cli": "built darwin/arm64 and executed help/independent conversions",
+      "diff_check": "passed",
+      "fuzz": {
+        "DOCXScriptFontSelection": {
+          "executions": 1000,
+          "passed": true,
+          "seconds": 1.494
+        },
+        "ReadDOCX": {
+          "executions": 500,
+          "passed": true,
+          "seconds": 1.593
+        }
+      },
+      "prosemirror_corpus": {
+        "passed": true,
+        "files": 51,
+        "nodes": 9031
+      },
+      "prosemirror_font_fixture": {
+        "passed": true,
+        "nodes": 14
+      },
+      "poppler_text": {
+        "passed": 28,
+        "total": 28
+      },
+      "independent_regressions": [
+        "verify_docx_theme_colors.py",
+        "examples/text-style + verify_text_style.py"
+      ]
+    },
+    "independent": {
+      "script": "scripts/verify_docx_font_selection.py",
+      "author": "python-docx plus explicit independent font/theme/settings/run XML",
+      "paragraphs": 5,
+      "exact_source_SF_spans": 8,
+      "scripts": "Latin/Greek/Cyrillic plus forced complex slot on Latin text, not a broader shaping qualification",
+      "checks": [
+        "SF family/size/marks/partition",
+        "DOCX four font slots and normal/complex size/bold/italic twins",
+        "native PDF per-character size/style/fixed-pitch after explicit family mapping",
+        "metadata/one page",
+        "LibreOffice exported DOCX every character/size/bold/italic"
+      ],
+      "native_pages": 1,
+      "libreoffice_pages": 1,
+      "visually_inspected": 2,
+      "office_fonts": [
+        "LiberationMono",
+        "LiberationSans",
+        "LiberationSerif",
+        "LiberationSerif-BoldItal"
+      ],
+      "source_font_or_Word_equivalence_claimed": false
+    },
+    "corpus_change": {
+      "isolated_prior_build": "5b92a20",
+      "changed_DOCX_text_styles": [
+        "docx_unicode.docx"
+      ],
+      "before": "one Cambria span",
+      "after": "Cambria text interleaved with declared ＭＳ 明朝 Chinese and supplementary spans",
+      "node_increase": 4,
+      "fixture_or_content_oracle_changed": false,
+      "comparison": "output/script-font-corpus-differences.json"
+    },
+    "test_correction": "New table/link test initially used raw-Go PDF helper; DOCX zero and SF one default spans are equivalent. Final check compares canonical SF with unchanged text/font/link/table ownership facts.",
+    "public_schema_or_dependency_change": false,
+    "remaining_required": [
+      "modern ranges and automatic complex assignment without cs/rtl",
+      "ambiguous cs hints and broader producer/font qualification",
+      "full direction/language/theme binding",
+      "Go shaping/bidi/glyph output and supplementary support",
+      "source-font handling",
+      "rich page/running content",
+      "broader PDF color/structure recovery",
+      "representative real exports and Word qualification"
+    ],
+    "next_commands": [
+      "rg -n 'validateFontText|textAtoms|CID|ToUnicode' pdf_write.go pdf_text.go pdf_font.go",
+      "GOWORK=off go doc github.com/benoitkugler/textlayout/harfbuzz",
+      "GOWORK=off go test -run TestDOCXFont -count=1",
+      "output/qa-venv/bin/python scripts/verify_docx_font_selection.py"
+    ],
+    "external_blocker": null
   }
 }

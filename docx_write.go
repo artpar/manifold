@@ -247,10 +247,10 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 					out.WriteString(`<w:rStyle w:val="` + strings.Title(r.Note.Kind) + `Reference"/>`)
 				}
 				if r.Bold {
-					out.WriteString(`<w:b/>`)
+					out.WriteString(`<w:b/><w:bCs/>`)
 				}
 				if r.Italic {
-					out.WriteString(`<w:i/>`)
+					out.WriteString(`<w:i/><w:iCs/>`)
 				}
 				if r.Underline {
 					out.WriteString(`<w:u w:val="single"/>`)

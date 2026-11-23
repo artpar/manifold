@@ -1013,3 +1013,65 @@ text comparisons passed. verification.json records results; ignored output holds
 raw logs/generated documents/renderings. No fixture oracle or runtime dependency
 changed. Unsupported DrawingML palette transforms and broader theme/script/font,
 page/running-content, shaping/bidi and real-export work remain required.
+
+
+## DOCX font-slot/theme-language qualification
+
+```sh
+GOWORK=off go test -run 'TestDOCXFont|TestDOCXScript' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzDOCXScriptFontSelection$' -fuzztime=1000x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=500x -parallel=2 -timeout=90s
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+output/qa-venv/bin/python scripts/verify_docx_font_selection.py
+mkdir -p output/docx-font-selection/lo
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/docx-font-selection/lo-profile --headless --convert-to pdf --outdir output/docx-font-selection/lo output/docx-font-selection/reflow.docx
+output/qa-venv/bin/python scripts/verify_docx_font_selection.py --office output/docx-font-selection/lo/reflow.pdf
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/docx-font-selection/source.sf
+output/qa-venv/bin/python scripts/verify_docx_theme_colors.py
+GOWORK=off go run ./examples/text-style
+output/qa-venv/bin/python scripts/verify_text_style.py
+python3 scripts/verify_structured_corpus.py
+python3 scripts/compare_pdf_text.py
+GOWORK=off go test ./... -count=1
+GOWORK=off go test -race ./... -count=1
+GOWORK=off go vet ./...
+git diff --check
+```
+
+Independently authored source parts test per-slot inheritance, family/theme pair
+replacement, supplemental BCP47 script mappings and default regions, cache fallback,
+unknown unused slots, hints, Chinese charset conditions, complex override/style
+toggles/direct values, Times New Roman and supplementary classification. SF and
+DOCX preserve exact resolved fonts/marks/colors/sizes. Inherited complex sizes also cannot be cleared by contradictory implicit-default
+metadata. Nested table/link checks
+retain ownership and URI relationships, with canonical SF comparison of equivalent
+zero/one default spans. Missing glyph and cross-font grapheme PDF paths still
+reject atomically, preserving source content. That is a current limitation, not
+completion of required Unicode rendering. Font fuzz also round trips SF and DOCX.
+
+The full independent python-docx/explicit-XML fixture has five paragraphs/eight
+exact SF text spans using Latin/Greek/Cyrillic characters and a forced complex slot
+with 18pt bold/italic. XML checks four exported font slots and normal/complex twins.
+MuPDF checks every native character's size/style/fixed-pitch face after explicit
+Go/Go Mono mapping; pypdf checks page count/metadata. Native readers legitimately
+coalesce mapped equal faces, so PDF span partition is not a structure oracle.
+The SF partition remains exact. LibreOffice verifies every exported DOCX character,
+size and boolean mark on one page; observed fonts are Liberation Sans/Mono/Serif
+and LiberationSerif-BoldItal. Both native/LibreOffice pages were visually inspected.
+Actual ProseMirror validates all 14 new nodes. This is targeted synthetic QA.
+
+Full tests passed (library 9.288s, CLI 1.035s), race passed (79.122s/2.116s), vet and
+CGO-disabled build/execution passed, diff check passed. Font fuzz passed 1,000 and
+malformed-DOCX fuzz 500 executions. All 51 accepted SF corpus files pass with 9,031
+nodes (four more), and all 28 Poppler text comparisons pass. An isolated prior
+5b92a20 build proves the corpus font change is limited to docx_unicode.docx:
+Chinese/supplementary spans now use declared ＭＳ 明朝 while other spans retain
+Cambria. Existing fixture/content oracles are unchanged. Theme-color and four-page
+rich-style independent regressions pass. Initial new table/link raw-Go comparison
+failed on equivalent default span spellings; final semantic checks and race pass.
+
+Current policy uses the cited MS character/hint table, not a completed modern
+Word selection engine. Automatic complex-script selection without cs/rtl, modern
+ranges, ambiguous cs hints, direction/language bindings, source fonts and broader
+producer qualification remain required. Native shaping/bidi/glyph output must be
+implemented; atomic rejection is not its completion evidence.

@@ -21,7 +21,49 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: calculated DOCX theme colors
+## Latest milestone: DOCX font slots and theme languages
+
+- DOCX keeps ASCII/high-ANSI/East-Asian/complex font slots in private import
+  state until text is known, then resolves ordinary public Run/SF textStyle spans.
+  Independent slot/theme pairs inherit across defaults/paragraph/character/direct
+  levels; a direct family replaces an inherited theme only for its own slot.
+  Equal effective families retain their original text span. No new public schema.
+- The published MS-OI29500 character/hint selection table supplies a deterministic
+  policy, including East Asian hints, Chinese-language/font-charset exceptions,
+  Times New Roman exception and UTF-16 surrogate classification. Settings
+  themeFontLang chooses supplemental theme faces by BCP47 script; empty language
+  settings use latin/ea/cs defaults. Low-confidence script inference, unknown
+  charsets, unresolved defaults and cached theme fallback diagnose uncertainty.
+- Explicit cs/rtl forces the complex slot; bCs/iCs/szCs resolve its formatting,
+  including style toggles/direct cancellation. RTL editing/layout direction is
+  still unrepresented and diagnoses. Generic DOCX output writes normal/complex
+  size/bold/italic twins, retaining a selected public style in both font contexts.
+  Checked implicit-default metadata also validates script choices before clearing.
+- Five independently authored DOCX paragraphs supply eight exact SF spans. Checks
+  cover families/sizes/marks, standard DOCX slots/complex twins, native PDF per-
+  character fixed-pitch/size/style evidence and LibreOffice-rendered DOCX characters.
+  Both generated pages were visually inspected. Explicit output maps deliberately
+  select Go/Go Mono; exact source/producer typeface equivalence is not claimed.
+- Existing corpus fixtures/oracles stay unchanged. An isolated prior-commit build
+  shows only docx_unicode.docx changes font spans: Chinese and supplementary text
+  now retain declared ＭＳ 明朝 instead of blanket Cambria. Actual ProseMirror corpus
+  nodes increase 9,027 → 9,031, across the same 51 accepted files. A new table/link
+  test compares declared SF semantics because Go default spans zero and SF one are
+  equivalent; its content/font/relationship expectations are unchanged.
+- Full tests/race/vet/CGO-disabled build/execution, font/package malformed fuzz,
+  independent theme/rich-style regressions and 28 Poppler comparisons passed;
+  verification.json records exact evidence. No new runtime dependency; x/text's
+  existing license covers language/script metadata. Generated output stays ignored.
+
+The full goal remains incomplete. Modern Unicode range updates, automatic complex
+selection without cs/rtl, ambiguous cs hints, producer variants and complete
+language/direction binding still require qualification/expansion. Next implement
+Go shaping/bidi/glyph output and source-font handling; then remaining rich pages/
+running content, PDF recovery/color and representative real exports. No external
+blocker exists. Prior checkpoint: 5b92a20. Do not treat atomic missing-glyph/shaping
+rejection as completion of the required Unicode capability.
+
+## Earlier milestone: calculated DOCX theme colors
 
 - DOCX text colors now calculate themeTint/themeShade in HSL luminance rather
   than blindly retaining a cached transformed RGB. Tint takes precedence when
@@ -933,7 +975,9 @@ module access. The go.mod selects Go 1.25; do not force an older local toolchain
 No external blocker currently prevents development. Editable PDF family/physical
 size/device-color recovery now exists with provenance and uncertainty diagnostics.
 DOCX theme tint/shade and settings color mappings now calculate resolved RGB.
-Next expand theme/script font choice, source-font handling, color management and Go shaping/bidi;
+DOCX font-slot and theme-language selection now resolves current spans with explicit
+uncertainty/binding-loss diagnostics. Next implement Go shaping/bidi/glyph output
+and source-font handling, and continue color management/selection qualification;
 continue page/running content, broader PDF recovery and representative real exports.
 These remain required acceptance work. Existing precision restrictions can require
 explicit caller retypesetting of imported PDFs; preserve original SF and disclose
@@ -947,7 +991,10 @@ GOWORK=off go test -run '^$' -fuzz '^FuzzPDFEditableStyles$' -fuzztime=1000x -pa
 output/qa-venv/bin/python scripts/verify_pdf_text_styles.py
 GOWORK=off go test -run 'TestDOCXTheme' -count=1
 output/qa-venv/bin/python scripts/verify_docx_theme_colors.py
-rg -n 'shaping|bidi|complex|supplement|themeFont|font_scripts' pdf_text.go pdf_font.go docx_text_style.go
+GOWORK=off go test -run 'TestDOCXFont|TestDOCXScript' -count=1
+output/qa-venv/bin/python scripts/verify_docx_font_selection.py
+rg -n 'validateFontText|textAtoms|CID|ToUnicode' pdf_write.go pdf_text.go pdf_font.go
+GOWORK=off go doc github.com/benoitkugler/textlayout/harfbuzz
 GOWORK=off go run ./examples/text-style
 output/qa-venv/bin/python scripts/verify_text_style.py --office output/text-style/lo/text-style.pdf
 GOWORK=off go test -run 'TestTextStyle|TestDOCXText|TestSuppliedNoto|TestPDFExplicitFont' -count=1

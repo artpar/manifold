@@ -385,3 +385,11 @@ current-theme RGB in some producers. Unsupported palette resolution uses a final
 RGB cache only with uncertainty, otherwise rejects. Broader DrawingML/theme/font
 and script features remain required expansion; resolved RGB round trips preserve
 this profile's declared scalar, not an absent live theme relationship.
+
+
+DOCX font-slot/theme-language import now emits ordinary textStyle spans for the
+selected family and complex size/marks. Private import selectors do not enter
+SF; binding/uncertainty losses diagnose. Exact source spans may split, while equal
+effective families coalesce within a leaf. Public schema/version meanings remain
+unchanged. Script/layout selector retention and broader qualification remain
+unfinished; native unsupported shaping/glyph errors are not completion exemptions.

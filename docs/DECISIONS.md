@@ -750,3 +750,31 @@ cache with explicit uncertainty. Do not ignore their children or tint that cache
 a second time. No usable final cache means unsupported resolution rejects.
 These constructs, theme bindings and script/font handling remain unfinished work;
 this milestone does not turn remaining required capabilities into exclusions.
+
+
+## 2026-11-23 Preserve font slots until source text is known
+
+A single primary family erased used East Asian/high-ANSI choices before text
+arrived. Keep slot/theme/style selectors in reader-private state, then resolve
+current text into established SF textStyle spans. Do not add a competing canonical
+Word font-selector representation. Preserve independent attribute inheritance and
+explicitly diagnose lost future editing/language/theme selectors. Public Go/SF
+font values and caller output font configuration remain unchanged.
+
+[MS-OI29500 rFonts](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-oi29500/aef3c9a6-5d6c-434b-90b7-85e761fd8e62)
+provides the character/hint policy used here; [themeFontLang](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.themefontlanguages?view=openxml-3.0.1)
+provides language-based theme selection. BCP47/script lookup reuses pinned x/text,
+including confidence diagnostics. These published rules do not prove current
+Word/other-producer equivalence; modern/automatic complex selection and ambiguous
+hints remain required work. Forced complex styles retain bCs/iCs/szCs with existing
+style-toggle/direct semantics. Export public values to normal/complex twins.
+
+An isolated 5b92a20 build compared every accepted DOCX source: the Unicode fixture
+alone gains four text nodes, correctly separating its declared ＭＳ 明朝 Chinese/
+supplementary spans from Cambria. No fixture or expected visible content changed.
+Native readers may coalesce mapped source families into the same Go face, so the
+new independent PDF check compares each actual character/face metric/style rather
+than requiring the source SF's exact span partition. The SF eight-span oracle
+remains exact. A new table/link test initially used a PDF-specific raw Go helper;
+DOCX default cell spans zero and SF explicit one are equivalent by contract. The
+fixed test compares canonical SF and unchanged font/link/table ownership facts.

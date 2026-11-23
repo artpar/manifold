@@ -206,3 +206,10 @@ DOCX imports calculate run theme tint/shade and document color mappings into RGB
 Theme/system bindings and mismatched cached colors have explicit diagnostics;
 unsupported palette choices may use a final cached RGB with uncertainty. Optional
 QA: `output/qa-venv/bin/python scripts/verify_docx_theme_colors.py`.
+
+
+DOCX font slots and theme languages resolve into explicit styled spans instead of
+one family for an entire mixed-script run. Selector/direction/language losses and
+uncertain defaults have diagnostics. Optional QA:
+`output/qa-venv/bin/python scripts/verify_docx_font_selection.py`. Broader font
+selection and native shaping/bidi remain required work; see docs/STATUS.md.

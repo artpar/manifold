@@ -431,3 +431,30 @@ with explicit uncertainty; they never apply theme modifiers twice. Without usabl
 cache, unsupported resolution rejects. Malformed RGB/modifiers/mapping values and
 duplicate mapping nodes/attributes reject. DrawingML choices/transforms beyond
 plain sRGB/sysClr, theme editing and script/font selection remain required work.
+
+
+## DOCX font-selection import state
+
+`docxRunStyle` wraps the public Run only inside the reader. Four independent
+family/theme pairs, hint/language and forced complex-format properties inherit
+without discarding unmentioned slots. Text leaves select effective families and
+become ordinary public spans; identical families coalesce within the original
+leaf. Links and nested block ownership remain intact. No new canonical font-map
+format or public schema/model fields are introduced. Selector/language/theme and
+layout binding losses have diagnostics rather than hidden editor semantics.
+
+`docx_fonts.go` uses the published MS-OI29500 character/hint table as a declared
+selection policy. Theme enumeration determines latin/ea/cs region; settings
+BCP47 languages can select supplemental font script entries, with explicit
+low-confidence/fallback diagnostics. Font-table charset participates in the
+specific Chinese hint exception. Missing used theme faces reject without a usable
+stored family; unknown application-default slots diagnose unresolved defaults.
+Only used text needs a resolvable theme slot. Explicit cs/rtl selects complex
+bold/italic/size; source RTL direction remains a separate diagnosed layout loss.
+DOCX output writes b/bCs, i/iCs and sz/szCs twins for explicit public values.
+
+This is not a complete Word font-selection/layout engine: modern Unicode range
+extensions, automatic complex-script assignment, ambiguous cs hints and producer
+variants remain required expansion/qualification. Native PDF still rejects
+unsupported shaping, supplementary glyphs and cross-style graphemes atomically;
+source normalized spans survive SF/DOCX independently of that output limitation.

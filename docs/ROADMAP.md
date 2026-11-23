@@ -9,7 +9,9 @@ integration and do not authorize changes to Daptin.
    corpus of real exported documents and intended deployment fonts. Compare text,
    structure, and appearance separately.
 2. Extend the implemented family/size/color fields with full theme/script/embedded
-   font recovery, shading and paragraph properties; calculated run theme tint/shade
+   font recovery, shaping/bidi/glyph output and paragraph properties; font-slot/
+   theme-language resolution now preserves current spans, while broader selection
+   qualification/modern ranges remain required; calculated run theme tint/shade
    and settings color mappings now exist; then asymmetric
    margins, sections, richer note numbering/separator/layout behavior, bookmarks, comment/revision history and
    broader numbering formats. Each feature needs import, model, export and tests;
@@ -35,3 +37,12 @@ integration and do not authorize changes to Daptin.
 Use `docs/STATUS.md` as the current handoff and `docs/TESTING.md` for the commands.
 Record compatibility changes and reference-corpus results before claiming a
 broader professional-document contract.
+
+
+The next shaping slice needs glyph-ID output as well as HarfBuzz shaping. Inspect
+pinned textlayout/harfbuzz and current gofpdf font/ToUnicode paths before changing
+validation. A glyph bridge must preserve actual outlines/advances/offsets,
+ToUnicode or ActualText logical text, bidi ordering, embedding rights and atomic
+errors. In-process PDF font dictionary/stream generation may avoid the existing
+BMP-only primitive path; qualify this with independent readers before relaxing
+any shaping/missing-glyph guard. This is unfinished implementation, not evidence.
