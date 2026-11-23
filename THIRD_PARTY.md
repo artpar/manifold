@@ -57,3 +57,7 @@ Its license is `testdata/assets/DejaVu-LICENSE.txt`; it is not linked into the
 library/CLI. TTF SHA-256: `7da195a74c55bef988d0d48f9508bd5d849425c1770dba5d7bfc6ce9ed848954`.
 Release ZIP SHA-256: `7576310b219e04159d35ff61dd4a4ec4cdba4f35c00e002a136f00e96a908b0a`.
 This is an original third-party asset, not a generated font or customer file.
+
+The optional QA environment additionally pins uharfbuzz 0.57.0 to compare native
+HarfBuzz 15.0.0 with actual Go-generated GIDs/positions. This is a development-only
+reader/oracle, not a Go runtime dependency or required conversion executable.

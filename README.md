@@ -209,8 +209,8 @@ QA: `output/qa-venv/bin/python scripts/verify_docx_theme_colors.py`.
 
 
 DOCX font slots and theme languages resolve into explicit styled spans instead of
-one family for an entire mixed-script run. Selector/direction/language losses and
-uncertain defaults have diagnostics. Optional QA:
+one family for an entire mixed-script run. Unused selector/theme losses and uncertain defaults have diagnostics; language
+and paragraph/run direction bindings now persist in SF and DOCX. Optional QA:
 `output/qa-venv/bin/python scripts/verify_docx_font_selection.py`. Broader font
 selection and native shaping/bidi remain required work; see docs/STATUS.md.
 
@@ -220,3 +220,10 @@ monochrome supplementary glyphs with caller-supplied TTFs, tables, links, notes
 and running content. Optional QA: `output/qa-venv/bin/python scripts/verify_glyphs.py`.
 Native joining/bidi/complex-script support is still unfinished; errors remain
 explicit. See docs/COMPATIBILITY.md for the current glyph/font contract.
+
+
+`GOWORK=off go run ./examples/language` demonstrates general/East Asian/complex
+language bindings and independent paragraph/run direction in SF/DOCX. Native PDF
+examples qualify language-tagged LTR localization, kerning, ligatures and re-shaping
+after wrapping. Optional QA: `output/qa-venv/bin/python scripts/verify_language.py`.
+RTL PDF and broader contextual/script/style shaping remain unfinished.

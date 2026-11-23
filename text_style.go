@@ -5,9 +5,38 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+
+	"golang.org/x/text/language"
 )
 
+func validateDirection(value string) error {
+	if value != "" && value != "ltr" && value != "rtl" {
+		return fmt.Errorf("direction must be ltr, rtl or empty")
+	}
+	return nil
+}
+func validateLanguage(value string) error {
+	if value == "" {
+		return nil
+	}
+	if len(value) > 255 || strings.TrimSpace(value) != value || strings.ContainsAny(value, "_\t\r\n ") {
+		return fmt.Errorf("invalid BCP47 language tag")
+	}
+	if _, err := language.Parse(value); err != nil {
+		return fmt.Errorf("invalid BCP47 language tag %q: %w", value, err)
+	}
+	return nil
+}
 func validateTextStyle(r Run) error {
+	if err := validateDirection(r.Direction); err != nil {
+		return err
+	}
+	for _, value := range []string{r.Language, r.EastAsiaLanguage, r.ComplexLanguage} {
+		if err := validateLanguage(value); err != nil {
+			return err
+		}
+	}
+
 	if err := validateString(r.FontFamily); err != nil {
 		return err
 	}

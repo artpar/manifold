@@ -808,3 +808,35 @@ breaks; noncollinear replacements keep uncertainty/paint order. Strict pdfcpu ch
 cover the new pure-glyph font graph; hybrid legacy descriptors omit optional
 FontFamily, which that validator's strict mode requires. Hybrid outputs instead
 retain independent strict pypdf/MuPDF checks; no required PDF/A/UA claim is made.
+
+
+## 2026-11-23 Preserve language/direction before broadening shaping
+
+Use the existing ProseMirror profile for language scalars and independent paragraph/
+run direction, including the forced complex-script flag. A single inferred language
+would discard the independently inherited general/EA/complex bindings. A single
+paragraph direction would discard run RTL characteristics. Public effective flags
+retain standard DOCX behavior; dormant font/theme choices still diagnose separately.
+Sources: [OOXML languages](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.languages),
+[RTL run characteristics](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.righttolefttext),
+[paragraph layout](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.bidi),
+[forced complex formatting](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.complexscript).
+Run ltr disables RTL characteristics; it must not be implemented as a strong-letter
+bidi override. Forced cs also selects the complex language, even for Cyrillic text.
+
+The independent C HarfBuzz oracle initially accepted localized GIDs but rejected
+spacing: isolated graphemes had lost Cyrillic kerning. Preserve that oracle and
+shape same-style/script language-tagged segments before breaking, then shape the
+actual chosen line again. Emergency ligature widths are estimates only; split
+source graphemes and re-shape instead of cutting glyphs. Recheck final advances
+and back off, including removal of cross-boundary kerning. ToUnicode must map
+individual logical clusters, not put a complete line on its first glyph.
+
+Native HarfBuzz 15.0.0 via QA-only uharfbuzz 0.57.0 supplies independent GID/advance
+evidence for localization, kerning, ligatures and every wrapped example run.
+No native dependency enters runtime. The existing pinned pure-Go engine remains.
+RTL and complex joining stay rejected until actual paragraph bidi/itemization/
+line-order/context evidence qualifies support. A downloaded go-text/typesetting
+v0.3.4 API inspection was research only; no new module was adopted. Its line
+wrapper slices existing glyph ranges; do not assume that supplies line-boundary
+re-shaping. Generalized default/style/font/language shaping remains required.

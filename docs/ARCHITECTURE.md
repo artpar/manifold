@@ -440,8 +440,8 @@ family/theme pairs, hint/language and forced complex-format properties inherit
 without discarding unmentioned slots. Text leaves select effective families and
 become ordinary public spans; identical families coalesce within the original
 leaf. Links and nested block ownership remain intact. No new canonical font-map
-format or public schema/model fields are introduced. Selector/language/theme and
-layout binding losses have diagnostics rather than hidden editor semantics.
+format is introduced. Later language/direction model fields preserve those
+bindings; unused selector/theme/hint losses still have diagnostics.
 
 `docx_fonts.go` uses the published MS-OI29500 character/hint table as a declared
 selection policy. Theme enumeration determines latin/ea/cs region; settings
@@ -450,7 +450,8 @@ low-confidence/fallback diagnostics. Font-table charset participates in the
 specific Chinese hint exception. Missing used theme faces reject without a usable
 stored family; unknown application-default slots diagnose unresolved defaults.
 Only used text needs a resolvable theme slot. Explicit cs/rtl selects complex
-bold/italic/size; source RTL direction remains a separate diagnosed layout loss.
+bold/italic/size; source RTL direction now persists through the later language/direction model;
+native bidi layout is still unfinished.
 DOCX output writes b/bCs, i/iCs and sz/szCs twins for explicit public values.
 
 This is not a complete Word font-selection/layout engine: modern Unicode range
@@ -490,3 +491,26 @@ checks at phase boundaries, not a claim of exhaustive adversarial-font safety.
 ActualText component movement is not a logical line break. Noncollinear replacements
 lack an established baseline; untagged inference retains paint order with uncertainty.
 General PDF note/paragraph/reading-order recovery remains separate and incomplete.
+
+
+## Language, direction and contextual LTR shaping
+
+Block.Direction and Run.Direction are separate effective flow/RTL-characteristic
+values; Run.Language/EastAsiaLanguage/ComplexLanguage retain all language slots,
+and Run.ComplexScript keeps forced cs selection. The existing SF textStyle adds
+these scalars; paragraph/heading attrs.dir carries paragraph flow. Checked standard
+DOCX properties flatten defaults/style/direct inheritance; explicit false values
+become ltr, independently from absent properties. Do not treat ltr as a bidi
+override. Retained flags no longer independently trigger selector-loss diagnostics.
+
+pdf_direction.go preflights all stories before writing unsupported RTL. The
+language-tagged LTR path in pdf_language.go resolves adjacent weak scripts, shapes
+same-style/script segments and measures actual HB clusters. Ligature advances are
+apportioned among source graphemes only to estimate emergency breaks. Final lines
+are freshly shaped and width checked, backing off on overflow; stale sliced glyphs
+never paint. Notes remain attached to their preceding atomic anchor. Distinct
+styles/scripts/controls bound segments. pdf_glyph.go maps each resulting cluster
+to its original logical text for ToUnicode while retaining complete-span ActualText.
+General/EA/forced-CS language reaches the shaping buffer. Untagged simple text
+retains existing primitives. This remains a staged LTR implementation; bidi levels,
+joining/style context, default-path unification and broader scripts are unfinished.

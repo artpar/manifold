@@ -76,7 +76,7 @@ it cannot preserve. It is not evidence that the full requested SF is implemented
 | --- | --- |
 | Body | doc.content in order; an empty document is valid |
 | Paragraph/heading | paragraph/heading with text children; heading.attrs.level 1–6; optional boolean attrs.pageBreakBefore (default false) |
-| Formatting | strong, em, underline, strike marks; link.attrs.href; textStyle with fontFamily, numeric point fontSize, color (#RRGGBB/auto) |
+| Formatting | strong, em, underline, strike marks; link.attrs.href; textStyle with fontFamily, numeric point fontSize, color (#RRGGBB/auto), lang/eastAsiaLanguage/complexLanguage, dir and complexScript |
 | Lists | ordered_list (nonnegative order, default 1) or bullet_list → list_item → paragraph/heading followed by blocks, including nested lists |
 | Tables | table → table_row → table_cell; colspan 1–1000, positive rowspan bounded by remaining rows; nested blocks; optional row attrs.repeatHeader (false default) |
 | Images | block image; src is an embedded `data:<media-type>;base64,...` URI; alt, width, height |
@@ -351,7 +351,8 @@ the requests. Broader page/layout qualification remains required work.
 
 `textStyle` is an optional formatting mark with `fontFamily` (string, default
 empty), `fontSize` (nonnegative finite numeric points, default zero) and `color`
-(empty/default, #RRGGBB or auto). Null/wrongly typed attributes reject. Hex spelling
+(empty/default, #RRGGBB or auto), plus the language/direction/complex-script
+bindings described below. Null/wrongly typed attributes reject. Hex spelling
 canonicalizes while semantic values persist. Font family names are single lookup
 names, not CSS fallback lists. The established TextStyle editor pattern is reused,
 with this profile's point-unit contract; native Tiptap/Colleaf compatibility is not
@@ -400,5 +401,28 @@ LTR supplementary outlines and residual combining marks use configured/admitted
 fonts and preserve original logical text through ActualText/ToUnicode. Glyph IDs
 are output implementation data, not another canonical text representation. Full
 source/font relationships remain in ordinary textStyle/link/note/table values.
-Paragraph joining/bidi/language semantics and broader Unicode support remain
-required; atomic unsupported-script errors must not be used as completion evidence.
+Language/direction bindings now exist as described below. Paragraph joining/bidi
+and broader Unicode support remain required; atomic unsupported-script errors must not be used as completion evidence.
+
+
+### Language and text flow
+
+Paragraph/heading `attrs.dir` is `""` (unspecified), `"ltr"` or `"rtl"`. Other
+blocks reject it. Optional textStyle strings `lang`, `eastAsiaLanguage` and
+`complexLanguage` preserve the general/East Asian/complex-script language bindings.
+Empty strings are unspecified. Nonempty tags are at most 255 bytes and must be
+accepted by the pinned BCP47 parser; underscores/whitespace reject. Original
+spelling/case persists; shaping uses a canonicalized tag. TextStyle `dir` preserves
+independent RTL run characteristics; `ltr` disables them without overriding strong
+RTL characters. `complexScript` is a boolean (default false), retaining forced
+complex-script selection independently of direction. These extend the existing
+version-one profile under development, not a new canonical format.
+
+DOCX resolves defaults, paragraph/character style inheritance and direct overrides
+into these values, including explicit false direction overrides and independently
+inherited language slots. Standard w:bidi/w:rtl/w:lang/w:cs exports them. Latent
+font choices, theme/hint bindings and other unrepresented properties still
+diagnose. PDF does not currently recover/persist these editing bindings.
+Language-tagged LTR PDF uses contextual run shaping and re-shapes final lines;
+RTL/joining/bidi, context across differing styles and broader script/language
+qualification remain required. Untagged ordinary text still uses the legacy path.

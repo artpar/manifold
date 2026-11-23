@@ -452,7 +452,7 @@ cache rejects. Unused unresolved theme slots do not discard unrelated content.
 
 Explicit cs/rtl selects complex font and bCs/iCs/szCs. Style bCs/iCs toggle;
 direct values override. DOCX output writes complex twins for public explicit
-bold/italic/size. Run editing/direction/language bindings and latent selectors
+bold/italic/size. Latent font selectors and theme bindings
 are not retained, with diagnostics. Checked implicit-default metadata cannot
 conceal contradictory script families/complex size. Normalized SF/DOCX spans
 preserve current declared family/mark/size/links and nested block ownership.
@@ -479,11 +479,42 @@ CIDs, invalid glyphs or offsets outside PDF coordinate bounds reject atomically.
 Font admission remains conservative, including the existing BMP cmap/embedding-flag
 requirements even though glyph transport itself uses full programs.
 
-This is LTR grapheme shaping, not word/paragraph contextual shaping, bidi, arbitrary
-script/language support, color fonts or supplementary fallback. Existing explicit
+The original path supports LTR graphemes. Language-tagged text now also uses
+contextual LTR runs and line re-shaping, as detailed below. Bidi, arbitrary script/
+language support, color fonts and supplementary fallback remain unfinished. Existing explicit
 joining/bidi/complex-script/cross-style-grapheme errors remain until implemented.
 These are required expansion work, not completion exemptions. Independent evidence
 uses Noto Sans marks and DejaVu Sans monochrome U+1F600, full program hashes and
 MuPDF reference GIDs/offsets; it does not qualify all fonts or Word-equivalent layout.
 PDF recovery preserves actual span positions and logical text with source precision;
 ambiguous noncollinear replacement paragraphs retain paint order and diagnostics.
+
+
+### Language/direction bindings and LTR run shaping
+
+SF/JSON/Go represent paragraph direction and independent run RTL characteristics,
+general/East Asian/complex language tags and forced complex-script selection.
+DOCX imports per-property defaults/style/direct inheritance and standard output
+preserves effective values. Explicit `ltr` maps to disabled w:bidi/w:rtl; run
+direction is not a Unicode embedding override. Unsupported values and malformed/
+duplicate properties reject. Unused font choices/hints remain diagnosed, but
+retained direction/language/cs alone no longer produces a false loss warning.
+
+For language-tagged PDF text, same-style LTR text shapes across graphemes and
+equal formatting runs. Distinct strong scripts stay separate; Common/Inherited
+graphemes use adjacent script context inside the style segment. General language
+is used normally, East Asian language for the resolved East Asian script, and
+forced cs selects complex language when set. Native HarfBuzz independently
+qualifies Russian/Serbian/Macedonian Cyrillic locl, Latin kerning and ffi ligatures.
+Line selection uses shaped cluster advances; emergency estimates never paint
+partial ligatures. Each final line re-shapes, rechecks its width and backs off if
+necessary. Per-cluster ToUnicode retains original logical text and ligatures;
+ActualText covers each final shaped span. Terminal overflowing whitespace retains
+logical text at zero advance. Shaping segments have a 65,536-scalar resource bound;
+individual graphemes retain the 1,024-scalar bound. Full original TTF cost remains.
+
+RTL paragraphs/runs reject atomically in every story, including empty paragraphs,
+tables, nested lists, headers/footers and notes. Paragraph-wide bidi/joining,
+context across differing styles/fonts/languages, full script itemization and
+untagged default-path shaping remain required implementation and qualification.
+This milestone does not satisfy the broader Unicode acceptance criterion.

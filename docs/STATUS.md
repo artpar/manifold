@@ -21,7 +21,53 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: positioned glyph transport and LTR graphemes
+## Latest milestone: language/direction and contextual LTR lines
+
+- Go/SF/JSON now retain paragraph flow, independent run RTL characteristics,
+  general/East Asian/complex language bindings and forced complex-script selection.
+  SF extends existing textStyle and paragraph/heading attrs; no second canonical
+  schema. BCP47/direction validation rejects invalid values and malformed inputs.
+- DOCX resolves each binding through defaults, paragraph/character inheritance and
+  direct overrides, including explicit false direction and partial language-slot
+  overrides. Standard bidi/rtl/lang/cs output preserves effective values. Direction,
+  language and cs alone no longer produce false loss diagnostics; unused font
+  choices/hints/theme bindings still diagnose. ltr is not a strong-letter override.
+- Language-tagged LTR PDF shapes same-style/script segments across graphemes and
+  equal formatting runs, with general/EA/forced-CS locale selection. Adjacent weak
+  scripts resolve inside those segments. Actual cluster advances drive wrapping;
+  emergency ligature estimates never paint sliced glyphs. Final lines shape again,
+  recheck advances and back off if needed. Per-cluster ToUnicode preserves original
+  logical mappings while complete-span ActualText retains original text.
+- The independent C HarfBuzz oracle first found correct localized IDs but wrong
+  Cyrillic spacing. The implementation was extended rather than changing that
+  oracle. Native HarfBuzz 15.0.0 now matches four localized rows, five kerning/
+  ligature wrapped runs and three emergency lines, including the forced-CS language
+  case. Three native pages and one LibreOffice DOCX page were visually inspected.
+  These are targeted synthetic checks, not broad script/Word qualification.
+- Independently authored DOCX verifies four inherited/direct paragraph/run/CS
+  bindings. Standard XML checks all stories; complete direction.sf → DOCX → SF
+  values (including notes/links) compare identically. Actual ProseMirror validates
+  40 nodes from five new SF files. The 51-file/9,031-node corpus and 28 Poppler
+  comparisons pass unchanged, alongside font/color/glyph independent regressions.
+- Full tests/race/vet/CGO-disabled build/execution pass. Binding fuzz 1,000,
+  paragraph-line fuzz 1,000 and malformed DOCX fuzz 500 executions pass; glyph
+  cluster fuzz also passed 1,000 after the cluster-map changes. verification.json
+  records commands/results and scope. Runtime modules/assets remain unchanged;
+  optional QA alone adds pinned uharfbuzz. No fixture oracle changed.
+
+The full goal remains **incomplete**. Untagged simple text still uses the legacy
+path; full itemization and context across differing styles/fonts/languages, bidi
+levels/ordering and joining scripts remain required, alongside source fonts, richer
+pages/running content, PDF structure/color and representative real exports. RTL
+rejects atomically in all stories, including empty paragraphs and notes; rejection
+is not completion evidence. No external blocker. Prior checkpoint: 76f5094.
+
+Next commands: GOWORK=off go run ./examples/language; the independent command is
+output/qa-venv/bin/python scripts/verify_language.py. Then inspect pdf_language.go,
+pdf_text.go and existing bidi APIs to unify default shaping and implement actual
+paragraph bidi/context. See TESTING.md for exact reproducible qualification.
+
+## Earlier milestone: positioned glyph transport and LTR graphemes
 
 - SF → PDF now has a real glyph-ID path for supported left-to-right graphemes.
   Pinned pure-Go HarfBuzz computes glyphs/GPOS positions; Type0/CIDFontType2
@@ -59,9 +105,9 @@ Full tests/race/vet/CGO-disabled build/execution, glyph/font/PDF malformed fuzz,
 51 accepted corpus files/9,031 nodes, 28 Poppler comparisons and independent
 recovery/inference/publication/rich-style regressions passed. verification.json
 records actual commands/counts and scope. The active full goal remains incomplete.
-Next implement paragraph-wide glyph shaping/bidi and language/direction semantics,
-then source-font handling, remaining rich pages/running content/PDF recovery/color
-and representative real exports. Prior checkpoint: 7fc0c6a. No external blocker.
+At that checkpoint paragraph shaping/bidi/language bindings remained next; the
+subsequent milestone above supplies current binding and limited LTR context
+evidence. Prior checkpoint: 7fc0c6a. No external blocker.
 
 ## Earlier milestone: DOCX font slots and theme languages
 
@@ -1036,6 +1082,11 @@ GOWORK=off go test -run 'TestDOCXTheme' -count=1
 output/qa-venv/bin/python scripts/verify_docx_theme_colors.py
 GOWORK=off go test -run 'TestDOCXFont|TestDOCXScript' -count=1
 output/qa-venv/bin/python scripts/verify_docx_font_selection.py
+GOWORK=off go run ./examples/language
+output/qa-venv/bin/python scripts/verify_language.py
+GOWORK=off go test -run 'TestLanguage|TestDOCXLanguage|TestPDFLanguage|TestPDFDirection' -count=1
+rg -n 'measureLanguageAtoms|shapeLanguageLine|emitFit|Direction' pdf_language.go pdf_text.go pdf_direction.go
+GOWORK=off go doc golang.org/x/text/unicode/bidi
 GOWORK=off go run ./examples/glyphs
 output/qa-venv/bin/python scripts/verify_glyphs.py
 GOWORK=off go test -run 'TestPDF.*Glyph|TestPDFNoncollinear' -count=1

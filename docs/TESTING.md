@@ -1126,3 +1126,67 @@ An initial suite invocation encountered two ignored probe main functions under
 output; moving those probes into output/_probes fixes the harness. Keep Go probes
 under underscore directories so go test ./... does not compile them. Final full
 and race suites passed after this correction. No fixture oracle changed.
+
+
+## Language/direction and contextual LTR line qualification
+
+```sh
+uv pip install --python output/qa-venv/bin/python -r scripts/requirements.txt
+GOWORK=off go run ./examples/language
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+output/qa-venv/bin/python scripts/verify_language.py
+bin/manydoc extract -format sf -o output/language/direction-roundtrip.sf output/language/direction.docx
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/language/direction.sf output/language/localized.sf output/language/wrap.sf output/language/emergency.sf output/language/source.sf
+GOWORK=off go test -run '^$' -fuzz '^FuzzLanguageDirectionRoundtrip$' -fuzztime=1000x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFLanguageLines$' -fuzztime=1000x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=500x -parallel=2 -timeout=90s
+GOWORK=off go test ./... -count=1
+GOWORK=off go test -race ./... -count=1
+GOWORK=off go vet ./...
+python3 scripts/verify_structured_corpus.py
+python3 scripts/compare_pdf_text.py
+output/qa-venv/bin/python scripts/verify_docx_font_selection.py
+output/qa-venv/bin/python scripts/verify_docx_theme_colors.py
+output/qa-venv/bin/python scripts/verify_glyphs.py
+mkdir -p output/language/lo
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/language/lo-profile --headless --convert-to pdf --outdir output/language/lo output/language/direction.docx
+git diff --check
+```
+
+The Python script authors standard DOCX properties independently: defaults,
+paragraph/derived/character styles and direct values give four exact language/
+direction/forced-CS bindings. Exported XML and the rich all-story example retain
+bidi/rtl/lang/cs, links and notes. direction.sf and its exported/reimported SF compare
+as complete parsed JSON, identically. Actual ProseMirror checks 40 nodes from the
+five new source/example files. No source fixture oracle changed. A previous font
+unit test now asserts retained RTL and absence of the former direction-loss
+warning, while keeping its exact font/size/bold expectations.
+
+QA-only uharfbuzz 0.57.0 runs native HarfBuzz 15.0.0 independently. Four Russian/
+Serbian/Macedonian/forced-CS Cyrillic rows compare actual original GIDs and physical
+advances; first glyphs 457/2090/2090/2090 distinguish real locl substitutions.
+Five wrapped Latin runs compare every actual CID→GID and Tm position against native
+shaping, including kerning and ffi ligatures. Three emergency lines re-shape ffi
+as f/f/i rather than slicing an existing ligature; advances fit the actual width.
+CMap destinations map logical clusters (including ffi) and pypdf fallback text is
+checked. Read pypdf's original_bytes for CIDs: get_original_bytes() can synthesize a
+UTF-16 BOM during encoding auto-detection and is not the raw content token.
+
+The initial independent kerning assertion failed on isolated grapheme advances;
+production now shapes segments and final lines, preserving the original oracle.
+Go tests also exercise width recheck when a kerned A must become unkerned at a
+line boundary, mixed strong scripts, equal-run continuity, invalid inputs, atomic
+RTL rejection in empty/nested/running/note stories and complete SF/DOCX semantics.
+New direct round-trip test fixtures use explicit resolved page dimensions; zero
+layout is not byte-identical to the effective exported DOCX page geometry.
+
+Final full tests pass (library 6.586s, CLI 0.755s), race passes (71.478s/1.755s), vet
+and CGO-disabled build/execution pass. Binding fuzz passes 1,000 executions (1.068s),
+line fuzz 1,000 (16.083s), malformed DOCX fuzz 500 (1.673s). Glyph-cluster fuzz after
+logical cluster-map changes passes 1,000 (26.282s). All 51 corpus files/9,031 nodes,
+28 Poppler comparisons and independent font/color/glyph regressions pass. Three
+native PDF pages and final one-page LibreOffice direction DOCX were visually
+inspected; all five expected text instances remain in the Office rendering. This
+is targeted scalar/content/typography QA, not full bidi or Word-equivalent fidelity.
+Default-path shaping, bidi/joining, differing-style/font/language context, full
+itemization, broader scripts and the other acceptance rows remain unfinished.

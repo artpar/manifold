@@ -41,9 +41,11 @@ broader professional-document contract.
 
 Glyph-ID output now exists for supported LTR graphemes, using full TrueType
 programs, shared CID resources, ActualText/ToUnicode and checked GPOS offsets.
-The next slice needs paragraph-wide segmentation/joining/bidi and language/direction
-semantics. Reuse the transport; keep current unsupported-script guards until
+Language/direction/forced-CS semantics and language-tagged LTR segment/line shaping
+now exist. The next slice needs paragraph bidi/joining and full itemization,
+default-path unification and context across differing styles/fonts/languages. Reuse the transport; keep current unsupported-script guards until
 independent glyph/order/layout evidence qualifies their replacement. Full-font
-cost, contextual re-shaping at line boundaries, style/font segmentation and
-internal text/link/note order need deliberate handling. Source-font recovery,
+cost, generalization beyond the implemented LTR language-tagged line re-shaping,
+style/font segmentation and internal text/link/note bidi order need deliberate
+handling. Source-font recovery,
 broader formats/qualification and other acceptance rows remain required.

@@ -84,7 +84,7 @@ func (r *pdfRenderer) textAdvance(text string, size float64) float64 {
 	return width
 }
 func samePDFStyle(a, b Run) bool {
-	return a.Bold == b.Bold && a.Italic == b.Italic && a.Underline == b.Underline && a.Strike == b.Strike && a.Link == b.Link && a.Note == nil && b.Note == nil && a.FontFamily == b.FontFamily && a.FontSize == b.FontSize && canonicalTextColor(a.Color) == canonicalTextColor(b.Color)
+	return a.ComplexScript == b.ComplexScript && a.Language == b.Language && a.EastAsiaLanguage == b.EastAsiaLanguage && a.ComplexLanguage == b.ComplexLanguage && a.Direction == b.Direction && a.Bold == b.Bold && a.Italic == b.Italic && a.Underline == b.Underline && a.Strike == b.Strike && a.Link == b.Link && a.Note == nil && b.Note == nil && a.FontFamily == b.FontFamily && a.FontSize == b.FontSize && canonicalTextColor(a.Color) == canonicalTextColor(b.Color)
 }
 func appendPDFSpan(line pdfLine, span pdfSpan) pdfLine {
 	zeroControl := span.width == 0 && span.text != "\u00ad" && !pdfHardBreak(span.text) && !pdfTrimSpace(span.text)
@@ -168,8 +168,8 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 			return nil, err
 		}
 		var glyphs *pdfGlyphCluster
-		if needsGlyphOutput(cluster) {
-			glyphs, err = r.glyphCluster(face, cluster)
+		if needsGlyphOutput(cluster) || pdfLanguageGlyph(run, cluster) {
+			glyphs, err = r.glyphClusterLanguage(face, cluster, run)
 			if err != nil {
 				return nil, err
 			}
@@ -225,6 +225,9 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 			atoms = append(atoms, atom)
 		}
 	}
+	if err := r.measureLanguageAtoms(atoms, size); err != nil {
+		return nil, err
+	}
 	return atoms, nil
 }
 
@@ -250,7 +253,7 @@ func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) 
 		}
 	}
 	var lines []pdfLine
-	emit := func(start, end int, optional bool) {
+	emit := func(start, end int, optional bool) (bool, error) {
 		// Whitespace at a soft line boundary may extend past the text area. Keep
 		// its logical value using a zero-advance ActualText span instead of dropping it.
 		trailing := end
@@ -266,12 +269,61 @@ func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) 
 				}
 				if i >= trailing && atoms[i].trim && used+span.width > width+1e-7 {
 					span.width = 0
+					span.glyphs = nil
 				}
 				line = appendPDFSpan(line, span)
 				used += span.width
 			}
 		}
-		lines = append(lines, line)
+		shaped, err := r.shapeLanguageLine(line, size)
+		if err != nil {
+			return false, err
+		}
+		if pdfAdvance(shaped) > width+1e-7 && trailing < end {
+			// Re-shaping can remove kerning across the selected line boundary.
+			// Keep overflowing terminal whitespace logically, at zero advance.
+			for i := len(line) - 1; i >= 0; i-- {
+				if pdfHardBreak(line[i].text) {
+					continue
+				}
+				if !pdfTrimSpace(line[i].text) {
+					break
+				}
+				line[i].width = 0
+				line[i].glyphs = nil
+			}
+			shaped, err = r.shapeLanguageLine(line, size)
+			if err != nil {
+				return false, err
+			}
+		}
+		if pdfAdvance(shaped) > width+1e-7 {
+			return false, nil
+		}
+		lines = append(lines, shaped)
+		return true, nil
+	}
+	emitFit := func(start, end int, optional bool) (int, error) {
+		for end > start {
+			fits, err := emit(start, end, optional)
+			if err != nil {
+				return start, err
+			}
+			if fits {
+				return end, nil
+			}
+			if protectedGroup[start] {
+				return start, fmt.Errorf("%w: reshaped nonbreaking PDF text exceeds the available width", ErrUnsupported)
+			}
+			end--
+			for j := end; j > start; j-- {
+				if atoms[j-1].breaking != uniseg.LineDontBreak {
+					end = j
+					break
+				}
+			}
+		}
+		return start, fmt.Errorf("%w: reshaped grapheme or note anchor wider than PDF content area", ErrUnsupported)
 	}
 	for start := 0; start < len(atoms); {
 		used, trailing := 0.0, 0.0
@@ -283,8 +335,11 @@ func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) 
 			}
 			atom := atoms[i]
 			if atom.hard {
-				emit(start, i+1, false)
-				start = i + 1
+				next, err := emitFit(start, i+1, false)
+				if err != nil {
+					return nil, err
+				}
+				start = next
 				finished = true
 				if start == len(atoms) {
 					blank := atom.spans[len(atom.spans)-1]
@@ -301,8 +356,11 @@ func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) 
 			}
 			if !atom.trim && used > width+1e-7 {
 				if candidate > start {
-					emit(start, candidate, true)
-					start = candidate
+					next, err := emitFit(start, candidate, true)
+					if err != nil {
+						return nil, err
+					}
+					start = next
 					finished = true
 					break
 				}
@@ -326,8 +384,11 @@ func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) 
 				if end == start {
 					return nil, fmt.Errorf("%w: discretionary hyphen cannot fit", ErrUnsupported)
 				}
-				emit(start, end, true)
-				start = end
+				next, err := emitFit(start, end, true)
+				if err != nil {
+					return nil, err
+				}
+				start = next
 				finished = true
 				break
 			}
@@ -335,8 +396,11 @@ func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) 
 				candidate = i + 1
 			}
 			if i == len(atoms)-1 {
-				emit(start, len(atoms), false)
-				start = len(atoms)
+				next, err := emitFit(start, len(atoms), false)
+				if err != nil {
+					return nil, err
+				}
+				start = next
 				finished = true
 				break
 			}

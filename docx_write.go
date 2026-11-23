@@ -186,6 +186,9 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 				}
 			}
 			out.WriteString(`><w:pPr>`)
+			if b.Direction != "" {
+				fmt.Fprintf(&out, `<w:bidi w:val="%t"/>`, b.Direction == "rtl")
+			}
 			if b.Kind == Heading {
 				fmt.Fprintf(&out, `<w:pStyle w:val="Heading%d"/>`, b.Level)
 			}

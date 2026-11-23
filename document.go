@@ -65,14 +65,16 @@ const (
 type Block struct {
 	// PageBreakBefore starts a paragraph/heading on a new page unless already
 	// at the page's first flow position. PageBreak blocks always advance a page.
-	PageBreakBefore bool       `json:"page_break_before,omitempty"`
-	Kind            Kind       `json:"kind"`
-	Runs            []Run      `json:"runs,omitempty"`
-	Level           int        `json:"level,omitempty"`
-	List            string     `json:"list,omitempty"` // bullet or number
-	Rows            []Row      `json:"rows,omitempty"`
-	Image           *Image     `json:"image,omitempty"`
-	Items           []ListItem `json:"items,omitempty"`
+	PageBreakBefore bool `json:"page_break_before,omitempty"`
+	// Direction is empty (unspecified), ltr or rtl; it describes paragraph flow.
+	Direction string     `json:"direction,omitempty"`
+	Kind      Kind       `json:"kind"`
+	Runs      []Run      `json:"runs,omitempty"`
+	Level     int        `json:"level,omitempty"`
+	List      string     `json:"list,omitempty"` // bullet or number
+	Rows      []Row      `json:"rows,omitempty"`
+	Image     *Image     `json:"image,omitempty"`
+	Items     []ListItem `json:"items,omitempty"`
 	// Start is the first ordered-list value; nil means one. Zero is valid.
 	Start                   *int        `json:"start,omitempty"`
 	Source                  *SourceInfo `json:"source,omitempty"`
@@ -91,6 +93,16 @@ type ListItem struct {
 }
 
 type Run struct {
+	// Language tags preserve the general, East Asian and complex-script bindings.
+	Language         string `json:"language,omitempty"`
+	EastAsiaLanguage string `json:"east_asia_language,omitempty"`
+	ComplexLanguage  string `json:"complex_language,omitempty"`
+	// ComplexScript forces complex-script formatting/language selection (OOXML cs).
+	ComplexScript bool `json:"complex_script,omitempty"`
+	// Direction enables/disables RTL run characteristics, independently of
+	// paragraph flow. Empty is unspecified; ltr does not override strong RTL text.
+	Direction string `json:"direction,omitempty"`
+
 	// Empty family/color and zero size use the renderer default. Sizes are points.
 	FontFamily string  `json:"font_family,omitempty"`
 	FontSize   float64 `json:"font_size,omitempty"`
@@ -326,6 +338,12 @@ func (d *Document) Validate() error {
 		for _, b := range bs {
 			if err := b.Source.validate(d.Pages); err != nil {
 				return err
+			}
+			if err := validateDirection(b.Direction); err != nil {
+				return err
+			}
+			if b.Direction != "" && b.Kind != Paragraph && b.Kind != Heading {
+				return errors.New("direction requires paragraph or heading")
 			}
 			if b.PageBreakBefore && b.Kind != Paragraph && b.Kind != Heading {
 				return errors.New("page break before requires paragraph or heading")

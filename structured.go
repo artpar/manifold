@@ -98,15 +98,16 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 		n := StructuredNode{Type: string(b.Kind)}
 		switch b.Kind {
 		case Paragraph, Heading:
-			if b.Kind == Heading || b.PageBreakBefore {
+			if b.Kind == Heading || b.PageBreakBefore || b.Direction != "" {
 				level := 0
 				if b.Kind == Heading {
 					level = b.Level
 				}
 				n.Attrs = sfAttrs(struct {
-					Level           int  `json:"level,omitempty"`
-					PageBreakBefore bool `json:"pageBreakBefore,omitempty"`
-				}{level, b.PageBreakBefore})
+					Level           int    `json:"level,omitempty"`
+					PageBreakBefore bool   `json:"pageBreakBefore,omitempty"`
+					Direction       string `json:"dir,omitempty"`
+				}{level, b.PageBreakBefore, b.Direction})
 			}
 			for _, r := range b.Runs {
 				if r.Text == "" && r.Note == nil {
@@ -125,12 +126,17 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 						t.Marks = append(t.Marks, StructuredMark{Type: m.name})
 					}
 				}
-				if r.FontFamily != "" || r.FontSize != 0 || r.Color != "" {
+				if r.FontFamily != "" || r.FontSize != 0 || r.Color != "" || r.Language != "" || r.EastAsiaLanguage != "" || r.ComplexLanguage != "" || r.Direction != "" || r.ComplexScript {
 					t.Marks = append(t.Marks, StructuredMark{Type: "textStyle", Attrs: sfAttrs(struct {
-						FontFamily string  `json:"fontFamily,omitempty"`
-						FontSize   float64 `json:"fontSize,omitempty"`
-						Color      string  `json:"color,omitempty"`
-					}{r.FontFamily, r.FontSize, canonicalTextColor(r.Color)})})
+						FontFamily       string  `json:"fontFamily,omitempty"`
+						FontSize         float64 `json:"fontSize,omitempty"`
+						Color            string  `json:"color,omitempty"`
+						Language         string  `json:"lang,omitempty"`
+						EastAsiaLanguage string  `json:"eastAsiaLanguage,omitempty"`
+						ComplexLanguage  string  `json:"complexLanguage,omitempty"`
+						Direction        string  `json:"dir,omitempty"`
+						ComplexScript    bool    `json:"complexScript,omitempty"`
+					}{r.FontFamily, r.FontSize, canonicalTextColor(r.Color), r.Language, r.EastAsiaLanguage, r.ComplexLanguage, r.Direction, r.ComplexScript})})
 
 				}
 				if r.Link != "" {
@@ -287,9 +293,19 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 		b := Block{Kind: Kind(n.Type), Source: source}
 		switch n.Type {
 		case "paragraph", "heading":
+			var paragraphAttrs map[string]json.RawMessage
+			if len(n.Attrs) > 0 {
+				if err := json.Unmarshal(n.Attrs, &paragraphAttrs); err != nil {
+					return nil, err
+				}
+				if v, present := paragraphAttrs["dir"]; present && bytes.Equal(bytes.TrimSpace(v), []byte("null")) {
+					return nil, fmt.Errorf("paragraph direction cannot be null")
+				}
+			}
 			a := struct {
-				Level           int  `json:"level,omitempty"`
-				PageBreakBefore bool `json:"pageBreakBefore,omitempty"`
+				Level           int    `json:"level,omitempty"`
+				PageBreakBefore bool   `json:"pageBreakBefore,omitempty"`
+				Direction       string `json:"dir,omitempty"`
 			}{}
 			if n.Type == "heading" {
 				a.Level = 1
@@ -299,7 +315,8 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 			}
 			if n.Type == "paragraph" {
 				paragraph := struct {
-					PageBreakBefore bool `json:"pageBreakBefore,omitempty"`
+					PageBreakBefore bool   `json:"pageBreakBefore,omitempty"`
+					Direction       string `json:"dir,omitempty"`
 				}{}
 				if err := strictSFAttrs(n.Attrs, &paragraph); err != nil {
 					return nil, err
@@ -307,6 +324,7 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 			}
 			b.Level = a.Level
 			b.PageBreakBefore = a.PageBreakBefore
+			b.Direction = a.Direction
 			for _, t := range n.Content {
 				r := Run{}
 				switch t.Type {
@@ -355,14 +373,21 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 							}
 						}
 						a := struct {
-							FontFamily string  `json:"fontFamily"`
-							FontSize   float64 `json:"fontSize"`
-							Color      string  `json:"color"`
+							FontFamily       string  `json:"fontFamily"`
+							FontSize         float64 `json:"fontSize"`
+							Color            string  `json:"color"`
+							Language         string  `json:"lang"`
+							EastAsiaLanguage string  `json:"eastAsiaLanguage"`
+							ComplexLanguage  string  `json:"complexLanguage"`
+							Direction        string  `json:"dir"`
+							ComplexScript    bool    `json:"complexScript"`
 						}{}
 						if err := strictSFAttrs(m.Attrs, &a); err != nil {
 							return nil, err
 						}
 						r.FontFamily, r.FontSize, r.Color = a.FontFamily, a.FontSize, a.Color
+						r.Language, r.EastAsiaLanguage, r.ComplexLanguage, r.Direction = a.Language, a.EastAsiaLanguage, a.ComplexLanguage, a.Direction
+						r.ComplexScript = a.ComplexScript
 						if err := validateTextStyle(r); err != nil {
 							return nil, err
 						}

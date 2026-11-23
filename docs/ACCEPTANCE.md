@@ -1,6 +1,6 @@
 # Active goal acceptance audit
 
-Audited 2026-11-23 after the SF foundation merged-table and explicit-list and typed-note, positioned-PDF and forward-tagged-PDF and Unicode-typography/implied-paragraph/untagged-inference/painted-grid/rich-cell/body-table-continuation/recursive-table/explicit-page-break/paragraph-property/image-height/repeating-header/text-style/PDF-style-recovery/theme-color/font-slot/glyph-transport milestones. **Not complete.** Passing initial
+Audited 2026-11-23 after the SF foundation merged-table and explicit-list and typed-note, positioned-PDF and forward-tagged-PDF and Unicode-typography/implied-paragraph/untagged-inference/painted-grid/rich-cell/body-table-continuation/recursive-table/explicit-page-break/paragraph-property/image-height/repeating-header/text-style/PDF-style-recovery/theme-color/font-slot/glyph-transport/language-LTR-shaping milestones. **Not complete.** Passing initial
 checks does not satisfy the expanded user goal. No external blocker currently
 prevents continuing implementation.
 
@@ -23,7 +23,7 @@ prevents continuing implementation.
 | Robustness/final checks | Existing deterministic damaged-input tests pass; SF fuzz 177,117 executions passed; full tests/race/vet/build pass | Repeat relevant malformed-input/fuzz and final complete checks after remaining implementation |
 | Recovery documentation | STATUS/ARCHITECTURE/DECISIONS/COMPATIBILITY/STRUCTURED_FORMAT/TESTING plus verification summary | Keep current each milestone; no completion claim until every row is proven |
 
-Next implementation slices: implement paragraph-wide Go shaping/bidi/language semantics and source-font handling, then complex color/selection details
+Next implementation slices: generalize the language-tagged LTR segment/line shaper to default text and implement paragraph bidi/joining/style context, then source-font handling, then complex color/selection details
 and broader font qualification. Editable PDF device-style recovery now has ten
 independently authored span/style/baseline checks through both output formats. Family/size/
 color and configured font handling now exist with targeted checks. Repeating
@@ -37,3 +37,11 @@ boundaries, starts, hierarchy and multi-block items now exist.
 Merged row spans and recursive group splitting exist; forced native breaks exist, while broader DOCX visual/Word and continuation qualification remain unfinished. Use the concrete recovery commands in STATUS.md. None of these
 required capabilities may be removed from this audit simply because it is hard
 to implement or currently rejected.
+
+
+Language/paragraph/run direction/forced-CS bindings now preserve effective SF and
+DOCX semantics, with independent inherited XML and all-story checks. Language-
+tagged native LTR shaping qualifies localized GIDs, kerning, ligatures and actual
+re-shaped wrapped lines against C HarfBuzz. This narrows the implementation gap
+without completing bidi, default/style-context shaping, broader Unicode or the
+full rich-document goal. RTL rejection remains a limitation, not acceptance proof.

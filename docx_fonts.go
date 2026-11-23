@@ -23,12 +23,12 @@ type docxFontChoice struct {
 // leaves resolve it into ordinary public runs; latent selectors diagnose loss.
 type docxRunStyle struct {
 	Run
-	fonts                  [4]docxFontChoice
-	hint, eastAsiaLanguage string
-	cs, rtl                bool
-	boldCS, italicCS       bool
-	sizeCS                 float64
-	hasCSStyle             bool
+	fonts            [4]docxFontChoice
+	hint             string
+	cs, rtl          bool
+	boldCS, italicCS bool
+	sizeCS           float64
+	hasCSStyle       bool
 }
 
 func (r *docxReader) readThemeLanguages(settings *xmlNode) error {
@@ -197,7 +197,7 @@ func (r *docxReader) fontSlot(ch rune, style docxRunStyle) int {
 	if ch == 0xA1 || ch == 0xA4 || ch >= 0xA7 && ch <= 0xA8 || ch == 0xAA || ch == 0xAD || ch == 0xAF || ch >= 0xB0 && ch <= 0xB4 || ch >= 0xB6 && ch <= 0xBA || ch >= 0xBC && ch <= 0xBF || ch == 0xD7 || ch == 0xF7 {
 		return docxEastAsia
 	}
-	chinese := chineseFontLanguage(style.eastAsiaLanguage)
+	chinese := chineseFontLanguage(style.EastAsiaLanguage)
 	if chinese && (ch >= 0xE0 && ch <= 0xE1 || ch >= 0xE8 && ch <= 0xEA || ch >= 0xEC && ch <= 0xED || ch >= 0xF2 && ch <= 0xF3 || ch >= 0xF9 && ch <= 0xFA || ch == 0xFC || ch >= 0x1E00 && ch <= 0x1EFF) {
 		return docxEastAsia
 	}
@@ -221,7 +221,7 @@ func (r *docxReader) fontSlot(ch rune, style docxRunStyle) int {
 }
 func (r *docxReader) textRuns(style docxRunStyle) ([]Run, error) {
 	var first *docxFontChoice
-	conditional := style.cs || style.rtl || style.hint == "eastAsia"
+	conditional := style.hint == "eastAsia"
 	for i, choice := range style.fonts {
 		if choice.set {
 			if first == nil {
@@ -233,7 +233,7 @@ func (r *docxReader) textRuns(style docxRunStyle) ([]Run, error) {
 	}
 	conditional = conditional || style.hasCSStyle && (style.boldCS != style.Bold || style.italicCS != style.Italic || style.sizeCS != style.FontSize)
 	if conditional {
-		r.doc.warn("font_selectors", "Conditional font selectors are resolved for current text; unused choices and future script/language selection are not retained")
+		r.doc.warn("font_selectors", "Conditional font selectors are resolved for current text; unused font choices and selection hints are not retained")
 	}
 
 	if style.Note != nil {

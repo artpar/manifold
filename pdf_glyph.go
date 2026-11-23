@@ -15,9 +15,11 @@ import (
 
 	"github.com/benoitkugler/textlayout/fonts/truetype"
 	"github.com/benoitkugler/textlayout/harfbuzz"
+	"github.com/benoitkugler/textlayout/language"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
+	"github.com/rivo/uniseg"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/sfnt"
 	"golang.org/x/image/math/fixed"
@@ -26,9 +28,12 @@ import (
 
 type pdfGlyphPosition struct {
 	glyph         uint16
+	cluster       int
+	logical       string
 	x, y, advance float64
 }
 type pdfGlyphCluster struct {
+	script                 language.Script
 	face                   *pdfGlyphFace
 	positions              []pdfGlyphPosition
 	width, ascent, descent float64 // em units, y offsets point upwards
@@ -53,7 +58,29 @@ func needsGlyphOutput(text string) bool {
 	}
 	return false
 }
-func (r *pdfRenderer) glyphCluster(face pdfFontFace, text string) (cluster *pdfGlyphCluster, err error) {
+
+// Special spaces and break controls retain the declared width/control policy.
+func pdfLanguageGlyph(run Run, text string) bool {
+	if run.Language == "" && run.EastAsiaLanguage == "" && run.ComplexLanguage == "" {
+		return false
+	}
+	for _, ch := range text {
+		if pdfSpecial(ch) {
+			return false
+		}
+	}
+	return true
+}
+func (r *pdfRenderer) glyphCluster(face pdfFontFace, text string) (*pdfGlyphCluster, error) {
+	return r.glyphClusterLanguage(face, text, Run{})
+}
+func (r *pdfRenderer) glyphClusterLanguage(face pdfFontFace, text string, run Run) (*pdfGlyphCluster, error) {
+	return r.shapeGlyphText(face, text, run, 1024)
+}
+func (r *pdfRenderer) shapeGlyphText(face pdfFontFace, text string, run Run, limit int) (*pdfGlyphCluster, error) {
+	return r.shapeGlyphTextScript(face, text, run, limit, 0)
+}
+func (r *pdfRenderer) shapeGlyphTextScript(face pdfFontFace, text string, run Run, limit int, script language.Script) (cluster *pdfGlyphCluster, err error) {
 	defer func() {
 		if p := recover(); p != nil {
 			cluster = nil
@@ -63,8 +90,8 @@ func (r *pdfRenderer) glyphCluster(face pdfFontFace, text string) (cluster *pdfG
 	if err = r.ctx.Err(); err != nil {
 		return nil, err
 	}
-	if utf8.RuneCountInString(text) > 1024 {
-		return nil, fmt.Errorf("%w: glyph grapheme exceeds 1024 scalar resource limit", ErrUnsupported)
+	if utf8.RuneCountInString(text) > limit {
+		return nil, fmt.Errorf("%w: glyph shaping segment exceeds %d scalar resource limit", ErrUnsupported, limit)
 	}
 	if r.glyphFaces == nil {
 		r.glyphFaces = map[string]*pdfGlyphFace{}
@@ -84,6 +111,22 @@ func (r *pdfRenderer) glyphCluster(face pdfFontFace, text string) (cluster *pdfG
 	b.Flags = harfbuzz.DoNotinsertDottedCircle
 	b.AddRunes([]rune(norm.NFC.String(text)), 0, -1)
 	b.GuessSegmentProperties()
+	if script != 0 {
+		b.Props.Script = script
+	}
+	locale := run.Language
+	if run.ComplexScript && run.ComplexLanguage != "" {
+		locale = run.ComplexLanguage
+	}
+	switch b.Props.Script {
+	case language.Han, language.Hiragana, language.Katakana, language.Hangul, language.Bopomofo, language.Yi:
+		if !run.ComplexScript && run.EastAsiaLanguage != "" {
+			locale = run.EastAsiaLanguage
+		}
+	}
+	if locale != "" {
+		b.Props.Language = language.NewLanguage(locale)
+	}
 	// This slice integrates LTR graphemes only. Paragraph joining/bidi needs the
 	// separate paragraph shaper; existing script/direction guards remain active.
 	if b.Props.Direction != harfbuzz.LeftToRight {
@@ -94,7 +137,7 @@ func (r *pdfRenderer) glyphCluster(face pdfFontFace, text string) (cluster *pdfG
 		return nil, fmt.Errorf("%w: empty/invalid shaping result", ErrUnsupported)
 	}
 	upem := float64(face.parsed.UnitsPerEm())
-	c := &pdfGlyphCluster{face: gf}
+	c := &pdfGlyphCluster{face: gf, script: b.Props.Script}
 	var buf sfnt.Buffer
 	x, y := 0.0, 0.0
 	for i, info := range b.Info {
@@ -105,7 +148,7 @@ func (r *pdfRenderer) glyphCluster(face pdfFontFace, text string) (cluster *pdfG
 		if pos.YAdvance != 0 {
 			return nil, fmt.Errorf("%w: vertical glyph advances", ErrUnsupported)
 		}
-		g := pdfGlyphPosition{glyph: uint16(info.Glyph), x: x + float64(pos.XOffset)/upem, y: y + float64(pos.YOffset)/upem, advance: float64(pos.XAdvance) / upem}
+		g := pdfGlyphPosition{glyph: uint16(info.Glyph), cluster: info.Cluster, x: x + float64(pos.XOffset)/upem, y: y + float64(pos.YOffset)/upem, advance: float64(pos.XAdvance) / upem}
 		bounds, _, e := face.parsed.GlyphBounds(&buf, sfnt.GlyphIndex(g.glyph), fixed.I(1000), font.HintingNone)
 		if e != nil {
 			return nil, e
@@ -117,6 +160,40 @@ func (r *pdfRenderer) glyphCluster(face pdfFontFace, text string) (cluster *pdfG
 	}
 	if !finite(x) || x < 0 {
 		return nil, fmt.Errorf("%w: invalid LTR glyph advance", ErrUnsupported)
+	}
+	// ToUnicode maps each shaped cluster, including ligatures, to its own
+	// original text. ActualText can then wrap a whole painted run without
+	// assigning that entire run to its first glyph in fallback readers.
+	var originalEnds []int
+	graphemes := uniseg.NewGraphemes(text)
+	for graphemes.Next() {
+		_, end := graphemes.Positions()
+		for range []rune(norm.NFC.String(graphemes.Str())) {
+			originalEnds = append(originalEnds, end)
+		}
+	}
+	consumed := 0
+	for first := 0; first < len(c.positions); {
+		last := first + 1
+		for last < len(c.positions) && c.positions[last].cluster == c.positions[first].cluster {
+			last++
+		}
+		from, to := c.positions[first].cluster, len(originalEnds)
+		if last < len(c.positions) {
+			to = c.positions[last].cluster
+		}
+		if from < 0 || from >= to || to > len(originalEnds) {
+			return nil, fmt.Errorf("%w: invalid LTR shaping cluster order", ErrUnsupported)
+		}
+		end := originalEnds[to-1]
+		if end > consumed {
+			c.positions[first].logical = text[consumed:end]
+			consumed = end
+		}
+		first = last
+	}
+	if consumed != len(text) {
+		return nil, fmt.Errorf("%w: shaping omitted logical text", ErrUnsupported)
 	}
 	c.width = x
 	if err = r.ctx.Err(); err != nil {
@@ -146,12 +223,8 @@ func (r *pdfRenderer) paintGlyphSpan(span pdfSpan, x, y, size float64) {
 	red, green, blue := textRGB(span.run.Color)
 	r.pdf.RawWriteStr("q\n" + pdfActualText(span.text))
 	r.pdf.RawWriteStr(fmt.Sprintf("%.8f %.8f %.8f rg", float64(red)/255, float64(green)/255, float64(blue)/255))
-	for i, g := range c.positions {
-		logical := ""
-		if i == 0 {
-			logical = span.text
-		}
-		code, err := c.face.cid(g.glyph, logical)
+	for _, g := range c.positions {
+		code, err := c.face.cid(g.glyph, g.logical)
 		if err != nil {
 			r.pdf.SetError(err)
 			return

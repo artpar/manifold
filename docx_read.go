@@ -512,7 +512,7 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 	if ppr != nil {
 		for _, p := range ppr.Children {
 			switch p.Name.Local {
-			case "pStyle", "numPr", "outlineLvl", "sectPr", "keepNext", "pageBreakBefore":
+			case "pStyle", "numPr", "outlineLvl", "sectPr", "keepNext", "pageBreakBefore", "bidi":
 			case "tabs":
 				if !(r.implicitNoteLayout && len(p.Children) == 1 && p.Children[0].Name.Local == "tab" && p.Children[0].attr("val") == "left" && p.Children[0].attr("pos") == "360") {
 					r.doc.warn("paragraph_formatting", "Paragraph property not represented: tabs")
@@ -537,6 +537,10 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 	}
 	if role == "before" || role == "beforeList" {
 		before = conditional
+	}
+	b.Direction, err = r.paragraphDirection(ppr, styleID)
+	if err != nil {
+		return nil, err
 	}
 	b.PageBreakBefore = before
 	b.docxBeforeList = role == "beforeList"
@@ -582,9 +586,7 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			if props := c.child("rPr"); props != nil {
 				for _, p := range props.Children {
 					switch p.Name.Local {
-					case "b", "i", "u", "strike", "rFonts", "sz", "szCs", "bCs", "iCs", "cs", "lang", "color":
-					case "rtl":
-						r.doc.warn("run_direction", "Run direction informs font selection; bidirectional layout control is not retained")
+					case "b", "i", "u", "strike", "rFonts", "sz", "szCs", "bCs", "iCs", "cs", "lang", "color", "rtl":
 					case "rStyle":
 						if r.styles[p.attr("val")] == nil && p.attr("val") != "FootnoteReference" && p.attr("val") != "EndnoteReference" {
 							r.doc.warn("run_formatting", "Run property not represented: rStyle")

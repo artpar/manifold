@@ -132,7 +132,7 @@ func TestDOCXFontInheritanceAndThemeLanguage(t *testing.T) {
 	}
 	d = readFontSelection(t, `<w:p>`+fontRun(`<w:rtl/><w:bCs/><w:szCs w:val="30"/>`, "ABC")+`</w:p>`, defaults, settings, scheme, "")
 	run := d.Blocks[0].Runs[0]
-	if run.FontFamily != "Arabic Major" || !run.Bold || run.FontSize != 15 || !hasDiagnostic(d, "run_direction") {
+	if run.FontFamily != "Arabic Major" || !run.Bold || run.FontSize != 15 || run.Direction != "rtl" || hasDiagnostic(d, "run_direction") {
 		t.Fatalf("complex theme %+v", run)
 	}
 	// With no themeFontLang, the region node supplies the default family.

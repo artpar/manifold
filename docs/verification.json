@@ -2153,5 +2153,128 @@
     ],
     "fixture_oracle_changed": false,
     "external_blocker": null
+  },
+  "latest_milestone": "language_direction_ltr_shaping",
+  "language_direction_ltr_shaping": {
+    "date": "2026-11-23",
+    "goal_complete": false,
+    "prior_checkpoint": "76f5094",
+    "public_model": [
+      "Block.Direction",
+      "Run.Language/EastAsiaLanguage/ComplexLanguage",
+      "Run.Direction (RTL characteristics, not strong-letter override)",
+      "Run.ComplexScript"
+    ],
+    "SF": "existing textStyle plus paragraph/heading attrs.dir; version-one profile under development",
+    "DOCX": "standard bidi/rtl/lang/cs with per-property defaults/style/direct inheritance",
+    "PDF": "language-tagged same-style/script LTR contextual segment measurements and final-line re-shaping; cluster ToUnicode and complete-span ActualText",
+    "checks": {
+      "go_test_all": {
+        "passed": true,
+        "library_seconds": 6.586,
+        "cli_seconds": 0.755,
+        "log": "output/language-tests-complete.log"
+      },
+      "go_race_all": {
+        "passed": true,
+        "library_seconds": 71.478,
+        "cli_seconds": 1.755,
+        "log": "output/language-race-complete.log"
+      },
+      "go_vet": "passed",
+      "cgo_disabled_cli": "built darwin/arm64 and executed source/roundtrip/QA conversions",
+      "diff_check": "passed",
+      "fuzz": {
+        "LanguageDirectionRoundtrip": {
+          "passed": true,
+          "executions": 1000,
+          "seconds": 1.068
+        },
+        "PDFLanguageLines": {
+          "passed": true,
+          "executions": 1000,
+          "seconds": 16.083
+        },
+        "ReadDOCX": {
+          "passed": true,
+          "executions": 500,
+          "seconds": 1.673
+        },
+        "PDFGlyphClusters_after_cluster_mapping": {
+          "passed": true,
+          "executions": 1000,
+          "seconds": 26.282
+        }
+      },
+      "prosemirror_examples": {
+        "passed": true,
+        "files": 5,
+        "nodes": 40
+      },
+      "prosemirror_corpus": {
+        "passed": true,
+        "files": 51,
+        "nodes": 9031
+      },
+      "poppler_text": {
+        "passed": 28,
+        "total": 28
+      },
+      "independent_regressions": [
+        "verify_docx_font_selection.py",
+        "verify_docx_theme_colors.py",
+        "verify_glyphs.py"
+      ],
+      "all_story_SF_DOCX_SF": "complete parsed direction.sf equals direction-roundtrip.sf including links/notes"
+    },
+    "independent": {
+      "script": "scripts/verify_language.py",
+      "DOCX_author": "python-docx and explicit standard property XML",
+      "source_binding_cases": 4,
+      "all_story_XML": true,
+      "glyph_oracle": "native HarfBuzz 15.0.0 via QA-only uharfbuzz 0.57.0",
+      "localized_rows": 4,
+      "localized_first_GIDs": [
+        457,
+        2090,
+        2090,
+        2090
+      ],
+      "wrapped_Latin_runs": 5,
+      "emergency_reshaped_lines": 3,
+      "checks": [
+        "original glyph IDs and advances",
+        "locale/forced-CS selection",
+        "kerning/ffi ligatures across graphemes",
+        "per-cluster ToUnicode and pypdf logical fallback",
+        "final-line GIDs and physical positions/width",
+        "SF language/direction/complex attributes",
+        "DOCX effective inheritance/export in every story"
+      ],
+      "native_pages": 3,
+      "office_pages": 1,
+      "pages_visually_inspected": 4,
+      "office_text_instances": 5,
+      "Word_or_full_bidi_equivalence_claimed": false
+    },
+    "correction": "Independent Cyrillic spacing failed with isolated graphemes; implementation now shapes segments and final lines. Oracle retained. Existing font test retains font/size/bold values and now asserts retained RTL rather than a loss warning.",
+    "runtime_dependency_or_asset_change": false,
+    "optional_QA_dependency": "uharfbuzz==0.57.0 (no runtime native dependency)",
+    "limitations": [
+      "untagged simple text remains on legacy primitives",
+      "bidi/joining and context across differing styles/fonts/languages",
+      "adjacent weak-script policy is not full script itemization",
+      "language/direction editing bindings are not currently recovered/persisted in PDF",
+      "full TTF byte cost and conservative font admission",
+      "remaining source fonts/rich pages/running content/PDF color/structure/real-export qualification"
+    ],
+    "next_commands": [
+      "GOWORK=off go run ./examples/language",
+      "output/qa-venv/bin/python scripts/verify_language.py",
+      "rg -n \"measureLanguageAtoms|shapeLanguageLine|emitFit|Direction\" pdf_language.go pdf_text.go pdf_direction.go",
+      "GOWORK=off go doc golang.org/x/text/unicode/bidi"
+    ],
+    "fixture_oracle_changed": false,
+    "external_blocker": null
   }
 }

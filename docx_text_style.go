@@ -78,10 +78,28 @@ func (r *docxReader) textProperties(run *docxRunStyle, pr *xmlNode, styleDefinit
 				return err
 			}
 		case "lang":
-			if value := p.attr("eastAsia"); value != "" {
-				run.eastAsiaLanguage = value
+			attrs := map[string]bool{}
+			for _, a := range p.Attr {
+				var target *string
+				switch a.Name.Local {
+				case "val":
+					target = &run.Language
+				case "eastAsia":
+					target = &run.EastAsiaLanguage
+				case "bidi":
+					target = &run.ComplexLanguage
+				default:
+					continue
+				}
+				if attrs[a.Name.Local] || a.Value == "" {
+					return fmt.Errorf("invalid or duplicate DOCX language attribute %s", a.Name.Local)
+				}
+				attrs[a.Name.Local] = true
+				if err := validateLanguage(a.Value); err != nil {
+					return err
+				}
+				*target = a.Value
 			}
-			r.doc.warn("run_language", "Run language informs font selection; editing/spelling language binding is not retained")
 		case "szCs":
 			v, err := strconv.ParseUint(p.attr("val"), 10, 32)
 			if err != nil || v == 0 {
@@ -99,8 +117,14 @@ func (r *docxReader) textProperties(run *docxRunStyle, pr *xmlNode, styleDefinit
 			}
 			target := &run.cs
 			switch kind {
+			case "cs":
+				run.ComplexScript = on
 			case "rtl":
 				target = &run.rtl
+				run.Direction = "ltr"
+				if on {
+					run.Direction = "rtl"
+				}
 			case "bCs":
 				target = &run.boldCS
 			case "iCs":
@@ -125,6 +149,21 @@ func (r *docxReader) textProperties(run *docxRunStyle, pr *xmlNode, styleDefinit
 }
 func docxTextStyle(run Run) (string, error) {
 	var out strings.Builder
+	if run.ComplexScript {
+		out.WriteString(`<w:cs/>`)
+	}
+	if run.Direction != "" {
+		fmt.Fprintf(&out, `<w:rtl w:val="%t"/>`, run.Direction == "rtl")
+	}
+	if run.Language != "" || run.EastAsiaLanguage != "" || run.ComplexLanguage != "" {
+		out.WriteString(`<w:lang`)
+		for _, a := range []struct{ name, value string }{{"val", run.Language}, {"eastAsia", run.EastAsiaLanguage}, {"bidi", run.ComplexLanguage}} {
+			if a.value != "" {
+				fmt.Fprintf(&out, ` w:%s="%s"`, a.name, escape(a.value))
+			}
+		}
+		out.WriteString(`/>`)
+	}
 	if run.FontFamily != "" {
 		fmt.Fprintf(&out, `<w:rFonts w:ascii="%s" w:hAnsi="%s" w:eastAsia="%s" w:cs="%s"/>`, escape(run.FontFamily), escape(run.FontFamily), escape(run.FontFamily), escape(run.FontFamily))
 	}
@@ -241,9 +280,7 @@ func (r *docxReader) warnTextStyleProperties(pr *xmlNode, id string) {
 			return
 		}
 		switch p.Name.Local {
-		case "b", "i", "strike", "u", "rFonts", "sz", "szCs", "bCs", "iCs", "cs", "lang", "color", "rStyle":
-		case "rtl":
-			r.doc.warn("run_direction", "Run direction informs font selection; bidirectional layout control is not retained")
+		case "b", "i", "strike", "u", "rFonts", "sz", "szCs", "bCs", "iCs", "cs", "lang", "color", "rStyle", "rtl":
 		case "vertAlign":
 			if id != "FootnoteReference" && id != "EndnoteReference" {
 				r.doc.warn("run_formatting", "Style property not represented: vertAlign")

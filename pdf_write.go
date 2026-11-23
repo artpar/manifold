@@ -55,6 +55,9 @@ func validatePDFText(r Run) error {
 	return validateFontText(r, parsedPDFFonts[runStyle(r)])
 }
 func validateFontText(r Run, font *sfnt.Font) error {
+	if r.Direction == "rtl" {
+		return fmt.Errorf("%w: PDF run direction needs bidirectional layout", ErrUnsupported)
+	}
 	var buf sfnt.Buffer
 	for _, ch := range norm.NFC.String(r.Text) {
 		if pdfSpecial(ch) {
@@ -123,6 +126,9 @@ func writePDF(ctx context.Context, out io.Writer, d *Document) error {
 	return writePDFWithFonts(ctx, out, d, nil, nil)
 }
 func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []FontFace, fontMap map[string]string) error {
+	if err := validatePDFDirections(ctx, d); err != nil {
+		return err
+	}
 	notes, err := catalogNotes(d, true)
 	if err != nil {
 		return err

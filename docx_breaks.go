@@ -32,12 +32,15 @@ func docxOnOff(n *xmlNode) (bool, error) {
 	return false, fmt.Errorf("invalid DOCX boolean value %q", value)
 }
 func paragraphBreakProperty(pr *xmlNode) (*xmlNode, error) {
+	return paragraphNamedProperty(pr, "pageBreakBefore")
+}
+func paragraphNamedProperty(pr *xmlNode, property string) (*xmlNode, error) {
 	var found *xmlNode
 	if pr != nil {
 		for _, c := range pr.Children {
-			if c.Name.Local == "pageBreakBefore" {
+			if c.Name.Local == property {
 				if found != nil {
-					return nil, fmt.Errorf("duplicate pageBreakBefore property")
+					return nil, fmt.Errorf("duplicate %s property", property)
 				}
 				found = c
 			}
@@ -45,20 +48,22 @@ func paragraphBreakProperty(pr *xmlNode) (*xmlNode, error) {
 	}
 	return found, nil
 }
-func (r *docxReader) paragraphPageBreak(pr *xmlNode, styleID string) (bool, error) {
+func (r *docxReader) paragraphOnOff(pr *xmlNode, styleID, property string) (bool, bool, error) {
+	present := false
 	value := false
 	apply := func(pr *xmlNode) error {
-		p, err := paragraphBreakProperty(pr)
+		p, err := paragraphNamedProperty(pr, property)
 		if err != nil {
 			return err
 		}
 		if p != nil {
+			present = true
 			value, err = docxOnOff(p)
 		}
 		return err
 	}
 	if err := apply(r.defaultPPr); err != nil {
-		return false, err
+		return false, false, err
 	}
 	if styleID == "" {
 		styleID = r.defaultParagraphStyle
@@ -67,10 +72,10 @@ func (r *docxReader) paragraphPageBreak(pr *xmlNode, styleID string) (bool, erro
 	var chain []*xmlNode
 	for styleID != "" {
 		if err := r.ctx.Err(); err != nil {
-			return false, err
+			return false, false, err
 		}
 		if visited[styleID] {
-			return false, fmt.Errorf("cyclic DOCX paragraph style inheritance")
+			return false, false, fmt.Errorf("cyclic DOCX paragraph style inheritance")
 		}
 		visited[styleID] = true
 		s := r.styles[styleID]
@@ -82,13 +87,28 @@ func (r *docxReader) paragraphPageBreak(pr *xmlNode, styleID string) (bool, erro
 	}
 	for i := len(chain) - 1; i >= 0; i-- {
 		if err := apply(chain[i].child("pPr")); err != nil {
-			return false, err
+			return false, false, err
 		}
 	}
 	if err := apply(pr); err != nil {
-		return false, err
+		return false, false, err
 	}
-	return value, nil
+	return value, present, nil
+}
+
+func (r *docxReader) paragraphPageBreak(pr *xmlNode, styleID string) (bool, error) {
+	value, _, err := r.paragraphOnOff(pr, styleID, "pageBreakBefore")
+	return value, err
+}
+func (r *docxReader) paragraphDirection(pr *xmlNode, styleID string) (string, error) {
+	value, present, err := r.paragraphOnOff(pr, styleID, "bidi")
+	if err != nil || !present {
+		return "", err
+	}
+	if value {
+		return "rtl", nil
+	}
+	return "ltr", nil
 }
 
 // Metadata distinguishes an exported unconditional control from a normal
