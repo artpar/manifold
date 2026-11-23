@@ -33,6 +33,9 @@ func (r *pdfReader) imageDimensions(sd *types.StreamDict) (int, int, error) {
 	return int(*w), int(*h), nil
 }
 func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, resources types.Dict, state pdfTextState) error {
+	if state.rulingClip != nil || state.rulingClipUnknown {
+		r.warnPage("pdf_clipping", "Image clipping is not applied to recovered raster pixels or bounds")
+	}
 	w, h, err := r.imageDimensions(sd)
 	if err != nil {
 		return err

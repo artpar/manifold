@@ -43,10 +43,17 @@ Glyph-ID output now exists for supported LTR graphemes, using full TrueType
 programs, shared CID resources, ActualText/ToUnicode and checked GPOS offsets.
 Language/direction/forced-CS semantics and language-tagged LTR segment/line shaping
 now exist. The next slice needs paragraph bidi/joining and full itemization,
-context across differing styles/fonts/languages. Ordinary default text now uses
+context across differing fonts/sizes/languages and within-grapheme styles. Ordinary default text now uses
 the same LTR shaping pipeline. Reuse the transport; keep current unsupported-script guards until
 independent glyph/order/layout evidence qualifies their replacement. Full-font
-cost, generalization beyond the implemented same-style LTR line re-shaping,
+cost, generalization beyond the implemented compatible-face/size/language LTR line re-shaping,
 style/font segmentation and internal text/link/note bidi order need deliberate
 handling. Source-font recovery,
 broader formats/qualification and other acceptance rows remain required.
+
+
+Paint-only boundaries now preserve shared LTR context, including clipped ligature
+colors, exact logical carriers and URI geometry. Keep the eight-row independent
+paint-context oracle while implementing paragraph bidi/itemization. Broader
+font/size/language and within-grapheme style context remain open; do not reintroduce
+paint-based shaping segments or the observed MuPDF missing-f defect.

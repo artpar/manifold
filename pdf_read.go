@@ -280,11 +280,14 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 	}
 	text := ""
 	actual := r.actualFrame()
+	decoded, decodeErr := s.font.decode(b)
 	if actual == nil {
-		text, err = s.font.decode(b)
-		if err != nil {
-			return err
+		if decodeErr != nil {
+			return decodeErr
 		}
+		text = decoded
+	} else if decodeErr != nil {
+		actual.alignmentUnavailable = true
 	}
 	advance, estimated, err := s.font.displacement(b, s.size, s.charSpace, s.wordSpace, s.hscale)
 	if err != nil {
@@ -327,6 +330,7 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 		}
 	}
 	if actual != nil {
+		actual.clipState |= replacementClipState(source.Precision)
 		if !actual.haveStyle {
 			actual.style = style
 			actual.style.Source = nil
@@ -355,8 +359,12 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 			actual.baseline[1] = end
 			actual.mixedFont = actual.mixedFont || actual.source.Font != source.Font || math.Abs(actual.source.FontSize-source.FontSize) > 1e-7
 		}
-		if actual.styleMixed {
-			r.warnPage("pdf_actualtext_style", "ActualText covers mixed formatting that cannot be mapped exactly to replacement characters")
+		if decodeErr == nil {
+			part := style
+			part.Text = decoded
+			part.Source = source
+			actual.fragments = append(actual.fragments, part)
+			actual.decoded = append(actual.decoded, decoded...)
 		}
 		if actual.source == nil {
 			copy := *source
@@ -713,9 +721,6 @@ func (r *pdfReader) form(o types.Object, parent types.Dict, depth int, state pdf
 	}
 	if *sub != "Form" {
 		return fmt.Errorf("%w: PDF XObject subtype %s", ErrUnsupported, *sub)
-	}
-	if sd.Dict["BBox"] != nil {
-		r.warnPage("pdf_form_clip", "Form BBox clipping is not applied to recovered content bounds")
 	}
 	if err := sd.Decode(); err != nil {
 		return err

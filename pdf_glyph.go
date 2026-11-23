@@ -32,15 +32,21 @@ type pdfGlyphPosition struct {
 	logical       string
 	x, y, advance float64
 }
+type pdfPaintActualGroup struct{ text string }
 type pdfGlyphCluster struct {
+	actualGroup            *pdfPaintActualGroup
 	script                 language.Script
 	face                   *pdfGlyphFace
 	positions              []pdfGlyphPosition
 	width, ascent, descent float64 // em units, y offsets point upwards
+	origin                 float64 // fragment start relative to the shared shaping origin
+	clipLeft, clipRight    bool
+	logicalCarrier         bool
 }
 type pdfGlyphCode struct {
-	glyph uint16
-	text  string
+	glyph       uint16
+	text        string
+	metricWidth float64 // em; zero uses nominal font advance
 }
 type pdfGlyphFace struct {
 	name     string
@@ -74,6 +80,23 @@ func pdfShapableText(text string) bool {
 	}
 	return true
 }
+func pdfGlyphLocale(run Run, script language.Script) language.Language {
+	locale := run.Language
+	if run.ComplexScript && run.ComplexLanguage != "" {
+		locale = run.ComplexLanguage
+	}
+	switch script {
+	case language.Han, language.Hiragana, language.Katakana, language.Hangul, language.Bopomofo, language.Yi:
+		if !run.ComplexScript && run.EastAsiaLanguage != "" {
+			locale = run.EastAsiaLanguage
+		}
+	}
+	if locale == "" {
+		locale = "und"
+	}
+	return language.NewLanguage(locale)
+}
+
 func (r *pdfRenderer) glyphCluster(face pdfFontFace, text string) (*pdfGlyphCluster, error) {
 	return r.glyphClusterLanguage(face, text, Run{})
 }
@@ -117,19 +140,7 @@ func (r *pdfRenderer) shapeGlyphTextScript(face pdfFontFace, text string, run Ru
 	if script != 0 {
 		b.Props.Script = script
 	}
-	locale := run.Language
-	if run.ComplexScript && run.ComplexLanguage != "" {
-		locale = run.ComplexLanguage
-	}
-	switch b.Props.Script {
-	case language.Han, language.Hiragana, language.Katakana, language.Hangul, language.Bopomofo, language.Yi:
-		if !run.ComplexScript && run.EastAsiaLanguage != "" {
-			locale = run.EastAsiaLanguage
-		}
-	}
-	if locale != "" {
-		b.Props.Language = language.NewLanguage(locale)
-	}
+	b.Props.Language = pdfGlyphLocale(run, b.Props.Script)
 	// Current run shaping supports LTR. Paragraph joining/bidi still needs a
 	// qualified implementation; existing script/direction guards remain active.
 	if b.Props.Direction != harfbuzz.LeftToRight {
@@ -205,7 +216,7 @@ func (r *pdfRenderer) shapeGlyphTextScript(face pdfFontFace, text string, run Ru
 	return c, nil
 }
 func (f *pdfGlyphFace) cid(glyph uint16, text string) (uint16, error) {
-	key := pdfGlyphCode{glyph, text}
+	key := pdfGlyphCode{glyph: glyph, text: text}
 	if code, ok := f.codes[key]; ok {
 		return code, nil
 	}
@@ -217,24 +228,83 @@ func (f *pdfGlyphFace) cid(glyph uint16, text string) (uint16, error) {
 	f.entries = append(f.entries, key)
 	return code, nil
 }
+func (f *pdfGlyphFace) carrierCID(text string, width float64) (uint16, error) {
+	var b sfnt.Buffer
+	gid, err := f.original.parsed.GlyphIndex(&b, ' ')
+	if err != nil || gid == 0 {
+		return 0, fmt.Errorf("%w: logical glyph carrier needs a space glyph", ErrUnsupported)
+	}
+	if !finite(width) || width <= 0 {
+		return 0, fmt.Errorf("%w: invalid logical carrier advance", ErrUnsupported)
+	}
+	key := pdfGlyphCode{glyph: uint16(gid), text: text, metricWidth: width}
+	if code, ok := f.codes[key]; ok {
+		return code, nil
+	}
+	if len(f.entries) >= 65535 {
+		return 0, fmt.Errorf("%w: per-face CID inventory exceeds 65535", ErrUnsupported)
+	}
+	code := uint16(len(f.entries) + 1)
+	f.codes[key] = code
+	f.entries = append(f.entries, key)
+	return code, nil
+}
+
 func (r *pdfRenderer) paintGlyphSpan(span pdfSpan, x, y, size float64) {
 	c := span.glyphs
 	// Match the existing primitive writer's baseline precision. Keep GPOS
 	// offsets precise relative to that baseline instead of manufacturing tiny
 	// baseline differences between adjacent primitive and glyph spans.
-	x, y = math.Round(x*100)/100, math.Round(y*100)/100
+	x, y = math.Round((x-c.origin*size)*100)/100+c.origin*size, math.Round(y*100)/100
 	red, green, blue := textRGB(span.run.Color)
-	r.pdf.RawWriteStr("q\n" + pdfActualText(span.text))
+	r.pdf.RawWriteStr("q")
+	if c.clipLeft || c.clipRight {
+		left, right := 0.0, r.width
+		if c.clipLeft {
+			left = x
+		}
+		if c.clipRight {
+			right = x + span.width
+		}
+		if right < left {
+			r.pdf.SetError(fmt.Errorf("invalid glyph fragment clip"))
+			return
+		}
+		r.pdf.RawWriteStr(fmt.Sprintf("%.8f 0 %.8f %.8f re W n", left, right-left, r.height))
+	}
+	if c.logicalCarrier {
+		r.pdf.RawWriteStr("/Artifact << /ActualText <FEFF> >> BDC")
+	} else if c.actualGroup == nil {
+		r.pdf.RawWriteStr(pdfActualText(span.text))
+	}
 	r.pdf.RawWriteStr(fmt.Sprintf("%.8f %.8f %.8f rg", float64(red)/255, float64(green)/255, float64(blue)/255))
 	for _, g := range c.positions {
-		code, err := c.face.cid(g.glyph, g.logical)
+		logical := g.logical
+		if c.logicalCarrier {
+			logical = ""
+		}
+		code, err := c.face.cid(g.glyph, logical)
 		if err != nil {
 			r.pdf.SetError(err)
 			return
 		}
 		r.pdf.RawWriteStr(fmt.Sprintf("BT /%s %.8f Tf 1 0 0 1 %.8f %.8f Tm <%04X> Tj ET", c.face.name, size, x+g.x*size, r.height-y+g.y*size, code))
 	}
-	r.pdf.RawWriteStr("EMC\nQ")
+	if c.actualGroup == nil || c.logicalCarrier {
+		r.pdf.RawWriteStr("EMC")
+	}
+	r.pdf.RawWriteStr("Q")
+	if c.logicalCarrier {
+		code, err := c.face.carrierCID(span.text, c.width)
+		if err != nil {
+			r.pdf.SetError(err)
+			return
+		}
+		r.pdf.RawWriteStr("q\n" + pdfActualText(span.text))
+		r.pdf.RawWriteStr(fmt.Sprintf("%.8f %.8f %.8f rg", float64(red)/255, float64(green)/255, float64(blue)/255))
+		r.pdf.RawWriteStr(fmt.Sprintf("BT /%s %.8f Tf 3 Tr 1 0 0 1 %.8f %.8f Tm <%04X> Tj ET", c.face.name, size, x, r.height-y, code))
+		r.pdf.RawWriteStr("EMC\nQ")
+	}
 }
 func glyphUTF16(text string) string {
 	data := make([]byte, 0, len(text)*2)
@@ -323,7 +393,11 @@ func (f *pdfGlyphFace) embed(p *model.Context) (*types.IndirectRef, error) {
 			if err != nil {
 				return nil, err
 			}
-			widths = append(widths, types.Integer(code), types.Array{types.Float(float64(width) / 64)})
+			metric := float64(width) / 64
+			if e.metricWidth > 0 {
+				metric = e.metricWidth * 1000
+			}
+			widths = append(widths, types.Integer(code), types.Array{types.Float(metric)})
 			fmt.Fprintf(&cmap, "<%04X> <%s>\n", code, glyphUTF16(e.text))
 		}
 		cmap.WriteString("endbfchar\n")

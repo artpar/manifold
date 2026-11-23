@@ -220,7 +220,6 @@ func (r *pdfReader) pathOperator(op string, args []any, path *pdfCurrentPath, st
 			return err
 		}
 		path.clip = true
-		r.warnPage("pdf_clipping", "Clipping paths are not applied to recovered text/image geometry; rectangular clips constrain ruling inference")
 	case "w":
 		a, e := nums(1)
 		if e != nil {

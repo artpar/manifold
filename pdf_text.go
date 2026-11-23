@@ -476,7 +476,21 @@ func (r *pdfRenderer) paintSpan(span pdfSpan, x, y, size float64) {
 func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 	baseline := pdfLineSize(line, size)
 	origin := x
+	var actualGroup *pdfPaintActualGroup
 	for _, span := range line {
+		var group *pdfPaintActualGroup
+		if span.glyphs != nil {
+			group = span.glyphs.actualGroup
+		}
+		if group != actualGroup {
+			if actualGroup != nil {
+				r.pdf.RawWriteStr("EMC")
+			}
+			if group != nil {
+				r.pdf.RawWriteStr(pdfActualText(group.text))
+			}
+			actualGroup = group
+		}
 		drawSize, rise := textSize(span.run, size), 0.0
 		if span.run.Note != nil {
 			drawSize = math.Round(drawSize*.7*100) / 100
@@ -501,6 +515,9 @@ func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 		}
 
 		x += span.width
+	}
+	if actualGroup != nil {
+		r.pdf.RawWriteStr("EMC")
 	}
 	r.drawLineDecorations(line, origin, y, baseline, size)
 }

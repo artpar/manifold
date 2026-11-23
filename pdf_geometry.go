@@ -88,6 +88,7 @@ func (r *pdfReader) sourceFor(s *pdfTextState, advance float64, estimated bool) 
 	}
 	r.order++
 	source := &SourceInfo{Format: PDF, Page: r.page, Order: r.order, Object: r.stream, Stream: r.stream, Quad: &q, Baseline: &baseline, Matrix: &matrix, Font: s.font.name, FontSize: math.Hypot(matrix[2], matrix[3]), Structure: "unstructured", Evidence: "pdf_text_operators", Precision: precision, Confidence: confidence, RenderMode: s.renderMode}
+	r.clipTextSource(source, s)
 	r.applyMarked(source)
 	return source
 }
@@ -138,6 +139,10 @@ func sourceForRuns(runs []Run) *SourceInfo {
 }
 
 type pdfMarkedContent struct {
+	decoded                          []byte
+	fragments                        []Run
+	alignmentUnavailable             bool
+	clipState                        uint8
 	tag                              string
 	stream                           string
 	mcid                             *int

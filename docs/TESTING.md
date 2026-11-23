@@ -1263,3 +1263,45 @@ existing 65,536-scalar shaping-segment/resource bounds remain explicit. Internal
 fixed-Go note labels/captions and virtual controls retain primitives. Bidi/joining,
 differing-style/font/language context, complete itemization, broader fonts and the
 other acceptance rows remain required; no full-goal completion is claimed.
+
+
+## Paint-context milestone (2026-11-23)
+
+```sh
+GOWORK=off go run ./examples/paint-context
+bin/manydoc extract -format sf -o output/paint-context/recovered.sf output/paint-context/paint.pdf
+output/qa-venv/bin/python scripts/verify_paint_context.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/paint-context/paint.sf output/paint-context/emergency.sf output/paint-context/recovered.sf
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFPaintContext$' -fuzztime=500x -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFPaintFont$' -fuzztime=500x -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFTextRectClip$' -fuzztime=1000x -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=500x -parallel=2 .
+```
+
+Use the existing optional QA environment (pypdf/python-docx/lxml/PyMuPDF/
+uharfbuzz); native HarfBuzz 15.0.0/uharfbuzz 0.57.0 is an independent test oracle.
+The script verifies eight baseline rows against native GIDs/origins, exact original
+Noto font bytes, six GDEF paint bands, colors, logical carrier widths, URI/source
+provenance and complete office/ffi text in both MuPDF and pypdf. Before carriers,
+MuPDF lost a middle f even under outer ActualText. The complete-word expectation
+was retained and production corrected. Unit tests separately qualify axis-aligned
+rectangular font-box clipping and exact mixed ActualText style alignment; unchanged
+replacement mismatch tests retain conservative loss behavior. No corpus fixture
+or semantic/content oracle was weakened.
+
+Two native PDF pages and one LibreOffice DOCX-to-PDF page were visually inspected;
+LibreOffice recovered AV/AV/office/office/AV on one page. QA generation/external
+readers are optional development tooling; no runtime dependency was introduced.
+Actual ProseMirror validates 48 nodes across three files. All 51 corpus files/
+9,031 nodes and 28 Poppler comparisons pass. Independent default-shaping, rich-style,
+glyph-transport, typography, PDF-style recovery, inference and published real-export
+normalization regressions pass.
+
+Full tests pass (library 7.957s, CLI 2.594s), race passes (118.657s/2.678s), vet
+and CGO-disabled CLI build pass. The subsequently added malformed-font fuzz seeds
+also pass the race detector (2.124s). Fuzz campaigns: paint context 525 executions in
+42.033s (500x target); paint-font mutations 500 in 18.886s; rectangular clips
+1,000 in 2.656s; malformed PDF 500 in 3.756s. Logs use output/paint-context-*.
+Generated output/QA environments remain ignored. Bidi/joining, remaining font/size/
+language and within-grapheme style context, broader recovery/layout/fonts and real
+exports remain unfinished; this is a verified milestone, not goal completion.

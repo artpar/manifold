@@ -427,3 +427,14 @@ Ordinary LTR PDF uses contextual run shaping and re-shapes final lines, with und
 when the language binding is absent;
 RTL/joining/bidi, context across differing styles and broader script/language
 qualification remain required. Language attributes affect locale; they are not an activation flag for typography.
+
+
+PDF paint-context shaping adds no schema fields. Source evidence may be
+pdf_actualtext_aligned when decoded operator text exactly establishes mixed-style
+ActualText intervals. Known text clipping uses rect_clipped_ precision prefixes;
+fully_clipped_/unresolved_clip_/mixed_clip_ describe retained uncertain operator
+bounds. Split-ligature logical carriers expose render_mode 3 and the existing
+pdf_invisible_text diagnostic; their replacement_span_bounds are logical advance
+bands, not visible glyph ink. Checked SF preserves these values and paint/link
+marks. Broader bidi/font/language context and within-grapheme style changes remain
+required, unfinished capabilities.

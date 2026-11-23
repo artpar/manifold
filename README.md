@@ -234,3 +234,11 @@ kerning, ligatures and final-line re-shaping; language tags are optional. QA:
 `output/qa-venv/bin/python scripts/verify_default_shaping.py`. Full original font
 embedding increases small PDF size. Bidi/joining and differing-style/font context
 remain required work; this is not a Word-equivalent layout engine.
+
+
+`GOWORK=off go run ./examples/paint-context` demonstrates shared kerning/ligatures
+across color, decoration and link boundaries, with emergency line re-shaping.
+QA: `output/qa-venv/bin/python scripts/verify_paint_context.py` after extracting
+`paint.pdf` to `output/paint-context/recovered.sf` (see docs/TESTING.md). Split
+ligatures retain original outlines and explicit invisible logical carriers.
+Paragraph bidi/joining and remaining font/size/language context are unfinished.

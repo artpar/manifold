@@ -33,10 +33,10 @@ func shapingAtom(atom pdfTextAtom) bool {
 	return true
 }
 
-// Resolve Common/Inherited graphemes from adjacent text inside each style
+// Resolve Common/Inherited graphemes from adjacent text inside each shaping
 // segment. Keep distinct strong scripts separate instead of shaping a mixed
 // paragraph with whichever OpenType script happens to appear first.
-func resolveShapingScripts(atoms []pdfTextAtom) {
+func resolveShapingScripts(atoms []pdfTextAtom, size float64) {
 	weak := func(s language.Script) bool { return s == language.Common || s == language.Inherited || s == 0 }
 	for start := 0; start < len(atoms); {
 		if !shapingAtom(atoms[start]) {
@@ -44,7 +44,7 @@ func resolveShapingScripts(atoms []pdfTextAtom) {
 			continue
 		}
 		end := start + 1
-		for len(atoms[end-1].spans) == 1 && end < len(atoms) && shapingAtom(atoms[end]) && samePDFStyle(atoms[start].spans[0].run, atoms[end].spans[0].run) {
+		for len(atoms[end-1].spans) == 1 && end < len(atoms) && shapingAtom(atoms[end]) && sameShapingContext(atoms[start].spans[0], atoms[end].spans[0], size) {
 			end++
 		}
 		next := make([]language.Script, end-start)
@@ -77,14 +77,14 @@ func resolveShapingScripts(atoms []pdfTextAtom) {
 // input graphemes for emergency wrapping, then the actual chosen line is shaped
 // afresh. Never split or paint a previously shaped ligature at a guessed offset.
 func (r *pdfRenderer) measureShapedAtoms(atoms []pdfTextAtom, size float64) error {
-	resolveShapingScripts(atoms)
+	resolveShapingScripts(atoms, size)
 	for start := 0; start < len(atoms); {
 		if !shapingAtom(atoms[start]) {
 			start++
 			continue
 		}
 		end := start + 1
-		for len(atoms[end-1].spans) == 1 && end < len(atoms) && shapingAtom(atoms[end]) && samePDFStyle(atoms[start].spans[0].run, atoms[end].spans[0].run) && atoms[start].spans[0].glyphs.script == atoms[end].spans[0].glyphs.script {
+		for len(atoms[end-1].spans) == 1 && end < len(atoms) && shapingAtom(atoms[end]) && sameShapingContext(atoms[start].spans[0], atoms[end].spans[0], size) && atoms[start].spans[0].glyphs.script == atoms[end].spans[0].glyphs.script {
 			end++
 		}
 		var text strings.Builder
@@ -161,7 +161,7 @@ func (r *pdfRenderer) shapeTextLine(line pdfLine, size float64) (pdfLine, error)
 			continue
 		}
 		end := start + 1
-		for end < len(line) && shapingSpan(line[end]) && samePDFStyle(line[start].run, line[end].run) && line[start].glyphs.script == line[end].glyphs.script {
+		for end < len(line) && shapingSpan(line[end]) && sameShapingContext(line[start], line[end], size) && line[start].glyphs.script == line[end].glyphs.script {
 			end++
 		}
 		var text strings.Builder
@@ -185,12 +185,11 @@ func (r *pdfRenderer) shapeTextLine(line pdfLine, size float64) (pdfLine, error)
 				return nil, fmt.Errorf("%w: shaped glyph offsets exceed PDF coordinate bounds", ErrUnsupported)
 			}
 		}
-		span.text = text.String()
-		span.glyphs = shaped
-		span.width = shaped.width * drawSize
-		span.ascent = math.Max(span.ascent, shaped.ascent*drawSize)
-		span.descent = math.Max(span.descent, shaped.descent*drawSize)
-		result = appendPDFSpan(result, span)
+		painted, err := splitShapedPaint(line[start:end], text.String(), shaped, size)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, painted...)
 		start = end
 	}
 	return result, nil

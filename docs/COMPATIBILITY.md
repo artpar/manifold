@@ -83,7 +83,7 @@ Explicit/color-key masks, Matte, JPX, inline LZW/CCITT framing, vertical text an
 broader color/font cases remain unfinished and reject explicitly. Stencils whose
 fill depends on unresolved general color-space operators also reject. Image dimensions
 are bounded before decoding; this is not a claim of exhaustive resource safety.
-Vector painting, clipping (including Form BBox), general color state, extended
+Vector painting, complex/image clipping, general color state, extended
 graphics effects, alternate color-profile
 conversion, mask resampling and out-of-crop bounds have explicit diagnostics.
 Scanned pages preserve their images; they still produce no OCR text.
@@ -500,9 +500,9 @@ direction is not a Unicode embedding override. Unsupported values and malformed/
 duplicate properties reject. Unused font choices/hints remain diagnosed, but
 retained direction/language/cs alone no longer produces a false loss warning.
 
-For all ordinary authored PDF text, same-style LTR text shapes across graphemes and
-equal formatting runs. Distinct strong scripts stay separate; Common/Inherited
-graphemes use adjacent script context inside the style segment. General language
+For all ordinary authored PDF text, compatible-face/size/language LTR text shapes across graphemes and
+paint/annotation boundaries. Distinct strong scripts stay separate; Common/Inherited
+graphemes use adjacent script context inside the shaping segment. General language
 is used normally, East Asian language for the resolved East Asian script, and
 forced cs selects complex language when set. Native HarfBuzz independently
 qualifies Russian/Serbian/Macedonian Cyrillic locl, Latin kerning and ffi ligatures.
@@ -515,7 +515,7 @@ individual graphemes retain the 1,024-scalar bound. Full original TTF cost remai
 
 RTL paragraphs/runs reject atomically in every story, including empty paragraphs,
 tables, nested lists, headers/footers and notes. Paragraph-wide bidi/joining,
-context across differing styles/fonts/languages, full script itemization and broader fonts remain required implementation and
+context across differing fonts/sizes/languages and within-grapheme styles, full script itemization and broader fonts remain required implementation and
 qualification. Empty language now selects und without changing the shaping path.
 This milestone does not satisfy the broader Unicode acceptance criterion.
 
@@ -527,3 +527,26 @@ across script/spacing boundaries. Marked special spaces retain real glyph positi
 Ordinary outputs serialize as PDF 1.7; control-only ActualText uses 1.4. Full-font
 embedding increases small PDF size (the short regular-face example is 71,869 bytes);
 no compact-subset promise or complete bidi/style-context support is made.
+
+
+### Paint boundaries and clipping
+
+Color/underline/strike/link changes preserve shared contextual kerning/ligatures
+when resolved face, effective size and canonical language bindings match. Explicit
+font aliases resolving to the same face qualify. GDEF ligature carets split paint
+bands; missing/mismatched carets use equal original-grapheme advance. Font/size/
+language changes and paint changes inside a grapheme remain unqualified.
+
+Split ligatures repeat the original outline under rectangular bands and use
+invisible logical carriers with exact band advances. These have render mode 3 and
+pdf_invisible_text diagnostics on recovery. Visible glyphs are artifacts with empty
+logical mappings; supported readers recover the original text once. Unsplit mixed
+paint groups use exact outer ActualText alignment, evidence pdf_actualtext_aligned.
+Different replacement strings still use conservative common formatting and warnings.
+
+Known rectangular clipping intersects axis-aligned text font-advance bounds and
+baseline segments, including applicable Form BBox. Precision gains rect_clipped_
+or replacement-span prefixes; these are not ink-outline bounds. Fully clipped text
+retains operator strings/original bounds with fully_clipped_ precision and warning;
+raw partial clips warn of hidden character ink. Complex/non-axis-aligned text and
+raster image clipping remain unresolved with explicit diagnostics.

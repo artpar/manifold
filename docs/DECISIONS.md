@@ -867,3 +867,28 @@ continuous underline/strike had existed. Join same-style decorations in producti
 instead of weakening that oracle. The spacing oracle still derives virtual widths
 from the primitive font, while A's actual advance now comes from its verified
 original shaped program (A is no longer needed in the control-only subset).
+
+
+## 2026-11-23 Separate paint boundaries from shaping context
+
+Color, decorations and links do not alter the resolved face, size or language.
+Keep them in shared LTR shaping context, then partition actual glyph positions.
+Use usable GDEF carets plus glyph-origin offsets for internal ligature paint edges;
+fall back to equal original-grapheme advance only when matching carets are absent.
+This is an allocation policy, not evidence of font-defined component ink bounds.
+References: [CSS Text boundary shaping](https://www.w3.org/TR/css-text-3/#boundary-shaping)
+and [HarfBuzz ligature carets](https://harfbuzz.github.io/harfbuzz-hb-ot-layout.html#hb-ot-layout-get-ligature-carets).
+No CSS conformance or full script/bidi qualification is claimed.
+
+Keep the independent complete-word oracle: clipped repeated ligatures initially
+lost a middle f in MuPDF, even under a single outer ActualText. Use visible artifact
+outlines plus unclipped invisible logical carriers with allocated CID widths. Both
+MuPDF and pypdf must recover office/ffi in full, while original programs, GIDs,
+GPOS, colors, clips and links remain independently checked. Carrier render mode
+and invisible-text provenance are explicit, not disguised as visible source ink.
+
+Applying rectangular text/font-box clips makes recovery bounds more useful; it
+does not justify claiming arbitrary clipping/ink recovery. Retain fully clipped
+operator strings with uncertainty. For mixed-style ActualText, align only on exact
+decoded concatenation equality, never equal rune count. Existing genuinely
+different replacement tests remain unchanged. No dependency or fixture change.

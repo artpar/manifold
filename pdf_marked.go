@@ -78,6 +78,13 @@ func (r *pdfReader) endMarked() {
 	if frame.actual == nil || r.actualFrame() != nil {
 		return
 	}
+	if frame.styleMixed && !frame.alignmentUnavailable && string(frame.decoded) == *frame.actual && len(frame.fragments) > 0 {
+		r.current = append(r.current, alignedActualTextRuns(frame.fragments)...)
+		return
+	}
+	if frame.styleMixed {
+		r.warnPage("pdf_actualtext_style", "ActualText covers mixed formatting that cannot be mapped exactly to replacement characters")
+	}
 	if frame.source == nil {
 		// An empty replacement span has no painted geometry, but logical text still persists.
 		r.order++
@@ -112,7 +119,7 @@ func (r *pdfReader) endMarked() {
 			frame.source.Font = ""
 			frame.source.FontSize = 0
 		}
-		frame.source.Precision = "replacement_span_bounds"
+		frame.source.Precision = clippedReplacementPrecision(frame.clipState)
 	}
 	if *frame.actual != "" {
 		run := frame.style

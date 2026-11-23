@@ -267,3 +267,21 @@ func FuzzPDFEditableStyles(f *testing.F) {
 		assertRecoverySF(t, d)
 	})
 }
+
+func TestPDFActualTextExactDecodedAlignmentKeepsMixedStyles(t *testing.T) {
+	content := "BT /F 12 Tf 1 0 0 rg 10 200 Td /Span << /ActualText (AB) >> BDC (A) Tj 0 0 1 rg /F 16 Tf (B) Tj EMC ET"
+	d := readRecovery(t, recoveryPage(content, ""))
+	runs := recoveryRuns(d)
+	if len(runs) != 2 || runs[0].Text != "A" || runs[1].Text != "B" || runs[0].Color != "#FF0000" || runs[1].Color != "#0000FF" || runs[0].FontSize != 12 || runs[1].FontSize != 16 {
+		t.Fatalf("exact ActualText alignment %+v", runs)
+	}
+	for _, r := range runs {
+		if r.Source.Evidence != "pdf_actualtext_aligned" {
+			t.Fatal("alignment not distinguished in provenance")
+		}
+	}
+	if hasDiagnostic(d, "pdf_actualtext_style") {
+		t.Fatal("exact style alignment diagnosed as ambiguous")
+	}
+	assertRecoverySF(t, d)
+}

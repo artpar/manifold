@@ -21,47 +21,49 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: default authored text uses contextual shaping
+## Latest milestone: shaping survives paint and annotation changes
 
-- All ordinary authored PDF text now shapes regardless of language metadata.
-  Empty language selects deterministic und; language bindings affect locale rather
-  than activating typography. Headers/footers, lists, cells and note bodies share
-  the same measurement/final-line re-shaping path in pdf_shaping.go (renamed from
-  pdf_language.go). No public API/schema/module/asset change.
-- Existing explicit spacing/control policy remains. Residual marks attached to
-  special spaces retain positioned glyphs; a new figure-space/mark test and native
-  oracle preserve that earlier capability. Decorations join across adjacent
-  same-style shaping/control/script spans; the unchanged continuity oracle caught
-  fragmented strokes and production was corrected.
-- Ordinary fonts now use actual descriptors/original full TTF programs and shared
-  glyph resources. Authored shaped output is PDF 1.7; control-only output still
-  qualifies its 1.4 ActualText path. Full-font size overhead now applies to normal
-  output: the short default-font benchmark is 71,869 bytes versus the earlier
-  10,896-byte primitive result. Timing is observational, not a regression guarantee.
-  Internal fixed-Go note labels/captions and virtual controls still use primitives.
-- Independent native HarfBuzz checks 24 untagged runs, six containing ligatures,
-  across default Go, Go Mono and configured Noto Sans, plus emergency breaks and
-  marked special spaces. Exact original font hashes, shared resources, glyph IDs,
-  physical origins, metadata, DOCX content, URI/note links and running content pass.
-  Four new native pages and two LibreOffice DOCX pages were visually inspected.
-  ProseMirror validates 81 source/recovered nodes; 51 corpus files/9,031 nodes and
-  28 Poppler comparisons pass. Rich-style/glyph/language/font/color/typography and
-  report independent regressions pass, without changing fixture/content oracles.
-- Unit provenance coverage keeps both the new descriptor and an independently
-  authored primitive font with embedded-name fallback. Independent reader checks
-  now verify physical original programs instead of private subset aliases; App
-  Sans and default Go legitimately share the supplied Go Regular font. Spacing,
-  baseline, bounds, formatting and relationship expectations remain intact.
+- Compatible resolved faces, effective sizes and canonical language bindings now
+  shape together across color, underline, strike and link boundaries. Final lines
+  still re-shape after wrapping. Font aliases resolving to the same face qualify;
+  different sizes/faces/languages remain separate. No public schema/module/asset
+  change. Previous checkpoint: 4d3446e.
+- Paint intervals retain contextual GIDs/GPOS. A boundary inside a ligature uses
+  matching valid GDEF carets, otherwise equal original-grapheme advance allocation.
+  Rectangular clipping colors the original outline. Invisible logical carriers
+  retain per-fragment text/style/advance/link bounds alongside visible artifact
+  glyphs. This fixes an independently observed MuPDF dropped-f defect; an outer
+  ActualText span alone did not fix its clipping filter. Reader source explicitly
+  records render mode 3 and the invisible-text diagnostic.
+- PDF recovery now applies known rectangular clips to axis-aligned font-advance
+  boxes, including applicable Form BBox intersections. Complex/non-axis-aligned
+  text and image clips diagnose unresolved behavior. Fully clipped operator strings
+  remain with original bounds and explicit uncertainty; raw partial clips warn
+  that some character ink may be hidden. These are not ink-outline measurements.
+- Mixed ActualText preserves style intervals only when decoded inner text exactly
+  equals the replacement. Evidence is pdf_actualtext_aligned; genuinely different
+  replacements retain the prior conservative common-style/loss behavior.
+- Native HarfBuzz independently checks eight rows, six GDEF clipping bands, exact
+  original font hashes/GIDs/origins and carrier advances. MuPDF and pypdf both
+  recover full office/ffi text. DOCX XML/python-docx checks formatting, relationships
+  and table content. Two native pages and one LibreOffice-rendered DOCX page were
+  visually inspected. Actual ProseMirror validates 48 nodes across three files;
+  51 corpus files/9,031 nodes and 28 Poppler comparisons pass. Default shaping,
+  typography, rich styles, glyph transport, PDF recovery/inference and the published
+  real-export normalization regressions pass. No corpus oracle was weakened.
+- Full tests pass (library 7.957s, CLI 2.594s); race passes (118.657s/2.678s);
+  vet and CGO-disabled CLI build pass. Paint-context fuzz: 525 executions; malformed
+  paint fonts: 500; rectangular clips: 1,000; malformed PDF: 500. See TESTING.md and
+  verification.json for reproducible commands and evidence.
 
-The full goal remains **incomplete**. Bidi/joining, context across differing
-styles/fonts/languages, complete script itemization, broader font admission/source
-font handling, richer pages/running content, PDF structure/color and representative
-real exports remain required. Resource bounds and explicit unsupported errors are
-not completion evidence. Full tests/race/vet/CGO-disabled build/execution and relevant
-fuzz checks are recorded in verification.json/TESTING.md. No external blocker.
-Prior checkpoint: f96ebe9. Next commands: GOWORK=off go run ./examples/shaping;
-output/qa-venv/bin/python scripts/verify_default_shaping.py; inspect pdf_shaping.go
-and pdf_direction.go for actual paragraph bidi/context work.
+The full goal remains **incomplete**, with no external blocker. Paragraph bidi/
+joining, style changes inside a grapheme, context across differing fonts/sizes/
+languages, complete itemization, source fonts, richer pages/running content,
+PDF structure/color and representative real exports remain required. Next commands:
+GOWORK=off go run ./examples/paint-context; bin/manydoc extract -format sf
+-o output/paint-context/recovered.sf output/paint-context/paint.pdf; output/qa-venv/bin/python scripts/verify_paint_context.py. Next
+implementation: paragraph bidi/itemization with independent glyph/order/layout
+oracles, preserving the newly qualified paint-context behavior.
 
 ## Earlier milestone: language/direction and contextual LTR lines
 

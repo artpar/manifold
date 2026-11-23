@@ -93,7 +93,7 @@ func (r *pdfReader) inferStructure() error {
 						eligible = false
 						break
 					}
-				} else if run.Source.Precision == "replacement_span_bounds" {
+				} else if strings.HasSuffix(run.Source.Precision, "replacement_span_bounds") {
 					// A noncollinear replacement has bounds, but no established
 					// logical baseline. Keep paint order instead of sorting it by
 					// its bounding-box bottom as though it were an ordinary line.

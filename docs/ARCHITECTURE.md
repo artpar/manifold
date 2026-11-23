@@ -506,15 +506,15 @@ override. Retained flags no longer independently trigger selector-loss diagnosti
 
 pdf_direction.go preflights all stories before writing unsupported RTL. The
 LTR path in pdf_shaping.go resolves adjacent weak scripts, shapes
-same-style/script segments and measures actual HB clusters. Ligature advances are
+compatible-face/size/language/script segments and measures actual HB clusters. Ligature advances are
 apportioned among source graphemes only to estimate emergency breaks. Final lines
 are freshly shaped and width checked, backing off on overflow; stale sliced glyphs
 never paint. Notes remain attached to their preceding atomic anchor. Distinct
-styles/scripts/controls bound segments. pdf_glyph.go maps each resulting cluster
+faces/sizes/language bindings/scripts/controls bound segments. pdf_glyph.go maps each resulting cluster
 to its original logical text for ToUnicode while retaining complete-span ActualText.
 General/EA/forced-CS language reaches the shaping buffer; empty language uses
 deterministic und, with the same contextual shaping for ordinary authored text. This remains a staged LTR implementation; bidi levels,
-joining/style context and broader scripts are unfinished.
+joining, context across different faces/sizes/languages and broader scripts are unfinished.
 
 
 Decoration painting is independent of glyph/control segmentation: adjacent spans
@@ -522,3 +522,28 @@ with the same authored style share one continuous underline/strike stroke. Marke
 special-space graphemes retain their previous glyph-positioned path. Original full
 TTF overhead now applies to ordinary output; do not bypass shaping to reduce bytes.
 A future glyph subsetter must preserve real GIDs/positions/logical mappings.
+
+
+## Contextual shaping and paint intervals
+
+pdf_paint_context.go compares resolved faces/effective sizes/canonical language
+bindings independently of paint/annotations. It partitions shaped cluster geometry
+back into authored paint intervals. Matching monotone GDEF ligature carets define
+internal edges; otherwise equal original-grapheme advance is an explicit allocation
+policy. A style boundary inside a grapheme still rejects. Shared group origins are
+rounded once, preserving relative GPOS positions. Line fitting and final shaping
+use the same context rule; emergency breaks never reuse sliced ligatures.
+
+pdf_glyph.go clips repeated original glyph outlines at partial-ligature paint
+boundaries. Such outlines are artifacts with empty ActualText/ToUnicode; unclipped
+invisible space-glyph carriers supply each interval's logical text with a CID width
+matching its allocated advance. This avoids MuPDF dropping clipped replacement
+characters. Color/size/link geometry remains authored; recovered source exposes
+render mode 3. Groups without split ligatures use outer ActualText. No glyph subset
+or original font-program modification is introduced.
+
+pdf_text_clip.go intersects known rectangular clips and axis-aligned font-advance
+quads, retaining precision prefixes and baseline intersections. It diagnoses
+complex/non-axis-aligned text, image clipping and fully clipped operator strings.
+pdf_actualtext_align.go preserves mixed styles only on exact decoded/replacement
+agreement; otherwise the conservative replacement path retains loss diagnostics.

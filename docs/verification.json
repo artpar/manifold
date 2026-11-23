@@ -2017,7 +2017,7 @@
         "docx_unicode.docx"
       ],
       "before": "one Cambria span",
-      "after": "Cambria text interleaved with declared ＭＳ 明朝 Chinese and supplementary spans",
+      "after": "Cambria text interleaved with declared \uff2d\uff33 \u660e\u671d Chinese and supplementary spans",
       "node_increase": 4,
       "fixture_or_content_oracle_changed": false,
       "comparison": "output/script-font-corpus-differences.json"
@@ -2404,6 +2404,97 @@
       "GOWORK=off go run ./examples/shaping",
       "output/qa-venv/bin/python scripts/verify_default_shaping.py",
       "rg -n \"shapeTextLine|resolveShapingScripts|Direction|cluster\" pdf_shaping.go pdf_direction.go pdf_glyph.go",
+      "GOWORK=off go doc golang.org/x/text/unicode/bidi"
+    ],
+    "external_blocker": null
+  },
+  "paint_context_2026_11_23": {
+    "goal_complete": false,
+    "previous_checkpoint": "4d3446e",
+    "behavior": [
+      "shared shaping across color/decorations/links for resolved face/effective size/canonical language bindings",
+      "GDEF carets or equal-grapheme advance paint allocation",
+      "partial-ligature visible artifacts plus unclipped render-mode-3 logical carriers with allocated CID widths",
+      "known rectangular axis-aligned text font-box clipping",
+      "exact decoded mixed-style ActualText alignment"
+    ],
+    "required_checks": {
+      "tests": {
+        "library_seconds": 7.957,
+        "cli_seconds": 2.594,
+        "result": "passed"
+      },
+      "race": {
+        "library_seconds": 118.657,
+        "cli_seconds": 2.678,
+        "result": "passed"
+      },
+      "vet": "passed",
+      "cgo_disabled_cli_build": "passed"
+    },
+    "fuzz": {
+      "paint_context": {
+        "executions": 525,
+        "seconds": 42.033,
+        "target": "500x"
+      },
+      "paint_font": {
+        "executions": 500,
+        "seconds": 18.886
+      },
+      "rectangular_text_clip": {
+        "executions": 1000,
+        "seconds": 2.656
+      },
+      "malformed_pdf": {
+        "executions": 500,
+        "seconds": 3.756
+      }
+    },
+    "independent": {
+      "script": "scripts/verify_paint_context.py",
+      "harfbuzz_rows": 8,
+      "gdef_clip_bands": 6,
+      "original_font_programs_gids_gpos_colors_carrier_widths_links": "passed",
+      "mupdf_and_pypdf_full_text": "passed",
+      "docx_python_docx_and_xml": "passed",
+      "prosemirror_nodes": 48,
+      "prosemirror_files": 3,
+      "native_pages_visually_inspected": 2,
+      "libreoffice_docx_pages_visually_inspected": 1,
+      "corpus_files": 51,
+      "corpus_nodes": 9031,
+      "poppler_comparisons": "28/28",
+      "regressions": [
+        "default shaping",
+        "rich text styles",
+        "glyph transport",
+        "typography",
+        "PDF style recovery",
+        "PDF recovery",
+        "PDF inference",
+        "published real-export normalization"
+      ]
+    },
+    "oracle_preservation": {
+      "mupdf_missing_middle_f": "fixed in writer; full text expectation unchanged",
+      "outer_actualtext_alone": "insufficient under MuPDF clip filtering",
+      "fixture_or_content_oracles_changed": false
+    },
+    "no_new_schema_dependency_or_assets": true,
+    "limitations": [
+      "paragraph bidi/joining and complete script itemization",
+      "within-grapheme paint changes",
+      "context across different faces/sizes/languages",
+      "equal-grapheme fallback is allocation rather than component ink evidence",
+      "carrier source is explicitly invisible logical geometry",
+      "complex/non-axis-aligned text and raster clipping unresolved",
+      "broader source fonts/layout/running content/PDF structure/color/representative real exports"
+    ],
+    "next_commands": [
+      "GOWORK=off go run ./examples/paint-context",
+      "bin/manydoc extract -format sf -o output/paint-context/recovered.sf output/paint-context/paint.pdf",
+      "output/qa-venv/bin/python scripts/verify_paint_context.py",
       "GOWORK=off go doc golang.org/x/text/unicode/bidi"
     ],
     "external_blocker": null
