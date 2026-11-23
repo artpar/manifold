@@ -204,9 +204,10 @@ func TestRecursiveTableSFDOCXSemantics(t *testing.T) {
 	}
 }
 
-func TestPDFRecursiveOversizedImageAtomicFailure(t *testing.T) {
+func TestPDFRecursiveUnrepresentableImageAtomicFailure(t *testing.T) {
 	d := recursiveTableDocument(t)
-	d.Notes[1].Blocks[1].Rows[0].Cells[0].Blocks[15].Image.Height = 2000
+	d.Notes[1].Blocks[1].Rows[0].Cells[0].Blocks[15].Image.Width = 1
+	d.Notes[1].Blocks[1].Rows[0].Cells[0].Blocks[15].Image.Height = 1e308
 	var out bytes.Buffer
 	err := Write(context.Background(), &out, d, PDF, WriteOptions{})
 	if !errors.Is(err, ErrUnsupported) || out.Len() != 0 {

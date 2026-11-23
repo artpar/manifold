@@ -84,8 +84,12 @@ readers check destinations, not only labels/text. Forced note breaks move their
 remaining flow to continuation pages. Leading breaks delay the first destination;
 empty break-only definitions target the final requested blank page. Trailing
 breaks leave a fresh page that resumed body can reuse. Empty notes reserve no
-separator height. Oversized atomic fragments and richer numbering/separator/layout
-behavior remain required expansion.
+separator height. A figure-bound minimum that cannot fit with its reference can
+reserve a measured linked continuation notice instead. Its first actual body
+remains pending with its destination unset until drawn; repeated references reuse
+that destination. Larger figures fit the full continuation container, not leftover
+reference-page space. Richer numbering/separator/layout behavior remains required
+expansion.
 
 ## Lists
 
@@ -133,16 +137,29 @@ separate pages. Remainder measurement traverses all forced segments. A condition
 control is skipped only at the first flow position of the current page; page-start
 state propagates through nested table selection and note continuation. Body/list
 paragraphs handle it before admission, keeping markers and note destinations with
-the paragraph. Oversized
-image handling and broader continuation qualification remain unfinished.
+the paragraph. Images now fit the full ancestor-constrained height; broader
+continuation qualification and repeated headers remain unfinished.
 
-`image_layout.go` fits preferred image dimensions to the current page/cell/list
-container before deriving a missing dimension, preventing overflow for extreme
-preferences. One dimension preserves intrinsic aspect ratio; no dimensions means
-96 DPI. Explicit width and height specify an aspect ratio. DOCX and PDF use the
-same fitting policy with their own padding. SF preserves preferences; readers of
-rendered formats recover physical dimensions. Finite positive dimensions and
-DOCX EMU conversion bounds are checked before output.
+`image_layout.go` fits preferred image dimensions to full container width/height,
+without cropping/resampling or enlarging that preferred rectangle. One dimension
+preserves intrinsic ratio; no dimensions means 96 DPI; both dimensions prescribe
+an aspect that may intentionally differ from intrinsic. Width fitting precedes
+missing-dimension derivation, then height fitting preserves the resulting ratio.
+PDF propagates ancestor padding/table gaps and note separator/heading budgets.
+DOCX reserves 8pt for the image paragraph, 14pt per enclosing cell and
+min(56pt, half the content height) in a note story; these are conservative image
+budgets, not Word row layout. SF retains preferences; readers recover fitted
+physical extents. Format-specific checks match actual coordinate serialization,
+including zero-rounding and EMU bounds.
+
+Before either writer registers/embeds a raster, configuration and full PNG/JPEG
+pixels are validated with a 25-million-pixel allocation bound (also used by PDF
+import). Context is checked before/after decode. Each write caches successful
+config/kind by SHA-256 of bytes; decoded buffers are not retained and caches are
+not shared. This prevents repeated decode during layout retries and a confirmed
+malformed-alpha PNG dependency panic. Invalid assets never reach caller output.
+The bound is technical resource protection; identity/admission/quotas stay outside
+this library.
 
 ## PDF
 

@@ -203,17 +203,17 @@ func TestImageHeightOnlyAndCellFitting(t *testing.T) {
 }
 
 func TestPDFRichCellsFailuresAreAtomic(t *testing.T) {
-	for _, kind := range []string{"oversized", "bad_image", "oversized_note"} {
+	for _, kind := range []string{"no_image_space", "bad_image", "unrepresentable_note"} {
 		t.Run(kind, func(t *testing.T) {
 			d := richCellDocument(t)
 			switch kind {
-			case "oversized":
-				d.Layout.Height = 150
+			case "no_image_space":
+				d.Layout.Height = 84
 			case "bad_image":
 				d.Blocks[1].Rows[0].Cells[0].Blocks[1].Image.Data = []byte("not an image")
-			case "oversized_note":
-				d.Notes[1].Blocks[1].Image.Width = 100
-				d.Notes[1].Blocks[1].Image.Height = 1000
+			case "unrepresentable_note":
+				d.Notes[1].Blocks[1].Image.Width = 1
+				d.Notes[1].Blocks[1].Image.Height = 1e308
 			}
 			var out bytes.Buffer
 			if e := Write(context.Background(), &out, d, PDF, WriteOptions{}); e == nil || out.Len() != 0 {

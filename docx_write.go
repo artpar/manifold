@@ -6,9 +6,6 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
-	"image"
-	_ "image/jpeg"
-	_ "image/png"
 	"io"
 	"math"
 	"sort"
@@ -26,17 +23,19 @@ const xmlHeader = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`
 const wordNamespaces = ` xmlns:w="` + wordNS + `" xmlns:r="` + relNS + `" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"`
 
 type docxWriter struct {
-	ctx          context.Context
-	parts        map[string][]byte
-	rels         []string
-	next         int
-	images       int
-	contentWidth float64
-	numberings   []docxNumbering
-	bookmarks    int
-	noteIDs      map[noteKey]int
-	noteLabels   map[noteKey]string
-	seenNoteRefs map[noteKey]bool
+	ctx             context.Context
+	parts           map[string][]byte
+	rels            []string
+	next            int
+	images          int
+	contentWidth    float64
+	contentHeight   float64
+	validatedImages outputImageCache
+	numberings      []docxNumbering
+	bookmarks       int
+	noteIDs         map[noteKey]int
+	noteLabels      map[noteKey]string
+	seenNoteRefs    map[noteKey]bool
 }
 
 func (w *docxWriter) addRel(kind, target string, external bool) string {
@@ -56,7 +55,7 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 		return err
 	}
 	wid, hei, mar := layout(d.Layout)
-	w := &docxWriter{ctx: ctx, parts: map[string][]byte{}, next: 1, contentWidth: wid - 2*mar}
+	w := &docxWriter{ctx: ctx, parts: map[string][]byte{}, next: 1, contentWidth: wid - 2*mar, contentHeight: hei - 2*mar, validatedImages: make(outputImageCache)}
 	w.noteIDs = map[noteKey]int{}
 	w.noteLabels = notes.labels
 	w.seenNoteRefs = map[noteKey]bool{}
@@ -307,7 +306,7 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 			out.WriteString(v)
 		case Picture:
 			im := b.Image
-			config, kind, err := image.DecodeConfig(bytes.NewReader(im.Data))
+			config, kind, err := decodeOutputImage(w.ctx, im.Data, w.validatedImages)
 			if err != nil {
 				return "", fmt.Errorf("image: %w", err)
 			}
@@ -322,11 +321,11 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 			w.parts["word/"+name] = im.Data
 			id := w.addRel("image", name, false)
 			available := w.contentWidth - float64(b.docxIndent)/20
-			width, height, err := fitImageSize(im, config.Width, config.Height, available)
+			width, height, err := fitImageBox(im, config.Width, config.Height, available, w.contentHeight-8)
 			if err != nil {
 				return "", err
 			}
-			if width > float64(math.MaxInt64)/12700 || height > float64(math.MaxInt64)/12700 {
+			if width > float64(math.MaxInt64)/12700 || height > float64(math.MaxInt64)/12700 || fmt.Sprintf("%.0f", width*12700) == "0" || fmt.Sprintf("%.0f", height*12700) == "0" {
 				return "", fmt.Errorf("%w: DOCX image exceeds EMU coordinate range", ErrUnsupported)
 			}
 			imageParagraph := "<w:p>"

@@ -16,7 +16,7 @@ import (
 )
 
 // Bound image allocations before asking a decoder to expand untrusted pixels.
-const maxPDFImagePixels = 25_000_000
+const maxPDFImagePixels = maxOutputImagePixels
 
 func (r *pdfReader) imageDimensions(sd *types.StreamDict) (int, int, error) {
 	w, e := r.pdf.DereferenceInteger(sd.Dict["Width"])

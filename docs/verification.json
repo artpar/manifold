@@ -1185,5 +1185,141 @@
       "broader Word/producer visual qualification",
       "other unfinished ACCEPTANCE.md rows"
     ]
+  },
+  "image_height_fitting_milestone": {
+    "date": "2026-11-23",
+    "goal_complete": false,
+    "prior_checkpoint": "0d2bbc4",
+    "go_tests": {
+      "result": "passed",
+      "library_seconds": 4.862
+    },
+    "race": {
+      "result": "passed",
+      "library_seconds": 55.787
+    },
+    "vet": "passed",
+    "module_verification": "all modules verified",
+    "cgo_disabled_host": "built and executed",
+    "diff_check": "passed",
+    "image_layout_fuzz": {
+      "seconds": 20,
+      "workers": 2,
+      "result": "passed",
+      "executions": 1236
+    },
+    "independent_script": "scripts/verify_image_fit.py",
+    "native": {
+      "pages": 7,
+      "image_pages": [
+        1,
+        2,
+        4,
+        6
+      ],
+      "image_rectangles_pt": [
+        [
+          20,
+          20,
+          35.2,
+          172
+        ],
+        [
+          32,
+          32,
+          44,
+          152
+        ],
+        [
+          38,
+          42,
+          51,
+          172
+        ],
+        [
+          50,
+          54,
+          59,
+          144
+        ]
+      ],
+      "pixels": "all four exact source RGB arrays, no crop/resample",
+      "reference_and_notice_destinations": [
+        [
+          3,
+          4
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          5,
+          6
+        ]
+      ],
+      "visual": "all seven pages inspected"
+    },
+    "docx": {
+      "media": "four original PNG byte arrays",
+      "extents_pt": [
+        [
+          15.2,
+          152
+        ],
+        [
+          12.4,
+          124
+        ],
+        [
+          9.6,
+          96
+        ],
+        [
+          6.8,
+          68
+        ]
+      ],
+      "independent_reader": "python-docx/XML and LibreOffice 7.6",
+      "libreoffice_pages": 5,
+      "visual": "all five pages inspected, all images/text within margins; producer pagination differs"
+    },
+    "raster_validation": {
+      "max_pixels": 25000000,
+      "complete_decode": true,
+      "cache": "per-write digest -> successful config/kind only",
+      "malformed_alpha_before": "PDF panic index out of range [257]; DOCX bad asset accepted",
+      "malformed_alpha_after": "both return errors with zero output",
+      "excessive_header": "50000x50000 rejected before allocation",
+      "serialization": "actual PDF precision and EMU rounding checked, including half-EMU tie"
+    },
+    "unit_checks": [
+      "source SF preferences unchanged",
+      "preface does not shrink to remainder",
+      "multiple/repeated/heading figure note references",
+      "original JPEG stream/media plus decoded pixels",
+      "formerly oversized positive cases preserve all text/assets"
+    ],
+    "prosemirror": {
+      "new_example_nodes": 36,
+      "corpus_files": 51,
+      "corpus_nodes": 9027,
+      "result": "passed"
+    },
+    "poppler_comparisons": {
+      "passed": 28,
+      "total": 28
+    },
+    "production_dependencies_added": false,
+    "remaining": [
+      "repeated table headers",
+      "broader image-codec/color/Word qualification",
+      "richer font/shaping/page/running content",
+      "other unfinished ACCEPTANCE.md rows"
+    ]
   }
 }

@@ -565,3 +565,36 @@ XML tests assert four paragraph properties instead of four break runs because
 the encoding deliberately changed; original SF, token/page/geometry/pixel/link
 oracles are unchanged. This content mitigation does not establish Word-equivalent
 layout, broad real-export fidelity or completion of the active goal.
+
+
+## Fit figures to full containers and validate original raster data
+
+Treat dimensions as preferences: first fit width safely, then height while
+retaining the resulting aspect. One missing dimension uses intrinsic aspect;
+both explicit values can intentionally prescribe another ratio. Never crop or
+resample pixels. Propagate full available height through table padding/gaps and
+note areas; current partial-page space does not shrink ordinary figures. DOCX's
+14pt per-cell and min(56pt, half-content) note allowances are conservative budgets
+for its declared default paragraph/reference layout, not a Word layout engine.
+
+A figure-bound first note start can be larger than the space left with its
+reference even on a fresh page. Keep the fitted figure at continuation size,
+render a measured linked notice and defer the original flow with first-body
+identity intact. Prefer earlier complete starts when several figures compete.
+Use 'a later page', since another note can precede this body's continuation.
+Both notice/reference resolve to the actual body; no synthetic notice is added
+to persisted SF content. Ordinary text/table starts retain prior admission rules.
+
+Configuration-only validation allowed a well-framed alpha PNG with one of 640
+scanlines to panic inside the PDF dependency and to enter a DOCX as a bad asset.
+Validate a complete standard-library decode before registration/embedding. Apply
+the existing PDF reader's 25-million-pixel allocation bound before expanding
+pixels; cache only successful config/kind per write by digest. Keep original
+encoded data. This is resource protection, not a Daptin permission/quota gate.
+
+Check actual serialized dimensions, including half-EMU round-to-even ties, rather
+than an approximate geometric threshold that can still emit zero. Preserve
+atomic output for malformed, excessive and unrepresentable assets. Positive
+oversized cases now assert preserved content/pixels; original fixtures and
+expected source text/assets remain unchanged. Native seven-page and LibreOffice
+five-page qualification is targeted synthetic evidence, not professional fidelity.

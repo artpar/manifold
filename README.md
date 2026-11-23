@@ -95,6 +95,7 @@ GOWORK=off go run ./examples/report -out output
 The SF-first examples exercise merged/nested cells, images, lists and rich notes:
 
 ```sh
+GOWORK=off go run ./examples/image-fit
 GOWORK=off go run ./examples/paragraph-breaks
 GOWORK=off go run ./examples/page-breaks
 GOWORK=off go run ./examples/page-breaks -empty-note -out output/page-breaks/empty
@@ -138,7 +139,10 @@ pages. `Block.PageBreakBefore` requests a paragraph page start without adding a
 blank page when already at page start; it is distinct from `PageBreak`. DOCX uses
 paragraph properties with checked metadata to preserve explicit controls and
 mitigate LibreOffice content loss. Cell/note pagination still differs between
-readers. Oversized images require expansion; images currently fit their width.
+readers. Images fit full container width/height without cropping or resampling.
+A figure-first footnote can use a linked continuation notice. PNG/JPEG output is
+fully validated, with a 25-million-pixel allocation bound and explicit errors for
+invalid data or unrepresentable dimensions.
 
 The Go engine model starts in `document.go`; the canonical SF tree is in
 `structured.go`. `Read` and `Write` are

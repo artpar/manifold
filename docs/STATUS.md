@@ -21,7 +21,57 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: paragraph page-start properties and DOCX mitigation
+## Latest milestone: image height fitting and raster validation
+
+- `fitImageBox` now fits the preferred image rectangle to full container width
+  and height, without cropping or resampling. One missing dimension retains the
+  intrinsic ratio; two explicit dimensions retain their requested ratio. No
+  dimensions means 96 DPI. Current page remainder does not shrink a figure;
+  ordinary flow moves the fitted figure to a fresh page when necessary.
+- PDF budgets include the 8pt image gap, 12pt cell padding and nested-table gaps.
+  Footnote figures fit a continuation area's separator/heading reservation. DOCX
+  uses a conservative full-page budget, a 14pt allowance per enclosing cell and
+  note-story reference/marker allowance; this is not a Word layout engine.
+  SF retains original preferences. Format readers recover physical extents.
+- When a figure-bound first footnote start cannot coexist with its reference,
+  a visible linked 'Continued on a later page' notice occupies the reference
+  page. The actual figure starts on a continuation page at its full fitted size.
+  Both the reference and notice target that actual body. Repeated references
+  reuse it; competing figure notes retain separate correct destinations. Ordinary
+  text/table starts keep their established behavior.
+- Output validates complete PNG/JPEG raster data, not just configuration, before
+  registration/embedding. A valid-header RGBA PNG with one of 640 rows reproduced
+  a PDF dependency panic and an invalid DOCX asset; both now return errors with
+  zero output. A 25-million-pixel allocation bound matches PDF import. Successful
+  validation is cached by digest per write, retaining config only. No global cache,
+  resampled pixels, application permission gate or production dependency was added.
+- Both formats reject dimensions their actual serializer would round to zero;
+  tests include a half-EMU tie. PDF JPEG streams and DOCX JPEG assets remain
+  byte-identical; PDF's normalized extraction also retains decoded pixels.
+  Empty/tiny containers and excessive/malformed rasters fail atomically.
+- `examples/image-fit` provides a self-contained 64×640 checkerboard used in body,
+  nested merged cells and two figure-first notes. Independent pypdf/MuPDF/
+  python-docx checks verify seven native pages, four exact pixel placements,
+  nested rectangles, original SF preferences, fitted DOCX extents and all four
+  actual note destinations. All seven native pages and five LibreOffice 7.6
+  DOCX-rendered pages were inspected; every original token/image remains inside
+  margins. Producer pagination differs. This remains targeted synthetic evidence.
+- Full Go tests/race/vet/module verification, host CGO-disabled build/execution
+  and diff checks pass; exact timings/fuzz counts are in verification.json.
+  Fuzz varies page sizes, nesting, preferred dimensions and body/note contexts,
+  checking pixels, requested aspect, bounds, no mutation and real destinations.
+  Regenerated prior examples preserve their independent geometry/content oracles;
+  all 28 Poppler comparisons, 51 corpus SF files/9,027 nodes and the new 36-node
+  ProseMirror example pass. Valid oversized rejection tests became positive
+  content/pixel checks; original source fixtures/oracles were not weakened.
+
+The active goal remains incomplete. Next implement repeated table headers, then
+other ACCEPTANCE.md rows: rich fonts/shaping, page/running-content semantics,
+broader PDF recovery, note-layout qualification and representative real exports.
+No external blocker exists. Prior checkpoint: `0d2bbc4`; this milestone groups
+its implementation, tests, example and aligned KT docs in one commit.
+
+## Earlier milestone: paragraph page-start properties and DOCX mitigation
 
 - Public `Block.PageBreakBefore` and SF paragraph/heading attrs.pageBreakBefore
   now preserve a conditional page-start request separately from unconditional
@@ -707,18 +757,22 @@ module access. The go.mod selects Go 1.25; do not force an older local toolchain
 
 ## Next work (required for the active goal)
 
-No external blocker currently prevents development. Paragraph property import,
-conditional native layout and the DOCX content mitigation now exist, with whole
-SF/control round trips. Next fit oversized PDF images to available page/container
-height while preserving pixels, aspect/declared-size intent, notes and padding;
-then implement repeated headers and the other acceptance rows. Wider Word/producer
-qualification remains required: LibreOffice retains content but cell/note page
-boundaries differ. Keep historical failures and their verified fixes distinct.
+No external blocker currently prevents development. Image height fitting,
+figure-note deferral and bounded full-raster validation now exist. Next establish
+repeatable table-header semantics across SF/Go, DOCX tblHeader and PDF continuation;
+keep authored header content distinct from repeated physical appearances and
+preserve note/reference identity. Then the other acceptance rows remain required.
+Broader Word/producer and real-export qualification stays open; current native and
+LibreOffice pagination differences are documented, not hidden.
 
 Next concrete commands:
 
 ```sh
-rg -n 'fitImageSize|measureImage|contentHeight|Height' image_layout.go pdf_cell_layout.go pdf_table_continue.go pdf_notes.go
+rg -n 'type Row|table_row|tblHeader|pdfTableGroup|continueTableGroup' document.go structured.go docx_table.go pdf_cell_layout.go pdf_table_continue.go
+GOWORK=off go run ./examples/image-fit
+output/qa-venv/bin/python scripts/verify_image_fit.py
+GOWORK=off go test -run 'TestImage|TestImages|TestFirstImage|TestOutputImage|TestPreviouslyOversized|TestJPEG' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzImageContainerFitting$' -fuzztime=20s -parallel=2 -timeout=50s
 GOWORK=off go test -run 'TestImage|TestPDFRich|TestParagraph|TestDOCXParagraph' -count=1
 GOWORK=off go run ./examples/paragraph-breaks
 output/qa-venv/bin/python scripts/verify_paragraph_breaks.py

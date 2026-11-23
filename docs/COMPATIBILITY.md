@@ -14,7 +14,7 @@ current rejection behavior must not be read as an exemption from that goal.
 | DOCX read | Paragraphs/headings, bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
 | DOCX write | Paragraphs/headings/runs/links, lists, tables/nesting/row and column spans, PNG/JPEG images, metadata, one page layout and header/footer, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
 | PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; more complex inference, internal destinations and OCR unfinished; unsupported codecs/encodings/operators reject |
-| PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, text headers/footers, linked rich footnotes/endnotes with continuation | Embedded Go font coverage; complex shaping/bidi rejected; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; oversized image atoms still reject |
+| PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, text headers/footers, linked rich footnotes/endnotes with continuation | Embedded Go font coverage; complex shaping/bidi rejected; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
 | SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; richer required features remain unfinished |
 | Legacy JSON | Public model with base64 image data and diagnostics | Unknown JSON fields rejected; this is manydoc's model, not Colleaf's .vdocs schema |
 | Text | Body/table/note text; form feeds represent page breaks | Formatting and binary image data are not represented |
@@ -132,10 +132,12 @@ and one enclosing frame per physical page. An oversized table can be the first
 footnote block. Explicit breaks cut the whole table page at the first cell
 boundary; sibling content remains unconsumed after that point. Nested breaks
 propagate to parents. Aligned sibling events share a page boundary; repeated
-breaks in one flow retain separate pages. Oversized image atoms still require
-expansion and reject without output. Image sizes are preferences fitted to available
-container width; a single dimension preserves intrinsic ratio, neither means
-96 DPI. DOCX/PDF padding differs, so physical fitted sizes may differ. SF retains
+breaks in one flow retain separate pages. Images now fit the full container's
+width and height, including ancestor cell padding and nested table gaps; a
+partial page moves an ordinary figure instead of shrinking it further. A single
+dimension preserves intrinsic ratio, neither means 96 DPI. Two dimensions retain
+the explicitly requested rectangle aspect. Raster pixels are never resampled or
+cropped by fitting. DOCX/PDF padding differs, so physical fitted sizes may differ. SF retains
 requested sizes; rendered-format readers recover physical drawing extents.
 A dedicated mixed-span example passed independent ProseMirror, python-docx and
 pypdf checks. Its native PDF and its LibreOffice 7.6 DOCX rendering were visually
@@ -190,12 +192,15 @@ minimum legal bands reserve note starts. A three-level body/two-level note
 fixture independently checks native columns, borders, pixels and destinations
 across seven pages. LibreOffice 7.6 reads its DOCX with all content/images but
 flattens note tables; native PDF and XML semantics pass, while note-table visual
-interoperability needs broader Word/producer qualification. Oversized image
-atoms, richer note numbering/placement and custom separators remain required
-expansion. Explicit note breaks now move remaining content to continuation pages.
+interoperability needs broader Word/producer qualification. Figure-bound first
+starts that cannot coexist with a reference now use a visible linked continuation
+notice; the actual body/figure starts on a later page at its full fitted size.
+References/notices point to that actual body, including multiple/repeated notes.
+Ordinary starts retain their reference-page policy. Richer note numbering/
+placement and custom separators remain required expansion. Explicit note breaks now move remaining content to continuation pages.
 Leading breaks delay the first destination; a break-only note targets its final
 blank page and needs no separator height. Trailing breaks create a reusable fresh
-page. Standard DOCX break runs persist, but the mixed cell/note-break fixture
+page. Before the paragraph-property codec, the mixed cell/note-break fixture
 failed LibreOffice 7.6 visual qualification: pagination differs and two note side
 texts disappear despite their presence in OOXML/native PDF. A QA paragraph
 pageBreakBefore variant recovered all texts/images. Production now uses the
@@ -274,8 +279,8 @@ bound inference. Border appearance, authorial/header semantics, arbitrary curves
 occlusion, double borders and complex orientations are not established by this
 milestone. Native PDF output now supports measured image/nested cells and
 recursive oversized body/nested/footnote group continuation and explicit
-cell/note page boundaries and conditional paragraph starts. Oversized images and
-broader DOCX visual/Word qualification still need work. DOCX/SF preserve imported
+cell/note page boundaries, conditional paragraph starts and image height fitting.
+Broader DOCX visual/Word qualification still needs work. DOCX/SF preserve imported
 cell content, with rendered image sizes fitted to the available width.
 
 
@@ -290,3 +295,17 @@ changing pagination recursively. Other paragraph/page properties remain required
 expansion. Unmarked heading bold defaults and structural empty-cell paragraphs
 now round trip without inventing explicit SF marks/content; external documents
 without our metadata still import their resolved styles/content normally.
+
+
+## Raster output containment and validation
+
+Supported PNG/JPEG assets are validated through a full decode before output,
+with a 25-million-pixel allocation bound matching PDF import. This is a decoder
+resource bound, not an application quota/permission check. Invalid pixel streams
+reject even with a valid header. Fitting retains original raster data; PDF's
+extracted PNG normalization preserves decoded pixels, while embedded JPEG streams
+and DOCX media retain original bytes. SF preferences persist; rendered formats
+return physical fitted dimensions. Geometries rounding to zero in PDF's matrix
+or DOCX's EMU serialization reject atomically. Ancestor padding must leave actual
+image space. Codec variants/color qualification and the wider acceptance rows
+remain open; these containment checks do not establish professional fidelity.

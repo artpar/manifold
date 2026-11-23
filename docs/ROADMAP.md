@@ -17,8 +17,8 @@ integration and do not authorize changes to Daptin.
 4. Expand forward tagged-PDF recovery and the implemented untagged whitespace/heading/list/numeric/painted-grid table inference (including merges/empty/multiline cells) with more complex/double-border/occluded/rotated layouts; validate inverse ParentTree and internal links. Expand CMaps,
    vertical text and remaining image codecs/masks/colors. A successful extraction must not imply
    reconstruction of editable Word structure.
-5. Extend recursive body/nested/footnote continuation with oversized images,
-   repeated headers and broader pagination qualification; native explicit breaks
+5. Extend recursive body/nested/footnote continuation with repeated headers and
+   broader pagination qualification; full-container image fitting, native explicit breaks
    and conditional paragraph starts now exist. Production DOCX encoding recovers
    the previously omitted note side texts in LibreOffice and retains SF controls;
    cell/note pagination still differs. Qualify broader Word/producer behavior and

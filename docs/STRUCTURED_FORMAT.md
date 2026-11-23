@@ -88,7 +88,9 @@ it cannot preserve. It is not evidence that the full requested SF is implemented
 | Representation losses | doc.attrs.diagnostics contains code/message objects |
 
 No image URLs are fetched. Image bytes are included in persistence, including
-within tables, running content and notes. Rendering still validates image types.
+within tables, running content and notes. Output validates PNG/JPEG configuration
+and complete pixels, bounded to 25 million pixels before expansion. Running-content
+layout follows each writer's separate contract.
 Diagnostics survive SF persistence and still require `AllowLossy` for rendered
 DOCX/PDF output. Revision/comment/field interpretation currently follows the
 DOCX reader's documented final-visible-view policy; their editing semantics are
@@ -142,8 +144,10 @@ Footnote images/tables use shared cell fragments and continue between text lines
 or recursively split table bands. Explicit cell/note page breaks propagate
 through native table/note layout. Leading breaks can move the first note body
 away from its reference; links target that body or a break-only note's final
-blank page. Repeated breaks preserve blank pages. Oversized images remain
-required expansion. Custom separator content, nondecimal note numbering, restart/start
+blank page. Repeated breaks preserve blank pages. Figures fit full continuation
+containers; a figure-bound first start that cannot coexist with the reference
+uses a linked continuation notice, keeping the actual body destination on its
+later page. Repeated references do not duplicate the figure. Custom separator content, nondecimal note numbering, restart/start
 or placement changes are diagnosed on DOCX import; custom marks encoded as text remain literal
 text alongside the normalized reference, with an explicit diagnostic. Symbol-font
 glyph runs reject until an explicit font-to-Unicode mapping is available. The omitted
@@ -211,13 +215,13 @@ rows/spans/blocks remain unchanged; no profile version change is needed.
 This is an initial SF milestone, not fulfillment of the active completion goal.
 The following remain required work, even where the current bridge rejects them:
 
-- Oversized PDF image atoms and richer note numbering/separator/layout options.
+- Broader note numbering/separator/layout qualification and image-codec/color variants.
 - Font sizes/families/colors and richer page settings.
 - Broader PDF structure recovery, internal destinations and inverse ParentTree
   validation. Positions/assets/pages and explicit/inferred provenance now exist;
   more complex layouts and broader real exports still need qualification.
 - PDF font/shaping coverage and table pagination/cell layout expansion, including
-  repeated headers and oversized images. Oversized body/nested/footnote groups
+  repeated headers and broader image/layout qualification. Oversized body/nested/footnote groups
   and explicit cell/note page breaks now continue recursively. Qualify DOCX
   richer paragraph/page properties without changing SF control semantics.
   Conditional pageBreakBefore import/export now exists separately from controls.
@@ -288,12 +292,12 @@ row/column merges and empty cells. Nested tables and images use existing blocks;
 original runs/assets/coordinates remain authoritative evidence. Empty paragraphs
 can carry boundary provenance without invented text. Native PDF rendering of
 image/nested cells now uses measured fragments. SF retains preferred image sizes;
-DOCX/PDF fit images to their available container width, so imported rendered
+DOCX/PDF fit images to full available container width/height, so imported rendered
 formats return physical extents. One requested dimension preserves intrinsic
 ratio; neither means 96 DPI. Oversized body/nested/note groups now continue
 recursively, including explicit cell/note boundaries. Aligned sibling breaks
-coalesce; consecutive breaks in one flow preserve distinct pages. Oversized
-images and broader DOCX visual/Word qualification still need work.
+coalesce; consecutive breaks in one flow preserve distinct pages. Image height
+containment now exists; broader DOCX visual/Word qualification still needs work.
 No SF schema change is required.
 
 
@@ -315,3 +319,12 @@ or strong marks on our exports. Exact SF comparisons cover controls/properties,
 notes, headings and nested cells; third-party readers can ignore metadata while
 retaining ordinary Word structures. LibreOffice content mitigation is verified,
 while cell/note pagination differs and wider Word qualification remains required.
+
+
+Image width/height are preferences, not an instruction to crop content outside
+paper. Full-container fitting keeps their prescribed aspect (intrinsic when one
+is missing), original pixels and source SF values. A page remainder does not
+change the ordinary figure size. PDF and DOCX use their own padding/reference
+budgets, so physical sizes can differ. A later DOCX/PDF import reports those
+physical extents; exact preferred-size persistence is established through SF,
+not claimed through a fitted rendering. No profile schema change was required.

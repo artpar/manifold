@@ -3,7 +3,6 @@ package manydoc
 import (
 	"bytes"
 	"fmt"
-	"image"
 	"math"
 
 	"github.com/phpdave11/gofpdf"
@@ -83,23 +82,26 @@ func flowNoteKeys(flow []pdfFragment) []noteKey {
 	}
 	return keys
 }
-func (r *pdfRenderer) measureImage(im *Image, width float64) (*pdfImageLayout, error) {
+func (r *pdfRenderer) measureImage(im *Image, width, height float64) (*pdfImageLayout, error) {
 	if err := r.ctx.Err(); err != nil {
 		return nil, err
 	}
-	if im == nil || !finite(width) || width <= 0 {
-		return nil, fmt.Errorf("%w: no width for PDF image", ErrUnsupported)
+	if im == nil || !finite(width) || width <= 0 || !finite(height) || height <= 0 {
+		return nil, fmt.Errorf("%w: no space for PDF image", ErrUnsupported)
 	}
-	config, kind, err := image.DecodeConfig(bytes.NewReader(im.Data))
+	config, kind, err := decodeOutputImage(r.ctx, im.Data, r.validatedImages)
 	if err != nil {
 		return nil, err
 	}
 	if kind != "png" && kind != "jpeg" {
 		return nil, fmt.Errorf("%w: PDF image %s", ErrUnsupported, kind)
 	}
-	iw, ih, err := fitImageSize(im, config.Width, config.Height, width)
+	iw, ih, err := fitImageBox(im, config.Width, config.Height, width, height)
 	if err != nil {
 		return nil, err
+	}
+	if fmt.Sprintf("%.5f", iw) == "0.00000" || fmt.Sprintf("%.5f", ih) == "0.00000" {
+		return nil, fmt.Errorf("%w: fitted PDF image is below coordinate precision", ErrUnsupported)
 	}
 	return &pdfImageLayout{im, kind, iw, ih}, nil
 }
@@ -114,7 +116,7 @@ func (r *pdfRenderer) drawImage(im *pdfImageLayout, x, y float64) error {
 	return r.pdf.Error()
 }
 
-func (r *pdfRenderer) cellFlow(bs []Block, width, indent float64) ([]pdfFragment, error) {
+func (r *pdfRenderer) cellFlow(bs []Block, width, indent, height float64) ([]pdfFragment, error) {
 	if !finite(width) || width <= indent {
 		return nil, fmt.Errorf("%w: PDF cell indentation/padding leaves no content width", ErrUnsupported)
 	}
@@ -149,7 +151,7 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent float64) ([]pdfFragment
 				if err != nil {
 					return nil, err
 				}
-				children, err := r.cellFlow(item.Blocks, width, indent+step)
+				children, err := r.cellFlow(item.Blocks, width, indent+step, height)
 				if err != nil {
 					return nil, err
 				}
@@ -157,13 +159,13 @@ func (r *pdfRenderer) cellFlow(bs []Block, width, indent float64) ([]pdfFragment
 				flow = append(flow, children...)
 			}
 		case Picture:
-			im, err := r.measureImage(b.Image, width-indent)
+			im, err := r.measureImage(b.Image, width-indent, height-8)
 			if err != nil {
 				return nil, err
 			}
 			flow = append(flow, pdfFragment{Image: im, Indent: indent, Height: im.height + 8})
 		case Table:
-			plan, err := r.measureTable(b, width-indent)
+			plan, err := r.measureTable(b, width-indent, height-8)
 			if err != nil {
 				return nil, err
 			}
@@ -211,7 +213,7 @@ func (r *pdfRenderer) drawFragment(f pdfFragment, x, y float64) error {
 	return r.pdf.Error()
 }
 
-func (r *pdfRenderer) measureTable(b Block, width float64) (*pdfTableLayout, error) {
+func (r *pdfRenderer) measureTable(b Block, width, height float64) (*pdfTableLayout, error) {
 	g, err := tableGrid(b.Rows)
 	if err != nil {
 		return nil, err
@@ -232,7 +234,7 @@ func (r *pdfRenderer) measureTable(b Block, width float64) (*pdfTableLayout, err
 		if err := r.ctx.Err(); err != nil {
 			return nil, err
 		}
-		flow, err := r.cellFlow(b.Rows[p.Row].Cells[p.Cell].Blocks, plan.unit*float64(p.ColSpan)-12, 0)
+		flow, err := r.cellFlow(b.Rows[p.Row].Cells[p.Cell].Blocks, plan.unit*float64(p.ColSpan)-12, 0, height-12)
 		if err != nil {
 			return nil, err
 		}
@@ -306,12 +308,12 @@ func (r *pdfRenderer) paintTableGroup(plan *pdfTableLayout, g pdfTableGroup, x, 
 	return r.pdf.Error()
 }
 func (r *pdfRenderer) table(b Block, width, x float64) error {
-	plan, err := r.measureTable(b, width)
+	plan, err := r.measureTable(b, width, r.height-2*r.margin)
 	if err != nil {
 		return err
 	}
 	for _, g := range plan.groups {
-		minimum, err := r.minimumNewFootnotes(g.keys, true)
+		minimum, err := r.minimumNewFootnotes(g.keys, true, g.height)
 		if err != nil {
 			return err
 		}

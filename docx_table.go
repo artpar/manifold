@@ -155,9 +155,12 @@ func (w *docxWriter) table(b Block) (string, error) {
 			out.WriteString(`</w:tcPr>`)
 			if ri == p.Row {
 				previousWidth := w.contentWidth
+				previousHeight := w.contentHeight
+				w.contentHeight -= docxImageCellHeightAllowance
 				w.contentWidth = float64(cellWidth)/20 - 8
 				v, err := w.blocks(c.Blocks)
 				w.contentWidth = previousWidth
+				w.contentHeight = previousHeight
 				if err != nil {
 					return "", err
 				}

@@ -237,11 +237,11 @@ func (r *pdfRenderer) continueTableGroup(plan *pdfTableLayout, g pdfTableGroup, 
 			if len(page.bands) == 0 {
 				break
 			}
-			minimum, err := r.minimumNewFootnotes(page.keys, false)
+			minimum, err := r.minimumNewFootnotes(page.keys, false, page.height)
 			if err != nil {
 				return err
 			}
-			freshMinimum, err := r.minimumNewFootnotes(page.keys, true)
+			freshMinimum, err := r.minimumNewFootnotes(page.keys, true, page.height)
 			if err != nil {
 				return err
 			}

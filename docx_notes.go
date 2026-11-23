@@ -3,6 +3,7 @@ package manydoc
 import (
 	"encoding/xml"
 	"fmt"
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -45,7 +46,10 @@ func (w *docxWriter) writeNoteParts(notes []Note) error {
 					blocks[i].docxIndent = 360
 				}
 			}
+			previousHeight := w.contentHeight
+			w.contentHeight -= math.Min(docxImageNoteHeightAllowance, w.contentHeight/2)
 			body, err := w.blocksAt(blocks, 1)
+			w.contentHeight = previousHeight
 			if err != nil {
 				w.rels = mainRels
 				return err

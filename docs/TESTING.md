@@ -696,3 +696,54 @@ DOCX's intentional property encoding assertion changed. All 28 Poppler text
 comparisons and 51 corpus SF files/9,027 nodes pass. No production dependency
 was added. Remaining acceptance rows, including oversized images, repeated
 headers, richer model/fonts/shaping and a broader real corpus, remain required.
+
+
+## Full-container image fitting
+
+```sh
+GOWORK=off go run ./examples/image-fit
+output/qa-venv/bin/python scripts/verify_image_fit.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/image-fit/image-fit.sf
+GOWORK=off go test -run 'TestImage|TestImages|TestFirstImage|TestOutputImage|TestPreviouslyOversized|TestJPEG|TestLargeFirstImage' -count=1
+GOWORK=off go test -run '^$' -fuzz '^FuzzImageContainerFitting$' -fuzztime=20s -parallel=2 -timeout=50s
+```
+
+The source contains four placements of an authored 64×640 RGB checkerboard with
+intrinsic, width-only, height-only and explicit preferred sizes, in body/nested
+merged cells and two figure-first notes. Exact independent image rectangles are:
+page one (20,20)-(35.2,172), page two (32,32)-(44,152), page four
+(38,42)-(51,172), page six (50,54)-(59,144). All decoded RGB pixels match source;
+no library resampling/cropping occurs. Nested table rectangles and rowspan
+identity are checked. Both references and notices point from three to four and
+five to six. Notice link rectangles contain their text. Page seven resumes body.
+All seven native pages were visually inspected. SF retains original size values;
+DOCX extents are 15.2×152, 12.4×124, 9.6×96 and 6.8×68pt, with original media bytes.
+Actual ProseMirror accepts the new example (36 nodes).
+
+Render the DOCX in LibreOffice with an isolated profile, then run the verifier
+with --office. Its five inspected pages retain all four figures and original
+text within margins. Pagination differs from native. This is actual producer
+qualification of targeted content, not an expanded published-document corpus.
+Regenerated prior examples still pass their exact independent geometry/pixel/
+reference checks, along with 28 Poppler comparisons and 51 corpus SFs/9,027 nodes.
+
+Fuzzing varies page dimensions, nesting, preferred sizes/aspects and body/note
+contexts. It checks original pixels, format-precision-bounded requested aspect,
+page bounds, no mutation, one placement and actual destinations. Final execution
+count/timings are in verification.json. Unit cases include full-container sizing
+after a preface; figure-first heading references; multiple/repeated notes with
+separate real targets; formerly oversized cells/notes; SF preference persistence;
+JPEG original stream/media bytes and decoded pixels; coordinate underflow and
+a half-EMU tie. PDF extraction normalizes rasters to PNG, so JPEG checks compare
+embedded DCT bytes and decoded pixels, not compressed extraction byte identity.
+
+A well-framed RGBA PNG containing only one of 640 required rows reproduced
+'index out of range [257]' in PDF output before the fix; DOCX also accepted the
+bad asset. TestOutputImageMalformedIDATDoesNotPanic now gets zero-output errors
+for both writers after full validation. A 50,000×50,000 header with corrected CRC
+is rejected before expansion under the 25-million-pixel bound. There is no runtime
+panic-recovery suppression or resampling workaround. Invalid/error cases remain
+atomic. Older sections' oversized-image rejection statements describe earlier
+milestones; valid tall figures now work, while no-space/precision/resource/codec
+limits remain explicit. Full tests/race/vet/module/CGO-disabled build/diff checks
+pass; current measured results are in verification.json.

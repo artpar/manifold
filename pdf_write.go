@@ -90,6 +90,7 @@ type pdfRenderer struct {
 	seenFootnotes            map[noteKey]bool
 	pageNotes, pendingNotes  []pdfNoteChunk
 	noteReserve              float64
+	validatedImages          outputImageCache
 }
 
 func writePDF(ctx context.Context, out io.Writer, d *Document) error {
@@ -112,7 +113,7 @@ func writePDF(ctx context.Context, out io.Writer, d *Document) error {
 		// Each renderer owns its buffer; sharing embedded font slices races.
 		p.AddUTF8FontFromBytes("Go", f.style, append([]byte(nil), f.data...))
 	}
-	r := &pdfRenderer{ctx: ctx, pdf: p, width: w, height: h, margin: m, y: m, headers: d.Headers, footers: d.Footers}
+	r := &pdfRenderer{ctx: ctx, pdf: p, width: w, height: h, margin: m, y: m, headers: d.Headers, footers: d.Footers, validatedImages: make(outputImageCache)}
 	r.notes = notes
 	r.noteLinks = map[noteKey]int{}
 	r.seenFootnotes = map[noteKey]bool{}
@@ -227,7 +228,7 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 			}
 			r.y += 8
 		case Picture:
-			im, err := r.measureImage(b.Image, width)
+			im, err := r.measureImage(b.Image, width, r.height-2*r.margin-8)
 			if err != nil {
 				return err
 			}
