@@ -136,7 +136,17 @@ func docxActiveSections(n *xmlNode) []*xmlNode {
 func (r *docxReader) pageSettings(n *xmlNode, section bool) error {
 	for _, c := range n.Children {
 		switch c.Name.Local {
-		case "mirrorMargins", "gutterAtTop", "bookFoldPrinting", "bookFoldRevPrinting", "printTwoOnOne", "evenAndOddHeaders", "titlePg":
+		case "evenAndOddHeaders":
+			on, err := docxOnOff(c)
+			if err != nil {
+				return err
+			}
+			r.doc.EvenAndOddHeaders = on
+		case "titlePg":
+			if _, err := docxOnOff(c); err != nil {
+				return err
+			}
+		case "mirrorMargins", "gutterAtTop", "bookFoldPrinting", "bookFoldRevPrinting", "printTwoOnOne":
 			on, err := docxOnOff(c)
 			if err != nil {
 				return err
@@ -148,7 +158,7 @@ func (r *docxReader) pageSettings(n *xmlNode, section bool) error {
 			if section && (c.attr("num") != "" && c.attr("num") != "1" || len(c.Children) > 0) {
 				r.doc.warn("docx_page_columns", "Multiple page columns/column widths are not represented by the single flow")
 			}
-		case "pgBorders", "textDirection", "paperSrc", "vAlign", "lnNumType":
+		case "pgBorders", "textDirection", "paperSrc", "vAlign", "lnNumType", "pgNumType", "rtlGutter", "docGrid":
 			if section {
 				r.doc.warn("docx_page_settings", "Section page presentation is not represented: "+c.Name.Local)
 			}

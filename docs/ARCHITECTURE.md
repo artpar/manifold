@@ -716,3 +716,29 @@ PDF rows qualify these paths; cross-item positioning, full itemization and broad
 font/script qualification remain unfinished. The existing LTR spacing/control
 policy stays intact. The original DejaVu Sans Bold test-only asset has a pinned
 hash and the existing license, not a new runtime dependency.
+
+
+## Section bodies and running-story selection
+
+`sections.go` adds root-only section containers, leaving flat documents compatible.
+`documentSections` resolves nil layouts and independent same-variant story links.
+`structured_sections.go` bridges them into the existing ProseMirror schema, whose
+root accepts either ordinary blocks or sections. Running content remains node
+arrays in section attributes, validated separately as editor trees. No parallel
+canonical representation is introduced. Global stories cannot accompany sections.
+
+DOCX properties at paragraph ends delimit the preceding body; their type controls
+that section's start. `docx_sections_read.go` partitions before recursive list and
+note resolution. The writer emits per-story parts/relationships and final or
+paragraph section properties; checked structural tails restore exact SF membership.
+Physical page geometry validates ignorable source-layout metadata. Reused source
+story parts decode once. Shared note parts use minimum section image containers.
+
+`pdf_sections.go` measures active story variants into a conservative common body
+frame, starts physical parity pages, and selects stories by section-local count.
+Pending plans install in the new page header callback after the old footer runs.
+Automatic body/note pages retain current size/orientation. Footnotes finish before
+section transitions; endnotes use the final section. Continuous sections currently
+share a page only with identical effective geometry/story policy. Changed shared
+frames are a required unfinished capability and reject atomically. Producer story
+selection/pagination and signed running overlap remain qualification work.

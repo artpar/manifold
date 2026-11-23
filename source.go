@@ -216,6 +216,16 @@ func (d *Document) hasPDFSource() bool {
 	var walk func([]Block) bool
 	walk = func(bs []Block) bool {
 		for _, b := range bs {
+			if b.Section != nil {
+				if walk(b.Section.Blocks) {
+					return true
+				}
+				for _, story := range sectionStories(b.Section) {
+					if story != nil && walk(story.Blocks) {
+						return true
+					}
+				}
+			}
 			if b.Source != nil {
 				return true
 			}

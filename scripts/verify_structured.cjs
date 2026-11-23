@@ -21,6 +21,15 @@ function verifyTree(nodes) {
     }
     count++;
     verifyTree(n.content);
+    if (n.type === 'section') {
+      for (const role of ['headers', 'footers']) {
+        for (const [variant, content] of Object.entries(n.attrs?.[role] || {})) {
+          assert.ok(['default', 'first', 'even'].includes(variant));
+          assert.ok(Array.isArray(content));
+          verifyTree(content);
+        }
+      }
+    }
   }
 }
 for (const filename of process.argv.slice(2)) {

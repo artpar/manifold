@@ -12,7 +12,7 @@ current rejection behavior must not be read as an exemption from that goal.
 | Operation | Implemented behavior | Important limits |
 | --- | --- | --- |
 | DOCX read | Paragraphs/headings, family/size/RGB/auto plus bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans/repeating header prefixes, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
-| DOCX write | Paragraphs/headings/runs/links with named families/half-point sizes/RGB/auto, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, one effective page layout with four margins/running distances and header/footer, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
+| DOCX write | Paragraphs/headings/runs/links with named families/half-point sizes/RGB/auto, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, section boundaries, four-edge layouts/distances and default/first/even header/footer variants, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
 | PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; more complex inference, internal destinations and OCR unfinished; unsupported codecs/encodings/operators reject |
 | PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, metadata, rich measured headers/footers, linked rich footnotes/endnotes with continuation | Built-in Go coverage plus explicit supplied TTFs; qualified Hebrew/Arabic bidi below, broader scripts unfinished; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
 | SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; richer required features remain unfinished |
@@ -30,9 +30,8 @@ the final visible view. Revision history is not preserved. Content-control text,
 cached field results and text-box text are retained, with diagnostics for their
 unrepresented control/evaluation/layout semantics.
 
-Bookmark destinations, comment annotations, multiple
-section-specific layouts, binding rules and conditional running variants are not
-fully represented. Static asymmetric edges and running distances are retained. Notes are
+Bookmark destinations, comment annotations and advanced page binding rules remain
+unfinished. Section-specific layouts and conditional running bindings are now represented. Static asymmetric edges and running distances are retained. Notes are
 extracted with typed inline identities and separate rich definitions. Automatic
 reference labels normalize to continuous decimal values; nondecimal/custom note
 marks, numbering/restart/placement changes and custom separator content have
@@ -702,3 +701,17 @@ formatting/relationships and assets compare exactly at represented precision.
 Native links/RTL note bounds and merged frames pass; native packing and producer
 cell-start/separator differences remain explicit. No professional/Word equivalence
 is established by this targeted evidence.
+
+
+Sectioned SF/DOCX preserves body membership, full layout overrides, same-variant
+inheritance and explicit blank stories. Native PDF supports next/odd/even starts
+and identical-policy continuous flow, changes page size/margins, and selects first/
+even/default stories. Changed continuous geometry/stories still reject explicitly;
+this is a required gap, not a completed-page-support exclusion. Body frames reserve
+all active variants conservatively. Footnotes drain before a section transition;
+endnotes use the final section. DOCX note parts fit minimum section containers.
+The eight-page native example has four exact-pixel image placements and preserves
+URI/note links. LibreOffice produces seven pages, suppresses the parity blank and
+differs in story selection/inheritance. A separate python-docx control demonstrates
+physical versus section-local parity differences. Preserve these observations;
+Word and broader real-export section behavior remain unqualified.

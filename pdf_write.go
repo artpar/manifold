@@ -116,6 +116,7 @@ type pdfRenderer struct {
 	content                  *pdfBodyBounds
 	page                     *pageGeometry
 	paintingRunning          bool
+	sectioned                bool
 	minimumBody              float64
 	runningImages            map[[32]byte]string
 	notes                    *noteCatalog
@@ -141,6 +142,9 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 		return err
 	}
 	g := pageLayout(d.Layout)
+	if hasSectionBlocks(d.Blocks) {
+		g = pageLayout(documentSections(d)[0].layout)
+	}
 	w, h, m := g.width, g.height, g.margins.Left
 	if fmt.Sprintf("%.2f", w) == "0.00" || fmt.Sprintf("%.2f", h) == "0.00" {
 		return fmt.Errorf("%w: PDF page dimensions round to zero", ErrUnsupported)
@@ -187,22 +191,28 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 	for _, key := range notes.order {
 		r.noteLinks[key] = p.AddLink()
 	}
-	if len(d.Headers) > 0 || len(d.Footers) > 0 {
-		minimum, err := r.minimumRunningBody(d.Blocks)
-		if err != nil {
+	if hasSectionBlocks(d.Blocks) {
+		if err := r.renderSections(d); err != nil {
 			return err
 		}
-		r.minimumBody = minimum
-	}
-	if err := r.prepareRunning(d.Headers, d.Footers, len(d.Blocks) > 0); err != nil {
-		return err
-	}
-	p.SetHeaderFunc(func() { r.y = r.bodyTop(); r.paintRunning(r.header) })
-	p.SetFooterFunc(func() { r.paintRunning(r.footer) })
+	} else {
+		if len(d.Headers) > 0 || len(d.Footers) > 0 {
+			minimum, err := r.minimumRunningBody(d.Blocks)
+			if err != nil {
+				return err
+			}
+			r.minimumBody = minimum
+		}
+		if err := r.prepareRunning(d.Headers, d.Footers, len(d.Blocks) > 0); err != nil {
+			return err
+		}
+		p.SetHeaderFunc(func() { r.y = r.bodyTop(); r.paintRunning(r.header) })
+		p.SetFooterFunc(func() { r.paintRunning(r.footer) })
 
-	p.AddPage()
-	if err := r.blocks(d.Blocks, r.bodyWidth(), r.bodyLeft()); err != nil {
-		return err
+		p.AddPage()
+		if err := r.blocks(d.Blocks, r.bodyWidth(), r.bodyLeft()); err != nil {
+			return err
+		}
 	}
 	if err := r.finishNotes(); err != nil {
 		return err

@@ -2017,7 +2017,7 @@
         "docx_unicode.docx"
       ],
       "before": "one Cambria span",
-      "after": "Cambria text interleaved with declared ＭＳ 明朝 Chinese and supplementary spans",
+      "after": "Cambria text interleaved with declared \uff2d\uff33 \u660e\u671d Chinese and supplementary spans",
       "node_increase": 4,
       "fixture_or_content_oracle_changed": false,
       "comparison": "output/script-font-corpus-differences.json"
@@ -2154,7 +2154,7 @@
     "fixture_oracle_changed": false,
     "external_blocker": null
   },
-  "latest_milestone": "page_geometry",
+  "latest_milestone": "sections",
   "language_direction_ltr_shaping": {
     "date": "2026-11-23",
     "goal_complete": false,
@@ -2499,7 +2499,7 @@
     ],
     "external_blocker": null
   },
-  "latest_evidence": "page_geometry_2026_11_24",
+  "latest_evidence": "sections_2026_11_24",
   "paragraph_bidi_levels_2026_11_24": {
     "goal_complete": false,
     "previous_checkpoint": "658a5b0",
@@ -3297,6 +3297,87 @@
       "output/page-layout-poppler.log",
       "output/page-layout-malformed-final.log",
       "output/page-layout-cli-final.log"
+    ]
+  },
+  "sections_2026_11_24": {
+    "previous_checkpoint": "ea2e726",
+    "goal_complete": false,
+    "external_blocker": null,
+    "implemented": [
+      "ProseMirror section containers and strict codecs",
+      "full section layout overrides and independent inherited/default/first/even bindings",
+      "DOCX standard section boundaries, variants and checked implicit metadata",
+      "native PDF page geometry transitions, next/odd/even starts and parity blanks",
+      "section-aware rich assets/lists/tables/notes and old-footer frame retention",
+      "identical-policy continuous flow"
+    ],
+    "independent": {
+      "source_docx_sf": "exact",
+      "native_pages": 8,
+      "native_pixel_placements": 4,
+      "native_uri_annotations": 1,
+      "native_note_destinations": [
+        [
+          7,
+          7
+        ]
+      ],
+      "prosemirror_files": 6,
+      "prosemirror_nodes": 304,
+      "corpus_files": 51,
+      "corpus_nodes": 9033,
+      "poppler_text_comparisons": "28/28",
+      "python_docx_control_sections": 2,
+      "native_and_office_pages_visually_inspected": [
+        8,
+        7
+      ]
+    },
+    "producer_observations": [
+      "LibreOffice exports seven pages and suppresses the physical parity blank",
+      "Inherited/conditional running story selection differs from the native section-local contract",
+      "Independent python-docx control also shows physical versus section-local story selection; broader Word qualification remains open"
+    ],
+    "fuzz": {
+      "FuzzSectionRoundTrips": {
+        "executions": 500,
+        "passed": true
+      },
+      "FuzzSectionBindings": {
+        "executions": 500,
+        "passed": true
+      },
+      "FuzzReadDOCX": {
+        "executions": 500,
+        "passed": true
+      }
+    },
+    "cli": {
+      "cgo_disabled": true,
+      "four_paths": "passed",
+      "source_docx_sf": "exact",
+      "pdf_operator_streams_matched": 8
+    },
+    "checks": {
+      "go_test_all": "passed: library 7.829s; CLI 0.384s; bidi 2.465s",
+      "race": "passed: library 95.495s; CLI 2.391s; bidi 15.245s",
+      "go_vet": "passed",
+      "go_mod_verify": "passed",
+      "cgo_disabled_host_build": "passed and executed",
+      "cgo_disabled_linux_amd64": "passed cross-build",
+      "cgo_disabled_linux_arm64": "passed cross-build",
+      "git_diff_check": "passed"
+    },
+    "remaining": [
+      "Changed continuous shared-page geometry and running story policies",
+      "Producer parity/inheritance and Word/representative real-export section qualification",
+      "Signed running overlap, conservative common-variant body packing and note-context fitting qualification",
+      "All other active script/font/PDF recovery/color/real-export requirements remain unfinished"
+    ],
+    "next_commands": [
+      "GOWORK=off go run ./examples/sections",
+      "output/qa-venv/bin/python scripts/verify_sections.py --office",
+      "GOWORK=off go test -run 'TestSection|TestDOCX.*Section|TestPDFSection|TestPDFContinuous' ."
     ]
   }
 }

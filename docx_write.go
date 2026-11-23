@@ -51,6 +51,9 @@ func (w *docxWriter) addRel(kind, target string, external bool) string {
 }
 
 func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
+	if hasSectionBlocks(d.Blocks) {
+		return writeSectionedDOCX(ctx, out, d)
+	}
 	notes, err := catalogNotes(d, true)
 	if err != nil {
 		return err
@@ -123,6 +126,10 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 	}
 	section += fmt.Sprintf(`<w:pgSz w:w="%.0f" w:h="%.0f"%s/>`, wid*20, hei*20, orientation) + docxPageMargins(d.Layout) + `</w:sectPr>`
 	w.parts["word/document.xml"] = []byte(xmlHeader + `<w:document` + wordNamespaces + docxMetadataNamespaces + `><w:body>` + body + section + `</w:body></w:document>`)
+	return w.output(out, d)
+}
+
+func (w *docxWriter) output(out io.Writer, d *Document) error {
 	w.parts["word/styles.xml"] = []byte(xmlHeader + `<w:styles xmlns:w="` + wordNS + `"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Noto Sans" w:hAnsi="Noto Sans"/><w:sz w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>` + headingStyles() + noteStyles() + `</w:styles>`)
 	w.parts["word/numbering.xml"] = []byte(w.numberingXML())
 	relsHead := xmlHeader + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`
@@ -130,7 +137,29 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 	w.parts["_rels/.rels"] = []byte(relsHead + `<Relationship Id="rId1" Type="` + relNS + `/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`)
 	w.parts["docProps/core.xml"] = []byte(xmlHeader + `<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>` + escape(d.Metadata.Title) + `</dc:title><dc:creator>` + escape(d.Metadata.Author) + `</dc:creator><dc:subject>` + escape(d.Metadata.Subject) + `</dc:subject></cp:coreProperties>`)
 	ct := xmlHeader + `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Default Extension="jpg" ContentType="image/jpeg"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>`
-	for _, v := range []struct{ name, kind string }{{"header1.xml", "header"}, {"footer1.xml", "footer"}, {"footnotes.xml", "footnotes"}, {"endnotes.xml", "endnotes"}} {
+	storyParts := []struct{ name, kind string }{}
+	var names []string
+	for name := range w.parts {
+		if strings.HasPrefix(name, "word/header") && strings.HasSuffix(name, ".xml") {
+			names = append(names, strings.TrimPrefix(name, "word/"))
+		}
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		storyParts = append(storyParts, struct{ name, kind string }{name, "header"})
+	}
+	names = nil
+	for name := range w.parts {
+		if strings.HasPrefix(name, "word/footer") && strings.HasSuffix(name, ".xml") {
+			names = append(names, strings.TrimPrefix(name, "word/"))
+		}
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		storyParts = append(storyParts, struct{ name, kind string }{name, "footer"})
+	}
+	storyParts = append(storyParts, struct{ name, kind string }{"footnotes.xml", "footnotes"}, struct{ name, kind string }{"endnotes.xml", "endnotes"}, struct{ name, kind string }{"settings.xml", "settings"})
+	for _, v := range storyParts {
 		if w.parts["word/"+v.name] != nil {
 			ct += `<Override PartName="/word/` + v.name + `" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.` + v.kind + `+xml"/>`
 		}
@@ -138,13 +167,13 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 	w.parts["[Content_Types].xml"] = []byte(ct + `</Types>`)
 	var buf bytes.Buffer
 	z := zip.NewWriter(&buf)
-	names := make([]string, 0, len(w.parts))
+	names = make([]string, 0, len(w.parts))
 	for n := range w.parts {
 		names = append(names, n)
 	}
 	sort.Strings(names)
 	for _, n := range names {
-		if err := ctx.Err(); err != nil {
+		if err := w.ctx.Err(); err != nil {
 			return err
 		}
 		f, err := z.Create(n)
@@ -158,7 +187,7 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 	if err := z.Close(); err != nil {
 		return err
 	}
-	_, err = io.Copy(out, &buf)
+	_, err := io.Copy(out, &buf)
 	return err
 }
 func headingStyles() string {

@@ -21,7 +21,54 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: asymmetric frames and running distances
+## Latest milestone: section bodies and conditional running stories
+
+- The existing SF profile now adds root-only `section` containers, each with body,
+  inherited or explicit layout, start kind and distinct default/first/even header
+  and footer bindings. Missing bindings inherit the same variant; explicit empty
+  stories suppress it. Global stories and section stories cannot be mixed. Flat
+  single-section documents retain their existing model and coordinate behavior.
+- DOCX no longer flattens represented sections or concatenates conditional stories.
+  Current end-of-section properties partition the body before list folding. Export
+  writes standard references/settings/properties and separate relationship scopes.
+  Checked ignorable metadata preserves source layout/inheritance presence without
+  overriding physical geometry or hiding visible structural-tail/story content.
+  Section body note identities and list counters traverse the new containers.
+  Shared DOCX note parts fit the conservative minimum section container.
+- Native PDF renders next/odd/even page starts, explicit blank parity pages, changed
+  page sizes/margins, inherited stories and first/even selection. Even selection
+  counts section pages from one, independent from physical-page start parity.
+  All active variants reserve one conservative body frame. Old-page footers paint
+  before the new geometry installs. Footnotes drain in their original section;
+  endnotes use the last section. Identical-geometry/story continuous sections flow
+  together; changed shared-page geometry/stories still reject explicitly and remain
+  required unfinished work. This milestone does not complete the overall goal.
+- `examples/sections` exercises all four paths. Source and reimported DOCX SF match
+  exactly, including assets/merges/links/notes/settings. Independent ProseMirror,
+  python-docx, XML, pypdf and MuPDF checks cover eight native pages, four exact RGBA
+  placements, URI and note destinations, and the previous footer's physical frame.
+  Native and producer page images were inspected. LibreOffice exports seven pages,
+  suppresses the parity blank and differs in inherited/conditional story selection;
+  a separate python-docx control confirms a parity-selection difference. These
+  producer observations remain distinct from source/standard/native oracles.
+- Full tests pass (library 7.829s, CLI 0.384s, bidi 2.465s); race passes
+  (95.495s/2.391s/15.245s). Vet, module verification, host/Linux CGO-disabled
+  builds and diff checks pass. Both section fuzz campaigns complete 500 executions,
+  as does malformed DOCX. Six SF files/304 nodes and the 51-file/9,033-node corpus
+  pass ProseMirror, with 28/28 Poppler text comparisons. Reproducible commands and
+  producer qualifications are in TESTING.md and verification.json. No new production dependency, Daptin edit, proprietary code,
+  or customer document was used. Previous verified checkpoint: ea2e726.
+
+The goal remains **incomplete**, with no external blocker. Next qualify and resolve
+continuous shared-page geometry/story changes and producer parity/inheritance;
+then broaden signed overlap, note/page binding, source-font/scripts/PDF recovery
+and representative real-export evidence. Next concrete commands:
+`GOWORK=off go run ./examples/sections`;
+`output/qa-venv/bin/python scripts/verify_sections.py --office`;
+`GOWORK=off go test -run 'TestSection|TestDOCX.*Section|TestPDFSection|TestPDFContinuous' .`;
+`rg -n 'SectionContinuous|localPage|sectionModel|inheritStories' sections.go docx_sections*.go pdf_sections.go`.
+
+## Previous milestone: asymmetric frames and running distances
 
 - Public Layout now adds Margins *PageMargins and optional HeaderDistance/
   FooterDistance point values. A nil group retains the legacy scalar fallback;

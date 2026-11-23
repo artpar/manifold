@@ -22,6 +22,11 @@ func referenceKey(n *NoteReference) noteKey { return noteKey{n.Kind, n.ID} }
 func noteIdentity(n Note) noteKey           { return noteKey{n.Kind, n.ID} }
 func walkNoteRuns(bs []Block, visit func(Run) error) error {
 	for _, b := range bs {
+		if b.Section != nil {
+			if err := walkNoteRuns(b.Section.Blocks, visit); err != nil {
+				return err
+			}
+		}
 		for _, r := range b.Runs {
 			if err := visit(r); err != nil {
 				return err
@@ -68,7 +73,18 @@ func validateNotes(d *Document) error {
 			return err
 		}
 	}
-	for _, bs := range [][]Block{d.Headers, d.Footers} {
+	var running [][]Block
+	for _, b := range d.Blocks {
+		if b.Section != nil {
+			for _, story := range sectionStories(b.Section) {
+				if story != nil {
+					running = append(running, story.Blocks)
+				}
+			}
+		}
+	}
+	running = append(running, d.Headers, d.Footers)
+	for _, bs := range running {
 		if err := walkNoteRuns(bs, func(r Run) error {
 			if r.Note != nil {
 				return fmt.Errorf("note references cannot occur in running headers/footers")

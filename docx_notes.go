@@ -209,6 +209,18 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 	resolve = func(bs []Block) error {
 		for bi := range bs {
 			b := &bs[bi]
+			if b.Section != nil {
+				if err := resolve(b.Section.Blocks); err != nil {
+					return err
+				}
+				for _, story := range sectionStories(b.Section) {
+					if story != nil {
+						if err := resolve(story.Blocks); err != nil {
+							return err
+						}
+					}
+				}
+			}
 			for ri := range b.Runs {
 				run := &b.Runs[ri]
 				if run.Note == nil {

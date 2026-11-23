@@ -303,7 +303,7 @@ func (r *pdfRenderer) nextPage(bodyNeeded bool) error {
 		if err := r.ctx.Err(); err != nil {
 			return err
 		}
-		r.pdf.AddPage()
+		r.addPDFPage()
 		r.y = r.bodyTop()
 		left := capacity
 		var chunks []pdfNoteChunk
@@ -350,7 +350,7 @@ func (r *pdfRenderer) nextPage(bodyNeeded bool) error {
 		}
 	}
 	if bodyNeeded && !lastEmpty {
-		r.pdf.AddPage()
+		r.addPDFPage()
 		r.y = r.bodyTop()
 	}
 	return r.pdf.Error()

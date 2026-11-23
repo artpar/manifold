@@ -10,6 +10,9 @@ The library reads and writes DOCX, extracts positioned text, raster images and s
 structured content, and exchanges documents as ProseMirror JSON (`.sf`), legacy JSON and text.
 The [structured-format decision](docs/STRUCTURED_FORMAT.md) records the schema,
 tradeoffs and required unfinished expansion.
+Sectioned SF supports separate body frames and default/first/even running stories.
+Run `GOWORK=off go run ./examples/sections` for all four conversion paths; see
+[compatibility limits](docs/COMPATIBILITY.md) for shared-page and producer differences.
 Applications retain ownership of identity, authorization, persistence and jobs.
 No external Office installation or conversion service is required.
 

@@ -370,6 +370,21 @@ func (r *docxReader) foldLists(bs []Block, counters map[string]*docxListCounter,
 	var out []Block
 	for index := 0; index < len(bs); {
 		b := bs[index]
+		if b.Section != nil {
+			var err error
+			b.Section.Blocks, err = r.foldLists(b.Section.Blocks, counters, depth+1)
+			if err != nil {
+				return nil, err
+			}
+			for _, story := range sectionStories(b.Section) {
+				if story != nil {
+					story.Blocks, err = r.foldLists(story.Blocks, map[string]*docxListCounter{}, depth+1)
+					if err != nil {
+						return nil, err
+					}
+				}
+			}
+		}
 		if b.docxBeforeList && b.Kind != ListBlock {
 			return nil, fmt.Errorf("list break metadata outside an explicit list range")
 		}

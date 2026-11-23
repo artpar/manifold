@@ -378,59 +378,8 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 		return nil, err
 	}
 	sections := docxActiveSections(n.child("body"))
-	for _, s := range sections {
-		if err := r.pageSettings(s, true); err != nil {
-			return nil, err
-		}
-		r.notePropertySources = append(r.notePropertySources, s)
-		if p := s.child("pgSz"); p != nil {
-			width, err := docxPageNumber(p, "w", 0)
-			if err != nil {
-				return nil, err
-			}
-			height, err := docxPageNumber(p, "h", 0)
-			if err != nil {
-				return nil, err
-			}
-			r.doc.Layout.Width, r.doc.Layout.Height = width, height
-		}
-		if m := s.child("pgMar"); m != nil {
-			if err := r.pageMargins(m); err != nil {
-				return nil, err
-			}
-		}
-		for _, c := range s.Children {
-			if c.Name.Local != "headerReference" && c.Name.Local != "footerReference" {
-				continue
-			}
-			if selector := c.attr("type"); selector != "" && selector != "default" {
-				r.doc.warn("docx_running_variants", "Conditional running stories are retained together without page selection: "+selector)
-			}
-			rel, ok := mainRels[c.attr("id")]
-			if !ok || rel.External {
-				return nil, errors.New("missing header/footer relationship")
-			}
-			part, e := r.xml(rel.Target)
-			if e != nil {
-				return nil, e
-			}
-			pr, e := r.rels(rel.Target)
-			if e != nil {
-				return nil, e
-			}
-			blocks, e := r.blocks(part, pr, 0)
-			if e != nil {
-				return nil, e
-			}
-			if c.Name.Local == "headerReference" {
-				r.doc.Headers = append(r.doc.Headers, blocks...)
-			} else {
-				r.doc.Footers = append(r.doc.Footers, blocks...)
-			}
-		}
-	}
-	if len(sections) > 1 {
-		r.doc.warn("multiple_sections", "Multiple sections are flattened to one page layout")
+	if err := r.readDocumentSections(sections, mainRels); err != nil {
+		return nil, err
 	}
 	if err := r.readNoteParts(mainRels); err != nil {
 		return nil, err
@@ -481,6 +430,33 @@ func (r *docxReader) blocks(n *xmlNode, rels map[string]docxRelation, depth int)
 			bs, err := r.paragraph(c, rels)
 			if err != nil {
 				return nil, err
+			}
+			if section := c.child("pPr").child("sectPr"); section != nil {
+				if len(bs) == 0 {
+					return nil, fmt.Errorf("section paragraph produced no boundary")
+				}
+				bs[len(bs)-1].docxSection = section
+			}
+			if marker := c.attributeNS(docxNotesNS, "sectionTail"); marker != "" {
+				if marker != "1" || c.child("pPr").child("sectPr") == nil || len(c.Children) != 1 || len(c.child("pPr").Children) != 1 || len(bs) != 1 || len(bs[0].Runs) != 0 {
+					return nil, fmt.Errorf("invalid structural section tail")
+				}
+				bs[0].docxSectionTail = true
+			}
+
+			if section := c.child("pPr").child("sectPr"); section != nil {
+				if len(bs) == 0 {
+					return nil, fmt.Errorf("section paragraph has no body boundary")
+				}
+				bs[len(bs)-1].docxSection = section
+				if marker := c.attributeNS(docxNotesNS, "sectionTail"); marker != "" {
+					if marker != "1" || len(c.Children) != 1 || c.Children[0].Name.Local != "pPr" || len(c.Children[0].Children) != 1 || len(bs) != 1 || len(bs[0].Runs) != 0 {
+						return nil, fmt.Errorf("invalid structural section tail")
+					}
+					bs[0].docxSectionTail = true
+				}
+			} else if c.attributeNS(docxNotesNS, "sectionTail") != "" {
+				return nil, fmt.Errorf("section tail has no section properties")
 			}
 			out = append(out, bs...)
 		case "tbl":

@@ -22,14 +22,15 @@ type StructuredDocument struct {
 	Content []StructuredNode     `json:"content,omitempty"`
 }
 type StructuredAttributes struct {
-	Schema      string           `json:"schema"`
-	Metadata    Metadata         `json:"metadata,omitempty"`
-	Layout      Layout           `json:"layout,omitempty"`
-	Headers     []StructuredNode `json:"headers,omitempty"`
-	Footers     []StructuredNode `json:"footers,omitempty"`
-	Notes       []StructuredNote `json:"notes,omitempty"`
-	Diagnostics []Diagnostic     `json:"diagnostics,omitempty"`
-	Pages       []PDFPage        `json:"pages,omitempty"`
+	Schema            string           `json:"schema"`
+	Metadata          Metadata         `json:"metadata,omitempty"`
+	Layout            Layout           `json:"layout,omitempty"`
+	Headers           []StructuredNode `json:"headers,omitempty"`
+	Footers           []StructuredNode `json:"footers,omitempty"`
+	Notes             []StructuredNote `json:"notes,omitempty"`
+	Diagnostics       []Diagnostic     `json:"diagnostics,omitempty"`
+	Pages             []PDFPage        `json:"pages,omitempty"`
+	EvenAndOddHeaders bool             `json:"evenAndOddHeaders,omitempty"`
 }
 type StructuredNote struct {
 	ID      string           `json:"id"`
@@ -60,7 +61,7 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 		return nil, err
 	}
 	s := &StructuredDocument{Type: "doc", Attrs: StructuredAttributes{
-		Schema: StructuredSchema, Metadata: d.Metadata, Layout: cloneLayout(d.Layout),
+		Schema: StructuredSchema, Metadata: d.Metadata, Layout: cloneLayout(d.Layout), EvenAndOddHeaders: d.EvenAndOddHeaders,
 		Diagnostics: append([]Diagnostic(nil), d.Diagnostics...), Pages: append([]PDFPage(nil), d.Pages...),
 	}}
 	var err error
@@ -97,6 +98,12 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 		}
 		n := StructuredNode{Type: string(b.Kind)}
 		switch b.Kind {
+		case SectionBlock:
+			var err error
+			n, err = encodeSFSection(b.Section)
+			if err != nil {
+				return nil, err
+			}
 		case Paragraph, Heading:
 			if b.Kind == Heading || b.PageBreakBefore || b.Direction != "" {
 				level := 0
@@ -215,7 +222,7 @@ func FromStructured(s *StructuredDocument) (*Document, error) {
 	if s.Attrs.Schema != StructuredSchema {
 		return nil, fmt.Errorf("%w: structured schema %q", ErrUnsupported, s.Attrs.Schema)
 	}
-	d := &Document{Metadata: s.Attrs.Metadata, Layout: cloneLayout(s.Attrs.Layout), Diagnostics: append([]Diagnostic(nil), s.Attrs.Diagnostics...), Pages: append([]PDFPage(nil), s.Attrs.Pages...)}
+	d := &Document{EvenAndOddHeaders: s.Attrs.EvenAndOddHeaders, Metadata: s.Attrs.Metadata, Layout: cloneLayout(s.Attrs.Layout), Diagnostics: append([]Diagnostic(nil), s.Attrs.Diagnostics...), Pages: append([]PDFPage(nil), s.Attrs.Pages...)}
 	var err error
 	if d.Blocks, err = decodeSFBlocks(s.Content, 0); err != nil {
 		return nil, err
@@ -292,6 +299,11 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 		}
 		b := Block{Kind: Kind(n.Type), Source: source}
 		switch n.Type {
+		case "section":
+			b.Section, err = decodeSFSection(n, depth)
+			if err != nil {
+				return nil, err
+			}
 		case "paragraph", "heading":
 			var paragraphAttrs map[string]json.RawMessage
 			if len(n.Attrs) > 0 {

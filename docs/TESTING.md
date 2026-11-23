@@ -1595,3 +1595,49 @@ Final full results: library/CLI/bidi 6.437s/0.662s/2.205s; race
 Focused signed, unused-distance and physical-serialization tests/race checks pass.
 The final full checks include the corrected baseline test; earlier logs retain
 its initial mistaken assertion as development evidence, not a passing result.
+
+## Section containers and running-story variants (2026-11-24)
+
+`sections_test.go` checks exact SF/JSON/DOCX trees, section body membership, merged
+cells, original assets, first/even/default inheritance versus explicit blanks,
+notes, malformed placement/metadata and foreign standard section properties.
+Native tests check changed frames, physical parity blank pages, section-local
+story selection, notes, identical-policy continuous flow and atomic rejection of
+unqualified changed continuous frames. Two valid-input fuzz targets require
+successful output rather than accepting ErrUnsupported.
+
+```sh
+GOWORK=off go run ./examples/sections
+output/qa-venv/bin/python scripts/verify_sections.py --make-control
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+bin/manydoc extract -format sf -o output/sections/control.sf output/sections/control.docx
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-sections-qa --headless --convert-to pdf --outdir output/sections/office output/sections/document.docx output/sections/control.docx
+output/qa-venv/bin/python scripts/verify_sections.py --office
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/sections/document.sf output/sections/docx.sf output/sections/pdf.sf output/sections/control.sf
+GOWORK=off go test -run 'TestSection|TestDOCX.*Section|TestPDFSection|TestPDFContinuous|FuzzSection' .
+GOWORK=off go test -run '^$' -fuzz '^FuzzSectionRoundTrips$' -fuzztime=500x -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzSectionBindings$' -fuzztime=500x -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=500x -parallel=2 .
+```
+
+Independent ProseMirror/python-docx/XML/pypdf/MuPDF checks pass. Source and DOCX SF
+match exactly. Eight native pages/four exact RGBA placements, one URI and the note
+reference's actual page-seven destination pass. The old portrait footer remains
+in its old frame before transition to landscape. Recovered SF has eight physical
+pages and does not invent authored section containers. Six source/reimported/CLI/
+control SF files total 304 checked nodes. The existing corpus passes 51 files/
+9,033 nodes (the section fixture now has two actual containers, adding two nodes),
+and 28/28 Poppler text comparisons pass. Two new valid section fuzz campaigns
+complete 500 executions each; malformed DOCX completes 500. The host CGO-disabled
+CLI runs all four paths, compares exact source DOCX SF and eight native operator
+streams. Host build executes; Linux amd64/arm64 builds establish compilation only.
+
+Native eight-page and LibreOffice seven-page rasters were visually inspected.
+LibreOffice suppresses the blank parity page and differs in inherited/conditional
+story selection. The independent two-section python-docx control preserves both
+layouts/bindings during extraction and separately demonstrates physical versus
+section-local story parity in its export. Producer URI preservation is still not
+qualified by this milestone. These are disclosed differences, not adjusted native
+or source oracles. Shared-page continuous changes, signed overlap, common-variant
+packing and broader Word/real-export qualification remain required work. See
+verification.json for final full-suite/race timings and the latest evidence key.

@@ -523,3 +523,33 @@ second schema or alternate canonical layout format. Current effective DOCX secti
 properties are read separately from revision snapshots. Unsupported advanced page/
 story settings and multiple-section flattening diagnose. PDF provenance preserves
 physical pages/quads, not inferred authorial margin preferences or anchor intent.
+
+
+## Section extension (2026-11-24)
+
+The same `manydoc-prosemirror/1` profile now accepts either `block*` or `section+`
+at the root. Sections are not general blocks and cannot nest in bodies, tables,
+lists, running stories or notes. A `section` contains ordinary block nodes. Its
+attributes are `layout` (optional full Layout override; null/absent inherits),
+`start` (`nextPage`, `continuous`, `evenPage`, `oddPage`; omitted means nextPage),
+`firstPage` (boolean), `headers` and `footers` (objects), and optional provenance.
+Each story object accepts only `default`, `first`, `even` node arrays. Missing keys
+inherit that same variant; `[]` is an explicit blank. Null stories/maps reject.
+Top-level `evenAndOddHeaders` controls even selection; first-page selection is per
+section. Distinct story mode requires sections. Global root headers/footers cannot
+be mixed with sections. Legacy flat content remains supported.
+
+```json
+{"type":"section","attrs":{"start":"oddPage","firstPage":true,"headers":{"first":[],"default":[{"type":"paragraph","content":[{"type":"text","text":"Chapter"}]}]}},"content":[{"type":"paragraph","content":[{"type":"text","text":"Body"}]}]}
+```
+
+Both bridges preserve and validate body/story nodes, assets, marks, notes and
+layout pointers. Native PDF selects even stories using section pages counted from
+one, while physical parity governs starts. Body packing uses a common conservative
+frame across active variants. Changed continuous frames/stories and advanced page
+bindings remain unfinished. DOCX preserves section intent through standard parts;
+checked ignorable metadata restores implicit presence, never replaces conflicting
+physical content. PDF recovery retains physical pages and source regions and does
+not fabricate authorial section/layout/story bindings from untagged output.
+`examples/sections` and `scripts/verify_sections.py` expose the four paths and
+independent checks, with producer differences recorded separately.

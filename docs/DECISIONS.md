@@ -1083,3 +1083,30 @@ selection and whole-note admission prefer a fresh page; the producer ignores its
 cell start and draws a left note separator. Keep these observations while expanding
 sections and pagination. Do not infer authored margin/anchor intent from untagged
 PDF coordinates or claim Word equivalence from the new synthetic cases.
+
+
+## Section containers preserve boundaries and independent story inheritance
+
+Use an additive root-only `section` node in the established ProseMirror profile,
+with ordinary body blocks and separately editable running-story attributes.
+A missing story means inherit that variant; an explicit empty array means blank.
+Layout nil inherits the prior effective layout, initially the document layout.
+Require either all root sections or flat blocks, and keep global running stories
+exclusive to flat documents. This avoids competing authoritative body/story models.
+
+Read section end properties before list folding; their start type applies to the
+current section, as described in the published [section-type documentation](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.sectiontype?view=openxml-3.0.1).
+Use same-variant header/footer inheritance per [header references](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.headerreference?view=openxml-3.0.1)
+and the [Word implementation correction for default references](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-oi29500/5de15e59-3ec1-4f80-aa4d-00bdd447b86f).
+Native even/odd selection follows the published [section-local counting rule](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.evenandoddheaders?view=openxml-3.0.1).
+Physical start parity and story parity are separate. Retain standards-derived and
+producer observations separately when they disagree; do not rewrite content or
+structural oracles to match one exporter. No proprietary implementation was used.
+
+Reserve one body rectangle across active variants to keep continued tables/notes
+safe, accepting conservative packing. Install new PDF geometry after old footer
+painting. Drain footnotes before leaving their section. Keep changed continuous
+frames explicit unfinished work. Shared DOCX note parts use minimum section
+containers; broader reference-specific fitting and producer/layout qualification
+remain required. Independent source/asset/reader checks and visual review support
+this milestone, not a Word-equivalence or full-goal completion claim.

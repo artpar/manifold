@@ -29,14 +29,15 @@ const (
 // whose structure cannot be represented. Converters reject lossy output unless
 // the caller explicitly acknowledges those diagnostics.
 type Document struct {
-	Metadata    Metadata     `json:"metadata,omitempty"`
-	Layout      Layout       `json:"layout,omitempty"`
-	Blocks      []Block      `json:"blocks"`
-	Headers     []Block      `json:"headers,omitempty"`
-	Footers     []Block      `json:"footers,omitempty"`
-	Notes       []Note       `json:"notes,omitempty"`
-	Diagnostics []Diagnostic `json:"diagnostics,omitempty"`
-	Pages       []PDFPage    `json:"pages,omitempty"`
+	Metadata          Metadata     `json:"metadata,omitempty"`
+	Layout            Layout       `json:"layout,omitempty"`
+	Blocks            []Block      `json:"blocks"`
+	Headers           []Block      `json:"headers,omitempty"`
+	Footers           []Block      `json:"footers,omitempty"`
+	Notes             []Note       `json:"notes,omitempty"`
+	Diagnostics       []Diagnostic `json:"diagnostics,omitempty"`
+	Pages             []PDFPage    `json:"pages,omitempty"`
+	EvenAndOddHeaders bool         `json:"even_and_odd_headers,omitempty"`
 }
 type Metadata struct {
 	Title     string `json:"title,omitempty"`
@@ -61,12 +62,13 @@ type Layout struct {
 type Kind string
 
 const (
-	Paragraph Kind = "paragraph"
-	Heading   Kind = "heading"
-	Table     Kind = "table"
-	ListBlock Kind = "list"
-	Picture   Kind = "image"
-	PageBreak Kind = "page_break"
+	Paragraph    Kind = "paragraph"
+	Heading      Kind = "heading"
+	Table        Kind = "table"
+	ListBlock    Kind = "list"
+	Picture      Kind = "image"
+	PageBreak    Kind = "page_break"
+	SectionBlock Kind = "section"
 )
 
 type Block struct {
@@ -85,6 +87,9 @@ type Block struct {
 	// Start is the first ordered-list value; nil means one. Zero is valid.
 	Start                   *int        `json:"start,omitempty"`
 	Source                  *SourceInfo `json:"source,omitempty"`
+	Section                 *Section    `json:"section,omitempty"`
+	docxSection             *xmlNode
+	docxSectionTail         bool
 	docxList                *docxListRef
 	docxNumberID            int
 	docxNumberLevel         int
@@ -279,8 +284,15 @@ func (d *Document) Text() string {
 	return strings.TrimRight(b.String(), "\n")
 }
 func textBlocks(b *strings.Builder, blocks []Block) {
+	seenSection := false
 	for _, v := range blocks {
 		switch v.Kind {
+		case SectionBlock:
+			if seenSection && v.Section.Start != SectionContinuous {
+				b.WriteString("\f")
+			}
+			seenSection = true
+			textBlocks(b, v.Section.Blocks)
 		case PageBreak:
 			b.WriteString("\f")
 		case Table:
@@ -328,6 +340,9 @@ func (d *Document) Validate() error {
 			return err
 		}
 	}
+	if err := validateSectionPlacement(d); err != nil {
+		return err
+	}
 	if err := validateLayout(d.Layout); err != nil {
 		return err
 	}
@@ -367,6 +382,20 @@ func (d *Document) Validate() error {
 				}
 			}
 			switch b.Kind {
+			case SectionBlock:
+				if b.Section == nil || len(b.Runs) > 0 || len(b.Rows) > 0 || b.Image != nil || len(b.Items) > 0 || b.List != "" || b.Level != 0 {
+					return errors.New("section content belongs in its section container")
+				}
+				if err := walk(b.Section.Blocks, depth+1); err != nil {
+					return err
+				}
+				for _, story := range sectionStories(b.Section) {
+					if story != nil {
+						if err := walk(story.Blocks, depth+1); err != nil {
+							return err
+						}
+					}
+				}
 			case Paragraph, Heading:
 				if len(b.Rows) > 0 || b.Image != nil {
 					return errors.New("paragraph cannot contain rows or an image")

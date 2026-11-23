@@ -1,7 +1,7 @@
 {
   "nodes": {
     "doc": {
-      "content": "block*",
+      "content": "block* | section+",
       "attrs": {
         "schema": {
           "default": "manydoc-prosemirror/1",
@@ -27,6 +27,10 @@
         },
         "pages": {
           "default": []
+        },
+        "evenAndOddHeaders": {
+          "default": false,
+          "validate": "boolean"
         }
       }
     },
@@ -176,6 +180,31 @@
         },
         "kind": {
           "validate": "string"
+        }
+      }
+    },
+    "section": {
+      "content": "block*",
+      "attrs": {
+        "layout": {
+          "default": null
+        },
+        "start": {
+          "default": "",
+          "validate": "string"
+        },
+        "firstPage": {
+          "default": false,
+          "validate": "boolean"
+        },
+        "headers": {
+          "default": {}
+        },
+        "footers": {
+          "default": {}
+        },
+        "source": {
+          "default": null
         }
       }
     }
