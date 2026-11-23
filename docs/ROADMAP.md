@@ -136,10 +136,12 @@ and producer observations, including orientation-hint qualifications. Run
 
 
 Signed running overlap is implemented with fixed body edges and foreground body/
-notes, with independent picture caps and contained-page checks. Next partition or
-refit continuous fixed/minimum mixtures when the global envelope is impossible;
+notes, with independent picture caps and contained-page checks. Continuous
+fixed/minimum mixtures now partition into feasible native groups;
 do not solve this by dropping a story, changing its source preference or placing
 measured notes into another interval. Controls/empty owners and the original
 font/script/recovery/real-export requirements remain open. Reproduce the current
 capability with `GOWORK=off go run ./examples/signed-overlap` and its independent
-verifier, then extend the signed-chain tests as admission changes.
+verifier. The continuous-admission example/verifier adds fresh-page boundaries,
+old-note drainage and actual body-floor evidence. Next qualify control/empty
+section ownership, then conservative packing and the broader requirements above.

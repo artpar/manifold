@@ -1193,3 +1193,24 @@ old notes cannot inhabit the new vertical interval, finish them before the new
 frame opens, retaining both note geometry and page owner. Out-of-canvas stories
 reject instead of clipping or disappearing. Large fixed/minimum mixtures with no
 common envelope still require partition/refit/admission work under the full goal.
+
+
+## 2026-11-24 Partition incompatible continuous story frames
+
+The preceding signed-overlap checkpoint exposed valid sections whose common
+running envelope crossed or left too little room for the body. Preserve valid
+sections by splitting their native shared-page group instead of declaring those
+source constructs unsupported. First attempt the whole chain to preserve existing
+compatible output. Otherwise extend feasible prefixes using copied plans; failed
+candidate fitting must not change the original plan or source assets. Check the
+actual minimum body floor, not merely positive frame area.
+
+At each internal admission boundary, finish existing notes before activating the
+new page, with its own first-page story and page number. Subsequent compatible
+sections may share that page again. Persist the authored continuous start through
+SF and DOCX; do not serialize renderer decisions as authored page controls.
+The measured frame strategy remains conservative and fallback prefix measurement
+can take quadratic work; minimal packing and control/empty ownership qualification
+are still required work. Independent producer outputs differ in packing and
+running-story ownership. Record content, asset and visual observations separately;
+neither producer equivalence nor full-goal completion is established.

@@ -156,3 +156,12 @@ prior nonnegative PDF streams/three DOCX packages are exact against 17c8b6c. Som
 continuous fixed/minimum mixtures still lack a common envelope, and producer
 compositing/pagination differs; broader ownership/packing, bindings, fonts/scripts,
 PDF recovery/color and representative real-export work remain required.
+
+
+Continuous story admission now handles individually valid fixed/minimum sections
+without a shared envelope. Four examples preserve exact source DOCX SF and all
+body/note content across thirteen native pages, with independent positions,
+assets, note targets, foreground pixels and producer visual observations. Native
+fresh-page groups preserve authored continuous starts; compatible output remains
+exact against a pinned prior build. Control/empty ownership, conservative packing
+and the remaining original acceptance requirements are still incomplete.

@@ -580,5 +580,7 @@ placement and compositing are independently qualified. Fixed footer backgrounds
 paint before body/notes, so physical PDF paint order differs from late-footer
 paths and must not be mistaken for authored logical order. Shared-chain signed
 edges retain their own absolute bound, and incompatible measured note intervals
-finish before the new frame binds. Some large fixed/minimum continuous mixtures
-still need a less conservative admission/partition strategy; the full goal is open.
+finish before the new frame binds. Incompatible continuous story envelopes now
+produce fresh native pages while preserving source continuous starts exactly.
+Admission groups and page-owner state are renderer internals, not new SF fields.
+Conservative packing and the full goal remain open.

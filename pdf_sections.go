@@ -1,6 +1,7 @@
 package manydoc
 
 import (
+	"errors"
 	"fmt"
 	"math"
 
@@ -14,6 +15,7 @@ type pdfSectionPlan struct {
 	bounds       pdfBodyBounds
 	minimumBody  float64
 	footerBehind bool
+	freshPage    bool
 	variants     [3]pdfSectionVariant // default, first, even
 }
 
@@ -165,61 +167,99 @@ func (r *pdfRenderer) planSections(d *Document, sections []resolvedSection) ([]*
 	}
 	for start := 0; start < len(plans); {
 		end := start + 1
-		minimum := plans[start].minimumBody
 		for end < len(plans) && sections[end].start == SectionContinuous && sameSectionCanvas(plans[end-1], plans[end]) {
-			minimum = math.Max(minimum, plans[end].minimumBody)
 			end++
 		}
-		for i := start; i < end; i++ {
-			if plans[i].minimumBody < minimum {
-				plan, err := r.planSection(d, sections[i], minimum, scope(i))
+		// Preserve established output for a compatible whole chain. If sharing
+		// is impossible, greedily admit compatible prefixes to fresh pages.
+		group, err := r.planContinuousGroup(d, plans[start:end], start, scope)
+		if err == nil {
+			copy(plans[start:end], group)
+		} else if !errors.Is(err, ErrUnsupported) {
+			return nil, err
+		} else {
+			for part := start; part < end; {
+				accepted, err := r.planContinuousGroup(d, plans[part:part+1], part, scope)
 				if err != nil {
 					return nil, err
 				}
-				plans[i] = plan
-			}
-		}
-		bounds := plans[start].bounds
-		for _, plan := range plans[start+1 : end] {
-			bounds.top = math.Max(bounds.top, plan.bounds.top)
-			bounds.bottom = math.Min(bounds.bottom, plan.bounds.bottom)
-		}
-		footerBehind := false
-		for _, plan := range plans[start:end] {
-			footerBehind = footerBehind || plan.geometry.margins.Bottom < 0
-		}
-		for _, plan := range plans[start:end] {
-			plan.footerBehind = footerBehind
-		}
-		// Positive edges reserve every possible running envelope in the shared
-		// chain; signed edges retain that section's exact body offset instead.
-		for _, plan := range plans[start:end] {
-			for _, variant := range plan.variants {
-				if variant.header != nil {
-					bounds.top = math.Max(bounds.top, variant.header.y+variant.header.height)
+				next := part + 1
+				for next < end {
+					candidate, err := r.planContinuousGroup(d, plans[part:next+1], part, scope)
+					if err != nil {
+						if !errors.Is(err, ErrUnsupported) {
+							return nil, err
+						}
+						break
+					}
+					accepted = candidate
+					next++
 				}
-				if variant.footer != nil {
-					bounds.bottom = math.Min(bounds.bottom, variant.footer.y)
-				}
+				accepted[0].freshPage = part > start
+				copy(plans[part:next], accepted)
+				part = next
 			}
-		}
-		for _, plan := range plans[start:end] {
-			own := bounds
-			if plan.geometry.margins.Top < 0 {
-				own.top = math.Abs(plan.geometry.margins.Top)
-			}
-			if plan.geometry.margins.Bottom < 0 {
-				own.bottom = plan.geometry.height - math.Abs(plan.geometry.margins.Bottom)
-			}
-			if own.bottom <= own.top {
-				return nil, fmt.Errorf("%w: continuous running stories leave no common body", ErrUnsupported)
-			}
-			plan.bounds = own
 		}
 		start = end
 	}
 	return plans, nil
 }
+
+// Plan a candidate shared-page group without changing its input plans. Refit
+// positive stories to the group's body floor; fixed stories keep their own
+// physical anchors. An incompatible group may still consist of valid sections.
+func (r *pdfRenderer) planContinuousGroup(d *Document, original []*pdfSectionPlan, start int, scope func(int) pdfSectionScope) ([]*pdfSectionPlan, error) {
+	minimum := 0.0
+	for _, plan := range original {
+		minimum = math.Max(minimum, plan.minimumBody)
+	}
+	plans := make([]*pdfSectionPlan, len(original))
+	for i, plan := range original {
+		if err := r.ctx.Err(); err != nil {
+			return nil, err
+		}
+		copy := *plan
+		plans[i] = &copy
+		if plan.minimumBody < minimum {
+			fitted, err := r.planSection(d, plan.section, minimum, scope(start+i))
+			if err != nil {
+				return nil, err
+			}
+			plans[i] = fitted
+		}
+	}
+	bounds := plans[0].bounds
+	footerBehind := false
+	for _, plan := range plans {
+		bounds.top = math.Max(bounds.top, plan.bounds.top)
+		bounds.bottom = math.Min(bounds.bottom, plan.bounds.bottom)
+		footerBehind = footerBehind || plan.geometry.margins.Bottom < 0
+		for _, variant := range plan.variants {
+			if variant.header != nil {
+				bounds.top = math.Max(bounds.top, variant.header.y+variant.header.height)
+			}
+			if variant.footer != nil {
+				bounds.bottom = math.Min(bounds.bottom, variant.footer.y)
+			}
+		}
+	}
+	for _, plan := range plans {
+		own := bounds
+		if plan.geometry.margins.Top < 0 {
+			own.top = math.Abs(plan.geometry.margins.Top)
+		}
+		if plan.geometry.margins.Bottom < 0 {
+			own.bottom = plan.geometry.height - math.Abs(plan.geometry.margins.Bottom)
+		}
+		if own.bottom <= own.top || own.bottom-own.top+1e-7 < plan.minimumBody {
+			return nil, fmt.Errorf("%w: continuous running stories leave no common body", ErrUnsupported)
+		}
+		plan.bounds = own
+		plan.footerBehind = footerBehind
+	}
+	return plans, nil
+}
+
 func (r *pdfRenderer) renderSections(d *Document) error {
 	sections := documentSections(d)
 	plans, err := r.planSections(d, sections)
@@ -276,7 +316,7 @@ func (r *pdfRenderer) renderSections(d *Document) error {
 		if err := r.ctx.Err(); err != nil {
 			return err
 		}
-		share := i > 0 && s.start == SectionContinuous && sameSectionCanvas(plans[i-1], plans[i])
+		share := i > 0 && !plans[i].freshPage && s.start == SectionContinuous && sameSectionCanvas(plans[i-1], plans[i])
 		if share {
 			next := plans[i].bounds
 			// Already measured note fragments must finish in their old vertical

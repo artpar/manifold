@@ -2154,7 +2154,7 @@
     "fixture_oracle_changed": false,
     "external_blocker": null
   },
-  "latest_milestone": "signed_running_overlap",
+  "latest_milestone": "continuous_story_admission",
   "language_direction_ltr_shaping": {
     "date": "2026-11-23",
     "goal_complete": false,
@@ -2499,7 +2499,7 @@
     ],
     "external_blocker": null
   },
-  "latest_evidence": "signed_running_overlap_2026_11_24",
+  "latest_evidence": "continuous_story_admission_2026_11_24",
   "paragraph_bidi_levels_2026_11_24": {
     "goal_complete": false,
     "previous_checkpoint": "658a5b0",
@@ -3821,6 +3821,85 @@
       "GOWORK=off go run ./examples/signed-overlap",
       "output/qa-venv/bin/python scripts/verify_signed_overlap.py --office",
       "GOWORK=off go test -run 'TestPDFSigned|TestFixedBlank|FuzzSignedRunning' ."
+    ]
+  },
+  "continuous_story_admission_2026_11_24": {
+    "status": "verified milestone; full rich-document goal incomplete; no external blocker",
+    "behavior": [
+      "compatible whole-chain output retained",
+      "incompatible individually valid continuous stories paginate in feasible groups",
+      "candidate plans do not mutate original plans, source starts or image preferences",
+      "actual body floor required; notes drain in their original frame; fresh-page first stories bind correctly"
+    ],
+    "example": "examples/continuous-admission",
+    "checks": {
+      "go_test_all": "passed: library 7.209s; CLI/bidi cached; subsequent full run cached",
+      "go_test_race_all": "passed: library 109.448s; CLI 1.673s; bidi 13.804s",
+      "example_race": "passed",
+      "go_vet_all": "passed",
+      "module_verify": "all modules verified",
+      "cgo_disabled_host_build_and_cli": "passed: all four paths for four cases; thirteen matching native page streams",
+      "cgo_disabled_linux_amd64_arm64": "builds passed; not executed",
+      "diff_check": "passed",
+      "valid_admission_fuzz": {
+        "executions": 1000,
+        "seconds": 10.134,
+        "passed": true
+      },
+      "malformed_docx_fuzz": {
+        "executions": 500,
+        "seconds": 1.483,
+        "passed": true
+      }
+    },
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_continuous_admission.py --office",
+      "result": "passed",
+      "cases": 4,
+      "native_pages": 13,
+      "native_rgba_placements": 9,
+      "producer_pages": 8,
+      "producer_rgba_placements": 5,
+      "source_docx_sf": "exact for all four; continuous starts preserved",
+      "long_note_paragraphs": 32,
+      "assertions": [
+        "source signed fields, metadata and hyperlinks",
+        "actual native paragraph/page bounds and running image positions",
+        "original RGBA assets and positioned recovered image quads",
+        "actual URI and note targets",
+        "old notes finish before the new section frame opens",
+        "black foreground pixels over fixed backgrounds"
+      ],
+      "sf_schema": {
+        "files": 20,
+        "nodes_and_marks_and_attributes": 815,
+        "result": "passed actual ProseMirror schema"
+      },
+      "visual_inspection": "thirteen native and eight producer pages; producer packing/story ownership and note continuation differ; body/notes preserved, later running artwork can remain unapplied on the shared producer page; no Word-equivalence claim"
+    },
+    "regression": {
+      "fresh_parent": "f9f7fcf",
+      "exact_pdf_page_streams": 27,
+      "exact_docx_packages": 8,
+      "examples": [
+        "sections",
+        "continuous",
+        "continuous-geometry",
+        "five signed-overlap cases"
+      ],
+      "oracle_policy": "source/content/asset fixtures preserved; previous incompatibility errors now positively require pagination"
+    },
+    "remaining": [
+      "leading/trailing/adjacent page controls and empty-section ownership",
+      "inherited first/even/parity story and note interactions",
+      "conservative frame packing and repeated prefix measurement under adverse chains",
+      "original font/script/PDF recovery/color/real-export acceptance requirements"
+    ],
+    "next_commands": [
+      "GOWORK=off go run ./examples/continuous-admission",
+      "output/qa-venv/bin/python scripts/verify_continuous_admission.py --office",
+      "GOWORK=off go test -run 'TestPDFContinuous|FuzzContinuousAdmission' .",
+      "rg -n 'pendingPage|nextBlank|freshPage|PageBreak' pdf_sections.go sections_test.go"
     ]
   }
 }

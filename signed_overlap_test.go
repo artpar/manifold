@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"strings"
 	"testing"
@@ -219,6 +220,158 @@ func FuzzSignedRunning(f *testing.F) {
 		}
 		if !bytes.Equal(before, canonicalSF(t, d)) {
 			t.Fatal("writer mutated source")
+		}
+	})
+}
+
+func TestPDFContinuousIncompatibleStoriesStartFreshPage(t *testing.T) {
+	for _, side := range []string{"header", "footer", "both"} {
+		for _, reverse := range []bool{false, true} {
+			t.Run(fmt.Sprintf("%s/reverse=%t", side, reverse), func(t *testing.T) {
+				fixed := Layout{Width: 300, Height: 400, Margins: &PageMargins{Top: -24, Right: 30, Bottom: -24, Left: 30}, HeaderDistance: pagePoint(12), FooterDistance: pagePoint(12)}
+				minimum := fixed
+				minimum.Margins = &PageMargins{Top: 24, Right: 30, Bottom: 24, Left: 30}
+				image := Block{Kind: Picture, Image: &Image{MediaType: "image/png", Data: runningPNG(t, false), Width: 100, Height: 370}}
+				blank := RunningStories{Default: &RunningStory{}}
+				a := &Section{Layout: &fixed, Headers: blank, Footers: blank, Blocks: []Block{sectionParagraph("FIXED BODY")}}
+				if side != "footer" {
+					a.Headers = RunningStories{Default: &RunningStory{Blocks: []Block{image}}}
+				}
+				if side != "header" {
+					a.Footers = RunningStories{Default: &RunningStory{Blocks: []Block{image}}}
+				}
+				b := &Section{Layout: &minimum, FirstPage: true, Headers: RunningStories{Default: sectionStory("MIN DEFAULT"), First: sectionStory("MIN FIRST")}, Footers: blank, Blocks: []Block{sectionParagraph("MIN BODY")}}
+				first, second := a, b
+				if reverse {
+					first, second = b, a
+				}
+				first.Blocks[0].Runs = append(first.Blocks[0].Runs, Run{Note: &NoteReference{Kind: Footnote, ID: "old"}})
+				second.Start = SectionContinuous
+				third := &Section{Start: SectionContinuous, Layout: second.Layout, Headers: blank, Footers: blank, Blocks: []Block{sectionParagraph("SHARED BODY")}}
+				d := &Document{Blocks: []Block{{Kind: SectionBlock, Section: first}, {Kind: SectionBlock, Section: second}, {Kind: SectionBlock, Section: third}}, Notes: []Note{{Kind: Footnote, ID: "old", Blocks: []Block{sectionParagraph("OLD NOTE")}}}}
+				before := canonicalSF(t, d)
+				var out bytes.Buffer
+				if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+					t.Fatal("individually feasible stories must paginate", err)
+				}
+				back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+				if err != nil {
+					t.Fatal(err)
+				}
+				if len(back.Pages) != 2 {
+					t.Fatal("expected fresh incompatible page and compatible successor sharing", len(back.Pages), back.Text())
+				}
+				for _, text := range []string{"FIXED BODY", "MIN BODY", "SHARED BODY", "OLD NOTE", "MIN FIRST"} {
+					if strings.Count(back.Text(), text) != 1 {
+						t.Fatal("visible content lost or repeated", text, back.Text())
+					}
+				}
+				images := 0
+				for _, block := range back.Blocks {
+					if block.Image != nil {
+						images++
+						if math.Abs(block.Image.Height-370) > .01 {
+							t.Fatal("fixed background shrank to share incompatible page", block.Image.Height)
+						}
+					}
+					for _, run := range block.Runs {
+						if run.Text == "SHARED BODY" && run.Source.Page != 2 || run.Text == "OLD NOTE" && run.Source.Page != 1 {
+							t.Fatal("partition reassigned note/body ownership", run.Text, run.Source)
+						}
+					}
+				}
+				wantImages := 1
+				if side == "both" {
+					wantImages = 2
+				}
+				if images != wantImages {
+					t.Fatal("running asset loss", images)
+				}
+				if !bytes.Equal(before, canonicalSF(t, d)) {
+					t.Fatal("pagination mutated source start or image preferences")
+				}
+				checkParagraphRoundtrip(t, d)
+			})
+		}
+	}
+}
+
+func TestPDFContinuousAdmissionReservesActualBodyFloor(t *testing.T) {
+	fixed := Layout{Width: 300, Height: 400, Margins: &PageMargins{Top: -24, Right: 30, Bottom: -24, Left: 30}, HeaderDistance: pagePoint(12), FooterDistance: pagePoint(12)}
+	positive := fixed
+	positive.Margins = &PageMargins{Top: 24, Right: 30, Bottom: 24, Left: 30}
+	large := sectionParagraph("BIG")
+	large.Runs[0].FontSize = 40
+	d := &Document{Blocks: []Block{
+		{Kind: SectionBlock, Section: &Section{Layout: &fixed, Headers: RunningStories{Default: &RunningStory{Blocks: []Block{{Kind: Picture, Image: &Image{MediaType: "image/png", Data: runningPNG(t, false), Width: 100, Height: 340}}}}}, Blocks: []Block{sectionParagraph("FIXED BODY")}}},
+		{Kind: SectionBlock, Section: &Section{Layout: &positive, Start: SectionContinuous, Headers: RunningStories{Default: &RunningStory{}}, Blocks: []Block{large}}},
+	}}
+	var out bytes.Buffer
+	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(back.Pages) != 2 || strings.Count(back.Text(), "BIG") != 1 {
+		t.Fatal("positive but insufficient shared frame", back.Text(), len(back.Pages))
+	}
+}
+
+func FuzzContinuousAdmission(f *testing.F) {
+	f.Add(uint16(370), uint16(360), byte(3))
+	f.Add(uint16(340), uint16(120), byte(0))
+	blob := runningPNG(f, false)
+	f.Fuzz(func(t *testing.T, head, foot uint16, flags byte) {
+		fixed := Layout{Width: 300, Height: 400, Margins: &PageMargins{Top: -24, Right: 30, Bottom: -24, Left: 30}, HeaderDistance: pagePoint(12), FooterDistance: pagePoint(12)}
+		positive := fixed
+		positive.Margins = &PageMargins{Top: 24, Right: 30, Bottom: 24, Left: 30}
+		picture := func(h uint16) *RunningStory {
+			return &RunningStory{Blocks: []Block{{Kind: Picture, Image: &Image{MediaType: "image/png", Data: blob, Width: 100, Height: float64(h%15 + 355)}}}}
+		}
+		blank := RunningStories{Default: &RunningStory{}}
+		a := &Section{Layout: &fixed, Headers: RunningStories{Default: picture(head)}, Footers: RunningStories{Default: picture(foot)}, Blocks: []Block{sectionParagraph("FIXED")}}
+		b := &Section{Layout: &positive, Headers: blank, Footers: blank, Blocks: []Block{sectionParagraph("POSITIVE")}}
+		b.Blocks[0].Runs[0].FontSize = float64(flags%30 + 11)
+		first, second := a, b
+		if flags&1 != 0 {
+			first, second = b, a
+		}
+		second.Start = SectionContinuous
+		first.Blocks[0].Runs = append(first.Blocks[0].Runs, Run{Note: &NoteReference{Kind: Footnote, ID: "old"}})
+		d := &Document{Blocks: []Block{{Kind: SectionBlock, Section: first}, {Kind: SectionBlock, Section: second}}, Notes: []Note{{Kind: Footnote, ID: "old", Blocks: []Block{sectionParagraph("NOTE")}}}}
+		before := canonicalSF(t, d)
+		var out bytes.Buffer
+		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
+			t.Fatal("feasible sections must render", err)
+		}
+		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(back.Pages) > 2 {
+			t.Fatal("unnecessary extra pages", len(back.Pages))
+		}
+		for _, text := range []string{"FIXED", "POSITIVE", "NOTE"} {
+			if strings.Count(back.Text(), text) != 1 {
+				t.Fatal("content lost or repeated", text, back.Text())
+			}
+		}
+		images := 0
+		for _, b := range back.Blocks {
+			if b.Image != nil {
+				images++
+				if math.Abs(b.Image.Height-float64(head%15+355)) > .01 && math.Abs(b.Image.Height-float64(foot%15+355)) > .01 {
+					t.Fatal("fixed story refitted", b.Image.Height)
+				}
+			}
+		}
+		if images != 2 {
+			t.Fatal("asset placements lost or repeated", images)
+		}
+		if !bytes.Equal(before, canonicalSF(t, d)) {
+			t.Fatal("source mutated")
 		}
 	})
 }

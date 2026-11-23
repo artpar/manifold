@@ -21,7 +21,45 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: signed running overlap and foreground preservation
+## Latest milestone: continuous story admission across incompatible frames
+
+- Individually valid fixed/minimum running stories now generate PDFs even when
+  they cannot share one body frame. Compatible whole chains retain their output;
+  incompatible chains admit compatible prefixes, then drain old notes and open a
+  fresh physical page for the next group. No source start setting or preferred
+  asset size changes. Compatible successors may share that new page again.
+- Candidate plans use copies and their own body floors. Failed group refits do
+  not leak into accepted plans. Admission checks actual minimum body height,
+  including large text and notes, rather than only a nonempty interval. Invalid
+  individual sections still fail atomically; context errors propagate.
+- Regressions cover header/footer/both conflicts in both directions, restored
+  successor sharing, note ownership, preferred 370pt images and a nonempty frame
+  too short for a 40pt line. Valid admission fuzz completes 1,000 executions.
+- `examples/continuous-admission` runs all four paths for four cases, including a
+  32-paragraph continued note. Independent readers verify thirteen native pages,
+  nine original RGBA placements, signed/continuous DOCX fields, exact source SF,
+  recovered image quads, URI/actual note targets and foreground pixels. Thirteen
+  native and eight producer pages were visually inspected. Producer output keeps
+  body/notes but follows different shared-page running ownership/packing: only
+  five picture placements appear, and new first stories may stay unapplied on an
+  already-open page. This does not establish Word-equivalent layout.
+- Full tests and race pass; vet, modules, host/Linux CGO-disabled builds, all four
+  host CLI paths, actual ProseMirror schema and malformed DOCX checks pass. See
+  TESTING.md/verification.json for commands/results. A fresh pinned f9f7fcf build
+  proves twenty-seven earlier PDF page streams/eight DOCX packages remain exact.
+
+The goal remains **incomplete**, with no external blocker. Next qualify leading,
+trailing and adjacent explicit page controls and empty-section ownership across
+continuous/parity boundaries, inherited first/even stories and note continuation.
+The shared-frame planner remains conservative; fallback admission can remeasure
+prefixes repeatedly and is not a globally minimal page-packing algorithm. Broader
+page/note bindings, fonts/scripts/PDF recovery and real exports remain required.
+Next commands: `GOWORK=off go run ./examples/continuous-admission`;
+`output/qa-venv/bin/python scripts/verify_continuous_admission.py --office`;
+`GOWORK=off go test -run 'TestPDFContinuous|FuzzContinuousAdmission' .`;
+`rg -n 'pendingPage|nextBlank|freshPage|PageBreak' pdf_sections.go sections_test.go`.
+
+## Previous milestone: signed running overlap and foreground preservation
 
 - Negative top/bottom margins now keep the body's absolute edge while allowing
   contained running content to overlap it. Positive edges still grow around their
@@ -54,11 +92,9 @@ compatibility has not been established. No Daptin files were changed.
   changed to hide a failure; the old signed-overlap rejection became positive
   fixed-baseline and preservation assertions as the capability was implemented.
 
-The goal remains **incomplete**, with no external blocker. Next resolve continuous
-chains whose large fixed background and later minimum-margin story have no common
-vertical envelope (currently an explicit error); partition/refit/page admission
-must preserve both stories and note contexts. Then qualify controls/empty-section
-ownership, broader page/note bindings, fonts/scripts/PDF recovery and real exports.
+The common-envelope error recorded at this checkpoint is now resolved by the
+continuous admission milestone above. Controls/empty-section ownership, broader
+page/note bindings, fonts/scripts/PDF recovery and real exports remain open.
 Next commands: `GOWORK=off go run ./examples/signed-overlap`;
 `output/qa-venv/bin/python scripts/verify_signed_overlap.py --office`;
 `GOWORK=off go test -run 'TestPDFSigned|TestFixedBlank|FuzzSignedRunning' .`;

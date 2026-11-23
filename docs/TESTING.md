@@ -1813,3 +1813,66 @@ The overall goal remains incomplete. Continuous chains with incompatible common
 fixed/minimum story envelopes currently error, even where a fresh page could
 accommodate them. Partition/admission, control/empty-section ownership, broader
 font/script/PDF recovery and real-export requirements remain necessary work.
+
+
+## Continuous story admission and actual body floors (2026-11-24)
+
+The previous incompatible common-envelope rejection is now implemented away.
+`TestPDFContinuousIncompatibleStoriesStartFreshPage` preserves headers/footers/both
+at their original 370pt height in either section order, keeps old notes on their
+own page, then allows compatible successors to share again. A separate regression
+requires a fresh page when the common interval is positive but too short for a
+40pt line. Canonical SF/DOCX remains exact, including continuous starts.
+
+```sh
+GOWORK=off go run ./examples/continuous-admission
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-continuous-admission-qa --headless --convert-to pdf --outdir output/continuous-admission/office output/continuous-admission/*.docx
+output/qa-venv/bin/python scripts/verify_continuous_admission.py --office
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/continuous-admission/*.sf
+GOWORK=off go test ./...
+GOWORK=off go test -race ./...
+GOWORK=off go vet ./...
+GOWORK=off go test -run '^$' -fuzz '^FuzzContinuousAdmission$' -fuzztime 1000x -parallel 2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime 500x -parallel 2 .
+GOWORK=off go mod verify
+git diff --check
+```
+
+Four examples pass all four library and CGO-disabled host CLI paths. Independent
+checks verify thirteen native physical pages, nine original RGBA placements and
+recovered quads, exact DOCX SF, metadata/signed fields/continuous starts, URI and
+actual note targets, foreground black pixels and all body/note content. All 32
+long-note paragraphs finish before the new frame opens. Actual ProseMirror checks
+pass twenty SF files (815 nodes/marks/attributes). The CLI's thirteen page streams
+match the library; its recovered SF retains all page/image counts.
+
+Thirteen native and eight LibreOffice pages were visually inspected. That producer
+keeps body/notes (including all 32 continued paragraphs) but leaves the minimum-
+first later fixed backgrounds unapplied on the already-open page. It emits five
+picture placements rather than native nine, does not apply later first stories
+on shared pages, and continues notes while later section bodies share that page.
+These observations qualify separate producer ownership/packing behaviors; they do
+not establish native/Word visual equivalence. Original source oracles remain.
+
+Full tests pass (library 7.209s, CLI/bidi cached in the final uncached-library run;
+subsequent full run passes from cache). Full race passes (library 109.448s, CLI
+1.673s, bidi 13.804s); `go run -race ./examples/continuous-admission` also passes.
+Vet/module verification pass. Host and Linux amd64/arm64 CGO-disabled builds pass;
+only the host binary was executed. Valid admission fuzz completes 1,000 cases
+(10.134s); malformed DOCX completes 500 (1.483s). Ignored evidence/logs are in
+`output/continuous-admission`; independent verification writes `independent.json`.
+
+Fresh pinned f9f7fcf CLI output matches twenty-seven earlier PDF page streams and
+eight complete DOCX packages: sections/continuous/continuous-geometry plus all five
+signed-overlap examples. Reproduce with a detached `output/admission-parent`
+worktree, build from there into `../../bin/admission-parent`, and render unchanged
+example SFs with both CLIs into `parent-{name}`/`current-{name}` PDF/DOCX pairs in
+the admission output directory. The verifier compares raw operators without
+stripping font selections. Remove the clean worktree afterward.
+
+Overall acceptance is still incomplete. Next exercise leading/trailing/adjacent
+page controls, empty-section ownership and first/even/parity/note interactions.
+The planner conservatively reserves group frames and may repeat prefix refits;
+minimal packing and adverse-chain performance remain unqualified, alongside the
+original font/script/PDF recovery/color/real-export requirements.

@@ -796,8 +796,8 @@ settings and original assets remain unchanged.
 In continuous chains a signed edge retains its own absolute offset. Positive
 edges reserve actual possible running envelopes. Incompatible pending note
 intervals drain before a new frame binds, rather than moving already-measured note
-fragments into a smaller interval. Common-envelope packing can still reject large
-fixed/minimum mixtures; partition/refit/admission remains required work.
+fragments into a smaller interval. Incompatible common envelopes now partition
+into feasible groups before painting; see continuous admission below.
 
 Header backgrounds already precede body painting. A chain with a fixed footer
 also paints its opened-page footer in that background phase, preserving body/note
@@ -806,3 +806,23 @@ only footer behavior is unchanged. Raw paint order may change for signed footers
 physical source quads remain evidence, not authored running-story reconstruction.
 Raster QA checks foreground ink and alpha samples alongside source/relationship/
 asset and page checks. Producer compositing and pagination remain qualified.
+
+
+## Continuous running-story admission
+
+`planContinuousGroup` calculates candidate bounds on copies, refits positive
+stories against the candidate body floor, restores signed edges and requires
+space for that floor. A failed candidate leaves original independently feasible
+plans unchanged. `planSections` first tries the whole same-paper continuous chain
+so established compatible output stays exact. On incompatibility it greedily
+extends feasible prefixes, marking each later group's first plan `freshPage`.
+Errors from individual sections and cancellation still propagate.
+
+Rendering uses the existing transition that flushes/drains old notes before
+binding a pending page owner. A group boundary starts with the new section's
+first-page story and local page one; compatible successors may share again.
+`freshPage` is renderer state, never a mutation of canonical continuous-start
+intent or DOCX section properties. Running assets retain their source sizes.
+The frame strategy remains conservative, not globally minimal packing; fallback
+prefix refitting may repeat measurements (quadratic work in an adverse chain).
+Control/empty-section ownership and broader real-export qualification remain open.

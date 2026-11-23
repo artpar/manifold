@@ -767,7 +767,19 @@ Five examples preserve exact source SF/DOCX, including the 370pt fixed images,
 with nine native pages/eighteen RGBA placements and seven inspected producer pages/
 fourteen placements. Pixel probes verify foreground black ink and translucent
 background samples. Producer pagination/positions and large cross-story alpha
-composition differ. Common-envelope errors for certain continuous fixed/minimum
-mixtures, control/empty-section ownership, richer binding/note behavior and broader
-real-export/Word qualification stay required. Fixed out-of-canvas text rejects atomically;
+composition differ. Continuous fixed/minimum common-envelope errors are resolved
+by admission below. Control/empty-section ownership, richer binding/note behavior
+and broader real-export/Word qualification stay required. Fixed out-of-canvas text rejects atomically;
 intentional in-canvas overlap is no longer a generic unsupported-output exception.
+
+
+Individually feasible continuous stories with incompatible shared envelopes now
+start fresh native pages rather than fail conversion. Groups reserve the actual
+body floor; old notes finish with their old page/frame and new first stories own
+the fresh page. Canonical SF/DOCX continuous starts and picture preferences remain
+unchanged. Four independent cases preserve thirteen native pages/nine raster
+placements and all body/note content. LibreOffice retains continuous shared-page
+ownership in these sources: eight pages/five placements, including no later fixed
+backgrounds in the minimum-first case. Producer running-story visibility and
+pagination differences are explicit qualification limits. Conservative packing,
+control/empty ownership, broader page/note/font/recovery and corpus work remain.
