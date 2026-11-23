@@ -6,6 +6,7 @@ from docx import Document
 from pathlib import Path
 from pypdf import PdfReader
 import pymupdf
+from font_oracles import verify_go_program
 
 out=Path('output/glyphs')
 word=Document(out/'glyphs.docx')
@@ -30,8 +31,10 @@ for page in r.pages:
   cid=f['/DescendantFonts'][0].get_object();assert cid['/Subtype']=='/CIDFontType2'
   desc=cid['/FontDescriptor'];family=str(desc['/FontFamily'])
   raw=desc['/FontFile2'].get_data()
-  source=Path('testdata/assets')/('NotoSans-Regular.ttf' if family=='Noto Sans' else 'DejaVuSans.ttf')
-  assert hashlib.sha256(raw).digest()==hashlib.sha256(source.read_bytes()).digest()
+  if family=='Go':verify_go_program(str(f['/BaseFont'])[1:],raw)
+  else:
+   source=Path('testdata/assets')/('NotoSans-Regular.ttf' if family=='Noto Sans' else 'DejaVuSans.ttf')
+   assert hashlib.sha256(raw).digest()==hashlib.sha256(source.read_bytes()).digest()
   assert desc['/FontFile2']['/Length1']==len(raw)
   mapping=cid['/CIDToGIDMap'].get_data();assert len(mapping)%2==0
   assert len(mapping)>2 and any(mapping[2:])
@@ -39,7 +42,7 @@ for page in r.pages:
   if family=='DejaVu Sans':assert b'D83DDE00' in unicode_map
   if family=='Noto Sans':assert b'00420315' in unicode_map and b'005A035C' in unicode_map
   seen[family]=(obj.idnum,len(raw))
-assert set(seen)=={'Noto Sans','DejaVu Sans'}
+assert set(seen)=={'Noto Sans','DejaVu Sans','Go'}
 for family in seen:
  refs=[]
  for page in r.pages:
@@ -60,8 +63,8 @@ with pymupdf.open(out/'glyphs.pdf') as doc:
  # The actual supplementary GID must come from the original program's cmap.
  expected=pymupdf.Font(fontfile='testdata/assets/DejaVuSans.ttf').has_glyph(0x1F600)
  assert expected>0
- glyph_ids=[c[1] for p in doc for s in p.get_texttrace() if s['font']=='DejaVuSans' for c in s['chars']]
- assert glyph_ids and set(glyph_ids)=={expected}
+ glyph_ids=[c[1] for p in doc for s in p.get_texttrace() if s['font']=='DejaVuSans' for c in s['chars'] if c[0]==0x1F600]
+ assert len(glyph_ids)==5 and set(glyph_ids)=={expected}
  # Reference shaping is MuPDF's HTML/Story engine, independent of the Go port.
  # Compare original GIDs and relative GPOS offsets, not merely extracted text.
  ref=pymupdf.open();p=ref.new_page(width=200,height=100)

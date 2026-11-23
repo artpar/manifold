@@ -8,6 +8,7 @@ from docx import Document
 from lxml import etree
 from pypdf import PdfReader
 import pymupdf
+from font_oracles import verify_go_program
 
 p=argparse.ArgumentParser()
 p.add_argument('directory',nargs='?',type=Path,default=Path('output/text-style'))
@@ -30,9 +31,17 @@ with ZipFile(out/'text-style.docx') as z:
 reader=PdfReader(out/'text-style.pdf',strict=True)
 assert len(reader.pages)==4
 fonts=[v.get_object() for v in reader.pages[0]['/Resources']['/Font'].values()]
-assert len(fonts)==4
+glyph_fonts=[v.get_object() for key,v in reader.pages[0]['/Resources']['/Font'].items() if str(key).startswith('/MDG')]
+# Four configured faces are used. App Sans deliberately supplies the same Go
+# Regular program as the default, so actual physical names correctly coincide.
+assert len(glyph_fonts)==4
+assert sorted(str(f['/BaseFont']) for f in glyph_fonts)==['/Go-Bold','/GoMono','/GoRegular','/GoRegular']
+for f in glyph_fonts:
+ desc=f['/DescendantFonts'][0].get_object()['/FontDescriptor']
+ verify_go_program(str(f['/BaseFont'])[1:],desc['/FontFile2'].get_data())
+assert (out/'app-sans.ttf').read_bytes() in [f['/DescendantFonts'][0].get_object()['/FontDescriptor']['/FontFile2'].get_data() for f in glyph_fonts]
 assert all('/FontFile2' in f['/DescendantFonts'][0].get_object()['/FontDescriptor'] for f in fonts)
-mono=next(f for f in fonts if str(f['/BaseFont'])=='/utf8manydoc4')
+mono=next(f for f in glyph_fonts if str(f['/BaseFont'])=='/GoMono')
 assert int(mono['/DescendantFonts'][0].get_object()['/FontDescriptor']['/Flags'])&1
 links=[]
 for i,page in enumerate(reader.pages):
@@ -50,11 +59,11 @@ with pymupdf.open(out/'text-style.pdf') as doc:
         found=[s for s in spans if s['text']==name];assert len(found)==1,(name,found);return found[0]
     for name,size,color in [('COLOR_AND_SIZE',24,0x224488),('LARGE ',28,0xBB2233),('small ',10,0x333333),('linked',18,0x2255CC),('LARGE_LIST',18,0x007777),('STYLED_NOTE',14,0x006633),('CUSTOM_FACE',14,0x225588)]:
         s=one(name);approx(s['size'],size);assert s['color']==color,(name,s)
-    assert len({one(name)['font'] for name in ('LARGE ','small ','CUSTOM_FACE')})==3
+    assert [one(name)['font'] for name in ('LARGE ','small ','CUSTOM_FACE')]==['GoRegular','GoMono','GoRegular']
     for name in ('LARGE ','small ','linked'):approx(one(name)['origin'][1],101.2)
     assert one('COLOR_AND_SIZE')['flags']&16
     for name in ['LARGE_LIST',*(f'CELL_{i:02d}' for i in range(6))]:
-        assert one(name)['font']=='utf8manydoc4'
+        assert one(name)['font']=='GoMono'
     raw=[s for b in doc[0].get_text('rawdict')['blocks'] for line in b.get('lines',[]) for s in line['spans']]
     chars=next(s['chars'] for s in raw if ''.join(c['c'] for c in s['chars'])=='small ')
     for x,y in zip(chars,chars[1:]):approx(y['origin'][0]-x['origin'][0],6)

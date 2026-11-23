@@ -2154,7 +2154,7 @@
     "fixture_oracle_changed": false,
     "external_blocker": null
   },
-  "latest_milestone": "language_direction_ltr_shaping",
+  "latest_milestone": "default_text_shaping",
   "language_direction_ltr_shaping": {
     "date": "2026-11-23",
     "goal_complete": false,
@@ -2275,6 +2275,137 @@
       "GOWORK=off go doc golang.org/x/text/unicode/bidi"
     ],
     "fixture_oracle_changed": false,
+    "external_blocker": null
+  },
+  "default_text_shaping": {
+    "date": "2026-11-23",
+    "goal_complete": false,
+    "prior_checkpoint": "f96ebe9",
+    "implementation": "all ordinary authored text shapes without a language activation tag; empty language is und",
+    "runtime_public_schema_dependency_asset_change": false,
+    "renamed": "pdf_language.go -> pdf_shaping.go",
+    "checks": {
+      "go_test_all": {
+        "passed": true,
+        "library_seconds": 7.901,
+        "cli_seconds": 0.816,
+        "log": "output/default-shaping-final-tests.log"
+      },
+      "go_race_all": {
+        "passed": true,
+        "library_seconds": 79.931,
+        "cli_seconds": 1.819,
+        "log": "output/default-shaping-final-race.log"
+      },
+      "go_vet": "passed",
+      "cgo_disabled_cli": "built darwin/arm64 and executed default PDF -> SF",
+      "diff_check": "passed",
+      "fuzz": {
+        "DefaultPDFText": {
+          "passed": true,
+          "executions": 529,
+          "target_executions": 500,
+          "seconds": 18.36
+        },
+        "PDFGlyphFont": {
+          "passed": true,
+          "executions": 500,
+          "seconds": 1.525
+        },
+        "PDFTextLayout": {
+          "passed": true,
+          "executions": 1005,
+          "target_executions": 1000,
+          "seconds": 2.697
+        },
+        "ReadPDF": {
+          "passed": true,
+          "executions": 500,
+          "seconds": 1.806
+        }
+      },
+      "prosemirror_examples": {
+        "passed": true,
+        "files": 4,
+        "nodes": 81
+      },
+      "prosemirror_corpus": {
+        "passed": true,
+        "files": 51,
+        "nodes": 9031
+      },
+      "poppler_text": {
+        "passed": 28,
+        "total": 28
+      },
+      "independent_regressions": [
+        "rich text style",
+        "glyph/mark/supplementary transport",
+        "language and locale",
+        "DOCX font slots",
+        "DOCX theme colors",
+        "15 typography spacing/control cases",
+        "two-page report"
+      ]
+    },
+    "independent": {
+      "script": "scripts/verify_default_shaping.py",
+      "glyph_oracle": "native HarfBuzz 15.0.0 via existing QA-only uharfbuzz",
+      "untagged_runs": 24,
+      "ligature_runs": 6,
+      "coordinate_tolerance_pt": 1e-06,
+      "original_programs": [
+        "Go Regular",
+        "Go Mono",
+        "Noto Sans"
+      ],
+      "checks": [
+        "original SHA256s/full programs/shared resources",
+        "actual GIDs/encoded positions",
+        "no language activation metadata",
+        "emergency ffi -> f/f/i",
+        "marked figure-space positioning",
+        "DOCX body/table/note/URI",
+        "PDF metadata/URI/note destinations/running content"
+      ],
+      "native_pages": 4,
+      "office_pages": 2,
+      "pages_visually_inspected": 6,
+      "office_all_tokens_and_running_content": "passed",
+      "Word_or_bidi_equivalence_claimed": false
+    },
+    "oracle_preservation": {
+      "font_provenance": "new descriptor plus independent primitive embedded-name fixture",
+      "raw_private_alias_checks": "replaced with original Go-font module hashes/physical names; App Sans intentionally uses the same original Go Regular bytes",
+      "spacing": "same primitive virtual-space widths; A comes from its actual shaped original program",
+      "decoration": "unchanged continuity oracle caught fragmented strokes; production now joins adjacent same-style spans",
+      "version": "shaped files explicitly 1.7; independent control-only ActualText remains 1.4",
+      "corpus_fixture_or_visible_content_changed": false
+    },
+    "benchmark": {
+      "iterations": 5,
+      "bytes_per_pdf": 71869,
+      "prior_primitive_bytes": 10896,
+      "observed_ns_per_op": 9393200,
+      "observed_bytes_per_op": 6368619,
+      "observed_allocs_per_op": 5616,
+      "timing_scope": "observational concurrent qualification load, not a throughput claim",
+      "log": "output/default-shaping-final-benchmark.log"
+    },
+    "limitations": [
+      "full original font size overhead for ordinary output",
+      "fixed-Go internal note labels/captions and virtual controls retain primitives",
+      "existing shaping segment/inventory/grapheme resource bounds",
+      "bidi/joining and differing-style/font/language context",
+      "complete script itemization and broader font admission/source fonts",
+      "remaining rich pages/running content/PDF recovery/color and real exports"
+    ],
+    "next_commands": [
+      "GOWORK=off go run ./examples/shaping",
+      "output/qa-venv/bin/python scripts/verify_default_shaping.py",
+      "rg -n \"shapeTextLine|resolveShapingScripts|Direction|cluster\" pdf_shaping.go pdf_direction.go pdf_glyph.go",
+      "GOWORK=off go doc golang.org/x/text/unicode/bidi"
+    ],
     "external_blocker": null
   }
 }

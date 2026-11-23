@@ -143,8 +143,8 @@ func TestPDFTypographyLogicalTextAndGeometry(t *testing.T) {
 	if e := Write(context.Background(), &output, doc, PDF, WriteOptions{}); e != nil {
 		t.Fatal(e)
 	}
-	if !bytes.HasPrefix(output.Bytes(), []byte("%PDF-1.4")) {
-		t.Fatal("ActualText output did not declare PDF 1.4")
+	if !bytes.HasPrefix(output.Bytes(), []byte("%PDF-1.7")) {
+		t.Fatal("Shaped ActualText output did not declare PDF 1.7")
 	}
 	got, e := ReadPDF(context.Background(), bytes.NewReader(output.Bytes()), ReadOptions{})
 	if e != nil {

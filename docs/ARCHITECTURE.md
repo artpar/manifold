@@ -469,7 +469,7 @@ or containing supplementary codepoints, use pinned textlayout HarfBuzz. Position
 are em-normalized; advance and actual glyph extents feed the shared layout engine.
 Fonts and buffers are renderer-owned, default shaping language is und, and no
 process-global configuration is changed. Unsupported paragraph scripts/directions
-stay guarded until a paragraph shaper exists. A 1,024-scalar grapheme and 65,535-CID
+stay guarded until paragraph bidi/joining is qualified. A 1,024-scalar grapheme and 65,535-CID
 per-face inventory are explicit resource bounds; offset coordinates are checked.
 
 Painting uses explicit glyph origins under a shared quantized baseline, preserving
@@ -482,7 +482,8 @@ page resources by the existing in-process pdfcpu writer. Shared programs/resourc
 are not duplicated per page. Existing font admission/embedding restrictions remain
 conservative; color/CFF/collection/font-variation expansion is still required.
 
-Simple text keeps its existing subset/primitives and skips PDF rewriting entirely.
+Ordinary authored text now uses the glyph graph. Virtual controls and internal
+fixed-Go note labels/captions retain primitives; control-only files skip rewriting.
 Renderer font entries retain their catalog key to avoid linear lookup while choosing
 between paths. Errors, cancellation and recovered dependency panics occur before
 writing caller output. Dependency shaping observes bounded graphemes and context
@@ -504,13 +505,20 @@ become ltr, independently from absent properties. Do not treat ltr as a bidi
 override. Retained flags no longer independently trigger selector-loss diagnostics.
 
 pdf_direction.go preflights all stories before writing unsupported RTL. The
-language-tagged LTR path in pdf_language.go resolves adjacent weak scripts, shapes
+LTR path in pdf_shaping.go resolves adjacent weak scripts, shapes
 same-style/script segments and measures actual HB clusters. Ligature advances are
 apportioned among source graphemes only to estimate emergency breaks. Final lines
 are freshly shaped and width checked, backing off on overflow; stale sliced glyphs
 never paint. Notes remain attached to their preceding atomic anchor. Distinct
 styles/scripts/controls bound segments. pdf_glyph.go maps each resulting cluster
 to its original logical text for ToUnicode while retaining complete-span ActualText.
-General/EA/forced-CS language reaches the shaping buffer. Untagged simple text
-retains existing primitives. This remains a staged LTR implementation; bidi levels,
-joining/style context, default-path unification and broader scripts are unfinished.
+General/EA/forced-CS language reaches the shaping buffer; empty language uses
+deterministic und, with the same contextual shaping for ordinary authored text. This remains a staged LTR implementation; bidi levels,
+joining/style context and broader scripts are unfinished.
+
+
+Decoration painting is independent of glyph/control segmentation: adjacent spans
+with the same authored style share one continuous underline/strike stroke. Marked
+special-space graphemes retain their previous glyph-positioned path. Original full
+TTF overhead now applies to ordinary output; do not bypass shaping to reduce bytes.
+A future glyph subsetter must preserve real GIDs/positions/logical mappings.

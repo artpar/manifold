@@ -61,3 +61,7 @@ This is an original third-party asset, not a generated font or customer file.
 The optional QA environment additionally pins uharfbuzz 0.57.0 to compare native
 HarfBuzz 15.0.0 with actual Go-generated GIDs/positions. This is a development-only
 reader/oracle, not a Go runtime dependency or required conversion executable.
+
+`scripts/font_oracles.py` records SHA256 values of original Go programs from the
+pinned x/image v0.32.0 byte constants. These QA facts qualify actual embedded
+programs independently of PDF resource aliases; no new font asset is vendored.

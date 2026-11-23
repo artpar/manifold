@@ -423,6 +423,7 @@ into these values, including explicit false direction overrides and independentl
 inherited language slots. Standard w:bidi/w:rtl/w:lang/w:cs exports them. Latent
 font choices, theme/hint bindings and other unrepresented properties still
 diagnose. PDF does not currently recover/persist these editing bindings.
-Language-tagged LTR PDF uses contextual run shaping and re-shapes final lines;
+Ordinary LTR PDF uses contextual run shaping and re-shapes final lines, with und
+when the language binding is absent;
 RTL/joining/bidi, context across differing styles and broader script/language
-qualification remain required. Untagged ordinary text still uses the legacy path.
+qualification remain required. Language attributes affect locale; they are not an activation flag for typography.

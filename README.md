@@ -227,3 +227,10 @@ language bindings and independent paragraph/run direction in SF/DOCX. Native PDF
 examples qualify language-tagged LTR localization, kerning, ligatures and re-shaping
 after wrapping. Optional QA: `output/qa-venv/bin/python scripts/verify_language.py`.
 RTL PDF and broader contextual/script/style shaping remain unfinished.
+
+
+`GOWORK=off go run ./examples/shaping` demonstrates ordinary default text with
+kerning, ligatures and final-line re-shaping; language tags are optional. QA:
+`output/qa-venv/bin/python scripts/verify_default_shaping.py`. Full original font
+embedding increases small PDF size. Bidi/joining and differing-style/font context
+remain required work; this is not a Word-equivalent layout engine.

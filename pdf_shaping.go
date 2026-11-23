@@ -18,11 +18,11 @@ func pdfAdvance(line pdfLine) float64 {
 	}
 	return width
 }
-func languageSpan(span pdfSpan) bool {
-	return span.run.Note == nil && span.glyphs != nil && pdfLanguageGlyph(span.run, span.text)
+func shapingSpan(span pdfSpan) bool {
+	return span.run.Note == nil && span.glyphs != nil && pdfShapableText(span.text)
 }
-func languageAtom(atom pdfTextAtom) bool {
-	if len(atom.spans) == 0 || !languageSpan(atom.spans[0]) {
+func shapingAtom(atom pdfTextAtom) bool {
+	if len(atom.spans) == 0 || !shapingSpan(atom.spans[0]) {
 		return false
 	}
 	for _, span := range atom.spans[1:] {
@@ -36,15 +36,15 @@ func languageAtom(atom pdfTextAtom) bool {
 // Resolve Common/Inherited graphemes from adjacent text inside each style
 // segment. Keep distinct strong scripts separate instead of shaping a mixed
 // paragraph with whichever OpenType script happens to appear first.
-func resolveLanguageScripts(atoms []pdfTextAtom) {
+func resolveShapingScripts(atoms []pdfTextAtom) {
 	weak := func(s language.Script) bool { return s == language.Common || s == language.Inherited || s == 0 }
 	for start := 0; start < len(atoms); {
-		if !languageAtom(atoms[start]) {
+		if !shapingAtom(atoms[start]) {
 			start++
 			continue
 		}
 		end := start + 1
-		for len(atoms[end-1].spans) == 1 && end < len(atoms) && languageAtom(atoms[end]) && samePDFStyle(atoms[start].spans[0].run, atoms[end].spans[0].run) {
+		for len(atoms[end-1].spans) == 1 && end < len(atoms) && shapingAtom(atoms[end]) && samePDFStyle(atoms[start].spans[0].run, atoms[end].spans[0].run) {
 			end++
 		}
 		next := make([]language.Script, end-start)
@@ -76,15 +76,15 @@ func resolveLanguageScripts(atoms []pdfTextAtom) {
 // exact paragraph measurements; a ligature's advance is apportioned among its
 // input graphemes for emergency wrapping, then the actual chosen line is shaped
 // afresh. Never split or paint a previously shaped ligature at a guessed offset.
-func (r *pdfRenderer) measureLanguageAtoms(atoms []pdfTextAtom, size float64) error {
-	resolveLanguageScripts(atoms)
+func (r *pdfRenderer) measureShapedAtoms(atoms []pdfTextAtom, size float64) error {
+	resolveShapingScripts(atoms)
 	for start := 0; start < len(atoms); {
-		if !languageAtom(atoms[start]) {
+		if !shapingAtom(atoms[start]) {
 			start++
 			continue
 		}
 		end := start + 1
-		for len(atoms[end-1].spans) == 1 && end < len(atoms) && languageAtom(atoms[end]) && samePDFStyle(atoms[start].spans[0].run, atoms[end].spans[0].run) && atoms[start].spans[0].glyphs.script == atoms[end].spans[0].glyphs.script {
+		for len(atoms[end-1].spans) == 1 && end < len(atoms) && shapingAtom(atoms[end]) && samePDFStyle(atoms[start].spans[0].run, atoms[end].spans[0].run) && atoms[start].spans[0].glyphs.script == atoms[end].spans[0].glyphs.script {
 			end++
 		}
 		var text strings.Builder
@@ -152,16 +152,16 @@ func (r *pdfRenderer) measureLanguageAtoms(atoms []pdfTextAtom, size float64) er
 // The line boundary is a new shaping boundary. Recompute substitutions, kerning,
 // ink extents and advances before committing a line. The caller backs off and
 // retries if its paragraph measurement underestimated the final line width.
-func (r *pdfRenderer) shapeLanguageLine(line pdfLine, size float64) (pdfLine, error) {
+func (r *pdfRenderer) shapeTextLine(line pdfLine, size float64) (pdfLine, error) {
 	var result pdfLine
 	for start := 0; start < len(line); {
-		if !languageSpan(line[start]) {
+		if !shapingSpan(line[start]) {
 			result = appendPDFSpan(result, line[start])
 			start++
 			continue
 		}
 		end := start + 1
-		for end < len(line) && languageSpan(line[end]) && samePDFStyle(line[start].run, line[end].run) && line[start].glyphs.script == line[end].glyphs.script {
+		for end < len(line) && shapingSpan(line[end]) && samePDFStyle(line[start].run, line[end].run) && line[start].glyphs.script == line[end].glyphs.script {
 			end++
 		}
 		var text strings.Builder

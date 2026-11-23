@@ -1,6 +1,6 @@
 # Active goal acceptance audit
 
-Audited 2026-11-23 after the SF foundation merged-table and explicit-list and typed-note, positioned-PDF and forward-tagged-PDF and Unicode-typography/implied-paragraph/untagged-inference/painted-grid/rich-cell/body-table-continuation/recursive-table/explicit-page-break/paragraph-property/image-height/repeating-header/text-style/PDF-style-recovery/theme-color/font-slot/glyph-transport/language-LTR-shaping milestones. **Not complete.** Passing initial
+Audited 2026-11-23 after the SF foundation merged-table and explicit-list and typed-note, positioned-PDF and forward-tagged-PDF and Unicode-typography/implied-paragraph/untagged-inference/painted-grid/rich-cell/body-table-continuation/recursive-table/explicit-page-break/paragraph-property/image-height/repeating-header/text-style/PDF-style-recovery/theme-color/font-slot/glyph-transport/language-LTR-shaping/default-shaping milestones. **Not complete.** Passing initial
 checks does not satisfy the expanded user goal. No external blocker currently
 prevents continuing implementation.
 
@@ -23,7 +23,7 @@ prevents continuing implementation.
 | Robustness/final checks | Existing deterministic damaged-input tests pass; SF fuzz 177,117 executions passed; full tests/race/vet/build pass | Repeat relevant malformed-input/fuzz and final complete checks after remaining implementation |
 | Recovery documentation | STATUS/ARCHITECTURE/DECISIONS/COMPATIBILITY/STRUCTURED_FORMAT/TESTING plus verification summary | Keep current each milestone; no completion claim until every row is proven |
 
-Next implementation slices: generalize the language-tagged LTR segment/line shaper to default text and implement paragraph bidi/joining/style context, then source-font handling, then complex color/selection details
+Next implementation slices: implement paragraph bidi/joining/style context on the unified default/tagged LTR shaper, then source-font handling, then complex color/selection details
 and broader font qualification. Editable PDF device-style recovery now has ten
 independently authored span/style/baseline checks through both output formats. Family/size/
 color and configured font handling now exist with targeted checks. Repeating
@@ -45,3 +45,8 @@ tagged native LTR shaping qualifies localized GIDs, kerning, ligatures and actua
 re-shaped wrapped lines against C HarfBuzz. This narrows the implementation gap
 without completing bidi, default/style-context shaping, broader Unicode or the
 full rich-document goal. RTL rejection remains a limitation, not acceptance proof.
+
+Default authored text now shares contextual LTR glyph/line shaping without language
+metadata. Native GIDs/origins, program hashes, default font/locale equivalence,
+marked spaces and decoration continuity are qualified; bidi/style context and the
+other incomplete rows still prevent completion.

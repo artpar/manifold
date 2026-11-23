@@ -50,6 +50,8 @@ type pdfGlyphFace struct {
 	entries  []pdfGlyphCode
 }
 
+// Residual marks need glyph positioning even when their grapheme starts with
+// an explicit spacing character. Keep the pre-existing marked-space path.
 func needsGlyphOutput(text string) bool {
 	for _, ch := range norm.NFC.String(text) {
 		if ch > 0xFFFF || unicode.Is(unicode.Mn, ch) || unicode.Is(unicode.Mc, ch) || unicode.Is(unicode.Me, ch) {
@@ -59,9 +61,10 @@ func needsGlyphOutput(text string) bool {
 	return false
 }
 
-// Special spaces and break controls retain the declared width/control policy.
-func pdfLanguageGlyph(run Run, text string) bool {
-	if run.Language == "" && run.EastAsiaLanguage == "" && run.ComplexLanguage == "" {
+// Explicit spacing/break controls retain their declared layout policy. Every
+// ordinary text cluster is shaped, whether or not it carries a language binding.
+func pdfShapableText(text string) bool {
+	if text == "" {
 		return false
 	}
 	for _, ch := range text {
@@ -127,8 +130,8 @@ func (r *pdfRenderer) shapeGlyphTextScript(face pdfFontFace, text string, run Ru
 	if locale != "" {
 		b.Props.Language = language.NewLanguage(locale)
 	}
-	// This slice integrates LTR graphemes only. Paragraph joining/bidi needs the
-	// separate paragraph shaper; existing script/direction guards remain active.
+	// Current run shaping supports LTR. Paragraph joining/bidi still needs a
+	// qualified implementation; existing script/direction guards remain active.
 	if b.Props.Direction != harfbuzz.LeftToRight {
 		return nil, fmt.Errorf("%w: glyph cluster requires paragraph direction layout", ErrUnsupported)
 	}

@@ -1190,3 +1190,76 @@ inspected; all five expected text instances remain in the Office rendering. This
 is targeted scalar/content/typography QA, not full bidi or Word-equivalent fidelity.
 Default-path shaping, bidi/joining, differing-style/font/language context, full
 itemization, broader scripts and the other acceptance rows remain unfinished.
+
+
+## Default text shaping qualification
+
+```sh
+GOWORK=off go run ./examples/shaping
+output/qa-venv/bin/python scripts/verify_default_shaping.py
+GOWORK=off go test -run '^$' -fuzz '^FuzzDefaultPDFText$' -fuzztime=500x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFGlyphFont$' -fuzztime=500x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFTextLayout$' -fuzztime=1000x -parallel=2 -timeout=90s
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=500x -parallel=2 -timeout=90s
+GOWORK=off go test ./... -count=1
+GOWORK=off go test -race ./... -count=1
+GOWORK=off go vet ./...
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+bin/manydoc extract -format sf -o output/default-shaping/recovered.sf output/default-shaping/default.pdf
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/default-shaping/default.sf output/default-shaping/emergency.sf output/default-shaping/marked-space.sf output/default-shaping/recovered.sf
+GOWORK=off go test -run '^$' -bench '^BenchmarkPDFUsedFontRegistration$' -benchtime=5x
+GOWORK=off go run ./examples/text-style
+output/qa-venv/bin/python scripts/verify_text_style.py
+GOWORK=off go run ./examples/glyphs
+output/qa-venv/bin/python scripts/verify_glyphs.py
+GOWORK=off go run ./examples/typography
+output/qa-venv/bin/python scripts/verify_typography.py
+mkdir -p output/default-shaping/lo
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/default-shaping/lo-profile --headless --convert-to pdf --outdir output/default-shaping/lo output/default-shaping/default.docx
+git diff --check
+```
+
+The untagged examples contain no language activation metadata. Native HarfBuzz
+15.0.0 independently checks 24 painted runs, six with ligatures, actual GIDs and
+origins within 0.000001pt of their encoded coordinate values. Original Go, Go Mono
+and Noto program hashes and shared references are checked, along with DOCX content,
+metadata, URI/note relationships, tables and running content. The emergency example
+re-shapes ffi to f/f/i. A marked figure-space grapheme retains its positioned path.
+Four native pages and two LibreOffice pages were visually inspected; Office retains
+all expected tokens and per-page running content. This is targeted evidence.
+
+The provenance unit keeps both a generated descriptor graph and an independently
+authored gofpdf primitive graph with the original embedded-name fallback oracle.
+Typography still checks all 15 spacing/control widths, original Unicode/NFC, bounds,
+URI and continuous decorations. Its A advance now comes from the verified original
+shaped program because A is absent from the control-only subset. The decoration
+oracle initially failed: the new spans split a continuous stroke. Production now
+joins adjacent same-style decoration spans; the original continuity threshold stays.
+
+Old raw font-alias/count assertions were implementation details: the new glyph
+resources embed original programs while controls may also need subset resources.
+The updated rich-style/glyph scripts verify exact original hashes, real PS names,
+used face inventories and supplementary GIDs. App Sans was always configured with
+the same Go Regular bytes as the default; its physical name is now correctly the
+same, while the SF family/configuration and distinct resource remain. Existing
+content, page counts, baselines, sizes/colors, bounds and relationship checks stay.
+No corpus fixture or visible-content oracle was rewritten.
+
+Final full tests pass (library 7.901s, CLI 0.816s), race passes (79.931s/1.819s),
+vet and CGO-disabled build/execution pass. Default PDF round-trip fuzz completed
+529 executions (500x target, 18.360s), glyph-font mutations 500 (1.525s), layout
+1,005 (1,000x target, 2.697s), malformed PDF 500 (1.806s). Original text scalars
+except physical/authored newlines compare exactly, and recovered SF/source values
+validate. Actual ProseMirror checks 81 nodes from four new source/recovered files.
+All 51 corpus files/9,031 nodes and 28 Poppler comparisons pass. Independent rich
+style, glyph, language, DOCX font/theme-color, typography and two-page report checks
+pass. Raw logs/generated output stay ignored.
+
+The short default-font benchmark produces 71,869 bytes/PDF versus the previous
+10,896-byte primitive output. Five observed iterations report 9,393,200 ns/op,
+6,368,619 B/op and 5,616 allocs/op under concurrent qualification load; these are
+observations, not a throughput claim. Full-font overhead is now general. The
+existing 65,536-scalar shaping-segment/resource bounds remain explicit. Internal
+fixed-Go note labels/captions and virtual controls retain primitives. Bidi/joining,
+differing-style/font/language context, complete itemization, broader fonts and the
+other acceptance rows remain required; no full-goal completion is claimed.

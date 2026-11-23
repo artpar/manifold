@@ -840,3 +840,30 @@ line-order/context evidence qualifies support. A downloaded go-text/typesetting
 v0.3.4 API inspection was research only; no new module was adopted. Its line
 wrapper slices existing glyph ranges; do not assume that supplies line-boundary
 re-shaping. Generalized default/style/font/language shaping remains required.
+
+
+## 2026-11-23 Shape ordinary default text without an activation tag
+
+An absent language is und, not permission to skip shaping. Route ordinary authored
+text through the same contextual measurement and final-line shaper. Keep explicit
+spacing/control policy and the existing positioned path for residual marks on
+special-space graphemes. Keep unsupported bidi/joining guards until independently
+qualified. Internal fixed-Go note UI still uses its primitive path.
+
+Full original fonts cost bytes: the short default-face example grows from 10,896
+to 71,869 bytes. Correct outlines/GIDs/GPOS and logical cluster mappings take
+precedence over preserving the old subset fast path. A qualified glyph subsetter
+can reduce this later. No new module/runtime executable is introduced.
+
+Private subset aliases are not physical typefaces: App Sans and default Go were
+both configured with the same Go Regular bytes. Replace alias-based reader checks
+with original module-font SHA256/program/physical-name checks, retaining all content,
+formatting, geometry and relationship assertions. Keep an independent primitive
+font fixture for the reader's embedded-name fallback; the new descriptor path does
+not replace that coverage. Control-only ActualText retains its 1.4 version check.
+
+The unchanged decoration-width oracle caught three adjacent strokes where one
+continuous underline/strike had existed. Join same-style decorations in production
+instead of weakening that oracle. The spacing oracle still derives virtual widths
+from the primitive font, while A's actual advance now comes from its verified
+original shaped program (A is no longer needed in the control-only subset).

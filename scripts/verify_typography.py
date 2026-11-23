@@ -7,10 +7,12 @@ import math
 from pypdf import PdfReader
 from pypdf.generic import ContentStream
 import pymupdf
+import uharfbuzz as hb
+from font_oracles import verify_go_program
 
 parser=argparse.ArgumentParser();parser.add_argument('directory',nargs='?',type=Path,default=Path('output/typography'))
 a=parser.parse_args();root=a.directory
-assert (root/'typography.pdf').read_bytes().startswith(b'%PDF-1.4')
+assert (root/'typography.pdf').read_bytes().startswith(b'%PDF-1.7')
 r=PdfReader(root/'typography.pdf',strict=True)
 sf=json.loads((root/'typography.sf').read_text())
 assert r.metadata.title=='Unicode typography' and len(r.pages)==1
@@ -26,6 +28,14 @@ while i<len(w):
         end=int(w[i]);value=float(w[i+1]);i+=2
         for code in range(start,end+1):widths[code]=value
 expected={1:5.5,2:11,3:11/3,4:11/4,5:11/6,6:11*widths[48]/1000,7:11*widths[46]/1000,8:2.2,9:1.1,10:2.2,11:22/9,12:11,13:11*widths[32]/1000,14:0,15:0}
+# Ordinary A now uses the shaped original font, while virtual-space widths
+# intentionally retain the declared primitive-font policy. Derive A from its
+# actual original program instead of assuming it appears in the control subset.
+shaped=next(f.get_object() for f in r.pages[0]['/Resources']['/Font'].values() if f.get_object()['/BaseFont']=='/GoRegular')
+raw=shaped['/DescendantFonts'][0].get_object()['/FontDescriptor']['/FontFile2'].get_data()
+verify_go_program('GoRegular',raw)
+face=hb.Face(raw);original=hb.Font(face)
+a_advance=11*original.get_glyph_h_advance(original.get_nominal_glyph(65))/face.upem
 chars_for=lambda page:[c for b in page.get_text('rawdict')['blocks'] if b['type']==0 for line in b['lines'] for span in line['spans'] for c in span['chars']]
 with pymupdf.open(root/'typography.pdf') as doc:
     all_chars=chars_for(doc[0]);rows={}
@@ -35,7 +45,7 @@ with pymupdf.open(root/'typography.pdf') as doc:
         if not text.startswith('S') or len(text)<3 or not text[1:3].isdigit():continue
         number=int(text[1:3]);ca=next(c for c in chars if c['c']=='A');cb=next(c for c in chars if c['c']=='B')
         # A's glyph advance is independent of the virtual-space implementation.
-        measured=cb['origin'][0]-ca['origin'][0]-11*widths[65]/1000
+        measured=cb['origin'][0]-ca['origin'][0]-a_advance
         assert abs(measured-expected[number])<.02,(number,measured,expected[number])
         expected.pop(number)
     assert not expected,expected

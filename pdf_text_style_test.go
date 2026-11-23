@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
+	"github.com/phpdave11/gofpdf"
 	"golang.org/x/image/font/gofont/goregular"
 )
 
@@ -100,12 +101,30 @@ func TestPDFRecoveredFontFamilyEvidence(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{PDFFonts: []FontFace{{Family: "Caller Alias", Data: goregular.TTF}}}); err != nil {
 		t.Fatal(err)
 	}
-	back := readRecovery(t, out.Bytes())
-	r := recoveryRuns(back)[0]
-	if r.FontFamily != "Go" || r.Source.FontFamilyEvidence != "embedded_name" || r.FontSize != 18 || r.Color != "#CC6633" {
-		t.Fatalf("embedded style %+v source %+v", r, r.Source)
+	generated := append([]byte(nil), out.Bytes()...)
+	// Independently authored primitive-writer fixture omits FontFamily, keeping
+	// the embedded-name fallback oracle independent of manydoc's new descriptor.
+	primitive := gofpdf.New("P", "pt", "A4", "")
+	primitive.AddUTF8FontFromBytes("Caller Alias", "", append([]byte(nil), goregular.TTF...))
+	primitive.AddPage()
+	primitive.SetFont("Caller Alias", "", 18)
+	primitive.SetTextColor(204, 102, 51)
+	primitive.Text(54, 72, "Embedded")
+	out.Reset()
+	if err := primitive.Output(&out); err != nil {
+		t.Fatal(err)
 	}
-	assertRecoverySF(t, back)
+	for _, tc := range []struct {
+		input    []byte
+		evidence string
+	}{{generated, "descriptor"}, {out.Bytes(), "embedded_name"}} {
+		back := readRecovery(t, tc.input)
+		r := recoveryRuns(back)[0]
+		if r.FontFamily != "Go" || r.Source.FontFamilyEvidence != tc.evidence || r.FontSize != 18 || r.Color != "#CC6633" {
+			t.Fatalf("embedded style %+v source %+v", r, r.Source)
+		}
+		assertRecoverySF(t, back)
+	}
 }
 
 func TestPDFActualTextRetainsOnlyCommonEditableStyles(t *testing.T) {

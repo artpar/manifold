@@ -21,7 +21,49 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: language/direction and contextual LTR lines
+## Latest milestone: default authored text uses contextual shaping
+
+- All ordinary authored PDF text now shapes regardless of language metadata.
+  Empty language selects deterministic und; language bindings affect locale rather
+  than activating typography. Headers/footers, lists, cells and note bodies share
+  the same measurement/final-line re-shaping path in pdf_shaping.go (renamed from
+  pdf_language.go). No public API/schema/module/asset change.
+- Existing explicit spacing/control policy remains. Residual marks attached to
+  special spaces retain positioned glyphs; a new figure-space/mark test and native
+  oracle preserve that earlier capability. Decorations join across adjacent
+  same-style shaping/control/script spans; the unchanged continuity oracle caught
+  fragmented strokes and production was corrected.
+- Ordinary fonts now use actual descriptors/original full TTF programs and shared
+  glyph resources. Authored shaped output is PDF 1.7; control-only output still
+  qualifies its 1.4 ActualText path. Full-font size overhead now applies to normal
+  output: the short default-font benchmark is 71,869 bytes versus the earlier
+  10,896-byte primitive result. Timing is observational, not a regression guarantee.
+  Internal fixed-Go note labels/captions and virtual controls still use primitives.
+- Independent native HarfBuzz checks 24 untagged runs, six containing ligatures,
+  across default Go, Go Mono and configured Noto Sans, plus emergency breaks and
+  marked special spaces. Exact original font hashes, shared resources, glyph IDs,
+  physical origins, metadata, DOCX content, URI/note links and running content pass.
+  Four new native pages and two LibreOffice DOCX pages were visually inspected.
+  ProseMirror validates 81 source/recovered nodes; 51 corpus files/9,031 nodes and
+  28 Poppler comparisons pass. Rich-style/glyph/language/font/color/typography and
+  report independent regressions pass, without changing fixture/content oracles.
+- Unit provenance coverage keeps both the new descriptor and an independently
+  authored primitive font with embedded-name fallback. Independent reader checks
+  now verify physical original programs instead of private subset aliases; App
+  Sans and default Go legitimately share the supplied Go Regular font. Spacing,
+  baseline, bounds, formatting and relationship expectations remain intact.
+
+The full goal remains **incomplete**. Bidi/joining, context across differing
+styles/fonts/languages, complete script itemization, broader font admission/source
+font handling, richer pages/running content, PDF structure/color and representative
+real exports remain required. Resource bounds and explicit unsupported errors are
+not completion evidence. Full tests/race/vet/CGO-disabled build/execution and relevant
+fuzz checks are recorded in verification.json/TESTING.md. No external blocker.
+Prior checkpoint: f96ebe9. Next commands: GOWORK=off go run ./examples/shaping;
+output/qa-venv/bin/python scripts/verify_default_shaping.py; inspect pdf_shaping.go
+and pdf_direction.go for actual paragraph bidi/context work.
+
+## Earlier milestone: language/direction and contextual LTR lines
 
 - Go/SF/JSON now retain paragraph flow, independent run RTL characteristics,
   general/East Asian/complex language bindings and forced complex-script selection.
@@ -55,17 +97,16 @@ compatibility has not been established. No Daptin files were changed.
   records commands/results and scope. Runtime modules/assets remain unchanged;
   optional QA alone adds pinned uharfbuzz. No fixture oracle changed.
 
-The full goal remains **incomplete**. Untagged simple text still uses the legacy
-path; full itemization and context across differing styles/fonts/languages, bidi
+At that checkpoint untagged simple text still used primitives; the default-text
+milestone above supplies current behavior. Still required are full itemization and context across differing styles/fonts/languages, bidi
 levels/ordering and joining scripts remain required, alongside source fonts, richer
 pages/running content, PDF structure/color and representative real exports. RTL
 rejects atomically in all stories, including empty paragraphs and notes; rejection
 is not completion evidence. No external blocker. Prior checkpoint: 76f5094.
 
 Next commands: GOWORK=off go run ./examples/language; the independent command is
-output/qa-venv/bin/python scripts/verify_language.py. Then inspect pdf_language.go,
-pdf_text.go and existing bidi APIs to unify default shaping and implement actual
-paragraph bidi/context. See TESTING.md for exact reproducible qualification.
+output/qa-venv/bin/python scripts/verify_language.py. Then inspect pdf_shaping.go,
+pdf_text.go and existing bidi APIs to implement actual paragraph bidi/context; default shaping is now unified. See TESTING.md for exact reproducible qualification.
 
 ## Earlier milestone: positioned glyph transport and LTR graphemes
 
@@ -1082,10 +1123,12 @@ GOWORK=off go test -run 'TestDOCXTheme' -count=1
 output/qa-venv/bin/python scripts/verify_docx_theme_colors.py
 GOWORK=off go test -run 'TestDOCXFont|TestDOCXScript' -count=1
 output/qa-venv/bin/python scripts/verify_docx_font_selection.py
+GOWORK=off go run ./examples/shaping
+output/qa-venv/bin/python scripts/verify_default_shaping.py
 GOWORK=off go run ./examples/language
 output/qa-venv/bin/python scripts/verify_language.py
 GOWORK=off go test -run 'TestLanguage|TestDOCXLanguage|TestPDFLanguage|TestPDFDirection' -count=1
-rg -n 'measureLanguageAtoms|shapeLanguageLine|emitFit|Direction' pdf_language.go pdf_text.go pdf_direction.go
+rg -n 'measureLanguageAtoms|shapeLanguageLine|emitFit|Direction' pdf_shaping.go pdf_text.go pdf_direction.go
 GOWORK=off go doc golang.org/x/text/unicode/bidi
 GOWORK=off go run ./examples/glyphs
 output/qa-venv/bin/python scripts/verify_glyphs.py

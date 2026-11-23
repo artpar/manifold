@@ -168,7 +168,7 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 			return nil, err
 		}
 		var glyphs *pdfGlyphCluster
-		if needsGlyphOutput(cluster) || pdfLanguageGlyph(run, cluster) {
+		if needsGlyphOutput(cluster) || pdfShapableText(cluster) {
 			glyphs, err = r.glyphClusterLanguage(face, cluster, run)
 			if err != nil {
 				return nil, err
@@ -225,7 +225,7 @@ func (r *pdfRenderer) textAtoms(runs []Run, size float64) ([]pdfTextAtom, error)
 			atoms = append(atoms, atom)
 		}
 	}
-	if err := r.measureLanguageAtoms(atoms, size); err != nil {
+	if err := r.measureShapedAtoms(atoms, size); err != nil {
 		return nil, err
 	}
 	return atoms, nil
@@ -275,7 +275,7 @@ func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) 
 				used += span.width
 			}
 		}
-		shaped, err := r.shapeLanguageLine(line, size)
+		shaped, err := r.shapeTextLine(line, size)
 		if err != nil {
 			return false, err
 		}
@@ -292,7 +292,7 @@ func (r *pdfRenderer) lines(runs []Run, width, size float64) ([]pdfLine, error) 
 				line[i].width = 0
 				line[i].glyphs = nil
 			}
-			shaped, err = r.shapeLanguageLine(line, size)
+			shaped, err = r.shapeTextLine(line, size)
 			if err != nil {
 				return false, err
 			}
@@ -475,6 +475,7 @@ func (r *pdfRenderer) paintSpan(span pdfSpan, x, y, size float64) {
 }
 func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 	baseline := pdfLineSize(line, size)
+	origin := x
 	for _, span := range line {
 		drawSize, rise := textSize(span.run, size), 0.0
 		if span.run.Note != nil {
@@ -498,21 +499,45 @@ func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 		if span.run.Link != "" && span.width > 0 {
 			r.pdf.LinkString(x, y+baseline-span.ascent, span.width, math.Max(textSize(span.run, size)*1.3, span.ascent+span.descent), span.run.Link)
 		}
+
+		x += span.width
+	}
+	r.drawLineDecorations(line, origin, y, baseline, size)
+}
+
+// Shaping/control/script boundaries do not break a continuous decoration.
+// Keep one stroke over adjacent spans with the same authored style.
+func (r *pdfRenderer) drawLineDecorations(line pdfLine, x, y, baseline, size float64) {
+	for start := 0; start < len(line); {
+		span := line[start]
+		end := start + 1
+		width := span.width
+		for end < len(line) && samePDFStyle(span.run, line[end].run) {
+			width += line[end].width
+			end++
+		}
 		if span.run.Underline || span.run.Strike {
+			drawSize, rise := textSize(span.run, size), 0.0
+			if span.run.Note != nil {
+				drawSize = math.Round(drawSize*.7*100) / 100
+				rise = textSize(span.run, size) * .3
+			}
+			red, green, blue := textRGB(span.run.Color)
 			old := r.pdf.GetLineWidth()
 			or, og, ob := r.pdf.GetDrawColor()
 			r.pdf.SetDrawColor(red, green, blue)
 			r.pdf.SetLineWidth(math.Max(.3, drawSize*.05))
 			if span.run.Underline {
-				r.pdf.Line(x, y+baseline-rise+drawSize*.1, x+span.width, y+baseline-rise+drawSize*.1)
+				r.pdf.Line(x, y+baseline-rise+drawSize*.1, x+width, y+baseline-rise+drawSize*.1)
 			}
 			if span.run.Strike {
-				r.pdf.Line(x, y+baseline-rise-drawSize*.4, x+span.width, y+baseline-rise-drawSize*.4)
+				r.pdf.Line(x, y+baseline-rise-drawSize*.4, x+width, y+baseline-rise-drawSize*.4)
 			}
 			r.pdf.SetLineWidth(old)
 			r.pdf.SetDrawColor(or, og, ob)
 		}
-		x += span.width
+		x += width
+		start = end
 	}
 }
 

@@ -469,8 +469,8 @@ joining/bidi and broader Unicode qualification remain incomplete.
 
 Admitted TTF faces can now render LTR supplementary outline glyphs and combining
 marks remaining after NFC via glyph IDs/GPOS. No fallback face is selected implicitly.
-The original full font is embedded, once per used glyph face; ordinary text retains
-its existing subset path. PDFs using this graph serialize as PDF 1.7. CIDToGIDMap,
+The original full font is embedded, once per used glyph face; ordinary authored text also uses the glyph path; virtual controls and internal
+fixed-Go note labels/captions retain primitives. PDFs using this graph serialize as PDF 1.7. CIDToGIDMap,
 nominal widths, original descriptors/TTF and ActualText/ToUnicode preserve visual
 and logical glyph relationships. Baseline placement matches the primitive writer's
 0.01pt precision; relative offsets retain finer precision. Ink extents reserve
@@ -500,7 +500,7 @@ direction is not a Unicode embedding override. Unsupported values and malformed/
 duplicate properties reject. Unused font choices/hints remain diagnosed, but
 retained direction/language/cs alone no longer produces a false loss warning.
 
-For language-tagged PDF text, same-style LTR text shapes across graphemes and
+For all ordinary authored PDF text, same-style LTR text shapes across graphemes and
 equal formatting runs. Distinct strong scripts stay separate; Common/Inherited
 graphemes use adjacent script context inside the style segment. General language
 is used normally, East Asian language for the resolved East Asian script, and
@@ -515,6 +515,15 @@ individual graphemes retain the 1,024-scalar bound. Full original TTF cost remai
 
 RTL paragraphs/runs reject atomically in every story, including empty paragraphs,
 tables, nested lists, headers/footers and notes. Paragraph-wide bidi/joining,
-context across differing styles/fonts/languages, full script itemization and
-untagged default-path shaping remain required implementation and qualification.
+context across differing styles/fonts/languages, full script itemization and broader fonts remain required implementation and
+qualification. Empty language now selects und without changing the shaping path.
 This milestone does not satisfy the broader Unicode acceptance criterion.
+
+
+Default text now has the same kerning/ligature/line re-shaping behavior as an
+explicit und language. Native original-font hashes and HarfBuzz GIDs/origins qualify
+Go/Go Mono/Noto Sans examples. Adjacent same-style decorations remain continuous
+across script/spacing boundaries. Marked special spaces retain real glyph positioning.
+Ordinary outputs serialize as PDF 1.7; control-only ActualText uses 1.4. Full-font
+embedding increases small PDF size (the short regular-face example is 71,869 bytes);
+no compact-subset promise or complete bidi/style-context support is made.
