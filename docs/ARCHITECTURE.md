@@ -928,3 +928,12 @@ numbering_resolve.go resolves enclosing counters on owned containers for SF/DOCX
 without modifying caller data. DOCX preserves logical levels and explicit contexts,
 with independent sequences, Word empty-override disclosure, checked implicit markers
 and legal-format metadata validated against visible decimal definitions. See NUMBERING.md.
+
+
+## Word relationship/anchor URI composition
+
+DOCX paragraph hyperlink reading now combines r:id Target plus #anchor using
+Word behavior from MS-OI29500 2.1.521, with an explicit compatibility diagnostic.
+The shared model holds the actual URI; canonical DOCX export uses that URI directly.
+No runtime dependency or API/schema changed. Internal named destinations remain
+next work; see INTERNAL_DESTINATIONS.md for source facts and integration points.

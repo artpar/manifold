@@ -616,6 +616,13 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 					return errors.New("missing hyperlink relationship")
 				}
 				style.Link = rel.Target
+				if anchor := c.attr("anchor"); anchor != "" {
+					// Word appends the anchor even when r:id is present (MS-OI29500
+					// 2.1.521). Keep its actual URI; strict OOXML readers may ignore
+					// this second attribute, so disclose the compatibility choice.
+					style.Link += "#" + anchor
+					r.doc.warn("hyperlink_word_anchor", "Hyperlink relationship plus anchor uses Word fragment composition; strict OOXML readers may ignore the anchor")
+				}
 			} else if a := c.attr("anchor"); a != "" {
 				style.Link = "#" + a
 			}

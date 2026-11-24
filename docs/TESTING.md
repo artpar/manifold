@@ -2168,3 +2168,39 @@ format/template/start import and all external-reader labels with:
 bin/manydoc convert -o output/numbering/format-probe.sf output/numbering/format-probe.docx
 output/qa-venv/bin/python scripts/verify_numbering_probe.py
 ```
+
+## Word fragments and original destination audit (2026-11-24)
+
+```sh
+output/qa-venv/bin/python scripts/audit_mqtt_destinations.py
+# Explicit oracle regeneration reads only the immutable originals, never manydoc:
+output/qa-venv/bin/python scripts/audit_mqtt_destinations.py --word-links-output testdata/real/mqtt-v5.0-word-links.json
+GOWORK=off go test -run 'TestDOCXRelationshipAndAnchor|TestRealWordMQTT' .
+GOWORK=off go test ./...
+GOWORK=off go test -race ./...
+GOWORK=off go vet ./...
+GOWORK=off go mod verify
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+bin/manydoc convert -o output/internal-destinations/mqtt.sf testdata/real/mqtt-v5.0-os.docx
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOWORK=off go build -o bin/manydoc-linux-amd64 ./cmd/manydoc
+git diff --check
+```
+
+Render output/internal-destinations/mqtt.pdf with the explicit font mappings in
+FONT_SUBSETTING.md, then run:
+
+```sh
+output/qa-venv/bin/python scripts/verify_word_fragments.py
+output/qa-venv/bin/python scripts/verify_mqtt_render.py --out output/internal-destinations
+```
+
+The first command compares to the captured b99922b baseline at
+output/numbering/mqtt.pdf. To reproduce that baseline, build the CLI from a detached
+b99922b worktree, import the unchanged original Word source, and use the same font
+mapping/render command. Remove that temporary worktree afterward. Every page
+command and annotation rectangle must remain exact; target values follow the
+separate original Word/publisher oracle. This is not a bookmark-navigation test.
+Earlier normalized DOCX `audit_mqtt_source.py --compare` invocations use the old
+normative 434-target projection; current Word-compatible canonical links require
+the separate word-links oracle. Do not rewrite the original oracle to hide that
+contract change. The new source audit rechecks all of its original target/text hashes.

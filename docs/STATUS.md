@@ -21,7 +21,34 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: numbering formats and counter contexts
+## Latest milestone: external Word fragments; internal target audit
+
+DOCX relationship + anchor hyperlinks retain their actual Word URI, with a Word/
+strict-OOXML compatibility diagnostic. Four original elements now yield the three
+correct fragment-bearing URLs confirmed in the unchanged publisher PDF. A separate
+source-derived oracle verifies 435 target/text groups; the original 434-target raw
+attribute oracle and all original source/golden files remain unchanged. All 189 page commands
+and annotation rectangles are exact against the numbering milestone, with five
+URI annotation values changed. Fonts/assets/metadata/Unicode checks pass.
+
+Full tests passed (library 13.992s, CLI 0.345s), race (167.816s / 1.932s), vet,
+module verification, host CGO-disabled CLI execution, Linux/amd64 cross-build and
+diff checks passed. Five literal URI cases run SF/DOCX/PDF round trips. Evidence is
+in output/internal-destinations and verification.json. Internal bookmarks are not
+yet resolved: the complete goal remains active/incomplete, with no external blocker.
+
+The original has 3,106 bookmark starts (3,073 inline / 33 between blocks), plus
+three visible references to absent _Introduction. The independent source audit also
+checks all original 434 raw target/text hashes and four split-attribute publisher
+URIs. Read INTERNAL_DESTINATIONS.md before implementing typed flow anchors/internal
+links and PDF target recovery. Next concrete commands:
+`output/qa-venv/bin/python scripts/audit_mqtt_destinations.py`;
+`rg -n 'bookmark|anchor|GoTo|Dests' docx_read.go docx_write.go pdf_links.go`;
+`rg -n 'pdfBidiRange|finishGlyphFonts|drawLine' pdf_bidi.go pdf_glyph.go pdf_text.go`.
+Then address required rich PDF semantics, remaining corpus qualification and the
+verbose SF/provenance/codec cost in a bounded completion audit.
+
+## Previous milestone: numbering formats and counter contexts
 
 Common decimal/padded/letter/Roman formats, templates, logical levels, explicit
 counter contexts and nested edits now persist through SF/DOCX and paint in native

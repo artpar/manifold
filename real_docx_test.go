@@ -138,10 +138,24 @@ func TestRealWordMQTTStructureAssetsAndNormalizedRoundtrip(t *testing.T) {
 			delete(linkedText, target)
 		}
 	}
-	if len(linkedText) != len(oracle.Hyperlinks) {
-		t.Fatal("hyperlink target ownership changed", len(linkedText), len(oracle.Hyperlinks))
+	// The original oracle remains the normative raw-attribute projection.
+	// Word's four split-attribute links have a separately verified publisher
+	// oracle; do not alter the original package facts to fit import behavior.
+	wordLinksRaw, err := os.ReadFile("testdata/real/mqtt-v5.0-word-links.json")
+	if err != nil {
+		t.Fatal(err)
 	}
-	for target, want := range oracle.Hyperlinks {
+	var wordLinks mqttOracle
+	if err := json.Unmarshal(wordLinksRaw, &wordLinks); err != nil {
+		t.Fatal(err)
+	}
+	if wordLinks.SourceSHA256 != oracle.SourceSHA256 {
+		t.Fatal("Word-link oracle source identity changed")
+	}
+	if len(linkedText) != len(wordLinks.Hyperlinks) {
+		t.Fatal("hyperlink target ownership changed", len(linkedText), len(wordLinks.Hyperlinks))
+	}
+	for target, want := range wordLinks.Hyperlinks {
 		if realTextDigest(linkedText[target]) != want {
 			t.Fatal("hyperlink visible text/destination ownership changed", target)
 		}

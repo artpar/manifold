@@ -225,3 +225,14 @@ and all-story independent-reader evidence. See NUMBERING.md. Next trace DOCX
 bookmarks/hyperlink anchors and PDF name trees/GoTo/Dest actions into the shared
 SF and typed link model. Preserve Unicode URI behavior and note-link identity;
 continue source/recovery/corpus and large-provenance work before completion.
+
+
+## 2026-11-24 Source destination audit and Word URI fix
+
+The split external URI component is corrected, with unchanged paint and separate
+source/publisher evidence. Next implement typed flow anchors and internal links,
+then native GoTo/name-tree output and exact/inferred PDF recovery. Read the concrete
+INTERNAL_DESTINATIONS.md plan first; it records zero-width layout/bidi concerns,
+between-block markers, missing source targets and existing finalization hooks.
+After this work, audit required PDF semantics and the verbose provenance/codec cost
+against the actual goal; do not expand into excluded Word-equivalent fidelity.

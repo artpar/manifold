@@ -90,3 +90,12 @@ writers, using the visible narrow page-130 description as real evidence. Continu
 source numbering patterns, internal destinations, broader rich-source/recovery
 qualification and PDF→SF provenance/codec size under the original acceptance goal.
 Keep all original fixtures/oracles; this milestone does not complete that goal.
+
+
+## Subsequent Word split-attribute qualification
+
+The 434-target evidence above belongs to its verified milestone. New source work
+preserves Word's relationship + anchor composition, independently confirmed by the
+original publisher PDF. The current Word-behavior oracle has 435 targets; the old
+434-target raw attribute oracle remains unchanged and independently checked. See
+INTERNAL_DESTINATIONS.md for the exact difference and remaining bookmark work.

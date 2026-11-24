@@ -1327,3 +1327,13 @@ containment and Word zero-override compatibility. Repeat alphabetic letters per
 OOXML rather than use Excel column numbering. Export redundant starts and lowered
 legal formats with checked metadata, driven by two independent-reader failures.
 See NUMBERING.md for exact policies and the unchanged publisher heading oracle.
+
+
+## 2026-11-24 Preserve split external Word URI fragments
+
+Four source hyperlinks carry both relationship and anchor attributes. Word and
+the original publisher PDF use the combined URI, unlike strict OOXML anchor-ignore
+behavior. Keep the actual Word URI with disclosure, preserve the old normative
+attribute oracle, and add a separately source/publisher-derived target/text oracle.
+Three authority empty-path/trailing-slash source differences remain explicit; do not
+normalize resource identities to mask them. See INTERNAL_DESTINATIONS.md.

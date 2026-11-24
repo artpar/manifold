@@ -865,3 +865,12 @@ running layout paints resolved labels. Symbolic SF values beyond the PDF expansi
 budget reject PDF output explicitly. Unsupported source formats and label presentation
 remain diagnosed. PDF marker text/positions do not imply original editable counter
 semantics. See NUMBERING.md.
+
+
+## Word split-attribute hyperlink targets
+
+A relationship-linked hyperlink with w:anchor retains Target + # + anchor, with
+hyperlink_word_anchor disclosure of Word/strict-OOXML behavior. Canonical SF/DOCX
+keeps the resulting URI and native PDF uses existing ASCII URI encoding. Internal
+bookmark navigation is still unfinished; source missing targets are documented in
+INTERNAL_DESTINATIONS.md, not repaired by guessing.

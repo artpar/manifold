@@ -246,3 +246,13 @@ numbers match the publisher, with one original title hyphen spelling difference
 recorded explicitly. Native output contains all 291 exact source headings.
 This does not close internal destinations, broader source/recovery/corpus, rich
 PDF semantic recovery or codec/performance work. See NUMBERING.md.
+
+
+## 2026-11-24 Source Word URI fragment milestone
+
+Four split-attribute source links now retain their Word URI. A separate original
+Word/publisher oracle verifies 435 visible target/text groups; the original 434-target
+raw-attribute oracle is unchanged and independently rechecked. All 189 page commands
+and annotation rectangles are exact; five URI annotations changed. This does not
+close internal destination support. The source audit identifies 3,106 bookmark starts
+and one missing target with three visible references. See INTERNAL_DESTINATIONS.md.

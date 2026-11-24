@@ -4744,5 +4744,51 @@
     "uri_regression": "all 8 targets, 2 pages and existing internal note destination passed",
     "limits": "Word zero-override compatibility differs from LibreOffice implicit-parent probe; source presentation is diagnosed as normalized; original numbering templates cannot be inferred from untagged paint. Full source/recovery/corpus, internal destinations and provenance/codec work remain.",
     "evidence": "output/numbering; docs/NUMBERING.md; scripts/verify_numbering*.py"
+  },
+  "word_external_fragment_composition": {
+    "date": "2026-11-24",
+    "status": "verified URI milestone; typed internal destinations and full goal incomplete",
+    "go_test": "passed: library 13.992s; CLI 0.345s",
+    "go_test_race": "passed: library 167.816s; CLI 1.932s",
+    "go_vet": "passed",
+    "module_verify": "all modules verified",
+    "diff_check": "passed",
+    "cgo_disabled": {
+      "darwin_arm64": "CLI built/executed; five-case all-path test passed",
+      "linux_amd64": "cross-build passed"
+    },
+    "original_oracles": "original fixture bytes and 434-target raw-attribute target/text oracle unchanged; independent audit recomputes every original hash",
+    "additional_oracle": "mqtt-v5.0-word-links.json, original ZIP/XML plus original publisher PDF; 435 Word-behavior target/text groups",
+    "split_attribute_elements": 4,
+    "distinct_split_targets": 3,
+    "publisher_split_uris": "all exact",
+    "original_external_word_targets": 56,
+    "publisher_external_targets": 56,
+    "original_uri_spelling_differences": [
+      "http://www.ibm.com versus trailing slash",
+      "http://www.microsoft.com versus trailing slash",
+      "https://www.privacyshield.gov versus trailing slash"
+    ],
+    "full_real_render": {
+      "pages": 189,
+      "bytes": 4977536,
+      "uri_targets": 435,
+      "uri_annotations": 1226,
+      "changed_uri_annotations": 5,
+      "page_content_streams": "all 189 exact b99922b baseline bytes",
+      "annotation_rectangles": "all exact baseline coordinates",
+      "font_asset_metadata_unicode": "independent checks passed"
+    },
+    "source_bookmark_audit": {
+      "starts_and_end_pairs": 3106,
+      "inline_starts": 3073,
+      "block_starts": 33,
+      "anchor_only_targets_including_empty_links": 389,
+      "unresolved_visible_target": "_Introduction",
+      "unresolved_visible_occurrences": 3,
+      "empty_hyperlink_elements": 49
+    },
+    "next": "Implement typed flow anchors/internal links, named PDF destinations/GoTo and PDF recovery; see INTERNAL_DESTINATIONS.md",
+    "evidence": "output/internal-destinations; scripts/audit_mqtt_destinations.py; scripts/verify_word_fragments.py"
   }
 }
