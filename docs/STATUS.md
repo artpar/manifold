@@ -79,11 +79,13 @@ ownership fixes that failure without changing its oracle.
 Read LITERAL_LIST_MARKERS.md and examples/literal-markers/README.md for policy,
 implementation and reproducible commands. Original import fixture oracles remain.
 
-Current full tests pass (library26.734s/CLI0.809s), final focused race passes
-(2.719s), vet/modules/CGO-disabled focused tests and builds pass. The final full
-race run is still live; verification.json records the pending run separately from
-the earlier pre-wrap passing revision. The short paint-context fuzz sample passes
-(eight executions/12.335s); it is not broad fuzz evidence.
+Current full tests pass (library26.734s/CLI0.809s); full race passes
+(library320.702s/CLI3.176s). Final focused race (2.719s) includes the last whitespace
+uncertainty diagnostic, added after the full-race snapshot. Final vet/modules,
+CGO-disabled focused tests (0.420s), host CLI and Linux amd64/arm64 builds pass;
+cross-builds establish compilation, not Linux execution. The short paint-context
+fuzz sample passes (eight executions/12.335s); it is not broad fuzz evidence.
+Commits 5b806cc and the following evidence update record this PDF milestone.
 
 DOCX/VDOCS literal-marker generation remains required unfinished work and rejects
 before output. The native repeated-footnote ordering failure and wider source/

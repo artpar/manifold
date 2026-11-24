@@ -7505,12 +7505,12 @@
     },
     "checks": {
       "go_test_all": "passed final library26.734s/CLI0.809s",
-      "race": "pending final complete run; earlier pre-wrap revision passed320.226s/CLI3.180s",
+      "race": "passed library320.702s/CLI3.176s, before final whitespace-uncertainty diagnostic only; final focused race covers current diagnostic; earlier pre-wrap revision passed320.226s/CLI3.180s",
       "focused_race": "passed final2.719s marker/ActualText/whitespace/paint-seed checks",
-      "CGO_disabled_focused": "passed0.432s before final whitespace diagnostic only",
-      "vet": "passed before final whitespace diagnostic only",
+      "CGO_disabled_focused": "passed final0.420s",
+      "vet": "passed final",
       "modules": "all modules verified",
-      "builds": "CGO-disabled host and Linux amd64/arm64 cross-builds pass before final whitespace diagnostic only;host CLI example generation/extraction execute. Cross-builds are not execution.",
+      "builds": "Final CGO-disabled host and Linux amd64/arm64 cross-builds pass;host CLI example generation/extraction execute. Cross-builds are not execution.",
       "fuzz": "FuzzPDFPaintContext passed eight executions/12.335s/two workers/six baseline seeds;very short sample,not broad safety evidence.",
       "diff_check": "passed"
     },
