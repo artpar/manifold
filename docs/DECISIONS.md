@@ -1624,3 +1624,22 @@ matching destination, and re-import actual TextX edit/save output. Native edits
 must win without consulting another text payload. Unknown presentation has explicit
 diagnostics, hidden content and unmapped containers reject in these private workers.
 No public rich-adapter support exception or runtime editor dependency is introduced.
+
+
+## 2026-11-24 Validate native merge continuations and width semantics executably
+
+SF origin-only table rows cannot be copied directly into native source rows.
+The executable pinned reader requires empty rowSpan0 continuation records to
+advance covered vertical grid columns. Omitting them shifts following cells left.
+Keep native cell stream/source ordinals exact, check combined merge occupancy,
+and reject visible continuation content. Accept checked optional horizontal
+zero/zero placeholders without copying their empty bodies into SF.
+
+Use full-width specified percentages for SF's equal-width default. Native zero
+unspecified widths produced invisible table geometry. Legacy table unit0 POINT
+values also behaved as pixels in the pinned layout, unlike their enum label;
+qualify that field-specific behavior alongside unit3 and keep font fs in points.
+Inspect skeTables as a Map, not a JSON object: earlier JSON dumps hid its entries.
+Table geometry is now qualified without claiming browser/font/visual fidelity.
+Keep native edits authoritative, diagnose mixed paragraph normalization and extra
+presentation, and keep the rich adapter private until remaining mappings work.

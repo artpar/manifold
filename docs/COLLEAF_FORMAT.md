@@ -220,3 +220,60 @@ stories/section settings, provenance, checked sparse intent metadata, strict
 JSON/envelope/surrogate decoding and broader native edit/render checks remain
 required. Next extend body/container ownership and validate native list/table/note
 sources using actual SDK APIs before exposing any .vdocs API/CLI.
+
+
+## Private merged/nested table mapping and executable geometry
+
+colleaf_tables.go now composes paragraphs and tables through shared SF. Native
+source row/cell ordinals must exactly match stream tokens. SF omits covered
+origins; native vertical continuations instead need rowSpan0/positive-columnSpan
+records plus empty CR/LF cell bodies. Combined2×2 merges therefore have an empty
+rowSpan0/columnSpan2 continuation in the next row. Omitting this record shifted
+its following cell to x0 rather than x240 in the pinned reader. Optional empty
+horizontal zero/zero records are checked against an owning span. Any covered
+cell carrying visible text or a nested container rejects; it is never discarded.
+A bounded occupancy grid catches overlaps, out-of-bounds/unowned spans, partial
+rows, token/source count disagreements, identity mismatches and orphan sources.
+Repeated headers retain their source flag and SF contiguous-prefix rules.
+
+Nested cells retain full stream/source/style/link offsets and globally distinct
+IDs. The reader reuses a global effective-style interval partition and indexed
+range intersections for paragraph fragments. Bare anchoring CRs are structural;
+authored text before/after a native table becomes ordered SF blocks with a loss
+diagnostic for the single-paragraph grouping. Extra table/row/cell presentation
+has explicit diagnostics. Fixed widths preserve point intent via native pixels.
+Equal full-width SF defaults use specified percentage columns/100% table width:
+zero unspecified native widths yielded zero/invisible table geometry.
+
+The pinned table skeleton treats both legacy unit0 (declared POINT) and unit3
+PIXEL dimension values as pixels. A unit0 table with the same numeric widths as
+unit3 retained width432px; reducing numbers by3/4 instead shrank it to324px. Import
+therefore maps both to SF points by3/4. This field-specific measured behavior must
+not change fs, which remains points. Percentages resolve against available width.
+Unequal relative/mixed auto/fixed dimensions still need the full layout-context
+mapping; private workers reject these rather than silently inventing dimensions.
+
+scripts/verify_colleaf_tables.cjs uses actual parseDataStreamToTree,
+DocumentDataModel/DocumentViewModel and DocumentSkeleton APIs. The hash-checked
+unmodified pinned Colleaf validator accepts generated and edited envelopes.
+The script verifies every
+row/cell count and exclusive extent, combined merge sources, following-cell x240,
+432px outer width, nested skeTables, visible equal-default table widths and legacy
+unit behavior. It then replaces cell C with Z via TextX, saves, and Go re-imports
+the change while retaining merge ownership. skeTables is a Map; the earlier plain
+JSON dump of it concealed existing table entries. These checks establish record/
+geometry/mutation semantics, not canvas font metrics, browser editor usability or
+visual layout fidelity. No SDK implementation code is copied or translated.
+
+```sh
+MANYDOC_COLLEAF_TABLE_QA=output/colleaf-qa/tables.json GOWORK=off go test -run TestColleafMergedNestedTableSFRoundTrip -count=1 .
+node scripts/verify_colleaf_tables.cjs
+MANYDOC_COLLEAF_TABLE_EDIT=output/colleaf-qa/tables-edited.json GOWORK=off go test -run TestColleaf -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafTables$' -fuzztime=10s -parallel=2 .
+```
+
+The full adapter remains private/incomplete. Required lists, notes/images/resources,
+section/story settings, source/intent mapping, strict envelope/JSON/surrogates and
+broad native rich editing/rendering still need completion. Private unsupported
+containers/relative sizing/ragged missing slots are unfinished work, not new public
+support exceptions. Public API/CLI and production dependencies remain unchanged.

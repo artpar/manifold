@@ -5547,5 +5547,42 @@
       "node scripts/verify_colleaf_text.cjs",
       "MANYDOC_COLLEAF_TEXT_EDIT=output/colleaf-qa/text-edited.json GOWORK=off go test -run TestColleaf -count=1 ."
     ]
+  },
+  "colleaf_table_semantics_2026_11_24": {
+    "scope": "Private actual native stream/source table mappings through SF; rich native adapter and full goal remain incomplete.",
+    "tests": [
+      "Canonical native->SF->native record equality for combined2x2 merges, nested cells/tables, fixed/default widths, repeated headers and astral text",
+      "Independent native fixture accepts checked horizontal/vertical continuation records and preserves origin content",
+      "Visible continuation content, overlaps, unowned/out-of-bounds spans, partial grids, missing/orphan source records reject",
+      "Mixed native text/table paragraph preserves visible order/styles with explicit grouping diagnostic",
+      "Legacy native geometry units0/3 import identically in points; source/default dimensions remain real native records",
+      "Actual SDK TextX cell replacement/save re-imported by Go with merge ownership retained"
+    ],
+    "independent_reader": {
+      "packages": "Pinned @univerjs/core and @univerjs/engine-render1.0.4, optional ignored QA install only",
+      "script": "scripts/verify_colleaf_tables.cjs",
+      "script_sha256": "9bbbe25c24e2517442643762990e5e33c687be46c35bae914b00cdf1fd271655",
+      "result": "All source/stream row/cell counts/exclusive extents, combined merges, nested skeTables, outer432px width, following-cell x240px, visible full-width default percentages, legacy unit0 geometry, TextX C->Z edit/save pass; Go re-import0.367s pass; pinned unmodified Colleaf validator accepts both generated and edited snapshots/envelopes (source hash asserted)",
+      "corrections": "Omitting vertical continuation shifted following cell to x0. Native zero auto widths yielded invisible geometry, fixed with real percentages. Legacy POINT0 numeric table dimensions behaved as pixels. Earlier plain JSON of skeTables Map hid its actual entries. Initial QA treated table metadata as AST; corrected to parseDataStreamToTree tree cache. No source/oracle changed to obtain a pass.",
+      "limits": "Headless SDK table geometry/mutation qualification only. Zero font metrics without canvas; browser/font/visual layout not qualified."
+    },
+    "checks": {
+      "full_tests": "go test ./... pass; library16.263s, CLI0.444s",
+      "full_race": "go test -race ./... pass after final production/test changes; library166.347s, CLI2.186s",
+      "vet": "pass",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "native focus0.375s pass; host CLI build/--help execution and Linux amd64/arm64 cross-builds pass",
+      "malformed_input_fuzz": "FuzzColleafTables14815 executions/11.440s pass, two workers; corrected an initial misspelled pattern that ran no fuzz tests",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure Go; no production dependency, public API/CLI or app/backend/authorization/quota change. SDK is QA only; no implementation code copied/translated.",
+    "remaining": "Lists, notes, embedded drawings/assets/resources, section/story/settings/provenance/nonvisual intent, full layout-context relative sizing/ragged missing slots and strict envelope/JSON/surrogate mapping; broad native editing/rendering qualification; broader untagged PDF recovery and final consistency/resource/API/acceptance audit.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_TABLE_QA=output/colleaf-qa/tables.json GOWORK=off go test -run TestColleafMergedNestedTableSFRoundTrip -count=1 .",
+      "node scripts/verify_colleaf_tables.cjs",
+      "MANYDOC_COLLEAF_TABLE_EDIT=output/colleaf-qa/tables-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
+      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafTables$\" -fuzztime=10s -parallel=2 ."
+    ]
   }
 }

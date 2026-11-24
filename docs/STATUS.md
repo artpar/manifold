@@ -39,7 +39,24 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: native text/style semantics (internal, incomplete)
+## Latest progress: native merged/nested table ownership (internal, incomplete)
+
+Private rich-body workers now map actual native table stream/source ownership
+through SF, including combined row/column merges, nested tables, fixed widths,
+equal full-width default columns and repeated headers. Vertical continuations use
+empty rowSpan0 records; covered SF cells remain omitted. Contradictory source/
+stream counts, overlap, missing/orphan sources and visible continuation content
+reject before a partial document is returned. Mixed text/table paragraphs retain
+ordered text/table blocks with an explicit normalization diagnostic.
+
+Pinned SDK parser/view/skeleton geometry and TextX edit/save checks qualify these
+records: the cell following a two-column vertical merge stays at x240px, nested
+table geometry remains present, default-width tables are visible and Go re-imports
+a native cell edit. This is structural/geometry evidence without canvas font
+metrics or browser/visual layout qualification. No public .vdocs API/CLI exists.
+Lists, assets/resources, notes, section/story settings, provenance/intent and
+strict envelope/JSON decoding still require implementation. Next continue these
+rich mappings, not a public wrapper around the current subset.
 
 Private text workers now map paragraphs/headings (including level6), direction,
 page-break-before, point-size typography, language, links and soft line breaks
@@ -49,11 +66,11 @@ visible edits remain authoritative. Optional pinned SDK QA reads generated recor
 uses TextX to replace astral heading text, saves, then Go re-imports the edit.
 This is text-level interoperability, not rich adapter or layout completion.
 
-Unknown presentation emits diagnostics; hidden text and unmapped containers reject
-rather than returning a partial document. Rich containers, sections/stories,
+Unknown presentation emits diagnostics; hidden text and other unmapped containers reject
+rather than returning a partial document. Remaining rich containers, section/story settings,
 provenance/nonvisual annotations, strict envelope decoding and full native edit/
 layout qualification remain open. No public format/API/CLI was added. Next extend
-these workers to rich body ownership and real lists/tables/notes/assets.
+these workers to lists/notes/assets and section/story ownership.
 
 The native adapter's private first layer now validates UTF-16 scalar/range bounds,
 paragraph/section/nested-table tokens and style/annotation/custom-block/soft-break

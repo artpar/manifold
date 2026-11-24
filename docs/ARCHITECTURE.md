@@ -1161,3 +1161,26 @@ These workers remain private pending rich ownership/asset/section/story mappings
 Tests cross the canonical SF and compare native records, verify style interval
 winners/inheritance, and re-import actual pinned SDK TextX edit/save output.
 Optional scripts/verify_colleaf_text.cjs is reader/mutation QA, not renderer QA.
+
+
+## Private Colleaf rich body/table mapping
+
+colleaf_tables.go composes actual stream/source records recursively. Native
+vertical continuations have rowSpan0, a positive columnSpan and empty CR/LF cell
+bodies; SF keeps only origin cells. Optional horizontal zero/zero placeholders
+are checked against an owning span. A bounded occupancy grid verifies every
+source/token ordinal, span and continuation before any document escapes. Visible
+continuation content rejects. IDs and UTF-16 metadata shift together across
+nested cells; table anchoring CRs do not invent extra SF paragraphs. Mixed native
+text/table paragraphs become ordered SF blocks with an explicit diagnostic.
+
+The reader partitions effective text styles once and uses indexed intersections
+for cell paragraphs; it does not scan every global text run for every paragraph.
+Widths use actual native geometry: legacy unit0 POINT and unit3 PIXEL table
+values are both consumed as pixels by the pinned executable table layout.
+SF point widths multiply by4/3 for native unit3. Equal default columns are native
+specified percentages totaling100, not zero automatic widths (which rendered
+invisible in the pinned skeleton). Named formatting stays in the shared text
+worker. Actual record/tree/geometry/edit/save probes are in
+scripts/verify_colleaf_tables.cjs; font metrics/browser rendering remain open.
+This internal composition is not a public partial native format support claim.
