@@ -63,7 +63,7 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 			return body, err
 		}
 		if (block.Kind != Paragraph && block.Kind != Heading) || block.Source != nil {
-			return body, fmt.Errorf("%w: native text worker requires paragraph/heading content without unmapped provenance/anchors", ErrUnsupported)
+			return body, fmt.Errorf("%w: native text worker requires paragraph/heading content without unmapped provenance", ErrUnsupported)
 		}
 		p := colleafParagraphRecord{ID: fmt.Sprintf("p%d", serial)}
 		serial++
@@ -383,7 +383,7 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 				block.Anchors = append(block.Anchors, bp.BookmarkID)
 			} else {
 				points[a.StartIndex] = append(points[a.StartIndex], Run{Anchor: bp.BookmarkID})
-				if bp.Hint != nil && bp.Hint.Role == "block" {
+				if bp.Hint != nil && bp.Hint.Role != "run" {
 					doc.warn("colleaf_stale_bookmark_placement", "Edited native bookmark position is retained as a current inline point rather than old block placement")
 				}
 			}

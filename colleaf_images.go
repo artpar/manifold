@@ -87,7 +87,7 @@ func colleafImageHash(data []byte) string {
 	return hex.EncodeToString(hash[:])
 }
 func (w *colleafBodyWriter) picture(block Block) error {
-	if block.Image == nil || block.Source != nil || len(block.Anchors) > 0 || block.Direction != "" || block.PageBreakBefore || len(block.Runs) > 0 || len(block.Rows) > 0 || len(block.Items) > 0 || block.Section != nil || block.List != "" || block.Numbering != nil || block.Start != nil || block.Level != 0 {
+	if block.Image == nil || block.Source != nil || block.Direction != "" || block.PageBreakBefore || len(block.Runs) > 0 || len(block.Rows) > 0 || len(block.Items) > 0 || block.Section != nil || block.List != "" || block.Numbering != nil || block.Start != nil || block.Level != 0 {
 		return fmt.Errorf("%w: invalid/unmapped native picture annotations", ErrUnsupported)
 	}
 	cfg, kind, err := decodeOutputImage(w.ctx, block.Image.Data, w.imageCache)
@@ -109,6 +109,9 @@ func (w *colleafBodyWriter) picture(block Block) error {
 		story = "main"
 	}
 	id := "manydoc-image-" + story + "-" + w.id("i")
+	if err := w.containerAnchors(block.Anchors, w.offset, "picture", id); err != nil {
+		return err
+	}
 	zero := 0
 	drawing := colleafNativeImage{ID: id, Type: &zero, Layout: &zero, UnitID: w.documentID, SubUnitID: w.documentID, SourceType: "BASE64", Source: "data:" + block.Image.MediaType + ";base64," + base64.StdEncoding.EncodeToString(block.Image.Data), Description: block.Image.Alt, Transform: &colleafDrawingTransform{Size: size, PositionH: sfAttrs(map[string]int{"relativeFrom": 2, "posOffset": 0}), PositionV: sfAttrs(map[string]int{"relativeFrom": 2, "posOffset": 0})}}
 	w.drawings[id] = sfAttrs(drawing)
@@ -349,7 +352,7 @@ func (r *colleafBodyReader) imageParagraph(start, end int, p colleafParagraphRec
 		if err != nil {
 			return nil, err
 		}
-		blocks = append(blocks, Block{Kind: Picture, Image: image})
+		blocks = append(blocks, Block{Kind: Picture, Image: image, Anchors: r.containerPoints[pos]})
 		cursor = pos + 1
 		properties, err := colleafStyleObject(p.Style)
 		if err != nil {

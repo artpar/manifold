@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"reflect"
@@ -254,8 +253,12 @@ func TestColleafNavigationMalformedAndStructuralPoints(t *testing.T) {
 	bad := wire
 	bad.Body.CustomRanges = append([]colleafRangeRecord(nil), wire.Body.CustomRanges...)
 	bad.Body.CustomRanges = append(bad.Body.CustomRanges, colleafRangeRecord{ID: "structural", Type: 3, StartIndex: wire.Body.Tables[0].StartIndex, EndIndex: wire.Body.Tables[0].StartIndex, Properties: sfAttrs(map[string]string{"bookmarkId": "structural"})})
-	if _, err = decodeColleafDocument(ctx, bad); !errors.Is(err, ErrUnsupported) {
-		t.Fatal("unrepresented structural point was silently lost", err)
+	recovered, err := decodeColleafDocument(ctx, bad)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(recovered.Blocks[4].Anchors, []string{"structural"}) {
+		t.Fatal("native table-start point lost")
 	}
 	for _, raw := range []string{`{"BookmarkID":"x"}`, `{"bookmarkId":"x","manydocNavigation":{"Version":1,"role":"run","paragraphId":"p"}}`} {
 		if _, err := readColleafBookmark(colleafRangeRecord{ID: "a", Properties: json.RawMessage(raw)}); err == nil {

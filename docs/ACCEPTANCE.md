@@ -65,8 +65,10 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
    execution with window.open stubbed does not qualify browser interaction or
    full native navigation. Current bookmark/heading point data, typed targets and
    real selection-manager refresh requests now have save/edit/Go/SF evidence.
-   Standalone/container/structural cursor projection, nonmain lookup limits and
-   actual rendered caret/scroll/browser behavior remain required.
+   Real table/image-start anchors now have nested/list/story save/edit/SF and
+   exact selection-request evidence. Standalone/list/section/page-break anchors,
+   remaining structural cursors, nonmain lookup limits and actual rendered caret/
+   scroll/browser behavior remain required.
 4. **Corpus/visual and final audit:** eight pinned, legally attributed original
    Word/Mac Word/LibreOffice inputs now qualify notes/running/review/field policies
    through source-only oracles, full semantic round trips, independent readers

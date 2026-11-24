@@ -6266,5 +6266,57 @@
       "MANYDOC_COLLEAF_NAVIGATION_SAVED=output/colleaf-qa/navigation-saved.json MANYDOC_COLLEAF_NAVIGATION_EDITED=output/colleaf-qa/navigation-edited.json MANYDOC_COLLEAF_NAVIGATION_HEADING=output/colleaf-qa/navigation-heading.json GOWORK=off go test -run TestColleafNavigation -count=1 .",
       "rg -n 'AnchorPoint|len\\(.*Anchors|structural cursor' colleaf_tables.go colleaf_lists.go colleaf_images.go colleaf_sections.go colleaf_navigation.go"
     ]
+  },
+  "colleaf_container_points_2026_11_24": {
+    "scope": "Private native table/image Block.Anchors at actual token starts through shared SF. Full adapter/public API/CLI and overall goal remain incomplete.",
+    "implementation": [
+      "Real BOOKMARK3 points at table-start controls and image atoms; sparse version1 table/picture ownerId bindings, without extra paragraphs/text/assets/body caches.",
+      "Classify current structural starts against validated native indexes before text fragmentation; nested cells/list continuation/header/footer/note ownership retained.",
+      "Promoted running-story table IDs and corresponding hint ownerIds stay aligned. Hint-free foreign starts attach to current tables/images; moved points in text become current inline points with stale-placement diagnostics.",
+      "Unknown metadata and bookmark span editing extent losses remain explicit. Contradictory role/owner/paragraph bindings reject; final graph validation still rejects other unrepresented controls."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_container_navigation.cjs",
+      "script_sha256": "6f1e9a81f85322933aa7be7c11eac6c109a3d1caddaa792ea7e673f09f4804e2",
+      "packages": "Same attributed pinned Univer1.0.4 packages, app validator, hash-pinned unmodified internal UI handler/helper and actual selection manager as prior navigation milestone.",
+      "main_offsets": {
+        "table": 8,
+        "table-alias": 8,
+        "cell-picture": 16,
+        "nested": 18,
+        "nested-alias": 18,
+        "picture": 38,
+        "list-table": 45,
+        "list-table-alias": 45,
+        "list-picture": 64
+      },
+      "other_offsets": "header-table/header-table-alias0, header-picture10; footer-picture0; note-table/note-table-alias0, note-picture8",
+      "results": [
+        "16 exact current token/source-ID points across main/nested/cell/list/header/footer/note bodies; seven exact collapsed internal selection-refresh requests at main table/image offsets.",
+        "Two actual registered-plugin saves/reopens and app validation pass. Selected table/image hints removed before save to verify native foreign-point interpretation without cached intent.",
+        "Actual TextX Q insertion at0 moves nine main offsets by1; source-ID binding remains current. Go strict .vdocs/SF import verifies the whole saved/edited tree, marks/assets/reference relationships and source immutability.",
+        "Native editing preserves separate inserted/original text intervals; the new test now expects actual TextX intervals after correcting its initial coalescence assumption. Original corpus/oracles unchanged.",
+        "Pinned skeleton constructs successfully; previous navigation and hyperlink-resource reader probes also pass."
+      ],
+      "limits": "Headless token/source/save/selection-refresh evidence. Render manager stubbed; no actual browser caret/scroll/events/bitmap-paint qualification or whole-native compatibility claim."
+    },
+    "checks": {
+      "tests": "Final full tests with actual saved/edited native artifacts pass library18.163s, CLI/internal cached; all examples build.",
+      "race": "Final all-package race with actual saved/edited native artifacts passes library174.809s, CLI/internal cached. Final combined actual saved/edited bookmark/heading/container regressions pass2.447s. Earlier focused saved/edited/binding/malformed race1.618s passes. Superseded full race stopped after correcting the test-only TextX interval expectation.",
+      "vet": "pass; production unchanged after this check",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "Focused tests0.568s, host CLI build/--help and Linux amd64/arm64 cross-builds pass. Cross-builds are not Linux execution evidence.",
+      "fuzz": "Existing small navigation property/offset fuzz target81482 executions/11.136s,2workers pass; short safety campaign, not exhaustive coverage of containers.",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go production only; no added production dependency, runtime executable/service/CGO/license server/upload, application/backend modification or permission/quota gate. Generated artifacts and optional QA installations ignored.",
+    "remaining": "Standalone AnchorPoint and list/section/page-break anchors, other structural cursor projection, nonmain editor target lookup limits; marker appearance/nonvisual/provenance intent; public native API/CLI and actual full-preset/browser qualification; per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_CONTAINER_QA=output/colleaf-qa/container-navigation.json GOWORK=off go test -run TestColleafContainerNavigation -count=1 .",
+      "node scripts/verify_colleaf_container_navigation.cjs",
+      "MANYDOC_COLLEAF_CONTAINER_SAVED=output/colleaf-qa/container-navigation-saved.json MANYDOC_COLLEAF_CONTAINER_EDITED=output/colleaf-qa/container-navigation-edited.json GOWORK=off go test -run TestColleafContainerNavigation -count=1 .",
+      "rg -n 'AnchorPoint|len\\(.*Anchors' colleaf_tables.go colleaf_lists.go colleaf_sections.go"
+    ]
   }
 }

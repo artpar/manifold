@@ -1540,3 +1540,19 @@ unmodified handler source issues twelve requests through the actual selection
 manager, with a stub render manager. This proves target/event logic, not rendered
 caret/scroll/browser interaction. Standalone/container anchors and structural
 cursor projection remain unfinished, alongside broader intent/API/UI audits.
+
+
+## Native table/image navigation points
+
+The rich body reader classifies bookmark starts against validated native table
+and image indexes before paragraph fragmentation. These zero-width points attach
+to the existing SF Block.Anchors on the current table/image, preserving nested
+and story ownership without consuming them into a temporary empty paragraph.
+Export uses real token offsets with sparse table/picture ownerId hints; header/
+footer table catalog promotion rebinds hint IDs with actual table IDs. Native
+edits and hint-free foreign points remain authoritative. Stale placement, unknown
+metadata and range editing extent losses are explicit. Other unrepresented
+structural controls still fail final graph validation rather than losing anchors.
+The optional pinned container-navigation probe qualifies actual plugin/save/edit/
+selection-refresh behavior and full Go/SF tree/assets/relationships; browser UI
+and remaining standalone/list/section/page-break anchors are unfinished.

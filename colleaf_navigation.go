@@ -13,7 +13,8 @@ import (
 type colleafBookmarkHint struct {
 	Version     int    `json:"version"`
 	Role        string `json:"role"`
-	ParagraphID string `json:"paragraphId"`
+	ParagraphID string `json:"paragraphId,omitempty"`
+	OwnerID     string `json:"ownerId,omitempty"`
 }
 type colleafBookmarkProperties struct {
 	BookmarkID string               `json:"bookmarkId,omitempty"`
@@ -46,8 +47,13 @@ func readColleafBookmark(a colleafRangeRecord) (colleafBookmarkProperties, error
 		if err = strictSFAttrs(fields["manydocNavigation"], p.Hint); err != nil {
 			return p, err
 		}
-		if p.Hint.Version != 1 || (p.Hint.Role != "run" && p.Hint.Role != "block") {
+		validRole := p.Hint.Role == "run" || p.Hint.Role == "block" || p.Hint.Role == "table" || p.Hint.Role == "picture"
+		if p.Hint.Version != 1 || !validRole {
 			return p, fmt.Errorf("%w: native bookmark placement intent", ErrUnsupported)
+		}
+		structural := p.Hint.Role == "table" || p.Hint.Role == "picture"
+		if structural && (p.Hint.OwnerID == "" || p.Hint.ParagraphID != "") || !structural && p.Hint.OwnerID != "" {
+			return p, fmt.Errorf("invalid native bookmark owner binding")
 		}
 	}
 	return p, nil
@@ -350,4 +356,56 @@ func finishColleafNavigation(ctx context.Context, input colleafNoteSnapshot, d *
 	}
 	sort.Strings(d.UnresolvedDestinations)
 	return nil
+}
+
+// Native container points use their real token and source identity, never a
+// synthetic paragraph or cached block. Current positions remain authoritative.
+func (w *colleafBodyWriter) containerAnchors(ids []string, offset int, role, owner string) error {
+	for _, id := range ids {
+		if err := destinationID(id); err != nil {
+			return err
+		}
+		a := writeColleafBookmark(id, offset, "", role)
+		a.Properties = sfAttrs(colleafBookmarkProperties{BookmarkID: id, Hint: &colleafBookmarkHint{Version: 1, Role: role, OwnerID: owner}})
+		w.body.CustomRanges = append(w.body.CustomRanges, a)
+	}
+	return nil
+}
+func colleafBookmarkLosses(doc *Document, a colleafRangeRecord) error {
+	fields, err := colleafStyleObject(a.Properties)
+	if err != nil {
+		return err
+	}
+	for name := range fields {
+		if name != "bookmarkId" && name != "manydocNavigation" {
+			doc.warn("colleaf_bookmark_metadata", "Native bookmark metadata outside identity and placement is not represented in SF")
+		}
+	}
+	if a.StartIndex != a.EndIndex {
+		doc.warn("colleaf_bookmark_span", "Native bookmark range editing extent becomes an SF point at its current start")
+	}
+	return nil
+}
+func (r *colleafBodyReader) containerBookmark(a colleafRangeRecord) (bool, error) {
+	role, owner := "", ""
+	if table, ok := r.index.tables[a.StartIndex]; ok {
+		role, owner = "table", table.ID
+	} else if atom, ok := r.index.blocks[a.StartIndex]; ok && atom.Type != nil && *atom.Type == 0 {
+		role, owner = "picture", atom.ID
+	}
+	if role == "" {
+		return false, nil
+	}
+	p, err := readColleafBookmark(a)
+	if err != nil {
+		return false, err
+	}
+	if err = colleafBookmarkLosses(r.doc, a); err != nil {
+		return false, err
+	}
+	if p.Hint != nil && (p.Hint.Role != role || p.Hint.OwnerID != owner) {
+		r.doc.warn("colleaf_stale_bookmark_placement", "Edited native bookmark position binds to its current container rather than stale placement intent")
+	}
+	r.containerPoints[a.StartIndex] = append(r.containerPoints[a.StartIndex], p.BookmarkID)
+	return true, nil
 }

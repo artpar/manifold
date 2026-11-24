@@ -1951,3 +1951,22 @@ requests from the unmodified UI handler. Stub render/window services in this pro
 and state its limits. These are not browser caret/scroll/event or full adapter
 completion evidence. Structural/standalone/container anchors and nonmain target
 lookup/remaining intent/API/browser qualification stay on the required queue.
+
+
+## 2026-11-24 Bind container navigation to current native tokens
+
+Table/image points belong to the current native table control/image atom and its
+source ID, rather than a synthetic paragraph or a hidden cached SF block. Extend
+sparse version1 placement hints with table/picture roles and ownerId; reject
+contradictory paragraph/owner bindings. Rebind promoted running-story table IDs.
+Classify real structural starts before paragraph fragments can consume them.
+Current offsets win: foreign hint-free starts attach to the current container;
+moved points in text retain inline locations, with stale-placement diagnostics.
+Do not silently omit unknown bookmark metadata or range editing extent.
+
+Qualify pinned real token/source bindings, plugin saves/reopens, TextX insertion
+and internal selection-manager refresh requests across rich nested/story content.
+The saved edit includes an independently styled text interval, so check that
+actual interval graph instead of assuming the editor coalesces it into old text.
+No original source oracle changes. Standalone/list/section/page-break anchors and
+remaining structural cursors, nonmain lookup and browser qualification stay open.

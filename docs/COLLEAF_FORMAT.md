@@ -991,7 +991,8 @@ selection manager emits its refresh request. No render/controller is mounted in
 this probe. Actual caret display, scrolling, widgets and browser events remain
 unqualified. The pinned handler resolves targets only in the main body; links to
 nonmain point definitions retain data with an explicit limitation diagnostic.
-Standalone AnchorPoint blocks, anchors on containers/images/sections and native
+Real table/image-start points are now mapped as described below. Standalone
+AnchorPoint blocks, anchors on lists/sections/page breaks and remaining native
 structural cursor projection remain required work. This component does not claim
 full native adapter/API/CLI or overall goal completion.
 
@@ -1000,4 +1001,39 @@ MANYDOC_COLLEAF_NAVIGATION_QA=output/colleaf-qa/navigation.json GOWORK=off go te
 node scripts/verify_colleaf_navigation.cjs
 MANYDOC_COLLEAF_NAVIGATION_SAVED=output/colleaf-qa/navigation-saved.json MANYDOC_COLLEAF_NAVIGATION_EDITED=output/colleaf-qa/navigation-edited.json MANYDOC_COLLEAF_NAVIGATION_HEADING=output/colleaf-qa/navigation-heading.json GOWORK=off go test -run 'TestColleafNavigation|TestColleafForeignHeading' -count=1 .
 GOWORK=off go test -run '^$' -fuzz '^FuzzColleafNavigationPoint$' -fuzztime=10s -parallel=2 .
+```
+
+
+## Current real table/image point component
+
+SF table/image Block.Anchors now use native BOOKMARK3 points at the actual table
+start control/image atom. Sparse version1 manydocNavigation accepts table/picture
+roles with ownerId and no paragraphId. Owner IDs follow promoted running-story
+table catalogs. Body interpretation classifies current token/source relationships
+before paragraph fragmentation, so points on images are not consumed into an
+empty temporary paragraph and points on tables are not omitted. No new text,
+paragraph, copied asset or SF body cache is introduced.
+
+Hint-free foreign points at these structural starts attach to the current table/
+image. Current edits win over stale intent, including points moved into ordinary
+text; diagnostics disclose ownership changes, unknown metadata and bookmark span
+extent loss. SF container anchors retain order and multiple aliases. Unmapped
+row/cell/section controls and other missing source graph nodes still reject.
+
+scripts/verify_colleaf_container_navigation.cjs uses the same pinned packages,
+validator and unmodified handler/actual selection manager as the previous probe.
+It checks16 points across main/nested/cell/list/header/footer/note bodies and seven
+exact internal selection-refresh requests, validates current token/source IDs,
+removes two hints to qualify foreign native points, saves/reopens twice and uses
+TextX to insert Q before all main points. Go strict .vdocs/SF reimport verifies the
+complete saved/edited tree, assets, styles and relationships. The inserted text
+retains TextX's separate interval. Skeleton construction passes; real browser
+paint/caret/scroll/controller behavior and nonmain target lookup remain open.
+Standalone AnchorPoint, list/section/page-break anchors, remaining structural
+cursor projection, broader intent/API/CLI/UI and final goal audits are unfinished.
+
+```sh
+MANYDOC_COLLEAF_CONTAINER_QA=output/colleaf-qa/container-navigation.json GOWORK=off go test -run TestColleafContainerNavigation -count=1 .
+node scripts/verify_colleaf_container_navigation.cjs
+MANYDOC_COLLEAF_CONTAINER_SAVED=output/colleaf-qa/container-navigation-saved.json MANYDOC_COLLEAF_CONTAINER_EDITED=output/colleaf-qa/container-navigation-edited.json GOWORK=off go test -run TestColleafContainerNavigation -count=1 .
 ```

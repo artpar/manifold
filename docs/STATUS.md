@@ -39,7 +39,46 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: bookmark points and typed internal navigation
+## Latest progress: real table and image navigation points
+
+Private native workers now export/import anchors at real table-start controls and
+image atoms, including nested cells, list continuations, headers, footers and
+notes. Native source IDs bind sparse version1 table/picture owner hints; running
+story table promotion rebinds those IDs. No synthetic paragraph, invisible text,
+asset copy or block tree is used to transport navigation. Current native token
+positions win over stale hints. Foreign hint-free points at these starts bind to
+the current SF table/image; moved container points in text become inline anchors
+with explicit diagnostics. Unknown metadata and span editing extent remain
+explicit losses. Unrepresented row/cell/section control positions still reject.
+
+Pinned actual plugins, app validation, two saves/reopens, skeleton construction
+and TextX insertion qualify 16 points across main/nested/cell/list/header/footer/
+note bodies, seven exact internal selection-manager refresh requests, hint-free
+native table/image points and current source-ID relationships. Go strict .vdocs/SF
+reimport checks the entire saved/edited tree, assets, formatting and relationships.
+TextX's independently inserted Q interval is checked separately from the original
+text interval. No browser caret/scroll/paint qualification is claimed.
+
+Final checks pass: all-package tests 18.163s, full race 174.809s, combined actual
+saved/edited navigation regression race 2.447s, vet/modules, CGO-disabled focused
+tests/host CLI execution and Linux amd64/arm64 cross-builds. A short navigation
+property/offset fuzz campaign passed 81,482 executions; it is not exhaustive
+container coverage. Pinned readers and diff checks pass; verification.json records
+exact scope. Cross-builds are not Linux execution evidence. The goal remains
+active/incomplete. Next implement standalone AnchorPoint, anchors on lists,
+sections and page breaks, and remaining structural cursor projection; then finish
+marker appearance/nonvisual/provenance intent, public native API/CLI and actual
+full-preset/browser qualification. Nonmain editor target lookup limits, per-page/
+decorated notes and broader PDF/source/resource/final acceptance audits remain
+required. No external blocker exists; runtime is pure Go and apps are untouched.
+
+```sh
+MANYDOC_COLLEAF_CONTAINER_QA=output/colleaf-qa/container-navigation.json GOWORK=off go test -run TestColleafContainerNavigation -count=1 .
+node scripts/verify_colleaf_container_navigation.cjs
+MANYDOC_COLLEAF_CONTAINER_SAVED=output/colleaf-qa/container-navigation-saved.json MANYDOC_COLLEAF_CONTAINER_EDITED=output/colleaf-qa/container-navigation-edited.json GOWORK=off go test -run TestColleafContainerNavigation -count=1 .
+```
+
+## Earlier progress: bookmark points and typed internal navigation
 
 Private native output/import now maps paragraph/heading block anchors and inline
 anchor atoms to real BOOKMARK3 point records without inserting visible characters.

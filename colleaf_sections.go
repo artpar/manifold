@@ -370,6 +370,20 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 		for i := range story.Body.Tables {
 			story.Body.Tables[i].ID = tableNames[story.Body.Tables[i].ID]
 		}
+		for i := range story.Body.CustomRanges {
+			a := &story.Body.CustomRanges[i]
+			if a.Type != 3 {
+				continue
+			}
+			p, err := readColleafBookmark(*a)
+			if err != nil {
+				return out, err
+			}
+			if p.Hint != nil && p.Hint.Role == "table" {
+				p.Hint.OwnerID = tableNames[p.Hint.OwnerID]
+				a.Properties = sfAttrs(p)
+			}
+		}
 		listNames := map[string]string{}
 		for old, raw := range story.Lists {
 			scoped := id + "-" + old

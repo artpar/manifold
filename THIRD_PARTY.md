@@ -184,3 +184,12 @@ It executes the unmodified internal-link handler/helper region with the actual
 DocSelectionManagerService and a stub render manager/window. It verifies selection
 refresh requests and save/edit transport, without claiming rendered caret/scroll
 or browser interaction. No additional package or production dependency was added.
+
+The optional container-navigation probe reuses those same pinned packages,
+validator and unmodified handler/selection manager. It qualifies table/image token
+and source bindings, headless save/edit transport and selection-refresh requests;
+no additional production dependency or browser fidelity claim is introduced.
+
+The container-navigation probe reuses those same pinned QA packages and handler
+source for table/image points, token/source bindings and selection refreshes.
+No additional dependency or third-party production source is incorporated.

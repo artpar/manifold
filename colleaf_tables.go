@@ -154,7 +154,7 @@ func (w *colleafBodyWriter) table(block Block, depth int) error {
 	if len(block.Runs) > 0 || block.Image != nil || len(block.Items) > 0 || block.Section != nil || block.List != "" || block.Level != 0 || block.Start != nil || block.Numbering != nil {
 		return fmt.Errorf("invalid native table block")
 	}
-	if block.Source != nil || len(block.Anchors) > 0 || block.PageBreakBefore || block.Direction != "" {
+	if block.Source != nil || block.PageBreakBefore || block.Direction != "" {
 		return fmt.Errorf("%w: native table annotations require mapping", ErrUnsupported)
 	}
 	grid, err := tableGrid(block.Rows)
@@ -169,6 +169,9 @@ func (w *colleafBodyWriter) table(block Block, depth int) error {
 	}
 	id := w.id("table")
 	start := w.offset
+	if err := w.containerAnchors(block.Anchors, start, "table", id); err != nil {
+		return err
+	}
 	w.text("\x1a")
 	rows := make([]any, 0, len(block.Rows))
 	for ri, row := range block.Rows {
@@ -358,6 +361,7 @@ func (r *colleafBodyReader) paragraphFragment(start, end int, p colleafParagraph
 }
 
 type colleafBodyReader struct {
+	containerPoints map[int][]string
 	ctx             context.Context
 	body            colleafBody
 	index           *colleafBodyIndex
@@ -485,7 +489,7 @@ func colleafUnitPoints(unit colleafNumberUnit) (float64, error) {
 	}
 }
 func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, error) {
-	block := Block{Kind: Table}
+	block := Block{Kind: Table, Anchors: r.containerPoints[node.start]}
 	record := r.index.tables[node.start]
 	raw, ok := r.tables[record.ID]
 	if !ok {
@@ -786,9 +790,17 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 		return nil, err
 	}
 	r.bookmarkUsed = map[string]bool{}
+	r.containerPoints = map[int][]string{}
 	r.paragraphStarts = colleafParagraphStarts(index)
 	for _, a := range body.CustomRanges {
 		if a.Type == 3 {
+			claimed, err := r.containerBookmark(a)
+			if err != nil {
+				return nil, err
+			}
+			if claimed {
+				continue
+			}
 			r.bookmarks = append(r.bookmarks, a)
 			continue
 		}
