@@ -986,3 +986,13 @@ internal IDs can share semantically equivalent href spellings; mixed targets cle
 editable ownership with the existing ambiguity diagnostic. Physical annotation
 records remain intact. Explicit PDF Note/Reference and pagination artifact semantic
 recovery still remain next work, with reproducible independent source probes.
+
+## PDF artifact provenance (2026-11-24)
+
+pdf_artifacts.go records page/stream-scoped explicit marked groups. SourceInfo
+membership links text/images and aggregates to PDFPage.Artifacts without copying
+visible content. Default-user-space BBoxes use the page transform, independently
+of content cm. Nested marked/ActualText/Form operations retain contributing IDs;
+synthetic gaps retain only shared memberships. SF pages clone these pointer-bearing
+records and source marks include artifacts. Header/Footer here is physical evidence,
+not an inferred reusable authoring template. See PDF_ARTIFACTS.md.

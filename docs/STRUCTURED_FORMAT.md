@@ -680,3 +680,10 @@ and CLI extract -format sf.gz. ReadStructured remains a plain JSON API; callers
 can wrap a standard gzip reader or convert through Read(SFGzip)/ToStructured.
 Compressed and uncompressed inputs receive the same strict schema/graph checks.
 See SF_CODEC.md for full-value/provenance proofs and retained allocation costs.
+
+PDF page attrs now optionally include artifacts (PDFArtifact records); source node/
+cell/list-item attrs and source marks optionally include artifacts ID arrays.
+These identify explicit physical page/stream groups with their original properties
+and displayed bounds. Membership survives nested marked content, Forms and ActualText;
+Go checks IDs/pages/coordinates and clones records across bridges. Physical page roles
+are separate from reusable header/footer templates. See PDF_ARTIFACTS.md.

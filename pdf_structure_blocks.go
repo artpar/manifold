@@ -261,6 +261,7 @@ func (s *pdfStructureRecovery) joinParagraph(last *Block, b Block) {
 		src := sourceFromBlocks([]Block{*last, b}, &pdfStructureNode{})
 		src.Structure = "inferred"
 		src.Evidence = "tagged_paragraph_word_gap"
+		src.Artifacts = commonArtifacts(last.Runs[len(last.Runs)-1].Source, b.Runs[0].Source)
 		src.Confidence = .6
 		src.Quad = nil
 		src.Regions = nil

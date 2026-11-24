@@ -912,3 +912,13 @@ Colleaf's actual .vdocs snapshot is pinned Univer 1.0.4 inside a version-3 app
 envelope. This library's SF is not that format. Native adapter/real-reader
 qualification remains open; no .vdocs read/write, app upload or native-save
 compatibility is claimed. See COLLEAF_FORMAT.md for inspected source facts.
+
+## Explicit artifact page roles
+
+PDFPage.Artifacts preserves generic/property-bearing Artifact groups, stream IDs,
+Type/Subtype, default-space BBox/display bounds and Attached edges. SourceInfo.Artifacts
+links actual text/image and aggregate membership, including nested/ActualText/Form
+cases. SF/JSON/gzip persist the complete graph; malformed properties/undefined
+memberships reject. Physical Header/Footer page roles remain source facts rather
+than invented authorial repeat templates. No content is removed or duplicated.
+See PDF_ARTIFACTS.md for original-source/independent checks and remaining typed-note work.

@@ -67,7 +67,7 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 	d = resolveNumberingDocument(d)
 	s := &StructuredDocument{Type: "doc", Attrs: StructuredAttributes{
 		PDFNavigation: clonePDFNavigation(d.PDFNavigation), Schema: StructuredSchema, Metadata: d.Metadata, Layout: cloneLayout(d.Layout), EvenAndOddHeaders: d.EvenAndOddHeaders,
-		Diagnostics: append([]Diagnostic(nil), d.Diagnostics...), Pages: append([]PDFPage(nil), d.Pages...),
+		Diagnostics: append([]Diagnostic(nil), d.Diagnostics...), Pages: clonePDFPages(d.Pages),
 		UnresolvedDestinations: append([]string(nil), d.UnresolvedDestinations...),
 	}}
 	sort.Strings(s.Attrs.UnresolvedDestinations)
@@ -253,7 +253,7 @@ func FromStructured(s *StructuredDocument) (*Document, error) {
 	if s.Attrs.Schema != StructuredSchema {
 		return nil, fmt.Errorf("%w: structured schema %q", ErrUnsupported, s.Attrs.Schema)
 	}
-	d := &Document{PDFNavigation: clonePDFNavigation(s.Attrs.PDFNavigation), EvenAndOddHeaders: s.Attrs.EvenAndOddHeaders, Metadata: s.Attrs.Metadata, Layout: cloneLayout(s.Attrs.Layout), Diagnostics: append([]Diagnostic(nil), s.Attrs.Diagnostics...), Pages: append([]PDFPage(nil), s.Attrs.Pages...), UnresolvedDestinations: append([]string(nil), s.Attrs.UnresolvedDestinations...)}
+	d := &Document{PDFNavigation: clonePDFNavigation(s.Attrs.PDFNavigation), EvenAndOddHeaders: s.Attrs.EvenAndOddHeaders, Metadata: s.Attrs.Metadata, Layout: cloneLayout(s.Attrs.Layout), Diagnostics: append([]Diagnostic(nil), s.Attrs.Diagnostics...), Pages: clonePDFPages(s.Attrs.Pages), UnresolvedDestinations: append([]string(nil), s.Attrs.UnresolvedDestinations...)}
 	var err error
 	if d.Blocks, err = decodeSFBlocks(s.Content, 0); err != nil {
 		return nil, err

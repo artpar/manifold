@@ -282,6 +282,7 @@
     },
     "source": {
       "attrs": {
+        "artifacts": {"default": []},
         "format": {
           "default": "pdf",
           "validate": "string"

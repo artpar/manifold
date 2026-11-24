@@ -189,6 +189,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 }
 
 type pdfReader struct {
+	artifactTotal            int
 	logicalBidiLine          bool
 	ctx                      context.Context
 	pdf                      *model.Context
@@ -250,6 +251,7 @@ func (r *pdfReader) space(next Run) {
 		copyRun.Note = nil
 		if last.Source != nil {
 			source := *last.Source
+			source.Artifacts = commonArtifacts(last.Source, next.Source)
 			source.Font = ""
 			source.FontSize = 0
 			source.RenderMode = 0
@@ -388,6 +390,7 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 			copy.Regions = nil
 			actual.source = &copy
 		}
+		actual.source.Artifacts = artifactIDs(actual.source, source.Artifacts...)
 		actual.source.Confidence = min(actual.source.Confidence, source.Confidence)
 		actual.source.Regions = append(actual.source.Regions, SourceRegion{Page: r.page, Quad: *source.Quad})
 	}

@@ -1,6 +1,6 @@
 # Active goal acceptance audit
 
-Audited against `f804210` plus the current ActualText-navigation fix, 2026-11-24.
+Audited after 54cee07 and the explicit-artifact structure milestone, 2026-11-24.
 **The full goal remains incomplete.** This is the current requirement audit;
 older milestone narratives are preserved in Git history and verification.json.
 The objective remains all four rich-document paths around one shared SF, pure Go,
@@ -17,12 +17,12 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
 | DOCX→SF | docx_read.go and scoped package/list/table/note/section/font code; unchanged original Word source/oracles; real_docx_test.go | Common required rich content preserved with explicit losses. Broader representative DOCX qualification remains needed; no universal OOXML claim |
 | SF→DOCX | docx_write.go and related modules; exact supported source SF round trips; python-docx/standard XML/LibreOffice checks and visual examples in verification.json | Implemented rich path; broaden original-export visual/corpus coverage beyond current synthetic combinations and single original Word publication |
 | SF→PDF wrapping/pagination/tables/fonts/Unicode | pdf_write/text/shaping/bidi/glyph/table/note modules; independent font/GID/geometry/pixel/continuation checks; 189-page real-source render | Implemented declared support contract. Unsupported shaping/missing glyphs explicitly error; no automatic font substitution. Do not turn this into an unstated requirement for every script or Word pagination |
-| PDF→SF text/images/pages/positions/structure | pdf_read/geometry/images/marked/structure/infer/rulings modules; original 90 tables/3,009 origins/eleven continuation refs; PDF_NAVIGATION.md | Rich extraction exists. Explicit Note/Reference relationships and pagination-artifact properties are not yet recovered into the corresponding semantics; probes below contradict completion |
-| Distinguish explicit/inferred/uncertain PDF meanings | SourceInfo; explicit logical roles separate from geometric/table/span/width/destination inference; original source identity/geometry oracles | Implemented for current recovery. Extend it to note/running semantics rather than guessing silently; inverse ParentTree consistency also remains unqualified |
+| PDF→SF text/images/pages/positions/structure | pdf_read/geometry/images/marked/structure/infer/rulings modules; original 90 tables/3,009 origins/eleven continuation refs; PDF_NAVIGATION.md | Rich extraction exists. Explicit artifact properties/membership now recover in physical page/source records (PDF_ARTIFACTS.md). Note/Reference relationships remain missing; the note probe contradicts completion |
+| Distinguish explicit/inferred/uncertain PDF meanings | SourceInfo; explicit logical roles separate from geometric/table/span/width/destination inference; original source identity/geometry oracles | Implemented for current recovery. Artifact page roles/properties now remain explicit, separate from authoring templates. Extend the same discipline to notes; inverse ParentTree consistency also remains unqualified |
 | Paragraphs/headings/formatting/links/lists | Shared model/profile, DOCX style/theme/slot/direction and numbering code; NUMBERING.md, URI_TARGETS.md, PDF_NAVIGATION.md; tests/independent source/render checks | Implemented for declared subset. Audit found ActualText dropped typed internal targets; current fix and regression tests close that concrete failure, with mixed ownership still diagnosed |
 | Tables including merged cells and widths | table_grid, DOCX merges/grids, native recursive continuation/repetition, tagged/painted PDF recovery; TABLE_WIDTHS.md and TAGGED_TABLE_SPANS.md | Declared semantics implemented and independently qualified, including actual Word/PDF cells. Complex ambiguous grids must retain content and disclose uncertainty |
 | Images/assets/metadata/page settings | Image decode/bounds/fitting, JPEG preservation, metadata, margins/sections/story ownership, multiple independent raster and relationship checks | Implemented current contract. Preserve practical source/asset qualification in final representative corpus; unsupported image variants have explicit outcomes |
-| Headers/footers/notes | Shared SF, DOCX parts/references, native per-section variants and rich note continuation; page/control/image/note tests and visual evidence | Generation and DOCX round trips exist. PDF explicit running-artifact and note/reference recovery gaps remain; anonymous physical note links alone do not fulfill typed notes |
+| Headers/footers/notes | Shared SF, DOCX parts/references, native per-section variants and rich note continuation; page/control/image/note tests and visual evidence | Generation and DOCX round trips exist. Explicit running-artifact facts now recover separately from templates; note/reference recovery remains missing. Anonymous physical note links alone do not fulfill typed notes |
 | Revisions/comments/fields/unsupported constructs have explicit behavior | DOCX final-visible-view and cached-field extraction, revision/comment/control loss diagnostics; COMPATIBILITY.md and fixed corpus tests | Explicit policy exists. Editing history/comment editing/field execution are not claimed; verify policy on the added real rich-export inputs rather than requiring arbitrary Office API parity |
 | Never silently lose visible content; reject unsupported output | Diagnostics, AllowLossy gate, strict SF/JSON schema/graphs, staged DOCX/PDF output, explicit missing glyph/shape failures | Existing tests and source checks qualify current paths; every new adapter/recovery feature must preserve this invariant. Physical unsupported constructs cannot be called complete merely because flattened text survives |
 | Supported SF round trips preserve declared semantics | Original 51 accepted corpus cases, rich feature tests and exact original Word normalization; gzip all-value hash and source identity proofs | Implemented checked normalized contract. Keep structural/source/asset oracles unchanged; test new native adapter against its actual snapshot semantics |
@@ -40,13 +40,13 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
    destination identity. The current fix retains matching internal targets and
    clears mixed URI/internal/different-target ownership. Single/multiple-run parent
    ActualText, SF, DOCX and intersection tests establish the corrected behavior.
-2. **Explicit PDF story semantics:** the targeted Note/Reference/Ref fixture keeps
-   BODY/marker/note text but produces zero typed notes. The Header pagination-
-   artifact fixture keeps HEADER text but produces zero running stories and loses
-   the explicit subtype/BBox/attachment properties. These are recoverable source
-   facts; flattening/diagnostics do not satisfy that part of the full objective.
-   Implement explicit relationships/provenance first, then separately identified
-   placement/kind inference where PDF does not distinguish footnote/endnote.
+2. **Explicit PDF story semantics:** the Note/Reference/Ref fixture keeps
+   BODY/marker/note text but produces zero typed notes. Implement explicit note
+   relationships/rich bodies first, with separately identified kind/placement
+   inference where the source is ambiguous. The Header probe now preserves its
+   Type/Subtype/BBox/Attached and exact membership, independently checked across
+   1,555 original groups. A physical page role does not prove a reusable authorial
+   template. PDF_ARTIFACTS.md records this implemented distinction and its limits.
 3. **Actual Colleaf boundary:** implement/qualify a standalone native Univer 1.0.4
    snapshot adapter through the shared SF, including rich structures and UTF-16
    ranges. Do not merely wrap plain text or rename SF. No Daptin or Colleaf edits
@@ -75,7 +75,6 @@ rg -n 'Ref|Note|Artifact|Subtype|BBox' pdf_structure.go pdf_structure_blocks.go 
 ```
 
 The generated source fixtures are independent hand-authored object syntax. Current
-Note/Ref text remains visible with explicit role/property-loss diagnostics; current
-artifact tag alone cannot express its Header property. See COLLEAF_FORMAT.md for
+Note/Ref text remains visible with explicit role/property-loss diagnostics; current artifact records now express the Header property and linked content. See COLLEAF_FORMAT.md for
 pinned remote schema evidence. The complete goal stays active, with no external
 blocker preventing the next implementation.

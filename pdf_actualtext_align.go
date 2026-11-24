@@ -26,6 +26,7 @@ func alignedActualTextRuns(fragments []Run) []Run {
 			text = append(text, fragment.Text...)
 			s := fragment.Source
 			clipState |= replacementClipState(s.Precision)
+			source.Artifacts = artifactIDs(&source, s.Artifacts...)
 			source.Confidence = min(source.Confidence, s.Confidence)
 			q := *s.Quad
 			source.Regions = append(source.Regions, SourceRegion{Page: s.Page, Quad: q})

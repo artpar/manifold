@@ -66,6 +66,7 @@ type TableWidthSource struct {
 // advance/font metrics, not glyph ink outlines. Precision discloses estimates.
 // Confidence is a heuristic ranking, not a calibrated probability.
 type SourceInfo struct {
+	Artifacts          []string          `json:"artifacts,omitempty"`
 	Format             Format            `json:"format"`
 	Page               int               `json:"page,omitempty"`
 	Object             string            `json:"object,omitempty"`
@@ -97,14 +98,15 @@ type SourceInfo struct {
 // PDFPage records physical page boundaries even when a logical tagged paragraph
 // spans pages. Boxes retain PDF user units; Width/Height and source quads use pt.
 type PDFPage struct {
-	Number    int        `json:"number"`
-	MediaBox  [4]float64 `json:"media_box"`
-	CropBox   [4]float64 `json:"crop_box"`
-	Rotate    int        `json:"rotate"`
-	UserUnit  float64    `json:"user_unit"`
-	Width     float64    `json:"width"`
-	Height    float64    `json:"height"`
-	Transform Matrix     `json:"transform"`
+	Artifacts []PDFArtifact `json:"artifacts,omitempty"`
+	Number    int           `json:"number"`
+	MediaBox  [4]float64    `json:"media_box"`
+	CropBox   [4]float64    `json:"crop_box"`
+	Rotate    int           `json:"rotate"`
+	UserUnit  float64       `json:"user_unit"`
+	Width     float64       `json:"width"`
+	Height    float64       `json:"height"`
+	Transform Matrix        `json:"transform"`
 }
 
 func finite(v float64) bool { return !math.IsNaN(v) && !math.IsInf(v, 0) }
@@ -114,6 +116,28 @@ func (s *SourceInfo) validate(pages []PDFPage) error {
 	}
 	if s.Format != PDF {
 		return fmt.Errorf("source format must be pdf")
+	}
+	seenArtifacts := map[string]bool{}
+	for _, id := range s.Artifacts {
+		if seenArtifacts[id] {
+			return fmt.Errorf("duplicate source artifact membership")
+		}
+		seenArtifacts[id] = true
+		found := false
+		for _, page := range pages {
+			if s.Page != 0 && s.Page != page.Number {
+				continue
+			}
+			for _, a := range page.Artifacts {
+				if a.ID == id {
+					found = true
+					break
+				}
+			}
+		}
+		if !found {
+			return fmt.Errorf("source artifact membership is undefined or belongs to another page")
+		}
 	}
 	if s.Page < 0 || s.Page > len(pages) {
 		return fmt.Errorf("source page out of range")
@@ -233,7 +257,23 @@ func (s *SourceInfo) validate(pages []PDFPage) error {
 	return nil
 }
 func validatePDFPages(pages []PDFPage) error {
+	artifacts := map[string]bool{}
 	for i, p := range pages {
+		for _, a := range p.Artifacts {
+			if artifacts[a.ID] {
+				return fmt.Errorf("duplicate PDF artifact identity")
+			}
+			artifacts[a.ID] = true
+			if len(artifacts) > 100000 {
+				return fmt.Errorf("PDF artifact budget exceeded")
+			}
+			if a.Matrix != p.Transform {
+				return fmt.Errorf("artifact coordinate matrix contradicts its page default space")
+			}
+			if e := a.validate(); e != nil {
+				return e
+			}
+		}
 		if p.Number != i+1 || p.Rotate < 0 || p.Rotate >= 360 || p.Rotate%90 != 0 || !finite(p.UserUnit) || p.UserUnit <= 0 || !finite(p.Width) || !finite(p.Height) || p.Width <= 0 || p.Height <= 0 {
 			return fmt.Errorf("invalid PDF page geometry")
 		}

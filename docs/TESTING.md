@@ -2280,3 +2280,15 @@ recovery is missing. They are gap evidence, not passing semantic acceptance test
 Actual Colleaf source/declaration inspection is pinned in COLLEAF_FORMAT.md and
 verification.json. No remote project code or customer documents are copied into
 this repository; optional retrieved source remains ignored under output/codec.
+
+## PDF artifact page structure
+
+PDF_ARTIFACTS.md has exact source, codec, independent-reader and ProseMirror commands.
+Target `TestPDF.*Artifact` covers nested groups/Span MCIDs, property resources/Form
+context, default-space BBoxes under cm/crop/rotation/UserUnit, ActualText unions,
+separator intersections, malformed properties and graph/clone checks. New PDF/SF
+fuzz seeds carry these fields. verify_pdf_artifacts.py independently reads original
+operators and compares every group/property/coordinate/membership reference, with
+actual original Word PDF (1,530 groups) and InDesign PDF (25) evidence. All previous
+source JSON values remain exact before additive artifact fields. Vector-only/empty
+groups may have no editable text/image member; this is disclosed rather than invented.

@@ -39,24 +39,29 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest audit and concrete progress
+## Latest progress: explicit PDF artifact structure
 
-ACCEPTANCE.md is rewritten against the actual objective and current evidence,
-replacing the obsolete cumulative TODO narrative. It identifies concrete gaps
-without inventing every-script/every-Office-feature completion requirements.
+PDFPage.Artifacts and SourceInfo.Artifacts now retain explicit physical groups,
+Type/Subtype, default-space BBox/display geometry, Attached edges and linked rich
+content membership. Nested marked content/MCIDs, images/Forms and ActualText keep
+these relationships; no visible text is duplicated. Physical Header/Footer roles
+are not silently treated as reusable authorial templates. Read PDF_ARTIFACTS.md.
 
-The current ActualText fix retains typed internal GoTo IDs alongside hrefs during
-structural replacement, and intersects mixed URI/internal targets correctly.
-Regression tests cover parent replacements outside child Link ownership, one or
-multiple contributing spans, SF/DOCX persistence, equivalent href spelling and
-mixed/different target cases. A prior correct-looking fragment href alone was
-insufficient evidence for preserved internal navigation.
+Independent original-object checks match all 1,530 MQTT groups (127 Header/137
+Footer, 1,266 generic) and 25 InDesign groups. All 15,324/160 source memberships
+survive, and the old whole-source JSON projection is exact before the additive
+artifact fields. Actual ProseMirror checks all 214,795 nodes/marks/attributes across
+both originals and the targeted Header probe. Original source/oracles remain intact.
 
-Independent hand-authored source probes prove remaining PDF semantic gaps:
-Note/Reference/Ref text survives but creates zero typed notes; explicit Header
-pagination-artifact content survives in body flow but loses subtype/BBox/attachment
-semantics. These are required recovery work, not exceptions disguised as support.
-Reproduce with scripts/generate_pdf_semantic_audit.py and the commands below.
+Checks pass: full tests (18.860s/0.824s), race (173.268s/1.864s), new-seed
+race (1.912s), vet/modules, host CGO-disabled build/focused execution and original
+PDF extraction, Linux amd64/arm64 cross-builds and diff check. PDF/SF ten-second
+fuzz campaigns pass (4,738/273 executions, two workers). Durable evidence is in
+verification.json; output/artifacts and output/audit hold ignored raw logs.
+
+The Note/Reference/Ref probe still produces zero typed notes. That is the next
+concrete required recovery gap; physical artifact facts are now available, while
+authorial template inference must remain distinct. The full goal stays incomplete.
 
 ## Existing verified evidence to preserve
 
@@ -92,10 +97,11 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
 
 ## Next concrete implementation order
 
-1. Finish/commit the ActualText fix and current audit/Colleaf evidence with checks.
-2. Recover explicit PDF note-reference and pagination-artifact semantics, keeping
+1. Finish/commit the explicit PDF artifact structure milestone with current checks.
+2. Recover explicit PDF note-reference semantics, keeping
    physical evidence separate from inferred placement/kind. Retain rich bodies,
-   actual labels and uncertainty rather than flattening them silently.
+   actual labels and uncertainty rather than flattening them silently. Explicit
+   pagination-artifact properties/membership are now qualified in PDF_ARTIFACTS.md.
 3. Implement/qualify the actual Colleaf native snapshot adapter through the shared
    SF. Include UTF-16 boundaries, rich source maps, notes/stories and resources;
    do not stop at plain-text wrapping. Leave applications/backends untouched.

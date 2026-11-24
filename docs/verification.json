@@ -5082,5 +5082,92 @@
     },
     "evidence": "output/audit and output/codec (ignored); no remote implementation source copied into production",
     "next": "explicit PDF note/reference and pagination semantics; checked rich Colleaf snapshot adapter; representative original DOCX/corpus/visual and final requirement audit"
+  },
+  "pdf_artifact_structure_milestone": {
+    "status": "explicit physical artifact structure qualified; full goal remains incomplete",
+    "public": [
+      "PDFPage.Artifacts / PDFArtifact",
+      "SourceInfo.Artifacts membership",
+      "SF source mark artifacts + page artifact values"
+    ],
+    "semantics": "explicit physical Header/Footer and other artifact facts; not an invented authorial repeating template; body text/images remain singular and linked",
+    "properties": [
+      "page/stream IDs",
+      "Type/Subtype",
+      "default-user-space BBox",
+      "page-transform display Bounds/Matrix",
+      "Attached edges"
+    ],
+    "correctness": [
+      "BBox excludes additional content cm per ISO 32000-1 Table 330",
+      "nested Span/MCID and property resources",
+      "Form inherited context/no later-call leakage",
+      "whole/aligned ActualText membership unions",
+      "synthetic separators use intersection",
+      "strict graph/finite geometry/attachments/100000-document budget",
+      "deep-clone page metadata"
+    ],
+    "independent": [
+      {
+        "pdf": "output/audit/pagination-artifact.pdf",
+        "sf": "output/artifacts/header.sf",
+        "pages": 1,
+        "artifacts": 1,
+        "types": {
+          "Header": 1
+        },
+        "memberships": 2,
+        "unpainted_or_empty_groups": 0,
+        "verification": "exact original Type/Subtype/BBox/Attached, stream/page IDs, default-space transform and valid source memberships; no inferred reusable template claim"
+      },
+      {
+        "pdf": "testdata/real/mqtt-v5.0-os.pdf",
+        "sf": "output/artifacts/mqtt.sf.gz",
+        "pages": 137,
+        "artifacts": 1530,
+        "types": {
+          "": 1266,
+          "Footer": 137,
+          "Header": 127
+        },
+        "memberships": 15324,
+        "unpainted_or_empty_groups": 1266,
+        "verification": "exact original Type/Subtype/BBox/Attached, stream/page IDs, default-space transform and valid source memberships; no inferred reusable template claim"
+      },
+      {
+        "pdf": "testdata/real/copyright-office-circular-1-2021.pdf",
+        "sf": "output/artifacts/indesign.sf",
+        "pages": 10,
+        "artifacts": 25,
+        "types": {
+          "": 25
+        },
+        "memberships": 160,
+        "unpainted_or_empty_groups": 0,
+        "verification": "exact original Type/Subtype/BBox/Attached, stream/page IDs, default-space transform and valid source memberships; no inferred reusable template claim"
+      }
+    ],
+    "original_values": {
+      "projected_sha256": "4b9ccc6f060fc45958494e3cfdf85ed3bad4d54076a97e79a153662e7d1d1d1b",
+      "baseline": "97a5bc2 original real-source SF; committed all-value semantic digest",
+      "removed_only_new_artifact_fields": 15461,
+      "all_preexisting_values": "exact"
+    },
+    "actual_prosemirror": "all 214,795 nodes/marks/attributes across original MQTT, original InDesign and targeted probe pass",
+    "checks": {
+      "full_tests": "library 18.860s; CLI 0.824s; all packages pass",
+      "full_race": "library 173.268s; CLI 1.864s; all packages pass",
+      "focused_new_seeds_race": "1.912s pass",
+      "vet": "pass",
+      "modules": "all modules verified",
+      "cgo_disabled": "host build/focused 0.357s execution + original PDF extraction; Linux amd64/arm64 cross-built only",
+      "fuzz": "ten seconds each/two workers: PDF 4,738; SF 273; pass",
+      "diff_check": "pass"
+    },
+    "source_and_oracles": "unchanged original fixture bytes and structural/text/merge/asset/navigation oracles; all preexisting source JSON values exact before additive fields",
+    "scope": "recovery/codec metadata only; no changed rendering commands or new visual/Word-parity claim",
+    "production_dependencies": "unchanged; no runtime executables/services/CGO/app changes",
+    "evidence": "output/artifacts and output/audit ignored; scripts/verify_pdf_artifacts.py; docs/PDF_ARTIFACTS.md",
+    "next": "explicit PDF Note/Reference/Ref graph and rich bodies/labels with kind/placement uncertainty; native snapshot adapter and remaining original corpus/visual audit"
   }
 }

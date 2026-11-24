@@ -5,10 +5,10 @@ current requirement-by-requirement audit; historical milestone narratives remain
 in Git history and verification.json. Do not use an old pending statement as proof
 that a feature is still missing or that a requirement can be dropped.
 
-1. Finish and commit the ActualText typed-navigation preservation fix and its
-   regression evidence. Mixed targets must not become a false single link.
-2. Recover explicit tagged-PDF Note/Reference relationships and pagination-
-   artifact properties. Preserve rich bodies, IDs, physical evidence and uncertainty;
+1. Finish and commit the explicit PDF artifact properties/membership milestone.
+   Keep physical page Header/Footer roles distinct from inferred authorial templates.
+2. Recover explicit tagged-PDF Note/Reference relationships. Explicit artifact
+   properties and rich source membership are now qualified in PDF_ARTIFACTS.md. Preserve rich bodies, IDs, physical evidence and uncertainty;
    do not treat anonymous links or text retention alone as semantic recovery.
    `scripts/generate_pdf_semantic_audit.py` reproduces current gaps.
 3. Implement/qualify a standalone Colleaf native Univer 1.0.4 snapshot adapter

@@ -17,6 +17,11 @@ func (r *pdfReader) actualFrame() *pdfMarkedContent {
 	return nil
 }
 func (r *pdfReader) applyMarked(source *SourceInfo) {
+	for _, frame := range r.marked {
+		if frame.artifact != "" {
+			source.Artifacts = artifactIDs(source, frame.artifact)
+		}
+	}
 	if len(r.marked) > 0 {
 		source.Tag = r.marked[len(r.marked)-1].tag
 	}
@@ -31,6 +36,7 @@ func (r *pdfReader) applyMarked(source *SourceInfo) {
 }
 func (r *pdfReader) beginMarked(tag string, value any, resources types.Dict) error {
 	frame := pdfMarkedContent{tag: tag, stream: r.stream}
+	var properties types.Dict
 	if value != nil {
 		var d types.Dict
 		if name, ok := value.(types.Name); ok {
@@ -53,6 +59,7 @@ func (r *pdfReader) beginMarked(tag string, value any, resources types.Dict) err
 				return fmt.Errorf("invalid marked-content properties")
 			}
 		}
+		properties = d
 		if v := d["MCID"]; v != nil {
 			n, e := r.pdf.DereferenceInteger(v)
 			if e != nil || n == nil || *n < 0 {
@@ -68,6 +75,13 @@ func (r *pdfReader) beginMarked(tag string, value any, resources types.Dict) err
 			}
 			frame.actual = &text
 		}
+	}
+	if tag == "Artifact" {
+		id, err := r.artifact(properties, r.pageInfo.Transform)
+		if err != nil {
+			return err
+		}
+		frame.artifact = id
 	}
 	r.marked = append(r.marked, frame)
 	return nil
@@ -96,6 +110,9 @@ func (r *pdfReader) endMarked() {
 			frame.source.Stream = frame.stream
 		}
 		frame.source.Tag = frame.tag
+		if frame.artifact != "" {
+			frame.source.Artifacts = artifactIDs(frame.source, frame.artifact)
+		}
 	}
 	if len(frame.source.Regions) > 0 {
 		var bounds Quad

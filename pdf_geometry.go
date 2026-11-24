@@ -121,6 +121,7 @@ func sourceForRuns(runs []Run) *SourceInfo {
 			copy.Precision = "union_of_run_bounds"
 			first = &copy
 		}
+		first.Artifacts = artifactIDs(first, s.Artifacts...)
 		x0, y0, x1, y1 := quadBounds(*s.Quad)
 		if have {
 			a, b, c, d := quadBounds(bounds)
@@ -139,6 +140,7 @@ func sourceForRuns(runs []Run) *SourceInfo {
 }
 
 type pdfMarkedContent struct {
+	artifact                         string
 	decoded                          []byte
 	fragments                        []Run
 	alignmentUnavailable             bool

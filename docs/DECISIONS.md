@@ -1390,3 +1390,14 @@ those concrete required gaps open. ActualText's loss of typed GoTo ownership is
 fixed now, with URI/internal/mixed intersections tested. Replace stale cumulative
 acceptance claims with current requirement evidence; do not use old TODOs or a
 passing suite as a substitute for the actual completion criteria.
+
+## 2026-11-24 Retain physical artifact roles without inventing templates
+
+Capture Artifact Type/Subtype/BBox/Attached and page/stream identity, with explicit
+source-content membership, in page/source provenance. This closes lost recoverable
+page Header/Footer facts without duplicating content or guessing section/parity/
+repeat behavior. Artifact BBox is default user space per ISO 32000-1 Table 330;
+content cm applies to glyphs, not again to that box. Validate source graph/geometry
+and retain nested/ActualText/Form membership. Full original object checks and exact
+preexisting-value projection qualify this change. Typed note relationships remain
+required next work. No dependency/runtime/app boundary changed.

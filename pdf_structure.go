@@ -484,6 +484,7 @@ func sourceFromBlocks(blocks []Block, n *pdfStructureNode) *SourceInfo {
 		if src == nil {
 			return
 		}
+		source.Artifacts = artifactIDs(source, src.Artifacts...)
 		if src.Order > 0 && (source.Order == 0 || src.Order < source.Order) {
 			source.Order = src.Order
 		}
