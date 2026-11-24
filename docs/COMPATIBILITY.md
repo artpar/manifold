@@ -1040,3 +1040,16 @@ seven explicit URI relationships keep targets. The observed LibreOffice exporter
 omits delins URI annotations for both original/generated Word; standard package
 and native PDF links qualify separately. See REAL_DOCX_CORPUS.md for original
 hashes, reader/visual evidence, font requirements and remaining work.
+
+
+PDF source-nested definitions now become independent editable notes when each has
+an eligible main-flow citation; original definition preorder and parent_element
+containment remain explicit, separately from reference ownership. Flattening is
+diagnosed. Same-target single-inline-child Ref chains retain all explicit owners
+on the most-specific citation without creating extra atoms. Paragraph joins also
+preserve wrapper-level Ref edges in source provenance. Different targets, additional
+paint/objects or opaque replacement extents retain uncertainty/source evidence.
+Recursive citations inside notes retain literal/source relationships under the
+existing nonrecursive editing contract. Independent original-object/Word/native/
+asset/visual checks qualify the concrete rules in PDF_NOTES.md; broader untagged
+recovery and the final source/consistency/native integration audit remain open.

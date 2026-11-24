@@ -1572,3 +1572,22 @@ package/native links from LibreOffice's observed zero-annotation exports, and us
 real caller-supplied Unicode/style fonts rather than silent glyph substitutions.
 REAL_DOCX_CORPUS.md records all33 inspected pages,762 actual PM nodes, commands and
 remaining broader graph/native-adapter/final-audit work. Runtime modules unchanged.
+
+
+## 2026-11-24 Distinguish nested definition containment from citation ownership
+
+Recover independently cited source-nested definitions as separate editable notes,
+retaining their validated parent_element and logical preorder. Child-first physical
+materialization must not reverse definition order or copy a child body into its
+parent. Source containment does not authorize recursive inline references. Diagnose
+the flattened authoring containment while keeping original parent/ID/Ref/geometry.
+
+Treat a same-target single-inline-child Ref wrapper as another explicit owner of
+one citation, not another occurrence. Keep each original owner/target edge on the
+specific atom. Different targets, extra paint and opaque replacement boundaries
+remain uncollapsed source evidence/uncertainty. Joining paragraphs previously lost
+wrapper block-level Ref edges even without conversion; aggregate original block and
+run sources before flattening. Independent PDF object/graph/asset and native/Word
+reader/visual checks qualify these rules, including nested mixed foot/endnotes.
+No source/oracle or runtime dependency was changed. PDF_NOTES.md records the eight
+inspected pages,130 actual PM nodes and broader recovery/native-adapter/final work.

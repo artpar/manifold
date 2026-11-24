@@ -22,6 +22,7 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 	s.noteRefs = map[*pdfStructureNode]*pdfRecoveredNote{}
 	s.cachedRefs = map[*pdfStructureNode][]Block{}
 	s.noteLabels = map[noteKey]string{}
+	s.noteOrder = map[noteKey]int{}
 	byID := map[string]*pdfStructureNode{}
 	inNote, underActual := map[*pdfStructureNode]bool{}, map[*pdfStructureNode]bool{}
 	parents := map[*pdfStructureNode]*pdfStructureNode{}
@@ -83,17 +84,28 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 		}
 	}
 	grouped := map[*pdfStructureNode][]*pdfStructureNode{}
+	redundantOwners := map[*pdfStructureNode][]SourceStructureReference{}
 	for _, n := range nodes {
 		if len(targets[n]) == 0 {
 			continue
+		}
+		if hasInner[n] && !inNote[n] && !underActual[n] {
+			if owner := s.redundantNoteOwner(n, targets); owner != nil {
+				// Attach actual wrapper edges to their one descendant atom so
+				// paragraph joining cannot discard an otherwise flattened owner.
+				if len(n.refs) > 0 {
+					redundantOwners[owner] = append(redundantOwners[owner], SourceStructureReference{Element: n.id, Targets: append([]string(nil), n.refs...)})
+				}
+				continue
+			}
 		}
 		if len(targets[n]) != 1 || hasInner[n] || inNote[n] || underActual[n] {
 			s.warn("pdf_note_relationship", "Ambiguous, nested or enclosing-ActualText note relationship remains explicit source evidence; visible content is retained")
 			continue
 		}
 		for note := range targets[n] {
-			if inNote[note] || underActual[note] {
-				s.warn("pdf_note_relationship", "Nested note definitions are retained in flow without inventing recursive notes")
+			if underActual[note] {
+				s.warn("pdf_note_relationship", "A note definition inside opaque ActualText remains in flow without moving it outside the replacement extent")
 				continue
 			}
 			// A citation that encloses its own note body is not a single text mark.
@@ -158,6 +170,10 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 		ids[noteKey{kind, id}] = true
 		note.definition = Note{ID: id, Kind: kind, KindInferred: inferred, Label: label}
 		s.noteLabels[noteKey{kind, id}] = label
+		s.noteOrder[noteKey{kind, id}] = index
+		if inNote[n] {
+			s.warn("pdf_note_nested_definition", "An independently cited nested source definition becomes a separate editable note; parent_element retains its original containment")
+		}
 		if label == "" {
 			value := ""
 			note.definition.BodyLabel = &value
@@ -167,6 +183,7 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 		for _, ref := range refs {
 			blocks := s.cachedRefs[ref]
 			source := sourceFromBlocks(blocks, ref)
+			source.References = structureReferences(source.References, redundantOwners[ref])
 			source.Evidence = "pdf_note_explicit_ref"
 			citation, _ := pdfNoteMark(blocks)
 			var run Run

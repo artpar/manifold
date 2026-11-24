@@ -772,3 +772,14 @@ SF node. position_tab diagnostics disclose lost alignment/base/leader presentati
 SF/JSON/gzip retain the diagnostic and the actual separator. Original header/footer
 export qualification is in REAL_DOCX_CORPUS.md. No exact Word tab-layout semantics
 are implied by preserving this normalized content.
+
+
+Optional source parent_element identifies the explicit parent structure object
+from validated PDF K containment/P agreement. It is provenance, independent of
+references (actual Ref edges) or the editable note identity. A source element
+cannot name itself as its parent. Recovered nested definitions keep parent_element
+when represented as separate note declarations in logical preorder, with a
+pdf_note_nested_definition diagnostic for the flattening. Alias wrapper owners
+retain their original explicit references on the one citation source; paragraph
+sources retain unconverted wrapper edges too. No duplicate editable body text or
+invented Ref edge is introduced. See PDF_NOTES.md for exact rule qualification.

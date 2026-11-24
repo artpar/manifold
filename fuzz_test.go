@@ -119,6 +119,8 @@ func FuzzReadDOCX(f *testing.F) {
 	})
 }
 func FuzzReadPDF(f *testing.F) {
+	f.Add(recoveryPDF(nestedDefinitionObjects()...))
+	f.Add(recoveryPDF(redundantNoteWrapperObjects()...))
 	f.Add(recoveryPDF(alignedActualNoteObjects(true)...))
 	f.Add(recoveryPDF(adjacentNoteObjects()...))
 	f.Add(recoveryPDF(linkedNoteObjects()...))

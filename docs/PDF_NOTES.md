@@ -34,7 +34,7 @@ diagnostic discloses that reflow normalizes independent label typography;
 label_source retains the physical font/paint evidence. A differing body mark is
 retained as BodyLabel; a complex label remains visible with a diagnostic.
 Definition ActualText follows the existing structural replacement policy. Enclosing
-ActualText, nested/ambiguous relationships or complex nontext citations remain in
+Opaque ActualText, recursive/ambiguous relationships or complex nontext citations remain in
 flow with diagnostics and explicit source Ref edges instead of invented note atoms.
 Malformed Ref shapes/targets or known invalid NoteType values are rejected; total
 Ref targets are bounded at 200,000 per document.
@@ -94,12 +94,13 @@ semantic failures.
 
 This milestone closes the audit's zero-typed-note failure for explicit unambiguous
 relationships, including rich/repeated/reverse-linked cases. Broader note recovery
-still needs broader nested graphs and geometric inference
+still needs broader untagged/geometric inference
 where no Ref exists; existing adjacency/physical-link rules are qualified below.
 Rich/mixed-direction citation interiors are qualified in RICH_CITATIONS.md. Differing, literal and explicitly empty
 citation/body marks now have their own representation, described below. Exact enclosing/nested ActualText now supports editable references as described
 below. Opaque replacement ranges retain content/graph evidence and uncertainty;
-broader nested-definition graphs remain required. Do not relabel
+independently cited nested definitions/Ref wrappers now qualify below; broader
+untagged inference remains required. Do not relabel
 these required follow-ups as a completed note contract. Original rich producer
 inputs, native Colleaf interoperability and final full-goal acceptance remain open.
 
@@ -252,8 +253,7 @@ GOWORK=off go test -race -run 'TestPDFAdjacent|TestPDFPhysicalLinkNoteInference|
 ```
 
 No required runtime component, module dependency, app integration or quota/access
-boundary changed. General untagged note recognition, richer/nested/ActualText label
-graphs, heterogeneous label layout, Colleaf snapshot integration and remaining
+boundary changed. General untagged note recognition, Colleaf snapshot integration and remaining
 original DOCX corpus/visual qualification are still open.
 
 
@@ -302,8 +302,8 @@ projection and checked original intent; see DOCX_PRECISION.md for full original
 Word round-trip/reader evidence. Strict output still rejects inexact sizes.
 Heterogeneous/mixed-direction body labels are qualified in RICH_NOTE_LABELS.md;
 rich/internal mixed-direction citations are qualified in RICH_CITATIONS.md.
-Exact enclosing ActualText correspondence is qualified below; broader nested
-graphs remain open.
+Exact enclosing ActualText correspondence and independently cited nested
+definitions/Ref wrappers are qualified below; broader untagged recovery remains open.
 
 ```sh
 GOWORK=off go run ./examples/notes -variant-labels -styled-labels -out output/note-styles
@@ -341,8 +341,8 @@ definitions remain opaque under the existing replacement/graph-evidence policy.
 A definition is never moved outside its own enclosing replacement just because the
 original body matched. Opaque cases preserve replacement text and unresolved source
 relationships with diagnostics; a prepared atom cannot silently disappear during
-materialization. Broader nested-definition/redundant-wrapper and untagged graphs
-remain open; this evidence does not establish arbitrary ActualText mapping.
+materialization. Independent nested-definition/redundant-wrapper cases now qualify
+below; broader untagged graphs remain open; this evidence does not establish arbitrary ActualText mapping.
 
 An independent source has outer ActualText BODY*1MIDDLE*1AFTER, an inner *1 boundary,
 explicit forward/reverse edges and original10pt black/8pt red citation operators.
@@ -370,5 +370,74 @@ GOWORK=off go test -race -run 'TestPDFNoteAligned|TestPDFNoteActualText' -count=
 
 Full/final focused checks and their timing are in verification.json; ignored QA
 is output/note-actual. Runtime remains pure Go; optional QA readers are not runtime
-dependencies. Next: nested-definition/redundant-wrapper note graph cases, broader
-untagged recovery and the actual Colleaf adapter. Full goal remains incomplete.
+dependencies. Nested-definition/redundant-wrapper cases now qualify below. Next:
+actual Colleaf integration and broader untagged recovery. Full goal remains incomplete.
+
+## Nested definitions and redundant ownership wrappers
+
+An independently cited Note/FENote can be a source child of another note without
+its body becoming recursive editable text. Eligible main-flow references now
+recover both definitions separately. The child body is not copied into the parent;
+original logical preorder is restored after child-first materialization. Explicit
+NoteType still determines foot/endnote placement, independently of nesting. The
+pdf_note_nested_definition diagnostic exposes this authoring-containment flattening.
+
+SourceInfo.ParentElement / source parent_element records the validated K/P parent
+object. It is distinct from original Ref edges and note kind/ID. It also applies to
+other recovered explicit container/run/image sources. No parent is invented from
+geometry; self-containing source records reject. SF/JSON/gzip retain this provenance;
+Word reflow retains editable note meaning while acknowledging physical-source loss.
+A flattened note declaration is not a claim that the original PDF tree was flat.
+
+Same-target Ref wrappers with exactly one inline-child path now contribute their
+actual owner/target edges to the most-specific citation. A multi-level chain is
+one occurrence, not one atom per Ref owner. No new Ref edge is fabricated from
+containment. Different targets, additional paint/objects and opaque ActualText
+boundaries retain source evidence and relationship uncertainty. Extra-content and
+conflicting wrappers do not replace surrounding text or select the outer mark in
+place of the more specific actual citation.
+
+A separate joining defect discarded wrapper-level Ref edges when their block
+source was flattened into an inline paragraph. Paragraph joins now aggregate the
+original block and run sources. Consequently opaque/unconverted wrapper edges
+also survive, independently of whether an editable note can be recovered. Existing
+recursive citations inside a note body remain literal/source edges with relationship
+diagnostics under the library's nonrecursive note editing contract; this change
+recovers independent definitions, not nested editable note-reference atoms.
+
+Independent source probes contain a footnote with a source-nested endnote, both
+cited in the main paragraph; a same-target wrapper; and an opaque wrapper retaining
+DIFFERENTMARK. pypdf reads their original P/ID/Ref objects, verifying the exact
+source parent and every reported original target. Both mixed-kind reference sites,
+definition order, exact SF/Word meaning, list/table and original red/blue2x1 pixels
+pass. Native annotations target the actual footnote page and endnote page separately.
+Actual ProseMirror validates130 nodes/marks/attributes. Eight native/LibreOffice
+pages were inspected: bodies occur once, notes/labels/list/table/raster remain
+readable and separated. Existing Word font/spacing/custom-label-link and endnote-
+page producer differences remain; no Word print-equivalence claim is made.
+
+The Go tests additionally qualify multi-level aliases, conflicting targets,
+extra-content and opaque wrappers, source self-parent rejection, all source codecs
+and Word identity/order. The original source bytes/expectations are unchanged;
+these targeted fixtures qualify the concrete rules, not arbitrary recursive or
+untagged note graphs. Broader untagged recovery, actual Colleaf integration and the
+final source consistency/resource/API/acceptance audit remain open.
+
+```sh
+output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
+GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
+for name in nested-definition redundant-wrapper opaque-wrapper; do
+  bin/manydoc extract -format sf -o output/nested-notes/$name.sf output/audit/$name-note.pdf
+  bin/manydoc convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/nested-notes/$name.pdf output/nested-notes/$name.sf
+  bin/manydoc convert -allow-lossy -o output/nested-notes/$name.docx output/nested-notes/$name.sf
+  bin/manydoc extract -format sf -o output/nested-notes/$name-word.sf output/nested-notes/$name.docx
+done
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-nested-notes-qa --headless --convert-to pdf --outdir output/nested-notes/lo output/nested-notes/*.docx
+output/qa-venv/bin/python scripts/verify_nested_notes.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/nested-notes/*.sf
+GOWORK=off go test -race -run 'TestPDFNested|TestPDFRedundantNote|TestPDFNoteWrapper' -count=1 .
+```
+
+Verification.json records full/final-focused tests, race, vet, modules, fuzz and
+CGO-disabled results. Ignored evidence is output/nested-notes. There is no runtime
+module/executable/service/CGO/upload/application/access/quota boundary change.

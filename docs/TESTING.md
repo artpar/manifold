@@ -2377,3 +2377,26 @@ Use REAL_DOCX_CORPUS.md for original/generated independent rendering commands,
 font prerequisites and exact33-page/762-node evidence. The source-only oracle never
 reads generated output. Preserve original hashes/expected source content; do not
 regenerate expectations to accept a failure. Optional readers remain QA only.
+
+
+## PDF source containment and note wrapper graphs
+
+pdf_nested_notes_test.go verifies independently cited nested definitions, original
+preorder/parent_element provenance, same-target wrapper chains, conflicting/extra-
+content/opaque boundaries, all original Ref owner edges and source self-parent
+rejection. Existing source/original corpus tests remain unchanged. PDF/SF fuzzing
+includes the new source graphs and parent provenance.
+
+```sh
+GOWORK=off go test -race -run 'TestPDFNested|TestPDFRedundantNote|TestPDFNoteWrapper' -count=1 .
+output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
+output/qa-venv/bin/python scripts/verify_nested_notes.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/nested-notes/*.sf
+```
+
+Use PDF_NOTES.md for complete source extraction/native/Word generation/independent
+render commands and exact scope. Original pypdf object parents/IDs/Ref targets,
+notes/body ownership/order, source raster pixels, native target pages and eight
+native/Word pages are independently checked; actual PM validates130 nodes/marks/
+attributes. Optional readers remain QA only. Untagged recovery/native integration
+and the final acceptance audit remain open.

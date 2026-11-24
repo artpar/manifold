@@ -117,6 +117,15 @@ labels. Opaque, nontext/multiple-paragraph or definition-containing ranges retai
 replacement semantics and uncertainty. No equal-label substring mapping is inferred;
 prepared atoms cannot be silently discarded into an incompatible replacement.
 
+Independent source-nested definitions with main-flow citations become separate notes;
+`noteOrder` restores logical preorder after child-first materialization. SourceInfo.
+ParentElement records validated K/P containment independently of Ref targets.
+`pdf_note_wrappers.go` recognizes only same-target single-inline-child ownership
+chains. Their actual owner/target edges attach to the most-specific atom. Paragraph
+joining aggregates both block and run source records, preserving even unconverted
+wrapper Ref evidence. Conflicting/extra-content/opaque ranges retain uncertainty;
+recursive editable citations remain excluded by the existing note-body contract.
+
 ## PDF running stories and body rectangle
 
 `pdf_running.go` measures immutable header/footer flows once through the shared

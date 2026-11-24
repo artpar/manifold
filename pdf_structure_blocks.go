@@ -109,6 +109,7 @@ func (s *pdfStructureRecovery) node(n *pdfStructureNode) ([]Block, error) {
 				if blocks[i].Source != nil {
 					src := *blocks[i].Source
 					src.Element = n.id
+					src.ParentElement = n.parent
 					src.Role = n.role
 					src.Structure = "explicit"
 					src.Evidence = "pdf_structure_tree"
@@ -168,6 +169,7 @@ func (s *pdfStructureRecovery) node(n *pdfStructureNode) ([]Block, error) {
 				copy := *run.Source
 				copy.Role = n.role
 				copy.Element = n.id
+				copy.ParentElement = n.parent
 				run.Source = &copy
 			}
 		}
@@ -301,9 +303,12 @@ func (s *pdfStructureRecovery) joinParagraph(last *Block, b Block) {
 		gap.Source = src
 		last.Runs = append(last.Runs, gap)
 	}
+	// Container Ref edges live on block sources as well as runs. Retain both
+	// original sources before flattening a wrapper into the merged paragraph.
+	source := sourceFromBlocks([]Block{*last, b}, &pdfStructureNode{})
 	last.Runs = append(last.Runs, b.Runs...)
 	// Do not union different pages into the first page's coordinate system.
-	last.Source = sourceFromBlocks([]Block{{Runs: last.Runs}}, &pdfStructureNode{})
+	last.Source = source
 	last.Source.Structure = "inferred"
 	last.Source.Evidence = "pdf_structure_inline_paragraph"
 	last.Source.Confidence = .75

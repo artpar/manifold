@@ -5463,5 +5463,26 @@
     "runtime": "pure Go, no CGO/required executables/services/uploads/app modifications/permission/quota gates; optional independent QA readers/fonts only",
     "remaining": "broader nested/untagged note graphs; actual Colleaf native adapter; final source consistency/resource/public-API/acceptance audit with measured producer/review/field/font limits",
     "next_commands": "GOWORK=off go test -race -run 'TestRealPOI|TestDOCXPositionalTab' -count=1 .; rg -n 'inNote|hasInner|grouped|recoverNote' pdf_structure_notes.go; see COLLEAF_FORMAT.md mapping queue"
+  },
+  "nested_note_source_graphs_2026_11_24": {
+    "goal": "active/incomplete",
+    "contract": "Independently main-flow-cited source-nested note definitions recover as separate editable notes in original logical preorder. Optional SourceInfo.ParentElement/source parent_element retains validated K/P containment independently of Ref edges; self-parent rejects; nested-definition flattening diagnosed.",
+    "wrappers": "Same-target single-inline-child chains contribute actual original owner/target Ref edges to the one most-specific citation. Conflicting/extra-content/opaque ranges retain source evidence/uncertainty. Recursive citations inside source note bodies remain literal/source edges under the nonrecursive editing contract.",
+    "source_fix": "Paragraph joining previously discarded wrapper block-level Ref edges; it now aggregates original block and run sources, including opaque/unconverted relationships. No source fixture or oracle weakened/changed.",
+    "independent": "pypdf original parents/ID bytes/all Ref owner-target arrays; two nested mixed foot/endnote main-flow sites and separate source-body ownership/order; exact editable SF/Word, python-docx; list/table/red-blue2x1 pixels; native links to actual distinct foot/endnote pages;130 actual ProseMirror nodes/marks/attributes; eight native/LibreOffice pages inspected. Existing font/spacing/custom-label-link/endnote-page producer differences remain, not Word-equivalent print claims.",
+    "checks": {
+      "full_tests": "final all packages pass16.369s library/0.685s CLI, including added chain/conflict/self-parent guards and fuzz seeds",
+      "full_race": "all packages pass167.030s library/2.117s CLI after final production changes; predates final added test-only chain/conflict cases/fuzz seeds",
+      "final_focused_race": "1.793s pass with final nested/wrapper/chain/conflict/self-parent cases",
+      "vet": "pass after final tests/seeds",
+      "modules": "all modules verified; go.mod/go.sum/THIRD_PARTY unchanged",
+      "cgo_disabled": "host CLI built; focused execution0.410s pass. On this host a CGO_ENABLED=0 focused race invocation also passed1.806s; env query confirmed0. Linux amd64/arm64 cross-builds pass, not execution evidence.",
+      "fuzz": "PDF270 executions11.583s; SF284 executions11.493s;10s/two workers requested each, pass including nested/wrapper/parent provenance seeds; short source-heavy campaigns not exhaustive",
+      "diff_check": "pass"
+    },
+    "evidence": "PDF_NOTES.md nested definitions/wrappers section; pdf_nested_notes_test.go, pdf_note_wrappers.go; scripts/generate_pdf_semantic_audit.py and verify_nested_notes.py; schema source parent_element; ignored output/nested-notes",
+    "runtime": "pure Go, unchanged dependencies; no required executables/CGO/services/uploads/app modifications/permission or quota gates; independent QA readers optional",
+    "remaining": "actual Colleaf native snapshot adapter; broader untagged note recovery and inverse source consistency/resource/public API/final acceptance audit; preserve original editor corpus and measured review/field/producer limits",
+    "next_commands": "cat docs/COLLEAF_FORMAT.md; rg -n 'IDocumentData|dataStream|customRanges|tableSource' output/codec; GOWORK=off go test -race -run 'TestPDFNested|TestPDFRedundantNote|TestPDFNoteWrapper' -count=1 ."
   }
 }

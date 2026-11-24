@@ -39,6 +39,7 @@ type pdfContentUnit struct {
 }
 type pdfStructureNode struct {
 	kind, tag, role, id, stream, object string
+	parent                              string
 	page, mcid                          int
 	kids                                []*pdfStructureNode
 	attrs                               map[string]types.Object
@@ -60,6 +61,7 @@ type pdfStructureRecovery struct {
 	cachedRefs     map[*pdfStructureNode][]Block
 	alignedActual  map[*pdfStructureNode]bool
 	noteLabels     map[noteKey]string
+	noteOrder      map[noteKey]int
 }
 
 func (r *pdfReader) recoverStructure(root types.Object) error {
@@ -129,6 +131,9 @@ func (r *pdfReader) recoverStructure(root types.Object) error {
 	if err != nil {
 		return err
 	}
+	sort.SliceStable(r.doc.Notes, func(i, j int) bool {
+		return s.noteOrder[noteIdentity(r.doc.Notes[i])] < s.noteOrder[noteIdentity(r.doc.Notes[j])]
+	})
 	var leftovers []int
 	for i, u := range s.units {
 		if !u.used && !(u.source != nil && u.source.Evidence == "positioned_word_gap") {
@@ -284,6 +289,7 @@ func (s *pdfStructureRecovery) parse(value types.Object, page int, parent string
 		if p := d["P"]; p != nil && fmt.Sprint(p) != parent {
 			return nil, fmt.Errorf("structure parent contradicts K containment for %s", id)
 		}
+		n.parent = parent
 		for _, entry := range []struct {
 			key    string
 			target **string
@@ -516,7 +522,7 @@ func (s *pdfStructureRecovery) materialize(ids []int, explicit bool, role string
 	return blocks
 }
 func sourceFromBlocks(blocks []Block, n *pdfStructureNode) *SourceInfo {
-	source := &SourceInfo{Format: PDF, StructureID: append([]byte(nil), n.originalID...), Element: n.id, Tag: n.tag, Role: n.role, Structure: "explicit", Evidence: "pdf_structure_tree", Confidence: 1, Precision: "union_of_content_bounds"}
+	source := &SourceInfo{Format: PDF, ParentElement: n.parent, StructureID: append([]byte(nil), n.originalID...), Element: n.id, Tag: n.tag, Role: n.role, Structure: "explicit", Evidence: "pdf_structure_tree", Confidence: 1, Precision: "union_of_content_bounds"}
 	if len(n.refs) > 0 {
 		source.References = []SourceStructureReference{{Element: n.id, Targets: append([]string(nil), n.refs...)}}
 	}

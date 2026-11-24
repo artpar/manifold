@@ -93,6 +93,8 @@ func structureReferences(a, b []SourceStructureReference) []SourceStructureRefer
 // advance/font metrics, not glyph ink outlines. Precision discloses estimates.
 // Confidence is a heuristic ranking, not a calibrated probability.
 type SourceInfo struct {
+	// ParentElement records explicit source-tree containment, not a note reference.
+	ParentElement string `json:"parent_element,omitempty"`
 	// References retains explicit PDF structure Ref edges, including unresolved targets.
 	StructureID        []byte                     `json:"structure_id,omitempty"` // original PDF ID bytes, not a Unicode text string
 	References         []SourceStructureReference `json:"references,omitempty"`
@@ -223,7 +225,10 @@ func (s *SourceInfo) validate(pages []PDFPage) error {
 	if s.RenderMode < 0 || s.RenderMode > 7 {
 		return fmt.Errorf("invalid text render mode")
 	}
-	for _, v := range []string{s.Object, s.Stream, s.Role, s.Element, s.Font, s.Tag, s.Evidence, s.Precision, s.Label} {
+	if s.ParentElement != "" && s.ParentElement == s.Element {
+		return fmt.Errorf("source element cannot contain itself")
+	}
+	for _, v := range []string{s.ParentElement, s.Object, s.Stream, s.Role, s.Element, s.Font, s.Tag, s.Evidence, s.Precision, s.Label} {
 		if err := validateString(v); err != nil {
 			return err
 		}

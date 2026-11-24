@@ -39,37 +39,36 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: original editor note/story/review/field corpus
+## Latest progress: nested definitions and redundant note ownership
 
-Eight unmodified, pinned Apache POI source DOCX exports now complement MQTT's
-large Word publication. Embedded metadata identifies Word12/14, Mac Word12 and
-LibreOffice6.0.7.3. Source-only ZIP/XML oracles qualify50 body paragraphs,81 direct
-formatting intervals, two exact note reference sites/definitions,16 story bindings,
-page settings, seven explicit URI relationships,13 cached field instructions,
-32 insertion/4 deletion containers and comments. Full normalized SF semantics
-survive SF/gzip/JSON/Word; review/comment/field losses remain explicitly diagnosed.
-See REAL_DOCX_CORPUS.md for sources/rights, limits and concrete reproduction.
+Independently cited PDF note definitions now recover even when their source
+containers are nested. Editable definitions stay separate, in original logical
+preorder, without duplicating the child body inside its parent. SourceInfo now
+retains optional parent_element from validated K/P containment, separate from
+actual Ref edges. pdf_note_nested_definition diagnoses the editable flattening;
+source parents/IDs/positions remain facts. Parent containment is not a citation.
 
-Independent visual QA exposed silently discarded Word positional tabs. The importer
-now preserves their separation as normal tabs and reports position_tab for the
-alignment/base/leader presentation loss; malformed nonempty controls reject. The
-original/source oracle reproduces the pre-fix failure. Exact Word tab placement is
-not claimed. Source files/oracles were not weakened to accept concatenated words.
+Single-inline-child same-target Ref wrappers now contribute explicit owner edges
+to the one most-specific citation, rather than creating duplicate references or a
+false ambiguity. Conflicting, extra-content and opaque-ActualText wrappers retain
+source evidence/uncertainty. A separate paragraph-join bug dropped wrapper-level
+Ref edges; joining now aggregates original block sources as well as run sources.
+Recursive citations inside note bodies still remain literal/source edges with
+relationship diagnostics under the existing nonrecursive editing contract.
 
-All four CLI paths run over the new inputs. Independent package/readers, actual
-ProseMirror762 nodes/marks/attrs, physical PDF page geometry, note/native URI targets
-and33 original/native/Word rendered pages qualify the milestone. Source delins
-renders editing markup; manydoc's final-text view excludes deleted history. Word's
-implicit Roman endnote mark, spacing/fonts/tab layout differ explicitly. LibreOffice
-exports zero delins URI annotations from both original/generated Word; standard
-package/native targets pass. Go-only fonts reject missing ṭ before output; QA
-supplies real DejaVu four-style faces. Production dependencies/boundaries unchanged.
+Independent original PDF objects/parents/IDs/Ref targets, two mixed foot/endnote
+sites and source-body ownership/order, exact SF/Word meaning, list/table/red-blue
+raster pixels and native note target pages pass. Actual ProseMirror validates130
+nodes/marks/attrs; eight native/LibreOffice pages were inspected. Producer font/
+spacing/footnote/endnote layout differences remain explicit. See PDF_NOTES.md and
+verify_nested_notes.py for bounds and reproduction. No original fixture/oracle was
+changed, no module/runtime/application/authorization/quota/upload boundary changed.
 
-Full/focused tests, race checks, vet, modules, fuzz and CGO-disabled verification
-are recorded in verification.json. QA remains ignored under output/real-docx-audit;
-third-party notices and source hashes are committed. Previous616fb6a qualifies exact
-nested/enclosing ActualText and5cde91b rich atomic bidi citations. Full goal remains
-active/incomplete; native Colleaf, broader note graphs and final audit remain open.
+Full/final-focused tests, race, vet, modules, fuzz and CGO-disabled results are in
+verification.json. Ignored QA is output/nested-notes. Previous8061131 qualified
+original Word/Mac Word/LibreOffice exports and fixed positional-tab separation.
+The full goal remains active/incomplete; actual Colleaf integration, broader
+untagged recovery and final consistency/resource/API/acceptance audit remain open.
 
 ## Existing verified evidence to preserve
 
@@ -105,11 +104,12 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
 
 ## Next concrete implementation order
 
-1. Complete remaining nested-definition/redundant-wrapper and broader untagged note graphs;
-   use the original-guide evidence in PDF_NOTES.md, preserving source facts/content.
-2. Implement/qualify the actual Colleaf native snapshot adapter through the shared
+1. Implement/qualify the actual Colleaf native snapshot adapter through the shared
    SF. Include UTF-16 boundaries, rich source maps, notes/stories and resources;
    do not stop at plain-text wrapping. Leave applications/backends untouched.
+2. Qualify remaining broader untagged note recovery and original source consistency,
+   using PDF_NOTES.md and preserving source facts/content. Newly qualified nested
+   definition/wrapper cases must remain regression evidence, not repeated blockers.
 3. Preserve the now broadened original DOCX corpus and independent expectations;
    carry its measured source/producer/review/field limits into the final audit.
    Fix further real failures without changing original oracles.
@@ -118,10 +118,11 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
    after every original criterion is proven. There is no external blocker now.
 
 ```sh
-# Next: resolve nested definitions/redundant wrappers without duplicating bodies.
-rg -n 'ActualText|nested|note' pdf_structure_notes.go pdf_structure.go pdf_marked.go
-GOWORK=off go test -race -run 'TestRichCitation|TestDOCXCitationIsolation|TestPDFRichCitation' -count=1 .
-# Full generation/reader commands: RICH_CITATIONS.md
+# Next: implement actual native integration from the pinned schema.
+cat docs/COLLEAF_FORMAT.md
+rg -n 'IDocumentData|dataStream|customRanges|tableSource' output/codec
+GOWORK=off go test -race -run 'TestPDFNested|TestPDFRedundantNote|TestPDFNoteWrapper' -count=1 .
+# Full nested source/generation/reader commands: PDF_NOTES.md
 output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
 bin/manydoc extract -format sf -o output/audit/explicit-note.sf output/audit/explicit-note.pdf
 bin/manydoc extract -format sf -o output/audit/pagination-artifact.sf output/audit/pagination-artifact.pdf

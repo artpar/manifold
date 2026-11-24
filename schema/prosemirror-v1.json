@@ -285,6 +285,7 @@
     },
     "source": {
       "attrs": {
+        "parent_element": {"default": "", "validate": "string"},
         "structure_id": {"default": null},
         "references": {"default": []},
         "artifacts": {"default": []},

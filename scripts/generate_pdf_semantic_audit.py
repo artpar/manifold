@@ -136,3 +136,22 @@ opaque_note=aligned_note.copy()
 opaque_note[6]=opaque_note[6].replace('BODY*1MIDDLE*1AFTER','DIFFERENT*1TEXT*1CONTENT')
 (out/'opaque-actual-note.pdf').write_bytes(pdf(opaque_note))
 print('Wrote exact nested/enclosing and opaque ActualText citation probes')
+
+# A nested definition has its own main-flow citation. Source containment does
+# not make its body part of the parent's editable text or a recursive citation.
+nested_note=objects.copy();child=len(nested_note)+1
+nested_note[8]=nested_note[8].replace('/Ref [8 0 R 18 0 R]','/Ref [8 0 R]').replace('20 0 R]',f'20 0 R {child} 0 R]')
+nested_note[17]=nested_note[17].replace('/K 7',f'/Ref [{child} 0 R] /K 7')
+nested_content=content.replace('125 300 Td (*1)','125 300 Td (*2)')+text(11,20,15,'*2')+text(12,40,15,'CHILD BODY')
+nested_note[4]=stream(nested_content)
+nested_note += [f'<< /Type /StructElem /S /FENote /A << /O /FENote /NoteType /Endnote >> /P 9 0 R /Pg 3 0 R /ID (note-2) /Ref [18 0 R] /K [{child+1} 0 R {child+2} 0 R] >>',
+ f'<< /Type /StructElem /S /Lbl /P {child} 0 R /K 11 >>', f'<< /Type /StructElem /S /P /P {child} 0 R /K 12 >>']
+(out/'nested-definition-note.pdf').write_bytes(pdf(nested_note))
+wrapper_note=objects.copy();wrapper=len(wrapper_note)+1
+wrapper_note[6]=wrapper_note[6].replace('/K [0 8 0 R',f'/K [0 {wrapper} 0 R')
+wrapper_note[7]=wrapper_note[7].replace('/P 7 0 R',f'/P {wrapper} 0 R')
+wrapper_note.append('<< /Type /StructElem /S /Span /P 7 0 R /Ref [9 0 R] /K 8 0 R >>')
+(out/'redundant-wrapper-note.pdf').write_bytes(pdf(wrapper_note))
+opaque_wrapper=wrapper_note.copy();opaque_wrapper[-1]=opaque_wrapper[-1].replace('/S /Span','/S /Span /ActualText (DIFFERENTMARK)')
+(out/'opaque-wrapper-note.pdf').write_bytes(pdf(opaque_wrapper))
+print('Wrote independently cited nested mixed-kind definition, redundant and opaque Ref wrapper probes')
