@@ -196,10 +196,15 @@ func (r *pdfRenderer) paintTablePage(plan *pdfTableLayout, page pdfTablePage, x,
 	r.bindDestinations(plan.anchors, top)
 	y := top
 	if page.header != nil {
+		before := r.suppressOutputStructure
+		r.suppressOutputStructure = before || plan.outputHeaderPainted
+		plan.outputHeaderPainted = true
+		defer func() { r.suppressOutputStructure = before }()
 		if err := r.paintTableGroup(plan, page.header.group, x, y); err != nil {
 			return err
 		}
 		y += page.header.height
+		r.suppressOutputStructure = before
 	}
 	bodyTop := y
 	r.pdf.SetDrawColor(120, 120, 120)

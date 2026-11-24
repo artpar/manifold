@@ -330,7 +330,7 @@ func TestJPEGHeightFittingKeepsOriginalAsset(t *testing.T) {
 		if format == PDF && !bytes.Contains(out.Bytes(), asset.Data) {
 			t.Fatal("PDF did not embed the original JPEG stream")
 		}
-		got, err := Read(context.Background(), &out, format, ReadOptions{PDFSkipInference: true})
+		got, err := Read(context.Background(), &out, format, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}

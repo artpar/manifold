@@ -532,6 +532,8 @@ func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 	origin := x
 	cursor := x
 	var actualGroup *pdfPaintActualGroup
+	var outputOwner *pdfOutputNode
+	marked := false
 	for _, span := range line {
 		if span.run.Anchor != "" {
 			r.bindDestinations([]string{span.run.Anchor}, y)
@@ -544,6 +546,29 @@ func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 		var group *pdfPaintActualGroup
 		if span.glyphs != nil {
 			group = span.glyphs.actualGroup
+		}
+		if r.outputStructure != nil {
+			if span.citation != nil || span.text == "" && group == nil {
+				if actualGroup != nil {
+					r.pdf.RawWriteStr("EMC")
+					actualGroup = nil
+				}
+				if marked {
+					r.pdf.RawWriteStr("EMC")
+					marked = false
+				}
+				outputOwner = nil
+			} else if span.run.pdfOutput != outputOwner || !marked {
+				if actualGroup != nil {
+					r.pdf.RawWriteStr("EMC")
+					actualGroup = nil
+				}
+				if marked {
+					r.pdf.RawWriteStr("EMC")
+				}
+				outputOwner = span.run.pdfOutput
+				marked = r.beginOutputMark(outputOwner)
+			}
 		}
 		if group != actualGroup {
 			if actualGroup != nil {
@@ -588,6 +613,9 @@ func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 		cursor += span.width
 	}
 	if actualGroup != nil {
+		r.pdf.RawWriteStr("EMC")
+	}
+	if marked {
 		r.pdf.RawWriteStr("EMC")
 	}
 	visual := visualPDFLine(line)

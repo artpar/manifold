@@ -40,7 +40,62 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: public native API/CLI and a concrete PDF acceptance failure
+## Latest progress: painted PDF structure and typed-note recovery
+
+PDF output now emits a PDF 2.0 logical tree tied to actual page-scoped MCIDs,
+MCRs, reciprocal parent-tree entries and named structure IDs. Paragraphs/headings,
+list/item/label/body groups, table rows/cells/spans, image Alt and foot/endnote
+roles describe current rendered content. Typed note definitions and citation Ref
+edges are reciprocal. Global note IDs are retained; scoped collisions are qualified
+once, with an IDTree, without growing prefixes on reflow. No SF/body/text cache is
+embedded. Blank citations have empty structural owners rather than dangling paint
+references. Running content and repeated headers/continued labels are artifacts.
+
+The previously failing three-note CLI oracle is unchanged and now passes in every
+standard run; its environment gate is removed. New Go tests check rich/default/
+empty labels, repeated/continued/scoped citations, exact body content and ownership,
+merged tables including documents without notes, list starts, formatting/URI,
+image pixels/Alt, source roles/regions and caller immutability. Original physical
+geometry/glyph/image/header oracles keep their expected values and explicitly use
+PDFSkipStructure (plus PDFSkipInference where needed). Header-version checks now
+require 2.0 for the emitted PDF 2.0 namespace; this is an intentional format upgrade.
+
+ReadOptions.PDFSkipStructure and CLI -pdf-skip-structure expose the positioned
+view without applying the logical tree. Combine with PDFSkipInference / the CLI
+flag for paint-order inspection; pdf_structure_skipped discloses the choice.
+Default tagged recovery remains logical; older tagged/untagged inputs still read.
+
+Independent pypdf checks actual marked-content balance, 24 contiguous MCIDs,
+forward/inverse page ownership, structure parents, IDs, three FENotes/two footnotes/
+one endnote and four reciprocal citation edges. MuPDF checks both example pages
+pixel-identical at 1.5x to output generated from commit 1d13d3c; Poppler renders of
+both pages were visually inspected, with aligned labels, notes and footer text.
+Independent recursive/repeated-header examples additionally cover 12 pages, seven
+FENotes total across all three cases, and table/row/cell-span/image/marker ownership.
+This is targeted structural/visual evidence, not PDF/UA/WTPDF conformance, full
+Word fidelity or completion of all PDF/native/source/resource acceptance.
+
+```sh
+GOWORK=off go test -run '^TestGeneratedPDF|^FuzzGeneratedPDFNoteGraph$' -count=1 .
+GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf|TestCLIPDFPhysicalInspection' -count=1 ./cmd/manydoc
+GOWORK=off go run ./examples/colleaf -out output/colleaf-tagged
+# Recreate the independent pre-tagging baseline (fresh detached checkout):
+git worktree add --detach output/tagged-baseline-1d13d3c 1d13d3c
+MANYDOC_QA_OUT="$PWD/output/colleaf-baseline-1d13" GOWORK=off sh -c 'go -C output/tagged-baseline-1d13d3c run ./examples/colleaf -out "$MANYDOC_QA_OUT"'
+git worktree remove output/tagged-baseline-1d13d3c
+output/qa-venv/bin/python scripts/verify_generated_pdf_structure.py
+```
+
+Full tests pass (library 27.124s/CLI 0.838s), race passes (315.451s/3.200s),
+vet/modules, CGO-disabled focused tests 0.605s, host build/help/logical and physical
+CLI extraction and Linux amd64/arm64 cross-builds pass. Generated-note fuzz passes
+951 executions/10.547s/two workers (short safety sample). ProseMirror checks 43
+recovered nodes/marks/attributes. verification.json records exact QA and scopes.
+Goal active/incomplete:
+remaining native rendering/intent/browser, note policies/decorations, general
+untagged recovery, inverse/source/resource and final acceptance audits stay open.
+
+## Earlier progress: public native API/CLI and the PDF acceptance failure
 
 Colleaf version-3/Univer 1.0.4 envelopes are now available through VDOCS,
 ReadVDOCS, WriteVDOCS, VDOCSMIME and .vdocs CLI input/output. Native transport

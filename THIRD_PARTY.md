@@ -266,3 +266,12 @@ The public native profile/example reuses existing attributed source fixtures,
 pinned Colleaf validator/Univer facade plugins and ProseMirror. Independent
 example checks use the existing optional pypdf and standard-library OOXML reader.
 No new production dependency or third-party implementation is incorporated.
+
+
+The generated PDF structure is independently authored against published PDF
+mechanisms and the PDF Association's WTPDF1.0 FENote/NoteType description
+(https://pdfa.org/wp-content/uploads/2024/02/Well-Tagged-PDF-WTPDF-1.0.pdf,
+CC BY4.0; PDF Association/PDF Reuse TWG/PDF-UA TWG,2024) and ISO document-interchange
+errata (https://pdf-issues.pdfa.org/32000-2-2020/clause14.html). No implementation
+code is copied or translated. Existing attributed gofpdf/pdfcpu run in-process;
+pypdf/MuPDF/Poppler are optional independent QA. No new production dependency.

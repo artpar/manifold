@@ -29,6 +29,12 @@ func (r *pdfRenderer) listMarker(b Block, index int, width, size float64) (pdfLi
 	if b.pdfListMarkerContent != nil {
 		runs = b.pdfListMarkerContent
 	}
+	if index < len(b.pdfOutputLabels) {
+		runs = append([]Run(nil), runs...)
+		for i := range runs {
+			runs[i].pdfOutput = b.pdfOutputLabels[index]
+		}
+	}
 	lines, err := r.lines(runs, width, size)
 	if err != nil {
 		return nil, 0, err

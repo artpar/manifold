@@ -327,7 +327,7 @@ func TestPDFListPaginationAndDepth(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	got, err := ReadPDF(context.Background(), &out, ReadOptions{})
+	got, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}

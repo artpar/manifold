@@ -39,6 +39,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	lossy := fs.Bool("allow-lossy", false, "acknowledge imported document fidelity diagnostics")
 	passwordEnv := fs.String("password-env", "", "environment variable containing the PDF password")
 	pdfSkipInference := fs.Bool("pdf-skip-inference", false, "retain untagged PDF paint order instead of inferring geometric structure")
+	pdfSkipStructure := fs.Bool("pdf-skip-structure", false, "ignore PDF logical tags; use with -pdf-skip-inference for physical paint inspection")
 	var fontMaps, fontFiles repeatedFlag
 	fs.Var(&fontMaps, "pdf-font-map", "explicit requested=target font family mapping (repeatable)")
 	fs.Var(&fontFiles, "pdf-font", "family[/B|I|BI]=path.ttf (repeatable)")
@@ -74,7 +75,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 			return err
 		}
 	}
-	opts := manydoc.ReadOptions{PDFSkipInference: *pdfSkipInference}
+	opts := manydoc.ReadOptions{PDFSkipInference: *pdfSkipInference, PDFSkipStructure: *pdfSkipStructure}
 	if *passwordEnv != "" {
 		var ok bool
 		opts.Password, ok = os.LookupEnv(*passwordEnv)

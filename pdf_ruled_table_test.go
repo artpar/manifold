@@ -91,7 +91,7 @@ func TestPDFRuledMergedEmptyMultilineAndLinks(t *testing.T) {
 			if e := Write(context.Background(), &pdf, d, PDF, WriteOptions{AllowLossy: true, PDFFontMap: map[string]string{"Helvetica": "Go"}}); e != nil {
 				t.Fatal(e)
 			}
-			decoded, e := ReadPDF(context.Background(), bytes.NewReader(pdf.Bytes()), ReadOptions{})
+			decoded, e := ReadPDF(context.Background(), bytes.NewReader(pdf.Bytes()), ReadOptions{PDFSkipStructure: true})
 			if e != nil {
 				t.Fatal(e)
 			}

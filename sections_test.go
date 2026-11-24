@@ -124,7 +124,7 @@ func TestPDFSectionFramesVariantsAndNotes(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	got, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+	got, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -170,7 +170,7 @@ func TestPDFContinuousSectionContract(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	got, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+	got, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,7 +182,7 @@ func TestPDFContinuousSectionContract(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	got, err = ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	got, err = ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -222,7 +222,7 @@ func FuzzSectionRoundTrips(f *testing.F) {
 		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 			t.Fatal(err)
 		}
-		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -270,7 +270,7 @@ func FuzzSectionBindings(f *testing.F) {
 		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 			t.Fatal(err)
 		}
-		if _, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true}); err != nil {
+		if _, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true}); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -360,7 +360,7 @@ func TestPDFContinuousStoriesAndSectionCount(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -399,7 +399,7 @@ func TestPDFContinuousStoriesReserveFutureBounds(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -438,7 +438,7 @@ func TestPDFContinuousRunningBudgetIncludesLaterBody(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal("later large line must participate in the shared image budget", err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -459,7 +459,7 @@ func TestPDFSectionNoteMeasurementUsesLocalFrame(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -478,7 +478,7 @@ func TestPDFSectionRepeatedNoteDoesNotRefitInLaterFrame(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -500,7 +500,7 @@ func FuzzContinuousStories(f *testing.F) {
 		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 			t.Fatal(err)
 		}
-		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -534,7 +534,7 @@ func TestPDFEmptyFinalSectionReservesEndnoteBody(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -556,7 +556,7 @@ func TestPDFContinuousInheritedStoriesRestartParity(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -585,7 +585,7 @@ func TestPDFContinuousFramesRetainRunningAndNoteOwners(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -641,7 +641,7 @@ func FuzzContinuousGeometry(f *testing.F) {
 		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 			t.Fatal(err)
 		}
-		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -709,7 +709,7 @@ func TestPDFContinuousMarginChangeKeepsNoteContinuationsInTheirFrame(t *testing.
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -765,7 +765,7 @@ func TestPDFContinuousMarginsKeepWrappedParagraphAndTableWidth(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}

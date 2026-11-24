@@ -25,7 +25,7 @@ func TestCustomNoteLabelsAcrossFormats(t *testing.T) {
 			if err := Write(context.Background(), &out, d, format, WriteOptions{}); err != nil {
 				t.Fatal(err)
 			}
-			got, err := Read(context.Background(), &out, format, ReadOptions{})
+			got, err := Read(context.Background(), &out, format, ReadOptions{PDFSkipStructure: true})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -38,7 +38,7 @@ func TestCustomNoteLabelsAcrossFormats(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	got, err := ReadPDF(context.Background(), &out, ReadOptions{})
+	got, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}

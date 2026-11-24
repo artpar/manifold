@@ -1164,6 +1164,21 @@ The checked native envelope profile is public through VDOCS/ReadVDOCS/WriteVDOCS
 and CLI .vdocs input/output. It preserves supported SF content/assets/history;
 unsupported native mappings still reject even with AllowLossy. No app size/quota/
 authorization gate is added. See COLLEAF_FORMAT.md for pinned version and scope.
-Browser interaction/rendering remain unqualified. Generated PDFs are untagged:
-visible note text does not yet recover into typed note definitions. The retained
-three-note acceptance oracle currently fails and remains a completion requirement.
+Browser interaction/rendering remain unqualified. The subsequently implemented
+painted PDF structure below fixes the three-note recovery failure; its unchanged
+acceptance oracle now runs unconditionally.
+
+
+Generated PDFs now declare PDF2.0 and include logical structure linked to actual
+painted MCIDs: paragraphs/headings, list/item/label/body groups, table rows/cells/
+spans, figures/Alt and typed foot/endnotes with reciprocal citation Ref edges.
+The previously zero-note generated-PDF acceptance case now passes without a gate.
+The PDF2 namespace requires the new header version; old1.4/1.7 minimum-version
+writer assertions were advanced to2.0. Reading older PDFs remains supported.
+
+Default PDF import uses logical tags; PDFSkipStructure / -pdf-skip-structure opts
+into positioned content without that tree, with an explicit diagnostic. Combine
+with PDFSkipInference for paint order. Running/repeated rendering stays physical
+artifact evidence, not reusable authoring-template reconstruction. Namespaced
+colliding note IDs are stable across reflow. This is not accessibility certification
+or arbitrary PDF/SF/Word fidelity. General untagged and source/resource audits remain.

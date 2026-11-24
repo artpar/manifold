@@ -117,6 +117,7 @@ type Block struct {
 	docxList                *docxListRef
 	docxNumberID            int
 	docxNumberLevel         int
+	pdfOutputLabels         []*pdfOutputNode
 	pdfListMarker           *string
 	pdfListMarkerStyle      *Run
 	pdfListMarkerContent    []Run
@@ -161,6 +162,7 @@ type Run struct {
 	Source              *SourceInfo    `json:"source,omitempty"`
 	colleafAnchorOrigin *colleafOrigin
 	colleafRunOrigin    *colleafOrigin
+	pdfOutput           *pdfOutputNode
 }
 type Row struct {
 	// RepeatHeader repeats a contiguous prefix of rows on table continuation pages.
@@ -178,6 +180,7 @@ type Cell struct {
 	colleafOrigin *colleafOrigin
 }
 type Image struct {
+	pdfOutput *pdfOutputNode
 	Data      []byte  `json:"data"` // JSON represents bytes as base64.
 	MediaType string  `json:"media_type"`
 	Alt       string  `json:"alt,omitempty"`
@@ -185,6 +188,7 @@ type Image struct {
 	Height    float64 `json:"height,omitempty"`
 }
 type Note struct {
+	pdfOutputLabel *pdfOutputNode
 	// BodyLabelContent owns a literal rich body mark. It excludes BodyLabel and
 	// BodyLabelStyle; only nonempty text runs are allowed, without nested atoms.
 	BodyLabelContent []Run `json:"body_label_content,omitempty"`
@@ -217,6 +221,9 @@ type ReadOptions struct {
 	// callers inspecting physical extraction. Tagged logical trees still apply.
 	// The default recovers geometric structure with disclosed uncertainty.
 	PDFSkipInference bool
+	// PDFSkipStructure ignores the logical tree and retains positioned content.
+	// Combine with PDFSkipInference for a physical paint-order inspection.
+	PDFSkipStructure bool
 }
 type WriteOptions struct {
 	// AllowLossy acknowledges import/reflow diagnostics and documented output

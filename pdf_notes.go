@@ -289,7 +289,10 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 			bodyX = chunk.left
 		}
 		if pdfLineHeight(label, 8, 1.4) <= 14 {
+			before := r.suppressOutputStructure
+			r.suppressOutputStructure = before || !chunk.first
 			r.drawLine(label, labelX, y, 8)
+			r.suppressOutputStructure = before
 		}
 		noticeTop := y
 		for _, fragment := range chunk.lines {
@@ -425,7 +428,7 @@ func (r *pdfRenderer) finishNotes() error {
 		}
 		r.pdf.SetLink(r.noteLinks[key], r.y, -1)
 		start, _ := strconv.Atoi(noteBodyLabel(r.notes, key))
-		list := Block{Kind: ListBlock, List: "number", Start: listStartPointer(start), Items: []ListItem{{Blocks: blocks}}}
+		list := Block{pdfOutputLabels: []*pdfOutputNode{note.pdfOutputLabel}, Kind: ListBlock, List: "number", Start: listStartPointer(start), Items: []ListItem{{Blocks: blocks}}}
 		if note.Label != "" || note.BodyLabel != nil || note.BodyLabelStyle != nil || note.BodyLabelContent != nil {
 			label := noteBodyLabel(r.notes, key)
 			list.pdfListMarker = &label

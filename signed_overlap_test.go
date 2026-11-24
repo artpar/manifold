@@ -41,7 +41,7 @@ func TestPDFSignedRunningImagesDoNotCompeteWithFixedBody(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +90,7 @@ func TestPDFSignedContinuousOriginsAndPositiveReservations(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,7 +135,7 @@ func TestPDFSignedContinuousDrainsOldNoteInterval(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -188,7 +188,7 @@ func FuzzSignedRunning(f *testing.F) {
 		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 			t.Fatal(err)
 		}
-		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -254,7 +254,7 @@ func TestPDFContinuousIncompatibleStoriesStartFreshPage(t *testing.T) {
 				if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 					t.Fatal("individually feasible stories must paginate", err)
 				}
-				back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+				back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -310,7 +310,7 @@ func TestPDFContinuousAdmissionReservesActualBodyFloor(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -346,7 +346,7 @@ func FuzzContinuousAdmission(f *testing.F) {
 		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 			t.Fatal("feasible sections must render", err)
 		}
-		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}

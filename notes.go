@@ -218,6 +218,7 @@ func noteBodyLabelRun(c *noteCatalog, key noteKey) Run {
 	if style := c.definitions[key].BodyLabelStyle; style != nil {
 		run = *style
 	}
+	run.pdfOutput = c.definitions[key].pdfOutputLabel
 	run.Text = noteBodyLabel(c, key)
 	return run
 }

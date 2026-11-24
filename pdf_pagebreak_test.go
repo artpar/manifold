@@ -31,6 +31,9 @@ func pageBreakDocument(t testing.TB) *Document {
 	}
 	return d
 }
+
+// Geometry/paint oracles inspect the physical view, independently of logical
+// note recovery. Expected page, glyph and asset values remain unchanged.
 func renderPageBreakDocument(t testing.TB, d *Document) (*Document, []byte) {
 	t.Helper()
 	before, _ := json.Marshal(d)
@@ -44,7 +47,7 @@ func renderPageBreakDocument(t testing.TB, d *Document) (*Document, []byte) {
 	if !bytes.Equal(before, after) {
 		t.Fatal("break planning mutated source")
 	}
-	got, err := ReadPDF(ctx, bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+	got, err := ReadPDF(ctx, bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}

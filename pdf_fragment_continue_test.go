@@ -57,7 +57,7 @@ func checkRecursiveTables(t *testing.T, d *Document) *Document {
 	if !bytes.Equal(before, after) {
 		t.Fatal("recursive planning mutated source")
 	}
-	got, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+	got, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +149,7 @@ func TestPDFRecursiveFootnoteStartsWithOversizedTable(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	got, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	got, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}

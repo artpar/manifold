@@ -2240,3 +2240,20 @@ Retain the newly failing generated-PDF note oracle (three typed definitions) as
 an explicit opt-in acceptance check. Ordinary green tests do not close it. The
 existing writer is untagged, so a real marked-content/structure or conservative
 recovery implementation is required; an SF cache must not masquerade as recovery.
+
+
+## 2026-11-24 Tie generated PDF semantics to actual painting
+
+Fix the zero-note acceptance failure by writing real marked-content ownership and
+logical structure, not an embedded SF/body snapshot. Use PDF2 namespace/FENote and
+the published WTPDF NoteType owner, with reciprocal citation Ref edges. Emit
+forward MCR and inverse page-parent bindings, stable byte-string IDs/IDTree and
+Unicode image Alt. The format header is now2.0, including control-only outputs.
+No PDF/UA or WTPDF conformance certification is claimed.
+
+Keep the unchanged three-note expectation unconditional. Blank marks have empty
+structural owners, not unresolved MCIDs. Preserve all physical geometry/glyph/asset
+expected values; select the new explicit physical view when testing those values.
+Readers still apply logical structure by default; skipping it is diagnosed.
+Independently inspect the tree/actual paint and compare rendered pixels against
+the pre-tagging commit, then keep the broader completion audit open.

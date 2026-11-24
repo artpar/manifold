@@ -35,7 +35,7 @@ func TestRichBodyLabelsAllPaths(t *testing.T) {
 			if err := Write(context.Background(), &out, d, format, WriteOptions{AllowLossy: true}); err != nil {
 				t.Fatal(sectioned, format, err)
 			}
-			got, err := Read(context.Background(), &out, format, ReadOptions{})
+			got, err := Read(context.Background(), &out, format, ReadOptions{PDFSkipStructure: true})
 			if err != nil {
 				t.Fatal(sectioned, format, err)
 			}
@@ -51,7 +51,7 @@ func TestRichBodyLabelsAllPaths(t *testing.T) {
 		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 			t.Fatal(err)
 		}
-		got, err := ReadPDF(context.Background(), &out, ReadOptions{})
+		got, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -111,7 +111,7 @@ func TestPDFRichBodyLabelRetainsIndividualStyles(t *testing.T) {
 		if err := Write(context.Background(), &out, d, format, WriteOptions{}); err != nil {
 			t.Fatal(err)
 		}
-		got, err := Read(context.Background(), &out, format, ReadOptions{})
+		got, err := Read(context.Background(), &out, format, ReadOptions{PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -218,7 +218,7 @@ func TestRichBodyLabelMixedDirectionFitsOwnGutter(t *testing.T) {
 			if err := Write(context.Background(), &out, d, PDF, WriteOptions{PDFFonts: []FontFace{{Family: "DejaVu", Data: data}}}); err != nil {
 				t.Fatal(err)
 			}
-			got, err := ReadPDF(context.Background(), &out, ReadOptions{})
+			got, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipStructure: true})
 			if err != nil {
 				t.Fatal(err)
 			}

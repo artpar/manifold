@@ -443,7 +443,7 @@ CGO-disabled results. Ignored evidence is output/nested-notes. There is no runti
 module/executable/service/CGO/upload/application/access/quota boundary change.
 
 
-## Generated-PDF typed-note acceptance remains incomplete
+## Generated-PDF note failure discovered (historical; fixed below)
 
 The public native example provides a concrete end-to-end failure independent of
 transport: examples/notes/document.sf has three typed definitions (two footnotes,
@@ -457,7 +457,53 @@ new expected count/kinds are unchanged in the CLI acceptance subtest:
 MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf' -count=1 ./cmd/manydoc
 ```
 
-It currently fails, explicitly. Ordinary unit/race runs skip this known acceptance
-gate and do not count it as a pass. Implement actual tagged painted relationships
-or a conservative geometric/link recovery with uncertainty; do not use cached SF
-as apparent source recovery. This is required work, not a completion exemption.
+At discovery this failed explicitly and ordinary runs skipped it. The painted
+structure implementation below now passes the unchanged expectation and removes
+the gate. Cached SF was not used as apparent source recovery.
+
+
+## Generated PDF painted-note graph: former acceptance failure fixed
+
+The original three-definition/two-footnote/one-endnote CLI expectation now passes
+unconditionally; MANYDOC_REQUIRE_PDF_NOTE_GRAPH is no longer a test gate. The
+writer emits PDF2 FENote/NoteType, Lbl and Reference nodes with reciprocal Ref
+relationships. K contains MCRs for actual page MCIDs, and ParentTree maps back to
+those exact owners. Header version2.0/namespace, IDs/IDTree and image Alt are
+serialized during the existing pure-Go object finalization pass. Empty citations
+retain explicit empty owners without dangling MCIDs. No body/SF cache is embedded.
+
+See the [published WTPDF FENote definition](https://pdfa.org/wp-content/uploads/2024/02/Well-Tagged-PDF-WTPDF-1.0.pdf)
+and [ISO document-interchange errata](https://pdf-issues.pdfa.org/32000-2-2020/clause14.html).
+This implementation uses their structural mechanisms; it is not a PDF/UA or
+WTPDF conformance claim. Link annotation OBJR/structure destinations, full artifact/
+accessibility semantics and the remaining language/reflow contract need broader
+qualification. Explicit recovered font geometry describes the actual PDF, not
+a promise to reconstruct the original authoring font sizes/templates exactly.
+
+TestGeneratedPDF* verifies typed content/relationships, rich/empty marks, continued
+notes and page regions, nested/merged table ownership, pixel-identical image
+content/Alt, formatting/URI, stable global/scoped IDs and input immutability. A
+standalone merged table verifies tagging is not limited to documents with notes.
+FuzzGeneratedPDFNoteGraph includes repeated, empty and rich marks and Unicode
+byte-string IDs. The first empty-mark seed exposed an unresolved zero-paint MCID;
+the writer now omits that paint reference without weakening the oracle.
+
+verify_generated_pdf_structure.py independently checks parent/child/MCR/MCID and
+reciprocal Ref/ID relationships against actual content-stream operators. The
+example has3 FENotes,4 citation owners and24 page MCIDs. Both pages render pixel-
+identically in MuPDF at1.5x to commit1d13d3c. Poppler PNGs were visually reviewed.
+Physical tests now explicitly select PDFSkipStructure; their page/geometry/glyph/
+asset expected values are unchanged. Source/raw corpus oracles were not edited.
+
+```sh
+GOWORK=off go test -run '^TestGeneratedPDF|^FuzzGeneratedPDFNoteGraph$' -count=1 .
+GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf' -count=1 ./cmd/manydoc
+```
+
+This closes the concrete generated-note graph failure. General untagged recovery,
+inverse source-tree audits and the remaining native/resource/final work remain.
+
+Independent source-SF-driven recursive-table and repeated-header checks also pass:
+7 and5 pages, respectively, with table/row/cell-span/image/citation ownership and
+original literal marker counts. Only the two-page notes example has the fresh
+pre-tagging pixel baseline and visual inspection in this milestone.

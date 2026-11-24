@@ -81,8 +81,8 @@ func TestPDFControlOnlyRetainsActualTextVersionAndContent(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.HasPrefix(out.Bytes(), []byte("%PDF-1.4")) {
-		t.Fatal("control-only ActualText needs PDF 1.4")
+	if !bytes.HasPrefix(out.Bytes(), []byte("%PDF-2.0")) {
+		t.Fatal("tagged control-only ActualText output needs PDF 2.0")
 	}
 	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
 	if err != nil {

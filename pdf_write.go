@@ -110,6 +110,8 @@ type pdfSpan struct {
 type pdfLine []pdfSpan
 type pdfRenderer struct {
 	ctx                      context.Context
+	outputStructure          *pdfOutputStructure
+	suppressOutputStructure  bool
 	destinationPoints        map[string]pdfDestinationPoint
 	destinationTokens        map[string]string
 	destinationURIs          map[string]string
@@ -141,6 +143,7 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 	if err := ctx.Err(); err != nil {
 		return err
 	}
+	d, structure := preparePDFOutputStructure(d)
 	notes, err := catalogNotes(d, true)
 	if err != nil {
 		return err
@@ -162,7 +165,7 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 	p.SetTitle(d.Metadata.Title, true)
 	p.SetAuthor(d.Metadata.Author, true)
 	p.SetSubject(d.Metadata.Subject, true)
-	r := &pdfRenderer{ctx: ctx, pdf: p, width: w, height: h, margin: m, page: &g, y: math.Abs(g.margins.Top), validatedImages: make(outputImageCache)}
+	r := &pdfRenderer{outputStructure: structure, ctx: ctx, pdf: p, width: w, height: h, margin: m, page: &g, y: math.Abs(g.margins.Top), validatedImages: make(outputImageCache)}
 	if err := r.prepareDestinations(d); err != nil {
 		return err
 	}

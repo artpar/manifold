@@ -76,7 +76,7 @@ func TestPDFRichRunningMeasuredAndOriginalModel(t *testing.T) {
 	if err := Write(context.Background(), &pdf, doc, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), bytes.NewReader(pdf.Bytes()), ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), bytes.NewReader(pdf.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,7 +126,7 @@ func TestPDFRunningImagesShareAvailableHeight(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,7 +185,7 @@ func FuzzPDFRunningRegions(f *testing.F) {
 		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 			t.Fatalf("valid running images/body must fit: %v (bytes %d)", err, out.Len())
 		}
-		back, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+		back, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -220,7 +220,7 @@ func TestPDFRunningImagesReserveIndivisibleBody(t *testing.T) {
 			if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 				t.Fatal(err)
 			}
-			back, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+			back, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -253,7 +253,7 @@ func TestPDFRunningFittedFloorPagination(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -290,7 +290,7 @@ func TestPDFRunningSerialNestedImagesFit(t *testing.T) {
 		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 			t.Fatalf("nested=%v: %v", nested, err)
 		}
-		back, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+		back, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}

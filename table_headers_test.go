@@ -38,7 +38,7 @@ func checkRepeatedHeaders(t testing.TB, d *Document, header, bodyPrefix string, 
 	if !bytes.Equal(want, canonicalSF(t, d)) {
 		t.Fatal("PDF mutated authored rows")
 	}
-	got, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+	got, err := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}

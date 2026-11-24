@@ -37,7 +37,7 @@ func TestTextStyleSFDOCXAndPDFFonts(t *testing.T) {
 	if !bytes.Equal(before, canonicalSF(t, d)) {
 		t.Fatal("font layout mutated source")
 	}
-	got, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	got, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -247,7 +247,7 @@ func TestSuppliedNotoFaceUsesItsOwnMetricsAndOutlines(t *testing.T) {
 	if !bytes.Equal(data, original) {
 		t.Fatal("subsetting mutated caller font data")
 	}
-	got, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	got, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}

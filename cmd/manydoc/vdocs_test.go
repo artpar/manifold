@@ -69,9 +69,6 @@ func TestCLIVDOCSSemantics(t *testing.T) {
 			if filepath.Ext(input) == ".sf" {
 				for _, ext := range []string{"docx", "pdf"} {
 					t.Run(ext, func(t *testing.T) {
-						if ext == "pdf" && os.Getenv("MANYDOC_REQUIRE_PDF_NOTE_GRAPH") == "" {
-							t.Skip("required acceptance remains incomplete: generated PDF is untagged and typed notes are not recovered; set MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 to reproduce")
-						}
 						target := filepath.Join(dir, "generated."+ext)
 						if err := run(ctx, []string{"convert", "-o", target, native}, &bytes.Buffer{}, &bytes.Buffer{}); err != nil {
 							t.Fatal(err)
@@ -116,5 +113,32 @@ func TestCLIVDOCSAtomicFailure(t *testing.T) {
 	files, err := filepath.Glob(filepath.Join(dir, ".manydoc-*"))
 	if err != nil || len(files) != 0 {
 		t.Fatal("temporary output leaked", files, err)
+	}
+}
+
+func TestCLIPDFPhysicalInspection(t *testing.T) {
+	dir := t.TempDir()
+	pdf := filepath.Join(dir, "notes.pdf")
+	ctx := context.Background()
+	if err := run(ctx, []string{"convert", "-o", pdf, "../../examples/notes/document.sf"}, &bytes.Buffer{}, &bytes.Buffer{}); err != nil {
+		t.Fatal(err)
+	}
+	var out bytes.Buffer
+	if err := run(ctx, []string{"extract", "-pdf-skip-structure", "-pdf-skip-inference", "-format", "sf", pdf}, &out, &bytes.Buffer{}); err != nil {
+		t.Fatal(err)
+	}
+	d, err := manydoc.Read(ctx, &out, manydoc.SF, manydoc.ReadOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(d.Notes) != 0 {
+		t.Fatal("physical mode interpreted note tree")
+	}
+	skipped := false
+	for _, diag := range d.Diagnostics {
+		skipped = skipped || diag.Code == "pdf_structure_skipped"
+	}
+	if !skipped {
+		t.Fatal("omitted logical interpretation not disclosed")
 	}
 }

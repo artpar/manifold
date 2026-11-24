@@ -1478,9 +1478,8 @@ verify_colleaf_envelope.cjs now accepts input/output path arguments; absent and
 empty story/drawing maps are schema-equivalent SDK defaults, without permitting
 any populated entries to disappear. This is not browser interaction/paint proof.
 
-A separate required CLI acceptance check expects three typed notes after native
-→PDF→SF; it currently fails with zero. Independent pypdf confirms no StructTreeRoot
-in generated PDF while all three note-body markers remain visible once each.
-Native/SF persistence succeeds; generated-PDF typed recovery does not. The oracle
-is retained behind MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 and is an explicit open goal
-requirement, not an unsupported-feature exemption or a successful round trip.
+At this milestone a separate CLI check found zero typed notes after native→PDF
+→SF, despite three visible bodies. The later painted PDF2 structure fix now passes
+the unchanged three-note expectation unconditionally. PDF_NOTES.md records actual
+MCR/MCID/ParentTree/Ref/ID and independent pixel evidence. This closes that concrete
+PDF failure, not remaining native browser/rendering qualification.

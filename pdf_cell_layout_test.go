@@ -58,7 +58,7 @@ func TestPDFRichCellsMergedGeometryNotesAndImages(t *testing.T) {
 	if e := Write(context.Background(), &out, d, PDF, WriteOptions{}); e != nil {
 		t.Fatal(e)
 	}
-	got, e := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+	got, e := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -127,7 +127,7 @@ func TestPDFRichFootnoteContinuationUsesFragmentHeights(t *testing.T) {
 	if e := Write(context.Background(), &out, d, PDF, WriteOptions{}); e != nil {
 		t.Fatal(e)
 	}
-	got, e := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+	got, e := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -172,7 +172,7 @@ func TestImageHeightOnlyAndCellFitting(t *testing.T) {
 			if e := Write(context.Background(), &out, d, format, WriteOptions{}); e != nil {
 				t.Fatal(e)
 			}
-			got, e := Read(context.Background(), &out, format, ReadOptions{PDFSkipInference: true})
+			got, e := Read(context.Background(), &out, format, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -240,7 +240,7 @@ func TestImagePreferredSizesAvoidOverflow(t *testing.T) {
 			if e := Write(context.Background(), &out, d, format, WriteOptions{}); e != nil {
 				t.Fatal(e)
 			}
-			got, e := Read(context.Background(), &out, format, ReadOptions{PDFSkipInference: true})
+			got, e := Read(context.Background(), &out, format, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 			if e != nil {
 				t.Fatal(e)
 			}
@@ -291,7 +291,7 @@ func FuzzPDFRichLayout(f *testing.F) {
 			}
 			return
 		}
-		got, e := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true})
+		got, e := ReadPDF(context.Background(), bytes.NewReader(out.Bytes()), ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 		if e != nil {
 			t.Fatal(e)
 		}

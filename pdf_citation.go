@@ -34,6 +34,7 @@ func (r *pdfRenderer) citationAtom(run Run, size float64, bidi pdfBidiRange, bre
 			return pdfTextAtom{}, fmt.Errorf("%w: PDF citation font size exceeds coordinate range or 0.01pt precision", ErrUnsupported)
 		}
 		full = math.Max(full, point)
+		children[i].pdfOutput = run.pdfOutput
 		children[i].FontSize = math.Round(point*.7*100) / 100
 	}
 	fallback := math.Round(size*.7*100) / 100
@@ -49,7 +50,7 @@ func (r *pdfRenderer) citationAtom(run Run, size float64, bidi pdfBidiRange, bre
 	placePDFLine(line, width)
 	rise := full * .3
 	baseline := pdfLineSize(line, fallback)
-	outer := Run{Note: run.Note, Source: run.Source, FontSize: full}
+	outer := Run{pdfOutput: run.pdfOutput, Note: run.Note, Source: run.Source, FontSize: full}
 	span := pdfSpan{bidi: bidi, run: outer, text: noteReferenceLabel(r.notes, run.Note), width: width, ascent: math.Max(full, baseline+rise), descent: pdfLineHeight(line, fallback, 1.4) - baseline - rise, citation: &pdfCitationBox{line: line, size: fallback, rise: rise}}
 	return pdfTextAtom{spans: pdfLine{span}, width: width, breaking: breaking}, nil
 }

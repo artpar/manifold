@@ -40,6 +40,7 @@ type pdfTableLayout struct {
 	cells                  []pdfMeasuredCell
 	groups                 []pdfTableGroup
 	header                 *pdfTableHeader
+	outputHeaderPainted    bool
 	headerRows, headerLast int
 }
 
@@ -160,7 +161,11 @@ func (r *pdfRenderer) drawImage(im *pdfImageLayout, x, y float64) error {
 			r.runningImages[digest] = name
 		}
 	}
+	marked := r.beginOutputMark(im.image.pdfOutput)
 	r.pdf.ImageOptions(name, x, y, im.width, im.height, false, gofpdf.ImageOptions{ImageType: im.kind}, 0, "")
+	if marked {
+		r.pdf.RawWriteStr("EMC")
+	}
 	return r.pdf.Error()
 }
 

@@ -26,7 +26,7 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
 | Revisions/comments/fields/unsupported constructs have explicit behavior | DOCX final-visible-view and cached-field extraction, revision/comment/control loss diagnostics; COMPATIBILITY.md and fixed corpus tests | Explicit policy exists. Editing history/comment editing/field execution are not claimed; policies now verified on original Word/LibreOffice exports in REAL_DOCX_CORPUS.md; no arbitrary Office API parity claim |
 | Never silently lose visible content; reject unsupported output | Diagnostics, AllowLossy gate, strict SF/JSON schema/graphs, staged DOCX/PDF output, explicit missing glyph/shape failures | Existing tests and source checks qualify current paths; every new adapter/recovery feature must preserve this invariant. Physical unsupported constructs cannot be called complete merely because flattened text survives |
 | Supported SF round trips preserve declared semantics | Original 51 accepted corpus cases, rich feature tests and exact original Word normalization; gzip all-value hash and source identity proofs | Implemented checked normalized contract. Keep structural/source/asset oracles unchanged; new eight-source normalized round trips also pass; native adapter must be tested against actual snapshot semantics |
-| Stable public Go API and all-four-path CLI/examples | document.go Read/Write/options/errors, structured tree APIs; report/sections/notes/destinations examples; atomic CLI and format tests | Existing API/CLI implemented. VDOCS public API/CLI/example now exposes the checked offline native profile; browser and remaining mappings stay open. The generated-PDF three-note recovery acceptance gate fails and must be fixed |
+| Stable public Go API and all-four-path CLI/examples | document.go Read/Write/options/errors, structured tree APIs; report/sections/notes/destinations examples; atomic CLI and format tests | Existing API/CLI implemented. VDOCS public API/CLI/example now exposes the checked offline native profile; browser and remaining mappings stay open. The generated-PDF three-note recovery check now passes unconditionally with painted logical structure; broader final acceptance remains open |
 | Everything runs in-process Go, no required CGO/executables/services/license server/uploads | go.mod/THIRD_PARTY.md; host CGO-disabled execution and Linux builds; no Daptin imports/service calls | Verified current production boundary. Optional Python/Node/LibreOffice are QA only; new adapter must preserve it |
 | Independent readers plus appropriate visual inspection | Optional verifiers, actual ProseMirror, pypdf/MuPDF/fontTools/python-docx/XML, many rendered synthetic pages and real native samples | Strong targeted evidence, not a blanket fidelity claim. Representative original DOCX coverage now includes33 inspected producer/native pages; broader semantic/native integration qualification remains open |
 | Representative corpus includes actual exports and targeted fixtures | testdata/corpus manifest; original Microsoft Word MQTT DOCX/PDF, published InDesign PDF, W3C PDF; pinned hashes/rights/oracles | Genuine originals present. Eight pinned Word/Mac Word/LibreOffice originals now cover notes/headers/revisions/fields with source-only oracles; retain their measured limits and original bytes |
@@ -186,7 +186,7 @@ direction rendering are not. Remaining native settings/API/browser and broader
 PDF/resource/final acceptance remain required.
 
 
-## Current public-native and PDF note acceptance result
+## Historical public-native milestone and PDF note failure (now fixed below)
 
 The checked offline native profile now has public API/CLI/example coverage and
 actual validator/save/SF evidence. Remaining native browser/rendering/intent work
@@ -200,3 +200,26 @@ one-endnote CLI oracle; it currently fails. Standard unit/race runs explicitly
 skip this acceptance gate. That green suite is not goal completion evidence.
 Fix the painted logical graph/recovery next, retain the source and expected values,
 and rerun independent structural/visual and final acceptance checks afterward.
+
+
+## Current generated-PDF structure acceptance result
+
+The zero-note failure discovered in the preceding milestone is fixed. Its source
+and three-note/two-footnote/one-endnote expectation are unchanged, and the test now
+runs unconditionally. Actual painted MCIDs/forward MCR/inverse ParentTree, reciprocal
+Ref, IDs/IDTree and PDF2 FENote/NoteType describe rendered content without a cached
+SF body. Standalone merged-table and richer note/body/list/image/formatting/source
+tests cover more than successful parsing/text. Empty-mark fuzz seeds remain intact.
+
+Independent pypdf validates actual paint/tree ownership and three definitions/four
+citations; MuPDF confirms two pages pixel-identical to the pre-tagging commit,
+with Poppler visual inspection. Physical oracles retain expected values and select
+PDFSkipStructure explicitly; default reads verify the logical graph separately.
+No PDF/UA/WTPDF conformance or full goal completion follows from this component
+evidence. Remaining native/browser, note policies, untagged/inverse/source/resource
+and final acceptance work stays open.
+
+Independent source-SF-driven recursive-table and repeated-header checks also pass:
+7 and5 pages, respectively, with table/row/cell-span/image/citation ownership and
+original literal marker counts. Only the two-page notes example has the fresh
+pre-tagging pixel baseline and visual inspection in this milestone.

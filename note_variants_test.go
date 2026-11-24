@@ -28,7 +28,7 @@ func TestNoteVariantLabelsAllPaths(t *testing.T) {
 			if err := Write(context.Background(), &buf, d, format, WriteOptions{AllowLossy: true}); err != nil {
 				t.Fatal(err)
 			}
-			got, err := Read(context.Background(), &buf, format, ReadOptions{})
+			got, err := Read(context.Background(), &buf, format, ReadOptions{PDFSkipStructure: true})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -52,7 +52,7 @@ func TestNoteVariantLabelsAllPaths(t *testing.T) {
 	if err := Write(context.Background(), &pdf, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	got, err := ReadPDF(context.Background(), &pdf, ReadOptions{})
+	got, err := ReadPDF(context.Background(), &pdf, ReadOptions{PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,13 +99,13 @@ func TestMarkerlessNoteLabels(t *testing.T) {
 			t.Fatal(format, err)
 		}
 		if format == PDF {
-			got, err := ReadPDF(context.Background(), &buf, ReadOptions{})
+			got, err := ReadPDF(context.Background(), &buf, ReadOptions{PDFSkipStructure: true})
 			if err != nil || !strings.Contains(got.Text(), "FIRST_NOTE_BODY") {
 				t.Fatal("markerless site lost body", err)
 			}
 			continue
 		}
-		got, err := Read(context.Background(), &buf, format, ReadOptions{})
+		got, err := Read(context.Background(), &buf, format, ReadOptions{PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}

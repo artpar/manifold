@@ -169,13 +169,17 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 		return nil, fmt.Errorf("PDF navigation: %w", e)
 	}
 	r.geometricLinks()
-	if catalog["StructTreeRoot"] == nil && !opts.PDFSkipInference {
+	if (catalog["StructTreeRoot"] == nil || opts.PDFSkipStructure) && !opts.PDFSkipInference {
 		if e := r.inferStructure(); e != nil {
 			return nil, fmt.Errorf("PDF inferred structure: %w", e)
 		}
 	}
-	if e := r.recoverStructure(catalog["StructTreeRoot"]); e != nil {
-		return nil, fmt.Errorf("PDF logical structure: %w", e)
+	if !opts.PDFSkipStructure {
+		if e := r.recoverStructure(catalog["StructTreeRoot"]); e != nil {
+			return nil, fmt.Errorf("PDF logical structure: %w", e)
+		}
+	} else if catalog["StructTreeRoot"] != nil {
+		doc.warn("pdf_structure_skipped", "Logical PDF structure was explicitly skipped; positioned paint content is retained")
 	}
 	r.diagnosePartialLinks()
 	r.bindPDFNavigation()

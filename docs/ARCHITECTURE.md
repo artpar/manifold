@@ -1801,7 +1801,26 @@ regardless of AllowLossy. The CLI reuses existing atomic replacement behavior.
 The offline profile is now public independently of still-unqualified browser
 interaction; this does not widen the supported native rendering contract.
 
-The new end-to-end note acceptance probe exposes the PDF writer's lack of logical
-tags. Its untagged visible note text is not typed recovery. The unchanged three-
-note expectation is an opt-in failing acceptance check, separate from ordinary
-unit/race passes; a structured PDF writer/recovery fix remains required.
+The initial end-to-end note probe exposed missing PDF logical tags. The painted
+output structure below now fixes that failure, and the unchanged three-note
+expectation runs unconditionally. Earlier opt-in failures remain historical evidence.
+
+
+## Painted PDF output structure
+
+pdf_output_structure.go clones current logical content and assigns transient
+structure owners to runs, list/body labels and images. Measurement/continuation
+carry those owners into actual painting. Page MCIDs are contiguous and only
+created for nonempty paint; blank citations retain empty structural owners.
+Shaping/ActualText boundaries stay inside the same ordinary-span owner, without
+splitting shaping contexts at paint changes. Repeated headers/running content and
+continued labels are artifacts, not duplicate logical owners.
+
+The existing in-process pdfcpu font/destination finalization pass emits a PDF2
+namespace, role tree, MCR/page relationships, inverse ParentTree, reciprocal note
+Refs and IDTree. IDs are byte strings; Alt is a Unicode text string. Globally
+unique note IDs persist; kind-scoped collisions receive stable qualified IDs.
+No alternate text/body/SF cache is stored. Default import uses that graph;
+PDFSkipStructure provides a diagnosed positioned view, and PDFSkipInference also
+disables geometric grouping. Physical test oracles explicitly select that view;
+separate logical tests check relationships/content/assets/formatting.

@@ -54,7 +54,7 @@ func assertControlPages(t *testing.T, d *Document, want []string) *Document {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}

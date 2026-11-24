@@ -29,7 +29,7 @@ func TestNoteBodyLabelStyleAllPaths(t *testing.T) {
 					if err := Write(context.Background(), &buf, d, format, WriteOptions{AllowLossy: true}); err != nil {
 						t.Fatal(err)
 					}
-					got, err := Read(context.Background(), &buf, format, ReadOptions{})
+					got, err := Read(context.Background(), &buf, format, ReadOptions{PDFSkipStructure: true})
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -44,7 +44,7 @@ func TestNoteBodyLabelStyleAllPaths(t *testing.T) {
 			if err := Write(context.Background(), &pdf, d, PDF, WriteOptions{}); err != nil {
 				t.Fatal(err)
 			}
-			got, err := ReadPDF(context.Background(), &pdf, ReadOptions{})
+			got, err := ReadPDF(context.Background(), &pdf, ReadOptions{PDFSkipStructure: true})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -151,7 +151,7 @@ func TestTallNoteBodyLabelReservesLayout(t *testing.T) {
 		if err := Write(context.Background(), &out, d, PDF, WriteOptions{}); err != nil {
 			t.Fatal(err)
 		}
-		got, err := ReadPDF(context.Background(), &out, ReadOptions{})
+		got, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}

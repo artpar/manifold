@@ -87,7 +87,7 @@ func TestPDFPaintLigatureTextStylesAndLinksRecover(t *testing.T) {
 	if err := Write(context.Background(), &out, d, PDF, WriteOptions{PDFFonts: []FontFace{{Family: "Noto Sans", Data: data}}}); err != nil {
 		t.Fatal(err)
 	}
-	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+	back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -226,7 +226,7 @@ func FuzzPDFPaintContext(f *testing.F) {
 		if err := Write(context.Background(), &out, d, PDF, WriteOptions{PDFFonts: []FontFace{{Family: "Noto Sans", Data: data}}}); err != nil {
 			t.Fatal(err)
 		}
-		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -256,7 +256,7 @@ func FuzzPDFPaintFont(f *testing.F) {
 			}
 			return
 		}
-		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true})
+		back, err := ReadPDF(context.Background(), &out, ReadOptions{PDFSkipInference: true, PDFSkipStructure: true})
 		if err != nil {
 			t.Fatal(err)
 		}

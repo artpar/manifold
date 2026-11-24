@@ -316,5 +316,7 @@ assets, notes, source facts and diagnostics without `-allow-lossy`; unsupported
 mappings still reject. [Native contract and limits](docs/COLLEAF_FORMAT.md) records
 actual validator/plugin-save evidence, rendering gaps and application size limits.
 Browser interaction and full native rendering remain unqualified. Generated PDFs
-are currently untagged: their visible notes do not yet reimport as typed SF notes.
-This is an open completion requirement, not a successful structured round trip.
+now use PDF 2.0 logical structure tied to actual painted content, including typed
+foot/endnote relationships. For physical inspection, combine `-pdf-skip-structure`
+with `-pdf-skip-inference`; skipped logical interpretation is diagnosed. Tagged
+output is not a PDF/UA or WTPDF conformance claim. See [PDF note evidence](docs/PDF_NOTES.md).

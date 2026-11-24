@@ -7068,5 +7068,119 @@
       "MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf' -count=1 ./cmd/manydoc",
       "rg -n 'finishGlyphFonts|RawWriteStr|drawFragment|noteLinks|StructTreeRoot' pdf_write.go pdf_glyph.go pdf_notes.go pdf_structure_notes.go"
     ]
+  },
+  "generated_pdf_painted_structure_2026_11_24": {
+    "status": "verified component milestone; full goal active/incomplete",
+    "implementation": "PDF2 logical role tree from current cloned content, actual paint-scoped MCIDs/MCRs and inverse ParentTree; reciprocal FENote/Reference edges, stable global/scoped byte-string IDs/IDTree, Unicode figure Alt. No cached SF/body document. Empty citations retain empty semantic owners without dangling paint references. Running/repeated/continuation rendering remains artifact evidence.",
+    "acceptance": "The existing three-definition/two-footnote/one-endnote CLI expectation passes unconditionally. Its environment skip gate is removed. Expected physical positions/glyph/image/header counts remain unchanged; physical tests explicitly request PDFSkipStructure. Header-version assertions now require2.0 for the declared output namespace.",
+    "public_physical_view": "ReadOptions.PDFSkipStructure and CLI -pdf-skip-structure; combine with PDFSkipInference for paint order; pdf_structure_skipped diagnosis. Default tagged recovery is logical.",
+    "semantic_tests": "Generated note body content, rich/empty/repeated/continued citations, explicit kinds/Ref ownership, source roles/regions, stable identities over two PDF reflows, image pixel/Alt, standalone merged grid, repeated-header single logical owner, list start/formatting/URI, SF validation and caller immutability. Existing geometry/paint oracles use the explicit view, not weaker expected values.",
+    "independent_QA": {
+      "script": "scripts/verify_generated_pdf_structure.py",
+      "sha256": "dbd3e599d8be5285bf9b4fa69ec5a3afd6e5734088222217ffcaf832c818d86b",
+      "results": {
+        "notes": {
+          "pages": 2,
+          "roles": {
+            "/Document": 1,
+            "/H1": 1,
+            "/Span": 12,
+            "/P": 8,
+            "/Reference": 4,
+            "/L": 2,
+            "/LI": 2,
+            "/Lbl": 5,
+            "/LBody": 2,
+            "/FENote": 3
+          },
+          "painted_MCID_owners": 24,
+          "note_kinds": {
+            "/Endnote": 1,
+            "/Footnote": 2
+          },
+          "citations": 4,
+          "source_marker_tokens": 3,
+          "scope": "Painted role/parent/MCID/reciprocal-Ref/ID graph; not PDF/UA or WTPDF conformance",
+          "MuPDF_baseline_pixels": {
+            "scale": 1.5,
+            "equal_pages": 2,
+            "sha256": [
+              "4773567861cfef6493f46622e037f6616bdaddd631ff435980fafb64466010a0",
+              "dbf737c3d5c3ea634d62dfae91061cdf5a52169292c3cc8a28ce5a85f117a8dc"
+            ]
+          }
+        },
+        "recursive": {
+          "pages": 7,
+          "roles": {
+            "/Document": 1,
+            "/Table": 5,
+            "/TR": 11,
+            "/TD": 16,
+            "/P": 69,
+            "/Span": 69,
+            "/Reference": 2,
+            "/Figure": 2,
+            "/FENote": 2,
+            "/Lbl": 2
+          },
+          "painted_MCID_owners": 75,
+          "note_kinds": {
+            "/Footnote": 2
+          },
+          "citations": 2,
+          "source_marker_tokens": 19,
+          "scope": "Painted role/parent/MCID/reciprocal-Ref/ID graph; not PDF/UA or WTPDF conformance"
+        },
+        "repeated_headers": {
+          "pages": 5,
+          "roles": {
+            "/Document": 1,
+            "/Table": 1,
+            "/TR": 5,
+            "/TD": 7,
+            "/P": 41,
+            "/Span": 41,
+            "/Figure": 2,
+            "/Reference": 2,
+            "/FENote": 2,
+            "/Lbl": 2
+          },
+          "painted_MCID_owners": 47,
+          "note_kinds": {
+            "/Footnote": 2
+          },
+          "citations": 2,
+          "source_marker_tokens": 41,
+          "scope": "Painted role/parent/MCID/reciprocal-Ref/ID graph; not PDF/UA or WTPDF conformance"
+        }
+      },
+      "source_comparison": "Unchanged original example SF drives note/citation/table/row/cell-span/image and literal marker expectations. Superscript digits may directly follow markers in pypdf text; literal known-token counting does not invent a word boundary. Repeated header physical copies are allowed while logical ownership stays single.",
+      "pixel_baseline": "Fresh detached checkout of commit1d13d3c generated the prior example; both pages pixel-identical at1.5x. Detached worktree removed; generated files ignored.",
+      "visual": "Poppler scale-to1000 page PNGs visually inspected: aligned note labels/body/footer, legible headings, no new clipping/overlap. Targeted two-page evidence, not universal fidelity.",
+      "ProseMirror": "43 nodes/marks/attributes checked in CLI-extracted generated-PDF SF.",
+      "scope_limit": "Not PDF/UA/WTPDF/accessibility certification, browser/Word fidelity, all source properties or general untagged recovery."
+    },
+    "checks": {
+      "go_test_all": "passed library27.124s/CLI0.838s; internal cached; required note gate runs unconditionally",
+      "race": "passed library315.451s/CLI3.200s; internal cached",
+      "vet": "passed",
+      "modules": "all modules verified",
+      "CGO_disabled_focused": "passed0.605s",
+      "builds": "CGO-disabled host CLI build/help/logical and physical extraction execute; Linux amd64/arm64 cross-builds pass, not execution",
+      "fuzz": "FuzzGeneratedPDFNoteGraph passed951 executions/10.547s/two workers after the empty-paint-reference correction; short safety sample",
+      "diff_check": "passed"
+    },
+    "standards": [
+      "https://pdfa.org/wp-content/uploads/2024/02/Well-Tagged-PDF-WTPDF-1.0.pdf",
+      "https://pdf-issues.pdfa.org/32000-2-2020/clause14.html"
+    ],
+    "remaining": "Native rendering/intent/browser; note policies/decorations; untagged and inverse/source/resource audits; broader semantic/reflow/relationship qualification and final API/visual acceptance. No new production dependency, external runtime or application/backend change.",
+    "next_commands": [
+      "GOWORK=off go test -run '^TestGeneratedPDF|^FuzzGeneratedPDFNoteGraph$' -count=1 .",
+      "GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf|TestCLIPDFPhysicalInspection' -count=1 ./cmd/manydoc",
+      "cat docs/STATUS.md docs/ACCEPTANCE.md",
+      "rg -n 'ParentTree|OBJR|Ref|pdf_note_reflow' pdf_structure.go pdf_structure_notes.go pdf_output_structure.go"
+    ]
   }
 }
