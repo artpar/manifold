@@ -29,15 +29,16 @@ const (
 // whose structure cannot be represented. Converters reject lossy output unless
 // the caller explicitly acknowledges those diagnostics.
 type Document struct {
-	Metadata          Metadata     `json:"metadata,omitempty"`
-	Layout            Layout       `json:"layout,omitempty"`
-	Blocks            []Block      `json:"blocks"`
-	Headers           []Block      `json:"headers,omitempty"`
-	Footers           []Block      `json:"footers,omitempty"`
-	Notes             []Note       `json:"notes,omitempty"`
-	Diagnostics       []Diagnostic `json:"diagnostics,omitempty"`
-	Pages             []PDFPage    `json:"pages,omitempty"`
-	EvenAndOddHeaders bool         `json:"even_and_odd_headers,omitempty"`
+	PDFNavigation     *PDFNavigation `json:"pdf_navigation,omitempty"`
+	Metadata          Metadata       `json:"metadata,omitempty"`
+	Layout            Layout         `json:"layout,omitempty"`
+	Blocks            []Block        `json:"blocks"`
+	Headers           []Block        `json:"headers,omitempty"`
+	Footers           []Block        `json:"footers,omitempty"`
+	Notes             []Note         `json:"notes,omitempty"`
+	Diagnostics       []Diagnostic   `json:"diagnostics,omitempty"`
+	Pages             []PDFPage      `json:"pages,omitempty"`
+	EvenAndOddHeaders bool           `json:"even_and_odd_headers,omitempty"`
 	// UnresolvedDestinations explicitly retains source links whose target is absent.
 	UnresolvedDestinations []string `json:"unresolved_destinations,omitempty"`
 }
@@ -522,7 +523,9 @@ func (d *Document) Validate() error {
 			return err
 		}
 	}
-	if _, err := catalogDestinations(d, true); err != nil {
+	if c, err := catalogDestinations(d, true); err != nil {
+		return err
+	} else if err := d.PDFNavigation.validate(d, c); err != nil {
 		return err
 	}
 	return validateNotes(d)

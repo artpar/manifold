@@ -2228,3 +2228,24 @@ retains 17 names/ten link text/target pairs; its PDF export omits most links, al
 for a minimal python-docx probe. Do not treat that PDF as a link oracle. PDF import
 still emits its prior unrepresented-action diagnostic and does not recover these
 targets. This milestone does not qualify PDF-to-SF internal navigation.
+
+## PDF physical navigation import
+
+```sh
+GOWORK=off go test -run 'TestPDFNavigation|TestPDFTaggedInternal|TestPDFPublishedInDesignExport' -count=1 .
+GOWORK=off CGO_ENABLED=0 go run ./examples/destinations
+bin/manydoc extract -format sf -o output/destinations/indesign.sf testdata/real/copyright-office-circular-1-2021.pdf
+bin/manydoc extract -format sf -o output/navigation-import/mqtt.sf testdata/real/mqtt-v5.0-os.pdf
+output/qa-venv/bin/python scripts/verify_navigation_import.py output/destinations/destinations.pdf output/destinations/from-pdf.sf testdata/real/copyright-office-circular-1-2021.pdf output/destinations/indesign.sf testdata/real/mqtt-v5.0-os.pdf output/navigation-import/mqtt.sf --report output/navigation-import/independent.json
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/destinations/from-pdf.sf output/destinations/indesign.sf
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadStructured$' -fuzztime=10s -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=10s -parallel=2 .
+```
+
+Use `extract -format sf` explicitly: extract defaults to text even when its output
+filename ends in .sf. New navigation fuzz seeds cover the nullable, rotated, binary
+name and malformed graph paths. The independent script verifies explicit PDF views,
+all supported annotation targets/regions and actual selected flow page/order, not
+just text. Original MQTT export is 477,613,781 bytes; full SF/provenance/codec costs
+remain required work. Small imported SFs pass actual ProseMirror (8,904 nodes); no
+477 MB ProseMirror check is claimed. See PDF_NAVIGATION.md for exact source evidence.

@@ -92,6 +92,7 @@ func FuzzReadDOCX(f *testing.F) {
 	})
 }
 func FuzzReadPDF(f *testing.F) {
+	f.Add(navigationFixture(fullNavigationTree(), `/foo [6 0 R /FitH 100]`, `(foo)`))
 	f.Add(recoveryPDF(taggedShortPatchObjects(true)...))
 	f.Add(recoveryPDF(taggedShortPatchObjects(false)...))
 	f.Add(recoveryPDF(inferenceObjects(ruledPath(false) + ruledContent())...))

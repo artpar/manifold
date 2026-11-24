@@ -165,6 +165,9 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 		}
 		doc.Blocks = append(doc.Blocks, r.lines...)
 	}
+	if e := r.recoverPDFNavigation(catalog); e != nil {
+		return nil, fmt.Errorf("PDF navigation: %w", e)
+	}
 	r.geometricLinks()
 	if catalog["StructTreeRoot"] == nil && !opts.PDFSkipInference {
 		if e := r.inferStructure(); e != nil {
@@ -175,6 +178,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 		return nil, fmt.Errorf("PDF logical structure: %w", e)
 	}
 	r.diagnosePartialLinks()
+	r.bindPDFNavigation()
 	if strings.TrimSpace(strings.ReplaceAll(doc.Text(), "\f", "")) == "" {
 		doc.warn("no_text", "No extractable text was found; scanned/image-only documents require OCR")
 	}

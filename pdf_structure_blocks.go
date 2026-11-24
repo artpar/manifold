@@ -53,15 +53,15 @@ func (s *pdfStructureRecovery) node(n *pdfStructureNode) ([]Block, error) {
 	if n.role == "Link" {
 		target, conflict := s.logicalLink(n.kids)
 		if conflict {
-			s.warn("pdf_link_ownership", "Logical Link element references different URI targets; exact ownership is unresolved")
-		} else if target != "" {
+			s.warn("pdf_link_ownership", "Logical Link element references different URI/internal targets; exact ownership is unresolved")
+		} else if !target.empty() {
 			for i := range blocks {
 				for j := range blocks[i].Runs {
 					run := &blocks[i].Runs[j]
-					if run.Link != "" && run.Link != target {
+					if (run.Link != "" || run.Destination != "") && ((run.Destination != "" && run.Destination != target.destination) || (run.Destination == "" && (run.Link != target.uri || target.destination != ""))) {
 						s.warn("pdf_link_ownership", "Logical link ownership contradicts geometric annotation association; logical ownership is used")
 					}
-					run.Link = target
+					target.apply(run)
 					if run.Source != nil {
 						copy := *run.Source
 						copy.Evidence += ";link_from_structure"

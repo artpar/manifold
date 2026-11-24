@@ -21,7 +21,38 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: typed navigation points through SF/DOCX/native PDF
+## Latest milestone: PDF physical navigation and inferred flow bindings
+
+PDF→SF now preserves named/direct GoTo views, nullable parameters, all eight view
+modes, namespace/raw name-byte identity, forward page references, transformed
+coordinates and complete supported annotation targets/regions. Editable anchor
+ownership is separately inferred/diagnosed; missing names remain unresolved.
+Tagged and geometric URI/internal ownership are distinct. Read PDF_NAVIGATION.md
+for the public model, validation, exact evidence and reflow/fit/zoom limitations.
+
+Independent original-object checks match all 325 anonymous views and 1,245 links
+in the original 137-page MQTT PDF, the InDesign publication's one named view/19
+links, and the native example's 17 named/one anonymous/one missing views and 13
+annotations. Every resolved view binds once at its selected source page/order.
+Original fixtures and structural/text/merge/asset oracles remain intact. Actual
+ProseMirror validates 8,904 imported small-example nodes/marks/attributes.
+
+Checks pass: full tests (15.043s / 0.383s), race (178.326s / 1.951s), vet,
+module verification, host/Linux CGO-disabled builds and diff check. Host CLI uses
+`extract -format sf` explicitly. Ten-second SF/PDF fuzz campaigns with navigation
+seeds pass (2,331 / 43,899 executions, two workers each); new metadata/seeds also
+passed a focused race check. Verification.json records durable evidence.
+
+The full objective remains **incomplete**. The original MQTT SF is 477,613,781
+bytes (~455.5 MiB); provenance/codec costs remain required usability work. Next
+perform the bounded acceptance/source/corpus/visual audit and address material
+remaining rich recovery/layout contracts without widening into Word-equivalent
+reflow. No external blocker prevents progress. Concrete commands:
+`output/qa-venv/bin/python scripts/verify_navigation_import.py output/destinations/destinations.pdf output/destinations/from-pdf.sf testdata/real/copyright-office-circular-1-2021.pdf output/destinations/indesign.sf testdata/real/mqtt-v5.0-os.pdf output/navigation-import/mqtt.sf`;
+`rg -n 'SourceInfo|Regions|sfAttrs|ReadStructured' source.go structured.go pdf_structure.go`;
+`cat docs/ACCEPTANCE.md`.
+
+## Previous milestone: typed navigation points through SF/DOCX/native PDF
 
 The shared API/profile now preserves inline/block/boundary anchors, typed internal
 links and explicitly unresolved names. Native output binds standard named GoTo

@@ -7,8 +7,21 @@ import (
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 )
 
+type pdfLinkTarget struct{ uri, destination string }
+
+func (t pdfLinkTarget) empty() bool { return t.uri == "" && t.destination == "" }
+func (t pdfLinkTarget) apply(run *Run) {
+	run.Link = t.uri
+	run.Destination = t.destination
+	if t.destination != "" {
+		run.Link = destinationHref(Run{Destination: t.destination})
+	}
+}
+
 type pdfRecoveredLink struct {
-	uri     string
+	target  pdfLinkTarget
+	view    types.Object
+	hasURI  bool
 	regions []Quad
 }
 
@@ -22,6 +35,9 @@ func (r *pdfReader) readLink(object types.Object, d types.Dict) error {
 	if err != nil {
 		return err
 	}
+	if action != nil && d["Dest"] != nil {
+		return fmt.Errorf("link has both an action and a destination")
+	}
 	link := pdfRecoveredLink{}
 	if action != nil {
 		kind := action.NameEntry("S")
@@ -30,12 +46,21 @@ func (r *pdfReader) readLink(object types.Object, d types.Dict) error {
 			if err != nil {
 				return err
 			}
-			link.uri = text
+			link.target.uri = text
+			link.hasURI = true
+			if text == "" {
+				r.warnPage("pdf_link_empty_uri", "Empty URI annotation retained as physical evidence; an empty href cannot own an editable text mark")
+			}
+		} else if kind != nil && *kind == "GoTo" {
+			if action["D"] == nil {
+				return fmt.Errorf("GoTo action lacks a destination")
+			}
+			link.view = action["D"]
 		} else {
-			r.warnPage("pdf_link_action", "Internal/other link action is not yet represented as an editable destination")
+			r.warnPage("pdf_link_action", "Non-URI/non-GoTo action is not represented as an editable link")
 		}
 	} else if d["Dest"] != nil {
-		r.warnPage("pdf_link_action", "Internal link destination is not yet represented as an editable destination")
+		link.view = d["Dest"]
 	}
 	if points, err := r.pdf.DereferenceArray(d["QuadPoints"]); err != nil {
 		return err
@@ -96,10 +121,10 @@ func (r *pdfReader) geometricLinks() {
 			if area <= 0 {
 				continue
 			}
-			target := ""
+			target := pdfLinkTarget{}
 			ambiguous := false
 			for key, link := range r.links {
-				if key.page != run.Source.Page || link.uri == "" {
+				if key.page != run.Source.Page || link.target.empty() {
 					continue
 				}
 				for _, q := range link.regions {
@@ -107,17 +132,17 @@ func (r *pdfReader) geometricLinks() {
 					intersection := max(0, math.Min(c, x1)-math.Max(a, x0)) * max(0, math.Min(d, y1)-math.Max(b, y0))
 					fraction := intersection / area
 					if fraction >= .8 {
-						if target != "" && target != link.uri {
+						if !target.empty() && target != link.target {
 							ambiguous = true
 						}
-						target = link.uri
+						target = link.target
 					} else if fraction > .05 {
 						r.partialLinks[run.Source.Order] = true
 					}
 				}
 			}
-			if target != "" && !ambiguous {
-				run.Link = target
+			if !target.empty() && !ambiguous {
+				target.apply(run)
 				copy := *run.Source
 				copy.Evidence += ";link_from_rectangle"
 				run.Source = &copy
@@ -127,19 +152,19 @@ func (r *pdfReader) geometricLinks() {
 		}
 	}
 }
-func (s *pdfStructureRecovery) logicalLink(nodes []*pdfStructureNode) (string, bool) {
-	target := ""
+func (s *pdfStructureRecovery) logicalLink(nodes []*pdfStructureNode) (pdfLinkTarget, bool) {
+	target := pdfLinkTarget{}
 	conflict := false
 	var walk func([]*pdfStructureNode)
 	walk = func(nodes []*pdfStructureNode) {
 		for _, n := range nodes {
 			if n.kind == "OBJR" {
 				for key, link := range s.reader.links {
-					if key.object == n.object && (n.page == 0 || key.page == n.page) && link.uri != "" {
-						if target != "" && target != link.uri {
+					if key.object == n.object && (n.page == 0 || key.page == n.page) && !link.target.empty() {
+						if !target.empty() && target != link.target {
 							conflict = true
 						}
-						target = link.uri
+						target = link.target
 					}
 				}
 			}
@@ -155,7 +180,7 @@ func (r *pdfReader) diagnosePartialLinks() {
 	walk = func(blocks []Block) {
 		for _, b := range blocks {
 			for _, run := range b.Runs {
-				if run.Source != nil && r.partialLinks[run.Source.Order] && run.Link == "" && run.Source.Precision != "synthetic_separator" {
+				if run.Source != nil && r.partialLinks[run.Source.Order] && run.Link == "" && run.Destination == "" && run.Source.Precision != "synthetic_separator" {
 					r.doc.warn("pdf_link_partial_span", "Link rectangle partially covers a text span; exact ownership requires tagged Link structure or finer glyph recovery")
 				}
 			}

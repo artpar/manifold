@@ -1,5 +1,12 @@
 # Next capability work
 
+Current PDF navigation slice: explicit named/direct views, nullable settings,
+byte identities and annotation geometry now recover through SF with separately
+inferred flow anchors; three-source independent checks pass. This closes the
+navigation-reader implementation gap recorded below. The full goal is still open:
+next bounded source/rich semantics/corpus/visual audit and the 477 MB SF/provenance/
+codec usability issue. See PDF_NAVIGATION.md and STATUS.md before historical notes.
+
 Latest navigation milestone: typed points/links and missing declarations now run
 through SF/DOCX/native PDF, with all 3,106 original Word names and unchanged native
 paint. Independent point/view checks, source graph tests and LibreOffice ODT import

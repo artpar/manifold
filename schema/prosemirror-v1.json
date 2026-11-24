@@ -32,6 +32,7 @@
           "default": false,
           "validate": "boolean"
         },
+        "pdfNavigation": {"default": null},
         "unresolvedDestinations": {
           "default": []
         }

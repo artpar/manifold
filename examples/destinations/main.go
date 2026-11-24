@@ -1,5 +1,4 @@
-// Named navigation points through SF, DOCX and native PDF.
-// PDF-to-SF destination recovery is tracked separately in docs/INTERNAL_DESTINATIONS.md.
+// Named navigation points through SF, DOCX, native PDF and PDF view recovery.
 package main
 
 import (

@@ -654,5 +654,11 @@ separate from its interoperable `href`; the root optionally declares
 to that ID. Plain href fragments retain generic URI semantics. IDs are unique,
 nonempty valid UTF-8 up to 1,024 bytes, and references require a definition or an
 explicit unresolved declaration. SF/JSON/DOCX preserve the graph. Native PDF binds
-standard named views after admission; PDF import recovery remains unfinished.
+standard named views after admission; PDF import retains explicit view provenance separately from inferred flow binding.
 See INTERNAL_DESTINATIONS.md for range, point placement and repeat policies.
+
+Root `attrs.pdfNavigation` (default null) stores PDFNavigation: explicit source
+views and annotation links, including base64 name bytes, nullable source parameters,
+display geometry and separately labeled flow binding/order. These values are
+validated and deeply cloned in SF bridges. They are provenance rather than an
+instruction to retain original page/zoom state after reflow; see PDF_NAVIGATION.md.

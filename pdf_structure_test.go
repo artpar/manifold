@@ -285,7 +285,7 @@ func TestPDFPublishedInDesignExport(t *testing.T) {
 				headings++
 			}
 			for _, r := range b.Runs {
-				if r.Link != "" {
+				if r.Link != "" && r.Destination == "" {
 					links[r.Link] = true
 				}
 			}
@@ -305,8 +305,17 @@ func TestPDFPublishedInDesignExport(t *testing.T) {
 	if lists != 10 || items != 57 || headings != 0 || len(links) != 16 {
 		t.Fatalf("real-export structure: lists=%d items=%d headings=%d URI targets=%d", lists, items, headings, len(links))
 	}
-	if !hasDiagnostic(d, "pdf_cmap_codespace") || !hasDiagnostic(d, "pdf_link_action") || !hasDiagnostic(d, "pdf_structure_unclaimed") {
+	if !hasDiagnostic(d, "pdf_cmap_codespace") || !hasDiagnostic(d, "pdf_destination_flow_inferred") || !hasDiagnostic(d, "pdf_structure_unclaimed") {
 		t.Fatal("known publication uncertainty disappeared")
+	}
+	// Independently checked against the original /Names tree and its one GoTo
+	// annotation: page 2 links to page 6 at XYZ(95,699,null).
+	if d.PDFNavigation == nil || len(d.PDFNavigation.Destinations) != 1 || len(d.PDFNavigation.Links) != 19 {
+		t.Fatal("published navigation evidence omitted")
+	}
+	view := d.PDFNavigation.Destinations[0]
+	if view.ID != "Circular 1 202109.indd:Copyright Notice:15" || view.Page != 6 || view.View != "XYZ" || *view.Parameters[0] != 95 || *view.Parameters[1] != 699 || view.Parameters[2] != nil {
+		t.Fatal("published explicit destination changed", view)
 	}
 	if !strings.Contains(d.Text(), "Copyright Basics") || !strings.Contains(d.Text(), "Literary works") {
 		t.Fatal("published content missing")

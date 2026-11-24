@@ -4854,5 +4854,86 @@
     "evidence": "output/destinations (ignored, regenerable); scripts/verify_destinations.py; docs/INTERNAL_DESTINATIONS.md",
     "runtime_dependencies": "unchanged; no external executable, CGO or service",
     "next": "Recover PDF direct/named destination views, ownership and inferred flow bindings; then bounded remaining acceptance/corpus/codec audit"
+  },
+  "pdf_navigation_recovery_milestone": {
+    "status": "implemented navigation reader; full rich-document objective remains incomplete",
+    "public": [
+      "Document.PDFNavigation",
+      "PDFNavigation.Destinations/Links",
+      "SF root pdfNavigation",
+      "separate editable anchors/internal marks"
+    ],
+    "scope": [
+      "all eight view modes",
+      "null/zero viewer settings",
+      "byte identity and legacy/string namespaces",
+      "forward page references",
+      "crop/rotation/UserUnit geometry",
+      "named/direct annotation targets",
+      "tagged/geometric ownership",
+      "explicit missing names",
+      "bounded malformed tree/view/graph rejection",
+      "deep-clone SF bridge isolation"
+    ],
+    "independent": [
+      {
+        "pdf": "output/destinations/destinations.pdf",
+        "sf": "output/destinations/from-pdf.sf",
+        "pages": 2,
+        "named_views": 17,
+        "anonymous_views": 1,
+        "missing_names": 1,
+        "annotation_links": 13,
+        "physical_views": "exact raw namespace/name bytes, page, view and nullable parameters",
+        "regions": "exact transformed annotation corners",
+        "flow": "every resolved view has one separately identified inferred anchor; no authorial ownership claim"
+      },
+      {
+        "pdf": "testdata/real/copyright-office-circular-1-2021.pdf",
+        "sf": "output/destinations/indesign.sf",
+        "pages": 10,
+        "named_views": 1,
+        "anonymous_views": 0,
+        "missing_names": 0,
+        "annotation_links": 19,
+        "physical_views": "exact raw namespace/name bytes, page, view and nullable parameters",
+        "regions": "exact transformed annotation corners",
+        "flow": "every resolved view has one separately identified inferred anchor; no authorial ownership claim"
+      },
+      {
+        "pdf": "testdata/real/mqtt-v5.0-os.pdf",
+        "sf": "output/navigation-import/mqtt.sf",
+        "pages": 137,
+        "named_views": 0,
+        "anonymous_views": 325,
+        "missing_names": 0,
+        "annotation_links": 1245,
+        "physical_views": "exact raw namespace/name bytes, page, view and nullable parameters",
+        "regions": "exact transformed annotation corners",
+        "flow": "every resolved view has one separately identified inferred anchor; no authorial ownership claim"
+      }
+    ],
+    "source_invariants": "original fixtures and original structure/text/merge/asset oracles unchanged; InDesign URI count remains 16, newly recovered internal target has separate classification and exact page 6 XYZ(95,699,null) expectation",
+    "checks": {
+      "test": "library 15.043s; CLI 0.383s; all packages passed",
+      "race": "library 178.326s; CLI 1.951s; all packages passed",
+      "vet": "pass",
+      "module_verification": "all modules verified",
+      "cgo_disabled": "host built/executed all four operations with extract -format sf; Linux/amd64 cross-built only",
+      "fuzz": "ten seconds each/two workers: SF 2,331; PDF 43,899; pass; added navigation seeds and malformed metadata also race-tested",
+      "prosemirror": "8,904 imported example/publication nodes/marks/attributes; host CLI SF 37 nodes; full 477 MB original SF not checked in ProseMirror",
+      "diff_check": "pass"
+    },
+    "physical_original_mqtt_sf_bytes": 477613781,
+    "limitations": [
+      "editable flow ownership is inferred, not authorial structure",
+      "physical view metadata persists in SF/JSON; formatting reflow uses current flow points and normalizes fit/zoom",
+      "unsupported non-URI/non-GoTo actions diagnose",
+      "typed semantic note recovery is separate from physical note links",
+      "477 MB SF/provenance/codec usability remains required work"
+    ],
+    "evidence": "output/navigation-import and output/destinations; scripts/verify_navigation_import.py; docs/PDF_NAVIGATION.md",
+    "production_dependencies": "unchanged",
+    "next": "Measure and fix large SF/provenance/codec costs, then bounded requirement-by-requirement source/corpus/visual completion audit"
   }
 }

@@ -100,5 +100,5 @@ for name,d in r.named_destinations.items():
     assert 0<=page<189 and d.typ=='/XYZ' and 0<=float(d.top)<=float(r.pages[page].mediabox.top)
 report=dict(synthetic_pages=2,synthetic_names=17,synthetic_and_real_paint='exact content bytes; real annotation rectangles unchanged',
             office_import=office,real_pages=189,real_names=3106,real_link_ids=379,real_annotations=dict(counts),real_uri_targets=56,
-            unresolved={'_Introduction':3},scope='SF/DOCX/native PDF navigation; PDF destination import still pending')
+            unresolved={'_Introduction':3},scope='SF/DOCX/native PDF navigation; PDF-to-SF view/annotation evidence is checked separately by verify_navigation_import.py')
 (out/'independent.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))

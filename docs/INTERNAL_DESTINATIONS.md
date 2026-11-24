@@ -1,5 +1,10 @@
 # Internal destinations: source evidence and implementation recovery
 
+Current PDF→SF recovery is implemented and qualified in PDF_NAVIGATION.md. It
+retains explicit physical view/action evidence separately from inferred editable
+points. The earlier native milestone below records its implementation boundary
+at that time; PDF import is no longer pending. The complete goal remains open.
+
 ## Implemented: SF/DOCX points and native PDF navigation
 
 The shared model now has `Block.Anchors`, zero-height `AnchorPoint` blocks,
@@ -65,11 +70,8 @@ absent `_Introduction`, with three links. Original source fixtures and original
 oracles remain unchanged; independent XML supplies the point/link identity oracle.
 The original fonts, embedded JPEG, metadata and Unicode checks still pass.
 
-PDF-to-SF internal destination recovery is the next required implementation, not
-an unsupported-feature exception. It must retain explicit physical view data
-separately from inferred flow binding, handle direct/named/forward/nullable and
-transformed destinations, and preserve link ownership in tagged/geometric paths.
-The full goal remains incomplete.
+PDF-to-SF recovery was pending at this earlier milestone. It is now implemented
+and independently checked in PDF_NAVIGATION.md; broader completion remains open.
 
 ## Previous milestone: Word external URI fragments
 
@@ -128,38 +130,13 @@ Raw projection has 444 targets if empty hyperlink elements are included, versus
 counts, raw attributes and actual Word URI behavior. The original fixtures and
 original golden files remain unchanged.
 
-## Next required implementation: PDF physical views and flow bindings
+## Next: broader completion audit and provenance cost
 
-PDF import must handle Dest and GoTo, direct arrays and named destinations/name
-trees, forward page references, transformed coordinates and nullable view parameters.
-Retain explicit physical destination/view evidence separately from any inferred
-binding into the recovered flow tree. `pdf_links.go` currently only has URI strings;
-`logicalLink`, geometric ownership and run-style copying need typed destinations too.
-Resolve after all page references exist. Keep source target/view data and uncertainty
-rather than imply exact authoring semantics from page geometry. A PDF-only physical
-view is not automatically the same destination after DOCX or native PDF reflow.
-
-Bound name-tree recursion/object counts, reject duplicate or contradictory target
-identities, and preserve actually missing named targets explicitly. Arrays need
-collision-free application IDs distinct from original named strings. Keep the view
-kind, nullable source parameters, original page reference and transformed physical
-coordinates; a null coordinate means retaining the viewer's current setting, not
-an invented zero. Flow placement inferred from nearby recovered content needs its
-own evidence/diagnostic and must not overwrite the explicit physical source view.
-
-Add independent fixtures for named/array destinations, forward pages, rotations,
-crops and nullable views. Test both geometric and tagged Link ownership, including
-partial/overlapping targets. Re-read the native example through PDF→SF and verify
-actual destination definitions, link IDs and physical positions, not just visible
-text. Keep native note destinations separate from inferred semantic note recovery.
-Test wrapping/continued/repeated tables and combining/bidi cluster-edge points
-beyond the current ligature boundary and all-story examples. Source relationships,
-assets, heading/list/merge/font/text/URI oracles must remain intact.
-
-Next concrete commands are in STATUS.md and TESTING.md. After destination paths
-work, audit remaining required rich PDF semantics, source/corpus qualification and
-the 451MB verbose SF/codec cost against the actual acceptance criteria; avoid an
-unbounded Word-fidelity expansion. No external blocker prevents this work.
+The navigation reader now covers the previously planned direct/named, byte-key,
+nullable and transformed views plus tagged/geometric ownership. See PDF_NAVIGATION.md
+for current qualifications and limitations. Next audit remaining rich source/
+recovery, representative corpus and visual evidence, and the 477 MB SF/codec cost.
+The objective remains incomplete; no external blocker prevents this work.
 
 ## Milestone check record
 

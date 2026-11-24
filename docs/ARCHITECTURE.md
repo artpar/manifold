@@ -935,8 +935,9 @@ and legal-format metadata validated against visible decimal definitions. See NUM
 DOCX paragraph hyperlink reading now combines r:id Target plus #anchor using
 Word behavior from MS-OI29500 2.1.521, with an explicit compatibility diagnostic.
 The shared model holds the actual URI; canonical DOCX export uses that URI directly.
-No runtime dependency or API/schema changed. Internal named destinations remain
-next work; see INTERNAL_DESTINATIONS.md for source facts and integration points.
+That URI milestone changed no runtime dependency/API/schema. Typed native
+destinations and PDF recovery now follow below; see INTERNAL_DESTINATIONS.md
+and PDF_NAVIGATION.md for current scope.
 
 ## Named navigation points (2026-11-24)
 
@@ -947,5 +948,15 @@ names and restores points across structural paragraphs without creating content.
 `pdf_destinations.go` binds during paint after admission and finalizes a standard
 UTF-16 name tree/GoTo actions in the glyph-font rewrite stage. Measurement never
 binds targets, and inline atoms never enter shaping. Running/header repeats use
-first paint. Generic URI semantics and note identities stay separate. PDF import
-still needs typed physical views and inferred binding; see INTERNAL_DESTINATIONS.md.
+first paint. Generic URI semantics and note identities stay separate. PDF import now retains typed physical views and separately inferred binding; see PDF_NAVIGATION.md.
+
+## Physical PDF navigation recovery (2026-11-24)
+
+`pdf_navigation.go` defines/clones/validates PDFNavigation provenance, independently
+of the editable destination graph. `pdf_navigation_read.go` resolves byte-identity
+names and direct arrays after pages exist, retains explicit views/actions/regions,
+and binds points only after tagged/geometric recovery, with separate inference.
+`pdf_links.go` uses typed URI/internal targets throughout both association paths.
+SF root pdfNavigation and legacy JSON preserve physical evidence; formatting
+output uses editable flow points rather than reproducing source viewer state.
+See PDF_NAVIGATION.md for exact source checks and the remaining completion audit.

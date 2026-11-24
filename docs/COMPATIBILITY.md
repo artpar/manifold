@@ -13,7 +13,7 @@ current rejection behavior must not be read as an exemption from that goal.
 | --- | --- | --- |
 | DOCX read | Paragraphs/headings, family/size/RGB/auto plus bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans/repeating header prefixes, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
 | DOCX write | Paragraphs/headings/runs/links with named families/half-point sizes/RGB/auto, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, section boundaries, four-edge layouts/distances and default/first/even header/footer variants, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
-| PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; more complex inference, internal destinations and OCR unfinished; unsupported codecs/encodings/operators reject |
+| PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; more complex inference, semantic note recovery and OCR unfinished; unsupported codecs/encodings/operators reject |
 | PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, per-section body margins/paper settings, metadata, rich measured headers/footers, linked rich footnotes/endnotes with continuation | Built-in Go coverage plus explicit supplied TTFs; qualified Hebrew/Arabic bidi below, broader scripts unfinished; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
 | SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; richer required features remain unfinished |
 | Legacy JSON | Public model with base64 image data and diagnostics | Unknown JSON fields rejected; this is manydoc's model, not Colleaf's .vdocs schema |
@@ -30,7 +30,7 @@ the final visible view. Revision history is not preserved. Content-control text,
 cached field results and text-box text are retained, with diagnostics for their
 unrepresented control/evaluation/layout semantics.
 
-Bookmark points and typed internal navigation now persist through SF/DOCX and native PDF; bookmark range/column editing semantics have explicit losses. PDF destination import, comment annotations and advanced page binding rules remain unfinished. Section-specific layouts and conditional running bindings are now represented. Static asymmetric edges and running distances are retained. Notes are
+Bookmark points and typed internal navigation now persist through SF/DOCX and native PDF; bookmark range/column editing semantics have explicit losses. Comment annotations and advanced page binding rules remain unfinished. Section-specific layouts and conditional running bindings are now represented. Static asymmetric edges and running distances are retained. Notes are
 extracted with typed inline identities and separate rich definitions. Automatic
 reference labels normalize to continuous decimal values; nondecimal/custom note
 marks, numbering/restart/placement changes and custom separator content have
@@ -67,8 +67,9 @@ relative-size headings, consecutive marker lists/nesting/starts/continuations
 and aligned numeric tables now exist. Results are explicitly inferred, not
 semantic facts. `ReadOptions.PDFSkipInference` / `-pdf-skip-inference` retains
 untagged paint order. More complex ruling/occlusion/double-border/rotated-table recovery, complex
-layouts, cross-page inferred membership and internal destinations remain required
-unfinished work. Whole-span URI geometry can be recovered;
+layouts and cross-page inferred membership remain required unfinished work.
+Physical/internal destination recovery now exists with separately inferred flow
+bindings; see PDF_NAVIGATION.md. Whole-span URI/internal geometry can be recovered;
 partial/overlapping text spans and conflicting multi-target Link groups diagnose
 uncertainty. ActualText replaces glyph strings once with contributing source
 regions. Quads use font advances/metrics, not ink; estimates remain disclosed.
@@ -844,8 +845,8 @@ percent-encoded ASCII URI references in PDF; PDF recovery keeps the stored URI f
 Existing escapes and reserved delimiters are preserved, with no normalization or
 implicit resolution. Eight all-story sample targets and all 434 original Word-source
 targets pass independent serialization/relationship checks. Relative fragments remain
-references, and internal bookmark/destination recovery remains unfinished. See
-URI_TARGETS.md.
+references. Typed internal bookmark/destination recovery is separate; see
+URI_TARGETS.md and PDF_NAVIGATION.md.
 
 
 ## Preferred table grid widths
@@ -880,3 +881,10 @@ undeclared missing names reject. Explicitly unresolved source names remain unbou
 Inline PDF targets open the containing line at x=0; repeated story/header targets
 open the first painted instance. See INTERNAL_DESTINATIONS.md for exact scope,
 source qualification, independent-reader results and remaining PDF recovery.
+
+PDF internal navigation now retains direct/named views, raw byte/namespace identity,
+null coordinates/zoom, all eight modes and transformed annotation geometry in
+PDFNavigation. Editable ownership is inferred and diagnosed separately. Formatting
+output reflows anchor points; it does not preserve source physical fit/zoom or
+annotation appearance. Non-URI/non-GoTo actions remain explicit diagnostics, not
+executed programs. See PDF_NAVIGATION.md for scope and independent source evidence.

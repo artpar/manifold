@@ -1350,3 +1350,15 @@ story policy. Inline points open their containing line at x=0, preserving shapin
 Independent real-source paint is exact across 189 pages and all 3,106 names survive.
 PDF import still needs physical view provenance plus separately identified inferred
 flow binding. This intermediate milestone does not complete that required path.
+
+## 2026-11-24 Separate explicit PDF views from editable flow ownership
+
+PDF names are byte identities, not Unicode-equivalence keys. Preserve namespaces
+and raw bytes, with collision-checked display/synthetic IDs; retain original local
+view modes/null parameters and transformed geometry separately from inferred flow
+anchors. Resolve forward targets after all pages exist. Complete physical annotation
+records preserve supported targets even without unambiguous text ownership. Tagged
+and geometric URI/GoTo ownership share a typed target. SF/JSON preserve this source
+provenance; native/Word reflow follows editable points and normalizes PDF viewing
+state with source diagnostics. Full source view/rectangle/flow checks pass without
+rewriting original source oracles. See PDF_NAVIGATION.md.
