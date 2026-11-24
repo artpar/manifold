@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"sort"
 	"strconv"
 )
@@ -33,18 +34,20 @@ type colleafNativeList struct {
 	Levels []colleafListLevel `json:"nestingLevel"`
 }
 type colleafListItemBinding struct {
+	Type  string `json:"type,omitempty"`
 	First string `json:"first"`
 	Last  string `json:"last"`
 }
 type colleafListBinding struct {
-	Type             string                   `json:"type"`
-	Group            string                   `json:"group"`
-	First            string                   `json:"first"`
-	Last             string                   `json:"last"`
-	Items            []colleafListItemBinding `json:"items"`
-	Implicit         bool                     `json:"implicitNumbering,omitempty"`
-	OriginalTemplate *string                  `json:"originalTemplate,omitempty"`
-	Independent      bool                     `json:"independent,omitempty"`
+	Projections      map[string]colleafNumberProjection `json:"projections,omitempty"`
+	Type             string                             `json:"type"`
+	Group            string                             `json:"group"`
+	First            string                             `json:"first"`
+	Last             string                             `json:"last"`
+	Items            []colleafListItemBinding           `json:"items"`
+	Implicit         bool                               `json:"implicitNumbering,omitempty"`
+	OriginalTemplate *string                            `json:"originalTemplate,omitempty"`
+	Independent      bool                               `json:"independent,omitempty"`
 }
 type colleafListOwnership struct {
 	Stories map[string][]colleafListBinding `json:"stories"`
@@ -62,6 +65,8 @@ type colleafListParagraph struct {
 	Numbering       *ListNumbering
 	ActiveAncestors []int
 	Loss            bool
+	PolicyLoss      bool
+	StaleProjection bool
 }
 
 var colleafNumberFormats = []string{"decimal", "decimalZero", "upperLetter", "lowerLetter", "upperRoman", "lowerRoman"}
@@ -75,30 +80,6 @@ func colleafNumberGlyph(format string) (int, error) {
 	return 0, fmt.Errorf("%w: native numbering format%s", ErrUnsupported, format)
 }
 
-func colleafCheckZeroNumbering(n *ListNumbering, value int, ancestors []int) error {
-	if n == nil || n.Legal {
-		return nil
-	}
-	for i := 0; i+1 < len(n.Template); i++ {
-		if n.Template[i] != '%' || n.Template[i+1] < '1' || n.Template[i+1] > '9' {
-			continue
-		}
-		level := int(n.Template[i+1] - '1')
-		i++
-		if level > n.Level {
-			continue
-		}
-		v := value
-		if level < n.Level {
-			v = ancestors[level]
-		}
-		if v == 0 && n.Formats[level] != "decimal" {
-			return fmt.Errorf("%w: native zero values in nondecimal numbering require a format-specific zero policy", ErrUnsupported)
-		}
-	}
-	return nil
-}
-
 func (w *colleafBodyWriter) list(block Block, depth int) error {
 	if depth > 64 || len(block.Items) == 0 || (block.List != "number" && block.List != "bullet") {
 		return fmt.Errorf("invalid native list")
@@ -109,11 +90,7 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 	if err := validateNumbering(block.Numbering); err != nil {
 		return err
 	}
-	if block.Numbering != nil {
-		if err := colleafCheckZeroNumbering(block.Numbering, listStart(block), block.Numbering.Ancestors); err != nil {
-			return err
-		}
-	}
+
 	level := w.listDepth
 	if block.Numbering != nil {
 		level = block.Numbering.Level
@@ -164,8 +141,30 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 		format := projectColleafListTemplate(block.Numbering.Template, level, &source)
 		source.Levels[level].Format = format
 	}
+	unprojected := source
+	normalValue := listStart(block)
+	if normalValue == 0 {
+		normalValue = 1
+	}
+	source, normalProjection := projectColleafNumbering(unprojected, block.Numbering, normalValue)
+	firstSource, firstProjection := projectColleafNumbering(unprojected, block.Numbering, listStart(block))
+	firstType := typeID
+	if !reflect.DeepEqual(firstSource.Levels, source.Levels) {
+		firstType = w.id("list-zero-type")
+		firstSource.Type = firstType
+		w.lists[firstType] = sfAttrs(firstSource)
+	}
 	w.lists[typeID] = sfAttrs(source)
 	binding := colleafListBinding{Type: typeID, Group: group, Implicit: block.Numbering == nil, Independent: independent}
+	if normalProjection != nil || firstProjection != nil {
+		binding.Projections = map[string]colleafNumberProjection{}
+	}
+	if normalProjection != nil {
+		binding.Projections[typeID] = *normalProjection
+	}
+	if firstProjection != nil {
+		binding.Projections[firstType] = *firstProjection
+	}
 	if block.Numbering != nil && source.Levels[level].Format != block.Numbering.Template {
 		original := block.Numbering.Template
 		binding.OriginalTemplate = &original
@@ -180,6 +179,7 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 		first := len(w.body.Paragraphs) - 1
 		bullet := colleafBullet{Type: typeID, ID: group, Level: level}
 		if i == 0 {
+			bullet.Type = firstType
 			start := listStart(block) - 1
 			bullet.Start = &start
 		}
@@ -189,7 +189,11 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 			return err
 		}
 		lastID := w.body.Paragraphs[len(w.body.Paragraphs)-1].ID
-		binding.Items = append(binding.Items, colleafListItemBinding{First: firstID, Last: lastID})
+		itemBinding := colleafListItemBinding{First: firstID, Last: lastID}
+		if bullet.Type != typeID {
+			itemBinding.Type = bullet.Type
+		}
+		binding.Items = append(binding.Items, itemBinding)
 	}
 	binding.First = binding.Items[0].First
 	binding.Last = binding.Items[len(binding.Items)-1].Last
@@ -209,6 +213,22 @@ func colleafListParagraphs(ctx context.Context, body colleafBody, lists map[stri
 			return nil, fmt.Errorf("invalid native list source")
 		}
 		sources[key] = source
+	}
+	checkedBindings := map[string]bool{}
+	for _, binding := range bindings {
+		if checkedBindings[binding.Type] {
+			continue
+		}
+		checkedBindings[binding.Type] = true
+		for name, p := range binding.Projections {
+			source, ok := sources[name]
+			if !ok {
+				return nil, fmt.Errorf("native numbering intent lacks its source type")
+			}
+			if err := validateColleafNumberProjection(p, min(8, len(source.Levels)-1)); err != nil {
+				return nil, err
+			}
+		}
 	}
 	var paragraphs []colleafParagraphRecord
 	for _, p := range body.Paragraphs {
@@ -295,9 +315,23 @@ func colleafListParagraphs(ctx context.Context, body colleafBody, lists map[stri
 			if err := validateNumbering(n); err != nil {
 				return nil, err
 			}
-			if err := colleafCheckZeroNumbering(n, value, info.ActiveAncestors); err != nil {
-				return nil, err
+			binding := bindings[bullet.Type]
+			restored := false
+			if p, ok := binding.Projections[bullet.Type]; ok {
+				if err := validateColleafNumberProjection(p, bullet.Level); err != nil {
+					return nil, err
+				}
+				restored = restoreColleafNumberProjection(n, p, value, info.ActiveAncestors, source)
+				info.StaleProjection = !restored
 			}
+			if !restored {
+				var err error
+				info.PolicyLoss, err = normalizeColleafNativeNumbering(n, value, info.ActiveAncestors)
+				if err != nil {
+					return nil, err
+				}
+			}
+
 			info.Numbering = n
 		}
 		info.Loss = info.Loss || len(level.Style) > 0 || len(level.Properties) > 0 || len(bullet.Style) > 0 || level.Align != 1
@@ -394,8 +428,12 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int) ([]Bl
 				if !valid {
 					break
 				}
+				expectedType := binding.Type
+				if item.Type != "" {
+					expectedType = item.Type
+				}
 				first, exists := r.listParagraphs[flow[a].Position]
-				valid = exists && first.Bullet.Type == info.Bullet.Type && first.Bullet.ID == info.Bullet.ID && first.Bullet.Level == info.Bullet.Level
+				valid = exists && first.Bullet.Type == expectedType && first.Bullet.ID == info.Bullet.ID && first.Bullet.Level == info.Bullet.Level
 				for k := a + 1; k <= b && valid; k++ {
 					if nested, ok := r.listParagraphs[flow[k].Position]; ok && len(flow[k].Bullet) > 0 && nested.Bullet.Level <= info.Bullet.Level {
 						valid = false
@@ -411,7 +449,7 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int) ([]Bl
 					// Authored restarts/changed counters must become native-derived groups,
 					// rather than being hidden inside a stale old list container.
 					current := r.listParagraphs[flow[item.start].Position]
-					if info.Kind == "number" && current.Value != info.Value+itemIndex {
+					if !sameColleafNumbering(info, current) || info.Kind == "number" && current.Value != info.Value+itemIndex {
 						valid = false
 						break
 					}
@@ -433,7 +471,7 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int) ([]Bl
 		cursor := start
 		for cursor < len(flow) {
 			current, ok := r.listParagraphs[flow[cursor].Position]
-			if !ok || len(flow[cursor].Bullet) == 0 || current.Bullet.Level != info.Bullet.Level || current.Bullet.ID != info.Bullet.ID || current.Bullet.Type != info.Bullet.Type || (info.Kind == "number" && current.Value != info.Value+len(block.Items)) {
+			if !ok || len(flow[cursor].Bullet) == 0 || current.Bullet.Level != info.Bullet.Level || current.Bullet.ID != info.Bullet.ID || current.Bullet.Type != info.Bullet.Type || !sameColleafNumbering(info, current) || (info.Kind == "number" && current.Value != info.Value+len(block.Items)) {
 				break
 			}
 			item := ListItem{Blocks: []Block{flow[cursor].Block}}

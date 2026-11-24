@@ -39,7 +39,48 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: dynamic native literal-percent and digit-suffix markers
+## Latest progress: native zero and legal-numbering mappings
+
+SF keeps its existing zero/legal semantics: nondecimal zero displays0 and Legal
+uses decimal for every referenced level. Private native output now uses a decimal
+first-zero type followed by the normal type in the same automatic counter group.
+Zero ancestors project similarly. Legal decimalZero fields project to decimal,
+correcting native's padded legal rendering. Sparse checked format intent and item-
+type aliases preserve exact SF formats/ownership; no marker/body cache was added.
+Running-story promotion scopes all aliases/projection keys into global catalogs.
+
+Import checks native glyphs, legal flags and actual counters before restoring
+format intent. Native edits win; stale intent gets diagnostics. Owned containers
+must agree on every item's effective numbering, not merely type/counter sequence.
+Foreign native00 or empty letter/Roman zero markers become explicit SF templates;
+foreign mixed legal-padding rules become actual effective formats. Semantic
+changes split groups and live-policy loss is diagnosed, retaining current visible
+markers. Projection keys/indices/ownership and canonical integer member names are
+checked; diagnostic order is stable and repeated aliases do not cause quadratic
+projection validation. Native format/live-policy parity is not claimed from this.
+
+The pinned renderer checks30 main/cell markers,3 note markers,3 isolated header
+markers with the actual global catalog, and10 foreign zero/legal policies. Two
+actual facade saves/reopens preserve exact Go/SF/native semantics. Native first
+counter edits0-to5, zero-ancestor edits0-to5 and legal glyph changes back to padded
+format update actual labels. Go/SF import checks every edited main/cell marker,
+including split groups. Existing literal and original list reader regressions pass.
+Headless content/counter/save checks do not qualify browser/preset interactions.
+
+Final checks are recorded in verification.json before commit. Goal remains active/
+incomplete. Next complete native marker appearance and navigation/nonvisual/
+provenance intent, public API/CLI and actual full-preset/browser paint/wrapping/
+selection/navigation/list editing checks. Per-page/decorated-note policies and
+broader PDF/source/resource/final acceptance audits remain required. No external
+blocker exists; no application/backend changes or runtime services were added.
+
+```sh
+MANYDOC_COLLEAF_ZERO_QA=output/colleaf-qa/zero-lists.json GOWORK=off go test -run TestColleafZero -count=1 .
+node scripts/verify_colleaf_zero_lists.cjs
+MANYDOC_COLLEAF_ZERO_SAVED=output/colleaf-qa/zero-lists-saved.json MANYDOC_COLLEAF_ZERO_EDITED=output/colleaf-qa/zero-lists-edited.json GOWORK=off go test -run TestColleafZero -count=1 .
+```
+
+## Earlier progress: dynamic native literal-percent and digit-suffix markers
 
 Native list output now compiles SF/OOXML single-digit placeholders into the pinned
 native grammar, which reads whole decimal indices and has no percent escape.

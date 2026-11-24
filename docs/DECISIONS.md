@@ -1876,3 +1876,29 @@ and helper expansion by the existing SF representation. Counter edits resolve
 through canonical SF's existing enclosing-counter rules; stored ancestor values
 are fallbacks, not proof that an edited enclosing counter was lost. Full browser
 and zero/legal numbering qualification remain required.
+
+
+## 2026-11-24 Preserve SF zero/legal semantics with checked native format variants
+
+Keep canonical SF's existing nondecimal-zero0 and fully decimal Legal meanings.
+Native emits00 for decimalZero0 and empty letter/Roman0; its Legal flag preserves
+padded decimalZero. Project only the needed glyph fields to decimal. A first-zero
+variant and normal type share the actual native counter group, so labels remain
+automatic. Bind item-type aliases and sparse original formats/zero-level conditions
+rather than caching marker strings, counters or body trees. Scope those identities
+when promoting running stories into the native global catalog.
+
+Restore format intent only while current glyphs/legal flags/counters agree. Edits
+must win. Check every item's effective numbering before restoring a container;
+otherwise a changed first variant or a foreign zero could be hidden under one old
+list format. Derive current foreign zero/legal presentation through explicit SF
+templates/effective formats and disclose live-policy loss. Split groups at semantic
+changes. Validate canonical integer member names before Go map conversion, bounded
+levels/format conditions and projection ownership. Aggregate diagnostics in stable
+order and deduplicate primary bindings to avoid alias-driven quadratic validation.
+
+Actual pinned glyph/source/facade evidence qualifies default/compound/ancestor
+zero, legal padding, main/cell/note/header catalogs and current counter/glyph edits.
+It does not qualify browser/preset controls, all live native numbering behavior or
+full adapter completion. Remaining appearance/intent/API/browser and broader goal
+requirements stay open.

@@ -747,15 +747,34 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 	}
 	r.listBindings = map[string]colleafListBinding{}
 	for _, binding := range settings.ListBindings {
-		if _, ok := r.listBindings[binding.Type]; ok || binding.Type == "" {
-			return nil, fmt.Errorf("duplicate/invalid native list ownership binding")
+		names, err := colleafListBindingTypes(binding)
+		if err != nil {
+			return nil, err
 		}
-		r.listBindings[binding.Type] = binding
+		for _, name := range names {
+			if _, ok := r.listBindings[name]; ok {
+				return nil, fmt.Errorf("duplicate native list binding alias")
+			}
+			r.listBindings[name] = binding
+		}
 	}
+
 	r.listParagraphs, err = colleafListParagraphs(ctx, body, settings.Lists, r.listBindings)
 	if err != nil {
 		return nil, err
 	}
+	policyLoss, staleProjection := false, false
+	for _, info := range r.listParagraphs {
+		policyLoss = policyLoss || info.PolicyLoss
+		staleProjection = staleProjection || info.StaleProjection
+	}
+	if policyLoss {
+		r.doc.warn("colleaf_numbering_policy", "Native zero/legal marker presentation is retained with explicit SF templates/formats; live native numbering policy is not retained")
+	}
+	if staleProjection {
+		r.doc.warn("colleaf_stale_numbering_projection", "Changed native numbering projection retained; old source format intent was not applied")
+	}
+
 	for _, p := range body.Paragraphs {
 		r.paragraphs[p.StartIndex] = p
 	}

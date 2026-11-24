@@ -381,9 +381,9 @@ matches actual glyphFormat. Native format edits remain authoritative. Literal
 percent/digit-suffix output is now implemented and qualified in the current list
 projection section below. Native zero in
 DECIMAL_ZERO displayed00; letter/Roman zero displayed an empty symbol, while SF
-currently displays0. Both import/export reject those known nondecimal-zero
-mismatches until a format-specific zero policy is represented. Decimal zero works.
-These are private unfinished mappings, not new public support exceptions.
+currently displays0. The original private milestone rejected those mismatches. The current zero/legal
+projection section below now replaces that rejection and qualifies both directions
+with explicit foreign-policy diagnostics. Decimal zero continues to work.
 
 ```sh
 MANYDOC_COLLEAF_LIST_QA=output/colleaf-qa/lists.json GOWORK=off go test -run TestColleafRichListOwnershipNumberingAndSF -count=1 .
@@ -839,8 +839,8 @@ current symbolic parts and checks that their SF spelling retains the same litera
 dynamic meaning. Unbound representable helper projections work too. Malformed,
 overlong or intrinsically ambiguous templates reject. Native numeric glyphs with
 fixed glyphSymbol now import the real constant marker rather than silently
-substituting a dynamic number. Nondecimal-zero and native legal-decimalZero
-semantics are still on the required mapping queue.
+substituting a dynamic number. The current zero/legal section below now qualifies nondecimal-zero and native
+legal-decimalZero mapping; broader marker appearance/browser qualification remains open.
 
 scripts/verify_colleaf_literal_lists.cjs checks actual pinned glyphs for twelve
 main/cell labels, two note labels and two header labels (using the correct global
@@ -857,4 +857,46 @@ MANYDOC_COLLEAF_LITERAL_LIST_QA=output/colleaf-qa/literal-lists.json GOWORK=off 
 node scripts/verify_colleaf_literal_lists.cjs
 MANYDOC_COLLEAF_LITERAL_LIST_SAVED=output/colleaf-qa/literal-lists-saved.json MANYDOC_COLLEAF_LITERAL_LIST_EDITED=output/colleaf-qa/literal-lists-edited.json GOWORK=off go test -run TestColleafLiteral -count=1 .
 GOWORK=off go test -run '^$' -fuzz '^FuzzColleafListTemplate$' -fuzztime=10s -parallel=2 .
+```
+
+
+## Current checked zero/legal list mapping
+
+colleaf_numbering_projection.go replaces the former nondecimal-zero rejection.
+SF's zero/legal convention stays unchanged. Native first-zero items use a decimal
+variant, followed by the ordinary type in the same automatic counter group; zero
+ancestor fields and legal decimalZero fields also project to decimal. Sparse format/
+zero-level intent records only the missing distinction, while item-type aliases
+retain one owned SF list with continuations. Running-story global promotion also
+renames those aliases and projection keys. No marker, counter or body cache exists.
+
+Current glyph fields, Legal flags and actual counters must agree before intent
+restores source formats. Changed native fields win and stale projection/ownership
+is diagnosed. Assembly compares every item's effective numbering, so type/counter
+agreement cannot hide a changed format. Foreign native00/empty zero labels and
+mixed padded legal rules derive explicit current SF templates/effective formats;
+groups split where semantics change, with diagnostics for lost live numbering
+policy. Intrinsically ambiguous unrepresentable templates still reject explicitly.
+Canonical sparse integer member names, bounded format/zero indices and ownership
+are checked; stable diagnostics and primary-binding deduplication keep output
+order deterministic and avoid alias-driven quadratic validation.
+
+scripts/verify_colleaf_zero_lists.cjs qualifies30 actual main/cell markers,3 note
+markers,3 isolated header markers using the correct global catalog, and10 foreign
+zero/legal policies against pinned Univer1.0.4. Covered formats are decimalZero,
+upper/lowerLetter and upper/lowerRoman, zero ancestors and independent compound
+legal lists. Two real facade saves/reopens preserve exact Go/SF/native semantics.
+Native counter0-to5 edits, including a zero ancestor, and a legal glyph edit back
+to padded format update real glyphs. Go/SF reimport verifies all30 edited main/cell
+markers and diagnoses stale intent without overriding current native data.
+Old literal and original list readers remain regression checks. These are headless
+content/counter/save checks, not browser paint, preset controls or all live-policy
+editing parity. Appearance/navigation/nonvisual/provenance intent, API/CLI and
+actual browser qualification remain required before the native adapter is complete.
+
+```sh
+MANYDOC_COLLEAF_ZERO_QA=output/colleaf-qa/zero-lists.json GOWORK=off go test -run TestColleafZero -count=1 .
+node scripts/verify_colleaf_zero_lists.cjs
+MANYDOC_COLLEAF_ZERO_SAVED=output/colleaf-qa/zero-lists-saved.json MANYDOC_COLLEAF_ZERO_EDITED=output/colleaf-qa/zero-lists-edited.json GOWORK=off go test -run TestColleafZero -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafNumberProjection$' -fuzztime=10s -parallel=2 .
 ```

@@ -1468,4 +1468,27 @@ marker. Unrepresentable/overlong/malformed helper templates reject explicitly.
 SF512-byte template limits bound helper projections and expanded parsing, without
 copying app quotas. Pinned renderer and facade tests qualify main/nested/cell/note/
 header marker content and counter/helper edits. Browser/preset qualification and
-nondecimal-zero/legal-decimalZero policies remain unfinished.
+zero/legal mappings are now described below; broader marker policies remain unfinished.
+
+
+## Native zero/legal numbering projection and import
+
+colleaf_numbering_projection.go maps SF's existing zero/legal convention without
+changing canonical SF. First nondecimal-zero items use a decimal type variant;
+normal items keep their number format in the same native counter group. Ancestor
+zero fields and legal decimalZero fields project to decimal as needed. Sparse
+format/zero-level intent and per-item type aliases preserve source SF semantics;
+there is no fixed marker text/per-item body cache. Running-story promotion scopes
+alias and projection keys along with the native catalogs.
+
+Import checks current native glyphs/legal flags/actual zero counters before
+restoring intent. Stale projections use current native data with diagnostics.
+Container assembly compares each item's effective numbering and scoped type;
+foreign native00/empty nondecimal-zero markers or mixed padded legal rules become
+explicit SF templates/effective formats, splitting groups when semantics change.
+This retains current presentation and discloses lost live policy. Canonical sparse
+integer member names and bounded format/zero indices prevent map-key aliasing;
+source/ownership contradictions reject. Policy diagnostics aggregate in stable
+order. Primary-binding deduplication avoids revalidating all projections for every
+alias. Native browser/preset appearance/live-edit parity and broader resource/API
+qualification remain on the required queue.

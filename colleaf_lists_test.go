@@ -228,14 +228,38 @@ func FuzzColleafLists(f *testing.F) {
 func TestColleafNondecimalZeroNeverSilentlyChangesMarker(t *testing.T) {
 	for _, format := range []string{"decimalZero", "upperLetter", "lowerLetter", "upperRoman", "lowerRoman"} {
 		d := &Document{Blocks: []Block{{Kind: ListBlock, List: "number", Start: listStartPointer(0), Numbering: &ListNumbering{Template: "%1.", Formats: []string{format}}, Items: []ListItem{{Blocks: []Block{{Kind: Paragraph}}}}}}}
-		if _, err := encodeColleafNotes(context.Background(), d); err == nil {
-			t.Fatal("unmapped native zero marker emitted", format)
+		wire, err := encodeColleafNotes(context.Background(), d)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := decodeColleafNotes(context.Background(), wire, colleafTextContext{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(got, d) {
+			t.Fatal("authored zero format intent lost", format, got)
 		}
 		glyph, _ := colleafNumberGlyph(format)
 		body := colleafBody{DataStream: "X\r\n", Paragraphs: []colleafParagraphRecord{{StartIndex: 1, Bullet: sfAttrs(colleafBullet{Type: "t", ID: "l", Level: 0})}}}
 		lists := map[string]json.RawMessage{"t": sfAttrs(colleafNativeList{Type: "t", Levels: []colleafListLevel{{Format: "%1.", Glyph: &glyph, Start: -1, Align: 1}}})}
-		if _, err := decodeColleafBody(context.Background(), body, colleafTextContext{Lists: lists}, nil); err == nil {
-			t.Fatal("native zero marker silently changed", format)
+		foreign, err := decodeColleafBody(context.Background(), body, colleafTextContext{Lists: lists}, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := "."
+		if format == "decimalZero" {
+			want = "00."
+		}
+		label, err := numberedLabel(foreign.Blocks[0], 0)
+		if err != nil || label != want {
+			t.Fatal("native actual zero marker lost", format, label, err)
+		}
+		found := false
+		for _, diag := range foreign.Diagnostics {
+			found = found || diag.Code == "colleaf_numbering_policy"
+		}
+		if !found {
+			t.Fatal("native policy normalization not disclosed")
 		}
 	}
 }

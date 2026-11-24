@@ -392,6 +392,18 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 			}
 		}
 		for i, b := range ownership.Stories[id] {
+			for j := range b.Items {
+				if b.Items[j].Type != "" {
+					b.Items[j].Type = listNames[b.Items[j].Type]
+				}
+			}
+			if len(b.Projections) > 0 {
+				mapped := map[string]colleafNumberProjection{}
+				for name, p := range b.Projections {
+					mapped[listNames[name]] = p
+				}
+				b.Projections = mapped
+			}
 			b.Type = listNames[b.Type]
 			b.Group = id + "-" + b.Group
 			ownership.Stories[id][i] = b
