@@ -134,20 +134,47 @@ func (r *pdfReader) addRuling(a, b Point, width float64, state pdfTextState) {
 	if line.end <= line.start {
 		return
 	}
-	if r.rulingOverflow == nil {
-		r.rulingOverflow = map[int]bool{}
-		r.rulings = map[int][]pdfRuling{}
-	}
-	if r.rulingOverflow[r.page] {
-		return
-	}
-	if len(r.rulings[r.page]) >= 100_000 {
-		r.rulingOverflow[r.page] = true
-		r.rulings[r.page] = nil
-		r.warnPage("pdf_ruling_limit", "Painted line count exceeds the per-page inference budget; ruled-table inference is skipped while text/images persist")
+	if !r.admitRuling() {
 		return
 	}
 	r.rulings[r.page] = append(r.rulings[r.page], line)
+}
+
+// Small filled corner/join pieces support coverage along established ruling
+// axes. They never introduce axes or connect independent ruling components.
+func (r *pdfReader) addRulingPatch(rect pdfRulingRect, state pdfTextState) {
+	if state.rulingEffects || state.rulingClipUnknown {
+		return
+	}
+	if !finite(rect.x0) || !finite(rect.y0) || !finite(rect.x1) || !finite(rect.y1) {
+		r.warnPage("pdf_ruling_geometry", "Nonfinite transformed ruling geometry is not used for inference")
+		return
+	}
+	clip := intersectRulingClip(state.rulingClip, &pdfRulingRect{0, 0, r.pageInfo.Width, r.pageInfo.Height})
+	rect = pdfRulingRect{max(rect.x0, clip.x0), max(rect.y0, clip.y0), min(rect.x1, clip.x1), min(rect.y1, clip.y1)}
+	if rect.x1 <= rect.x0 || rect.y1 <= rect.y0 || !r.admitRuling() {
+		return
+	}
+	r.rulingPatches[r.page] = append(r.rulingPatches[r.page], rect)
+}
+
+func (r *pdfReader) admitRuling() bool {
+	if r.rulingOverflow == nil {
+		r.rulingOverflow = map[int]bool{}
+		r.rulings = map[int][]pdfRuling{}
+		r.rulingPatches = map[int][]pdfRulingRect{}
+	}
+	if r.rulingOverflow[r.page] {
+		return false
+	}
+	if len(r.rulings[r.page])+len(r.rulingPatches[r.page]) >= 100_000 {
+		r.rulingOverflow[r.page] = true
+		r.rulings[r.page] = nil
+		r.rulingPatches[r.page] = nil
+		r.warnPage("pdf_ruling_limit", "Painted line and patch count exceeds the per-page inference budget; ruled-table inference is skipped while text/images persist")
+		return false
+	}
+	return true
 }
 
 func (r *pdfReader) pathOperator(op string, args []any, path *pdfCurrentPath, state *pdfTextState) error {
@@ -259,6 +286,9 @@ func (r *pdfReader) pathOperator(op string, args []any, path *pdfCurrentPath, st
 				}
 				if rect, ok := rulingRect(points); ok {
 					w, h := rect.x1-rect.x0, rect.y1-rect.y0
+					if w <= 3 && h <= 3 {
+						r.addRulingPatch(rect, *state)
+					}
 					if h <= 3 && w >= max(4, h*5) {
 						r.addRuling(Point{rect.x0, (rect.y0 + rect.y1) / 2}, Point{rect.x1, (rect.y0 + rect.y1) / 2}, h, *state)
 					}

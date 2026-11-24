@@ -2047,3 +2047,18 @@ eight truly empty references and 5,536 painted sides; actual ProseMirror checks 
 nodes/marks/attributes. Five original pages plus a page-89 crop were visually inspected.
 Full final checks/logs are recorded under tagged_table_spans in verification.json. Page
 89 remains an explicit required gap; see TAGGED_TABLE_SPANS.md.
+
+
+## 2026-11-24 Short painted connectors and shifted axes
+
+Run `GOWORK=off go run ./examples/tagged-spans -out output/tagged-rows` and
+`output/qa-venv/bin/python scripts/verify_tagged_spans.py --out output/tagged-rows`. The
+unchanged source now yields 42 inferred grids, 3,009 origins, eleven continuation
+references and no grid-uncertainty diagnostic. Independent tests check every logical
+identity/role/row, 5,852 sides, three continuous short-painted junctions and all 79
+page-89 Word-oracle coordinates/spans/text hashes. Actual ProseMirror checks 958 sample
+nodes/marks/attributes. The original page-89 crop was visually inspected. Synthetic
+tagged/untagged shifted-axis cases preserve seven origins;
+absent/clipped/transparent/uncertain-effect connectors cannot prove a grid, and isolated
+patches create no axes. See verification.json and TAGGED_TABLE_SPANS.md for checks and
+remaining work.

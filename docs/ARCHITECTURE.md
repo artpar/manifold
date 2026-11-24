@@ -876,7 +876,8 @@ implemented for unique page-local grids (see TAGGED_TABLE_SPANS.md). Missing
 span attributes must not be confused with
 invalid PDF objects, nor should the whole logical table be discarded to obtain a
 passing plain-text extraction. Cell/attribute provenance and empty continuations now have explicit treatment;
-row-dependent partitions remain unfinished. Native output also needs a font covering actual U+2A6D4;
+short filled connector pieces now supply coverage along existing axes; no
+row-constrained border completion is implemented. Native output also needs a font covering actual U+2A6D4;
 missing-glyph rejection currently preserves atomicity, not full-goal completion.
 
 
@@ -886,4 +887,5 @@ missing-glyph rejection currently preserves atomicity, not full-goal completion.
 grid. Span provenance is separate from membership and keeps empty continuation
 identities/original rows. Candidates use copies, bounded alignment and per-page grid
 caching. Ambiguous grids retain explicit cells with uncertainty, not guessed padding.
-See TAGGED_TABLE_SPANS.md for contracts and remaining row-dependent grid work.
+Small filled rectangles provide coverage along established axes without creating
+axes or connecting components. See TAGGED_TABLE_SPANS.md for contracts and limits.

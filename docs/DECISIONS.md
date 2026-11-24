@@ -1271,3 +1271,14 @@ ambiguous alignment and retain ragged explicit tables with diagnostics. Original
 tables drive the tests; page 89 remains a required grid gap. The measured joins account
 for crossing stroke thickness plus coordinate tolerance, without widening axis snapping.
 See TAGGED_TABLE_SPANS.md; no proprietary converter source was used.
+
+
+## 2026-11-24 Use actual short connector paint on established axes
+
+Independent original paths corrected the initial missing-border diagnosis. Small filled
+rectangles complete the collected longitudinal evidence; retain them as coverage-only
+patches. They cannot invent axes or join independent ruling components. Keep existing
+clipping/effect/budget rules and the unique grid/cell matcher. All 42 original
+omitted-span grids now recover, including exact Word-oracle page-89 spans/text. A
+genuinely missing connector remains uncertain. See TAGGED_TABLE_SPANS.md; no row-tag
+border invention or broader snap tolerance was introduced.

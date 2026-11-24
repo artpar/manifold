@@ -172,3 +172,12 @@ preserving all distinct axes and explicit continuation identities. The other 41
 omitted-span grids now recover with independently checked painted boundaries. Then
 qualify the supplementary CJK source example and continue the full acceptance work. See
 TAGGED_TABLE_SPANS.md.
+
+
+## 2026-11-24 Next after short-connector recovery
+
+Page 89 is resolved by collecting short painted connector pieces, not by merging its
+distinct axes. Next qualify an appropriately licensed reusable static font for source
+U+2A6D4, then render the actual full Word source with explicit font mappings to expose
+further layout/numbering/width/shading requirements. Keep original fixtures and oracles.
+See TAGGED_TABLE_SPANS.md.

@@ -814,13 +814,13 @@ Four selected normalized render pages were inspected; the producer reflow is
 143 pages against the original paired PDF's 137, with substantial presentation
 and numbering differences. No general DOCX/Word visual-fidelity claim follows.
 
-The original Word 2016 PDF currently fails native logical recovery on an incomplete
-unit-span grid: 42 of its 90 tagged tables omit spans despite visible merged cells.
-This is an outstanding required recovery capability, not a malformed-fixture or
-unsupported-feature exemption. Original tags and painted grids provide evidence
-for recovery with explicit/inferred provenance. The source's actual U+2A6D4 also
-requires a suitable font; mapping all families to Go fails explicitly/atomically
-rather than discarding it. All four paths are not yet qualified for this source.
+The original Word 2016 PDF now imports all 90 tagged tables, with 42 omitted-span
+grids recovered from painted evidence. Short filled connector pieces resolve the
+previous incomplete grid; all 3,020 cell identities remain accounted for by 3,009
+origins and eleven continuation references. This does not qualify all original
+PDF content/style/link/image semantics. The actual U+2A6D4 still needs a suitable
+output font; mapping every family to Go rejects explicitly and atomically.
+All four paths are not yet qualified for this complete source.
 
 
 ## Tagged missing-span recovery checkpoint
@@ -829,5 +829,6 @@ Page-local tagged tables can infer absent merges from unique painted grids while
 retaining explicit membership and separate span provenance. Empty continuation tags
 retain identities/rows on origins. Unequal unresolved row widths remain explicit with a
 grid-uncertainty diagnostic. Original MQTT import now retains all 90 tables/3,020 cell
-identities; 41 inferred grids and one page-89 uncertain grid are not a full-source
-fidelity claim. See TAGGED_TABLE_SPANS.md.
+identities; all 42 omitted-span grids now recover, including page 89 with seventeen
+distinct axes and all 79 Word-oracle origin span/text checks. This is not a
+full-source fidelity claim. See TAGGED_TABLE_SPANS.md.

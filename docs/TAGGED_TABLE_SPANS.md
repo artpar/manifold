@@ -1,124 +1,127 @@
-# Tagged-table span recovery checkpoint
+# Tagged-table span recovery
 
 Updated 2026-11-24. The full rich-document goal remains incomplete. No external
-blocker prevents continued development. This checkpoint concerns PDF input, not
-Word-equivalent reflow or every omitted PDF construct.
+blocker prevents continued development. This reader checkpoint does not establish
+Word-equivalent reflow or complete interpretation of every source PDF construct.
 
-## Implemented behavior
+## Current behavior
 
 `pdf_tagged_spans.go` reconciles page-local explicit rows/cells with a uniquely
-matching valid painted grid. It uses the existing bounded ruling collector and
-per-page cached grids. Membership remains explicit; only absent span attributes
-are inferred. Present unit attributes are authoritative too. All visible cell
+matching valid painted grid. Membership remains explicit; only absent span
+attributes are inferred. Present unit attributes remain authoritative. Visible
 content must fit the matched physical boundary on the same page. Multiple grid
-matches or row alignments refuse inference. A row dynamic-programming budget of
-100,000 states refuses the entire candidate when exhausted, with a diagnostic;
-cancellation propagates. Existing 4,096 merged-line, 1,000-axis-interval and
-100,000-slot grid budgets remain in force.
+matches or row alignments refuse inference. A row alignment budget of 100,000
+states refuses the entire candidate with a diagnostic when exhausted; context
+cancellation propagates. Candidates use copies and per-page cached grids.
 
-Empty vertical continuations can be coalesced only if they contain paragraph
-containers with no runs, no other visible blocks and no explicit row-span
-attribute. Their identity/role/tag/page and original zero-based row remain in
-`SourceInfo.TableSpans.Continuations`. When arity forces all eligible empties to
-be continuations, match continuation and new-origin classes in their respective
-orders. This handles Word exports listing empty continuation tags before visible
-origins in a different physical column. Otherwise require one ordered alignment.
-Candidate copies never mutate the original table on refusal.
+Empty vertical continuations coalesce only when they have paragraph containers
+with no runs, no other visible blocks and no explicit row-span attribute. Their
+identity/role/tag/page/original zero-based row survive in
+`SourceInfo.TableSpans.Continuations`. If arity forces all eligible empties to be
+continuations, match continuation and new-origin classes in their respective
+orders; otherwise require one ordered alignment. No visible cell is discarded.
 
-`SourceInfo.Structure/Evidence/Confidence` describe logical membership.
+`SourceInfo.Structure/Evidence/Confidence` describe explicit membership.
 `TableSpans.ColSpan/RowSpan` are `explicit` or `inferred`; separate evidence
-`painted_grid_adjacency`, heuristic confidence .7 and full painted bounds disclose
-inference. The content quad/regions keep their existing meaning. SF and legacy
-JSON retain this additive provenance; validation checks geometry, references,
-finite metrics and supported enums. DOCX/PDF reflow retains its existing explicit
-source-geometry-loss policy. The public runtime remains pure Go.
+`painted_grid_adjacency`, heuristic confidence .7 and painted bounds disclose span
+inference. Content quads/regions retain their original meaning. SF and legacy
+JSON retain and validate this provenance. DOCX/PDF reflow retains its existing
+explicit geometry-loss policy. No schema or public API change was needed for the
+short-connector fix. Runtime remains pure Go with no new dependency.
 
-Ruling joins now include the crossing stroke's half-width plus the existing
-.25pt coordinate tolerance. A 1e-5pt arithmetic guard handles separately rounded
-path operands; tests reject larger unsupported gaps. This repairs actual .48/
-.504pt border-piece joins without widening the axis-clustering tolerance.
+Ruling joins include crossing-stroke half-width plus the existing .25pt
+coordinate tolerance, with a 1e-5pt arithmetic guard for separately rounded path
+operands. Distinct axes keep the .25pt clustering rule; they are not snapped
+more broadly to force a table match. A logical table with unequal trailing widths
+and no unique painted solution retains its original cells/positions and emits
+`pdf_structure_table_grid_uncertain`. Invalid explicit spans/overlaps still reject.
+This preservation policy remains exercised by a genuinely missing-connector test.
 
-A logical table with unequal trailing row widths and no unique painted solution
-is retained as explicit, with `pdf_structure_tree_ragged_grid` evidence and
-`pdf_structure_table_grid_uncertain`. No synthetic cells, dropped content or
-unproven merges are introduced. Invalid explicit spans/overlaps still reject.
-This preservation policy is not a completed merged-grid recovery claim.
+## Short painted connector pieces
 
-## Real source and independent evidence
+`pdf_rulings.go` captures filled rectangles up to 3pt in each displayed dimension
+as supporting patches. They respect known rectangular clips, page bounds,
+transparency and uncertain graphics-effect exclusion. Patches never introduce
+row/column axes or connect independent ruling components. `rulingPatchLines`
+projects their actual filled extents onto already established axes, merges them
+with longitudinal rulings, and runs the same rectangular grid validation used
+for tagged and untagged tables. Missing paint is not filled from row tags.
 
-The original OASIS source files and independently committed oracles are unchanged.
-The PDF contains 137 pages, 90 page-local tables, 756 rows and 3,020 logical cells.
-Import retains every table/cell identity, role and original row membership.
-Forty-one tables have recovered spans: 3,012 origins and eight retained empty
-continuation identities account for all 3,020 cells. Table 4887 page 17 recovers
-its three independently proven eight-column merges. Tables 5936/6359/7503 recover
-three/two/three explicit empty continuation tags respectively.
+Lines and patches share the 100,000 per-page capture budget; overflow clears both
+so no partial grid is presented as complete evidence. Projection caps at 100,000
+segments and 4,096 merged segments per candidate, with explicit limit diagnostics
+and cancellation checks. Existing limits of 1,000 axis intervals and 100,000 grid
+slots remain. Broader occlusion, double-border and rotated-table work is unfinished.
 
-`scripts/verify_tagged_spans.py` uses pypdf to check logical membership and that
-coalesced tags contain no marked content/object references, and MuPDF to decode
-painted paths independently and check all 5,536 sides of 1,384 recovered cell
-bounds. It does not use manydoc's geometry as a source oracle. Default MuPDF table
-snapping differs on several closely spaced axes; no claim of exact whole-corpus
-MuPDF grid equality is made. Five original pages (17/25/53/69/89) and the detailed
-page-89 table crop were visually inspected. The three-table SF sample passes the
-actual ProseMirror schema with 964 nodes and all marks/attributes. Generated QA
-reports, SF and images remain ignored; runtime uses none of the QA tools.
+The handwritten fixture has axes only one point apart and a one-point short
+filled connector. Both tagged and untagged readers recover the four distinct
+primitive columns, seven origins and merged spans. Removing the connector keeps
+the tagged cells uncertain. Clipped, transparent and uncertain-blend connectors
+cannot establish coverage. Isolated filled corner squares cannot invent axes.
+Tests also preserve explicit continuation references and exact SF semantics.
 
-## Open work and next commands
+## Original source and independent evidence
 
-Page 89 Table 12539 has shifted column boundaries (including .96pt shifts), so
-its global primitive grid currently fails rectangular-component validation. Its
-source cells and bounds remain explicit with uncertainty. The visible description
-cell for byte 4 spans bytes 5–7; those three continuation tags remain explicit
-cells pending a row-dependent partition solution. Do not change the original
-oracle or casually snap these distinct axes to make this pass.
+The original OASIS DOCX/PDF files and committed oracles are unchanged. Native
+PDF import retains 137 pages, 90 page-local tables, 756 rows and all 3,020 logical
+cell identities/roles/original rows. All 42 omitted-span grids recover using
+painted evidence: 3,009 editable origins plus eleven continuation references.
+Table 4887 page 17 retains its three independently proven eight-column merges.
+Page-89 table 12539 retains 17 distinct columns and all 79 origins; every origin's
+row/column, row/column spans and normalized text hash matches Word table 51 in the
+unchanged independently authored source oracle. Its description origin 12635
+spans four rows and keeps continuation IDs 12654/12674/12694 on rows 7/8/9.
 
-A subsequent single-page native trace isolates the first rejected component:
-zero-based rows 6–7, primitive columns 14–16, four slots in a six-slot bounding
-rectangle. The 17-column axes include 511.540005 and 512.50002pt; other shifted
-pairs include 328.870005/329.82999pt. Missing small horizontal pieces connect
-neighboring rows into an L-shaped region. Raising the .25pt snap tolerance would
-hide distinct painted axes and is not the selected fix. The diagnostic trace ran
-as a temporary single-page test, passed in .462s and was removed; ignored
-`output/tagged-spans/debug89.log` retains its output. Production is unchanged.
+The previous trace correctly found a nonrectangular L-shaped component (rows
+6–7, primitive columns 14–16), but incorrectly assumed the evidence gap was an
+unpainted source gap. Independent MuPDF paths prove three continuous filled
+junctions on y=301.249995pt: x=433.14999..433.98999,
+459.310005..460.030005, and 511.540005..512.50002. Short connector rectangles,
+including pieces only .24/.36/.48pt wide, had been excluded by the longitudinal
+line-length threshold. Capturing those pieces repairs the root cause. A proposed
+row-constrained border-completion rule was investigated but is not implemented.
 
-Next investigate a tagged-row-constrained partition: derive each row's physical
-intervals from vertical rulings, then join vertically only identical intervals
-with absent separating borders. Explicit TR membership and contained visible
-content can disambiguate otherwise nonrectangular missing-edge components.
-Retain all distinct global axes as span columns. Any completed horizontal gaps
-must have separate evidence/confidence and explicit gap geometry/diagnostics;
-do not call them fully painted boundaries or apply that rule to untagged input.
-Require unique logical alignment and preserve explicit span attributes. Author a
-small shifted-axis/gapped-border tagged fixture before implementation, then
-compare the original row/cell IDs, all eleven continuation tags and actual drawn
-segments independently. This is a proposed next implementation, not behavior
-already shipped by this checkpoint.
+`scripts/verify_tagged_spans.py` independently decodes original pypdf membership
+and confirms each coalesced tag has no MCID/object-reference content. MuPDF
+checks all 5,852 sides of 1,463 recovered cell bounds against painted paths with
+.3pt tolerance; this is a geometric tolerance, not an ink-outline equality claim.
+A separate .001pt interval-union check proves the three junctions have paint
+continuity. All 79 page-89 origin coordinates/spans/text hashes also match the
+Word oracle. The three-table SF sample passes actual ProseMirror (958 nodes and
+all marks/attributes). The original page-89 table crop was visually inspected;
+prior five-page observations remain historical evidence, not reflow equivalence.
 
-The previous DOCX oracle's eleven raw continuation cells and the currently
-coalesced eight PDF tags are different counts. This checkpoint is not evidence
-that all source merges, styles, links, text runs or images are fully recovered.
-Other original extraction diagnostics remain. Full-source pretty SF has large
-per-glyph provenance overhead (~451 MB); the example deliberately emits a small,
-labelled three-table SF sample and a whole-table audit rather than repeating that
-large artifact. Codec/provenance performance remains required work.
-
-After this grid, supply/qualify a reusable font covering original U+2A6D4, then
-continue real numbering templates, shading, widths, source-font/scripts and the
-other acceptance requirements. Preserve missing-glyph errors; do not delete the
-character or silently substitute fonts.
+## Reproduce and continue
 
 ```sh
-GOWORK=off go run ./examples/tagged-spans
-output/qa-venv/bin/python scripts/verify_tagged_spans.py
-NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/tagged-spans/sample.sf
-GOWORK=off go test -run 'TestPDFTagged|TestRealPDFMQTT|TestRulingJoin' -v .
-GOWORK=off go test ./...
-GOWORK=off go test -race ./...
-GOWORK=off go vet ./...
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
-git diff --check
+GOWORK=off go run ./examples/tagged-spans -out output/tagged-rows
+output/qa-venv/bin/python scripts/verify_tagged_spans.py --out output/tagged-rows
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/tagged-rows/sample.sf
+GOWORK=off go test -run 'TestPDF.*Patch|TestRealPDFMQTT' -v .
 ```
 
-Actual final check results/log locations are in docs/verification.json; historical
-results from earlier checkpoints are not substitutes for this feature's checks.
+Full tests/race/vet, malformed-PDF and valid-grid fuzz, module verification and
+host/Linux CGO-disabled builds are recorded under `short_painted_ruling_patches`
+in verification.json. Generated reports/SF/images remain ignored; none of the QA
+tools are required at runtime. Complete-source pretty SF is about 451 MB; the
+example deliberately emits a small three-table sample and full table audit.
+Provenance/codec performance remains required work.
+
+Next qualify a reusable static font covering actual source U+2A6D4 with explicit
+family mappings and independent glyph/content/visual checks. Do not remove the
+character or silently substitute fonts. The publisher's
+[BabelStone Han page](https://www.babelstone.co.uk/Fonts/Han.html) identifies a
+candidate static TTF and its original Arphic license. The unmodified 16.0.3 TTF
+was downloaded to ignored output/font-research (51,971,284 bytes; SHA-256
+`d8bb747b3fdccd84a60bd0aa56bb90937270d0bd15f1101cd8f2a5a3709dd0a3`).
+Independent fontTools confirms U+2A6D4 maps to u2A6D4 in its 65,534-glyph static
+glyf/loca font. Go validation/rendering, reuse/integration and independent full-source
+qualification remain open. A subsequent CGO-disabled one-glyph preview succeeds;
+pypdf and MuPDF both extract exact U+2A6D4, and its raster was visually inspected.
+It is 20,348,885 bytes, exposing a font-subsetting/transport efficiency requirement.
+This does not qualify the complete original source or original-font appearance.
+No font is vendored or linked into the runtime.
+Source numbering templates, shading, unequal widths and broader font/script,
+layout, link/content/asset recovery and corpus acceptance remain required. All
+other source diagnostics persist; recovering these table grids is not full-source
+fidelity or full-goal completion.

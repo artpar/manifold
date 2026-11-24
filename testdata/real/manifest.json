@@ -85,7 +85,7 @@
         ]
       },
       "current_conversion_evidence": {
-        "PDF_to_SF": "Imports all 90 tables/756 rows/3020 cell identities and roles/rows. Forty-one grids infer missing spans with separate provenance; 3012 origins plus eight empty continuation references. Page 89 Table 12539 remains explicitly uncertain with three continuation cells pending row-dependent grid recovery; other extraction diagnostics remain. Original oracles unchanged. See docs/TAGGED_TABLE_SPANS.md."
+        "PDF_to_SF": "Imports all 90 tables/756 rows/3020 cell identities and roles/rows. All 42 omitted-span grids recover from painted evidence; 3009 origins plus eleven empty continuation references. Short painted connector pieces resolve page 89; its 17 axes and 79 origin coordinates/spans/text hashes match original Word table 51. Other extraction diagnostics remain; full-source fidelity is not claimed. Original oracles unchanged. See docs/TAGGED_TABLE_SPANS.md."
       }
     }
   ]

@@ -86,6 +86,8 @@ func FuzzReadDOCX(f *testing.F) {
 	})
 }
 func FuzzReadPDF(f *testing.F) {
+	f.Add(recoveryPDF(taggedShortPatchObjects(true)...))
+	f.Add(recoveryPDF(taggedShortPatchObjects(false)...))
 	f.Add(recoveryPDF(inferenceObjects(ruledPath(false) + ruledContent())...))
 	f.Add(fixture(f, "pdf_basic.pdf"))
 	f.Add(fixture(f, "pdf_unicode.pdf"))

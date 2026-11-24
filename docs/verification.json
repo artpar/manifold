@@ -4174,5 +4174,110 @@
       "next": "author tagged shifted-axis/gapped-border fixture; investigate explicit-row-constrained partition with separate gap provenance; preserve untagged behavior",
       "log": "ignored output/tagged-spans/debug89.log"
     }
+  },
+  "short_painted_ruling_patches": {
+    "date": "2026-11-24",
+    "status": "reader milestone; full goal incomplete; no external blocker",
+    "root_cause": "small filled connector rectangles were skipped by longitudinal ruling thresholds; the original source has paint continuity at all three questioned junctions",
+    "implementation": "coverage-only filled patches on established axes; no wider snapping, row-tag boundary invention, public API/schema change or dependency",
+    "original_sources_and_oracles_unchanged": true,
+    "independent_evidence": {
+      "pages": 137,
+      "tables": 90,
+      "rows": 756,
+      "explicit_cell_identities": 3020,
+      "editable_origins": 3009,
+      "retained_empty_continuations": 11,
+      "inferred_tables": 42,
+      "painted_boundaries_checked": 5852,
+      "uncertain_tables": [],
+      "word_table_51_origin_spans_and_text_hashes": 79,
+      "short_painted_junctions": [
+        [
+          433.14999,
+          433.98999,
+          301.249995
+        ],
+        [
+          459.310005,
+          460.030005,
+          301.249995
+        ],
+        [
+          511.540005,
+          512.50002,
+          301.249995
+        ]
+      ],
+      "limitation": "All 42 omitted-span grids recovered from painted evidence; other recovery diagnostics remain. This is not visual equivalence or full-goal completion."
+    },
+    "independent_readers": {
+      "pypdf": "7.1.1",
+      "PyMuPDF": "1.28.2"
+    },
+    "prosemirror": "passed: 958 nodes, marks and attributes in the three-table SF sample; not complete-source SF",
+    "checks": {
+      "go_test_all": "passed: library 22.027s; CLI 0.433s; all packages passed",
+      "go_test_race_all": "passed: library 178.025s; CLI 2.140s; all packages passed",
+      "go_vet_all": "passed",
+      "module_verify": "passed: all modules verified",
+      "cgo_disabled_darwin_arm64": "passed build and execution: original PDF TXT retained U+2A6D4 and inferred-span diagnostic without grid-uncertainty diagnostic",
+      "cgo_disabled_linux_amd64": "passed cross-build only; not executed on Linux",
+      "malformed_pdf": "passed: FuzzReadPDF 500 executions, two workers, 3.742s; includes with/without short-patch seeds",
+      "ruled_grid_fuzz": "passed: FuzzPDFRuledGrid 500 executions, two workers, 5.079s",
+      "original_pdf_oracle": "exact regenerated pypdf oracle matches committed oracle",
+      "diff_check": "passed"
+    },
+    "synthetic_evidence": [
+      "tagged and untagged one-point shifted axes retain four primitive columns and seven merged origins",
+      "removing short paint retains uncertain explicit cells",
+      "clipped, transparent and uncertain-blend patches cannot establish coverage",
+      "isolated filled patches create no axes",
+      "exact SF/provenance preservation and unchanged explicit span policy"
+    ],
+    "visual": "original page-89 detailed crop inspected; no generated output or Word-equivalence claim for this reader checkpoint",
+    "limits": [
+      "100000 total captured lines/patches per page, clearing both on overflow",
+      "100000 projected segments and 4096 merged segments per candidate",
+      "existing 1000 axis interval and 100000 slot budgets, cancellation and diagnostics"
+    ],
+    "open_work": [
+      "actual U+2A6D4 source font still needs license/coverage/validation and rendering qualification; BabelStone Han primary publisher page identifies a candidate but none is vendored",
+      "source numbering, widths/shading, broader fonts/scripts/layout/PDF content/link/assets and corpus acceptance",
+      "complete-source pretty SF about 451 MB; provenance/codec performance"
+    ],
+    "commands": [
+      "GOWORK=off go run ./examples/tagged-spans -out output/tagged-rows",
+      "output/qa-venv/bin/python scripts/verify_tagged_spans.py --out output/tagged-rows",
+      "NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/tagged-rows/sample.sf",
+      "GOWORK=off go test -run 'TestPDF.*Patch|TestRealPDFMQTT' -v .",
+      "GOWORK=off go test ./...",
+      "GOWORK=off go test -race ./...",
+      "GOWORK=off go vet ./...",
+      "GOWORK=off go mod verify",
+      "CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc",
+      "CGO_ENABLED=0 GOWORK=off GOOS=linux GOARCH=amd64 go build -o bin/manydoc-linux-amd64 ./cmd/manydoc",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=500x -parallel=2 -timeout=90s",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzPDFRuledGrid$' -fuzztime=500x -parallel=2 -timeout=90s"
+    ],
+    "kt": "docs/TAGGED_TABLE_SPANS.md",
+    "logs": "ignored output/tagged-rows/",
+    "font_research": {
+      "publisher": "https://www.babelstone.co.uk/Fonts/Han.html",
+      "download": "https://www.babelstone.co.uk/Fonts/Download/BabelStoneHan.ttf",
+      "version": "16.0.3",
+      "bytes": 51971284,
+      "sha256": "d8bb747b3fdccd84a60bd0aa56bb90937270d0bd15f1101cd8f2a5a3709dd0a3",
+      "independent_fonttools_cmap": "U+2A6D4 -> u2A6D4; 65534 glyphs; glyf/loca static TTF",
+      "license": "original Arphic license in name ID13 and primary publisher page; no font vendored or binary embedding added",
+      "status": "ignored-source candidate: CGO-disabled single-glyph Go preview passed pypdf/MuPDF exact U+2A6D4 extraction and visual inspection; full-source integration/subsetting/reuse qualification remains open",
+      "preview": {
+        "output_bytes": 20348885,
+        "pages": 1,
+        "pypdf_and_pymupdf_text": "U+2A6D4 exact",
+        "visual": "single glyph visibly rendered; no comparison/fidelity claim to the original MingLiU face",
+        "limitation": "about 20 MB for one glyph; full-font transport/subsetting efficiency remains required work"
+      }
+    }
   }
 }

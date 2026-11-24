@@ -21,7 +21,45 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: tagged membership with inferred painted spans
+## Latest milestone: short painted connectors recover the remaining grid
+
+The original MQTT PDF now recovers all 42 omitted-span table grids, including
+page 89, with all 90 tables/756 rows/3,020 logical cell identities preserved.
+There are 3,009 editable origins and eleven retained continuation references.
+All seventeen distinct page-89 column axes and all 79 origin coordinates/spans/
+per-cell text hashes match original Word table 51's unchanged independent oracle.
+
+The actual cause was skipped small filled connector rectangles. The earlier
+L-shaped component was a gap in collected evidence, not a hole in the original
+paint. Small rectangles now support coverage along established axes without
+creating axes or connecting separate components. Clipping, invisible/uncertain
+effects, cancellation and shared line/patch budgets apply. A genuinely missing
+connector still preserves the explicit cells with uncertainty. No row-constrained
+border invention, wider snapping, public SF/API change or new dependency is needed.
+
+Independent pypdf/MuPDF checks retain every membership, verify 5,852 cell sides
+and prove paint continuity across the three formerly missing evidence intervals.
+The SF sample passes actual ProseMirror (958 nodes/marks/attributes). See
+[TAGGED_TABLE_SPANS.md](TAGGED_TABLE_SPANS.md) and verification.json for exact
+commands/results. The full goal remains **incomplete**, with no external blocker.
+Other original PDF recovery diagnostics, font/layout/numbering/shading/width and
+representative corpus requirements remain; full-source pretty SF is ~451 MB.
+
+Next qualify a reusable static font for original U+2A6D4 without removing the
+character, using explicit family mappings and independent glyph/content checks.
+Then use the complete real-source render to drive remaining layout work.
+BabelStone Han 16.0.3 is downloaded only under ignored output/font-research;
+independent fontTools confirms its static TTF maps U+2A6D4. Its primary publisher
+page and embedded original Arphic license are recorded. A CGO-disabled single-glyph
+Go preview passes exact pypdf/MuPDF text and visual checks, but is 20,348,885 bytes.
+Full-source integration and font-subsetting efficiency remain open; no font is
+vendored or linked into the binary.
+Next commands: `GOWORK=off go run ./examples/tagged-spans -out output/tagged-rows`;
+`output/qa-venv/bin/python scripts/verify_tagged_spans.py --out output/tagged-rows`;
+`GOWORK=off go test -run 'TestPDF.*Patch|TestRealPDFMQTT' -v .`;
+`rg -n 'FontFace|validatePDFTrueType|missing glyph|FontMap' pdf_font.go pdf_font_validate.go cmd/manydoc`.
+
+## Previous milestone: tagged membership with inferred painted spans
 
 Native import now reads the original 137-page MQTT PDF rather than rejecting its
 first tagged table. All 90 table identities, 756 rows and 3,020 cell identities/

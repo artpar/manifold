@@ -193,3 +193,13 @@ tags survive on origins. Independent readers audit all memberships and 5,536 pai
 cell sides. Page 89 remains uncertain with three visible-merge continuations still
 represented as explicit cells. Broader source/font/style/link/content/asset recovery and
 all remaining acceptance work stay required; see TAGGED_TABLE_SPANS.md.
+
+
+## 2026-11-24 All original MQTT omitted-span grids recovered
+
+All 42 omitted-span grids now recover from actual paint; 3,009 origins plus eleven
+continuation references retain all 3,020 cell identities. Page 89 preserves seventeen
+distinct axes and matches all 79 original Word-oracle span/content facts. Independent
+readers check 5,852 sides and actual short-connector paint continuity. Other source
+semantics, fonts/scripts, rendering and full corpus requirements remain open; see
+TAGGED_TABLE_SPANS.md.

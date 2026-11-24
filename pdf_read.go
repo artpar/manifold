@@ -205,6 +205,7 @@ type pdfReader struct {
 	links                    map[pdfObjectKey]pdfRecoveredLink
 	partialLinks             map[int]bool
 	rulings                  map[int][]pdfRuling
+	rulingPatches            map[int][]pdfRulingRect
 	rulingOverflow           map[int]bool
 }
 type pdfTextState struct {

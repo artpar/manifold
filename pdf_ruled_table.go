@@ -196,7 +196,10 @@ func (r *pdfReader) rulingRegions(page int) []pdfGridRegion {
 			out = append(out, g)
 			continue
 		}
-		g.cells, g.valid = r.ruledPDFCells(group, xs, ys)
+		coverage, ok := r.rulingPatchLines(page, group, xs, ys)
+		if ok {
+			g.cells, g.valid = r.ruledPDFCells(coverage, xs, ys)
+		}
 		out = append(out, g)
 	}
 	// Resolve inner grids first, allowing an outer cell to own the recovered
@@ -213,6 +216,40 @@ func (r *pdfReader) rulingRegions(page int) []pdfGridRegion {
 		return a.x0 < b.x0
 	})
 	return out
+}
+
+// Project actual filled patches onto existing axes only. Sorting/merging joins
+// the short connector pieces to adjacent longitudinal paint before coverage is
+// tested. A patch cannot invent a new row/column or connect separate components.
+func (r *pdfReader) rulingPatchLines(page int, group []pdfRuling, xs, ys []float64) ([]pdfRuling, bool) {
+	if len(r.rulingPatches[page]) == 0 {
+		return group, true
+	}
+	lines := append([]pdfRuling{}, group...)
+	for _, p := range r.rulingPatches[page] {
+		if r.ctx.Err() != nil {
+			return nil, false
+		}
+		if p.x1 < xs[0] || p.x0 > xs[len(xs)-1] || p.y1 < ys[0] || p.y0 > ys[len(ys)-1] {
+			continue
+		}
+		for i := sort.SearchFloat64s(ys, p.y0-pdfRulingEpsilon); i < len(ys) && ys[i] <= p.y1+pdfRulingEpsilon; i++ {
+			lines = append(lines, pdfRuling{horizontal: true, pos: ys[i], start: p.x0, end: p.x1, width: p.y1 - p.y0})
+		}
+		for i := sort.SearchFloat64s(xs, p.x0-pdfRulingEpsilon); i < len(xs) && xs[i] <= p.x1+pdfRulingEpsilon; i++ {
+			lines = append(lines, pdfRuling{pos: xs[i], start: p.y0, end: p.y1, width: p.x1 - p.x0})
+		}
+		if len(lines) > 100000 {
+			r.doc.warn("pdf_ruling_limit", "Projected ruling patches exceed the inference budget; candidate grid is skipped")
+			return nil, false
+		}
+	}
+	lines = mergePDFRulings(lines)
+	if len(lines) > 4096 {
+		r.doc.warn("pdf_ruling_limit", "Merged ruling patches exceed the inference budget; candidate grid is skipped")
+		return nil, false
+	}
+	return lines, true
 }
 
 func (r *pdfReader) ruledPDFCells(lines []pdfRuling, xs, ys []float64) ([]pdfGridCell, bool) {

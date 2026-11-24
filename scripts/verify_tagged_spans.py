@@ -4,11 +4,15 @@ Run examples/tagged-spans first. This does not compare plain text alone, alter
 the published fixtures/oracles, or assert Word-equivalent layout.
 """
 import json
+import argparse
+import hashlib
 from pathlib import Path
 from pypdf import PdfReader
 import pymupdf
 
-out = Path('output/tagged-spans')
+parser = argparse.ArgumentParser()
+parser.add_argument('--out',type=Path,default=Path('output/tagged-spans'))
+out = parser.parse_args().out
 report = json.loads((out/'tables.json').read_text())
 oracle = json.loads(Path('testdata/real/mqtt-v5.0-pdf-oracle.json').read_text())
 reader = PdfReader('testdata/real/mqtt-v5.0-os.pdf', strict=True)
@@ -78,8 +82,36 @@ for expected in oracle['tables']:
     want = {(ri,f"({c['id']} 0 R)"): c['role'] for ri,row in enumerate(expected['cells']) for c in row}
     assert members == want, expected['id']
     cells += len(members)
-assert cells == 3020 and origins == 3012 and continuations == 8 and inferred == 41
-assert uncertain == ['(12539 0 R)']
+assert cells == 3020 and origins == 3009 and continuations == 11 and inferred == 42
+assert uncertain == []
+# The original paired Word source independently declares all seventeen columns
+# and all 79 origin spans/texts for this same page-local PDF table.
+word = json.loads(Path('testdata/real/mqtt-v5.0-oracle.json').read_text())['tables'][51]
+table = actual['(12539 0 R)']
+slots = [[False]*17 for _ in range(table['rows'])]
+got = []
+for cell in table['cells']:
+    row = cell['row']; col = slots[row].index(False)
+    cs,rs = max(1,cell['colspan']),max(1,cell['rowspan'])
+    for rr in range(row,row+rs):
+        assert col+cs <= 17 and not any(slots[rr][col:col+cs])
+        slots[rr][col:col+cs] = [True]*cs
+    digest = hashlib.sha256(' '.join(cell['text'].split()).encode()).hexdigest()
+    got.append(dict(row=row,column=col,colspan=cs,rowspan=rs,text_sha256=digest))
+assert all(all(row) for row in slots) and got == word['cells']
+# Independently resolve the formerly ambiguous junctions using every filled
+# rectangle, including the short pieces excluded by longitudinal-line filters.
+junctions = [(433.14999,433.98999,301.249995),
+             (459.310005,460.030005,301.249995),
+             (511.540005,512.50002,301.249995)]
+paint = border_rectangles(pdf[88])
+for x0,x1,y in junctions:
+    intervals = sorted((r.x0,r.x1) for r in paint if r.y0 <= y <= r.y1 and r.x1>x0 and r.x0<x1)
+    reach = x0
+    for a,b in intervals:
+        assert a <= reach+.001, (x0,x1,y,a,reach)
+        reach = max(reach,b)
+    assert reach>=x1-.001
 for n in (17,25,53,69,89):
     pdf[n-1].get_pixmap(matrix=pymupdf.Matrix(1,1)).save(out/f'original-{n}.png')
 pdf[88].get_pixmap(matrix=pymupdf.Matrix(2,2), clip=pymupdf.Rect(65,150,550,370)).save(out/'page-89-grid.png')
@@ -87,6 +119,8 @@ result = dict(pages=137, tables=90, rows=756, explicit_cell_identities=cells,
               editable_origins=origins, retained_empty_continuations=continuations,
               inferred_tables=inferred, painted_boundaries_checked=boundaries,
               uncertain_tables=uncertain,
-              limitation='Page 89 has shifted column edges; no guessed grid. Other recovery diagnostics remain. This is not visual equivalence or full-goal completion.')
+              word_table_51_origin_spans_and_text_hashes=len(got),
+              short_painted_junctions=junctions,
+              limitation='All 42 omitted-span grids recovered from painted evidence; other recovery diagnostics remain. This is not visual equivalence or full-goal completion.')
 (out/'independent.json').write_text(json.dumps(result,indent=2)+'\n')
 print(json.dumps(result,indent=2))

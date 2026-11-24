@@ -3,6 +3,7 @@ package manydoc
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -30,6 +31,131 @@ func taggedSpanObjects(path string) []string {
 		"<< /Type /StructElem /S /TD /P 11 0 R /K [] >>",
 		"<< /Type /StructElem /S /TD /P 11 0 R /K 5 >>",
 		"<< /Type /StructElem /S /TD /P 11 0 R /K 6 >>")
+}
+
+const taggedShortPatchPath = "0.25 w 20 220 240 120 re S 20 300 m 260 300 l S 100 260 m 180 260 l S 181 260 m 260 260 l S 100 220 m 100 300 l S 180 260 m 180 340 l S 181 220 m 181 260 l S\n"
+
+func taggedShortPatchObjects(patch bool) []string {
+	path := taggedShortPatchPath
+	if patch {
+		path += "180 259.875 1 .25 re f\n"
+	}
+	return taggedSpanObjects(path)
+}
+
+func TestPDFRulingPatchesRespectClipAndVisibility(t *testing.T) {
+	for _, mode := range []string{"clipped", "transparent", "blend"} {
+		t.Run(mode, func(t *testing.T) {
+			paint := "q /G gs 180 259.875 1 .25 re f Q\n"
+			if mode == "clipped" {
+				paint = "q 0 0 1 1 re W n 180 259.875 1 .25 re f Q\n"
+			}
+			objects := taggedSpanObjects(taggedShortPatchPath + paint)
+			if mode != "clipped" {
+				state := "/ca 0"
+				if mode == "blend" {
+					state = "/BM /Multiply"
+				}
+				objects[2] = strings.Replace(objects[2], "/Resources <<", "/Resources << /ExtGState << /G << "+state+" >> >>", 1)
+			}
+			d := readRecovery(t, recoveryPDF(objects...))
+			if !hasDiagnostic(d, "pdf_structure_table_grid_uncertain") || hasDiagnostic(d, "pdf_structure_spans_inferred") {
+				t.Fatal("unpainted or uncertain patch used as evidence", d.Diagnostics)
+			}
+			assertRecoverySF(t, d)
+		})
+	}
+}
+
+func TestPDFSmallFilledPatchesDoNotCreateAxes(t *testing.T) {
+	var content strings.Builder
+	for _, x := range []int{20, 100, 180, 260} {
+		for _, y := range []int{220, 260, 300, 340} {
+			fmt.Fprintf(&content, "%d %d 1 1 re f\n", x, y)
+		}
+	}
+	content.WriteString(markedText(0, 30, 320, "KEPT"))
+	d, err := ReadPDF(context.Background(), bytes.NewReader(recoveryPDF(inferenceObjects(content.String())...)), ReadOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, b := range d.Blocks {
+		if b.Kind == Table {
+			t.Fatal("isolated patches invented a grid")
+		}
+	}
+	if strings.Count(d.Text(), "KEPT") != 1 {
+		t.Fatal("text lost")
+	}
+}
+
+func TestPDFTaggedShortPatchSupportsShiftedAxes(t *testing.T) {
+	d := readRecovery(t, recoveryPDF(taggedShortPatchObjects(true)...))
+	if len(d.Blocks) != 1 || d.Blocks[0].Kind != Table {
+		t.Fatal("table lost")
+	}
+	b := d.Blocks[0]
+	g, err := tableGrid(b.Rows)
+	if err != nil || g.Columns != 4 || len(g.Origins) != 7 {
+		t.Fatal("distinct shifted axes lost", g, err)
+	}
+	if b.Rows[0].Cells[0].ColSpan != 2 || b.Rows[0].Cells[1].ColSpan != 2 || b.Rows[1].Cells[0].RowSpan != 2 || b.Rows[1].Cells[2].ColSpan != 2 || b.Rows[2].Cells[0].ColSpan != 2 || b.Rows[2].Cells[1].ColSpan != 1 {
+		t.Fatal("shifted spans incorrect", b.Rows)
+	}
+	refs := b.Rows[1].Cells[0].Source.TableSpans.Continuations
+	if len(refs) != 1 || refs[0].Element != "(17 0 R)" || refs[0].Row != 2 {
+		t.Fatal("continuation identity lost", refs)
+	}
+	if hasDiagnostic(d, "pdf_structure_table_grid_uncertain") || !hasDiagnostic(d, "pdf_structure_spans_inferred") {
+		t.Fatal("unexpected inference result", d.Diagnostics)
+	}
+	for _, row := range b.Rows {
+		for _, c := range row.Cells {
+			if c.Source.TableSpans.Evidence != "painted_grid_adjacency" {
+				t.Fatal("paint evidence lost")
+			}
+		}
+	}
+	for _, word := range []string{"TOP", "RIGHT", "VERT", "MID", "R1", "LOW", "R2"} {
+		if strings.Count(d.Text(), word) != 1 {
+			t.Fatal("content changed", word)
+		}
+	}
+	assertRecoverySF(t, d)
+}
+
+func TestPDFTaggedMissingPatchRetainsUncertainCells(t *testing.T) {
+	d := readRecovery(t, recoveryPDF(taggedShortPatchObjects(false)...))
+	if len(d.Blocks) != 1 || d.Blocks[0].Kind != Table || len(d.Blocks[0].Rows[2].Cells) != 3 || !hasDiagnostic(d, "pdf_structure_table_grid_uncertain") || hasDiagnostic(d, "pdf_structure_spans_inferred") {
+		t.Fatal("unpainted border silently completed", d.Diagnostics)
+	}
+	assertRecoverySF(t, d)
+}
+
+func TestPDFUntaggedShortPatchSupportsShiftedAxes(t *testing.T) {
+	objects := taggedShortPatchObjects(true)
+	objects[0] = strings.Replace(objects[0], "/StructTreeRoot 7 0 R", "", 1)
+	d, err := ReadPDF(context.Background(), bytes.NewReader(recoveryPDF(objects...)), ReadOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(d.Blocks) != 1 || d.Blocks[0].Kind != Table {
+		t.Fatal("painted grid not recovered", d.Text())
+	}
+	b := d.Blocks[0]
+	g, err := tableGrid(b.Rows)
+	if err != nil || g.Columns != 4 || len(g.Origins) != 7 || b.Rows[1].Cells[0].RowSpan != 2 {
+		t.Fatal("shifted physical grid lost", g, err)
+	}
+	if b.Source.Structure != "inferred" || b.Source.Evidence != "painted_grid_adjacency" {
+		t.Fatal("untagged inference provenance incorrect", b.Source)
+	}
+	for _, word := range []string{"TOP", "RIGHT", "VERT", "MID", "R1", "LOW", "R2"} {
+		if strings.Count(d.Text(), word) != 1 {
+			t.Fatal("content changed", word)
+		}
+	}
+	assertRecoverySF(t, d)
 }
 
 func TestRulingJoinIncludesPaintedCrossingStroke(t *testing.T) {
@@ -123,6 +249,24 @@ func TestRealPDFMQTTTaggedTableMembership(t *testing.T) {
 	if err := json.Unmarshal(oracleRaw, &oracle); err != nil {
 		t.Fatal(err)
 	}
+	wordRaw, err := os.ReadFile("testdata/real/mqtt-v5.0-oracle.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var word struct {
+		Tables []struct {
+			Cells []struct {
+				Row     int
+				Column  int
+				ColSpan int    `json:"colspan"`
+				RowSpan int    `json:"rowspan"`
+				TextSHA string `json:"text_sha256"`
+			}
+		}
+	}
+	if err := json.Unmarshal(wordRaw, &word); err != nil {
+		t.Fatal(err)
+	}
 	d, err := ReadPDF(context.Background(), bytes.NewReader(raw), ReadOptions{PDFSkipInference: true})
 	if err != nil {
 		t.Fatal(err)
@@ -206,8 +350,22 @@ func TestRealPDFMQTTTaggedTableMembership(t *testing.T) {
 				}
 			}
 		}
+		if want.ID == 12539 {
+			g, err := tableGrid(b.Rows)
+			if err != nil || g.Columns != 17 || len(g.Origins) != len(word.Tables[51].Cells) {
+				t.Fatal("source shifted grid lost", err)
+			}
+			for i, p := range g.Origins {
+				w := word.Tables[51].Cells[i]
+				c := b.Rows[p.Row].Cells[p.Cell]
+				hash := fmt.Sprintf("%x", sha256.Sum256([]byte(strings.Join(strings.Fields((&Document{Blocks: c.Blocks}).Text()), " "))))
+				if p.Row != w.Row || p.Column != w.Column || p.ColSpan != w.ColSpan || p.RowSpan != w.RowSpan || hash != w.TextSHA {
+					t.Fatalf("Word table 51 cell %d coordinate/span/content differs: %+v %+v", i, p, w)
+				}
+			}
+		}
 	}
-	if origins+continuations != 3020 || continuations != 8 || uncertain != 1 {
+	if origins != 3009 || origins+continuations != 3020 || continuations != 11 || uncertain != 0 || inferred != 42 {
 		t.Fatal("corpus cell accounting/uncertainty changed", origins, continuations, uncertain)
 	}
 	t.Logf("tables=%d inferred=%d uncertain=%d origins=%d continuations=%d", len(tables), inferred, uncertain, origins, continuations)
