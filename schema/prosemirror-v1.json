@@ -88,6 +88,7 @@
       "group": "block",
       "content": "list_item+",
       "attrs": {
+        "numbering": {"default": null},
         "order": {
           "default": 1,
           "validate": "number"

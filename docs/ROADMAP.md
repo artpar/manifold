@@ -216,3 +216,12 @@ restart/overrides and real-source headings independently, then address internal
 destinations and remaining source/recovery/corpus/performance work. Word auto-fit
 and conflicting width overrides remain explicit layout losses, not a claim of
 complete Word layout. Do not remove any required acceptance row to call this done.
+
+
+## 2026-11-24 Numbering landed; next internal destinations
+
+Common formats/templates and explicit counter contexts now have original-publisher
+and all-story independent-reader evidence. See NUMBERING.md. Next trace DOCX
+bookmarks/hyperlink anchors and PDF name trees/GoTo/Dest actions into the shared
+SF and typed link model. Preserve Unicode URI behavior and note-link identity;
+continue source/recovery/corpus and large-provenance work before completion.

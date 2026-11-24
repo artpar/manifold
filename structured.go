@@ -60,6 +60,7 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 	if err := d.Validate(); err != nil {
 		return nil, err
 	}
+	d = resolveNumberingDocument(d)
 	s := &StructuredDocument{Type: "doc", Attrs: StructuredAttributes{
 		Schema: StructuredSchema, Metadata: d.Metadata, Layout: cloneLayout(d.Layout), EvenAndOddHeaders: d.EvenAndOddHeaders,
 		Diagnostics: append([]Diagnostic(nil), d.Diagnostics...), Pages: append([]PDFPage(nil), d.Pages...),
@@ -161,8 +162,9 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 			if b.List == "number" {
 				n.Type = "ordered_list"
 				n.Attrs = sfAttrs(struct {
-					Order int `json:"order"`
-				}{listStart(b)})
+					Order     int            `json:"order"`
+					Numbering *ListNumbering `json:"numbering,omitempty"`
+				}{listStart(b), b.Numbering})
 			}
 			for _, item := range b.Items {
 				content, err := encodeSFBlocks(item.Blocks)
@@ -444,13 +446,15 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 			b.List = "bullet"
 			if n.Type == "ordered_list" {
 				a := struct {
-					Order int `json:"order"`
-				}{1}
+					Order     int            `json:"order"`
+					Numbering *ListNumbering `json:"numbering,omitempty"`
+				}{Order: 1}
 				if err := strictSFAttrs(n.Attrs, &a); err != nil {
 					return nil, err
 				}
 				b.List = "number"
 				b.Start = listStartPointer(a.Order)
+				b.Numbering = a.Numbering
 			} else if err := emptySFAttrs(n.Attrs); err != nil {
 				return nil, err
 			}

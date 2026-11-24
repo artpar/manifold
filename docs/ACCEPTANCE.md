@@ -235,3 +235,14 @@ evidence; four native and three independent DOCX-render pages were inspected.
 Full-source output is 189 pages, not a Word-equivalence result. Source numbering,
 internal destinations, broader corpus/recovery and codec/performance remain open.
 See TABLE_WIDTHS.md.
+
+
+## 2026-11-24 Numbering format/template milestone
+
+Six formats, multilevel labels, logical counter contexts, nested edits and legal
+numbering now persist through SF/DOCX and render in native rich containers. Ten
+all-story markers agree with independent DOCX rendering; all 291 source heading
+numbers match the publisher, with one original title hyphen spelling difference
+recorded explicitly. Native output contains all 291 exact source headings.
+This does not close internal destinations, broader source/recovery/corpus, rich
+PDF semantic recovery or codec/performance work. See NUMBERING.md.

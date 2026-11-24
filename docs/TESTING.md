@@ -2119,3 +2119,52 @@ original table page, and full-source page 120. The initial randomized rounding
 check caught false metadata rejection; writer metadata now carries the available
 container width so the reader recomputes exact quantization instead of using a
 rounded total. The failing log is retained locally; it is not a green result.
+
+## Numbering formats and contexts (2026-11-24)
+
+```sh
+CGO_ENABLED=0 GOWORK=off go run ./examples/numbering
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-number-profile --headless --convert-to pdf --outdir output/numbering/lo output/numbering/numbering.docx
+output/qa-venv/bin/python scripts/verify_numbering.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/numbering/source.sf output/numbering/from-docx.sf output/numbering/from-pdf.sf
+output/qa-venv/bin/python scripts/author_numbering_probe.py
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-number-profile --headless --convert-to pdf --outdir output/numbering output/numbering/format-probe.docx
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+bin/manydoc convert -o output/numbering/mqtt.sf testdata/real/mqtt-v5.0-os.docx
+output/qa-venv/bin/python scripts/verify_numbering_source.py
+```
+
+Render the source with FONT_SUBSETTING.md's explicit Han/DejaVu/Go Mono mappings,
+using output/numbering for its SF/PDF. Then run:
+
+```sh
+output/qa-venv/bin/python scripts/verify_numbering_source.py --native
+output/qa-venv/bin/python scripts/verify_mqtt_render.py --out output/numbering
+GOWORK=off go test ./...
+GOWORK=off go test -race ./...
+GOWORK=off go test -race -run 'TestNumberingAdmission|TestDOCXEmpty' .
+GOWORK=off go vet ./...
+GOWORK=off go mod verify
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOWORK=off go build -o bin/manydoc-linux-amd64 ./cmd/manydoc
+git diff --check
+```
+
+Native source heading checks reject cached-TOC-only matches: all 291 labels must
+be painted Go-family spans at the native heading size with the title alongside
+on the same baseline. Original publisher matching records one preexisting title
+hyphen spelling difference; label values remain exact. Both all-story pages and
+full-source pages 15/120 were visually inspected. LibreOffice initially ignored
+isLgl and a footnote startOverride; lowered visible decimal formats with checked
+original-format metadata and matching abstract/instance starts fix those output
+failures. Its implicit-ancestor empty-override behavior still differs from Word;
+NUMBERING.md records the original publisher evidence and the explicit diagnostic.
+PDF import preserves painted marker text/positions; recovering every original
+counter-template binding from untagged paint is not established.
+
+After the 45-case authored probe and its external rendering, verify exact source
+format/template/start import and all external-reader labels with:
+
+```sh
+bin/manydoc convert -o output/numbering/format-probe.sf output/numbering/format-probe.docx
+output/qa-venv/bin/python scripts/verify_numbering_probe.py
+```

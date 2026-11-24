@@ -855,3 +855,13 @@ SF/JSON/DOCX retain optional point preferences per logical column. PDF fits and
 continues the same physical grid; ruled recovery exposes measured inferred widths.
 Word auto-fit and conflicting cell/table preferences remain diagnosed layout losses.
 No source Word-equivalent pagination is claimed. See TABLE_WIDTHS.md.
+
+
+## Common numbering formats and templates
+
+Ordered SF/DOCX lists preserve decimal, padded decimal, repeated Latin letters,
+Roman formats, %1..%9 templates, starts and counter contexts. Native body/cell/note/
+running layout paints resolved labels. Symbolic SF values beyond the PDF expansion
+budget reject PDF output explicitly. Unsupported source formats and label presentation
+remain diagnosed. PDF marker text/positions do not imply original editable counter
+semantics. See NUMBERING.md.

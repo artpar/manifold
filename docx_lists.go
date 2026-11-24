@@ -1,6 +1,7 @@
 package manydoc
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"strconv"
@@ -11,9 +12,13 @@ const docxListTag = "manydoc:list:v1:"
 const docxItemTag = "manydoc:list-item:v1"
 
 type docxListLevel struct {
-	Kind           string
-	Start, Restart int
-	Format, Label  string
+	Kind                         string
+	Legal, Implicit, Independent bool
+	Presentation                 bool
+	EmptyOverride                bool
+	OriginalFormats              []string
+	Start, Restart               int
+	Format, Label                string
 }
 type docxListRef struct {
 	ID         string
@@ -25,6 +30,10 @@ func (w *docxWriter) list(b Block, depth int) (string, error) {
 	if depth > 8 {
 		return "", fmt.Errorf("%w: DOCX numbering supports nine levels", ErrUnsupported)
 	}
+	outputLevel := depth
+	if b.Numbering != nil {
+		outputLevel = b.Numbering.Level
+	}
 	id := len(w.numberings) + 1
 	var abstract strings.Builder
 	fmt.Fprintf(&abstract, `<w:abstractNum w:abstractNumId="%d"><w:multiLevelType w:val="multilevel"/>`, id-1)
@@ -34,10 +43,43 @@ func (w *docxWriter) list(b Block, depth int) (string, error) {
 			format = "bullet"
 			label = "•"
 		}
-		fmt.Fprintf(&abstract, `<w:lvl w:ilvl="%d"><w:start w:val="1"/><w:numFmt w:val="%s"/><w:lvlText w:val="%s"/><w:lvlJc w:val="left"/><w:pPr><w:tabs><w:tab w:val="num" w:pos="%d"/></w:tabs><w:ind w:left="%d" w:hanging="240"/></w:pPr></w:lvl>`, level, format, label, (level+1)*360, (level+1)*360)
+		start := 1
+		if level == outputLevel {
+			start = listStart(b)
+		}
+		extra := ""
+		if b.Numbering != nil {
+			if level <= outputLevel {
+				format = b.Numbering.Formats[level]
+				if b.Numbering.Legal {
+					format = "decimal"
+				}
+			}
+			if level < outputLevel {
+				start = b.Numbering.Ancestors[level]
+			}
+			if level == outputLevel {
+				label = b.Numbering.Template
+				if b.Numbering.Legal {
+					extra = "<w:isLgl/>"
+				}
+			}
+		}
+		implicit := ""
+		if level == outputLevel && b.Numbering != nil && b.Numbering.Legal {
+			raw, _ := json.Marshal(b.Numbering.Formats)
+			implicit = ` md:numberingFormats="` + escape(string(raw)) + `"`
+		}
+		if level == outputLevel && b.Numbering != nil && b.Numbering.Independent {
+			implicit += ` md:numberingIndependent="1"`
+		}
+		if level == outputLevel && b.Numbering == nil {
+			implicit = ` md:numberingImplicit="1"`
+		}
+		fmt.Fprintf(&abstract, `<w:lvl w:ilvl="%d"%s><w:start w:val="%d"/><w:numFmt w:val="%s"/><w:lvlText w:val="%s"/>%s<w:lvlJc w:val="left"/><w:pPr><w:tabs><w:tab w:val="num" w:pos="%d"/></w:tabs><w:ind w:left="%d" w:hanging="240"/></w:pPr></w:lvl>`, level, implicit, start, format, escape(label), extra, (depth+1)*360, (depth+1)*360)
 	}
 	abstract.WriteString(`</w:abstractNum>`)
-	number := fmt.Sprintf(`<w:num w:numId="%d"><w:abstractNumId w:val="%d"/><w:lvlOverride w:ilvl="%d"><w:startOverride w:val="%d"/></w:lvlOverride></w:num>`, id, id-1, depth, listStart(b))
+	number := fmt.Sprintf(`<w:num w:numId="%d"><w:abstractNumId w:val="%d"/><w:lvlOverride w:ilvl="%d"><w:startOverride w:val="%d"/></w:lvlOverride></w:num>`, id, id-1, outputLevel, listStart(b))
 	w.numberings = append(w.numberings, docxNumbering{abstract.String(), number})
 	var out strings.Builder
 	w.bookmarks++
@@ -53,7 +95,7 @@ func (w *docxWriter) list(b Block, depth int) (string, error) {
 			blocks[0].docxExplicitBreakBefore = true
 		}
 		blocks[0].docxNumberID = id
-		blocks[0].docxNumberLevel = depth
+		blocks[0].docxNumberLevel = outputLevel
 		for i := 1; i < len(blocks); i++ {
 			if blocks[i].Kind != ListBlock {
 				blocks[i].docxIndent = (depth + 1) * 360
@@ -74,7 +116,7 @@ type docxNumbering struct{ abstract, number string }
 
 func (w *docxWriter) numberingXML() string {
 	var out strings.Builder
-	out.WriteString(xmlHeader + `<w:numbering xmlns:w="` + wordNS + `">`)
+	out.WriteString(xmlHeader + `<w:numbering xmlns:w="` + wordNS + `" xmlns:md="` + docxNotesNS + `" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="md">`)
 	for _, n := range w.numberings {
 		out.WriteString(n.abstract)
 	}
@@ -140,6 +182,7 @@ func (r *docxReader) taggedList(n *xmlNode, rels map[string]docxRelation, depth 
 		if firstID == "" {
 			firstID = ref.ID
 			firstLevel = ref.Level
+			b.Numbering = r.publicListNumbering(ref, nil)
 		} else if ref.ID != firstID || ref.Level != firstLevel {
 			return Block{}, fmt.Errorf("list item ranges disagree on numbering identity/level")
 		}
@@ -186,7 +229,39 @@ func parseDOCXListLevel(n *xmlNode, level int) (docxListLevel, error) {
 	if format == "bullet" {
 		kind = "bullet"
 	}
-	return docxListLevel{Kind: kind, Start: start, Restart: restart, Format: format, Label: n.child("lvlText").attr("val")}, nil
+	legal := false
+	var errLegal error
+	if n.child("isLgl") != nil {
+		legal, errLegal = docxOnOff(n.child("isLgl"))
+	}
+	err = errLegal
+	if err != nil {
+		return docxListLevel{}, err
+	}
+	implicit := n.attributeNS(docxNotesNS, "numberingImplicit")
+	if implicit != "" && implicit != "1" {
+		return docxListLevel{}, fmt.Errorf("invalid numbering implicit marker")
+	}
+	independent := n.attributeNS(docxNotesNS, "numberingIndependent")
+	if independent != "" && independent != "1" {
+		return docxListLevel{}, fmt.Errorf("invalid independent numbering marker")
+	}
+	var originals []string
+	if raw := n.attributeNS(docxNotesNS, "numberingFormats"); raw != "" {
+		if err := json.Unmarshal([]byte(raw), &originals); err != nil || !legal || len(originals) != level+1 {
+			return docxListLevel{}, fmt.Errorf("invalid legal numbering format metadata")
+		}
+		for _, f := range originals {
+			if !supportedNumberFormat(f) {
+				return docxListLevel{}, fmt.Errorf("invalid legal numbering source format")
+			}
+		}
+	}
+	label := n.child("lvlText").attr("val")
+	if implicit == "1" && (independent != "" || legal || (kind == "number" && (format != "decimal" || label != fmt.Sprintf("%%%d.", level+1)))) {
+		return docxListLevel{}, fmt.Errorf("numbering implicit marker disagrees with definition")
+	}
+	return docxListLevel{Kind: kind, Start: start, Restart: restart, Format: format, Label: label, Legal: legal, Implicit: implicit == "1", Independent: independent == "1", Presentation: n.child("rPr") != nil, OriginalFormats: originals}, nil
 }
 func (r *docxReader) readNumbering(n *xmlNode) error {
 	if n.Name.Local != "numbering" {
@@ -253,6 +328,10 @@ func (r *docxReader) readNumbering(n *xmlNode) error {
 				if !ok {
 					return fmt.Errorf("missing overridden numbering level")
 				}
+				if override.child("startOverride") == nil && override.child("lvl") == nil {
+					def.Start = 0
+					def.EmptyOverride = true
+				}
 				if start := override.child("startOverride"); start != nil {
 					def.Start, err = docxInteger(start, 0, 2147483647)
 					if err != nil {
@@ -260,6 +339,15 @@ func (r *docxReader) readNumbering(n *xmlNode) error {
 					}
 				}
 				levels[level] = def
+			}
+			for level, def := range levels {
+				if len(def.OriginalFormats) > 0 {
+					for ancestor := 0; ancestor <= level; ancestor++ {
+						if levels[ancestor].Format != "decimal" {
+							return fmt.Errorf("legal numbering metadata disagrees with visible formats")
+						}
+					}
+				}
 			}
 			r.num[id] = levels
 		}
@@ -311,14 +399,20 @@ func (r *docxReader) paragraphList(b *Block, ppr *xmlNode, styleID string) error
 		if !ok {
 			return fmt.Errorf("missing DOCX numbering ID %q level %d", id, level)
 		}
-		if def.Format != "decimal" && def.Format != "bullet" {
+		if def.Presentation {
+			r.doc.warn("numbering_presentation", "Numbering label font/color/run presentation is normalized; label text and formats retained")
+		}
+		if def.EmptyOverride {
+			r.doc.warn("numbering_empty_override", "Empty numbering-level override uses Word zero-start compatibility; other readers may inherit the abstract start")
+		}
+		if !supportedNumberFormat(def.Format) && def.Format != "bullet" {
 			r.doc.warn("numbering_format", "Numbering format "+def.Format+" represented as decimal")
 		}
 		expected := fmt.Sprintf("%%%d.", level+1)
 		if def.Kind == "bullet" {
 			expected = "•"
 		}
-		if def.Label != expected {
+		if def.Kind == "bullet" && def.Label != expected {
 			r.doc.warn("numbering_label", "Numbering label "+def.Label+" normalized to "+expected)
 		}
 		b.List = def.Kind
@@ -336,7 +430,7 @@ func (r *docxReader) paragraphList(b *Block, ppr *xmlNode, styleID string) error
 	if kind != "" {
 		r.doc.warn("list_inference", "List membership inferred from style name without a numbering definition")
 		b.List = kind
-		b.docxList = &docxListRef{ID: "style:" + styleID, Definition: docxListLevel{Kind: kind, Start: 1}}
+		b.docxList = &docxListRef{ID: "style:" + styleID, Definition: docxListLevel{Kind: kind, Start: 1, Implicit: true}}
 	}
 	return nil
 }
@@ -463,6 +557,11 @@ func (r *docxReader) foldListLevel(run []Block, index *int, level int, counters 
 				lists = append(lists, children...)
 			} else {
 				parent := &lists[len(lists)-1]
+				for _, child := range children {
+					if child.Numbering != nil && r.listSequences[child.Numbering] != lastID {
+						child.Numbering.Independent = true
+					}
+				}
 				item := &parent.Items[len(parent.Items)-1]
 				item.Blocks = append(item.Blocks, children...)
 			}
@@ -472,6 +571,15 @@ func (r *docxReader) foldListLevel(run []Block, index *int, level int, counters 
 		if counter == nil {
 			counter = &docxListCounter{}
 			counters[ref.ID] = counter
+		}
+		for ancestor := 0; ancestor < level; ancestor++ {
+			if !counter.started[ancestor] {
+				def, ok := r.num[ref.ID][ancestor]
+				if ok {
+					counter.values[ancestor] = def.Start
+					counter.started[ancestor] = true
+				}
+			}
 		}
 		if !counter.started[level] {
 			counter.values[level] = ref.Definition.Start
@@ -491,7 +599,7 @@ func (r *docxReader) foldListLevel(run []Block, index *int, level int, counters 
 			}
 		}
 		if lastID != ref.ID || len(lists) == 0 || lists[len(lists)-1].List != ref.Definition.Kind {
-			list := Block{Kind: ListBlock, List: ref.Definition.Kind}
+			list := Block{Kind: ListBlock, List: ref.Definition.Kind, Numbering: r.publicListNumbering(ref, counter)}
 			if list.List == "number" {
 				list.Start = listStartPointer(counter.values[level])
 			}
@@ -567,4 +675,50 @@ func expandListBookmarks(children []*xmlNode, depth int) ([]*xmlNode, error) {
 		index = end
 	}
 	return result, nil
+}
+
+// Capture unpainted ancestor counters for a list resumed outside its ancestors.
+// Enclosing SF lists can subsequently replace these fallbacks when edited.
+func (r *docxReader) publicListNumbering(ref *docxListRef, counter *docxListCounter) *ListNumbering {
+	if ref.Definition.Kind != "number" || ref.Definition.Implicit {
+		return nil
+	}
+	n := &ListNumbering{Level: ref.Level, Template: ref.Definition.Label, Legal: ref.Definition.Legal, Independent: ref.Definition.Independent, Formats: make([]string, ref.Level+1), Ancestors: nil}
+	if ref.Level > 0 {
+		n.Ancestors = make([]int, ref.Level)
+	}
+	for level := 0; level <= ref.Level; level++ {
+		def, ok := r.num[ref.ID][level]
+		if level == ref.Level {
+			def = ref.Definition
+			ok = true
+		}
+		if !ok {
+			def = docxListLevel{Format: "decimal", Start: 1}
+			r.doc.warn("numbering_context_inferred", "Missing ancestor numbering definition uses decimal start one")
+		}
+		if def.EmptyOverride {
+			r.doc.warn("numbering_empty_override", "Empty numbering-level override uses Word zero-start compatibility; other readers may inherit the abstract start")
+		}
+		format := def.Format
+		if !supportedNumberFormat(format) {
+			format = "decimal"
+			r.doc.warn("numbering_format", "Numbering format "+def.Format+" represented as decimal")
+		}
+		n.Formats[level] = format
+		if level < ref.Level {
+			n.Ancestors[level] = def.Start
+			if counter != nil && counter.started[level] {
+				n.Ancestors[level] = counter.values[level]
+			}
+		}
+	}
+	if len(ref.Definition.OriginalFormats) > 0 {
+		n.Formats = append([]string(nil), ref.Definition.OriginalFormats...)
+	}
+	if r.listSequences == nil {
+		r.listSequences = map[*ListNumbering]string{}
+	}
+	r.listSequences[n] = ref.ID
+	return n
 }

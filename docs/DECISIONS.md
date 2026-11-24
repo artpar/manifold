@@ -1316,3 +1316,14 @@ merged cells sum their intervals. Preserve preferences before container shrinkag
 through checked ignorable DOCX metadata, with standard grids independently usable.
 Report Word auto-fit/override losses. PDF measured widths carry independent inferred
 provenance; they do not change logical membership evidence. See TABLE_WIDTHS.md.
+
+
+## 2026-11-24 Keep editable numbering templates and counter contexts
+
+Extend ordered_list order with explicit formats/template/logical-level/fallback
+ancestors. Enclosing counters drive edits unless the list is independent. Keep
+source list identities outside the public application boundary; disclose inferred
+containment and Word zero-override compatibility. Repeat alphabetic letters per
+OOXML rather than use Excel column numbering. Export redundant starts and lowered
+legal formats with checked metadata, driven by two independent-reader failures.
+See NUMBERING.md for exact policies and the unchanged publisher heading oracle.

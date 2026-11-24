@@ -88,9 +88,10 @@ type Block struct {
 	Image        *Image     `json:"image,omitempty"`
 	Items        []ListItem `json:"items,omitempty"`
 	// Start is the first ordered-list value; nil means one. Zero is valid.
-	Start                   *int        `json:"start,omitempty"`
-	Source                  *SourceInfo `json:"source,omitempty"`
-	Section                 *Section    `json:"section,omitempty"`
+	Numbering               *ListNumbering `json:"numbering,omitempty"`
+	Start                   *int           `json:"start,omitempty"`
+	Source                  *SourceInfo    `json:"source,omitempty"`
+	Section                 *Section       `json:"section,omitempty"`
 	docxSection             *xmlNode
 	docxSectionTail         bool
 	docxList                *docxListRef
@@ -252,6 +253,9 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 	if (format == DOCX || format == PDF) && d.hasPDFSource() && !opts.AllowLossy {
 		return fmt.Errorf("%w: positioned PDF source content will be reflowed and provenance omitted", ErrLossy)
 	}
+	if format == DOCX || format == PDF {
+		d = resolveNumberingDocument(d)
+	}
 	switch format {
 	case DOCX:
 		return writeDOCX(ctx, w, d)
@@ -384,6 +388,12 @@ func (d *Document) Validate() error {
 					return err
 				}
 			}
+			if b.Numbering != nil && (b.Kind != ListBlock || b.List != "number") {
+				return errors.New("numbering requires an ordered list")
+			}
+			if err := validateNumbering(b.Numbering); err != nil {
+				return err
+			}
 			if b.Kind != Table && len(b.ColumnWidths) > 0 {
 				return errors.New("column widths require a table")
 			}
@@ -425,6 +435,7 @@ func (d *Document) Validate() error {
 				if b.Start != nil && (b.List != "number" || *b.Start < 0 || int64(*b.Start)+int64(len(b.Items))-1 > 2147483647) {
 					return errors.New("invalid ordered-list start/range")
 				}
+
 				for _, item := range b.Items {
 					if err := item.Source.validate(d.Pages); err != nil {
 						return err

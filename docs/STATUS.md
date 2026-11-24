@@ -21,7 +21,31 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: preferred physical table grid widths
+## Latest milestone: numbering formats and counter contexts
+
+Common decimal/padded/letter/Roman formats, templates, logical levels, explicit
+counter contexts and nested edits now persist through SF/DOCX and paint in native
+body/table/note/running containers. Independent sequences retain their own context.
+Legal-numbering definitions and redundant starts fix actual independent-reader
+failures without changing source oracles. Unsupported source formats/presentation
+and Word empty-override compatibility have explicit outcomes. See NUMBERING.md.
+
+All ten all-story example markers agree between native PDF and LibreOffice DOCX;
+source/DOCX SF is exact. Both pages were visually inspected. All 291 source heading
+numbers match the unchanged publisher PDF (290 exact full titles; one original
+U+2011/ASCII-hyphen difference is recorded explicitly), and all 291 exact source
+headings occur in native 189-page output. Original font/asset/434 URI checks pass.
+Checks passed: full tests (library 14.558s; CLI cached), full race check
+(library 166.742s; CLI 1.961s), additional admission/empty-override race checks
+(1.486s), vet, module verification, host/Linux CGO-disabled builds, all-four-path
+example, URI regression, 45-case independent format probe and actual ProseMirror
+(149 nodes/marks/attributes). The full goal remains incomplete.
+
+Next: `rg -n 'bookmark|anchor|/Dest|GoTo|Dests' docx_read.go pdf_read.go`.
+Implement typed internal destinations through shared SF/DOCX/PDF, then remaining
+source/recovery/corpus and large-provenance/codec acceptance work.
+
+## Previous milestone: preferred physical table grid widths
 
 SF table `columnWidths` and public `Block.ColumnWidths` now preserve logical grid
 preferences in points through SF/JSON/DOCX. PDF measurement/drawing/continuation

@@ -919,3 +919,12 @@ PDF measurement/paint/continuation. SF table columnWidths extends the establishe
 profile; docx_table_widths.go imports original grid preferences and checks metadata
 against actual serialized twips. PDF source.table_widths separates measured grid
 evidence from explicit membership. See TABLE_WIDTHS.md.
+
+
+## Numbering definitions and owned counter contexts
+
+numbering.go implements six standard formats and %1..%9 templates.
+numbering_resolve.go resolves enclosing counters on owned containers for SF/DOCX/PDF
+without modifying caller data. DOCX preserves logical levels and explicit contexts,
+with independent sequences, Word empty-override disclosure, checked implicit markers
+and legal-format metadata validated against visible decimal definitions. See NUMBERING.md.

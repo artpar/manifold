@@ -5,14 +5,19 @@ import (
 	"math"
 )
 
-func listPrefix(b Block, index int) string {
-	if b.List == "number" {
-		return fmt.Sprintf("%d.", listStart(b)+index)
-	}
-	return "•"
-}
 func (r *pdfRenderer) listMarker(b Block, index int, width, size float64) (pdfLine, float64, error) {
-	lines, err := r.lines([]Run{{Text: listPrefix(b, index)}}, width, size)
+	text := "•"
+	if b.List == "number" {
+		var err error
+		text, err = numberedLabel(b, index)
+		if err != nil {
+			return nil, 0, err
+		}
+	}
+	if text == "" {
+		return nil, 0, nil
+	}
+	lines, err := r.lines([]Run{{Text: text}}, width, size)
 	if err != nil {
 		return nil, 0, err
 	}

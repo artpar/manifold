@@ -149,6 +149,7 @@ type docxReader struct {
 	noteBookmarkNames     map[string]bool
 	cachedNoteMarks       map[string][]string
 	rangeNumIDs           map[string]bool
+	listSequences         map[*ListNumbering]string
 	types                 map[string]string
 }
 

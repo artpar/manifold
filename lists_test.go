@@ -178,6 +178,14 @@ func TestDOCXNumberingHierarchyOverridesAndContinuation(t *testing.T) {
 			}}, mergeParagraph("gap"), {Kind: ListBlock, List: "number", Start: listStartPointer(6), Items: []ListItem{listItem("Parent6")}},
 			{Kind: ListBlock, List: "number", Items: []ListItem{listItem("Restart1")}},
 		}
+		// Preserve the original hierarchy/start/restart/text oracle and add the
+		// literal definitions/counter contexts from the input OOXML above.
+		for _, i := range []int{0, 2, 3} {
+			expected[i].Numbering = &ListNumbering{Level: 0, Template: "%1.", Formats: []string{"decimal"}}
+		}
+		for index, parent := range []int{3, 4} {
+			expected[0].Items[index].Blocks[1].Numbering = &ListNumbering{Level: 1, Template: "%2.", Formats: []string{"decimal", "decimal"}, Ancestors: []int{parent}}
+		}
 		if !reflect.DeepEqual(d.Blocks, expected) {
 			a, _ := json.Marshal(d.Blocks)
 			b, _ := json.Marshal(expected)
@@ -195,7 +203,7 @@ func TestDOCXNumberingInheritanceCancellationAndLosses(t *testing.T) {
 	if len(d.Blocks) != 2 || d.Blocks[0].Kind != ListBlock || listStart(d.Blocks[0]) != 3 || d.Blocks[1].Kind != Paragraph {
 		t.Fatal("style inheritance or numId cancellation lost")
 	}
-	bad := strings.Replace(testListNumbering, `w:val="decimal"`, `w:val="lowerLetter"`, 1)
+	bad := strings.Replace(testListNumbering, `w:val="decimal"`, `w:val="ordinal"`, 1)
 	d, err = ReadDOCX(context.Background(), bytes.NewReader(numberedDOCX(t, body, bad, styles)))
 	if err != nil {
 		t.Fatal(err)

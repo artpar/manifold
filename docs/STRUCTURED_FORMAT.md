@@ -633,3 +633,13 @@ one per shared logical column; default null/empty means equal available columns.
 It preserves subpixel source dimensions and avoids inconsistent per-cell widths.
 PDF source.table_widths records measured grid evidence/confidence/bounds independently
 from explicit membership. See TABLE_WIDTHS.md for editor adaptation and validation.
+
+
+## Ordered-list numbering contexts
+
+Optional ordered_list attrs.numbering maps to ListNumbering: level, template,
+formats, ancestors, legal and independent. Fields are checked by the Go bridge;
+templates use %1..%9 and preserve literals. Enclosing list counters refresh matching
+ancestors during serialization, unless independent; fallback contexts cover resumed
+lists. Source SF/DOCX round trips retain canonical semantics and implicit nil defaults.
+See NUMBERING.md for supported formats, budgets and independent evidence.

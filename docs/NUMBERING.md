@@ -1,0 +1,102 @@
+# Numbering formats and counter contexts
+
+Ordered lists keep ProseMirror `order` and add optional `attrs.numbering`, mirrored
+by public `Block.Numbering *ListNumbering`. Nil retains the existing decimal label
+and implicit nesting contract. An explicit value contains zero-based `level`,
+`template`, one `formats` entry per level, fallback `ancestors` before the current
+level, and optional `legal` / `independent` booleans. This extends the existing
+manydoc-prosemirror/1 profile; no runtime dependency was added.
+
+Supported format names follow OOXML: decimal, decimalZero, upperLetter,
+lowerLetter, upperRoman and lowerRoman. Alphabetic values repeat the same letter
+on successive passes: 26 = Z, 27 = AA, 28 = BB, 53 = AAA. They do not use Excel
+column labels. Zero displays 0; decimalZero pads positive single digits. Roman
+values use subtractive numerals and repeated M beyond 3999. These cases have
+literal Go expectations and a separately authored 45-case OOXML/LibreOffice probe.
+
+[OOXML LevelText](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.leveltext?view=openxml-3.0.1)
+uses %1..%9 counter references. Literal text is retained and references to deeper
+levels are ignored. [Legal numbering](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.islegalnumberingstyle?view=openxml-3.0.1)
+renders every referenced level as decimal while retaining the underlying formats.
+Templates are bounded to 512 UTF-8 bytes, logical levels to nine, and values to
+0..2147483647. PDF marker expansion has a 4096-byte admission budget; oversized
+symbolic values remain representable in SF and reject PDF output atomically.
+Unsupported SF formats reject; unsupported source formats retain decimal-normalized
+labels with diagnostics. Existing bullet normalization/diagnostics remain separate.
+
+## Editing and persistence
+
+SF/DOCX/PDF serialization resolves current enclosing ordered-list counters into
+matching ancestor levels on owned containers. This updates nested labels when a
+parent's start or item order changes. It does not mutate caller data. Fallback
+ancestor values cover resumed or orphaned lists whose original ancestors are not
+inside the current tree. `independent: true` preserves those values even inside
+another list; import uses it when inferred containment joins different Word
+numbering identities. Notes and running stories resolve independently. Tables
+inside items can retain their surrounding counter context.
+
+Raw DOCX import now retains explicit formats, templates, logical levels and counter
+contexts, including standard start/restart overrides, style inheritance and isLgl.
+An implicit ancestor encountered through a deeper item initializes its counter;
+a following real ancestor advances it. Empty instance level overrides use Word's
+zero-start compatibility behavior, with `numbering_empty_override` disclosure.
+The original publisher's 1.0 heading proves the required case; this differs from
+LibreOffice's behavior on the separately authored implicit-ancestor probe. See
+[the LibreOffice developer's change description](https://gerrit.libreoffice.org/c/core/+/145770)
+and the linked commit announcement in the QA research logs. This is a bounded
+compatibility policy, not a claim to implement every Word counter rule.
+
+DOCX emits ordinary multilevel definitions, starts at both the abstract and
+instance override levels, and standard numbered paragraphs. Redundant starts
+avoid LibreOffice restarting the footnote example at a despite an instance start
+of 28. For legal numbering, the visible format definitions are decimal at every
+referenced level; checked ignorable `numberingFormats` metadata retains the
+original formats. This avoids LibreOffice ignoring isLgl and painting B.iv.07
+instead of 2.4.7. The importer checks those visible definitions before using the
+metadata. Implicit/default and independent markers are checked too. Removing
+metadata retains the same visible legal labels in a normal OOXML reader.
+
+Numbering font/color/run presentation is diagnosed as normalized. Counter labels
+are not part of paragraph run text or plain-text body oracles. No source fixtures,
+original hashes, paragraph text hashes or publisher PDF oracles were rewritten.
+The existing hierarchy/restart test adds literal input definition/context fields;
+its previous hierarchy/start/restart/text expectations remain intact. Its unsupported
+format case now uses ordinal because lowerLetter has become supported.
+
+## Independent evidence and remaining work
+
+All ten markers in the all-story example agree between native PDF and an actual
+LibreOffice DOCX render, including Appendix AA./BB., AA.iv)/BB.iv), legal 2.4.7,
+Roman 4000, table (aaa), footnote (bb), and running H01:/Fix:. Source SF and
+DOCX-recovered SF are exactly equal, including stories and notes. Both PDF pages
+were visually inspected. The PDF-recovered SF preserves painted marker text and
+positions; the skip-inference example does not claim original counter semantics
+can be recovered from those pixels/text alone. Actual ProseMirror checks 149
+nodes/marks/attributes in the three example trees.
+
+An independent Python formatter compares all 291 numbered source headings with
+the unchanged 137-page publisher PDF. 290 complete numbered headings match after
+whitespace normalization. The remaining original pair has Word U+2011 in
+Non‑shared and PDF ASCII hyphen in Non-shared; that one title spelling difference
+is explicitly recorded, and its label 4.8.1 matches. No generic punctuation or
+numbering normalization masks mismatches. All 291 exact source-numbered headings
+are also present in the native 189-page full-source render. The checker additionally
+requires all 291 painted body markers at the native heading size with their title
+on the same baseline, so cached TOC text cannot mask wrong body numbering. It retains 434 URI
+targets, the original JPEG, required characters and independent font checks.
+Native checks additionally require actual Go-family heading markers at the native
+heading size and titles alongside on the same baseline, so cached TOC text cannot
+mask missing body numbering. All 291 pass. This is heading/marker evidence, not
+complete source text/layout qualification.
+
+Remaining work includes internal destinations, broader source/recovery/corpus
+qualification, large provenance/codec costs, and explicit recovery of more rich
+PDF semantics. No full Word layout or complete numbering-format parity is claimed.
+The overall goal remains incomplete. See TESTING.md and verification.json for
+actual completed commands/results.
+
+The 45-case probe uses a 22-inch square canvas to keep long repeated-letter labels
+visible; expected labels and counter values are unchanged. It independently checks
+Go import of every format/template/start and LibreOffice literal labels. The two
+implicit-parent sequences are separate research evidence, including the explicitly
+documented Word/LibreOffice empty-override disagreement.

@@ -4689,5 +4689,60 @@
     "initial_failure": "random fractional preferences exposed false metadata rejection when using the rounded table total; fixed by recording/checking actual fitting container, original failing log retained locally",
     "limits": "Word auto-fit/width overrides are diagnosed. Broader numbering, source/recovery/corpus, internal destinations and codec/performance remain. No Word-equivalent layout claim.",
     "evidence": "output/table-widths; docs/TABLE_WIDTHS.md; scripts/verify_table_widths.py"
+  },
+  "numbering_templates": {
+    "date": "2026-11-24",
+    "status": "verified milestone; full objective incomplete",
+    "go_test": "passed: library 14.558s; CLI cached",
+    "go_test_race": "passed: library 166.742s; CLI 1.961s",
+    "additional_race": "new admission and empty-override tests passed 1.486s after the full race build",
+    "go_vet": "passed",
+    "module_verify": "all modules verified",
+    "diff_check": "passed",
+    "cgo_disabled": {
+      "darwin_arm64": "CLI built and executed; all four example paths executed",
+      "linux_amd64": "cross-build passed"
+    },
+    "all_story_example": {
+      "native_pdf_pages": 1,
+      "libreoffice_docx_pages": 1,
+      "literal_marker_targets": 10,
+      "sf_docx_tree": "exact body/attrs/stories/notes",
+      "positioned_pdf_spans": 25,
+      "prosemirror_nodes_marks_attributes": 149,
+      "visual": "both pages inspected"
+    },
+    "format_probe": {
+      "cases": 45,
+      "authored_oo_xml": "format/template/start exact Go import",
+      "libreoffice_reader": "all 45 literal labels exact on deliberately large 22in canvas"
+    },
+    "original_numbered_headings": {
+      "total": 291,
+      "publisher_label_matches": 291,
+      "publisher_exact_full_heading_text": 290,
+      "original_title_spelling_difference": "Word Non-U+2011-shared versus PDF Non-ASCII-hyphen-shared, label 4.8.1 exact; explicit one-title correspondence, no generic normalization",
+      "native_exact_heading_text_matches": 291,
+      "native_painted_body_markers_with_size_and_baseline_title": 291,
+      "toc_only_matches": "rejected"
+    },
+    "full_real_render": {
+      "pages": 189,
+      "bytes": 4977457,
+      "uri_targets": 434,
+      "font_asset_metadata_checks": "passed",
+      "visual_pages": [
+        15,
+        120
+      ]
+    },
+    "fixed_independent_reader_failures": [
+      "legal numbering lowered to explicit decimal formats with checked original-format metadata",
+      "current abstract start now agrees with instance override, fixing footnote restart"
+    ],
+    "fixed_source_numbering": "empty source override now gives publisher 1.0 rather than 1.1, with Word compatibility diagnostic",
+    "uri_regression": "all 8 targets, 2 pages and existing internal note destination passed",
+    "limits": "Word zero-override compatibility differs from LibreOffice implicit-parent probe; source presentation is diagnosed as normalized; original numbering templates cannot be inferred from untagged paint. Full source/recovery/corpus, internal destinations and provenance/codec work remain.",
+    "evidence": "output/numbering; docs/NUMBERING.md; scripts/verify_numbering*.py"
   }
 }
