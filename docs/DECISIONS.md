@@ -1970,3 +1970,25 @@ The saved edit includes an independently styled text interval, so check that
 actual interval graph instead of assuming the editor coalesces it into old text.
 No original source oracle changes. Standalone/list/section/page-break anchors and
 remaining structural cursors, nonmain lookup and browser qualification stay open.
+
+
+## 2026-11-24 Restore current flow ownership without moving points
+
+Native lists have no enclosing stream token. Bind list intent to the first
+paragraph ID plus current point position, and promote only at the reconstructed
+list's current start. A point moved within the same paragraph must remain inline;
+matching an old owner ID alone is insufficient. Stale list grouping does not
+justify moving or deleting its point. Keep metadata/range losses explicit.
+
+Use actual hard-break controls and current section-ID/start bindings. Preserve a
+soft-break point even when omitting that layout boundary. Keep section and child
+points distinct at shared offsets, including empty sections. Do not cache body
+content or insert characters for ownership. Qualify actual save/edit/selection
+requests and the complete strict native/SF graph, without browser fidelity claims.
+
+The temporary first-section note composition may need references to omitted root/
+other-section anchors. Admit those only in that internal projection, after full
+input validation. Persist the original unresolved declarations and validate final
+composition against the complete actual graph. This is document interpretation,
+not an application authorization or quota gate. Standalone/other structural
+points, UI/API and the broader acceptance queue remain required.

@@ -193,3 +193,6 @@ no additional production dependency or browser fidelity claim is introduced.
 The container-navigation probe reuses those same pinned QA packages and handler
 source for table/image points, token/source bindings and selection refreshes.
 No additional dependency or third-party production source is incorporated.
+
+The flow-navigation probe reuses the same attributed pinned QA packages and
+unmodified handler source for list/break/section save/edit/selection evidence.

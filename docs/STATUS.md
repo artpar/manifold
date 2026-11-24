@@ -39,7 +39,52 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: real table and image navigation points
+## Latest progress: list, page-break and section navigation
+
+Private native workers now map list container anchors, hard-page-break anchors
+and explicit section anchors through real BOOKMARK3 points. List ownership hints
+bind the first paragraph ID and current start; promotion to a list occurs only
+when current grouping agrees. Moved/stale points stay at their current inline
+position with diagnostics. Page breaks use the real form-feed token; omitting a
+rendered soft break retains its point as a zero-height SF AnchorPoint. Sections
+bind actual section IDs and starts, including empty sections and starts shared
+with a paragraph/break point. No extra text or cached body trees are introduced.
+
+The preliminary first-section note composition now admits omitted section/root
+anchor references only in its internal temporary graph. Final destination
+validation still checks the entire real document and retains only actual declared
+unresolved targets. This fixes valid cross-section links without inventing final
+missing-target declarations. Section/list ownership and metadata losses remain
+explicit; no application admission/permission policy is introduced.
+
+Pinned actual plugins/validator/skeleton/save/reopen/TextX checks qualify eleven
+points across nested main lists, three sections (one empty), hard breaks, header
+and note lists, plus nine exact internal selection-manager refresh requests. Go
+strict .vdocs/SF checks compare the entire saved/edited structure and relationships,
+including exact stale-section placement diagnostics and actual text intervals.
+Moved-in-paragraph list points and soft-break point retention have regressions.
+No browser caret/scroll/paint fidelity is claimed.
+
+Final checks pass: post-cleanup full tests 16.491s and all Colleaf race tests
+5.077s; preceding full race 174.130s/CLI1.820s passed before removing one duplicate
+identical control lookup. Final vet/CGO-disabled host build pass; modules, focused
+CGO-disabled tests, CLI execution and Linux amd64/arm64 builds also pass. The short
+property/offset fuzz run passed75,187 executions before the isolated cleanup; it
+is not exhaustive flow-owner coverage. Pinned readers and diff checks pass. See
+verification.json for exact scopes; cross-builds are not Linux execution evidence.
+The full goal stays active/incomplete. Next implement standalone AnchorPoint export and remaining
+structural cursors, then marker appearance/nonvisual/provenance intent, public
+native API/CLI and actual full-preset/browser qualification. Nonmain target lookup
+limits, per-page/decorated notes and broader PDF/source/resource/final acceptance
+work remain required. No external blocker exists; production stays pure Go.
+
+```sh
+MANYDOC_COLLEAF_FLOW_QA=output/colleaf-qa/flow-navigation.json GOWORK=off go test -run TestColleafFlowNavigation -count=1 .
+node scripts/verify_colleaf_flow_navigation.cjs
+MANYDOC_COLLEAF_FLOW_SAVED=output/colleaf-qa/flow-navigation-saved.json MANYDOC_COLLEAF_FLOW_EDITED=output/colleaf-qa/flow-navigation-edited.json GOWORK=off go test -run TestColleafFlowNavigation -count=1 .
+```
+
+## Earlier progress: real table and image navigation points
 
 Private native workers now export/import anchors at real table-start controls and
 image atoms, including nested cells, list continuations, headers, footers and

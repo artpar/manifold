@@ -47,11 +47,11 @@ func readColleafBookmark(a colleafRangeRecord) (colleafBookmarkProperties, error
 		if err = strictSFAttrs(fields["manydocNavigation"], p.Hint); err != nil {
 			return p, err
 		}
-		validRole := p.Hint.Role == "run" || p.Hint.Role == "block" || p.Hint.Role == "table" || p.Hint.Role == "picture"
+		validRole := p.Hint.Role == "run" || p.Hint.Role == "block" || p.Hint.Role == "table" || p.Hint.Role == "picture" || p.Hint.Role == "list" || p.Hint.Role == "break" || p.Hint.Role == "section"
 		if p.Hint.Version != 1 || !validRole {
 			return p, fmt.Errorf("%w: native bookmark placement intent", ErrUnsupported)
 		}
-		structural := p.Hint.Role == "table" || p.Hint.Role == "picture"
+		structural := p.Hint.Role == "table" || p.Hint.Role == "picture" || p.Hint.Role == "list" || p.Hint.Role == "break" || p.Hint.Role == "section"
 		if structural && (p.Hint.OwnerID == "" || p.Hint.ParagraphID != "") || !structural && p.Hint.OwnerID != "" {
 			return p, fmt.Errorf("invalid native bookmark owner binding")
 		}
@@ -394,6 +394,12 @@ func (r *colleafBodyReader) containerBookmark(a colleafRangeRecord) (bool, error
 		role, owner = "picture", atom.ID
 	}
 	if role == "" {
+		token, err := r.index.text.exclusive(a.StartIndex, a.StartIndex+1)
+		if err == nil && token == "\f" {
+			role, owner = "break", "page-break"
+		}
+	}
+	if role == "" {
 		return false, nil
 	}
 	p, err := readColleafBookmark(a)
@@ -408,4 +414,36 @@ func (r *colleafBodyReader) containerBookmark(a colleafRangeRecord) (bool, error
 	}
 	r.containerPoints[a.StartIndex] = append(r.containerPoints[a.StartIndex], p.BookmarkID)
 	return true, nil
+}
+
+// A native list has no token of its own. Restore container ownership only when
+// the current list starts at the point's current first paragraph; otherwise keep
+// the real inline point and disclose the lost ownership.
+func (r *colleafBodyReader) promoteListPoints(block *Block, firstID string, position int) {
+	if len(block.Items) == 0 || len(block.Items[0].Blocks) == 0 {
+		return
+	}
+	p := &block.Items[0].Blocks[0]
+	runs := make([]Run, 0, len(p.Runs))
+	for _, run := range p.Runs {
+		if owner, ok := r.listPointOwners[run.Anchor]; ok && owner == firstID && r.listPointPositions[run.Anchor] == r.paragraphStarts[position] {
+			block.Anchors = append(block.Anchors, run.Anchor)
+			r.promotedListPoints[run.Anchor] = true
+		} else {
+			runs = append(runs, run)
+		}
+	}
+	if len(runs) == 0 {
+		p.Runs = nil
+	} else {
+		p.Runs = runs
+	}
+}
+func (r *colleafBodyReader) finishListPoints() {
+	for id := range r.listPointOwners {
+		if !r.promotedListPoints[id] {
+			r.doc.warn("colleaf_stale_bookmark_placement", "Native list point retains its current inline position because current list ownership differs")
+			return
+		}
+	}
 }

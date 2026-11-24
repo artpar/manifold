@@ -84,8 +84,8 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 	if depth > 64 || len(block.Items) == 0 || (block.List != "number" && block.List != "bullet") {
 		return fmt.Errorf("invalid native list")
 	}
-	if block.Source != nil || len(block.Anchors) > 0 {
-		return fmt.Errorf("%w: native list provenance/anchors require mapping", ErrUnsupported)
+	if block.Source != nil {
+		return fmt.Errorf("%w: native list provenance requires mapping", ErrUnsupported)
 	}
 	if err := validateNumbering(block.Numbering); err != nil {
 		return err
@@ -173,6 +173,7 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 		if item.Source != nil || len(item.Blocks) == 0 || (item.Blocks[0].Kind != Paragraph && item.Blocks[0].Kind != Heading) {
 			return fmt.Errorf("%w: native list item requires a leading paragraph without unmapped provenance", ErrUnsupported)
 		}
+		pointOffset := w.offset
 		if err := w.paragraph(item.Blocks[0]); err != nil {
 			return err
 		}
@@ -185,6 +186,11 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 		}
 		w.body.Paragraphs[first].Bullet = sfAttrs(bullet)
 		firstID := w.body.Paragraphs[first].ID
+		if i == 0 {
+			if err := w.containerAnchors(block.Anchors, pointOffset, "list", firstID); err != nil {
+				return err
+			}
+		}
 		if err := w.flow(item.Blocks[1:], depth); err != nil {
 			return err
 		}
@@ -460,6 +466,7 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int) ([]Bl
 					block.Items = append(block.Items, ListItem{Blocks: append([]Block{flow[item.start].Block}, children...)})
 				}
 				if valid {
+					r.promoteListPoints(&block, flow[start].ID, flow[start].Position)
 					return block, end + 1, nil
 				}
 			}
@@ -498,6 +505,7 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int) ([]Bl
 			block.Items = append(block.Items, item)
 		}
 		r.doc.warn("colleaf_list_ownership", "Native bullet records infer list containers; unmarked continuation ownership is not explicit")
+		r.promoteListPoints(&block, flow[start].ID, flow[start].Position)
 		return block, cursor, nil
 	}
 	return group(0, len(flow), depth, "")

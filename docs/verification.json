@@ -6318,5 +6318,58 @@
       "MANYDOC_COLLEAF_CONTAINER_SAVED=output/colleaf-qa/container-navigation-saved.json MANYDOC_COLLEAF_CONTAINER_EDITED=output/colleaf-qa/container-navigation-edited.json GOWORK=off go test -run TestColleafContainerNavigation -count=1 .",
       "rg -n 'AnchorPoint|len\\(.*Anchors' colleaf_tables.go colleaf_lists.go colleaf_sections.go"
     ]
+  },
+  "colleaf_flow_points_2026_11_24": {
+    "scope": "Private native list/page-break/section anchors through existing SF. Full adapter/native public API/CLI and overall goal remain incomplete.",
+    "implementation": [
+      "Sparse version1 list/break/section owner hints bind real native first paragraph IDs, form-feed controls and current section-ID/start positions. No extra text or body cache.",
+      "List promotion checks current reconstructed first paragraph ID and exact current point position; same-paragraph moves remain inline with stale-placement diagnostics. Nested/main/header/note lists retain independent container/child anchors.",
+      "Section and child points coexist at shared offsets, including empty sections and hard-break starts. Moved section points retain actual inline positions with explicit diagnostics.",
+      "Discarded rendered soft breaks retain attached zero-height SF AnchorPoint data. Standalone AnchorPoint export and other structural cursors remain required work.",
+      "Whole input graph validates first. Temporary first-section note composition admits omitted section/root target references internally; final intent retains only original unresolved declarations and final graph validation checks actual complete composition."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_flow_navigation.cjs",
+      "script_sha256": "c26b8ab28c1b6731c802667d3cfbc443feaacc58c67204d06e1946fc9cc1eae7",
+      "packages": "Same attributed pinned Univer1.0.4 plugins, app validator, hash-pinned unmodified internal UI handler/helper and actual selection manager used by previous navigation probes.",
+      "main_offsets": {
+        "section-1": 0,
+        "list": 8,
+        "list-alias": 8,
+        "item": 8,
+        "nested-list": 13,
+        "list-break": 18,
+        "section-2": 63,
+        "break-2": 63,
+        "empty-section": 73
+      },
+      "other_offsets": "header-list0, note-list0",
+      "results": [
+        "Eleven points across nested main/header/note lists, hard breaks and three sections (one empty); nine exact collapsed main internal selection-refresh requests. Current native IDs/bullets/section starts/control characters checked independently.",
+        "App validation, skeleton construction, two actual registered-plugin saves/reopens and TextX Q insertion pass. Native nine main offsets move by1; first section point moves inside current text and is not restored to obsolete section ownership.",
+        "Go strict .vdocs/SF checks compare all saved/edited structures, actual text intervals, anchors/links/note relationships and exact expected stale-section diagnostics; input snapshots remain unchanged.",
+        "Same-paragraph list point move retains current inline point and discloses lost container ownership; soft-break regression retains its point without preserving a false hard boundary.",
+        "Previous pinned container/navigation reader probes pass unchanged."
+      ],
+      "limits": "Headless token/ownership/save/edit/selection-refresh evidence, with stub render manager. Actual browser caret/scroll/paint/events and complete native compatibility remain unqualified."
+    },
+    "checks": {
+      "tests": "Final post duplicate-lookup cleanup all-package tests with actual saved/edited artifacts pass library16.491s, CLI/internal cached; earlier full run17.117s/CLI0.376s also passes.",
+      "race": "Full all-package race passes library174.130s/CLI1.820s/internal cached before removal of one redundant identical control lookup. Final post-cleanup all Colleaf tests with actual saved/edited flow artifacts pass under race5.077s. Flow-focused race1.500s also passed before adding the soft-break regression.",
+      "vet": "pass after final duplicate-lookup cleanup",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "Final post-cleanup host CLI build passes. Focused flow tests0.400s, host CLI --help and Linux amd64/arm64 cross-builds passed before isolated removal of redundant identical control lookup. Cross-builds are not Linux execution evidence.",
+      "fuzz": "Existing small navigation property/offset fuzz target75187 executions/10.742s,2workers pass before isolated duplicate-lookup removal; short safety campaign, not exhaustive flow-owner coverage.",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go production changes only; no new dependency, runtime executable/service/CGO/license server/upload, app/backend change or permission/quota gate. Optional pinned QA and generated artifacts remain ignored. Original corpus/oracles unchanged.",
+    "remaining": "Standalone AnchorPoint native export and other structural cursors; nonmain editor target lookup limits, marker appearance/nonvisual/provenance intent; public native API/CLI and actual full-preset/browser qualification; per-page/decorated notes and broader PDF/source/resource/final acceptance audit.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_FLOW_QA=output/colleaf-qa/flow-navigation.json GOWORK=off go test -run TestColleafFlowNavigation -count=1 .",
+      "node scripts/verify_colleaf_flow_navigation.cjs",
+      "MANYDOC_COLLEAF_FLOW_SAVED=output/colleaf-qa/flow-navigation-saved.json MANYDOC_COLLEAF_FLOW_EDITED=output/colleaf-qa/flow-navigation-edited.json GOWORK=off go test -run TestColleafFlowNavigation -count=1 .",
+      "rg -n 'AnchorPoint|structural cursor' colleaf_tables.go colleaf_navigation.go"
+    ]
   }
 }

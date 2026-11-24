@@ -1556,3 +1556,20 @@ structural controls still fail final graph validation rather than losing anchors
 The optional pinned container-navigation probe qualifies actual plugin/save/edit/
 selection-refresh behavior and full Go/SF tree/assets/relationships; browser UI
 and remaining standalone/list/section/page-break anchors are unfinished.
+
+
+## Native flow-owner points
+
+List hints carry the first native paragraph ID. Inline points are promoted to
+Block.Anchors only at the current first paragraph/start of a reconstructed list;
+other points retain current inline positions and get stable stale-placement
+diagnostics. Page-break points are classified before text fragmentation, using
+real form-feed controls. A discarded rendered soft break retains a zero-height
+SF point. Explicit sections use checked current section-ID/start bindings and
+avoid flattening away section anchors. Empty sections remain independently owned.
+
+Whole-document encoding validates the complete destination graph first. Its
+preliminary first-section note projection temporarily declares only links whose
+anchors were omitted by that projection; the final native intent uses original
+unresolved identities and final composition checks the complete real graph.
+Standalone AnchorPoint export and other structural cursors remain unfinished.

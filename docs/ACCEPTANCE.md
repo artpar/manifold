@@ -66,7 +66,9 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
    full native navigation. Current bookmark/heading point data, typed targets and
    real selection-manager refresh requests now have save/edit/Go/SF evidence.
    Real table/image-start anchors now have nested/list/story save/edit/SF and
-   exact selection-request evidence. Standalone/list/section/page-break anchors,
+   exact selection-request evidence. List/section/page-break anchors now also have
+   nested/story/empty-section save/edit/SF and selection evidence; soft-boundary
+   point retention has a Go regression. Standalone AnchorPoint export,
    remaining structural cursors, nonmain lookup limits and actual rendered caret/
    scroll/browser behavior remain required.
 4. **Corpus/visual and final audit:** eight pinned, legally attributed original

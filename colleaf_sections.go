@@ -179,6 +179,22 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 		plain.Footers = nil
 		plain.EvenAndOddHeaders = false
 	}
+	// The preliminary note composition uses only the first section body. Its
+	// omitted root/other-section anchors are not unresolved in the final document.
+	// Admit those links only in this temporary validated projection.
+	partial, err := catalogDestinations(&plain, false)
+	if err != nil {
+		return colleafNoteSnapshot{}, err
+	}
+	plain.UnresolvedDestinations = append([]string(nil), plain.UnresolvedDestinations...)
+	var omitted []string
+	for id := range partial.links {
+		if !partial.anchors[id] && !partial.missing[id] {
+			omitted = append(omitted, id)
+		}
+	}
+	sort.Strings(omitted)
+	plain.UnresolvedDestinations = append(plain.UnresolvedDestinations, omitted...)
 	catalog, err := catalogNotes(resolved, false)
 	if err != nil {
 		return colleafNoteSnapshot{}, err
@@ -294,15 +310,19 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 		sectionBlocks = []Block{{Kind: SectionBlock, Section: &Section{Blocks: resolved.Blocks}}}
 	}
 	for i, b := range sectionBlocks {
-		if b.Source != nil || len(b.Anchors) > 0 {
-			return out, fmt.Errorf("%w: native section source/anchors need mapping", ErrUnsupported)
+		if b.Source != nil {
+			return out, fmt.Errorf("%w: native section provenance needs mapping", ErrUnsupported)
 		}
 		section := b.Section
+		sectionOffset := w.offset
 		if err = w.blocks(section.Blocks, 0); err != nil {
 			return out, err
 		}
 		record := &w.body.SectionBreaks[len(w.body.SectionBreaks)-1]
 		record.ID = fmt.Sprintf("manydoc-section-%d", i+1)
+		if err = w.containerAnchors(b.Anchors, sectionOffset, "section", record.ID); err != nil {
+			return out, err
+		}
 		start, err := colleafSectionStart(section.Start)
 		if err != nil {
 			return out, err
@@ -850,10 +870,10 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 			}
 			section.FirstPage = *record.FirstPage == 1
 		}
-		doc.Blocks = append(doc.Blocks, Block{Kind: SectionBlock, Section: section})
+		doc.Blocks = append(doc.Blocks, Block{Kind: SectionBlock, Section: section, Anchors: reader.sectionPoints[node.start]})
 		previous = actual
 	}
-	if len(intent.Layouts) > 0 && !intent.Sectioned && len(doc.Blocks) == 1 && !doc.EvenAndOddHeaders && !doc.Blocks[0].Section.FirstPage && doc.Blocks[0].Section.Headers.First == nil && doc.Blocks[0].Section.Headers.Even == nil && doc.Blocks[0].Section.Footers.First == nil && doc.Blocks[0].Section.Footers.Even == nil {
+	if len(intent.Layouts) > 0 && !intent.Sectioned && len(doc.Blocks) == 1 && len(doc.Blocks[0].Anchors) == 0 && !doc.EvenAndOddHeaders && !doc.Blocks[0].Section.FirstPage && doc.Blocks[0].Section.Headers.First == nil && doc.Blocks[0].Section.Headers.Even == nil && doc.Blocks[0].Section.Footers.First == nil && doc.Blocks[0].Section.Footers.Even == nil {
 		section := doc.Blocks[0].Section
 		doc.Blocks = section.Blocks
 		if section.Layout != nil {
@@ -885,6 +905,7 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 		return nil, err
 	}
 	doc.Diagnostics = append(doc.Diagnostics, hyperlinkDiagnostics...)
+	reader.finishListPoints()
 	doc.Diagnostics = append(doc.Diagnostics, reader.doc.Diagnostics...)
 	doc.Diagnostics = append(doc.Diagnostics, diagnostics...)
 	if err = citations.collapse(ctx, doc); err != nil {
@@ -944,10 +965,13 @@ func (r *colleafBodyReader) breakParagraph(start, end int, p colleafParagraphRec
 			appendPart(part)
 		}
 		if soft[position] {
+			if ids := r.containerPoints[position]; len(ids) > 0 {
+				blocks = append(blocks, Block{Kind: AnchorPoint, Anchors: ids})
+			}
 			r.doc.warn("colleaf_soft_page_break", "Native rendered soft page boundary omitted from logical flow; literal content is retained")
 			join = true
 		} else {
-			blocks = append(blocks, Block{Kind: PageBreak})
+			blocks = append(blocks, Block{Kind: PageBreak, Anchors: r.containerPoints[position]})
 			join = false
 		}
 		cursor = position + 1

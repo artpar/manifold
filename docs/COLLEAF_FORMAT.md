@@ -992,8 +992,9 @@ this probe. Actual caret display, scrolling, widgets and browser events remain
 unqualified. The pinned handler resolves targets only in the main body; links to
 nonmain point definitions retain data with an explicit limitation diagnostic.
 Real table/image-start points are now mapped as described below. Standalone
-AnchorPoint blocks, anchors on lists/sections/page breaks and remaining native
-structural cursor projection remain required work. This component does not claim
+AnchorPoint native export and remaining structural cursor projection remain
+required work; list/section/page-break owners are mapped in the flow component
+below. This component does not claim
 full native adapter/API/CLI or overall goal completion.
 
 ```sh
@@ -1037,3 +1038,31 @@ MANYDOC_COLLEAF_CONTAINER_QA=output/colleaf-qa/container-navigation.json GOWORK=
 node scripts/verify_colleaf_container_navigation.cjs
 MANYDOC_COLLEAF_CONTAINER_SAVED=output/colleaf-qa/container-navigation-saved.json MANYDOC_COLLEAF_CONTAINER_EDITED=output/colleaf-qa/container-navigation-edited.json GOWORK=off go test -run TestColleafContainerNavigation -count=1 .
 ```
+
+
+## Current list, break and section point component
+
+Version1 owner hints now also accept list (first paragraph ID), break (real
+form-feed control) and section (current native section ID/start). List points
+become container anchors only at the reconstructed list's current first-paragraph
+start. Moved points retain actual inline locations with diagnostics, including
+moves within the same paragraph. Explicit section and child points can share an
+offset without collapsing ownership. Empty section anchors survive save/reopen.
+A point on a native rendered soft page break becomes a zero-height SF AnchorPoint
+when that layout boundary is omitted, with the ordinary soft-break diagnostic.
+Standalone AnchorPoint native export remains unfinished, including that imported
+case; it is still required work rather than a completion exception.
+
+The preliminary note composition sees a first-section subset. Its temporary
+unresolved set admits references to omitted root/other-section anchors; the final
+native intent retains the original declarations and complete graph validation.
+No invented final destination or runtime permission gate is introduced.
+
+scripts/verify_colleaf_flow_navigation.cjs reuses the same pinned validator,
+plugins, unmodified handler and actual selection manager. Eleven points across
+main/nested/header/note lists, breaks and three sections (one empty), nine exact
+internal refresh requests, two saves/reopens and actual TextX movement pass.
+Go strict .vdocs/SF reimport checks all structures, relationships, actual interval
+boundaries and exact stale-section diagnostics. Render manager remains stubbed;
+actual browser caret/scroll/paint/events and remaining structural/API/intent
+qualification remain open.

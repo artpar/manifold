@@ -123,8 +123,11 @@ func (w *colleafBodyWriter) flow(blocks []Block, depth int) error {
 			return err
 		}
 		if b.Kind == PageBreak {
-			if b.Source != nil || len(b.Anchors) > 0 {
-				return fmt.Errorf("%w: native page-break source/anchors require mapping", ErrUnsupported)
+			if b.Source != nil {
+				return fmt.Errorf("%w: native page-break provenance requires mapping", ErrUnsupported)
+			}
+			if err := w.containerAnchors(b.Anchors, w.offset, "break", "page-break"); err != nil {
+				return err
 			}
 			w.text("\f")
 			w.body.Paragraphs = append(w.body.Paragraphs, colleafParagraphRecord{StartIndex: w.offset, ID: w.id("p")})
@@ -361,25 +364,29 @@ func (r *colleafBodyReader) paragraphFragment(start, end int, p colleafParagraph
 }
 
 type colleafBodyReader struct {
-	containerPoints map[int][]string
-	ctx             context.Context
-	body            colleafBody
-	index           *colleafBodyIndex
-	settings        colleafTextContext
-	tables          map[string]json.RawMessage
-	doc             *Document
-	paragraphs      map[int]colleafParagraphRecord
-	used            map[string]bool
-	spans           []colleafStyleSpan
-	ranges          []colleafRangeRecord
-	bookmarks       []colleafRangeRecord
-	bookmarkUsed    map[string]bool
-	paragraphStarts map[int]int
-	atomPositions   []int
-	listParagraphs  map[int]colleafListParagraph
-	listBindings    map[string]colleafListBinding
-	images          map[string]*Image
-	imageBindings   map[string]colleafImageBinding
+	sectionPoints      map[int][]string
+	listPointPositions map[string]int
+	listPointOwners    map[string]string
+	promotedListPoints map[string]bool
+	containerPoints    map[int][]string
+	ctx                context.Context
+	body               colleafBody
+	index              *colleafBodyIndex
+	settings           colleafTextContext
+	tables             map[string]json.RawMessage
+	doc                *Document
+	paragraphs         map[int]colleafParagraphRecord
+	used               map[string]bool
+	spans              []colleafStyleSpan
+	ranges             []colleafRangeRecord
+	bookmarks          []colleafRangeRecord
+	bookmarkUsed       map[string]bool
+	paragraphStarts    map[int]int
+	atomPositions      []int
+	listParagraphs     map[int]colleafListParagraph
+	listBindings       map[string]colleafListBinding
+	images             map[string]*Image
+	imageBindings      map[string]colleafImageBinding
 }
 
 func (r *colleafBodyReader) paragraph(start, end int, p colleafParagraphRecord) ([]Block, error) {
@@ -791,15 +798,42 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 	}
 	r.bookmarkUsed = map[string]bool{}
 	r.containerPoints = map[int][]string{}
+	r.sectionPoints = map[int][]string{}
+	sectionEndIDs := map[int]string{}
+	for _, s := range body.SectionBreaks {
+		sectionEndIDs[s.StartIndex] = s.ID
+	}
+	sectionStartIDs := map[int]string{}
+	for _, s := range index.sections {
+		sectionStartIDs[s.start] = sectionEndIDs[s.end-1]
+	}
+	r.listPointOwners = map[string]string{}
+	r.listPointPositions = map[string]int{}
+	r.promotedListPoints = map[string]bool{}
 	r.paragraphStarts = colleafParagraphStarts(index)
 	for _, a := range body.CustomRanges {
 		if a.Type == 3 {
+			p, err := readColleafBookmark(a)
+			if err != nil {
+				return nil, err
+			}
+			if p.Hint != nil && p.Hint.Role == "section" && p.Hint.OwnerID == sectionStartIDs[a.StartIndex] {
+				if err = colleafBookmarkLosses(r.doc, a); err != nil {
+					return nil, err
+				}
+				r.sectionPoints[a.StartIndex] = append(r.sectionPoints[a.StartIndex], p.BookmarkID)
+				continue
+			}
 			claimed, err := r.containerBookmark(a)
 			if err != nil {
 				return nil, err
 			}
 			if claimed {
 				continue
+			}
+			if p.Hint != nil && p.Hint.Role == "list" {
+				r.listPointOwners[p.BookmarkID] = p.Hint.OwnerID
+				r.listPointPositions[p.BookmarkID] = a.StartIndex
 			}
 			r.bookmarks = append(r.bookmarks, a)
 			continue
@@ -861,6 +895,7 @@ func decodeColleafBody(ctx context.Context, body colleafBody, settings colleafTe
 		return nil, err
 	}
 	r.doc.Blocks = blocks
+	r.finishListPoints()
 	if len(r.used) != len(tables) {
 		return nil, fmt.Errorf("native table source is orphaned")
 	}
