@@ -314,6 +314,14 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 			return nil, err
 		}
 		block.colleafOrigin = origin
+		block.colleafListOrigin, err = readColleafOriginProfile(directParagraph["manydocListOrigin"], colleafListOriginProfile)
+		if err != nil {
+			return nil, err
+		}
+		block.colleafItemOrigin, err = readColleafOriginProfile(directParagraph["manydocItemOrigin"], colleafItemOriginProfile)
+		if err != nil {
+			return nil, err
+		}
 		level, hasLevel, err := colleafRawInt(properties, "outlineLevel")
 		if err != nil {
 			return nil, err
@@ -571,6 +579,10 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 		sort.Strings(keys)
 		for _, key := range keys {
 			switch key {
+			case "manydocListOrigin", "manydocItemOrigin":
+				if (key == "manydocListOrigin" && block.colleafListOrigin == nil) || (key == "manydocItemOrigin" && block.colleafItemOrigin == nil) {
+					doc.warn("colleaf_list_origin_inheritance", "Inherited native source properties are not treated as direct list/item ownership")
+				}
 			case "manydocOrigin":
 				if origin == nil {
 					doc.warn("colleaf_origin_inheritance", "Inherited native source-binding properties are not treated as direct paragraph ownership")

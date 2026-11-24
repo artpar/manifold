@@ -86,9 +86,6 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 	if depth > 64 || len(block.Items) == 0 || (block.List != "number" && block.List != "bullet") {
 		return fmt.Errorf("invalid native list")
 	}
-	if block.Source != nil {
-		return fmt.Errorf("%w: native list provenance requires mapping", ErrUnsupported)
-	}
 	if err := validateNumbering(block.Numbering); err != nil {
 		return err
 	}
@@ -172,7 +169,7 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 		binding.OriginalTemplate = &original
 	}
 	for i, item := range block.Items {
-		if item.Source != nil || len(item.Blocks) == 0 || (item.Blocks[0].Kind != Paragraph && item.Blocks[0].Kind != Heading) {
+		if len(item.Blocks) == 0 || (item.Blocks[0].Kind != Paragraph && item.Blocks[0].Kind != Heading) {
 			return fmt.Errorf("%w: native list item requires a leading paragraph without unmapped provenance", ErrUnsupported)
 		}
 		pointOffset := w.offset
@@ -187,6 +184,36 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 			bullet.Start = &start
 		}
 		w.body.Paragraphs[first].Bullet = sfAttrs(bullet)
+
+		props, err := colleafStyleObject(w.body.Paragraphs[first].Style)
+		if err != nil {
+			return err
+		}
+		if i == 0 && block.Source != nil {
+			hash, err := colleafListFingerprint(block)
+			if err != nil {
+				return err
+			}
+			origin, err := newColleafSourceOrigin(block.Source, hash, colleafListOriginProfile)
+			if err != nil {
+				return err
+			}
+			props["manydocListOrigin"] = sfAttrs(origin)
+		}
+		if item.Source != nil {
+			hash, err := colleafItemFingerprint(block, i)
+			if err != nil {
+				return err
+			}
+			origin, err := newColleafSourceOrigin(item.Source, hash, colleafItemOriginProfile)
+			if err != nil {
+				return err
+			}
+			props["manydocItemOrigin"] = sfAttrs(origin)
+		}
+		if len(props) > 0 {
+			w.body.Paragraphs[first].Style = sfAttrs(props)
+		}
 		firstID := w.body.Paragraphs[first].ID
 		if i == 0 {
 			if err := w.containerAnchors(block.Anchors, pointOffset, "list", firstID); err != nil {

@@ -231,3 +231,8 @@ The image-origin probe reuses the same attributed pinned SDK/renderer/plugins,
 hash-pinned Colleaf validator and existing ProseMirror reader. It reuses existing
 attributed JPEG and synthetic PNG fixtures; no new production dependency or
 third-party implementation is introduced.
+
+
+The list-origin probe reuses the same attributed pinned SDK/renderer/plugins,
+hash-pinned Colleaf validator and existing ProseMirror reader. No new production
+dependency or third-party implementation is introduced.

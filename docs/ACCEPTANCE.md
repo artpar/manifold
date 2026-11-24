@@ -138,3 +138,10 @@ detachment and exact asset/SF evidence, including registered mirror consistency 
 original JPEG bytes. Source facts remain separate from current native geometry.
 List/item/other container/anchor sources and full native intent/API/UI/corpus/final
 acceptance remain required; browser bitmap painting is not qualified by these probes.
+
+
+Native list/item sources now have synthetic actual save/TextX edit/rendered restart/
+reference-detachment and exact SF evidence, including parent numbering/ordinal
+qualification, inherited/lost ownership and stable repeated round trips. Other
+container/anchor sources and full native intent/API/UI/corpus/final acceptance
+remain required.

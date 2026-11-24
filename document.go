@@ -103,6 +103,8 @@ type Block struct {
 	Start                   *int           `json:"start,omitempty"`
 	Source                  *SourceInfo    `json:"source,omitempty"`
 	Section                 *Section       `json:"section,omitempty"`
+	colleafListOrigin       *colleafOrigin
+	colleafItemOrigin       *colleafOrigin
 	colleafImageOrigin      *colleafOrigin
 	colleafTableOrigin      *colleafOrigin
 	colleafOrigin           *colleafOrigin

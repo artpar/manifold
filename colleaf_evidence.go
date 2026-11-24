@@ -5,6 +5,7 @@ import "fmt"
 // Original source evidence and diagnostic history are nonvisual intent, not a
 // cached body and not a claim about the native editor's current page geometry.
 type colleafDocumentEvidence struct {
+	ListOrigins    []colleafOrigin     `json:"listOrigins,omitempty"`
 	ImageOrigins   []colleafOrigin     `json:"imageOrigins,omitempty"`
 	TableOrigins   []colleafOrigin     `json:"tableOrigins,omitempty"`
 	RunOrigins     []colleafOrigin     `json:"runOrigins,omitempty"`
@@ -48,6 +49,11 @@ func (e *colleafDocumentEvidence) validate() error {
 	}
 	for i := range e.UnboundSources {
 		if err := e.UnboundSources[i].validate(e.Pages); err != nil {
+			return err
+		}
+	}
+	for _, o := range e.ListOrigins {
+		if err := validateColleafListOrigin(o, e.Pages); err != nil {
 			return err
 		}
 	}

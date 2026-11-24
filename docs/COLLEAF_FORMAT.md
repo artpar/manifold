@@ -1303,5 +1303,34 @@ snapshot assets and detached references. Strict .vdocs/Go/SF compares exact asse
 structure, preferred sizes, source states, diagnostics and repeated stability.
 Actual ProseMirror checks96 nodes/marks/attributes. Go separately qualifies fitted
 explicit-section/running/note sources. This is synthetic headless provenance
-qualification; browser bitmap paint, list/item/other container/anchor source slots
-and full native/API/preset/final acceptance remain required.
+qualification; browser bitmap paint, remaining source slots and full native/API/
+preset/final acceptance remain required. The list/item component is qualified below.
+
+
+## Current list/item origin component
+
+Direct paragraphStyle.manydocListOrigin / manydocItemOrigin contain respectively
+manydoc.list-origin or manydoc.item-origin, version1 and ref only. Root
+evidence.listOrigins stores deduplicated SourceInfo and source-free SF fingerprints,
+not list/item content. Final current list composition assigns the list source from
+its first leading paragraph and each item source from its leading paragraph.
+Markers left on unmarked or other non-owning paragraphs do not assert ownership.
+Inherited source properties diagnose; every direct native reference still validates.
+Private markers clear before public return.
+
+List fingerprints cover current list semantics. Item fingerprints cover its subtree,
+parent numbering attrs and ordinal index, without repeated sibling-body encoding.
+Counter/format/position edits therefore qualify affected item sources historical,
+even with unchanged text. Changes to source binding metadata alone do not stale
+semantics. Changed owners use colleaf_list_source_historical; missing owners archive
+facts with colleaf_list_source_unbound. Source physical coordinates remain original.
+
+scripts/verify_colleaf_list_origins.cjs reuses pinned SDK/validator/renderer for24
+records (10lists/14items) across nested/independent/restarted/bullet/zero/cell/running/
+note cases, styled emoji, two saves/reopens, TextX content edits, rendered2/3-to9/10
+native restart and list/item reference removal. Strict .vdocs/Go/SF compares full
+structures/numbering/source states/diagnostics and repeated stability. ProseMirror
+checks326 nodes/marks/attributes. Go separately qualifies inherited/contradictory/
+lost ownership, unmarked paragraphs, malformed pools and source-only bullet-item
+context. This synthetic headless evidence does not complete other container/anchor
+source slots, remaining appearance/intent or native/API/browser/final acceptance.

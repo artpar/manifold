@@ -6769,5 +6769,46 @@
       "MANYDOC_COLLEAF_IMAGE_ORIGIN_SAVED=output/colleaf-qa/image-origins-saved.json MANYDOC_COLLEAF_IMAGE_ORIGIN_RESIZED=output/colleaf-qa/image-origins-resized.json MANYDOC_COLLEAF_IMAGE_ORIGIN_ASSET=output/colleaf-qa/image-origins-asset.json MANYDOC_COLLEAF_IMAGE_ORIGIN_DETACHED=output/colleaf-qa/image-origins-detached.json GOWORK=off go test -run TestColleafImageOrigins -count=1 .",
       "rg -n 'Source != nil|manydocOrigin' colleaf_lists.go colleaf_navigation.go colleaf_tables.go"
     ]
+  },
+  "colleaf_list_origins_2026_11_24": {
+    "scope": "Private native list/item source ownership and numbering-aware historical qualification. Full native integration and overall goal remain active/incomplete.",
+    "implementation": [
+      "Direct leading-paragraph properties manydocListOrigin/manydocItemOrigin contain manydoc.list-origin or manydoc.item-origin/version1/ref only. evidence.listOrigins deduplicates original SourceInfo and source-free SF hashes; no list/item body cache.",
+      "Final current list composition determines owners. List hashes cover current list semantics; item hashes cover selected subtree, parent numbering attrs and ordinal index. Only the selected item subtree is encoded per item, avoiding repeated sibling bodies.",
+      "Changed content/numbering/ownership sources become historical with a diagnostic. Unused sources archive unbound; inherited defaults and markers on unmarked paragraphs do not assert current ownership. Private markers clear before return.",
+      "Every direct native reference validates, including markers not consumed as owners. Missing/version/digest/duplicate/contradictory records reject. Source-only edits do not falsely stale list/item semantics; source physical geometry never becomes current layout authority."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_list_origins.cjs",
+      "script_sha256": "ebfcfacc179c7c011c409d60503a44ee5ad50143a32df10d95a87598b3b8f20d",
+      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned Colleaf validator and prosemirror-model1.25.13; no new dependency.",
+      "results": [
+        "24 source facts (10lists/14items) across nested, independent, restarted, bullet, zero, merged-cell, header/footer and note lists. Reference-only properties and evidence have no text/body caches.",
+        "Actual registered-plugin saves/reopens preserve source pools/streams and whole bold13pt emoji. Actual TextX Q insertion retains edited content and historical enclosing-list/item facts.",
+        "Actual native bullet restart changes rendered markers2./3. to9./10.; strict .vdocs/Go/SF verifies current numbering, historical list and both item sources, unchanged text and exact diagnostic.",
+        "Actual list-only and item-only source-reference removal archives the respective facts without staling the other owner. All five actual artifacts have exact SF/current structure/source/diagnostic checks and stable repeated native round trips.",
+        "Actual ProseMirror checks326 nodes/marks/attributes. Go separately qualifies lost bullet ownership, inherited defaults, contradictory metadata, malformed pools and source-free bullet-item context.",
+        "Existing table-origin and image-origin independent probes pass after integration."
+      ],
+      "limits": "Synthetic headless component evidence, not full imported-PDF source coverage, actual browser paint/caret/scroll/events, remaining container/anchor source slots or full native API/CLI/final acceptance."
+    },
+    "checks": {
+      "tests": "Final all-package tests with all five actual list artifacts pass library16.697s/CLI0.758s/internal cached.",
+      "race": "Final all-package race with all five actual list artifacts passes library171.728s/CLI1.804s/internal cached.",
+      "vet": "pass after final source/test changes",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "Final focused list tests0.544s with actual artifacts, host CLI build/--help and Linux amd64/arm64 cross-builds pass. Cross-builds are not execution evidence.",
+      "fuzz": "Direct paragraph list/item metadata scanner target115916 executions/10.795s with2workers passes; short malformed-input safety sample, not exhaustive coverage.",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go/std-library production only. No dependency/runtime executable/service/CGO/license server/upload, application/backend/permission/quota change or modified original corpus/oracle. SF value/schema unchanged; generated QA artifacts ignored.",
+    "remaining": "Other container/anchor sources and explicit zero-width empty-text source policy; remaining marker appearance/nonvisual run/settings intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_LIST_ORIGIN_QA=output/colleaf-qa/list-origins.json GOWORK=off go test -run TestColleafListOrigins -count=1 .",
+      "node scripts/verify_colleaf_list_origins.cjs",
+      "MANYDOC_COLLEAF_LIST_ORIGIN_SAVED=output/colleaf-qa/list-origins-saved.json MANYDOC_COLLEAF_LIST_ORIGIN_EDITED=output/colleaf-qa/list-origins-edited.json MANYDOC_COLLEAF_LIST_ORIGIN_RESTARTED=output/colleaf-qa/list-origins-restarted.json MANYDOC_COLLEAF_LIST_ORIGIN_DETACHED=output/colleaf-qa/list-origins-detached.json MANYDOC_COLLEAF_LIST_ORIGIN_ITEM_DETACHED=output/colleaf-qa/list-origins-item-detached.json GOWORK=off go test -run TestColleafListOrigins -count=1 .",
+      "rg -n 'Source != nil|manydocOrigin' colleaf_navigation.go colleaf_tables.go colleaf_sections.go"
+    ]
   }
 }

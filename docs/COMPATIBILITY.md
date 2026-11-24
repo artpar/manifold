@@ -1105,5 +1105,16 @@ absent bindings archive sources unbound. Current bytes and geometry remain
 native-authoritative, with independent stale-size diagnostics. Registered drawing
 mirrors must agree with direct descriptors, including provenance. Synthetic save/
 resize/replacement/detachment, original JPEG, fitted-section and strict SF checks
-qualify this component. Browser bitmap paint, list/item/other container/anchor
-source bindings and full native/API/UI/corpus/final acceptance remain incomplete.
+qualify this component. Browser bitmap paint, remaining source slots and full
+native/API/UI/corpus/final acceptance remain incomplete. List/item sources are
+qualified below.
+
+
+Private native list/item source bindings now retain nested/independent/restarted/
+bullet/zero/cell/running/note provenance. Item source qualification includes parent
+numbering and ordinal context, not just text. Changed semantics remain historical;
+missing current owners archive facts unbound. Inherited or unmarked paragraphs do
+not acquire ownership. Source-only metadata changes do not stale enclosing/item
+semantics. Synthetic actual save/edit/restart/detachment and strict SF evidence
+qualify this component; other container/anchor slots and full native intent/API/UI/
+corpus/final acceptance remain unfinished.

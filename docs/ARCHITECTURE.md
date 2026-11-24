@@ -1719,3 +1719,17 @@ including provenance. A shared source-record constructor retains existing table
 and run/paragraph value contracts. Actual save/edit/frame/asset/SF checks qualify
 this component; list/item/other container/anchor and full native/API/UI/final work
 remain required.
+
+
+## Native list/item origin bindings
+
+colleaf_list_origins.go binds sources through direct leading-paragraph metadata and
+a deduplicated document-evidence pool. Final list composition determines current
+owners; old offsets and cached item trees have no authority. List fingerprints
+cover the current list; item fingerprints cover the selected item subtree plus
+parent numbering attrs and ordinal index, with all source fields normalized out.
+Only the selected subtree is encoded per item, avoiding repeated sibling traversal.
+Changed semantics retain historical facts; unused records archive unbound. All
+native references validate, inherited styles do not own sources and unconsumed
+private markers clear before return. Actual save/edit/marker-restart/SF checks
+qualify this component; remaining container/anchor/native/API/UI/final work remains.

@@ -39,7 +39,52 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: image source bindings and mirror consistency
+## Latest progress: list and item source bindings
+
+Private direct leading-paragraph properties now carry manydoc.list-origin and
+manydoc.item-origin/version1 references in manydocListOrigin / manydocItemOrigin.
+A deterministic evidence.listOrigins pool stores original SourceInfo and source-
+free SF fingerprints, without list/item bodies. Ownership follows current list
+composition, not old offsets or a cached tree. List semantics include the whole
+current list; item semantics include its subtree, parent numbering attrs and ordinal
+index. Changed content/numbering/ownership qualifies source facts historical;
+missing current owners archive facts unbound. Original physical facts remain
+independent of current native geometry.
+
+Sources on unmarked paragraphs do not become list ownership; inherited style
+metadata is diagnosed without ownership. All native references validate before
+restoration, even if current composition does not consume their markers. Private
+markers clear before return. Source-only edits do not falsely stale parent/item
+semantics. Item hashes encode only the selected subtree plus small parent context,
+not all sibling bodies for every item.
+
+Pinned actual plugins/validator/skeleton check24 source records across10 nested,
+independent, restarted, bullet, zero, cell, header/footer and note lists; styled
+emoji; two saves/reopens; TextX edits; native marker restart2/3 to9/10; list/item
+reference removal. Strict .vdocs/Go/SF compares exact content, numbering, sources,
+diagnostics and repeated stability. ProseMirror checks326 nodes/marks/attributes.
+Go also covers missing/inherited/contradictory ownership, bullet removal, malformed
+pools and source-free bullet-item context. This is synthetic headless component
+qualification, not full imported-PDF/native/browser fidelity.
+
+Final tests16.697s/CLI0.758s, vet/modules, CGO-disabled focused tests0.544s, host
+CLI/--help and Linux amd64/arm64 cross-builds pass. Metadata-scanner fuzz passes
+115916 executions/10.795s, a short safety sample. Full race passes171.728s/
+CLI1.804s. verification.json records scopes and limitations. The full goal remains
+active/incomplete. Next implement other container and zero-width anchor sources,
+then remaining appearance/nonvisual intent, public native API/CLI, full-preset/
+browser and broader PDF/source/resource/final acceptance audits. Production stays
+pure Go, with no application/backend change or external blocker.
+
+```sh
+MANYDOC_COLLEAF_LIST_ORIGIN_QA=output/colleaf-qa/list-origins.json GOWORK=off go test -run TestColleafListOrigins -count=1 .
+node scripts/verify_colleaf_list_origins.cjs
+MANYDOC_COLLEAF_LIST_ORIGIN_SAVED=output/colleaf-qa/list-origins-saved.json MANYDOC_COLLEAF_LIST_ORIGIN_EDITED=output/colleaf-qa/list-origins-edited.json MANYDOC_COLLEAF_LIST_ORIGIN_RESTARTED=output/colleaf-qa/list-origins-restarted.json MANYDOC_COLLEAF_LIST_ORIGIN_DETACHED=output/colleaf-qa/list-origins-detached.json MANYDOC_COLLEAF_LIST_ORIGIN_ITEM_DETACHED=output/colleaf-qa/list-origins-item-detached.json GOWORK=off go test -run TestColleafListOrigins -count=1 .
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/colleaf-qa/list-origins-saved.json.sf output/colleaf-qa/list-origins-edited.json.sf output/colleaf-qa/list-origins-restarted.json.sf output/colleaf-qa/list-origins-detached.json.sf output/colleaf-qa/list-origins-item-detached.json.sf
+rg -n 'Source != nil|manydocOrigin' colleaf_navigation.go colleaf_tables.go colleaf_sections.go
+```
+
+## Earlier progress: image source bindings and mirror consistency
 
 Private direct drawing descriptors now carry manydoc.image-origin/version1 source
 references; evidence.imageOrigins stores deduplicated original SourceInfo and

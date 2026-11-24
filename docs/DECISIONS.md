@@ -2145,3 +2145,20 @@ mirror reference must reject, rather than disappear as harmless metadata. Qualif
 actual plugin saves of resized/replaced/detached snapshots, exact JPEG bytes, SF
 structures/source states and fitted-section sources. Browser bitmap painting and
 remaining native/source/API/final acceptance remain open.
+
+
+## 2026-11-24 Preserve list/item facts through current list composition
+
+Use direct paragraph properties for list/item source references, backed by a
+source/hash pool, rather than old flow offsets or cached bodies. Restore list
+ownership only from a current first leading paragraph and item ownership from its
+current leading paragraph. Validate every marker, including markers not consumed
+as current owners. Unmarked paragraphs/inherited defaults do not acquire ownership.
+Archive missing-owner facts and clear transient markers before public return.
+
+Include parent numbering context and ordinal index in item semantic hashes, so
+counter edits cannot leave item provenance falsely current. Normalize source-only
+changes out of both parent and item semantics; encode only the selected item subtree
+per item hash. Qualify actual TextX edits, rendered2/3-to9/10 restart, source-reference
+removal, lost/inherited ownership, strict SF and repeated stability. Remaining source/
+marker/API/UI/final acceptance stays required; no application policy is introduced.
