@@ -2458,3 +2458,16 @@ JPEG interpolation differences retain their original strict independent oracles.
 No API/dependency-version/runtime-service/app-permission changes. Original publication
 and MQTT SF remain identical. PDF_IMAGE_DECODING.md records exact fixtures, independent
 readers, visual inspection, reproduction and initial-parser/full-goal remaining work.
+
+
+## 2026-11-25 Validate retained parser streams and compressed identities
+
+After initial pdfcpu loading, verify original Raw xref/object streams through the
+shared64MiB/256MiB decoder, bypassing lenient cached Content. Validate N/First,
+member identity/offsets and active xref-index ownership before page access, retaining
+incremental replacements. This closes successful corrupt-source acceptance without
+claiming to bound earlier initial-parser allocations. No new API/dependency/version,
+app permission gate or vendor patch. PDF_PARSER_STREAMS.md records original sources,
+independent full-SF/geometry checks, original corpus equality, and the next exact
+compatibility defect: direct Encrypt dictionaries in MuPDF compressed exports.
+Its strict original success oracle remains failing and is next work, not a waiver.

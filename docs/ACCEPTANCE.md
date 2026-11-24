@@ -216,3 +216,13 @@ independent readers and original publication/MQTT complete-SF equality qualify t
 milestone. CMYK managed color and JPEG chroma interpolation differences retain
 strict oracles. See PDF_IMAGE_DECODING.md and verification.json. Initial parser
 resources and the full acceptance audit remain open; the goal is active/incomplete.
+
+
+Retained initial-stream integrity/ownership now has exact source and independent
+full-SF/geometry evidence: ten positive sources, nine atomically rejected invalid
+sources and original publication/MQTT equality. Earlier dependency allocations
+remain outside these guards. The audit exposed direct Encrypt dictionaries in
+MuPDF object-stream exports as a concrete next library compatibility defect; all
+four independent-reader password cases succeed while the library strict oracle
+still fails (`--require-encrypted`). PDF_PARSER_STREAMS.md records reproduction and the intended next
+adaptation boundary. No overall blocked state or completion exception follows.

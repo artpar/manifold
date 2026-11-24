@@ -7864,4 +7864,60 @@
       "GOWORK=off go test ./..."
     ]
   }
+,
+  "pdf_parser_stream_integrity": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "After initial pdfcpu loading, verify original Raw retained xref/object streams with native decoding instead of trusting lenient cached Content. Validate N/First, positive unique member identities, increasing in-body offsets and active compressed-xref index ownership before page access. Keep latest incremental replacements. Share64MiB-stage/256MiB decoded-work budget with syntax/images; no API/dependency/runtime-service/app-gate changes.",
+    "boundary": "This runs after ReadWithContext, which already decodes xref streams/prologs and may expand a catalog-containing object stream. It does not prevent those earlier allocations. It validates remaining lazy source before page access; no exhaustive parser memory/safety claim.",
+    "original_sources": {
+      "positive_count": 10,
+      "negative_count": 9,
+      "positives": "Raw/Flate/ASCII85/LZW0/LZW1/PNG/TIFF codecs retain exact full source Document/SF. Trailing comment/NUL prologs and latest incremental font replacement remain supported. Independent readers verify source pairs, xref membership, actual glyph origins, Courier style and latest Bold replacement, plus complete SF equality for codec/whitespace controls.",
+      "negatives": "Object/xref checksums, wrong header owner, low/high N, duplicate/zero identity, non-PDF vertical-tab whitespace and64MiB oversized lazy body. All9 unchanged sources succeeded through exact73fb39e Git-archive CLI; all now reject without partial Document/CLI destination mutation. Independent zlib counts actual67108936-byte lazy source and rejects corrupt checksums; prolog/xref source oracles distinguish count/identity defects."
+    },
+    "original_corpus": {
+      "publication_sf_sha256": "2d630c8ff72ec594b95b67542d66bf2df13886380672f6a213e5713b8095a7b2",
+      "mqtt_sf_sha256": "14742c55e8295feb0058a74cc33afe394f1ac340fa82aa422af3ad325524f526",
+      "assessment": "Both complete SF files byte-identical to exact73fb39e baseline. Original publication structure/content/DOCX and9-page PDF reflow checks pass unchanged."
+    },
+    "checks": {
+      "normal_all": "passed library28.161s/CLIcached; earlier29.093s/CLI0.811s",
+      "race_all": "passed final production library344.060s/CLI2.798s before later test-only predictor/prolog/incremental/negative/fuzz additions",
+      "focused_race": "passed current1.550s including later tests and fuzz baseline seeds; previous focused1.508s",
+      "cgo_disabled_focus": "passed0.380s",
+      "vet": "passed final",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "builds": "CGO-disabled host and Linux amd64/arm64 cross-builds passed; not Linux execution",
+      "header_fuzz_timed": "FAIL:10s campaign reported context deadline exceeded after110806 executions; no crashing input recorded. Preserve command/outcome, no engine/root-cause claim.",
+      "header_fuzz_count": "PASS: unchanged fuzzer,100000 executions/11.867s/two workers; header inputs <=4096 bytes, not complete PDF codec/parser safety.",
+      "diff_check": "passed"
+    },
+    "new_compatibility_failure": {
+      "producer": "MuPDF/PyMuPDF1.28.2 encrypted saves from original-syntax fixture with use_objstms=1,permissions=0; pypdf7.1.1 independently decrypts all4 with supplied password reader.",
+      "cases": [
+        "RC4-40",
+        "RC4-128",
+        "AES-128",
+        "AES-256"
+      ],
+      "cause": "Direct Encrypt dictionary in xref stream. Pinned parser parseTrailer reads only IndirectRefEntry(Encrypt), so EncKey is not initialized and compressed encrypted bodies fail zlib header validation inside ReadWithContext before manydoc gets the parsed context. Exact73fb39e baseline fails too.",
+      "strict_oracle": "scripts/verify_pdf_parser_streams.py --require-encrypted fails on aes128. Do not substitute external decrypted text or call this a completed unsupported-feature exception.",
+      "next": "Implement/qualify a pure-Go direct encryption dictionary adaptation preserving ciphertext, original object numbers, file IDs, source semantics and supplied-password behavior; no performer permission gate or vendor/app patch.",
+      "exact_preserved_source_sha256": {
+        "encrypted-aes128.pdf": "de6f4200642e141bb7038751f9bc56d1074ee9a957561fb481b9697843f3996a",
+        "encrypted-aes256.pdf": "f5948ef742735366132afa5df174ef69eefae42728beb262586a5d8c3a6ea8e7",
+        "encrypted-rc4-128.pdf": "53efa168ec8e13fc82b09425bf89c352cf6b89edb18131c61619c3b43455c65e",
+        "encrypted-rc4-40.pdf": "5fedd8e71299d02ad7334eb06712bdfc8aa5cc7d41a3d5fe019a6328a7a629b2"
+      },
+      "oracle": "--require-encrypted requires supplied-password success and complete SF equality to the source control, in addition to independent payload/member/glyph-geometry assertions. Generator preserves existing encrypted bytes/file IDs. Current library FAILS before validator; queued compatibility fix."
+    },
+    "remaining": "Initial pre-expansion resource boundary and direct Encrypt compatibility defect are explicit; full original semantic/reflow/native/API/visual acceptance remains active. Prior independent CMYK/JPEG/pypdf/CID/native-note/Word-PDF discrepancies retain original strict oracles. No overall external blocker.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/ACCEPTANCE.md docs/PDF_PARSER_STREAMS.md",
+      "GOWORK=off MANYDOC_PDF_PARSER_QA=output/pdf-parser-qa go test -run \"TestPDFParser|TestPDFObjectStream\" -count=1 .",
+      "output/qa-venv/bin/python scripts/verify_pdf_parser_streams.py output/pdf-parser-qa --generate-encrypted --require-encrypted",
+      "GOWORK=off go test ./..."
+    ]
+  }
 }

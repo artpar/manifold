@@ -40,7 +40,28 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: bounded image decoding and exact sample precision
+## Latest progress: parser-stream integrity and member ownership
+
+Retained xref/object streams now validate original decoded source before page
+access, sharing the existing stage/work bounds. Corrupt checksums and inconsistent
+N/header identities/xref indexes reject without partial extraction or CLI output.
+Ten positive original-syntax sources retain formatting, geometry and complete SF;
+nine negative sources previously accepted by73fb39e now reject atomically. Original
+publication/MQTT SF remains identical. PDF_PARSER_STREAMS.md records source oracles,
+independent readers, checks and the precise remaining pre-expansion boundary.
+Current tests28.161s, final-production full race344.060s, focused current race1.550s,
+vet/module verification and CGO-disabled host/Linux cross-builds pass. The first
+timed header-fuzz run reported a deadline failure; the unchanged fixed-count
+100,000-execution campaign passes. Both outcomes remain in the ledger.
+
+This audit also reproduces a separate real compatibility gap: MuPDF encrypted
+exports with direct Encrypt dictionaries fail before this validator because the
+initial parser recognizes only indirect Encrypt. Independent readers decrypt all
+four supplied-password variants. The strict original success oracle remains
+FAILING. Fix that combination next; it is not a completed unsupported exception.
+The goal remains active/incomplete, with no overall external blocker.
+
+## Prior progress: bounded image decoding and exact sample precision
 
 PDF image/stencil/mask byte filters and Indexed lookups now expand within explicit
 limits before raster rendering. JPEG headers are checked before pixel decoding;
@@ -624,14 +645,20 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-The image-stage audit is now qualified in PDF_IMAGE_DECODING.md. Review the initial
-pdfcpu xref/object-stream path next: read.go xRefStreamDict/saveDecodedStreamContent
-still calls StreamDict.Decode before the library owns the parsed objects, and
-parseObjectStream decodes the prolog using source First. This is a concrete remaining
-resource path, not an overall blocker or an excuse to defer semantic acceptance.
+The retained parser-stream audit is now qualified in PDF_PARSER_STREAMS.md, with
+its earlier allocation boundary still explicit. Prioritize the newly reproduced
+direct Encrypt/object-stream compatibility failure before returning to the wider
+source/reflow/API/visual acceptance matrix. The exact strict oracle is:
+
+```sh
+cat docs/PDF_PARSER_STREAMS.md docs/ACCEPTANCE.md
+GOWORK=off MANYDOC_PDF_PARSER_QA=output/pdf-parser-qa go test -run 'TestPDFParser|TestPDFObjectStream' -count=1 .
+output/qa-venv/bin/python scripts/verify_pdf_parser_streams.py output/pdf-parser-qa --generate-encrypted --require-encrypted
+rg -n 'parseTrailer|IndirectRefEntry\("Encrypt"|checkForEncryption' /Users/artpar/go/pkg/mod/github.com/pdfcpu/pdfcpu@v0.11.1/pkg/pdfcpu/read.go
+```
 
 1. Continue the wider source/resource/reflow/native corpus audit, including
-   initial xref/object-stream resources after the image-stage fix. The
+   the remaining initial parser boundary and direct encryption dictionaries. The
    native repeated-footnote failure is revalidated in COLLEAF_BROWSER.md; retain
    its original oracle and seek new evidence rather than repeating the same check.
    Broaden source/structure and resource audits beyond the newly qualified

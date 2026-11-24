@@ -42,6 +42,10 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 	// Accept version-extension conventions during object parsing, but never
 	// accept partially decoded corrupt page streams as successful extraction.
 	p.XRefTable.ValidationMode = model.ValidationStrict
+	r := &pdfReader{ctx: ctx, pdf: p}
+	if err := r.validateParserStreams(); err != nil {
+		return nil, err
+	}
 	if err = p.EnsurePageCount(); err != nil {
 		return nil, err
 	}
@@ -84,7 +88,11 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 	if catalog["Metadata"] != nil {
 		doc.warn("pdf_xmp_metadata", "XMP metadata is not merged into the editable metadata model")
 	}
-	r := &pdfReader{ctx: ctx, pdf: p, doc: doc, pageRefs: map[string]int{}, objects: map[pdfObjectKey][]pdfPaintRange{}, links: map[pdfObjectKey]pdfRecoveredLink{}, partialLinks: map[int]bool{}}
+	r.doc = doc
+	r.pageRefs = map[string]int{}
+	r.objects = map[pdfObjectKey][]pdfPaintRange{}
+	r.links = map[pdfObjectKey]pdfRecoveredLink{}
+	r.partialLinks = map[int]bool{}
 	for page := 1; page <= p.PageCount; page++ {
 		if err := ctx.Err(); err != nil {
 			return nil, err

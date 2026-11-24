@@ -1279,3 +1279,18 @@ is explicitly diagnosed; managed CMYK colors and JPEG chroma interpolation can
 still differ between readers. Original strict comparisons remain executable.
 See PDF_IMAGE_DECODING.md for bounds, source/placement/SF/independent evidence and
 remaining initial-parser/full-acceptance work. This is not exhaustive PDF safety.
+
+
+Retained initial xref/object streams now undergo strict original-source decoding
+and N/First/member/xref-index checks before page access; cached lenient bytes cannot
+bypass integrity. The64MiB/256MiB bounds apply to this verification, not allocations
+already made in the initial dependency parser. Original incremental member
+replacement remains supported. See PDF_PARSER_STREAMS.md for independent source,
+full-SF and atomic-rejection evidence.
+
+The encrypted corpus checks above do not cover every encryption-dictionary shape.
+MuPDF exports with a direct Encrypt dictionary and object streams currently fail
+before this validator for RC4-40/128 and AES-128/256, while independent readers
+successfully decrypt with the supplied password. This is a concrete library
+compatibility defect queued for correction, not an unsupported-feature completion
+exception. PDF_PARSER_STREAMS.md preserves its strict reproduction.
