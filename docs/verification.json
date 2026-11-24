@@ -4488,5 +4488,155 @@
     ],
     "kt": "docs/FONT_SUBSETTING.md",
     "logs": "ignored output/font-subset/"
+  },
+  "unicode_uri_targets": {
+    "date": "2026-11-24",
+    "status": "verified URI-action milestone; full goal incomplete; no external blocker",
+    "standards": [
+      "ISO 32000-1:2008 Table 206: ASCII URI action string",
+      "RFC 3987 section 3.1: UTF-8 percent encoding, no normalization/double encoding"
+    ],
+    "contract": "Source SF/JSON/DOCX keep Unicode IRIs; PDF serializes equivalent ASCII URI references and PDF recovery retains those references; no source mutation, schema/API/dependency change or resolution policy",
+    "checks": {
+      "go_test_all": "passed: library 14.281s; CLI 0.380s; all packages passed",
+      "go_test_race_all": "passed: library 164.999s; CLI 1.937s; all packages passed",
+      "go_vet_all": "passed",
+      "module_verify": "all modules verified",
+      "uri_fuzz": "FuzzPDFASCIIURI: 1000 executions, two workers, passed 0.656s",
+      "cgo_disabled_host": "built and all four example SF paths executed; real source native PDF regenerated",
+      "cgo_disabled_linux_amd64": "cross-build passed; not executed",
+      "diff_check": "passed"
+    },
+    "independent_example": {
+      "pages": 2,
+      "source_iri_targets": 8,
+      "serialized_ascii_uri_targets": 8,
+      "docx_targets": "exact original Unicode IRIs",
+      "pdf_and_recovered_sf_targets": "RFC 3987 equivalent ASCII URI references",
+      "sources": "original source SF unchanged; reserved/percent delimiters preserved; no normalization",
+      "readers": "pypdf raw URI annotation bytes and MuPDF URI/file-reference targets exact",
+      "internal_note_destinations": 1,
+      "scope": "body, table cells, list, note and repeated headers/footers; internal bookmark resolution remains outside this URI-action change"
+    },
+    "prosemirror": "three SF files, 84 nodes/marks/attributes validated",
+    "real_source_before_after": {
+      "pages": 207,
+      "page_commands": "all exact",
+      "annotation_rectangles": "all exact",
+      "source_iri_targets": 434,
+      "old_mismatched_targets": 3,
+      "new_mismatched_targets": 0,
+      "old_non_ascii_uri_annotations": 4,
+      "old_expected_ascii_uris_missing": [
+        "#_CONNACK_%E2%80%93_Connect",
+        "#_CONNECT_%E2%80%93_Connection",
+        "#_Figure_4.3_%E2%80%93"
+      ],
+      "old_corrupt_targets": [
+        "#_CONNACK_\u00e2\u2022\ufb01_Connect",
+        "#_CONNECT_\u00e2\u2022\ufb01_Connection",
+        "#_Figure_4.3_\u00e2\u2022\ufb01"
+      ],
+      "source_fixtures_and_oracles": "unchanged",
+      "comparison": "Independent urllib RFC 3987 mapping preserves source Unicode and rejects old mojibake"
+    },
+    "real_source_current": {
+      "pages": 207,
+      "bytes": 4990492,
+      "title": "MQTT Version 5.0",
+      "uri_targets": 434,
+      "expected_source_uri_targets": 434,
+      "source_iri_targets": 434,
+      "uri_comparison": "RFC 3987 UTF-8 percent-encoded ASCII URI references; original source targets remain unchanged",
+      "missing_uri_targets": [],
+      "unexpected_uri_targets": [],
+      "image_programs": 1,
+      "original_jpeg_sha_preserved": true,
+      "supplementary_character_count": 1,
+      "figure_dash_count": 4,
+      "unique_glyph_font_programs": [
+        {
+          "name": "DejaVuSans-Bold",
+          "source_bytes": 705684,
+          "subset_bytes": 148968,
+          "glyph_ids": 6196,
+          "used_and_component_glyphs": 85
+        },
+        {
+          "name": "DejaVuSans",
+          "source_bytes": 757076,
+          "subset_bytes": 152288,
+          "glyph_ids": 6253,
+          "used_and_component_glyphs": 100
+        },
+        {
+          "name": "GoRegular",
+          "source_bytes": 148672,
+          "subset_bytes": 25700,
+          "glyph_ids": 712,
+          "used_and_component_glyphs": 13
+        },
+        {
+          "name": "DejaVuSans-BoldOblique",
+          "source_bytes": 643292,
+          "subset_bytes": 125712,
+          "glyph_ids": 5413,
+          "used_and_component_glyphs": 33
+        },
+        {
+          "name": "BabelStoneHan",
+          "source_bytes": 51971284,
+          "subset_bytes": 1371528,
+          "glyph_ids": 65534,
+          "used_and_component_glyphs": 2
+        },
+        {
+          "name": "GoMono",
+          "source_bytes": 173248,
+          "subset_bytes": 34452,
+          "glyph_ids": 712,
+          "used_and_component_glyphs": 66
+        },
+        {
+          "name": "DejaVuSans-Oblique",
+          "source_bytes": 635416,
+          "subset_bytes": 130680,
+          "glyph_ids": 5355,
+          "used_and_component_glyphs": 59
+        }
+      ],
+      "selected_pages_for_visual_inspection": [
+        1,
+        24,
+        130
+      ],
+      "limitation": "Explicit caller font normalization and acknowledged source diagnostics. This does not prove complete source text/structure/layout recovery or Word-equivalent reflow; widths/numbering/shading and further corpus work remain."
+    },
+    "oracle_policy": "Unmodified source strings/golden fixtures; independent urllib RFC mapping and raw ASCII check still reject the old file and accept the corrected file",
+    "visual": "two URI example pages inspected; repeated running labels have dark pixels on both pages; complete-source all 207 page commands and annotation rectangles exact",
+    "commands": [
+      "GOWORK=off CGO_ENABLED=0 go run ./examples/uri",
+      "output/qa-venv/bin/python scripts/verify_uri.py",
+      "NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/uri/source.sf output/uri/from-docx.sf output/uri/from-pdf.sf",
+      "GOWORK=off go test -run 'TestPDFIRI|TestPDFUnicodeURI' -v .",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzPDFASCIIURI$' -fuzztime=1000x -parallel=2 -timeout=90s",
+      "output/qa-venv/bin/python scripts/verify_mqtt_render.py",
+      "GOWORK=off go test ./...",
+      "GOWORK=off go test -race ./...",
+      "GOWORK=off go vet ./...",
+      "GOWORK=off go mod verify",
+      "CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc",
+      "CGO_ENABLED=0 GOWORK=off GOOS=linux GOARCH=amd64 go build -o bin/manydoc-linux-amd64 ./cmd/manydoc"
+    ],
+    "next_commands": [
+      "rg -n 'tblGrid|docxTableColumns|tableGrid|colwidth' docx_table.go document.go structured.go schema pdf_cell_layout.go"
+    ],
+    "open_required_work": [
+      "source table widths and numbering patterns; real native table wrapping is visibly poor",
+      "internal destination/bookmark and broader rich-source/recovery/corpus acceptance",
+      "large PDF-to-SF provenance/codec overhead"
+    ],
+    "kt": "docs/URI_TARGETS.md",
+    "logs": "ignored output/uri/"
   }
 }

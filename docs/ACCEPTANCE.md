@@ -213,3 +213,14 @@ and all shaping/GID/GPOS oracles pass. The complete original source now renders 
 pages with explicit family/style mappings, but its URI audit fails three Unicode
 fragments and widths/numbering/other source fidelity remain open. The full objective is
 not complete; see FONT_SUBSETTING.md.
+
+
+## 2026-11-24 Unicode URI failure resolved
+
+The full original Word-source render now matches all 434 equivalent URI targets under
+independent RFC mapping and raw ASCII checks. The old file still fails on three
+targets/four invalid annotations. Eight all-story sample targets pass through all four
+SF paths with visible repeated running labels and preserved note destinations. All 207
+page commands/annotation rectangles are exact before/after. The goal remains incomplete:
+source widths/numbering, internal destinations, broader source/recovery/corpus and codec
+overhead remain required. See URI_TARGETS.md.

@@ -1295,3 +1295,14 @@ original font hash oracles for sources; validate optimized output with independe
 fontTools outline/metric/notice and pinned raster comparisons. Do not normalize the
 newly discovered Unicode URI corruption to make a corpus audit pass. See
 FONT_SUBSETTING.md.
+
+
+## 2026-11-24 Encode URI actions according to their ASCII type
+
+ISO 32000-1 Table 206 defines URI as an ASCII string, so storing raw UTF-8 or a Unicode
+text string is inappropriate. Use RFC 3987 section 3.1 percent encoding without
+normalization or double escaping. Preserve input Unicode and expose its equivalent URI
+on PDF import. Compare output to an independent RFC mapping of unchanged source targets,
+and prove the old mojibake still fails. All 207 page streams and annotation rectangles
+remain exact. Internal destination resolution is not inferred from a fragment string;
+see URI_TARGETS.md.

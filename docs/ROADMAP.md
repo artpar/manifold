@@ -191,3 +191,12 @@ fragment targets found by scripts/verify_mqtt_render.py without changing its exp
 source set. Then preserve source column widths and numbering formats, driven by the
 native 207-page Word-source render. Continue other required recovery/layout/corpus and
 provenance/codec performance work. See FONT_SUBSETTING.md.
+
+
+## 2026-11-24 Next after Unicode URI serialization
+
+The three actual Unicode fragment targets are now correctly encoded without modifying
+the source oracle. Next preserve source logical-column widths through SF/DOCX/native PDF
+sizing, then source numbering templates/formats. The 207-page real render supplies
+concrete table-wrapping and heading evidence. Continue the original broader
+requirements; see URI_TARGETS.md.

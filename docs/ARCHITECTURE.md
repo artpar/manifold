@@ -900,3 +900,13 @@ subset tags replace full-program glyph embedding without changing CID mappings, 
 positions or caller bytes. Optional fontTools QA independently compares outlines and
 metadata. No SF/public API/runtime dependency changes. See FONT_SUBSETTING.md for
 source-font qualification and the newly reproduced three-target Unicode URI failure.
+
+
+## PDF URI actions use ASCII references
+
+pdf_uri.go maps Unicode IRI UTF-8 octets and excluded ASCII to percent-encoded URI
+references at the existing LinkString call. Source models/codecs and DOCX retain the
+IRI; PDF recovery keeps the stored equivalent URI. Existing escapes/delimiters and
+distinct resource normalization forms are preserved. No URI resolution, destination
+inference or public schema/API change is added. See URI_TARGETS.md for source-oracle and
+reader evidence.

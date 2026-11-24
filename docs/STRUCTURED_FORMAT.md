@@ -616,3 +616,11 @@ references (`element`, `role`, `tag`, `page`, zero-based `row`). Source content 
 remain unchanged. Logical membership remains explicit. These values round-trip through
 SF and are validated by Go; the schema already permits the source attribute. See
 TAGGED_TABLE_SPANS.md.
+
+
+## Link target encoding at the PDF boundary
+
+The existing link mark href string retains its Unicode IRI in SF and DOCX. PDF
+URI-action strings use equivalent RFC 3987 ASCII/percent representations, and PDF import
+retains that stored URI. Direct SF bridges do not rewrite targets. This is a
+serialization rule, with no new mark/node/version; see URI_TARGETS.md.

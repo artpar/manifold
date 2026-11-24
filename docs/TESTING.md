@@ -2076,3 +2076,16 @@ style, paint-context, bidi and language/HarfBuzz oracles pass. Source URI verifi
 intentionally fails three mojibake fragments on the 207-page native Word render; its
 fonts/asset/metadata/character evidence is reported separately. See FONT_SUBSETTING.md
 and verification.json for commands, logs, exact checks and incomplete acceptance work.
+
+
+## 2026-11-24 ASCII URI actions from Unicode IRIs
+
+Run examples/uri, scripts/verify_uri.py and the ProseMirror verifier for its three SF
+files. Eight targets cover body/table/list/note and repeated stories. Independent checks
+inspect actual action type/ASCII bytes, DOCX IRIs, encoded PDF/SF targets, MuPDF
+URI/file-reference fields, visible running pixels and one note destination. The updated
+complete-source audit uses independent urllib RFC mapping of unchanged source strings;
+old corruption still fails, new output matches all 434 targets. All 207 page commands
+and annotation rectangles remain exact. Go tests/race/vet, 1,000 URI fuzz executions and
+CGO-disabled builds pass; exact evidence and remaining limitations are in
+URI_TARGETS.md/verification.json.

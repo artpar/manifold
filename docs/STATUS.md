@@ -21,7 +21,39 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: in-process glyph-font subsets and real-source output
+## Latest milestone: standards-based Unicode URI serialization
+
+PDF link targets now use UTF-8 percent-encoded ASCII URI references, as required
+by ISO 32000-1 Table 206 and RFC 3987. Unicode source IRIs stay unchanged in SF
+and DOCX; PDF recovery retains the stored equivalent URI. Existing escapes and
+reserved delimiters remain intact, and no Unicode normalization changes resource
+identity. No schema/public API/runtime dependency or URI-resolution policy changed.
+
+The actual Word-source audit now passes all 434 target identities using an
+independent RFC mapping. The old file still fails on three targets/four invalid
+non-ASCII annotations under that same oracle. Every page command and annotation
+rectangle across all 207 pages is exact before/after. The new PDF is 4,990,492 bytes;
+fonts, original JPEG bytes, metadata, Han and figure dash evidence remain intact.
+Original fixtures and golden oracles are unchanged.
+
+The two-page all-story example checks eight targets across body/table/list/note
+and repeated running stories, exact DOCX IRIs, serialized PDF/SF URIs, raw ASCII
+annotation bytes in pypdf, MuPDF URI/file-reference classification and the existing
+note destination. Both pages were visually inspected. Three SF files pass actual
+ProseMirror (84 nodes/marks/attributes). Go tests/race/vet, 1,000 URI fuzz cases,
+module and host/Linux CGO-disabled builds pass; see verification.json.
+
+The full goal remains **incomplete**, with no external blocker. Next preserve
+source table widths through SF/DOCX/native layout, driven by the narrow page-130
+cells in the real render; then numbering patterns and other remaining rich-source,
+link/destination/recovery/corpus and provenance/codec requirements. Relative URI
+storage is not an implementation of internal bookmark resolution. Read
+[URI_TARGETS.md](URI_TARGETS.md) for policy, evidence and commands.
+Next commands: `GOWORK=off go run ./examples/uri`;
+`output/qa-venv/bin/python scripts/verify_uri.py`;
+`rg -n 'tblGrid|docxTableColumns|tableGrid|colwidth' docx_table.go document.go structured.go schema pdf_cell_layout.go`.
+
+## Previous milestone: in-process glyph-font subsets and real-source output
 
 The positioned-glyph PDF path now embeds a TrueType subset with original GIDs,
 used outlines and transitive composite components, retaining metrics, cmap,

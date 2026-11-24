@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from urllib.parse import quote
 from pypdf import PdfReader
 import pymupdf
 from font_oracles import original_font_name, verify_pdf_glyph_program
@@ -18,6 +19,8 @@ def walk(n):
  for child in n.get('content',[]):walk(child)
 walk(sf)
 r=PdfReader(out/'mqtt.pdf',strict=True);pdf=pymupdf.open(out/'mqtt.pdf')
+source_iris=expected_links
+expected_links={quote(target,safe=":/?#[]@!$&'()*+,;=%") for target in source_iris}
 assert len(r.pages)==len(pdf) and r.metadata.title=='MQTT Version 5.0'
 sources={name:Path('output/font-subset/dejavu')/(name+'.ttf') for name in ('DejaVuSans','DejaVuSans-Bold','DejaVuSans-Oblique','DejaVuSans-BoldOblique')}
 sources['BabelStoneHan']=Path('output/font-research/BabelStoneHan.ttf')
@@ -25,7 +28,9 @@ links=set();images={};programs={}
 for page in r.pages:
  for ref in page.get('/Annots',[]):
   annot=ref.get_object()
-  if annot.get('/A',{}).get('/URI'):links.add(str(annot['/A']['/URI']))
+  if annot.get('/A',{}).get('/URI'):
+   uri=annot['/A']['/URI'];assert str(uri).isascii() and all(b<128 for b in uri.original_bytes)
+   links.add(str(uri))
  for ref in page['/Resources'].get('/XObject',{}).values():
   obj=ref.get_object()
   if obj.get('/Subtype')=='/Image':images[ref.idnum]=hashlib.sha256(obj.get_data()).hexdigest()
@@ -45,6 +50,7 @@ selected={0,next(i for i,s in enumerate(texts) if '𪛔' in s),next(i for i,s in
 for i in sorted(selected):pdf[i].get_pixmap(matrix=pymupdf.Matrix(1,1)).save(out/f'mqtt-page-{i+1}.png')
 report=dict(pages=len(pdf),bytes=(out/'mqtt.pdf').stat().st_size,title=r.metadata.title,
             uri_targets=len(links),expected_source_uri_targets=len(expected_links),
+            source_iri_targets=len(source_iris),uri_comparison='RFC 3987 UTF-8 percent-encoded ASCII URI references; original source targets remain unchanged',
             missing_uri_targets=sorted(expected_links-links),unexpected_uri_targets=sorted(links-expected_links),
             image_programs=len(images),original_jpeg_sha_preserved=True,
             supplementary_character_count=1,figure_dash_count=4,

@@ -98,7 +98,7 @@ same font, 400×200pt page, 24pt margins and 60pt character. Optional font downl
 `curl -fL --max-time 60 -o output/font-research/BabelStoneHan.ttf https://www.babelstone.co.uk/Fonts/Download/BabelStoneHan.ttf`.
 Verify the recorded hash before relying on a changed upstream download.
 
-## Full Word source: actual progress and precise open failure
+## Full Word source at the font checkpoint
 
 The current DOCX→SF output is byte-exact against the earlier 8.3MB source SF.
 Using explicit caller mappings to all four DejaVu Sans 2.37 styles, Go Mono and
@@ -112,7 +112,7 @@ subset/notice/metric audit, the original JPEG bytes remain, and title/page count
 agree in independent readers. The Han appears once in all-page MuPDF text and
 once on that page in pypdf. This is not a full source-content or structure oracle.
 
-`scripts/verify_mqtt_render.py` deliberately **fails**: three source URI fragments
+`scripts/verify_mqtt_render.py` **failed at this checkpoint**: three source URI fragments
 containing U+2013 become mojibake, despite both actual/expected sets containing
 434 targets. Expected suffixes are `#_CONNECT_–_Connection`,
 `#_CONNACK_–_Connect`, `#_Figure_4.3_–`; actual bytes decode as `â•ﬁ` in place of
@@ -126,8 +126,10 @@ These are open required layout/numbering/source-interpretation issues; 207 versu
 137 publisher pages is not a Word-fidelity claim. The PDF subset tests establish
 embedding correctness, not complete original-document acceptance.
 
-Next fix URI serialization using primary PDF/URI encoding evidence and explicit
-Unicode target tests; retain this source oracle. Then add source table widths
+The subsequent URI_TARGETS.md milestone fixes that serialization using ASCII
+URI references; the independent verifier still rejects the old file and now
+passes all 434 correctly mapped source targets. Original source strings and
+golden oracles remain unchanged. Next add source table widths
 and numbering formats, qualify further body/link/asset recovery, and reduce the
 large PDF→SF provenance/codec overhead under the original full acceptance goal.
 
@@ -135,6 +137,6 @@ large PDF→SF provenance/codec overhead under the original full acceptance goal
 bin/manydoc extract -format sf -o output/font-subset/mqtt.sf testdata/real/mqtt-v5.0-os.docx
 # Explicit font mappings used for the current native render:
 bin/manydoc convert -allow-lossy -pdf-font Han=output/font-research/BabelStoneHan.ttf -pdf-font Sans=output/font-subset/dejavu/DejaVuSans.ttf -pdf-font Sans/B=output/font-subset/dejavu/DejaVuSans-Bold.ttf -pdf-font Sans/I=output/font-subset/dejavu/DejaVuSans-Oblique.ttf -pdf-font Sans/BI=output/font-subset/dejavu/DejaVuSans-BoldOblique.ttf -pdf-font-map 'Arial,MingLiU-ExtB=Han' -pdf-font-map Arial=Sans -pdf-font-map 'Arial,Consolas=Go Mono' -pdf-font-map 'Arial,Verdana=Sans' -pdf-font-map Calibri=Sans -pdf-font-map 'Courier New=Go Mono' -pdf-font-map 'Arial Unicode MS=Sans' -pdf-font-map 'Arial,Arial Unicode MS=Sans' -o output/font-subset/mqtt.pdf output/font-subset/mqtt.sf
-output/qa-venv/bin/python scripts/verify_mqtt_render.py  # known three-target failure
+output/qa-venv/bin/python scripts/verify_mqtt_render.py  # now passes after the URI_TARGETS.md fix
 rg -n 'LinkString|URI' pdf_text.go pdf_links.go
 ```

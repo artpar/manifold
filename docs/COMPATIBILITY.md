@@ -836,3 +836,14 @@ grid-uncertainty diagnostic. Original MQTT import now retains all 90 tables/3,02
 identities; all 42 omitted-span grids now recover, including page 89 with seventeen
 distinct axes and all 79 Word-oracle origin span/text checks. This is not a
 full-source fidelity claim. See TAGGED_TABLE_SPANS.md.
+
+
+## Unicode link targets in PDF output
+
+Unicode IRI references are retained in SF/JSON/DOCX and serialized as UTF-8
+percent-encoded ASCII URI references in PDF; PDF recovery keeps the stored URI form.
+Existing escapes and reserved delimiters are preserved, with no normalization or
+implicit resolution. Eight all-story sample targets and all 434 original Word-source
+targets pass independent serialization/relationship checks. Relative fragments remain
+references, and internal bookmark/destination recovery remains unfinished. See
+URI_TARGETS.md.

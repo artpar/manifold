@@ -551,7 +551,7 @@ func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 			r.pdf.Link(x, y+baseline-span.ascent, span.width, math.Max(textSize(span.run, size), span.ascent+span.descent), r.noteLinks[referenceKey(span.run.Note)])
 		}
 		if span.run.Link != "" && span.width > 0 {
-			r.pdf.LinkString(x, y+baseline-span.ascent, span.width, math.Max(textSize(span.run, size)*1.3, span.ascent+span.descent), span.run.Link)
+			r.pdf.LinkString(x, y+baseline-span.ascent, span.width, math.Max(textSize(span.run, size)*1.3, span.ascent+span.descent), pdfASCIIURI(span.run.Link))
 		}
 
 		cursor += span.width
