@@ -29,8 +29,8 @@ func TestColleafNoteIdentityReferenceBodyAndSFRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(wire.Body.CustomBlocks) != 4 || len(wire.Notes) != 3 || wire.Body.CustomBlocks[0].StartIndex != 3 {
-		t.Fatal("note identity/UTF-16 anchors", wire.Body.CustomBlocks)
+	if len(wire.Body.CustomRanges) != 5 || len(wire.Notes) != 3 || wire.Body.CustomRanges[0].StartIndex != 3 {
+		t.Fatal("note range identity/UTF-16 anchors", wire.Body.CustomRanges)
 	}
 	doc, err := decodeColleafNotes(ctx, wire, colleafTextContext{})
 	if err != nil {
@@ -107,9 +107,9 @@ func TestColleafNoteNativeIdentityAndStaleBindings(t *testing.T) {
 	delete(wire.Notes, "manydoc-note-3")
 	note.ID = "edited-id"
 	wire.Notes[note.ID] = note
-	for i := range wire.Body.CustomBlocks {
-		if wire.Body.CustomBlocks[i].NoteID == "manydoc-note-3" {
-			wire.Body.CustomBlocks[i].NoteID = note.ID
+	for i, a := range wire.Body.CustomRanges {
+		if a.Type == 8 && string(a.Properties) == `{"noteId":"manydoc-note-3"}` {
+			wire.Body.CustomRanges[i].Properties = sfAttrs(map[string]string{"noteId": note.ID})
 		}
 	}
 	doc, err = decodeColleafNotes(ctx, wire, colleafTextContext{})
@@ -123,8 +123,8 @@ func TestColleafNoteNativeIdentityAndStaleBindings(t *testing.T) {
 func TestColleafNoteRejectsDanglingAndContradictoryGraph(t *testing.T) {
 	ctx := context.Background()
 	for _, mutate := range []func(*colleafNoteSnapshot){
-		func(w *colleafNoteSnapshot) { delete(w.Notes, w.Body.CustomBlocks[0].NoteID) },
-		func(w *colleafNoteSnapshot) { w.Body.CustomBlocks[0].NoteType = Endnote },
+		func(w *colleafNoteSnapshot) { delete(w.Notes, "manydoc-note-2") },
+		func(w *colleafNoteSnapshot) { w.Body.CustomRanges[0].Type = 9 },
 		func(w *colleafNoteSnapshot) {
 			n := w.Notes["manydoc-note-1"]
 			n.ID = "wrong"
@@ -205,4 +205,53 @@ func FuzzColleafNotes(f *testing.F) {
 			}
 		}
 	})
+}
+
+func TestColleafNativeNoteRangesAndChangedAutomaticOrder(t *testing.T) {
+	ctx := context.Background()
+	d := &Document{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Note: &NoteReference{Kind: Footnote, ID: "a"}}, {Note: &NoteReference{Kind: Footnote, ID: "b"}}, {Note: &NoteReference{Kind: Footnote, ID: "a"}}}}}, Notes: []Note{{Kind: Footnote, ID: "a", Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "A"}}}}}, {Kind: Footnote, ID: "b", Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "B"}}}}}}}
+	wire, err := encodeColleafNotes(ctx, d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if wire.Body.DataStream != "\ufffc\ufffc\ufffc\r\n" || len(wire.Body.CustomBlocks) != 0 {
+		t.Fatal("non-rendering custom block note projection")
+	}
+	if *wire.Notes["manydoc-note-1"].Mark != "1" || *wire.Notes["manydoc-note-2"].Mark != "2" {
+		t.Fatal("shared automatic label not stabilized")
+	}
+	a, b := wire.Body.CustomRanges[0].Properties, wire.Body.CustomRanges[1].Properties
+	wire.Body.CustomRanges[0].Properties = b
+	wire.Body.CustomRanges[1].Properties = a
+	got, err := decodeColleafNotes(ctx, wire, colleafTextContext{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Notes[0].Label != "1" || got.Notes[1].Label != "2" || len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "colleaf_stale_note_numbering" {
+		t.Fatal("reordered native marks replaced by old automatic intent", got.Notes, got.Diagnostics)
+	}
+	for _, mutate := range []func(*colleafNoteSnapshot){
+		func(w *colleafNoteSnapshot) { w.Body.CustomRanges[0].EndIndex++ },
+		func(w *colleafNoteSnapshot) {
+			w.Body.CustomRanges[0].Properties = json.RawMessage(`{"noteId":"absent"}`)
+		},
+		func(w *colleafNoteSnapshot) { w.Body.CustomRanges[0].Type = 9 },
+		func(w *colleafNoteSnapshot) {
+			w.Body.CustomRanges[0].Properties = json.RawMessage(`{"noteId":"manydoc-note-1","hidden":true}`)
+		},
+		func(w *colleafNoteSnapshot) {
+			a := w.Body.CustomRanges[0]
+			a.ID = "overlap"
+			w.Body.CustomRanges = append(w.Body.CustomRanges, a)
+		},
+	} {
+		wire, err := encodeColleafNotes(ctx, d)
+		if err != nil {
+			t.Fatal(err)
+		}
+		mutate(&wire)
+		if _, err = decodeColleafNotes(ctx, wire, colleafTextContext{}); err == nil {
+			t.Fatal("invalid note range accepted")
+		}
+	}
 }

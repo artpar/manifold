@@ -33,7 +33,7 @@ func TestColleafNativeIntentCarrierAndLegacyRead(t *testing.T) {
 	if string(before) != string(after) {
 		t.Fatal("opening intent mutated caller")
 	}
-	if len(legacy.Resources) != 3 || len(legacy.Body.CustomRanges) != 0 {
+	if len(legacy.Resources) != 3 || len(legacy.Body.CustomRanges) != 1 {
 		t.Fatal("incorrect intent transport extraction")
 	}
 	doc, err := decodeColleafNotes(ctx, legacy, colleafTextContext{})
@@ -45,17 +45,19 @@ func TestColleafNativeIntentCarrierAndLegacyRead(t *testing.T) {
 	}
 	for _, mutate := range []func(*colleafNoteSnapshot){
 		func(w *colleafNoteSnapshot) {
-			a := w.Body.CustomRanges[0]
+			a := w.Body.CustomRanges[len(w.Body.CustomRanges)-1]
 			a.ID = "duplicate"
 			w.Body.CustomRanges = append(w.Body.CustomRanges, a)
 		},
 		func(w *colleafNoteSnapshot) {
-			w.Body.CustomRanges[0].Properties = sfAttrs(colleafIntentCarrier{Profile: colleafIntentProfile, Version: 2})
+			w.Body.CustomRanges[len(w.Body.CustomRanges)-1].Properties = sfAttrs(colleafIntentCarrier{Profile: colleafIntentProfile, Version: 2})
 		},
 		func(w *colleafNoteSnapshot) {
-			w.Body.CustomRanges[0].Properties = sfAttrs(colleafIntentCarrier{Profile: colleafIntentProfile, Version: 1, Records: []colleafResource{{Name: "unknown", Data: "{}"}}})
+			w.Body.CustomRanges[len(w.Body.CustomRanges)-1].Properties = sfAttrs(colleafIntentCarrier{Profile: colleafIntentProfile, Version: 1, Records: []colleafResource{{Name: "unknown", Data: "{}"}}})
 		},
-		func(w *colleafNoteSnapshot) { w.Body.CustomRanges[0].EndIndex = colleafUTF16Len(w.Body.DataStream) },
+		func(w *colleafNoteSnapshot) {
+			w.Body.CustomRanges[len(w.Body.CustomRanges)-1].EndIndex = colleafUTF16Len(w.Body.DataStream)
+		},
 	} {
 		input, err := encodeColleafNotes(ctx, colleafImageExample(t))
 		if err != nil {

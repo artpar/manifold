@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 // Wire records follow the pinned IDocumentBody schema. Text styles/properties
@@ -81,7 +82,7 @@ func indexColleafBody(ctx context.Context, body colleafBody) (*colleafBodyIndex,
 		if err != nil {
 			return err
 		}
-		if b == len(body.DataStream) || rune(body.DataStream[b]) != ch {
+		if b == len(body.DataStream) || !strings.HasPrefix(body.DataStream[b:], string(ch)) {
 			return fmt.Errorf("native offset %d must point at U+%04X", offset, ch)
 		}
 		return nil
@@ -176,6 +177,32 @@ func indexColleafBody(ctx context.Context, body colleafBody) (*colleafBodyIndex,
 			return nil, err
 		}
 		ids[annotation.ID] = true
+		if annotation.Type == 8 || annotation.Type == 9 {
+			if annotation.StartIndex != annotation.EndIndex {
+				return nil, fmt.Errorf("native note range must own exactly one atom")
+			}
+			if err := token(annotation.StartIndex, '\ufffc'); err != nil {
+				return nil, err
+			}
+			var props struct {
+				NoteID string `json:"noteId"`
+			}
+			if err := strictSFAttrs(annotation.Properties, &props); err != nil {
+				return nil, err
+			}
+			if props.NoteID == "" {
+				return nil, fmt.Errorf("native note range lacks definition identity")
+			}
+			if _, exists := index.blocks[annotation.StartIndex]; exists {
+				return nil, fmt.Errorf("conflicting native note atom ownership")
+			}
+			kind := Footnote
+			if annotation.Type == 9 {
+				kind = Endnote
+			}
+			one := 1
+			index.blocks[annotation.StartIndex] = colleafBlockRecord{StartIndex: annotation.StartIndex, Type: &one, ID: annotation.ID, NoteID: props.NoteID, NoteType: kind}
+		}
 	}
 	positions = map[int]bool{}
 	for _, offset := range body.RenderedPageBreaks {

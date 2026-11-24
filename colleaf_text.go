@@ -10,16 +10,17 @@ import (
 )
 
 type colleafTextContext struct {
-	DefaultText      json.RawMessage
-	DefaultParagraph json.RawMessage
-	Styles           map[string]colleafNamedStyle
-	NoteIDs          map[string]noteKey
-	Lists            map[string]json.RawMessage
-	ListBindings     []colleafListBinding
-	Drawings         map[string]json.RawMessage
-	DrawingOrder     []string
-	ImageBindings    []colleafImageBinding
-	ImageCache       outputImageCache
+	DeferNoteNumbering bool
+	DefaultText        json.RawMessage
+	DefaultParagraph   json.RawMessage
+	Styles             map[string]colleafNamedStyle
+	NoteIDs            map[string]noteKey
+	Lists              map[string]json.RawMessage
+	ListBindings       []colleafListBinding
+	Drawings           map[string]json.RawMessage
+	DrawingOrder       []string
+	ImageBindings      []colleafImageBinding
+	ImageCache         outputImageCache
 }
 
 func colleafRawInt(style colleafStyleMap, key string) (int, bool, error) {
@@ -100,10 +101,13 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 				if err != nil {
 					return body, err
 				}
-				one := 1
-				body.CustomBlocks = append(body.CustomBlocks, colleafBlockRecord{StartIndex: offset, Type: &one, ID: fmt.Sprintf("note%d", len(body.CustomBlocks)), NoteID: id, NoteType: run.Note.Kind})
+				kind := 8
+				if run.Note.Kind == Endnote {
+					kind = 9
+				}
+				body.CustomRanges = append(body.CustomRanges, colleafRangeRecord{StartIndex: offset, EndIndex: offset, ID: fmt.Sprintf("note%d", len(body.CustomRanges)), Type: kind, Whole: true, Properties: sfAttrs(map[string]string{"noteId": id})})
 				body.TextRuns = append(body.TextRuns, colleafTextRun{St: offset, Ed: offset + 1, TS: style})
-				appendText("\b")
+				appendText("\ufffc")
 				continue
 			}
 			if run.Text == "" {
@@ -181,7 +185,12 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 	if err != nil {
 		return nil, err
 	}
-	annotations := append([]colleafRangeRecord(nil), body.CustomRanges...)
+	var annotations []colleafRangeRecord
+	for _, a := range body.CustomRanges {
+		if a.Type != 8 && a.Type != 9 {
+			annotations = append(annotations, a)
+		}
+	}
 	sort.Slice(annotations, func(i, j int) bool { return annotations[i].StartIndex < annotations[j].StartIndex })
 	var annotationBounds []int
 	for i, annotation := range annotations {
@@ -329,7 +338,7 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 				return nil, err
 			}
 			run.Text = strings.ReplaceAll(text, "\v", "\n")
-			if text == "\b" {
+			if text == "\b" || (text == "\ufffc" && index.blocks[start].NoteID != "") {
 				atom, ok := index.blocks[start]
 				if !ok {
 					return nil, fmt.Errorf("unowned native note atom")

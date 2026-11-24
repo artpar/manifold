@@ -5784,5 +5784,50 @@
       "MANYDOC_COLLEAF_SECTION_SAVED=output/colleaf-qa/sections-saved.json GOWORK=off go test -run TestColleaf -count=1 .",
       "GOWORK=off go test -run '^$' -fuzz '^FuzzColleafDocument$' -fuzztime=10s -parallel=2 ."
     ]
+  },
+  "colleaf_frame_bounds_and_real_note_placement_2026_11_24": {
+    "scope": "Private native individual image frame bounds plus actual note range/glyph/body placement correction. Native public API/CLI and full goal remain incomplete.",
+    "discovery": [
+      "Actual native renderer kept a1000x2000px frame on320px body/600px page; source box equality did not establish fitting",
+      "Earlier custom-block note projection persisted metadata but did not enter native note layout. Pinned resolveNoteReferences reads FOOTNOTE8/ENDNOTE9 custom ranges and createNoteGlyph consumes U+FFFC. Prior source/view/save evidence remains narrower historical evidence."
+    ],
+    "implementation": [
+      "Bound main section/cell/nested merged grid/list/note/running frames with shared pure-Go fit helpers; narrow inherited/shared contexts; preferred rectangle aspect retained without enlargement",
+      "Fit geometry container stored only when frame changes, with original preferred dimensions/digest/native box checks. Actual native resize/asset edits win.",
+      "Emit/read exact one-atom FOOTNOTE/ENDNOTE U+FFFC ranges; reject malformed/contradictory extents/ownership/properties and definitions. Read older private custom blocks.",
+      "Real native customMark stabilizes shared automatic SF decimal labels across repeated references and native Roman endnote defaults; checked autoLabel intent restores omission only when actual mark/current citation order agree. Complete-document catalog includes notes first cited in later sections."
+    ],
+    "independent_reader": {
+      "packages": "Pinned actual Univer1.0.4 and hash-pinned unmodified Colleaf validator; optional ignored Node QA only",
+      "scripts": {
+        "scripts/verify_colleaf_notes.cjs": "6d48619a30200d9b2cb5b432f504f01aca29c6c6f9b2a0595be741af2d0e1a5f",
+        "scripts/verify_colleaf_image_fit.cjs": "9a2483b3bd8499365c5e54f934856da0a7e9631313834745588a3131cd9507e3"
+      },
+      "results": [
+        "Actual note skeleton citation glyphs are shared footnote1/endnote1/repeated footnote1/custom section mark, and all three note bodies are placed including a cell citation. TextX note edits/save and Go semantic re-import pass.",
+        "Fixed frame example checks body191x382pt, nested merged cell85.5x171pt, list191x382pt, shared note143x286pt, inherited header5x10pt/footer10x20pt in actual skeleton boxes. Real note image placement and all horizontal/container bounds checked.",
+        "Actual FDocument.save/fresh reopen/save and app envelope validation pass; Go preserves full SF/preferred size semantics. Original overflowing-frame behavior reproduced explicitly.",
+        "All9 stream/text/tables/notes/lists/images/facade/sections/image_fit scripts and independent Pillow pass. Final note/fitting scripts rerun after last source fix; combined Go edited/saved re-import0.945s passes."
+      ],
+      "limits": "Zero-font-metric headless geometry/structure/save evidence; browser font/paint, full-preset UI, complete native story-height layout and foreign automatic note settings remain unfinished."
+    },
+    "checks": {
+      "full_tests": "Final go test ./... pass library18.035s/CLI0.815s/internal3.029s",
+      "vet": "Final pass",
+      "modules": "all modules verified; production dependencies unchanged",
+      "cgo_disabled": "Final focused native tests0.518s, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass (cross-builds not execution)",
+      "malformed_input_fuzz": "Final FuzzColleafDocument15990 executions/11.469s and FuzzColleafNotes737 executions/11.864s pass, each two workers; short campaigns not exhaustive",
+      "full_race": "Final go test -race ./... pass after last production/test changes; library168.843s/CLI2.995s/internal15.225s",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure Go/std library changes and shared existing helpers only. No required tool/service/CGO/upload/application/backend changes or permission/quota gates. Original source/oracle files unchanged.",
+    "remaining": "Foreign note numbering/settings, rich citation/body-marker/provenance intent, remaining list/appearance and strict native envelope/JSON/surrogates; native public adapter; browser/full-preset paint/text/total-story fit qualification; broader untagged PDF recovery and final source/resource/API/acceptance audit.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_NOTE_QA=output/colleaf-qa/notes.json MANYDOC_COLLEAF_FIT_QA=output/colleaf-qa/fitted-images.json GOWORK=off go test -run TestColleaf -count=1 .",
+      "node scripts/verify_colleaf_notes.cjs",
+      "node scripts/verify_colleaf_image_fit.cjs",
+      "MANYDOC_COLLEAF_FIT_SAVED=output/colleaf-qa/fitted-images-saved.json GOWORK=off go test -run TestColleaf -count=1 ."
+    ]
   }
 }

@@ -1312,3 +1312,32 @@ nontraditional/unpaginated and note-setting policies remain unfinished and rejec
 unknown style properties retain content with explicit representation diagnostics.
 The pinned seven-page skeleton and real facade save/reopen qualify source lookup,
 geometry and story selection, separately from unfinished browser/font/paint checks.
+
+
+## Native frame bounds and executable note citations
+
+colleaf_image_fit.go bounds individual frames after document composition. Shared
+fitImageBox preserves the preferred rectangle's aspect without enlarging. Main
+sections have distinct body boxes; table grid/span recursion accounts for native
+10px horizontal cell margins, nested containers and conservative height allowances.
+Shared notes use the narrowest actual citation section, with a separator/reference
+allowance. Inherited running frames use the narrowest referenced section and
+available running band (physical fallback for zero margins). These bounds do not
+claim to measure complete native text/story height; the editor owns those metrics.
+
+Only changed frames gain a container in manydoc.image-geometry.v1. Re-import
+recomputes the fit from preferred size/container and checks source digest/native
+box before restoring optional dimensions. Real asset/resize edits invalidate it.
+The body/native catalog remains the sole source of image bytes/relationships.
+
+The native renderer consumes FOOTNOTE8/ENDNOTE9 custom ranges covering one U+FFFC
+atom, not the old custom-block note projection. Body indexing validates each
+range/token/definition relationship and derives semantic atom entries internally;
+paragraph fragments preserve ranges. Hyperlinks remain a separate range mapping.
+Generated repeated/automatic notes use real customMark strings because native
+repeat counters and implicit Roman endnotes differ from SF shared decimal labels.
+The checked identity binding stores only the missing automatic-label intent; it is
+restored after complete body assembly when actual mark and citation order agree.
+Legacy private custom blocks still read. Foreign automatic settings and advanced
+marks remain unfinished. Pinned skeleton glyphs/placed note pages, frame boxes and
+actual facade save qualify the correction; browser font/paint is still separate.

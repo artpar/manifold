@@ -1743,3 +1743,26 @@ separation. Disable native automatic hyphenation in generated projections to avo
 facade-injected behavior changes. Record measured seven-page selection/geometry
 and actual FDocument.save/fresh-reopen equality, without claiming browser/font
 fidelity. Contextual fitting, advanced intent and public native API remain work.
+
+
+## 2026-11-24 Fit native frames and correct citation atoms using placement evidence
+
+The pinned renderer retained an oversized 1000×2000px drawing on a 320px body;
+source size equality was insufficient to establish usable placement. Bound individual
+native image frames using actual section/cell/story contexts, preserving original
+preferred dimensions in guarded fit intent. Reuse pure-Go raster/fit helpers; do
+not add a runtime browser or claim complete native story/font layout from boxes.
+
+The same skeleton probe exposed that the old custom-block note projection never
+entered native note layout. Earlier source/view/save checks were narrower evidence,
+not placement proof. Emit/read actual FOOTNOTE/ENDNOTE U+FFFC custom ranges and
+retain the old input representation only for private compatibility. Keep the
+original structural tests and add genuine glyph/placed-body assertions, including
+table citations. No original document or fixture oracle was altered.
+
+Stabilize generated shared SF automatic labels with real native customMark values,
+plus sparse checked automatic intent in the existing carrier. Native default
+endnotes are Roman, and repeated references consume native counters; neither may
+silently change shared SF labels. Restore implicit numbering only when actual
+marks/citation order match. Native edits retain visible marks with diagnostics.
+Foreign numbering/settings and advanced marks remain required unfinished work.

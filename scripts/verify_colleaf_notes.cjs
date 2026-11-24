@@ -20,15 +20,16 @@ async function main(){
  let view=new engine.DocumentViewModel(model);
  const noteViews=view.getNoteTreeMap();
  assert.equal(noteViews.size,3);
- const refs=model.getBody().customBlocks;
+ const refs=model.getBody().customRanges.filter(r=>r.rangeType===8||r.rangeType===9);
  assert.equal(refs.length,4);
  assert.equal(refs[0].startIndex,3); // after A + astral scalar
- assert.equal(view.getCustomBlock(3).noteId,'manydoc-note-2');
+ assert.equal(view.getCustomRangeRaw(3).properties.noteId,'manydoc-note-2');
  assert.equal(view.getTextRun(3).ts.bl,1);
  assert.equal(view.getTextRun(3).ts.fs,12);
  assert.equal(view.getTextRun(3).ts.lang,'en-US');
- assert.equal(refs[0].noteId,refs[2].noteId); // repeated citation, one definition
- assert.equal(refs[1].noteType,'endnote');
+ assert.equal(refs[0].properties.noteId,refs[2].properties.noteId); // repeated citation, one definition
+ assert.equal(refs[1].rangeType,core.CustomRangeType.ENDNOTE);
+ for(const ref of refs)assert.equal(snapshot.body.dataStream[ref.startIndex],'\ufffc');
  assert.equal(noteViews.get('manydoc-note-1').getBody().dataStream,'End body 😀\r\n');
  assert.ok(noteViews.get('manydoc-note-2').getBody().dataStream.startsWith('Foot body\r'));
  const noteTable=snapshot.notes['manydoc-note-2'].body.tables[0];
@@ -37,6 +38,16 @@ async function main(){
  assert.equal(snapshot.notes['manydoc-note-3'].showBodyReference,false);
  const identities=JSON.parse(snapshot.body.customRanges.find(r=>r.rangeType===5&&r.properties.profile==='manydoc.native-intent').properties.records.find(r=>r.name==='manydoc.note-identities.v1').data);
  assert.deepEqual(identities.bindings.map(b=>[b.nativeId,b.kind,b.id]),[['manydoc-note-1','endnote','same'],['manydoc-note-2','footnote','same'],['manydoc-note-3','footnote','custom']]);
+ const skeleton=new engine.DocumentSkeleton(view,new core.LocaleService());skeleton.calculate();
+ const labels=[],placed=new Set();
+ function mainLabels(page){
+  for(const section of page.sections)for(const column of section.columns)for(const line of column.lines)for(const divide of line.divides)for(const glyph of divide.glyphGroup)if(glyph.noteId)labels.push([glyph.noteId,glyph.content]);
+  for(const table of page.skeTables.values())for(const row of table.rows)for(const cell of row.cells)mainLabels(cell);
+ }
+ for(const page of skeleton.getSkeletonData().pages){mainLabels(page);for(const note of page.notes||[])placed.add(note.noteId)}
+ assert.deepEqual(labels,[['manydoc-note-2','1'],['manydoc-note-1','1'],['manydoc-note-2','1'],['manydoc-note-3','§']]);
+ assert.deepEqual([...placed].sort(),['manydoc-note-1','manydoc-note-2','manydoc-note-3']);
+ skeleton.dispose();
  view.dispose();
  const saved=structuredClone(model.getSnapshot());
  saved.notes['manydoc-note-2'].body=core.TextX.apply(saved.notes['manydoc-note-2'].body,new core.TextX().delete(4).insert(4,{dataStream:'Edit'}).serialize());
@@ -48,6 +59,6 @@ async function main(){
  app.validateDocument(envelope(model.getSnapshot()));
  fs.writeFileSync(path.join(qa,'notes-edited.json'),JSON.stringify(model.getSnapshot(),null,2));
  view.dispose();model.dispose();
- console.log('Pinned app validator, native foot/endnote identities/references/bodies/tables and TextX note edit/save passed; note placement/browser rendering not qualified');
+ console.log('Pinned app validator, native foot/endnote identities/references/bodies/tables and TextX note edit/save passed; actual note ranges/glyphs/body placement pass; browser font/paint not qualified');
 }
 main().catch(error=>{console.error(error);process.exitCode=1});

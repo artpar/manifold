@@ -568,3 +568,53 @@ appearance intent; strict native envelope/JSON/surrogates; then full-preset/brow
 editing and rendering. The adapter remains private/incomplete; native API/CLI and
 the full goal are not complete. No runtime dependencies or application/backend
 changes were introduced. Existing source/oracle files are unchanged.
+
+
+## Individual frame fitting and actual foot/endnote placement correction
+
+Executable overflow regression: native docTransform.size 1000×2000px stayed that
+size on a 320px-wide body/600px-high page. Source dimensions alone do not qualify
+placement. colleaf_image_fit.go now projects frame bounds through main section
+layouts, fixed/relative merged/nested table grids (native 10px horizontal cell
+margins), list continuations, actual cited note sections and inherited running
+variants. Shared stories use the narrowest applicable context. Conservative page/
+cell/note paragraph/separator allowances bound individual frames. Running bands
+use declared margin/distance space when available, otherwise a physical-page
+fallback. Complete native story text height/font layout is not measured here.
+
+Original preferred dimensions remain unchanged through SF. Only fitted frames add
+a container to the existing checked image geometry record. Import recomputes that
+projection and checks original asset digest plus actual box. Native frame/asset
+edits win and disclose stale intent. No second image/whole-SF payload is stored.
+
+The actual note layout probe found the earlier custom-block references were only
+transported metadata: no native note bodies were placed. Native resolveNoteReferences
+reads CustomRangeType.FOOTNOTE8/ENDNOTE9 and createNoteGlyph consumes U+FFFC. The
+writer now emits those exact single-atom ranges; indexing rejects bad bounds,
+missing definitions, conflicting ownership and unsupported range properties. The
+reader separates note ranges from hyperlink ranges and preserves styled references
+in cell/paragraph fragments. Earlier private custom-block input remains readable.
+
+Pinned note renderer assertions now inspect real citation glyphs and placed
+foot/endnote pages, including a cell reference, instead of only getCustomBlock.
+Generated automatic notes use customMark strings with guarded implicit intent:
+native repeat counters and lowerRoman endnote defaults would otherwise change SF
+shared decimal labels. When native citation order changes, stale automatic intent
+is not restored; actual marks and disclosed numbering changes remain. Foreign
+implicit note numbering/settings and richer citation/body-label policies still
+need their required mappings before exposing the public adapter.
+
+scripts/verify_colleaf_image_fit.cjs independently checks body, nested merged-cell,
+list, shared note and inherited running boxes, actual note-image placement,
+facade save/fresh reopen and the original overflowing-frame regression. Go checks
+full SF equality/preferred sizes and native resize precedence. This is geometry/
+structure/save evidence; browser font/paint and total running-story layout remain
+unfinished. Production dependencies and application/backend code are unchanged.
+
+```sh
+MANYDOC_COLLEAF_NOTE_QA=output/colleaf-qa/notes.json MANYDOC_COLLEAF_FIT_QA=output/colleaf-qa/fitted-images.json GOWORK=off go test -run TestColleaf -count=1 .
+node scripts/verify_colleaf_notes.cjs
+node scripts/verify_colleaf_image_fit.cjs
+MANYDOC_COLLEAF_FIT_SAVED=output/colleaf-qa/fitted-images-saved.json GOWORK=off go test -run TestColleaf -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafNotes$' -fuzztime=10s -parallel=2 .
+```

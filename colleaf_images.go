@@ -44,12 +44,13 @@ type colleafNativeImage struct {
 	Geometry    *string                  `json:"prstGeom,omitempty"`
 }
 type colleafImageBinding struct {
-	ID           string  `json:"drawingId"`
-	Hash         string  `json:"sha256"`
-	Width        float64 `json:"width"`
-	Height       float64 `json:"height"`
-	NativeWidth  float64 `json:"nativeWidth"`
-	NativeHeight float64 `json:"nativeHeight"`
+	Container    *colleafImageSize `json:"container,omitempty"`
+	ID           string            `json:"drawingId"`
+	Hash         string            `json:"sha256"`
+	Width        float64           `json:"width"`
+	Height       float64           `json:"height"`
+	NativeWidth  float64           `json:"nativeWidth"`
+	NativeHeight float64           `json:"nativeHeight"`
 }
 type colleafImageGeometry struct {
 	Stories map[string][]colleafImageBinding `json:"stories"`
@@ -213,6 +214,11 @@ func (r *colleafBodyReader) nativeImage(id string) (*Image, error) {
 		candidate.Width = binding.Width
 		candidate.Height = binding.Height
 		projected, err := colleafIntrinsicImageSize(&candidate, cfg)
+		if err == nil && binding.Container != nil {
+			width, height, fitErr := fitImageBox(&candidate, cfg.Width, cfg.Height, binding.Container.Width, binding.Container.Height)
+			err = fitErr
+			projected = colleafImageSize{Width: width * 4 / 3, Height: height * 4 / 3}
+		}
 		if err == nil && binding.Hash == colleafImageHash(data) && binding.NativeWidth == size.Width && binding.NativeHeight == size.Height && projected == size {
 			im.Width = binding.Width
 			im.Height = binding.Height

@@ -179,7 +179,11 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 		plain.Footers = nil
 		plain.EvenAndOddHeaders = false
 	}
-	out, err := encodeColleafNotes(ctx, &plain)
+	catalog, err := catalogNotes(resolved, false)
+	if err != nil {
+		return colleafNoteSnapshot{}, err
+	}
+	out, err := encodeColleafNotesWithCatalog(ctx, &plain, catalog)
 	if err != nil {
 		return out, err
 	}
@@ -218,6 +222,7 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 	out.Headers = map[string]colleafRunningStory{}
 	out.Footers = map[string]colleafRunningStory{}
 	cache := outputImageCache{}
+	runningBlocks := map[string][]Block{}
 	storySerial := 0
 	encodeStory := func(story *RunningStory, header bool) (*string, error) {
 		if story == nil {
@@ -229,6 +234,7 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 			prefix = "header"
 		}
 		id := fmt.Sprintf("manydoc-%s-%d", prefix, storySerial)
+		runningBlocks[id] = story.Blocks
 		e, err := encodeColleafAssetBody(ctx, story.Blocks, nil, out.ID, id, cache)
 		if err != nil {
 			return nil, err
@@ -414,6 +420,9 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 	styleOutput["doNotHyphenateCaps"] = json.RawMessage("0")
 	out.DocumentStyle = sfAttrs(styleOutput)
 	out.Resources = colleafReplaceResource(out.Resources, colleafListResource, ownership)
+	if err = fitColleafDocumentImages(ctx, resolved, &out, &geometry, runningBlocks, cache); err != nil {
+		return out, err
+	}
 	out.Resources = colleafReplaceResource(out.Resources, colleafImageResource, geometry)
 	out.Resources = colleafReplaceResource(out.Resources, colleafDocumentResource, intent)
 	if err = sealColleafIntent(&out); err != nil {
@@ -523,7 +532,9 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 	}
 	stub.Resources = colleafReplaceResource(stub.Resources, colleafListResource, stubOwnership)
 	stub.Resources = colleafReplaceResource(stub.Resources, colleafImageResource, stubGeometry)
-	doc, err := decodeColleafNotes(ctx, stub, settings)
+	noteSettings := settings
+	noteSettings.DeferNoteNumbering = true
+	doc, err := decodeColleafNotes(ctx, stub, noteSettings)
 	if err != nil {
 		return nil, err
 	}
@@ -809,6 +820,15 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 	}
 	if len(usedTables) != len(opened.Tables) || len(usedDrawings) != len(opened.Drawings) {
 		return nil, fmt.Errorf("native main source is orphaned")
+	}
+	autoLabels := map[noteKey]string{}
+	for _, binding := range identities.Bindings {
+		if n, ok := opened.Notes[binding.NativeID]; ok && n.Kind == binding.Kind && binding.AutoLabel != nil && n.Mark != nil && *n.Mark == *binding.AutoLabel {
+			autoLabels[noteKey{binding.Kind, binding.ID}] = *binding.AutoLabel
+		}
+	}
+	if err = finishColleafNoteNumbering(doc, autoLabels); err != nil {
+		return nil, err
 	}
 	doc.Diagnostics = append(doc.Diagnostics, reader.doc.Diagnostics...)
 	doc.Diagnostics = append(doc.Diagnostics, diagnostics...)

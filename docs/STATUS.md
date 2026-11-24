@@ -39,6 +39,37 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
+## Latest progress: native image bounds and real note placement
+
+Private document output now fits individual image frames to page/cell/note/running
+containers, including merged/nested cells and narrower inherited story contexts.
+It retains preferred SF sizes in checked geometry intent; real native resizes win.
+The executable renderer does not shrink oversized frames itself: a 1000×2000px
+frame overflowed a 320px body on a 600px page. The new regression preserves that
+failure, checks actual projected boxes and verifies facade save/Go re-import.
+
+That probe exposed a substantive note representation error. Earlier custom-block
+checks proved transport/source access but did not place notes. Native citation
+layout consumes FOOTNOTE8/ENDNOTE9 ranges on U+FFFC, now emitted and read. The
+pinned reader independently checks citation glyphs and actual placed foot/endnote
+bodies, including a cell citation. Checked automatic-mark intent stabilizes shared
+SF note labels across repeated native references and native endnote Roman defaults;
+reordered native citations keep actual marks when automatic intent becomes stale.
+Older private custom-block input remains readable, but is no longer emitted.
+
+Final checks pass: tests 18.035s/0.815s, race 168.843s/2.995s, vet/modules,
+CGO-disabled focused tests/host CLI execution and Linux amd64/arm64 cross-builds;
+document/note fuzz 15,990/737 executions and diff check. Linux cross-builds are not
+execution evidence. Full details and limits are in verification.json.
+
+Nine pinned reader/save scripts plus Pillow and combined edited/saved Go re-import
+pass. The latest full checks are recorded in verification.json. These are frame/
+structure/placement/save checks, not browser font/paint or total-story-height
+qualification. Foreign automatic note numbering/settings, rich citation/body
+marks, remaining list/appearance/provenance intent, strict native envelope/JSON/
+surrogates and actual full-preset/browser behavior remain work. Public native
+API/CLI and the full goal remain incomplete. Production stays pure Go.
+
 ## Latest progress: native sections, page settings and running stories
 
 Private document composition now connects page geometry, section boundaries and
@@ -56,7 +87,7 @@ were ignored by the renderer. Actual FDocument.save/fresh reopen retains the sam
 Go model. This proves structure/geometry/save behavior, not browser paint or font
 metrics. The native adapter remains private/incomplete, with no public API/CLI.
 
-Next qualify contextual image fitting, complete rich note/marker/list/appearance
+Next qualify total native story layout and complete rich note/marker/list/appearance
 intent and strict native envelope/JSON/surrogate handling, then actual full-preset/
 browser editing/rendering and the final acceptance audit. Broader untagged PDF
 note recovery and final source/resource/API checks also remain. No external
@@ -87,7 +118,8 @@ Mixed inline image/text becomes ordered SF blocks with diagnostics. Malformed or
 contradictory sources, orphans, remote/hosted sources and unmapped hidden/transformed
 appearance reject instead of silently changing/dropping content. No public native
 API/CLI exists. Browser bitmap painting/editor resource persistence, contextual
-page/cell/note fitting and remaining profile mappings are open. Running stories
+total story fitting and remaining profile mappings are open. Individual frames
+now have contextual bounds; running stories
 now have the section-composition qualification above.
 The full adapter and overall goal remain active/incomplete.
 

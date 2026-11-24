@@ -232,6 +232,9 @@ func TestColleafSectionsShareNotes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if wire.Notes["manydoc-note-1"].Mark == nil || *wire.Notes["manydoc-note-1"].Mark != "1" || wire.Notes["manydoc-note-2"].Mark == nil || *wire.Notes["manydoc-note-2"].Mark != "1" {
+		t.Fatal("later-section automatic labels not projected")
+	}
 	got, err := decodeColleafDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)

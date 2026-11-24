@@ -288,8 +288,20 @@ func (r *colleafBodyReader) paragraphFragment(start, end int, p colleafParagraph
 			break
 		}
 		atom := r.index.blocks[position]
+		raw, err := r.index.text.exclusive(position, position+1)
+		if err != nil {
+			return out, err
+		}
 		atom.StartIndex -= start
-		out.CustomBlocks = append(out.CustomBlocks, atom)
+		if raw == "\ufffc" && atom.NoteID != "" {
+			kind := 8
+			if atom.NoteType == Endnote {
+				kind = 9
+			}
+			out.CustomRanges = append(out.CustomRanges, colleafRangeRecord{StartIndex: atom.StartIndex, EndIndex: atom.StartIndex, ID: atom.ID, Type: kind, Whole: true, Properties: sfAttrs(map[string]string{"noteId": atom.NoteID})})
+		} else {
+			out.CustomBlocks = append(out.CustomBlocks, atom)
+		}
 	}
 
 	return out, nil
@@ -671,7 +683,7 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 		return nil, err
 	}
 	for _, a := range body.CustomRanges {
-		if a.Type != 0 {
+		if a.Type != 0 && a.Type != 8 && a.Type != 9 {
 			return nil, fmt.Errorf("%w: native annotation type %d requires mapping", ErrUnsupported, a.Type)
 		}
 	}
@@ -720,7 +732,11 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 	if err != nil {
 		return nil, err
 	}
-	r.ranges = append([]colleafRangeRecord(nil), body.CustomRanges...)
+	for _, a := range body.CustomRanges {
+		if a.Type != 8 && a.Type != 9 {
+			r.ranges = append(r.ranges, a)
+		}
+	}
 	sort.Slice(r.ranges, func(i, j int) bool { return r.ranges[i].StartIndex < r.ranges[j].StartIndex })
 	for i := 1; i < len(r.ranges); i++ {
 		if r.ranges[i-1].EndIndex >= r.ranges[i].StartIndex {

@@ -26,9 +26,10 @@ type colleafNativeNote struct {
 	Lists             map[string]json.RawMessage `json:"lists,omitempty"`
 }
 type colleafNoteBinding struct {
-	NativeID string `json:"nativeId"`
-	Kind     string `json:"kind"`
-	ID       string `json:"id"`
+	AutoLabel *string `json:"autoLabel,omitempty"`
+	NativeID  string  `json:"nativeId"`
+	Kind      string  `json:"kind"`
+	ID        string  `json:"id"`
 }
 type colleafNoteIdentities struct {
 	Bindings []colleafNoteBinding `json:"bindings"`
@@ -54,11 +55,22 @@ type colleafNoteSnapshot struct {
 // Native note IDs share one namespace; SF identities are scoped by kind. This
 // sparse resource binds identities/order only, never another copy of note text.
 func encodeColleafNotes(ctx context.Context, d *Document) (colleafNoteSnapshot, error) {
+	return encodeColleafNotesWithCatalog(ctx, d, nil)
+}
+func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *noteCatalog) (colleafNoteSnapshot, error) {
 	out := colleafNoteSnapshot{ID: "manydoc"}
 	if err := d.Validate(); err != nil {
 		return out, err
 	}
 	d = resolveNumberingDocument(d)
+	if catalog == nil {
+		var err error
+		catalog, err = catalogNotes(d, false)
+		if err != nil {
+			return out, err
+		}
+	}
+
 	ids := map[noteKey]string{}
 	bindings := colleafNoteIdentities{}
 	ownership := colleafListOwnership{Stories: map[string][]colleafListBinding{}}
@@ -77,7 +89,12 @@ func encodeColleafNotes(ctx context.Context, d *Document) (colleafNoteSnapshot, 
 		}
 		id := fmt.Sprintf("manydoc-note-%d", i+1)
 		ids[noteIdentity(n)] = id
-		bindings.Bindings = append(bindings.Bindings, colleafNoteBinding{NativeID: id, Kind: n.Kind, ID: n.ID})
+		binding := colleafNoteBinding{NativeID: id, Kind: n.Kind, ID: n.ID}
+		if n.Label == "" && catalog.labels[noteIdentity(n)] != "" {
+			label := catalog.labels[noteIdentity(n)]
+			binding.AutoLabel = &label
+		}
+		bindings.Bindings = append(bindings.Bindings, binding)
 		encoded, err := encodeColleafAssetBody(ctx, n.Blocks, nil, out.ID, id, imageCache)
 		if err != nil {
 			return out, err
@@ -89,8 +106,11 @@ func encodeColleafNotes(ctx context.Context, d *Document) (colleafNoteSnapshot, 
 		if len(encoded.ImageGeometry) > 0 {
 			imageGeometry.Stories[id] = encoded.ImageGeometry
 		}
-		if n.Label != "" {
+		if n.Label != "" || binding.AutoLabel != nil {
 			mark := n.Label
+			if binding.AutoLabel != nil {
+				mark = *binding.AutoLabel
+			}
 			note.Mark = &mark
 		}
 		if n.BodyLabel != nil {
@@ -149,6 +169,7 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 	}
 	doc := &Document{}
 	ids := map[string]noteKey{}
+	autoLabels := map[noteKey]string{}
 	keys := make([]string, 0, len(input.Notes))
 	for id, n := range input.Notes {
 		if err := ctx.Err(); err != nil {
@@ -238,6 +259,10 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 				continue
 			}
 			ids[binding.NativeID] = noteKey{binding.Kind, binding.ID}
+			if binding.AutoLabel != nil && n.Mark != nil && *n.Mark == *binding.AutoLabel {
+				autoLabels[ids[binding.NativeID]] = *binding.AutoLabel
+			}
+
 			order = append(order, binding.NativeID)
 		}
 	}
@@ -307,6 +332,10 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 				return nil, err
 			}
 			note.Label = *n.Mark
+			if _, ok := autoLabels[key]; ok {
+				note.Label = ""
+			}
+
 		}
 		if n.ShowBodyReference != nil && !*n.ShowBodyReference {
 			empty := ""
@@ -348,8 +377,30 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 	}
 	doc.Blocks = body.Blocks
 	doc.Diagnostics = append(doc.Diagnostics, body.Diagnostics...)
+	if !settings.DeferNoteNumbering {
+		if err = finishColleafNoteNumbering(doc, autoLabels); err != nil {
+			return nil, err
+		}
+	}
 	if err = validateNotes(doc); err != nil {
 		return nil, err
 	}
 	return doc, nil
+}
+
+func finishColleafNoteNumbering(doc *Document, autoLabels map[noteKey]string) error {
+	if len(autoLabels) > 0 {
+		actual, err := catalogNotes(doc, false)
+		if err != nil {
+			return err
+		}
+		for i, n := range doc.Notes {
+			if label, ok := autoLabels[noteIdentity(n)]; ok && actual.labels[noteIdentity(n)] != label {
+				doc.Notes[i].Label = label
+				doc.warn("colleaf_stale_note_numbering", "Native custom mark retained because current citation order no longer matches original automatic numbering")
+			}
+		}
+	}
+
+	return nil
 }
