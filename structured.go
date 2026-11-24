@@ -153,6 +153,7 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 				}{level, b.PageBreakBefore, b.Direction})
 			}
 			for _, r := range b.Runs {
+				r = canonicalCitationRun(r)
 				if r.Text == "" && r.Note == nil && r.Anchor == "" {
 					continue
 				}
@@ -165,7 +166,11 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 				}
 				if r.Note != nil {
 					t.Type = "note_reference"
-					t.Attrs = sfAttrs(r.Note)
+					var err error
+					t.Attrs, err = encodeSFNoteReference(r.Note)
+					if err != nil {
+						return nil, err
+					}
 				}
 				for _, m := range []struct {
 					name string
@@ -466,11 +471,11 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 					if t.Text != "" || len(t.Content) > 0 {
 						return nil, fmt.Errorf("note reference is an inline atom")
 					}
-					ref := NoteReference{}
-					if err := strictSFAttrs(t.Attrs, &ref); err != nil {
+					ref, err := decodeSFNoteReference(t.Attrs, depth)
+					if err != nil {
 						return nil, err
 					}
-					r.Note = &ref
+					r.Note = ref
 				default:
 					return nil, sfUnsupported(t.Type)
 				}
@@ -548,7 +553,10 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 						return nil, sfUnsupported(m.Type)
 					}
 				}
-				b.Runs = append(b.Runs, r)
+				if err := validateTextStyle(r); err != nil {
+					return nil, err
+				}
+				b.Runs = append(b.Runs, canonicalCitationRun(r))
 			}
 		case "bullet_list", "ordered_list":
 			b.Kind = ListBlock

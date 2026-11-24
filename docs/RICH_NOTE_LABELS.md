@@ -26,7 +26,8 @@ Marker bidi placement uses its own measured width, preventing a full paragraph's
 right-alignment offset from escaping the label gutter. Gutter side follows the
 first note-body paragraph; inline text uses the renderer's normal bidi defaults.
 Arabic/Latin body marks with a supplied DejaVu font qualify both gutter sides.
-Richly styled/internal mixed-direction citation atoms remain separate next work.
+Richly styled/internal mixed-direction citation atoms are qualified separately in
+RICH_CITATIONS.md.
 
 ## Portable Word and checked role
 
@@ -79,7 +80,7 @@ hyperlinks in PDF export. In the sectioned example its main page is approximatel
 420pt square. These are measured producer differences, not proof of exact Word
 page geometry or print equivalence. Standard source settings and semantic SF
 round trips are separately verified; broader producer qualification remains open.
-Heterogeneous/mixed-direction citations, nested/enclosing-ActualText relationships,
+Nested/enclosing-ActualText relationships,
 broader untagged note recovery, the Colleaf adapter and original DOCX corpus/final
 audit remain required. The full goal is incomplete.
 

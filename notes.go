@@ -14,6 +14,8 @@ const (
 // NoteReference identifies a note independently of its displayed automatic number.
 // IDs are scoped by Kind and may be application identifiers rather than integers.
 type NoteReference struct {
+	// LabelContent owns a literal rich citation. Label must be absent.
+	LabelContent []Run `json:"label_content,omitempty"`
 	// Inferred records a recovered relationship that was not an explicit source link.
 	Inferred bool `json:"inferred,omitempty"`
 	// Label overrides this citation only. Nil inherits the note label; empty is markerless.
@@ -178,6 +180,9 @@ func validateNoteLabel(label string) error {
 }
 
 func noteReferenceLabel(c *noteCatalog, ref *NoteReference) string {
+	if ref.LabelContent != nil {
+		return noteLabelContentText(ref.LabelContent)
+	}
 	if ref.Label != nil {
 		return *ref.Label
 	}
@@ -200,7 +205,7 @@ func variantNoteKeys(d *Document) map[noteKey]bool {
 		}
 	}
 	_ = walkNoteRuns(d.Blocks, func(r Run) error {
-		if r.Note != nil && r.Note.Label != nil {
+		if r.Note != nil && (r.Note.Label != nil || r.Note.LabelContent != nil) {
 			keys[referenceKey(r.Note)] = true
 		}
 		return nil

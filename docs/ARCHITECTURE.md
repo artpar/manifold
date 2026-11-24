@@ -91,6 +91,16 @@ that destination. Larger figures fit the full continuation container, not leftov
 reference-page space. Richer numbering/separator/layout behavior remains required
 expansion.
 
+Rich citation content lives on NoteReference.LabelContent, using ordinary SF text
+nodes/marks. Canonicalization materializes shared outer marks into the fragments.
+`pdf_citation.go` measures inner text/bidi at superscript sizes and keeps a single
+outer note atom for pagination, preceding-anchor binding, reservation and navigation.
+DOCX uses literal reference-styled hyperlink runs; `docx_citation_bidi.go` emits
+checked LRI/PDI boundary runs where independent reader isolation is needed, restoring
+only exact generated controls. Ordinary editable label text stays authoritative.
+PDF structure recovery retains heterogeneous fragments and per-run source evidence;
+physical alternate navigation remains separate from the editable note target.
+
 ## PDF running stories and body rectangle
 
 `pdf_running.go` measures immutable header/footer flows once through the shared

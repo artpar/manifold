@@ -97,6 +97,7 @@ func validateFontText(r Run, font *sfnt.Font) error {
 }
 
 type pdfSpan struct {
+	citation        *pdfCitationBox
 	bidi            pdfBidiRange
 	placed          bool
 	visualX         float64

@@ -1515,3 +1515,22 @@ Keep observed font/hyperlink/endnote-page producer differences explicit; do not
 revise source operators, expected styles or page claims to accept the prototype.
 RICH_NOTE_LABELS.md records native/Word/raster/structure evidence and remaining
 heterogeneous/mixed-direction citation and graph work.
+
+
+## 2026-11-24 Preserve rich citations inside one measured note atom
+
+Use ordinary text nodes/marks in label_content rather than another literal string
+plus style offsets. Exclude Label when content exists; reference kind/ID owns the
+link. Materialize outer positive/fallback typography into fragments in canonical
+SF. Keep original source regions on each fragment; diagnose alternate source
+navigation when editable citation ownership replaces it.
+
+Shape/layout the interior independently and bind one outer atom to its preceding
+grapheme. This preserves note reservation/link bounds and supports mixed-direction
+plain labels without changing the existing homogeneous RTL shaping path. Word
+uses ordinary reference runs in its checked hyperlink. LibreOffice ignored w:dir
+for this case; tested Unicode LRI/PDI controls kept fragments together. Validate
+exact boundary roles/content before stripping them on import, never arbitrary
+user controls or visible text. Existing producer superscript/font/page differences
+remain explicit. RICH_CITATIONS.md records structural and independent visual QA;
+no source oracle or runtime/app boundary was changed.

@@ -28,6 +28,7 @@ func main() {
 	fractionalSizes := flag.Bool("fractional-sizes", false, "export SF/DOCX with fractional authoring sizes (native PDF requires 0.01pt)")
 	sectioned := flag.Bool("sectioned", false, "wrap content and running stories in an explicit section")
 	richBodyLabels := flag.Bool("rich-body-labels", false, "use multiple independently styled/linkable body-label text runs")
+	richCitations := flag.Bool("rich-citations", false, "use individually styled literal citation fragments")
 	flag.Parse()
 	ctx := context.Background()
 	sf, err := manydoc.ReadStructured(ctx, bytes.NewReader(source))
@@ -110,6 +111,9 @@ func main() {
 			}
 		}
 	}
+	if *richCitations {
+		styleExampleCitations(d.Blocks, map[string]string{})
+	}
 	if *sectioned {
 		d.Blocks = []manydoc.Block{{Kind: manydoc.SectionBlock, Section: &manydoc.Section{Blocks: d.Blocks, Headers: manydoc.RunningStories{Default: &manydoc.RunningStory{Blocks: d.Headers}}, Footers: manydoc.RunningStories{Default: &manydoc.RunningStory{Blocks: d.Footers}}}}}
 		d.Headers = nil
@@ -136,12 +140,40 @@ func main() {
 	for _, format := range formats {
 		name := filepath.Join(*out, "notes."+string(format))
 		var buf bytes.Buffer
-		if err := manydoc.Write(ctx, &buf, d, format, manydoc.WriteOptions{AllowLossy: *variantLabels || *styledLabels || *fractionalSizes || *richBodyLabels}); err != nil {
+		if err := manydoc.Write(ctx, &buf, d, format, manydoc.WriteOptions{AllowLossy: *variantLabels || *styledLabels || *fractionalSizes || *richBodyLabels || *richCitations}); err != nil {
 			log.Fatal(err)
 		}
 		if err := os.WriteFile(name, buf.Bytes(), 0644); err != nil {
 			log.Fatal(err)
 		}
 		log.Println(name)
+	}
+}
+
+func styleExampleCitations(blocks []manydoc.Block, labels map[string]string) {
+	for i := range blocks {
+		b := &blocks[i]
+		for j := range b.Runs {
+			ref := b.Runs[j].Note
+			if ref == nil {
+				continue
+			}
+			key := ref.Kind + ":" + ref.ID
+			suffix := labels[key]
+			if suffix == "" {
+				suffix = strconv.Itoa(len(labels) + 1)
+				labels[key] = suffix
+			}
+			ref.Label = nil
+			ref.LabelContent = []manydoc.Run{{Text: "C", FontFamily: "Go", FontSize: 9, Bold: true, Color: "#203040"}, {Text: "-" + suffix, FontFamily: "Go", FontSize: 8, Italic: true, Color: "#FF0000"}}
+		}
+		for j := range b.Items {
+			styleExampleCitations(b.Items[j].Blocks, labels)
+		}
+		for j := range b.Rows {
+			for k := range b.Rows[j].Cells {
+				styleExampleCitations(b.Rows[j].Cells[k].Blocks, labels)
+			}
+		}
 	}
 }

@@ -241,6 +241,11 @@ func TestStructuredListBoundaryRoundTrip(t *testing.T) {
 }
 
 func FuzzReadStructured(f *testing.F) {
+	var richCitation bytes.Buffer
+	if err := Write(context.Background(), &richCitation, richCitationDocument(true), SF, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(richCitation.Bytes())
 	var richLabel bytes.Buffer
 	if err := Write(context.Background(), &richLabel, richBodyNoteDocument(true), SF, WriteOptions{}); err != nil {
 		f.Fatal(err)

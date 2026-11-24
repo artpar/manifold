@@ -39,43 +39,30 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: rich body labels and measured bidi gutters
+## Latest progress: rich citation labels and atomic mixed-direction layout
 
-Note.BodyLabelContent now holds literal rich label runs; SF uses ordinary text
-nodes/marks in body_label_content. This alternative excludes BodyLabel and
-BodyLabelStyle, so there is one body-text authority. Fonts/sizes/colors/emphasis,
-per-fragment links and source positions survive SF/JSON/gzip. PDF recovery retains
-differently styled leading-Lbl runs instead of their common intersection.
-Uniform labels retain the previous template representation.
+NoteReference.LabelContent / note_reference.attrs.label_content now preserves
+literal fragments with individual text marks and source positions. It excludes
+the Label pointer; the note owns navigation. Shared outer marks canonicalize into
+child text nodes without mutating caller data. Source PDF citation MCID operators
+retain their individual 10pt black/8pt red fragments rather than a common style.
 
-Ordinary and sectioned Word export uses checked matching bookmark ranges around
-actual visible runs/hyperlinks. The range binds to the real note; metadata does
-not duplicate body text. Invalid roles, hidden/nontext content, conflicting
-sources of authority and private-prefix destination collisions are tested. Inserted
-revisions retain final-visible text; deleted history/comments diagnose, and an
-empty final label becomes explicit markerless display without invented numbering. Native
-PDF measures rich foot/endnote marks through its normal font/glyph/bidi/layout
-paths. Marker bidi offsets now use the intrinsic width, preventing alignment in
-an entire body column from escaping the gutter.
+Native PDF measures these fragments, including mixed Arabic/Latin plain labels,
+in one internal bidi box. Wrapping, preceding-anchor admission, footnote reservation
+and one complete reference link use the same atom. Word exports ordinary visible
+reference-styled runs inside the existing note-body hyperlink. Checked Unicode
+LRI/PDI boundary runs keep mixed labels together in independently rendered RTL
+paragraphs; imports validate/remove only the exact generated controls. Source text
+is never duplicated in metadata. See RICH_CITATIONS.md for contracts/reproduction.
 
-Independent source MCID operators establish a 10pt black/8pt red mark; source/SF/
-Word/native paint, geometry, list/table/image pixels and source evidence pass.
-A sectioned example preserves all three rich marks and native fragment URI/named
-backlinks. Supplied-DejaVu Arabic/Latin marks qualify both gutter sides. Actual
-ProseMirror checks 138 nodes/marks/attributes; eight generated pages were inspected.
-Read RICH_NOTE_LABELS.md for exact semantics, independent checks and reproduction.
-
-Independent QA rejected an inline content-control prototype that moved/restyled
-labels; the final ordinary bookmark-range output passes. LibreOffice still uses
-installed fonts, omits custom label PDF hyperlinks, and chooses a dedicated Letter
-endnote page in the example (native pages 420pt square, Word main ~419.556pt).
-No source-layout or Word-equivalent print-fidelity claim is made. This producer
-qualification remains open, separately from verified standard settings/SF meaning.
-
-Current check results are in verification.json; ignored QA is output/rich-note-labels.
-Previous precision/sectioned-note parity is 2b791c0; common body-label templates
-580411d; identified note relationships 894ee74. No runtime/module/app/access/quota
-boundary changed. The full goal remains active/incomplete; remaining work follows.
+SF/JSON/gzip and ordinary/sectioned Word semantics, repeat/list references, actual
+ProseMirror184 nodes/marks/attributes, independent source operators/package/paint/
+link geometry and eight native/LibreOffice pages qualify this milestone. Existing
+Word font substitution, superscript ratios/baselines and dedicated Letter endnote
+page differ from native output. Broader producer qualification remains required.
+Tests and full check evidence are recorded in verification.json with this commit.
+QA artifacts remain ignored under output/rich-citations. No runtime dependencies,
+application, quota, authorization or upload boundary changed. Goal remains incomplete.
 
 ## Existing verified evidence to preserve
 
@@ -111,8 +98,7 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
 
 ## Next concrete implementation order
 
-1. Complete heterogeneous/internal mixed-direction citation marks and remaining
-   nested/ActualText/untagged graphs;
+1. Complete remaining nested/ActualText/untagged note graphs;
    use the original-guide evidence in PDF_NOTES.md, preserving source facts/content.
 2. Implement/qualify the actual Colleaf native snapshot adapter through the shared
    SF. Include UTF-16 boundaries, rich source maps, notes/stories and resources;
@@ -125,12 +111,10 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
    after every original criterion is proven. There is no external blocker now.
 
 ```sh
-# Next: retain per-fragment citation marks and shape an atomic mixed-direction
-# label in its own box; preserve relationship/preceding-anchor line admission.
-rg -n 'noteMarkLevel|structureReplacement|citation|run.Note' pdf_structure_notes.go pdf_text.go pdf_bidi.go
-GOWORK=off go run ./examples/notes -rich-body-labels -sectioned -out output/rich-note-labels/example
-# Full source, reader and renderer commands: RICH_NOTE_LABELS.md
-GOWORK=off go test -race -run 'TestPDFAdjacent|TestPDFPhysicalLinkNoteInference|TestDOCXNoteRelationshipInference|TestPDFNoteLinkAmbiguity' -count=1 .
+# Next: resolve explicit relationships without conflating enclosing ActualText.
+rg -n 'ActualText|nested|note' pdf_structure_notes.go pdf_structure.go pdf_marked.go
+GOWORK=off go test -race -run 'TestRichCitation|TestDOCXCitationIsolation|TestPDFRichCitation' -count=1 .
+# Full generation/reader commands: RICH_CITATIONS.md
 output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
 bin/manydoc extract -format sf -o output/audit/explicit-note.sf output/audit/explicit-note.pdf
 bin/manydoc extract -format sf -o output/audit/pagination-artifact.sf output/audit/pagination-artifact.pdf

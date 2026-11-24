@@ -27,6 +27,7 @@ func parseNoteBodyName(name string) (*NoteReference, error) {
 	return parseNoteBookmark("mdnote1_" + strings.TrimPrefix(name, "mdnotebody1_"))
 }
 func (w *docxWriter) variantNoteReference(run Run, block Block) (string, error) {
+	run = canonicalCitationRun(run)
 	key := referenceKey(run.Note)
 	id := w.noteIDs[key]
 	wire := noteKey{key.kind, strconv.Itoa(id)}
@@ -40,12 +41,24 @@ func (w *docxWriter) variantNoteReference(run Run, block Block) (string, error) 
 	literal := run
 	literal.Note = nil
 	literal.Text = noteReferenceLabel(w.noteCatalog, run.Note)
-	encoded, err := w.blocksAt([]Block{{Kind: block.Kind, Level: block.Level, Runs: []Run{literal}}}, 0)
+	rich := run.Note.LabelContent != nil
+	runs := []Run{literal}
+	kind, level := block.Kind, block.Level
+	if rich {
+		runs = run.Note.LabelContent
+		kind = Paragraph
+		level = 0
+	}
+	encoded, err := w.blocksAt([]Block{{Kind: kind, Level: level, Runs: runs}}, 0)
 	if err != nil {
 		return "", err
 	}
-	encoded = strings.Replace(encoded, `<w:rPr>`, `<w:rPr><w:rStyle w:val="`+strings.Title(key.kind)+`Reference"/>`, 1)
-	if literal.Text == "" {
+	if rich {
+		encoded = strings.ReplaceAll(encoded, `<w:rPr>`, `<w:rPr><w:rStyle w:val="`+strings.Title(key.kind)+`Reference"/>`)
+	} else {
+		encoded = strings.Replace(encoded, `<w:rPr>`, `<w:rPr><w:rStyle w:val="`+strings.Title(key.kind)+`Reference"/>`, 1)
+	}
+	if !rich && literal.Text == "" {
 		encoded = strings.Replace(encoded, `</w:r>`, `<w:t/></w:r>`, 1)
 	}
 	start := strings.Index(encoded, `</w:pPr>`)
@@ -57,8 +70,17 @@ func (w *docxWriter) variantNoteReference(run Run, block Block) (string, error) 
 	if run.Note.Label != nil {
 		override = "1"
 	}
+	if rich {
+		override = "rich"
+	}
 	name := noteBodyName(wire)
-	fmt.Fprintf(&out, `<w:hyperlink w:anchor="%s" md:noteCitation="%s" md:noteOverride="%s"%s>%s</w:hyperlink>`, name, name, override, docxNoteInference(run.Note), encoded[start+len(`</w:pPr>`):end])
+	content := encoded[start+len(`</w:pPr>`) : end]
+	isolation := ""
+	if rich || citationNeedsIsolation(literal.Text) {
+		isolation = ` md:noteIsolation="ltr"`
+		content = docxCitationIsolationStart + content + docxCitationIsolationEnd
+	}
+	fmt.Fprintf(&out, `<w:hyperlink w:anchor="%s" md:noteCitation="%s" md:noteOverride="%s"%s%s>%s</w:hyperlink>`, name, name, override, docxNoteInference(run.Note), isolation, content)
 	return out.String(), nil
 }
 func (w *docxWriter) noteDisplayMetadata(n Note) string {
@@ -137,6 +159,9 @@ func (r *docxReader) variantCitation(n *xmlNode) (*NoteReference, error) {
 	}
 	if err := readDocxNoteInference(n, ref); err != nil {
 		return nil, err
+	}
+	if n.attributeNS(docxNotesNS, "noteOverride") == "rich" {
+		return r.richCitation(n, ref)
 	}
 	if n.attr("anchor") != name || n.attr("id") != "" || len(n.Children) != 1 || n.Children[0].Name.Local != "r" {
 		return nil, fmt.Errorf("note citation target/shape contradicts metadata")

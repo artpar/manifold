@@ -121,6 +121,7 @@ func (r *pdfRenderer) textAtomsDirection(runs []Run, size float64, direction str
 	var text strings.Builder
 	var ranges []pdfRunRange
 	for _, run := range runs {
+		run = canonicalCitationRun(run)
 		start := text.Len()
 		if run.Note != nil {
 			text.WriteRune('\ufffc')
@@ -137,6 +138,18 @@ func (r *pdfRenderer) textAtomsDirection(runs []Run, size float64, direction str
 	}
 	paragraphIndex, scalarOffset := 0, 0
 	var atoms []pdfTextAtom
+	appendAtom := func(atom pdfTextAtom, note bool) {
+		if note && len(atoms) > 0 && !atoms[len(atoms)-1].hard {
+			previous := &atoms[len(atoms)-1]
+			previous.spans = append(previous.spans, atom.spans...)
+			previous.width += atom.width
+			previous.breaking = atom.breaking
+			previous.trim = false
+			previous.softHyphen = false
+		} else {
+			atoms = append(atoms, atom)
+		}
+	}
 	rangeIndex := 0
 	graphemes := uniseg.NewGraphemes(text.String())
 	for graphemes.Next() {
@@ -164,6 +177,18 @@ func (r *pdfRenderer) textAtomsDirection(runs []Run, size float64, direction str
 			return nil, err
 		}
 		scalarOffset = scalarEnd
+		if run.Note != nil && r.notes != nil {
+			label := noteReferenceLabel(r.notes, run.Note)
+			_, directionErr := r.noteMarkLevel(label, run.Direction)
+			if run.Note.LabelContent != nil || directionErr != nil {
+				composite, err := r.citationAtom(run, size, sourceRange, atom.breaking)
+				if err != nil {
+					return nil, err
+				}
+				appendAtom(composite, true)
+				continue
+			}
+		}
 		if full := textSize(run, size); full > 14400 || fmt.Sprintf("%.2f", full) == "0.00" || math.Abs(full-math.Round(full*100)/100) > 1e-9 {
 			return nil, fmt.Errorf("%w: PDF font size exceeds coordinate range or 0.01pt precision", ErrUnsupported)
 		}
@@ -244,16 +269,7 @@ func (r *pdfRenderer) textAtomsDirection(runs []Run, size float64, direction str
 		if atom.softHyphen {
 			atom.hyphenWidth = r.pdf.GetStringWidth("-")
 		}
-		if run.Note != nil && len(atoms) > 0 && !atoms[len(atoms)-1].hard {
-			previous := &atoms[len(atoms)-1]
-			previous.spans = append(previous.spans, atom.spans...)
-			previous.width += atom.width
-			previous.breaking = atom.breaking
-			previous.trim = false
-			previous.softHyphen = false
-		} else {
-			atoms = append(atoms, atom)
-		}
+		appendAtom(atom, run.Note != nil)
 	}
 	if err := r.measureShapedAtoms(atoms, size); err != nil {
 		return nil, err
@@ -543,17 +559,22 @@ func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 			drawSize = math.Round(drawSize*.7*100) / 100
 			rise = textSize(span.run, size) * .3
 		}
-		if span.glyphs == nil {
-			face, err := r.font(span.run)
-			if err != nil {
-				r.pdf.SetError(err)
-				return
+		if span.citation != nil {
+			box := span.citation
+			r.drawLine(box.line, x, y+baseline-box.rise-pdfLineSize(box.line, box.size), box.size)
+		} else {
+			if span.glyphs == nil {
+				face, err := r.font(span.run)
+				if err != nil {
+					r.pdf.SetError(err)
+					return
+				}
+				r.pdf.SetFont(face.id, runStyle(span.run), drawSize)
 			}
-			r.pdf.SetFont(face.id, runStyle(span.run), drawSize)
+			red, green, blue := textRGB(span.run.Color)
+			r.pdf.SetTextColor(red, green, blue)
+			r.paintSpan(span, x, y+baseline-rise, drawSize)
 		}
-		red, green, blue := textRGB(span.run.Color)
-		r.pdf.SetTextColor(red, green, blue)
-		r.paintSpan(span, x, y+baseline-rise, drawSize)
 		if span.run.Note != nil && span.width > 0 {
 			r.pdf.Link(x, y+baseline-span.ascent, span.width, math.Max(textSize(span.run, size), span.ascent+span.descent), r.noteLinks[referenceKey(span.run.Note)])
 		}

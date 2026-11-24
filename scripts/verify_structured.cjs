@@ -22,6 +22,11 @@ function verifyTree(nodes) {
     }
     count++;
     verifyTree(n.content);
+    if (n.type === 'note_reference' && n.attrs?.label_content != null) {
+      assert.ok(Array.isArray(n.attrs.label_content) && n.attrs.label_content.length);
+      assert.ok(n.attrs.label_content.every(n => n.type === 'text'));
+      verifyTree(n.attrs.label_content);
+    }
     if (n.type === 'section') {
       for (const role of ['headers', 'footers']) {
         for (const [variant, content] of Object.entries(n.attrs?.[role] || {})) {

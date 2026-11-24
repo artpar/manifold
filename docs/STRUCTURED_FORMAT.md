@@ -746,3 +746,14 @@ allowed, independently of aggregate label_source. This maps to Note.BodyLabelCon
 ([]Run), without changing citation/default label or counters. Native/Word use the
 shared rich runs; no duplicate literal body text is stored in Word metadata.
 See RICH_NOTE_LABELS.md for exact range validation, bidi/gutter and reader evidence.
+
+
+Optional note_reference.attrs.label_content is a nonempty array of ordinary text
+nodes with existing formatting/source marks, mapped to NoteReference.LabelContent.
+Label must be absent; nested atoms, links, destinations, blank joined labels and
+multiline content reject. The reference kind/ID supplies navigation. Shared outer
+positive marks and unspecified typography canonicalize into each fragment, with
+explicit fragment values taking precedence; canonical atoms have no outer typography.
+Native PDF treats this as one atomic citation with independently shaped interior.
+Word stores its actual literal runs, not duplicate text metadata. See
+RICH_CITATIONS.md for exact behavior and independent-reader evidence.

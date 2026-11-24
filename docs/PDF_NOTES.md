@@ -94,8 +94,9 @@ semantic failures.
 
 This milestone closes the audit's zero-typed-note failure for explicit unambiguous
 relationships, including rich/repeated/reverse-linked cases. Broader note recovery
-still needs rich multi-node/internal mixed-direction citations, nested/enclosing-ActualText graphs, and carefully identified adjacency/
-geometric inference where no Ref exists. Differing, literal and explicitly empty
+still needs nested/enclosing-ActualText graphs and broader geometric inference
+where no Ref exists; existing adjacency/physical-link rules are qualified below.
+Rich/mixed-direction citation interiors are qualified in RICH_CITATIONS.md. Differing, literal and explicitly empty
 citation/body marks now have their own representation, described below. Enclosing
 ActualText/nested cases retain content and source evidence but do not yet expose a full editable note graph. Do not relabel
 these required follow-ups as a completed note contract. Original rich producer
@@ -126,10 +127,9 @@ label with a missing glyph or excess width fails explicitly before output. Endno
 marks use the normal list-marker path with a distinct explicit-empty state. Empty
 citation marks retain note admission/identity while emitting no zero-width link
 rectangle. Homogeneous RTL citation labels shape in their own direction; decimal
-marks remain LTR inside RTL prose. Mixed-direction atomic citation labels currently
-return an explicit shaping error rather than paint incorrect glyph order. Rich
-multi-node/mixed-script internal label layout remains a follow-up, not a fidelity
-claim.
+marks remain LTR inside RTL prose. Rich/mixed-direction citation labels now use
+a measured atomic box with ordinary independently shaped interiors; see
+RICH_CITATIONS.md for exact scaling, source, Word-isolation and independent checks.
 
 ### DOCX representation and editing policy
 
@@ -300,7 +300,8 @@ The original guide's 6.959646pt sizes now export with acknowledged half-point
 projection and checked original intent; see DOCX_PRECISION.md for full original
 Word round-trip/reader evidence. Strict output still rejects inexact sizes.
 Heterogeneous/mixed-direction body labels are qualified in RICH_NOTE_LABELS.md;
-rich/internal mixed-direction citations and nested/ActualText graphs remain open.
+rich/internal mixed-direction citations are qualified in RICH_CITATIONS.md.
+Nested/ActualText graphs remain open.
 
 ```sh
 GOWORK=off go run ./examples/notes -variant-labels -styled-labels -out output/note-styles

@@ -427,6 +427,11 @@ func (d *Document) Validate() error {
 				return errors.New("list items/start require a list block")
 			}
 			for _, r := range b.Runs {
+				if r.Note != nil && r.Note.LabelContent != nil {
+					if err := validateCitationContent(r.Note, d.Pages); err != nil {
+						return err
+					}
+				}
 				if err := validateTextStyle(r); err != nil {
 					return err
 				}

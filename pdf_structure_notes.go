@@ -164,9 +164,22 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 			source := sourceFromBlocks(blocks, ref)
 			source.Evidence = "pdf_note_explicit_ref"
 			citation, _ := pdfNoteMark(blocks)
-			run := s.structureReplacement(blocks, citation, source)
-			run.Text, run.Link, run.Destination = "", "", ""
-			run.Note = &NoteReference{ID: id, Kind: kind, Inferred: inferredRefs[ref] != ""}
+			var run Run
+			if len(blocks) > 0 && pdfNoteLabelNeedsRichContent(blocks[0].Runs) {
+				content := append([]Run(nil), blocks[0].Runs...)
+				for i := range content {
+					if content[i].Link != "" || content[i].Destination != "" {
+						s.warn("pdf_note_citation_navigation", "Citation annotation navigation remains physical evidence; the editable reference targets its note body")
+					}
+					content[i].Link = ""
+					content[i].Destination = ""
+				}
+				run = Run{Source: source, Note: &NoteReference{ID: id, Kind: kind, Inferred: inferredRefs[ref] != "", LabelContent: content}}
+			} else {
+				run = s.structureReplacement(blocks, citation, source)
+				run.Text, run.Link, run.Destination = "", "", ""
+				run.Note = &NoteReference{ID: id, Kind: kind, Inferred: inferredRefs[ref] != ""}
+			}
 			if inferredRefs[ref] != "" {
 				source.Evidence = "pdf_note_adjacent_reference"
 				source.Confidence = .85
@@ -175,7 +188,7 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 					source.Confidence = .95
 				}
 			}
-			if citation != label || label == "" {
+			if run.Note.LabelContent == nil && (citation != label || label == "") {
 				value := citation
 				run.Note.Label = &value
 			}

@@ -205,9 +205,14 @@ func TestVariantCitationDirectionAndShaping(t *testing.T) {
 		t.Fatal("RTL citation shaped in LTR direction", span)
 	}
 	mixed := "بb"
-	if _, err := r.lines([]Run{{Note: &NoteReference{Kind: Footnote, ID: "n", Label: &mixed}, FontFamily: "DejaVu"}}, 200, 18); !errors.Is(err, ErrUnsupported) {
-		t.Fatal("unsupported internal bidi painted silently", err)
+	composite, err := r.lines([]Run{{Note: &NoteReference{Kind: Footnote, ID: "n", Label: &mixed}, FontFamily: "DejaVu"}}, 200, 18)
+	if err != nil {
+		t.Fatal(err)
 	}
+	if len(composite) != 1 || len(composite[0]) != 1 || composite[0][0].citation == nil || composite[0][0].text != mixed || len(composite[0][0].citation.line) < 2 {
+		t.Fatal("mixed citation did not retain one outer atom with independently shaped inner spans")
+	}
+
 }
 
 func TestMissingCitationPaintIsNotMarkerlessProof(t *testing.T) {

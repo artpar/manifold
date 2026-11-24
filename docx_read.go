@@ -668,7 +668,7 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				if err != nil {
 					return err
 				}
-				if activeNoteReference == nil || *activeNoteReference != *ref || seenNoteReference {
+				if activeNoteReference == nil || referenceKey(activeNoteReference) != referenceKey(ref) || activeNoteReference.Inferred != ref.Inferred || seenNoteReference {
 					return fmt.Errorf("variant note anchor lacks matching reference bookmark")
 				}
 				seenNoteReference = true
@@ -715,9 +715,17 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				return nil
 			}
 			if c.attributeNS(docxNotesNS, "noteCitation") != "" {
+				c, err := checkedCitationIsolation(c)
+				if err != nil {
+					return err
+				}
 				ref, err := r.variantCitation(c)
 				if err != nil {
 					return err
+				}
+				if ref.LabelContent != nil {
+					b.Runs = append(b.Runs, Run{Note: ref})
+					return nil
 				}
 				run := c.child("r")
 				if err := r.textStyleChain(&style, run.child("rPr").child("rStyle").attr("val")); err != nil {

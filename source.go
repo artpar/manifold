@@ -389,6 +389,13 @@ func (d *Document) hasPDFSource() bool {
 				return true
 			}
 			for _, r := range b.Runs {
+				if r.Note != nil {
+					for _, child := range r.Note.LabelContent {
+						if child.Source != nil {
+							return true
+						}
+					}
+				}
 				if r.Source != nil {
 					return true
 				}

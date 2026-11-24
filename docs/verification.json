@@ -2017,7 +2017,7 @@
         "docx_unicode.docx"
       ],
       "before": "one Cambria span",
-      "after": "Cambria text interleaved with declared ＭＳ 明朝 Chinese and supplementary spans",
+      "after": "Cambria text interleaved with declared \uff2d\uff33 \u660e\u671d Chinese and supplementary spans",
       "node_increase": 4,
       "fixture_or_content_oracle_changed": false,
       "comparison": "output/script-font-corpus-differences.json"
@@ -4121,7 +4121,7 @@
         69,
         89
       ],
-      "detailed_crop": "page 89 shifted-column grid; byte 4 description visibly spans bytes 5–7",
+      "detailed_crop": "page 89 shifted-column grid; byte 4 description visibly spans bytes 5\u20137",
       "claim": "reader geometry qualification; no generated-output or Word-equivalence claim"
     },
     "limitations": [
@@ -4380,14 +4380,14 @@
       "uri_targets": 434,
       "expected_source_uri_targets": 434,
       "missing_uri_targets": [
-        "#_CONNACK_–_Connect",
-        "#_CONNECT_–_Connection",
-        "#_Figure_4.3_–"
+        "#_CONNACK_\u2013_Connect",
+        "#_CONNECT_\u2013_Connection",
+        "#_Figure_4.3_\u2013"
       ],
       "unexpected_uri_targets": [
-        "#_CONNACK_â•ﬁ_Connect",
-        "#_CONNECT_â•ﬁ_Connection",
-        "#_Figure_4.3_â•ﬁ"
+        "#_CONNACK_\u00e2\u2022\ufb01_Connect",
+        "#_CONNECT_\u00e2\u2022\ufb01_Connection",
+        "#_Figure_4.3_\u00e2\u2022\ufb01"
       ],
       "image_programs": 1,
       "original_jpeg_sha_preserved": true,
@@ -4471,7 +4471,7 @@
     },
     "commands": [
       "GOWORK=off CGO_ENABLED=0 go run ./examples/font-subset",
-      "GOWORK=off CGO_ENABLED=0 go run ./examples/font-subset -font output/font-research/BabelStoneHan.ttf -family 'BabelStone Han' -text 𪛔 -out output/font-subset/han-example",
+      "GOWORK=off CGO_ENABLED=0 go run ./examples/font-subset -font output/font-research/BabelStoneHan.ttf -family 'BabelStone Han' -text \ud869\uded4 -out output/font-subset/han-example",
       "output/qa-venv/bin/python scripts/verify_font_subsets.py --han-font output/font-research/BabelStoneHan.ttf",
       "output/qa-venv/bin/python scripts/verify_glyphs.py",
       "output/qa-venv/bin/python scripts/verify_default_shaping.py",
@@ -4533,9 +4533,9 @@
         "#_Figure_4.3_%E2%80%93"
       ],
       "old_corrupt_targets": [
-        "#_CONNACK_â•ﬁ_Connect",
-        "#_CONNECT_â•ﬁ_Connection",
-        "#_Figure_4.3_â•ﬁ"
+        "#_CONNACK_\u00e2\u2022\ufb01_Connect",
+        "#_CONNECT_\u00e2\u2022\ufb01_Connection",
+        "#_Figure_4.3_\u00e2\u2022\ufb01"
       ],
       "source_fixtures_and_oracles": "unchanged",
       "comparison": "Independent urllib RFC 3987 mapping preserves source Unicode and rejects old mojibake"
@@ -5174,7 +5174,7 @@
     "date": "2026-11-24",
     "model": "Note.Label / SF attrs.notes[].label; empty automatic; custom does not advance per-kind counter; identity separate",
     "paths": "SF/gzip SF/JSON/DOCX round trips; native PDF footnotes/endnotes; repeated references",
-    "independent": "python-docx/lxml package+standard references, pypdf/PyMuPDF native and LibreOffice PDF: two pages each, exact *α three/§E two marks, bodies each once, automatic 1 and >=4 internal links",
+    "independent": "python-docx/lxml package+standard references, pypdf/PyMuPDF native and LibreOffice PDF: two pages each, exact *\u03b1 three/\u00a7E two marks, bodies each once, automatic 1 and >=4 internal links",
     "visual": "all four native/LibreOffice pages inspected; no duplicate marks/body-note overlap; native/Word endnote heading/page reflow differences remain explicit",
     "failure_and_fix": "LibreOffice duplicates multi-character custom mark in one w:t; one scalar per text node plus standard note-body Ref avoids duplication",
     "checks": {
@@ -5243,7 +5243,7 @@
     "native": "body labels use normal font/glyph/shaping/measured-width checks; missing body glyphs error before output; empty marks retain admission without zero-width link rectangles; homogeneous RTL citation shaping and existing LTR-decimal-in-RTL semantics pass; internal mixed-direction atomic marks explicitly error",
     "independent": {
       "source": "pypdf original paint, ID/Ref owners/targets and explicitly empty K containers; two typed sites per note; different versus inherited versus empty values checked",
-      "roundtrip": "all editable source body/reference fields, rich hierarchy, styles, body anchors and exact raster bytes match PDF→SF→DOCX→SF; JSON/SF/gzip Go round trips pass",
+      "roundtrip": "all editable source body/reference fields, rich hierarchy, styles, body anchors and exact raster bytes match PDF\u2192SF\u2192DOCX\u2192SF; JSON/SF/gzip Go round trips pass",
       "readers": "python-docx/lxml standard anchor/body bookmark/hyperlink/style/label markup; pypdf/PyMuPDF native and LibreOffice outputs exact label/body counts, no visible anchor glyphs, visible first/repeated citations link to actual body coordinates",
       "pixels": "source two-pixel red/blue asset and alternative text preserved",
       "visual": "all four native/LibreOffice two-page variant example pages inspected; body labels separated and citations superscript; no duplicated mark; normal nonvariant custom-label example also independently passes",
@@ -5397,5 +5397,26 @@
     "remaining": "heterogeneous/internal mixed-direction citation atoms; nested/enclosing-ActualText and broader untagged note graphs; actual Colleaf adapter; broader original DOCX note/story/revision/field corpus and producer qualification; final acceptance audit",
     "next_commands": "rg -n 'noteMarkLevel|structureReplacement|citation|run.Note' pdf_structure_notes.go pdf_text.go pdf_bidi.go; GOWORK=off go test -race -run 'TestRichBodyLabel|TestPDFRichBodyLabel' -count=1 .",
     "goal": "active/incomplete"
+  },
+  "rich_citations_2026_11_24": {
+    "goal": "active/incomplete",
+    "contract": "NoteReference.LabelContent uses ordinary SF text nodes/marks; excludes Label and fragment navigation; canonicalizes shared outer typography without caller mutation. Notes own targets and numbering stays independent.",
+    "pdf_recovery": "MCID1 source10pt black asterisk/8pt red digit retain individual text/style/source regions; heterogeneous citations no longer collapse to common marks; physical alternate navigation separately retained/diagnosed.",
+    "native": "Composite inner shaping/bidi at .7 fragment sizes/.3 maximum rise, one atomic outer link/reservation/preceding-grapheme binding. Rich and plain mixed Arabic/Latin labels qualify LTR/RTL flow, safe bounds, unique complete link boxes and correct target pages.",
+    "docx": "Actual visible reference-styled runs in body-target hyperlinks; checked LRI/PDI start/end runs preserve isolation in LibreOffice. Namespaces/roles/literal controls checked; edits remain visible authority; malformed controls reject. Literal rich citation revision wrappers/fields explicitly reject, no silent content loss.",
+    "independent": "pypdf raw source operator oracle; python-docx/lxml package reader; exact editable source/Word SF; sectioned four repeated/list rich citations and three rich body marks;184 actual ProseMirror nodes/marks/attrs; eight native/LibreOffice pages inspected. Superscript/font/baseline/endnote-page producer differences documented, not an exact Word-fidelity claim.",
+    "checks": {
+      "tests": "all packages pass; library16.119s/CLI0.356s",
+      "race": "all packages pass; library165.142s/CLI2.109s",
+      "vet": "pass",
+      "modules": "all modules verified; dependencies unchanged",
+      "cgo_disabled": "host CLI built and focused tests executed0.394s pass; Linux amd64/arm64 cross-builds pass (not execution evidence)",
+      "fuzz": "DOCX201 executions11.666s; SF67860 executions11.491s;10s/two workers requested, both pass, new rich sectioned seeds; short campaigns not exhaustive",
+      "diff_check": "pass"
+    },
+    "evidence": "RICH_CITATIONS.md; note_citation_content_test.go; generate_pdf_semantic_audit.py, verify_rich_citations.py, verify_structured.cjs; examples/notes -rich-citations -rich-body-labels -sectioned; ignored output/rich-citations",
+    "runtime": "pure Go; no new modules/CGO/required executables/services/uploads/application changes/permission or quota gates",
+    "remaining": "nested/enclosing-ActualText and broader untagged note graphs; actual Colleaf native adapter; broader original DOCX note/story/revision/field corpus and producer qualification; final source/resource/API/acceptance audit",
+    "next_commands": "rg -n 'ActualText|nested|note' pdf_structure_notes.go pdf_structure_blocks.go pdf_marked.go; GOWORK=off go test -run 'TestPDFNoteInlineAndEnclosingActualText|TestPDFAdjacentNotesConservativeBoundaries' -count=1 ."
   }
 }

@@ -99,3 +99,25 @@ for kind in ('footnote','endnote'):
 mixed_sf={'type':'doc','attrs':{'schema':'manydoc-prosemirror/1','layout':{'width':420,'height':420,'margin':36},'notes':mixed_notes},
           'content':[{'type':'paragraph','content':[{'type':'text','text':'Mixed body labels '},{'type':'note_reference','attrs':{'kind':'footnote','id':'footnote'}},{'type':'text','text':' and '},{'type':'note_reference','attrs':{'kind':'endnote','id':'endnote'}}]}]}
 (out/'mixed-note-labels.sf').write_text(json.dumps(mixed_sf,ensure_ascii=False))
+
+
+# One explicit citation has individual glyph styles; the repeated site differs
+# only in that it keeps the original uniform representation.
+rich_citation=objects.copy()
+fragment='q BT /F 10 Tf /P << /MCID 1 >> BDC 60 300 Td (*) Tj /F 8 Tf 1 0 0 rg (1) Tj EMC ET Q\n'
+rich_citation[4]=stream(content.replace(text(1,60,300,'*1'),fragment))
+(out/'rich-citation-note.pdf').write_bytes(pdf(rich_citation))
+
+# Rich and uniform mixed-direction citation labels share the same note identity
+# machinery, but retain their own independent style/text representation.
+rich_mark=[{'type':'text','text':'بب','marks':[{'type':'textStyle','attrs':{'fontFamily':'DejaVu','fontSize':12}}]},
+           {'type':'text','text':'A','marks':[{'type':'textStyle','attrs':{'fontFamily':'DejaVu','fontSize':10,'color':'#FF0000'}}]}]
+mixed_citations={'type':'doc','attrs':{'schema':'manydoc-prosemirror/1','layout':{'width':300,'height':240,'margin':24},
+    'notes':[{'id':n,'kind':'footnote','content':[{'type':'paragraph','content':[{'type':'text','text':'NOTE_'+n.upper()}]}]} for n in ('one','two')]},
+    'content':[{'type':'paragraph','attrs':{'dir':direction},'content':[
+        {'type':'text','text':'Before anchorONE'},
+        {'type':'note_reference','attrs':{'id':'one','kind':'footnote','label_content':rich_mark}},
+        {'type':'text','text':' and anchorTWO'},
+        {'type':'note_reference','attrs':{'id':'two','kind':'footnote','label':'بA'},'marks':[{'type':'textStyle','attrs':{'fontFamily':'DejaVu','fontSize':14}}]},
+        {'type':'text','text':' after the atomic citations.'}]} for direction in ('ltr','rtl')]}
+(out/'mixed-citations.sf').write_text(json.dumps(mixed_citations,ensure_ascii=False))
