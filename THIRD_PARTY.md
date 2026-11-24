@@ -5,6 +5,7 @@ included. Third-party components remain under their respective licenses.
 
 | Component | Version | Purpose | License |
 | --- | --- | --- | --- |
+| github.com/hhrutter/lzw | v1.0.0 | Bounded PDF LZW stream decoding with EarlyChange support (previously transitive) | BSD-3-Clause |
 | github.com/pdfcpu/pdfcpu | v0.11.1 | PDF objects/streams/xrefs/encryption, raster extraction and core font metrics | Apache-2.0 |
 | github.com/phpdave11/gofpdf | v1.4.3 | PDF primitives and embedded fonts | MIT |
 | github.com/benoitkugler/textlayout | v0.3.2 | Adobe glyph names/encodings, TrueType layout and HarfBuzz glyph shaping | MIT |

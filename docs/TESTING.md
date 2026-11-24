@@ -2493,3 +2493,13 @@ varies source ranges/values/repetition. verify_pdf_cid_widths.py independently r
 all W values with pypdf and origins with MuPDF. Its unambiguous control must agree;
 the --require-mupdf-agreement switch retains the overlapping-source discrepancy.
 PDF_FONT_WIDTHS.md has exact commands, benchmark samples and remaining scope.
+
+
+Syntax-stream tests verify full SF/source equality across filters/pipelines,
+compressed ToUnicode, split tokens, repeated Forms/appearances, cache cancellation,
+remaining document allowances, all PNG filters and packed/16-bit TIFF vectors.
+Real64MiB expansion and shrinking intermediate probes reject. FuzzPDFSyntaxFilters
+roundtrips bounded arbitrary bytes across six codecs. verify_pdf_syntax_streams.py
+independently checks decoded bytes/MuPDF glyph origins, full SF and CLI rejection;
+--require-pypdf-all retains the longEarlyChange0 consumer failure. Commands/scope
+are in PDF_SYNTAX_STREAMS.md; no universal malformed-PDF or visual fidelity claim.

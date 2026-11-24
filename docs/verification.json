@@ -7767,5 +7767,44 @@
       "GOWORK=off go test ./...",
       "output/qa-venv/bin/python scripts/verify_pdf_cid_widths.py output/pdf-cid-qa --require-mupdf-agreement"
     ]
+  },
+  "pdf_syntax_stream_bounds": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "Pages,Forms/annotation appearances and ToUnicode use shared in-process bounded syntax decoding. Raw/Flate/ASCIIHex/ASCII85/RunLength/LZW EarlyChange0/1,pipelines and packed TIFF/PNG predictors remain supported. Limits64MiB per stage/joined page,256MiB document decoded-stage work,256MiB interpreted syntax,16filters. Unique indirect source bytes cache without collapsing actual transformed occurrences. Context/size/integrity errors return no partial Document/CLI output.",
+    "before": "Exact pre-change7727679 Git-archive CLI accepted unchanged deliberately bad zlib checksum and recovered FILTERED successfully. Current reader rejects. First baseline invocation preceded fixture export completion and failed missing-file;rerun after the export completed proves actual old acceptance.",
+    "implementation": "Independently authored filter/predictor orchestration around Go zlib/ascii85 and existing pinned hhrutter/lzw. Decoded reads stop at remaining stage/document allowance plus one detection byte. Page array bytes concatenate exactly. Cumulative interpreted work includes cached Form replays. Invalid predictor arithmetic/rows/samples reject before unsafe allocation.",
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_pdf_syntax_streams.py output/pdf-stream-qa",
+      "sha256": "85fc6c78c308d9cf5dc966a66a6b8d96b9cdea8de3d06ae31193d6cedd20ed91",
+      "positive": "12encodings incl30000byte-comment LZW0/1 dictionary transitions:MuPDF independently decodes every source byte and exact8glyph origins;full actual GoSF matches raw reference. pypdf passes11sources.",
+      "negative": "Pythonzlib confirms checksum/truncation corruption and bounded first-stage expansion>64MiB for direct and shrinking-chain sources. All8negative sources reject in actual CLI without committed destination.",
+      "retained_consumer_failure": "--require-pypdf-all intentionally FAILS on long-lzw0:code598/table593. Pinned pypdf ignores DecodeParms/EarlyChange;MuPDF and Go both decode the unchanged full source exactly. Original strict oracle retained,not replaced with short control. This is a consumer limitation,not ambiguous source geometry."
+    },
+    "Go_scope": "Fixed vectors cover PNGfilters0..4,packed TIFF1/2/4/8/16 and modulo wrap;public tests cover full SF/source equivalence,split token streams,compressed/corrupt ToUnicode,actual Form/appearance positions,cache/remaining-work bounds,short predecoded data,cancellation and real dictionary growth.",
+    "original_corpus": {
+      "command": "output/qa-venv/bin/python scripts/verify_published_pdf.py output/pdf-stream-published",
+      "result": "Original pinned InDesign bytes/metadata/10lists/57items/exactK membership/16URI targets/20531normalized chars/DOCX/nine reflowed PDFpages/spacecounts/textbounds pass. No new layout/fidelity claim.",
+      "baseline": "Complete publicationSF equals exact pre-change772767910258ecb250f09b5f0475ac9cb0015f4b Git-archive CLI byte-for-byte.",
+      "SF_sha256": "2d630c8ff72ec594b95b67542d66bf2df13886380672f6a213e5713b8095a7b2"
+    },
+    "checks": {
+      "go_test_all": "passed final library28.772s/CLIcached;earlier fresh28.893s/CLI0.829s",
+      "race": "passed library347.433s/CLI3.203s on final production code;precedes later test-only predictor/ToUnicode/long-LZW/fuzz additions,covered by final focused race",
+      "focused_race": "passed current8.633s including all later test-only additions",
+      "CGO_disabled_focus": "passed current0.782s",
+      "vet": "passed final",
+      "modules": "all modules verified;tidy completed",
+      "builds": "CGO-disabled host and Linux amd64/arm64 cross-builds pass;not Linux execution.",
+      "fuzz": "FuzzPDFSyntaxFilters passed16179executions/11.464s/two workers/three baseline seeds;short sample,not exhaustive safety.",
+      "diff_check": "passed"
+    },
+    "dependencies": "hhrutter/lzw v1.0.0 promoted from existing indirect to direct runtime requirement;version unchanged,existing BSD license retained and THIRD_PARTY updated. go.sum adds existing upstream textlayout-testdata v0.1.1 hashes after tidy;not a new runtime component. No proprietary code copied.",
+    "remaining": "Image codecs and initial dependency xref/object-stream parsing are separate resource paths,not claimed bounded by this fix. Full original source/reflow/API/visual/corpus acceptance audit remains active. Native repeated-footnote,Word-PDF annotations,CID ambiguity and independent pypdf EarlyChange0 discrepancy remain explicit. No overall blocker or completion waiver.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/ACCEPTANCE.md docs/PDF_SYNTAX_STREAMS.md",
+      "rg -n 'Decode\\(|ExtractImage|SMask' pdf_images.go",
+      "GOWORK=off go test ./..."
+    ]
   }
 }

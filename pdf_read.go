@@ -104,8 +104,8 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 		r.page = page
 		r.pageInfo = geometry
 		r.stream = fmt.Sprintf("page:%d", page)
-		data, e := p.PageContent(d, page)
-		if e != nil && !errors.Is(e, model.ErrNoContent) {
+		data, e := r.pageContent(d)
+		if e != nil {
 			return nil, e
 		}
 		r.lines = nil
@@ -193,6 +193,8 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 }
 
 type pdfReader struct {
+	streamBudget             *pdfStreamBudget
+	contentBytes             int
 	xobjectTotal             int
 	artifactTotal            int
 	logicalBidiLine          bool
@@ -415,6 +417,13 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 }
 
 func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state pdfTextState) error {
+	if err := r.ctx.Err(); err != nil {
+		return err
+	}
+	if len(data) > maxPDFDecodedBytes-r.contentBytes {
+		return fmt.Errorf("PDF interpreted syntax exceeds %d bytes", maxPDFDecodedBytes)
+	}
+	r.contentBytes += len(data)
 	spaces, err := r.pdf.DereferenceDict(resources["ColorSpace"])
 	if err != nil {
 		return err
@@ -762,7 +771,8 @@ func (r *pdfReader) form(o types.Object, parent types.Dict, depth int, state pdf
 	if *sub != "Form" {
 		return fmt.Errorf("%w: PDF XObject subtype %s", ErrUnsupported, *sub)
 	}
-	if err := sd.Decode(); err != nil {
+	decoded, err := r.decodePDFStream(o, sd)
+	if err != nil {
 		return err
 	}
 	resources, err := r.pdf.DereferenceDict(sd.Dict["Resources"])
@@ -811,7 +821,7 @@ func (r *pdfReader) form(o types.Object, parent types.Dict, depth int, state pdf
 	r.stream = r.objectID(o, "form")
 	defer func() { r.stream = oldStream }()
 	r.newline()
-	return r.content(sd.Content, resources, depth+1, state)
+	return r.content(decoded, resources, depth+1, state)
 }
 
 type pdfFont struct {
@@ -904,10 +914,11 @@ func (r *pdfReader) font(resources types.Dict, name string) (*pdfFont, error) {
 		if sd == nil {
 			return nil, errors.New("invalid ToUnicode stream")
 		}
-		if err := sd.Decode(); err != nil {
+		decoded, err := r.decodePDFStream(o, sd)
+		if err != nil {
 			return nil, err
 		}
-		f.mapping, err = parseUnicodeMap(r.ctx, sd.Content)
+		f.mapping, err = parseUnicodeMap(r.ctx, decoded)
 		if err != nil {
 			return nil, fmt.Errorf("ToUnicode: %w", err)
 		}

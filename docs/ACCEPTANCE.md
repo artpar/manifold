@@ -197,3 +197,13 @@ are explicitly diagnosed and marked estimated; the strict original agreement ora
 remains executable. The non-overlapping control and original publication agree with
 independent expectations. PDF_FONT_WIDTHS.md gives the scoped evidence. Decoded-
 stream/resource and full original-goal audits remain open.
+
+
+Syntax-stream resource/integrity audit now bounds every page/Form/appearance/
+ToUnicode filter stage and cumulative decoded/interpreted work. Original bad-checksum
+acceptance is fixed; public negative probes reject atomically. Twelve raw/filtered/
+predictor/LZW-transition source graphs match exactly and MuPDF independently confirms
+bytes/positions. Original publication SF remains identical. The pinned pypdf long
+EarlyChange0 limitation retains a strict failing oracle; no blanket reader/fidelity
+claim follows. Images/initial-parser resources and the full acceptance audit remain
+open. See PDF_SYNTAX_STREAMS.md.

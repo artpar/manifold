@@ -124,3 +124,14 @@ entries, now represented by explicit diagnostics and estimated advance precision
 The unambiguous control agrees with MuPDF. PDF_FONT_WIDTHS.md records the algorithm,
 bounded auxiliary domain, complete-inventory/source/SF checks, retained strict
 consumer oracle, original publication comparison and remaining memory limits.
+
+
+## Syntax stream decoding
+
+Page/Form/appearance/ToUnicode paths now enforce bounded filter stages, cumulative
+decoded/interpreted work, cancellation and strict completion/checksum handling.
+Cache reuse retains repeated physical placements. Standard filters, LZW0/1 and
+packed TIFF/PNG predictors are covered. PDF_SYNTAX_STREAMS.md records exact bounds,
+independent raw/typed/geometry oracles, original bad-checksum acceptance/fix and
+reader discrepancies. This does not bound image codecs or initial dependency
+xref/object-stream parsing; those remain separate audit paths.

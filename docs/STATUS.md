@@ -40,7 +40,38 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: bounded CID widths and explicit geometry ambiguity
+## Latest progress: bounded syntax-stream decoding and strict integrity
+
+Page contents, Forms/annotation appearances and ToUnicode now use a shared native
+Go decoder. Raw/Flate/ASCIIHex/ASCII85/RunLength/LZW(EarlyChange0/1), pipelines and
+packed TIFF/PNG predictors remain supported. Each decoded stage/joined page is
+bounded64MiB; document decoded work and actual interpreted syntax have separate
+256MiB bounds. Cached indirect streams decode once while each actual placement
+retains its transform/source. Cancellation and integrity failures reject without
+partial Document or committed CLI output. No app quota/permission gate is added.
+
+An unchanged bad-checksum source previously succeeded through the exact pre-change
+Git-archive CLI; it now rejects. Independent limited zlib confirms oversized direct
+and shrinking-pipeline intermediate data exceed the actual public cap. Eight negative
+sources reject atomically. Twelve valid sources retain exact complete SF/source
+identity; MuPDF verifies every decoded byte and all glyph origins. The pinned pypdf
+ignores EarlyChange and fails on long0 dictionary transitions; its strict oracle
+remains executable and FAILING, while MuPDF and Go agree exactly. See
+PDF_SYNTAX_STREAMS.md for source, scope and reproduction.
+
+The original InDesign source/structure/content/DOCX/nine-page reflow oracle passes.
+Full publication SF remains byte-identical to exact pre-change7727679. The already-
+pinned BSD hhrutter/lzw module is now direct, with its notice/THIRD_PARTY aligned;
+versions unchanged. Tidy adds existing upstream testdata checksums, not runtime code.
+
+Final tests pass (library28.772s/CLIcached;earlier fresh28.893s/CLI0.829s), full race
+passes347.433s/3.203s on final production code before later test-only additions;
+focused current race8.633s and CGO-disabled focus0.782s cover them. Vet/modules,
+host/Linux amd64/arm64 CGO-disabled builds pass. Short fuzz16179executions/11.464s/
+two workers passes;not exhaustive safety. Images, initial xref/object-stream parsing
+and broader original acceptance audits remain unfinished; the full goal stays active.
+
+## Earlier: bounded CID widths and explicit geometry ambiguity
 
 CID font widths no longer replay every overlapping range. The reader parses source
 assignments once, caches shared indirect numeric arrays and uses reverse successor
@@ -577,7 +608,7 @@ QA only. Historical codec timings are retained in the verification ledger.
 ## Next concrete implementation order
 
 1. Continue the wider source/resource/reflow/native corpus audit, including
-   decoded-stream handling after the XObject and CID-width fixes. The
+   image and initial xref/object-stream resources after the syntax-stream fix. The
    native repeated-footnote failure is revalidated in COLLEAF_BROWSER.md; retain
    its original oracle and seek new evidence rather than repeating the same check.
    Broaden source/structure and resource audits beyond the newly qualified

@@ -1260,3 +1260,12 @@ are conservatively flagged. Independent consumers can place the same text differ
 for these ambiguous inputs. Non-overlapping source widths keep exact metric behavior.
 PDF_FONT_WIDTHS.md gives independent source/geometry evidence and the retained strict
 consumer oracle. This does not bound all font/input/decoded-stream memory.
+
+
+PDF syntax streams (pages, Forms/appearances, ToUnicode) now reject decoded stages
+or joined pages beyond64MiB, pipelines beyond16 filters, or document decoded work/
+interpreted syntax beyond256MiB. Failures return no partial document. Checksums,
+truncated compression and incomplete RunLength data now reject. Valid raw/Flate/
+ASCII85/ASCIIHex/RunLength/LZW0/1/predictor content retains exact source graphs within
+these parser bounds. Initial xref/object streams and images have separate handling;
+no general memory-safety/RSS guarantee follows. See PDF_SYNTAX_STREAMS.md.

@@ -1978,3 +1978,18 @@ conservative overlap detection emits pdf_cid_width_overlap and marks advances as
 estimated because independent consumers disagree. Unambiguous source geometry and
 original-publication SF remain unchanged. See PDF_FONT_WIDTHS.md for evidence and
 remaining decoded-stream/resource scope; no application quota or new dependency.
+
+
+## 2026-11-25 Bound syntax decoding while preserving actual source content
+
+Page contents, Forms/appearances and ToUnicode use independently authored bounded
+filter/predictor interpretation around standard Go and pinned hhrutter/lzw codecs.
+A64MiB stage/page bound and256MiB document decoded/interpreted-work bounds reject
+before partial success. Indirect decoded bytes are cached, not rendered content;
+each valid occurrence keeps its actual transform/source. Strict zlib integrity now
+rejects the original checksum fixture that the previous reader accepted. Packed
+TIFF/PNG rules and both LZW EarlyChange modes have explicit tests and MuPDF bytes/
+position evidence; pypdf's longEarlyChange0 failure remains an executable separate
+oracle. No app admission/identity/quota logic or dependency version upgrade. Images
+and initial xref/object-stream decoding remain separate unfinished resource paths.
+PDF_SYNTAX_STREAMS.md gives limits, source references and original-corpus evidence.
