@@ -1766,3 +1766,25 @@ endnotes are Roman, and repeated references consume native counters; neither may
 silently change shared SF labels. Restore implicit numbering only when actual
 marks/citation order match. Native edits retain visible marks with diagnostics.
 Foreign numbering/settings and advanced marks remain required unfinished work.
+
+
+## 2026-11-24 Resolve foreign counters into current explicit marks
+
+Do not reinterpret native implicit endnotes as SF decimal defaults. Resolve native
+root/section counters and format outcomes before rich body decoding, preserving
+first/current citation labels and the final generated body mark on repeated notes.
+Represent those current values with existing SF literal-label fields. Explicitly
+diagnose loss of live restart/placement/column policies; do not invent another
+canonical settings schema or hide the loss behind successful text extraction.
+
+Qualify exact labels/body marks against the actual pinned skeleton and facade,
+including zero starts, custom marks not consuming counters, markerless labels,
+section restarts and repeated references. Keep unproven automatic per-page and
+editable separator/notice cases explicit and rejecting while their mappings remain
+unfinished. Keep native output for independent/rich marks on the required queue.
+
+A genuine saved-input comparison exposed the earlier assumed foreign running
+geometry default: native constructor/save fills 30px, so import must use 22.5pt.
+Do not revise the source or ignore layout in the equality check. Independent
+Word/PDF output relationships, annotation boxes and four visually inspected PDF
+pages qualify this targeted case; they do not establish native-browser/Word parity.

@@ -39,7 +39,47 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: native image bounds and real note placement
+## Latest progress: foreign native note numbering and output proof
+
+colleaf_note_numbering.go now recovers native automatic citation/body marks from
+root and section settings: starts/restarts, decimal/zero/letter/Roman defaults,
+markerless/custom marks, repeated citations with different labels and supported
+symbol/Unicode formats. Current values become explicit SF labels with diagnostics
+for live-counter/placement/column policy losses. First and final body marks stay
+distinct; source range IDs carry per-citation overrides through cell fragments.
+The actual reader confirms all ten example citations and eight placed note bodies,
+fifteen format outcomes, native default Roman endnotes and facade save/reopen.
+
+The save test also corrected foreign omitted header/footer distances: the native
+constructor supplies 30px (22.5pt), not the earlier assumed 18pt. Generated own
+projections already emit their distances explicitly. Section snapshot transport now
+retains uncaptured properties so independent readers see actual noteProperties.
+
+SF→DOCX/PDF paths accept the imported marks with explicit AllowLossy acknowledgment.
+Independent Word XML/python-docx and PDF pypdf/MuPDF verify eight bodies, variant/
+markerless relationships, nine actual citation/link boxes and shared destinations.
+PDF output uses explicitly supplied regular/bold DejaVu faces for the original
+supplementary character; missing font/glyph attempts rejected explicitly. All four
+Poppler-rendered PDF pages were visually inspected: marks/bodies are legible with
+no clipping/overlap/missing glyphs. This is a sparse targeted fixture, not a general
+Word/Colleaf-browser fidelity claim. Full check evidence is in verification.json.
+
+Final milestone checks pass: tests 17.489s/0.746s, race 167.481s/2.265s,
+vet/modules, CGO-disabled focused tests/host CLI execution and Linux amd64/arm64
+cross-builds; document/note fuzz 22,371/2,551 executions and diff check. All ten
+pinned reader/save scripts, Pillow, independent note-output readers and combined
+Go edited/saved import pass. Cross-builds are not Linux execution evidence.
+
+The adapter remains private/incomplete. Next implement checked native literal/rich
+citation and independent body-mark output, remaining list/appearance/provenance
+intent, strict envelope/JSON/surrogates, then public native API/CLI and actual
+browser/preset qualification. Automatic per-page note counters still require an
+authoritative layout strategy; editable separators/notices and remaining native
+number formats also remain explicit unfinished cases. They reject rather than
+silently guessing or dropping visible content. Pure-Go runtime and application/
+backend boundaries are unchanged; there is no external blocker to the next work.
+
+## Earlier progress: native image bounds and real note placement
 
 Private document output now fits individual image frames to page/cell/note/running
 containers, including merged/nested cells and narrower inherited story contexts.
@@ -65,12 +105,12 @@ execution evidence. Full details and limits are in verification.json.
 Nine pinned reader/save scripts plus Pillow and combined edited/saved Go re-import
 pass. The latest full checks are recorded in verification.json. These are frame/
 structure/placement/save checks, not browser font/paint or total-story-height
-qualification. Foreign automatic note numbering/settings, rich citation/body
-marks, remaining list/appearance/provenance intent, strict native envelope/JSON/
+qualification. Basic foreign numbering is now qualified above. Rich citation/body
+marks, per-page/decorated settings, remaining list/appearance/provenance intent, strict native envelope/JSON/
 surrogates and actual full-preset/browser behavior remain work. Public native
 API/CLI and the full goal remain incomplete. Production stays pure Go.
 
-## Latest progress: native sections, page settings and running stories
+## Earlier progress: native sections, page settings and running stories
 
 Private document composition now connects page geometry, section boundaries and
 first/even/default header/footer variants to the existing text/table/list/image/

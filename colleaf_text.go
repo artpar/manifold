@@ -11,6 +11,7 @@ import (
 
 type colleafTextContext struct {
 	DeferNoteNumbering bool
+	NoteLabels         map[string]string
 	DefaultText        json.RawMessage
 	DefaultParagraph   json.RawMessage
 	Styles             map[string]colleafNamedStyle
@@ -346,6 +347,10 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 				key := settings.NoteIDs[atom.NoteID]
 				run.Text = ""
 				run.Note = &NoteReference{ID: key.id, Kind: key.kind}
+				if label, ok := settings.NoteLabels[atom.ID]; ok {
+					copy := label
+					run.Note.Label = &copy
+				}
 			} else if strings.ContainsRune(text, '\b') {
 				return nil, fmt.Errorf("native note atom was not isolated")
 			}

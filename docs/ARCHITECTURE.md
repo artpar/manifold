@@ -1341,3 +1341,31 @@ restored after complete body assembly when actual mark and citation order agree.
 Legacy private custom blocks still read. Foreign automatic settings and advanced
 marks remain unfinished. Pinned skeleton glyphs/placed note pages, frame boxes and
 actual facade save qualify the correction; browser font/paint is still separate.
+
+
+## Native automatic numbering resolution before semantic decoding
+
+colleaf_note_numbering.go resolves modern native note ranges against root section
+ownership and document/section note settings before body mapping. Independent
+per-kind counters follow scalar reference order, reset only under the active
+restart policy and exclude custom marks. Default footnotes are decimal; native
+endnotes are lowerRoman. Zero decimal/letter/Roman outcomes and supported symbol/
+Unicode outcomes match the executable pinned reader, including its parenthesized
+ideograph result for the format named ideographEnclosedCircle.
+
+A plan binds range IDs to citation overrides and note IDs to first/final marks.
+Semantic import stores current literal Note.Label, differing NoteReference.Label,
+and independent/empty BodyLabel values. It emits explicit numbering/settings
+normalization diagnostics because SF does not retain live native counter, column
+or placement policies. Generated custom marks with checked autoLabel intent retain
+their existing semantic restoration; legacy private block input still reads.
+Source property nulls, malformed enums/ranges and unresolved automatic per-page
+counters reject. Editable separator/notice bodies reject pending visible mapping.
+
+The same import works in whole-document composition and the private note worker;
+whole-document assembly defers numbering until all sections are available. Source
+range IDs survive paragraph fragments. Number/body lookup is linear in notes and
+references. Uncaptured section properties survive raw snapshot marshaling for real
+reader checks, while SF interpretation still diagnoses/rejects representation loss.
+Foreign omitted running distances now follow native constructor defaults 30px;
+explicit own projection values are unaffected.

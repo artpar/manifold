@@ -242,3 +242,27 @@ func (s *colleafSectionRecord) UnmarshalJSON(data []byte) error {
 	*s = colleafSectionRecord(value)
 	return nil
 }
+
+// Keep uncaptured native section properties when transporting a parsed snapshot
+// to an independent reader. Semantic import still diagnoses or rejects them.
+func (s colleafSectionRecord) MarshalJSON() ([]byte, error) {
+	type alias colleafSectionRecord
+	data, err := json.Marshal(alias(s))
+	if err != nil {
+		return nil, err
+	}
+	if len(s.Extra) == 0 {
+		return data, nil
+	}
+	var fields map[string]json.RawMessage
+	if err = json.Unmarshal(data, &fields); err != nil {
+		return nil, err
+	}
+	for key, raw := range s.Extra {
+		if _, exists := fields[key]; exists {
+			return nil, fmt.Errorf("conflicting native section property %q", key)
+		}
+		fields[key] = raw
+	}
+	return json.Marshal(fields)
+}

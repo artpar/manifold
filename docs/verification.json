@@ -5829,5 +5829,51 @@
       "node scripts/verify_colleaf_image_fit.cjs",
       "MANYDOC_COLLEAF_FIT_SAVED=output/colleaf-qa/fitted-images-saved.json GOWORK=off go test -run TestColleaf -count=1 ."
     ]
+  },
+  "colleaf_foreign_note_numbering_2026_11_24": {
+    "scope": "Private native foreign automatic note-numbering import through shared SF, including current literal citation/body marks. Full adapter/public native API/CLI/goal remain incomplete.",
+    "implementation": [
+      "Root and root-section native settings resolved with independent per-kind counters, starts/continuous/eachSect behavior and custom marks not advancing counters",
+      "Current first Note.Label, per-range NoteReference.Label overrides and distinct final/empty BodyLabel preserve repeated and markerless displays; scalar range IDs survive paragraph/cell fragments",
+      "Supported numeric/Roman/letter/zero/symbol/Unicode formats have checked native outcomes; reject unresolved per-page automatic numbers, editable separator/notice bodies and remaining formats",
+      "Explicit diagnostics disclose live counter/placement/column normalization; generated checked autoLabel remains compatible",
+      "Raw section transport preserves uncaptured properties; foreign omitted header/footer distance corrected from assumed18pt to actual constructor30px/22.5pt",
+      "Unknown/null/malformed settings and unsorted/contradictory source note ranges reject; no app admission/quota/permission rules added"
+    ],
+    "independent": {
+      "scripts": {
+        "scripts/verify_colleaf_note_numbering.cjs": "a0bbbc27500ef3192b4711d33347e16d9d3d8231a06ad04002e6bddb3af07b63",
+        "scripts/verify_colleaf_note_outputs.py": "ef8142b0fec5f1c018cdc4dfcd9ac1c75c8fc057ab92220b73a6d4c630a3e812"
+      },
+      "native": "Pinned actual Univer1.0.4 skeleton plus hash-pinned unmodified app validator confirms ten citations III/AA/IV/V/section-sign/VI/00/BB/01/empty and eight placed note bodies. Shared body mark01; fifteen format outcomes including zero and symbol boundaries, named ideographEnclosedCircle actual parenthesized output. Native constructor distances30px. Real FDocument.save/fresh reopen/save and exact Go SF semantics pass.",
+      "outputs": "Shared SF to DOCX/PDF with explicit AllowLossy, and actual regular/bold DejaVu faces for unchanged emoji. python-docx/XML verifies eight bodies and variant/markerless anchor/reference graph. pypdf/MuPDF verifies nine visible citation/link boxes, shared body destinations, distinct endnote targets, Unicode and markerless body. Go verifies all ten Word citation labels.",
+      "regressions": "Fresh artifacts, all10 stream/text/tables/notes/lists/images/facade/sections/image_fit/note_numbering scripts, Pillow and note-output Python checks pass; final combined edited/saved Go re-import0.480s passes.",
+      "visual": "Four final native PDF pages rendered using Poppler100DPI and each inspected: legible marks/bodies, no clipping/overlap/missing glyphs. Sparse synthetic targeted case; no Word/Colleaf browser/full-preset fidelity claim.",
+      "visual_pdf_sha256": "a11c9c4552fd7b8c8c3cc1c40814e5d441b1e7c59b5ff776e60937638a851d80",
+      "visual_png_sha256": [
+        "73e4c6688204934f264dadeadca20a082242a39be2f749c8c31cdea58d8d72a8",
+        "220e9616495510a6c814be534984289b40ff67473acab2baccdbeeab4fa42fde",
+        "665a28d726d877ea36d1b53280f59f626c4d4174db9acd629e92d274e3447a46",
+        "24b0ff2f6d0ef5f21e62ed34d5dc723c9c92fe32fdab61d72f54bc11e3252544"
+      ]
+    },
+    "checks": {
+      "full_tests": "go test ./... pass library17.489s/CLI0.746s/internal2.643s",
+      "vet": "pass",
+      "modules": "all modules verified; production dependencies unchanged",
+      "cgo_disabled": "Native focused tests0.519s, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass (cross-builds not execution)",
+      "fuzz": "FuzzColleafDocument22371 executions/11.452s and FuzzColleafNotes2551 executions/11.855s pass, each two workers; short campaigns not exhaustive",
+      "full_race": "Final go test -race ./... pass; library167.481s/CLI2.265s/internal14.193s",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go standard-library mapping/shared existing number helpers only. Node/Python/Poppler remain optional ignored QA; no required executable/service/CGO/customer upload/app/backend modification. Original corpus/oracles unchanged.",
+    "remaining": "Native literal/rich citation and independent body-mark output; remaining formats/per-page/decorated policies and list/appearance/provenance intent; strict native envelope/JSON/surrogates and public API/CLI; full browser/preset text/paint/total-story layout; broader untagged PDF recovery and final source/resource/API/acceptance audit.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_NUMBER_QA=output/colleaf-qa/note-numbering.json MANYDOC_COLLEAF_NUMBER_OUTPUT=output/colleaf-qa/note-numbering GOWORK=off go test -run TestColleaf -count=1 .",
+      "node scripts/verify_colleaf_note_numbering.cjs",
+      "MANYDOC_COLLEAF_NUMBER_SAVED=output/colleaf-qa/note-numbering-saved.json GOWORK=off go test -run TestColleaf -count=1 .",
+      "output/qa-venv/bin/python scripts/verify_colleaf_note_outputs.py"
+    ]
   }
 }

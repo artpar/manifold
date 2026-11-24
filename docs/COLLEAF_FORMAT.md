@@ -618,3 +618,62 @@ node scripts/verify_colleaf_image_fit.cjs
 MANYDOC_COLLEAF_FIT_SAVED=output/colleaf-qa/fitted-images-saved.json GOWORK=off go test -run TestColleaf -count=1 .
 GOWORK=off go test -run '^$' -fuzz '^FuzzColleafNotes$' -fuzztime=10s -parallel=2 .
 ```
+
+
+## Foreign automatic numbering: current marks, not invented live policy
+
+colleaf_note_numbering.go now reads typed root noteSettings and root-section
+noteProperties. Root defaults merge with each section's explicit properties.
+Per-kind counters honor active starts/continuous/eachSect restarts, and custom
+marks do not advance them. Default native endnotes are lowerRoman. Modern note
+ranges must follow scalar source order; unknown/nullable/malformed settings reject
+rather than silently changing counter behavior. Table-cell section sentinels do
+not own document note settings.
+
+Current labels map into existing SF fields: first Note.Label, differing per-range
+NoteReference.Label, and independent final BodyLabel when the repeated native
+note body uses a different mark. Empty labels remain markerless at both sites.
+The native sample displays III/AA/IV/V/§/VI, then 00/BB/01, then an empty mark;
+the shared body's mark is 01. Generated checked autoLabel behavior stays intact.
+colleaf_note_numbering/colleaf_note_settings diagnostics state that live counters,
+placement and column policy have been normalized. Source label/body/citation
+identities and text survive SF; the policies are not claimed as retained.
+
+Qualified formats: decimal, decimalZero, upper/lowerLetter, upper/lowerRoman,
+none, chicago, decimalFullWidth/2, ideographDigital/taiwaneseDigital,
+decimalEnclosedCircle, ideographEnclosedCircle, ideographTraditional and
+ideographZodiac. The pinned implementation uses parenthesized ideographs for the
+name ideographEnclosedCircle; the adapter preserves that actual outcome. Go and
+actual renderer checks include zero/overflow-to-decimal symbol boundaries.
+Remaining number formats, authoritative automatic eachPage numbering, and editable
+separator/continuation/notice bodies remain unfinished and reject explicitly.
+All-custom-mark per-page settings can import because displayed labels do not
+depend on inferred page counters; policy loss is still diagnosed.
+
+Uncaptured section properties now survive raw marshaling for independent reader
+transport. A save/reopen equality failure also corrected foreign default header/
+footer distances to native 30px/22.5pt; own generated values are already explicit.
+No oracle or source document was changed to accept the earlier wrong default.
+
+scripts/verify_colleaf_note_numbering.cjs checks the pinned app validator, actual
+skeleton citation glyphs/placed body markers, fifteen formatter outcomes, native
+30px defaults and real facade save/reopen. Go checks full imported SF semantics,
+source order/validation, markerless variants and DOCX label round trips. Optional
+Word/PDF artifacts use explicit regular/bold DejaVu for the unchanged supplementary
+character. scripts/verify_colleaf_note_outputs.py verifies eight note bodies,
+variant and markerless Word anchor relationships, nine PDF citation/link boxes,
+shared destinations and Unicode through python-docx/XML/pypdf/MuPDF. Four Poppler
+pages were visually checked for overlap, clipping and missing glyphs. No native
+browser paint, live counter editing or general Word visual parity is claimed.
+
+```sh
+MANYDOC_COLLEAF_NUMBER_QA=output/colleaf-qa/note-numbering.json MANYDOC_COLLEAF_NUMBER_OUTPUT=output/colleaf-qa/note-numbering GOWORK=off go test -run TestColleaf -count=1 .
+node scripts/verify_colleaf_note_numbering.cjs
+MANYDOC_COLLEAF_NUMBER_SAVED=output/colleaf-qa/note-numbering-saved.json GOWORK=off go test -run TestColleaf -count=1 .
+output/qa-venv/bin/python scripts/verify_colleaf_note_outputs.py
+pdftoppm -r 100 -png output/colleaf-qa/note-numbering.pdf output/colleaf-qa/note-numbering-page
+```
+
+Next implement literal/rich citation and independent body-mark output with checked
+native ownership, then remaining mappings/strict envelope and public API/CLI;
+qualify actual browser/preset behavior. The full adapter and goal stay incomplete.

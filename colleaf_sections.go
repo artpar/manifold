@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"reflect"
 	"sort"
-	"strings"
 )
 
 const colleafDocumentResource = "manydoc.document-properties.v1"
@@ -455,8 +454,9 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 	if root.Flavor != nil && *root.Flavor != 0 && *root.Flavor != 1 {
 		return nil, fmt.Errorf("%w: native nontraditional document flavor", ErrUnsupported)
 	}
-	if raw := strings.TrimSpace(string(opened.NoteSettings)); raw != "" && raw != "null" && raw != "{}" {
-		return nil, fmt.Errorf("%w: native note numbering/placement settings require their mapping", ErrUnsupported)
+	numberPlan, err := planColleafNoteNumbers(ctx, opened)
+	if err != nil {
+		return nil, err
 	}
 	var intent colleafDocumentIntent
 	if err = colleafResourceMap(opened.Resources, colleafDocumentResource, &intent); err != nil {
@@ -470,7 +470,7 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 		hints[h.ID] = h
 	}
 	// Traditional native defaults are measured against the pinned executable reader.
-	baseline := Layout{Width: 794 * .75, Height: 1124 * .75, Margin: 54, HeaderDistance: colleafFloat(18), FooterDistance: colleafFloat(18)}
+	baseline := Layout{Width: 794 * .75, Height: 1124 * .75, Margin: 54, HeaderDistance: colleafFloat(22.5), FooterDistance: colleafFloat(22.5)}
 	layout, err := colleafLayoutFromProperties(root, baseline)
 	if err != nil {
 		return nil, err
@@ -502,7 +502,7 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 	if err = colleafResourceMap(opened.Resources, colleafImageResource, &geometry); err != nil {
 		return nil, err
 	}
-	settings := colleafTextContext{ImageCache: outputImageCache{}, Styles: opened.Styles}
+	settings := colleafTextContext{ImageCache: outputImageCache{}, Styles: opened.Styles, NoteLabels: numberPlan.Overrides}
 	styleFields, err := colleafStyleObject(opened.DocumentStyle)
 	if err != nil {
 		return nil, err
@@ -740,9 +740,9 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 	for i, node := range index.sections {
 		record := sectionRecords[node.end-1]
 		var extras []string
-		for key, raw := range record.Extra {
-			if key == "noteProperties" && strings.TrimSpace(string(raw)) != "{}" {
-				return nil, fmt.Errorf("%w: native section note settings require their mapping", ErrUnsupported)
+		for key := range record.Extra {
+			if key == "noteProperties" {
+				continue
 			}
 			extras = append(extras, key)
 		}
@@ -827,6 +827,7 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 			autoLabels[noteKey{binding.Kind, binding.ID}] = *binding.AutoLabel
 		}
 	}
+	applyColleafNoteNumbers(doc, numberPlan, noteIDs)
 	if err = finishColleafNoteNumbering(doc, autoLabels); err != nil {
 		return nil, err
 	}

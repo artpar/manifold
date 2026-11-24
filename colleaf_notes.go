@@ -167,6 +167,14 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 	if err != nil {
 		return nil, err
 	}
+	var numberPlan colleafNoteNumberPlan
+	if !settings.DeferNoteNumbering {
+		numberPlan, err = planColleafNoteNumbers(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		settings.NoteLabels = numberPlan.Overrides
+	}
 	doc := &Document{}
 	ids := map[string]noteKey{}
 	autoLabels := map[noteKey]string{}
@@ -326,7 +334,8 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 		doc.Diagnostics = append(doc.Diagnostics, body.Diagnostics...)
 		if n.Mark != nil {
 			if *n.Mark == "" {
-				return nil, fmt.Errorf("%w: explicit empty native custom mark requires markerless semantics mapping", ErrUnsupported)
+				empty := ""
+				note.BodyLabel = &empty
 			}
 			if err := validateNoteLabel(*n.Mark); err != nil {
 				return nil, err
@@ -378,6 +387,7 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 	doc.Blocks = body.Blocks
 	doc.Diagnostics = append(doc.Diagnostics, body.Diagnostics...)
 	if !settings.DeferNoteNumbering {
+		applyColleafNoteNumbers(doc, numberPlan, ids)
 		if err = finishColleafNoteNumbering(doc, autoLabels); err != nil {
 			return nil, err
 		}
