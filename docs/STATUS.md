@@ -39,7 +39,24 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: native embedded raster assets (internal, incomplete)
+## Latest progress: actual facade-save persistence correction
+
+The public FDocument.save API used by Colleaf drops unregistered manydoc.*
+resources. Earlier model getSnapshot checks did not prove facade persistence.
+The adapter now stores only its checked intent records in a native CUSTOM range
+on the protected terminal LF. No visible text/assets/SF body are copied there.
+Actual createDocument→save→fresh reopen→save preserves notes/list ownership/image
+size intent; TextX edits move the carrier correctly. Go re-imports the same graph.
+
+Registered drawing resources are accepted as redundant mirrors only when every
+entry matches a persisted source; contradictions/orphans reject. SDK permission
+resources are outside document interpretation and never gate conversion. Legacy
+private direct-resource input still reads. Public native API/CLI remains absent.
+Browser drawing mutations/painting and full preset behavior still need evidence;
+a headless image facade resize needs a render-manager service and is not qualified.
+Next implement page/section/header/footer context and image fitting, complete
+remaining intent policies, then qualify the full browser/editor and final audit.
+
 
 Private image workers now map embedded PNG/JPEG bytes, alternative text, drawing
 atoms/sources/order and preferred boxes through SF in main bodies, nested cells,

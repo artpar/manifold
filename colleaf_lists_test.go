@@ -91,6 +91,10 @@ func TestColleafNativeListsWithoutOwnershipKeepActualBullets(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	wire, err = openColleafIntent(ctx, wire)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var keep []colleafResource
 	for _, r := range wire.Resources {
 		if r.Name != colleafListResource {

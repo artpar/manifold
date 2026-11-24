@@ -87,6 +87,10 @@ func TestColleafNoteNativeIdentityAndStaleBindings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	wire, err = openColleafIntent(ctx, wire)
+	if err != nil {
+		t.Fatal(err)
+	}
 	wire.Resources = nil
 	doc, err := decodeColleafNotes(ctx, wire, colleafTextContext{})
 	if err != nil {
@@ -126,7 +130,14 @@ func TestColleafNoteRejectsDanglingAndContradictoryGraph(t *testing.T) {
 			n.ID = "wrong"
 			w.Notes["manydoc-note-1"] = n
 		},
-		func(w *colleafNoteSnapshot) { w.Resources = append(w.Resources, w.Resources[0]) },
+		func(w *colleafNoteSnapshot) {
+			var err error
+			*w, err = openColleafIntent(ctx, *w)
+			if err != nil {
+				t.Fatal(err)
+			}
+			w.Resources = append(w.Resources, w.Resources[0])
+		},
 		func(w *colleafNoteSnapshot) {
 			n := w.Notes["manydoc-note-1"]
 			n.Body = w.Body

@@ -1,5 +1,13 @@
 # Colleaf native representation: inspected source and integration boundary
 
+## Current persistence correction
+
+The current transport uses a native CUSTOM range, not unregistered manydoc.*
+plugin resources. See the final facade-save section below. Earlier sections
+record the original private worker milestones; their raw-model save evidence did
+not qualify the actual FDocument.save API. The current output retains their
+checked intent records inside one carrier and reads the old transport as input.
+
 ## Authoritative source inspected
 
 Colleaf is available through GitHub even though no local checkout was found.
@@ -455,3 +463,57 @@ page/cell/note contextual fitting needs the remaining native section/layout cont
 Header/footer stories, rich label/marker/list-policy intent and strict native
 JSON/envelope/surrogate handling remain required before the public native adapter.
 Production modules/API/CLI and application/backend boundaries are unchanged.
+
+
+## Actual FDocument.save/reopen: corrected intent transport
+
+Read-only application source explicitly calls document.save() (colleaf-1.txt:117).
+A pinned headless Univer instance with real Docs/Drawing model plugins demonstrated
+that FDocument.save regenerates registered resources and discards unregistered
+manydoc.note-identities.v1/list-ownership.v1/image-geometry.v1 entries. The existing
+model getSnapshot tests had not exercised this API. No original oracle was changed;
+the new regression reproduces the failure before testing the fix.
+
+colleaf_intent.go now seals those same checked intent records in one body.customRanges
+entry: rangeType5 (CUSTOM), rangeId manydoc-intent-v1, properties.profile
+manydoc.native-intent, version1 and records. The range initially covers the final
+LF, outside visible text. It adds no control characters, text, assets or complete
+SF cache. Native TextX updates its scalar range during edits; individual records
+still apply only after their existing ID/geometry/counter checks. The reader strips
+only the recognized carrier, validates version/ranges/record names, rejects
+multiple carriers and still accepts the old private direct-resource input.
+
+The registered DOC_DRAWING_PLUGIN contains data/order mirrors. Every mirrored
+descriptor must exactly match a real persisted main/note drawing source; IDs/order
+must be valid and unique. A checked mirror does not become another authority.
+Contradictions or resource-only/orphan sources reject pending their explicit
+mapping, rather than silently choosing bytes. Empty DOC_WORD_STYLES_PLUGIN and
+DOC_NOTE_PLUGIN resources do not imply content loss. SDK object permission state
+is deliberately not interpreted or enforced by this standalone document library.
+
+scripts/verify_colleaf_facade.cjs uses actual Univer, Docs, Drawing and DocsDrawing
+plugins plus the public createDocument/FDocument.save APIs, then fresh instances
+for reopen/save. Notes/lists/images retain the carrier and all mapped semantics
+on Go re-import. The script also reproduces the old drop, executes the pinned
+unmodified app validator and inserts text with TextX before saving/reopening;
+IDs, continuation ownership and carrier placement survive. The prior reader
+scripts now locate intent records in the carrier, with unchanged semantic oracles.
+
+An additional image.setSize facade probe requires an unregistered render-manager
+service in this bare headless setup. No fake service was substituted and no image
+facade mutation/browser painting qualification is claimed. Those need the actual
+render/preset/browser environment. The successful facade save proof closes the
+API-level persistence gap; it does not close all editor/UI/rendering work.
+
+```sh
+MANYDOC_COLLEAF_FACADE_QA=output/colleaf-qa/facade-cases.json GOWORK=off go test -run TestColleafFacadeSavedIntentSemantics -count=1 .
+node scripts/verify_colleaf_facade.cjs
+MANYDOC_COLLEAF_FACADE_SAVED=output/colleaf-qa/facade-saved.json MANYDOC_COLLEAF_FACADE_EDITED=output/colleaf-qa/facade-edited.json GOWORK=off go test -run TestColleaf -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafIntent$' -fuzztime=10s -parallel=2 .
+```
+
+Next implement native page/section/story metadata and contextual fitting, complete
+remaining rich label/list/appearance intent and strict envelope/JSON/surrogates,
+then qualify actual full-preset/browser editing/rendering. The adapter remains
+private/incomplete. Production dependencies/API/CLI and application/backend code
+are unchanged; Node remains optional QA, with no services/uploads/permission gates.

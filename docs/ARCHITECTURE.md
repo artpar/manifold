@@ -1259,3 +1259,28 @@ floating/cropped/rotated/hidden/translucent appearance still requires mapping be
 public native support. Node pinned reader/drawing scope/skeleton/save checks and
 Pillow byte/pixel/alpha checks qualify basic asset transport. Browser paint,
 contextual fitting and editor resource-manager persistence remain open.
+
+
+## Native intent persistence through the actual facade
+
+colleaf_intent.go replaces unregistered-resource output with a versioned CUSTOM5
+annotation on the final LF: profile manydoc.native-intent, version1, records holding
+only the existing checked identity/ownership/geometry intent. FDocument.save
+regenerates registered resources and drops unknown ones, so model getSnapshot
+round trips alone were insufficient. The Go reader opens the carrier before
+ordinary range mapping, verifies scalar bounds/version/record names and rejects
+duplicates. Direct resources remain readable for older private snapshots.
+
+The registered DOC_DRAWING_PLUGIN resource is ignored only as a verified subset
+mirror of real persisted main/note drawing sources and valid unique order IDs.
+Contradictory descriptors and unbound entries reject rather than choosing a hidden
+second asset authority. Empty word/note plugin resources do not create false loss
+diagnostics. DOC_OBJECT_PERMISSION_PLUGIN is outside document interpretation;
+its payload is never evaluated and introduces no admission/permission gate.
+
+scripts/verify_colleaf_facade.cjs creates real Univer/Docs/Drawing model plugins,
+uses actual FUniver.createDocument and FDocument.save, reopens in fresh instances,
+and tests TextX edits. It deliberately reproduces the old resource-drop failure.
+Go verifies full mapped model semantics after saved/reopened fixtures. Browser
+painting, preset-specific UI behavior and drawing facade mutations requiring the
+render-manager service remain separate, unfinished qualification.

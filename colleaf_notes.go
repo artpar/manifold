@@ -128,10 +128,18 @@ func encodeColleafNotes(ctx context.Context, d *Document) (colleafNoteSnapshot, 
 		}
 		out.Resources = append(out.Resources, colleafResource{Name: colleafImageResource, Data: string(data)})
 	}
+	if err := sealColleafIntent(&out); err != nil {
+		return colleafNoteSnapshot{}, err
+	}
 	return out, nil
 }
 
 func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings colleafTextContext) (*Document, error) {
+	var err error
+	input, err = openColleafIntent(ctx, input)
+	if err != nil {
+		return nil, err
+	}
 	doc := &Document{}
 	ids := map[string]noteKey{}
 	keys := make([]string, 0, len(input.Notes))
@@ -161,6 +169,18 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 		settings.ImageCache = outputImageCache{}
 	}
 	for _, resource := range input.Resources {
+		if resource.Name == "DOC_OBJECT_PERMISSION_PLUGIN" {
+			continue
+		}
+		if resource.Name == "DOC_DRAWING_PLUGIN" {
+			if err := checkColleafDrawingMirror(input, resource); err != nil {
+				return nil, err
+			}
+			continue
+		}
+		if emptyColleafBuiltinResource(resource) {
+			continue
+		}
 		if resource.Name == colleafImageResource {
 			if seenImages {
 				return nil, fmt.Errorf("duplicate native image geometry resource")

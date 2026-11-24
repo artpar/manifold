@@ -35,7 +35,7 @@ async function main(){
  assert.equal(noteViews.get('manydoc-note-2').getTableByStartIndex(noteTable.startIndex).tableSource.tableRows[0].tableCells[0].columnSpan,2);
  assert.equal(snapshot.notes['manydoc-note-3'].customMark,'§');
  assert.equal(snapshot.notes['manydoc-note-3'].showBodyReference,false);
- const identities=JSON.parse(snapshot.resources.find(r=>r.name==='manydoc.note-identities.v1').data);
+ const identities=JSON.parse(snapshot.body.customRanges.find(r=>r.rangeType===5&&r.properties.profile==='manydoc.native-intent').properties.records.find(r=>r.name==='manydoc.note-identities.v1').data);
  assert.deepEqual(identities.bindings.map(b=>[b.nativeId,b.kind,b.id]),[['manydoc-note-1','endnote','same'],['manydoc-note-2','footnote','same'],['manydoc-note-3','footnote','custom']]);
  view.dispose();
  const saved=structuredClone(model.getSnapshot());

@@ -5706,5 +5706,46 @@
       "MANYDOC_COLLEAF_IMAGE_EDIT=output/colleaf-qa/images-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
       "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafImages$\" -fuzztime=10s -parallel=2 ."
     ]
+  },
+  "colleaf_actual_facade_persistence_2026_11_24": {
+    "scope": "Correct private native intent persistence through the actual FDocument.save API used by pinned Colleaf; no public native API/CLI, full goal incomplete.",
+    "discovery": "Actual FUniver.createDocument plus Docs/Drawing model plugins and FDocument.save dropped all unregistered manydoc.* resources, retaining only registered plugin resources. Earlier DocumentDataModel.getSnapshot checks did not establish facade persistence. scripts/verify_colleaf_facade.cjs reproduces the old failure as a regression.",
+    "implementation": [
+      "Version1 manydoc.native-intent CUSTOM5 annotation on terminal LF carries only existing checked identity/list ownership/image geometry records, not visible text/assets/whole SF",
+      "Validate scalar bounds/profile/version/known record names and duplicates, preserve caller input and legacy direct-resource read compatibility",
+      "Actual native field edits remain authoritative through existing record guards; TextX moves carrier with document text",
+      "Registered DOC_DRAWING_PLUGIN descriptor/order mirrors checked against persisted main/note sources; contradictory or orphan caches reject",
+      "SDK permission resource payload is outside interpretation/admission and ignored; empty registered word/note caches do not create false losses"
+    ],
+    "independent_facade": {
+      "packages": "Pinned actual Univer/Docs/Drawing/DocsDrawing1.0.4 and core/docs facades, optional ignored Node QA only",
+      "script": "scripts/verify_colleaf_facade.cjs",
+      "script_sha256": "bcb0062d2c39a98ad956c394e1e9c2405cc7875b31305e700a1af63779a4363a",
+      "result": "Notes/lists/images survive actual createDocument/save/fresh reopen/save with native carrier unchanged and all mapped model semantics equal on Go re-import. TextX prepended X survives facade save/reopen and Go graph/ownership checks; terminal carrier shifts correctly. Pinned hash-checked app validator accepts all saved envelopes.",
+      "changed_reader_scripts": {
+        "verify_colleaf_notes.cjs": "f66a225f9be1261a6fa31a334c1756b3ed767fe3d4cd32ab02a0e06e670b77c2",
+        "verify_colleaf_lists.cjs": "9fd98c1e3f5e3872fbc91c51442adb28164086633beb86016eb914f937251594"
+      },
+      "regressions": "Fresh artifacts and all7 stream/text/table/note/list/image/facade Node scripts plus Pillow passed; final combined Go re-import0.414s passes. Earlier script hashes remain historical commit-specific evidence, not current checksums.",
+      "limits": "Actual facade API save/reopen is now qualified; full browser/preset rendering and UI mutation behavior are not. Additional FDocumentImage.setSize probe needs render-manager service; no mock substituted or mutation/browser qualification claimed."
+    },
+    "checks": {
+      "full_tests": "go test ./... pass library16.185s/CLI0.703s",
+      "full_race": "go test -race ./... pass after final production/test changes; library165.862s/CLI2.240s",
+      "vet": "pass",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "native focus0.719s pass, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass",
+      "malformed_input_fuzz": "FuzzColleafIntent25364 executions/11.450s, two workers; pass; short campaign not exhaustive",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure Go/std library additions only. No production dependency, required tool/service/CGO/upload/app/backend modification or permission/quota gate. Node SDK/facades remain optional QA.",
+    "remaining": "Native page/section/header/footer metadata and contextual image fitting; rich note/marker/list/appearance intent, strict native envelope/JSON/surrogates; full-preset/browser rendering/UI mutations; broader untagged PDF recovery and final source/resource/API/acceptance audit.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_FACADE_QA=output/colleaf-qa/facade-cases.json GOWORK=off go test -run TestColleafFacadeSavedIntentSemantics -count=1 .",
+      "node scripts/verify_colleaf_facade.cjs",
+      "MANYDOC_COLLEAF_FACADE_SAVED=output/colleaf-qa/facade-saved.json MANYDOC_COLLEAF_FACADE_EDITED=output/colleaf-qa/facade-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
+      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafIntent$\" -fuzztime=10s -parallel=2 ."
+    ]
   }
 }

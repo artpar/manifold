@@ -26,7 +26,7 @@ async function main(){
  const note=snapshot.notes['manydoc-note-1'];
  const noteLabels=markerMap({id:'note-labels',documentStyle:snapshot.documentStyle,body:note.body,lists:note.lists});
  assert.deepEqual(note.body.paragraphs.filter(p=>p.bullet).map(p=>noteLabels.get(p.startIndex)),['0.','1.']);
- const ownership=JSON.parse(snapshot.resources.find(r=>r.name==='manydoc.list-ownership.v1').data);
+ const ownership=JSON.parse(snapshot.body.customRanges.find(r=>r.rangeType===5&&r.properties.profile==='manydoc.native-intent').properties.records.find(r=>r.name==='manydoc.list-ownership.v1').data);
  assert.equal(ownership.stories[''].length,6);
  const model=new core.DocumentDataModel(snapshot);let view=new engine.DocumentViewModel(model);
  assert.equal(view.getParagraph(marked[0].startIndex).bullet.startNumber,26);

@@ -1704,3 +1704,21 @@ Qualify actual drawing ownership and layout boxes plus independent pixel/alpha
 and original-byte checks. Those do not prove browser painting, editor resource
 persistence or contextual image fitting. Keep those and remaining appearance/
 profile mappings open, rather than exposing a partial native public format.
+
+
+## 2026-11-24 Correct metadata transport using actual FDocument.save evidence
+
+The pinned application calls FDocument.save, not DocumentDataModel.getSnapshot.
+An executable facade probe dropped every unregistered manydoc.* resource while
+regenerating registered resources. Preserve that failure as a regression; earlier
+raw-model checks remain narrower historical evidence and cannot establish this
+API's persistence.
+
+Move checked, nonvisible intent records to one native CUSTOM annotation on the
+terminal LF. It survives facade save/fresh reopen and normal TextX shifts without
+copying the SF/body/assets. Check namespace/version/range/record identity and
+existing semantic bindings; native edits remain authoritative. Retain read support
+for older private resource transport. Verify registered drawing mirrors before
+ignoring duplicate cache data. Do not inspect SDK permission payloads or add
+performer-level gates. Browser/preset/render-service-dependent operations remain
+unfinished rather than being inferred from successful headless saves.
