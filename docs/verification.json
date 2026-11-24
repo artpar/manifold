@@ -6891,5 +6891,58 @@
       "MANYDOC_COLLEAF_FLOW_ORIGIN_SAVED=output/colleaf-qa/flow-origins-saved.json MANYDOC_COLLEAF_FLOW_ORIGIN_EDITED=output/colleaf-qa/flow-origins-edited.json MANYDOC_COLLEAF_FLOW_ORIGIN_RENAMED=output/colleaf-qa/flow-origins-renamed.json MANYDOC_COLLEAF_FLOW_ORIGIN_DETACHED=output/colleaf-qa/flow-origins-detached.json MANYDOC_COLLEAF_FLOW_ORIGIN_SOFT=output/colleaf-qa/flow-origins-soft.json GOWORK=off go test -run TestColleafFlowOrigins -count=1 .",
       "rg -n 'ErrUnsupported|requires mapping|annotations|EastAsiaLanguage' colleaf_*.go"
     ]
+  },
+  "colleaf_real_source_transport_2026_11_24": {
+    "status": "verified milestone; full goal active/incomplete",
+    "implementation": "Lossless deterministic gzip/base64 native-intent/version2 for large private metadata; exact decompressed length, 128MiB parser expansion bound, legacy version1 retained; current native content remains authoritative.",
+    "real_source": {
+      "path": "testdata/real/copyright-office-circular-1-2021.pdf",
+      "sha256": "a37450360b4b440cb10ccfd9ce37cb92ea8193884c5700948df942aa1c62920f",
+      "original_pdf_bytes": 111322,
+      "original_pages": 10,
+      "original_native_transport_bytes": 11220431,
+      "compact_native_bytes": 3804294,
+      "actual_saved_native_bytes": 3809441,
+      "paragraph_origins": 153,
+      "run_origins": 8651,
+      "list_and_item_origins": 67,
+      "comparison": "Full SF graph equality after two Go cycles, two registered-plugin saves/reopens, strict envelope reimport and another Go cycle; input immutability. Original structural oracle/bytes unchanged."
+    },
+    "independent_QA": {
+      "script": "scripts/verify_colleaf_real_source.cjs",
+      "script_sha256": "15282556f045b28accb729ab238640fc539bdf59473ce76fabb6ac48412bc185",
+      "sdk": "Actual Univer1.0.4 registered Docs/Drawing/DocsDrawing/Hyperlink facade saves in fresh instances",
+      "validator": "Unmodified pinned Colleaf validator; reconstructed old transport reproducibly fails unchanged5MiB limit, compact and saved snapshots pass",
+      "validator_sha256": "c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0",
+      "prosemirror": "1.25.13; 8872 nodes/marks/attributes checked"
+    },
+    "checks": {
+      "GOWORK=off go test ./...": "passed; library21.154s, CLI0.732s, internal cached",
+      "GOWORK=off go test -race ./...": "passed; library240.050s, CLI2.143s, internal cached",
+      "GOWORK=off go vet ./...": "passed",
+      "GOWORK=off go mod verify": "all modules verified",
+      "CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc": "passed; host --help executed",
+      "CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOWORK=off go build -o bin/manydoc-linux-amd64 ./cmd/manydoc": "passed; cross-build only",
+      "CGO_ENABLED=0 GOOS=linux GOARCH=arm64 GOWORK=off go build -o bin/manydoc-linux-arm64 ./cmd/manydoc": "passed; cross-build only",
+      "actual_saved_full_graph": "passed9.332s; actual ProseMirror8872 nodes",
+      "malformed_inputs": "checksum/truncation/trailing bytes/concatenated members/exact-size/bound/mixed encodings/version/profile/duplicate and unknown JSON fields/nulls/cancellation; strict resource preflight sees duplicate keys inside compressed record data",
+      "fuzz": "FuzzColleafCompressedIntent passed102415 executions/10.464s/2workers; short safety sample",
+      "node --check scripts/verify_colleaf_real_source.cjs": "passed",
+      "git diff --check": "passed"
+    },
+    "limitations": [
+      "No browser paint/pagination claim or all-producer/all-owner qualification.",
+      "Private native public API/CLI, remaining settings/marker/nonvisual intent, browser/full preset, nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance remain open.",
+      "Five inspected original DOCX note/story fixtures still reject: inherited east_asia_language=en-US and complex_language=ar-SA on5/14/5/19/22 runs respectively. These are not counted as native passes.",
+      "Exploratory large MQTT probe interrupted after50s without a result; no pass or proven conversion failure claimed.",
+      "Compression cannot guarantee arbitrary documents fit application limits; parser bound is unrelated to application authorization/admission."
+    ],
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_REAL_QA=output/colleaf-qa/real-source.json GOWORK=off go test -run TestColleafPublishedPDFSourceGraph -count=1 .",
+      "node scripts/verify_colleaf_real_source.cjs",
+      "MANYDOC_COLLEAF_REAL_SAVED=output/colleaf-qa/real-source-saved.json GOWORK=off go test -run TestColleafPublishedPDFSourceGraph -count=1 .",
+      "rg -n 'nonvisual|EastAsiaLanguage|ComplexLanguage|ComplexScript' colleaf_styles.go text_style.go"
+    ]
   }
 }

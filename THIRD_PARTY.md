@@ -246,3 +246,10 @@ dependency or third-party implementation is introduced.
 The flow-origin probe reuses the same attributed pinned SDK/renderer/plugins,
 hash-pinned Colleaf validator and existing ProseMirror reader. No new production
 dependency or third-party implementation is introduced.
+
+
+The real-source native transport probe reuses the attributed original Copyright
+Office InDesign PDF, pinned Colleaf validator, Univer1.0.4 plugins/facade and
+ProseMirror reader. Standard gzip uses Go compress/gzip at runtime and Node zlib
+only for independent QA. No new production dependency or third-party implementation
+is incorporated. Source publication rights and original hash remain unchanged.

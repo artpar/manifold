@@ -39,7 +39,47 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: section, break and standalone-point sources
+## Latest progress: real-source native transport and compact intent
+
+The original ten-page Copyright Office InDesign PDF now passes full PDF→SF→native
+→SF comparisons, including source facts, diagnostics, navigation, formatting and
+list relationships, and repeated Go round trips. The original source hash and
+independent structural oracle are unchanged. This combines 153 paragraph, 8,651 run
+and 67 list/item origin records from a real producer; it does not qualify every
+source-owner kind or every producer.
+
+The audit reproduced an actual integration failure: the 109 KiB PDF became an 11 MiB
+native snapshot, rejected by Colleaf's unchanged 5 MiB validator. Large private
+metadata now uses deterministic gzip/base64 in native-intent/version 2, with exact
+expanded length and a 128 MiB parser expansion bound. Small carriers keep version 1;
+legacy inputs remain readable. Visible native content stays authoritative. No
+source fact is deleted and no application quota or authorization rule is changed.
+The resulting 3.6 MiB snapshot passes the pinned actual app validator and two real
+registered-plugin save/reopen cycles. Go strict-envelope reimport compares the
+complete SF graph; actual ProseMirror checks 8,872 nodes/marks/attributes. Browser
+paint/pagination and all-source combined corpus coverage remain unqualified.
+
+Malformed checksum/truncation/trailing/multistream/size/JSON/record encodings,
+context cancellation and duplicate resource keys inside compression are checked.
+Full tests pass (library 21.154s, CLI 0.732s), full race passes (240.050s/2.143s),
+vet/modules, CGO-disabled host build/--help and Linux amd64/arm64 cross-builds pass.
+Compressed-input fuzz passes 102415 executions/10.464s (short safety sample).
+verification.json records exact transport sizes and evidence. The goal remains
+active/incomplete. Native nonvisual run annotations still reject the
+exported DOCX note/story fixtures (inherited EastAsiaLanguage=en-US and
+ComplexLanguage=ar-SA); mapping these accurately remains next work,
+alongside remaining native/API/UI/PDF/resource/final acceptance.
+
+```sh
+MANYDOC_COLLEAF_REAL_QA=output/colleaf-qa/real-source.json GOWORK=off go test -run TestColleafPublishedPDFSourceGraph -count=1 .
+node scripts/verify_colleaf_real_source.cjs
+MANYDOC_COLLEAF_REAL_SAVED=output/colleaf-qa/real-source-saved.json GOWORK=off go test -run TestColleafPublishedPDFSourceGraph -count=1 .
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/colleaf-qa/real-source-saved.json.sf
+GOWORK=off go test -run TestColleafIntentCompressionAndValidation -count=1 .
+rg -n 'nonvisual|EastAsiaLanguage|ComplexLanguage|ComplexScript' colleaf_styles.go text_style.go
+```
+
+## Earlier progress: section, break and standalone-point sources
 
 Private section metadata, single-hard-break paragraph properties and the first
 bookmark of a standalone-point group now carry manydoc.flow-origin/version1 refs.

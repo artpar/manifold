@@ -2198,3 +2198,16 @@ Reject identityless empty text with Source during SF output; silently skipping i
 would discard source facts. UnboundSources is the explicit existing representation
 for detached facts; named anchors and empty paragraphs have their own semantics.
 Keep production pure Go and the broader native/source/API/UI acceptance queue open.
+
+
+## 2026-11-24 Compress large native metadata without discarding evidence
+
+The original Copyright Office PDF exposed an 11 MiB native snapshot rejected by the
+actual 5 MiB Colleaf validator. Keep the validator, original source and SF oracle
+unchanged. Use deterministic standard gzip/base64 for large private metadata,
+version its carrier and retain legacy reads. Bound expansion and verify size,
+checksum, single-stream framing and strict resource JSON. This reduces the
+publication snapshot to 3.6 MiB while preserving its complete SF/source graph after
+actual registered-plugin saves. Compression does not guarantee that arbitrary
+documents fit Colleaf limits and does not introduce a library authorization gate.
+DOCX nonvisual run intent and full native/UI/API acceptance remain open.

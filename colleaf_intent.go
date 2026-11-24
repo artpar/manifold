@@ -1,9 +1,12 @@
 package manydoc
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 )
@@ -12,9 +15,11 @@ const colleafIntentProfile = "manydoc.native-intent"
 const colleafIntentRangeID = "manydoc-intent-v1"
 
 type colleafIntentCarrier struct {
-	Profile string            `json:"profile"`
-	Version int               `json:"version"`
-	Records []colleafResource `json:"records"`
+	Profile      string            `json:"profile"`
+	Version      int               `json:"version"`
+	Records      []colleafResource `json:"records,omitempty"`
+	GzipRecords  []byte            `json:"gzipRecords,omitempty"`
+	RecordsBytes int               `json:"recordsBytes,omitempty"`
 }
 
 func colleafOwnIntent(name string) bool {
@@ -49,7 +54,11 @@ func sealColleafIntent(snapshot *colleafNoteSnapshot) error {
 			return fmt.Errorf("native intent carrier identity collision")
 		}
 	}
-	snapshot.Body.CustomRanges = append(snapshot.Body.CustomRanges, colleafRangeRecord{StartIndex: position, EndIndex: position, ID: colleafIntentRangeID, Type: 5, Properties: sfAttrs(colleafIntentCarrier{Profile: colleafIntentProfile, Version: 1, Records: records})})
+	carrier, err := makeColleafIntentCarrier(records)
+	if err != nil {
+		return err
+	}
+	snapshot.Body.CustomRanges = append(snapshot.Body.CustomRanges, colleafRangeRecord{StartIndex: position, EndIndex: position, ID: colleafIntentRangeID, Type: 5, Properties: sfAttrs(carrier)})
 	snapshot.Resources = remaining
 	return nil
 }
@@ -75,8 +84,9 @@ func openColleafIntent(ctx context.Context, snapshot colleafNoteSnapshot) (colle
 		if err := strictSFAttrs(a.Properties, &carrier); err != nil {
 			return snapshot, err
 		}
-		if carrier.Version != 1 {
-			return snapshot, fmt.Errorf("%w: native intent version%d", ErrUnsupported, carrier.Version)
+		records, err := carrier.records(ctx)
+		if err != nil {
+			return snapshot, err
 		}
 		index, err := newColleafTextIndex(ctx, snapshot.Body.DataStream)
 		if err != nil {
@@ -87,7 +97,7 @@ func openColleafIntent(ctx context.Context, snapshot colleafNoteSnapshot) (colle
 		if _, err = index.inclusive(a.StartIndex, a.EndIndex); err != nil {
 			return snapshot, err
 		}
-		for _, record := range carrier.Records {
+		for _, record := range records {
 			if !colleafOwnIntent(record.Name) {
 				return snapshot, fmt.Errorf("unknown record in native intent carrier %q", record.Name)
 			}
@@ -171,4 +181,84 @@ func checkColleafDrawingMirror(snapshot colleafNoteSnapshot, resource colleafRes
 		seen[id] = true
 	}
 	return nil
+}
+
+// This is a parser allocation bound, independent of application admission quotas.
+const maxColleafIntentBytes = 128 << 20
+
+func makeColleafIntentCarrier(records []colleafResource) (colleafIntentCarrier, error) {
+	out := colleafIntentCarrier{Profile: colleafIntentProfile, Version: 1, Records: records}
+	raw, err := json.Marshal(records)
+	if err != nil {
+		return out, err
+	}
+	if len(raw) > maxColleafIntentBytes {
+		return out, fmt.Errorf("%w: native intent exceeds parser expansion bound", ErrUnsupported)
+	}
+	if len(raw) < 64<<10 {
+		return out, nil
+	}
+	var buf bytes.Buffer
+	z := gzip.NewWriter(&buf)
+	if _, err = z.Write(raw); err != nil {
+		return out, err
+	}
+	if err = z.Close(); err != nil {
+		return out, err
+	}
+	// Include base64 expansion before choosing the compact representation.
+	if ((buf.Len()+2)/3)*4 >= len(raw) {
+		return out, nil
+	}
+	out.Version, out.Records, out.GzipRecords, out.RecordsBytes = 2, nil, buf.Bytes(), len(raw)
+	return out, nil
+}
+
+func (c colleafIntentCarrier) records(ctx context.Context) ([]colleafResource, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if c.Profile != colleafIntentProfile {
+		return nil, fmt.Errorf("invalid native intent profile")
+	}
+	switch c.Version {
+	case 1:
+		if c.GzipRecords != nil || c.RecordsBytes != 0 {
+			return nil, fmt.Errorf("mixed native intent encodings")
+		}
+		return c.Records, nil
+	case 2:
+		if c.Records != nil || len(c.GzipRecords) == 0 || c.RecordsBytes <= 0 || c.RecordsBytes > maxColleafIntentBytes {
+			return nil, fmt.Errorf("invalid compressed native intent size/encoding")
+		}
+	default:
+		return nil, fmt.Errorf("%w: native intent version%d", ErrUnsupported, c.Version)
+	}
+	source := bytes.NewReader(c.GzipRecords)
+	z, err := gzip.NewReader(source)
+	if err != nil {
+		return nil, err
+	}
+	defer z.Close()
+	z.Multistream(false)
+	raw, err := io.ReadAll(io.LimitReader(contextReader{ctx, z}, int64(c.RecordsBytes)+1))
+	if err != nil {
+		return nil, err
+	}
+	if len(raw) != c.RecordsBytes || source.Len() != 0 {
+		return nil, fmt.Errorf("compressed native intent length/trailing data mismatch")
+	}
+	var records []colleafResource
+	if err = validateTypedJSON(ctx, raw, reflect.TypeFor[[]colleafResource]()); err != nil {
+		return nil, err
+	}
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	if err = decoder.Decode(&records); err != nil {
+		return nil, err
+	}
+	if records == nil {
+		return nil, fmt.Errorf("compressed native intent requires record array")
+	}
+	return records, nil
 }

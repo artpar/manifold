@@ -1390,3 +1390,36 @@ component does not complete combined real-source/browser/native/API/final audits
 Source on identityless empty text is now explicitly rejected by SF encoding rather
 than silently skipped. Detached facts can be represented in UnboundSources. Named
 points and empty paragraph blocks retain their distinct supported semantics.
+
+
+## Actual published PDF graph and compressed metadata
+
+TestColleafPublishedPDFSourceGraph imports the unchanged original ten-page
+Copyright Office InDesign PDF. Its separate source-only structural oracle remains
+TestPDFPublishedInDesignExport. Two Go native/SF cycles compare the full graph and
+check input immutability. The optional verify_colleaf_real_source.cjs uses the
+hash-pinned actual app validator and registered Univer1.0.4 plugin facade for two
+saves/reopens. Go strict-envelope reimport compares all semantics again, and actual
+ProseMirror checks 8,872 nodes/marks/attributes. Combined 153 paragraph, 8,651 run and 67
+list/item source records survive, including original physical pages/navigation and
+uncertainty diagnostics. This is real-source component evidence; browser paint,
+native pagination, other source-owner kinds and producer universality are unproven.
+
+The audit first reproduced rejection: an 11 MiB snapshot exceeded the unchanged app
+5MiB limit. Large intent arrays now emit profile manydoc.native-intent/version 2:
+gzipRecords is standard base64 gzip of the original JSON record array; recordsBytes
+is the exact expanded UTF-8 byte count. Version1 records remain supported/emitted
+for small payloads. Expansion is bounded at 128 MiB, with checksum, trailing/multiple
+stream, cancellation, strict duplicate/Unicode/typed-key/unknown-field and resource
+JSON checks. Only existing sparse metadata is compressed; current native content
+remains authoritative. The complete snapshot is 3.6 MiB and passes the actual app
+validator. Compression neither changes app limits nor guarantees arbitrary files
+fit them. Runtime uses the Go standard library; Node/zlib are independent QA only.
+
+Exported DOCX note/story probes still reject nonvisual run annotations at the
+existing mapping guard: all five inspected fixtures carry inherited
+EastAsiaLanguage=en-US and ComplexLanguage=ar-SA (5/14/5/19/22 runs in
+poi-footnotes/endnotes/headerFooter/HeaderFooterUnicode/DiffFirstPageHeadFoot).
+They are not counted as native qualification. An exploratory
+large MQTT audit was interrupted after50s without a result; it is not a pass or a
+proven conversion failure. Broader source/resource/producer audits remain required.

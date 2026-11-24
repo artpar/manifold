@@ -1141,3 +1141,11 @@ SF output now rejects Source on identityless empty text instead of silently drop
 it. Use Document.UnboundSources for detached facts, a named Anchor for a point, or
 an empty paragraph Source for paragraph ownership. Ordinary source-free empty runs
 continue to normalize away. Source ownership is never invented during conversion.
+
+
+Private native transport now losslessly compresses large sparse intent/source
+metadata using a checked version 2 carrier. The original ten-page InDesign PDF
+passes full-graph Go/SF and actual validator/plugin save checks (COLLEAF_FORMAT.md).
+The unchanged app 5 MiB limit still applies; this does not qualify arbitrary native
+sizes, browser layout or exported DOCX nonvisual run annotations. Expanded metadata
+has a 128 MiB parser bound with explicit rejection, separate from app admission.

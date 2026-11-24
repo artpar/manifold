@@ -109,7 +109,11 @@ func checkColleafResourceJSON(ctx context.Context, native colleafNoteSnapshot) e
 			if err := json.Unmarshal(r.Properties, &carrier); err != nil {
 				return err
 			}
-			records = append(records, carrier.Records...)
+			expanded, err := carrier.records(ctx)
+			if err != nil {
+				return err
+			}
+			records = append(records, expanded...)
 		}
 	}
 	for _, r := range records {

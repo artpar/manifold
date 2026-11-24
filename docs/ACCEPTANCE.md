@@ -159,3 +159,13 @@ soft-boundary/group-rename/detachment and strict SF evidence. Identityless empty
 SF output now rejects explicitly; detached facts round-trip through UnboundSources.
 Combined real-source qualification and remaining native intent/API/UI/corpus/final
 acceptance remain required.
+
+
+Latest combined native source evidence: the unchanged original Copyright Office
+PDF now preserves its full SF graph through repeated private Go conversion and
+two actual registered-plugin saves/reopens. Its11MiB snapshot initially failed the
+actual app 5 MiB validator; checked lossless metadata compression reduces it to 3.6 MiB
+and the unchanged validator passes.153 paragraph / 8,651 run / 67 list/item records and
+8,872 actual ProseMirror nodes qualify this producer/component. Other owner kinds,
+exported DOCX nonvisual intent, native browser/API and broader resource/final audits
+remain required. No blocked required capability is reclassified as complete.

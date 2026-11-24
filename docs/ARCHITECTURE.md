@@ -1763,3 +1763,16 @@ qualify the component; combined real-source and native/API/UI/final audits remai
 SF encoding rejects Source on identityless empty runs, which ProseMirror cannot
 retain as text nodes. Callers can explicitly retain detached facts in UnboundSources;
 named anchors and empty paragraphs retain distinct supported ownership semantics.
+
+
+## Compact native intent transport
+
+Large private intent record arrays use native-intent/version 2 with gzipRecords
+(base64 JSON bytes) and recordsBytes (exact decompressed UTF-8 byte count). Version1
+records remain supported and emitted below 64 KiB or when compression would not
+reduce base64 payload size. The 128 MiB expansion bound protects parser allocation;
+it is unrelated to application admission. Single-stream gzip checksums, exact size,
+trailing bytes, cancellation and strict typed JSON/resource validation apply before
+interpretation. The carrier holds only existing sparse metadata/source pools, never
+an alternative editable document. Real published PDF full-graph/save checks now
+qualify combined paragraph/run/list provenance; browser and broader audits remain.
