@@ -61,6 +61,25 @@ for formatting output. This is an explicit reflow policy, not exact PDF viewing-
 state round-trip fidelity. Typed semantic footnote/endnote inference from physical
 links is separate work; anonymous note-view recovery is not proof of note roles.
 
+## Edited flow and retained source history
+
+FlowBinding also accepts unbound when the original view/name evidence has no
+current editable-flow assertion. Physical pages, nullable parameters, name bytes,
+view/annotation geometry and last source FlowOrder stay historical. A formerly
+resolved source view can lack a current anchor without losing its physical facts;
+a source-missing name stays Unresolved even if an editor later creates a target
+with that identity. No source page or editable anchor is invented. Ordinary
+nearest_content/page_boundary values still require current anchor definitions.
+Source-unresolved entries require current missing declarations unless explicitly
+unbound; their physical page/view fields remain absent and source order remains0.
+
+The private native adapter transports this document-level evidence separately
+from current native text/style/layout. It validates physical syntax first, then
+reconciles edited target availability with explicit diagnostics. Final full-model
+validation checks the current graph. Public JSON/SF round trips retain unbound
+values; formatting output still uses only the current editable graph. Per-node
+native provenance bindings and full adapter/browser qualification remain open.
+
 ## Validation, robustness and evidence
 
 Import bounds destination-tree depth at 64 and nodes/entries/navigation at 100,000,

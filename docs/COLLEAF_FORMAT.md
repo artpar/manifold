@@ -1124,9 +1124,39 @@ Go strict .vdocs/SF checks compare full saved/edited graphs and diagnostic evide
 All 63 scalar boundaries of the rich reference, horizontal continuations,
 header/footer/note contexts, list ownership and hard-break termini have regressions.
 
-SF preserves the historical loss diagnostics exactly. The separate normalized
-native semantic fixed-point test clears them explicitly, because native nonvisual
-intent transport remains unfinished. Original source expectations stay unchanged.
+SF preserves the historical loss diagnostics exactly. The normalized native
+semantic fixed point now preserves them through document evidence below; its
+temporary clearing workaround is removed. Original source expectations stay unchanged.
 Headless requests do not prove browser caret/scroll/paint/events. Nonmain lookup,
 remaining appearance/nonvisual/provenance/API/preset and final acceptance work
 remain required.
+
+
+## Current document-level evidence component
+
+Document properties intent optionally includes evidence version1: ordered
+Diagnostics, original metadata PageCount, PDF pages and PDFNavigation. The same
+checked CUSTOM carrier persists it through actual FDocument.save; it contains no
+body/cache or native-pagination authority. History duplicates/order remain exact;
+new identical warnings deduplicate against history. Returned pointer-bearing
+source evidence is cloned. Known resource payloads now pass typed canonical JSON
+validation before semantic decoding, including aliases/duplicates/Unicode/nulls.
+
+PDFNavigation FlowBinding accepts unbound when current editable targets differ
+from original physical inference. Source resolution facts, names/bytes, nullable
+views, geometry and historical source order persist. Deleted anchors are not
+restored from evidence; newly created editor targets do not resolve an original
+source-missing name. Syntax/geometry validate before reconciliation, and final
+model validation uses the complete current graph. Unknown bindings cannot be
+repaired by target edits. Ordinary bound values still require actual anchors.
+
+scripts/verify_colleaf_evidence.cjs uses pinned actual plugins, validator and
+renderer to check Unicode/newline/duplicate history, two original PDF pages versus
+one current native skeleton page, physical views/annotations,13pt/bold/color emoji,
+two saves/reopens and actual TextX/delete/create edits. Go strict .vdocs/SF tests
+check full root data/current graph, malformed evidence, isolation and repeated
+stability. The structural-cursor semantic fixed point now retains its diagnostics;
+the clearing workaround is removed. This is document-level history qualification,
+not full imported-PDF body provenance, browser painting or adapter completion.
+Per-block/run/cell/item/note Source mappings, remaining appearance/intent/API/UI
+and final acceptance work remain required.

@@ -2040,3 +2040,27 @@ relationships. Historical diagnostics are verified in SF and deliberately cleare
 only for the separate normalized native fixed-point test; their native intent
 transport remains unfinished. No source oracle is changed. Browser/preset and
 broader intent/API/resource/final acceptance gates remain open.
+
+
+## 2026-11-24 Keep document source history independently of current native flow
+
+Persist diagnostics in exact historical order, including duplicates, and append
+new distinct warnings without repeated reopen growth. Preserve original metadata
+page count/PDF pages/navigation as nonvisual intent; they never dictate native
+pagination or replace edited text/styles. Validate canonical typed payloads and
+physical evidence before reconciling current graph edits. An unknown enum must
+not become valid merely because an edited target is absent.
+
+Extend PDFDestination.FlowBinding with unbound for source evidence without a
+current flow assertion. Preserve original resolved/missing facts, byte identity,
+physical views/regions and historical source order after target deletion/creation;
+never invent editable anchors/pages or retroactively resolve the original PDF.
+Normal inference bindings retain their anchor validation. Final document graph
+validation remains authoritative. This expands the existing SF profile's value
+contract; it adds no alternate canonical format or rendering authority.
+
+Qualify actual registered-plugin saves, UTF-16 TextX movement, deletion/creation,
+current native skeleton versus original physical page count, exact root/SF data
+and repeated stability. Remove the temporary diagnostic-clearing test workaround.
+Per-node source binding and remaining native appearance/intent/API/UI plus final
+acceptance remain required; no application permission/quota policy is introduced.

@@ -890,7 +890,10 @@ null coordinates/zoom, all eight modes and transformed annotation geometry in
 PDFNavigation. Editable ownership is inferred and diagnosed separately. Formatting
 output reflows anchor points; it does not preserve source physical fit/zoom or
 annotation appearance. Non-URI/non-GoTo actions remain explicit diagnostics, not
-executed programs. See PDF_NAVIGATION.md for scope and independent source evidence.
+executed programs. Unbound flow evidence can retain original PDF facts after
+editable target deletion/creation; it does not invent a current anchor or resolve
+a source-missing name. Formatting output still uses the editable graph. See
+PDF_NAVIGATION.md for scope and independent source evidence.
 
 ## SF JSON and gzip persistence
 

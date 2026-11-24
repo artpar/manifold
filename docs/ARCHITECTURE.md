@@ -1614,7 +1614,28 @@ continuation ownership. Position-specific diagnostics use a projection-local set
 Independent pinned native saves/edits/selection requests assert both original and
 normalized offsets, unchanged text/assets and covered-cell source records. Exact
 SF structure/loss checks and a normalized native semantic fixed point are separate:
-historical diagnostic transport in native intent remains required work. SF keeps
-those diagnostics. Every scalar boundary of the rich fixture, horizontal/vertical
+historical diagnostic transport now uses the document evidence described below.
+SF keeps those diagnostics. Every scalar boundary of the rich fixture, horizontal/vertical
 continuations and story/list/break cases have structural regressions. Browser UI,
 remaining appearance/provenance/API and final acceptance work remain open.
+
+
+## Native document-level history/evidence
+
+colleaf_evidence.go carries version1 diagnostics, metadata page count, original
+PDF pages and view/annotation evidence in existing native document intent. It
+contains no editable body. Deep clones separate returned evidence from inputs.
+History order/duplicates persist; only new identical warnings are deduplicated.
+Current native text/style/targets/layout never restore from source evidence.
+
+PDFNavigation permits unbound physical evidence independently of current editable
+anchor availability. History syntax/geometry validates without a current catalog;
+final Document.Validate always uses its complete current catalog and requires
+anchors for bound inference values. Native deletion/creation reconciles historical
+bindings to unbound with diagnostics, preserving physical resolution facts and
+last source order rather than inventing anchors/pages or viewer state. Known
+intent resources pass typed canonical JSON validation before decoding.
+
+Actual pinned save/edit/current-skeleton evidence and strict native/SF tests cover
+root history, source geometry and target edits. Per-block/run/cell/item/note Source
+bindings and remaining appearance/intent/API/browser/final work are unfinished.

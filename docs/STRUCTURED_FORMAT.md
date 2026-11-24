@@ -669,7 +669,11 @@ Root `attrs.pdfNavigation` (default null) stores PDFNavigation: explicit source
 views and annotation links, including base64 name bytes, nullable source parameters,
 display geometry and separately labeled flow binding/order. These values are
 validated and deeply cloned in SF bridges. They are provenance rather than an
-instruction to retain original page/zoom state after reflow; see PDF_NAVIGATION.md.
+instruction to retain original page/zoom state after reflow. FlowBinding also
+accepts unbound for original source evidence without a current flow assertion,
+including edited/deleted/recreated targets. Original source resolved/missing facts
+remain independent of current editable-target availability. Bound inference values
+still require anchors; see PDF_NAVIGATION.md.
 
 ## Compact JSON and optional gzip transport
 

@@ -72,8 +72,11 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
    actual save/edit/SF/group/alias/carrier/text and selection-request evidence;
    foreign row/cell/terminator controls now have explicit normalized SF targets
    and original/normalized/edited native selection evidence. Nonmain lookup limits,
-   historical diagnostic/provenance intent and actual rendered caret/
-   scroll/browser behavior remain required.
+   document-level diagnostic/page/view evidence now survives actual native saves
+   and edited target graphs. Per-node provenance/remaining intent and rendered caret/
+   scroll/browser behavior remain required. Document-level diagnostic/page/view
+   history now has actual save/edit/SF evidence and explicit unbound physical
+   views after editable-target changes; native pagination remains independent.
 4. **Corpus/visual and final audit:** eight pinned, legally attributed original
    Word/Mac Word/LibreOffice inputs now qualify notes/running/review/field policies
    through source-only oracles, full semantic round trips, independent readers

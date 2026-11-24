@@ -132,13 +132,12 @@ func TestColleafForeignStructuralCursorProjection(t *testing.T) {
 	if !reflect.DeepEqual(sf, sfAgain) {
 		t.Fatal("SF lost controls projection or diagnostics")
 	}
-	// This new document represents the disclosed normalized semantics. Historical
-	// diagnostic transport in native intent remains a separate unfinished task.
+	// This new document represents the disclosed normalized semantics, including
+	// its original diagnostic history through checked native intent.
 	normalizedInput, err := FromStructured(sf)
 	if err != nil {
 		t.Fatal(err)
 	}
-	normalizedInput.Diagnostics = nil
 	normalized, err := encodeColleafDocument(ctx, normalizedInput)
 	if err != nil {
 		t.Fatal(err)

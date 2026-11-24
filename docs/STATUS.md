@@ -39,7 +39,51 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: foreign native control-cursor recovery
+## Latest progress: document history and PDF evidence in native intent
+
+Private native composition now persists diagnostic history, metadata PageCount,
+original PDF pages and PDFNavigation in version1 document evidence, carried by
+the existing checked native CUSTOM annotation. This is nonvisual evidence, not a
+cached body or native pagination instruction. Historical warning order/duplicates
+remain exact; newly generated warnings append without reopen growth. Native
+Title/body/styles stay authoritative. Typed intent parsing now checks canonical
+keys, duplicates, Unicode and scalar shapes before semantic decoding.
+
+PDFDestination.FlowBinding now also permits unbound: original physical view facts
+remain even if native editing removes its current anchor or defines a formerly
+missing source name. Resolved/missing source-PDF facts stay distinct from current
+editable-target availability. No anchor/page is invented. Physical syntax and
+geometry validate before graph reconciliation; unknown bindings cannot be repaired
+into an accepted value by native edits. Normal bound values retain graph checks.
+
+Pinned actual plugins/validator/renderer qualify exact history (including Unicode/
+newlines/duplicates), two source PDF pages versus one current native skeleton
+page, physical nullable/FitR views and annotations, styled emoji, two saves/reopens
+and TextX/delete/create edits. Go strict .vdocs/SF comparisons check complete root
+history/current graph, clone isolation, orphan reconciliation and stable repeated
+round trips. The structural-control fixed-point test now preserves diagnostics;
+its earlier clearing workaround is removed. Source PDF evidence comes from the
+published-format synthetic PDF reader fixture with independently authored current
+body content; this is not full imported-PDF body provenance qualification.
+
+Final checks pass: full tests16.949s/CLI0.411s, full race171.301s/CLI2.180s,
+vet/modules, CGO-disabled focused tests/host CLI execution and Linux amd64/arm64
+cross-builds. Final payload fuzz passed105,180 executions; it is not exhaustive
+proof. Pinned readers and diff checks pass; verification.json records exact scope.
+Cross-builds are not Linux execution evidence. The full goal stays active/
+incomplete. Next bind per-block/run/cell/item/note provenance through native
+edits and complete marker appearance, remaining nonvisual intent, public native
+API/CLI and full-preset/browser qualification. Nonmain lookup limits, per-page/
+decorated notes and broader PDF/source/resource/final acceptance audits remain
+required. No external blocker exists; production stays pure Go and apps are untouched.
+
+```sh
+MANYDOC_COLLEAF_EVIDENCE_QA=output/colleaf-qa/document-evidence.json GOWORK=off go test -run TestColleafDocumentEvidence -count=1 .
+node scripts/verify_colleaf_evidence.cjs
+MANYDOC_COLLEAF_EVIDENCE_SAVED=output/colleaf-qa/document-evidence-saved.json MANYDOC_COLLEAF_EVIDENCE_EDITED=output/colleaf-qa/document-evidence-edited.json MANYDOC_COLLEAF_EVIDENCE_DELETED=output/colleaf-qa/document-evidence-deleted.json MANYDOC_COLLEAF_EVIDENCE_CREATED=output/colleaf-qa/document-evidence-created.json GOWORK=off go test -run 'TestColleafDocumentEvidence|TestPDFNavigationUnbound' -count=1 .
+```
+
+## Earlier progress: foreign native control-cursor recovery
 
 Private native import now projects bookmarks on row/cell boundaries and section,
 table, image-paragraph and page-break-paragraph terminators into SF AnchorPoint

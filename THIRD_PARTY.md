@@ -202,3 +202,7 @@ validator and unmodified handler for text-free point/group/save/edit evidence.
 
 The structural-cursor probe reuses the same attributed pinned packages, validator
 and unmodified handler for original/normalized/save/edit selection evidence.
+
+The document-evidence probe reuses the attributed pinned core/renderer/plugins
+and hash-pinned Colleaf validator for opaque history transport and glyph/skeleton
+checks. No additional package or production dependency is introduced.

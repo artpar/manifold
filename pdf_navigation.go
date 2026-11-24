@@ -24,7 +24,7 @@ type PDFDestination struct {
 	Region     *Quad      `json:"region,omitempty"`
 	Unresolved bool       `json:"unresolved,omitempty"`
 	// FlowBinding records inference, never authorial bookmark ownership.
-	FlowBinding string `json:"flow_binding,omitempty"` // nearest_content or page_boundary
+	FlowBinding string `json:"flow_binding,omitempty"` // nearest_content, page_boundary, or unbound (source evidence without a current flow assertion)
 	FlowOrder   int    `json:"flow_order,omitempty"`
 }
 type PDFNavigationLink struct {
@@ -81,6 +81,9 @@ func pdfViewCount(view string) int {
 	}
 	return -1
 }
+
+// A nil catalog validates physical/history syntax independently of an edited
+// flow graph. Document.Validate always supplies its current complete catalog.
 func (n *PDFNavigation) validate(d *Document, c *destinationCatalog) error {
 	if n == nil {
 		return nil
@@ -112,12 +115,12 @@ func (n *PDFNavigation) validate(d *Document, c *destinationCatalog) error {
 			names[key] = true
 		}
 		if v.Unresolved {
-			if v.NameKind == "" || v.PageObject != "" || !c.missing[v.ID] || v.Page != 0 || v.View != "" || len(v.Parameters) > 0 || v.Point != nil || v.Region != nil || v.FlowBinding != "" {
+			if v.NameKind == "" || v.PageObject != "" || (c != nil && v.FlowBinding != "unbound" && !c.missing[v.ID]) || v.Page != 0 || v.View != "" || len(v.Parameters) > 0 || v.Point != nil || v.Region != nil || (v.FlowBinding != "" && v.FlowBinding != "unbound") || v.FlowOrder != 0 {
 				return fmt.Errorf("invalid unresolved PDF destination")
 			}
 			continue
 		}
-		if v.Page < 1 || v.Page > len(d.Pages) || pdfViewCount(v.View) != len(v.Parameters) || !c.anchors[v.ID] {
+		if v.Page < 1 || v.Page > len(d.Pages) || pdfViewCount(v.View) != len(v.Parameters) || (c != nil && v.FlowBinding != "unbound" && !c.anchors[v.ID]) {
 			return fmt.Errorf("invalid PDF destination view or flow anchor")
 		}
 		for _, p := range v.Parameters {
@@ -138,7 +141,7 @@ func (n *PDFNavigation) validate(d *Document, c *destinationCatalog) error {
 		if !reflect.DeepEqual(v.Point, expected.Point) || !reflect.DeepEqual(v.Region, expected.Region) {
 			return fmt.Errorf("destination geometry contradicts explicit view parameters")
 		}
-		if v.FlowBinding != "nearest_content" && v.FlowBinding != "page_boundary" {
+		if v.FlowBinding != "nearest_content" && v.FlowBinding != "page_boundary" && v.FlowBinding != "unbound" {
 			return fmt.Errorf("invalid destination flow binding")
 		}
 		if v.FlowOrder < 0 {

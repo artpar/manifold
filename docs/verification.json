@@ -6520,5 +6520,49 @@
       "MANYDOC_COLLEAF_CURSOR_SAVED=output/colleaf-qa/structural-cursors-saved.json MANYDOC_COLLEAF_CURSOR_EDITED=output/colleaf-qa/structural-cursors-edited.json MANYDOC_COLLEAF_CURSOR_NORMALIZED_SAVED=output/colleaf-qa/structural-cursors-normalized-saved.json GOWORK=off go test -run TestColleafForeignStructural -count=1 .",
       "rg -n 'Diagnostics|Source|PDFNavigation|KindInferred' colleaf_sections.go colleaf_notes.go colleaf_images.go colleaf_text.go"
     ]
+  },
+  "colleaf_document_evidence_2026_11_24": {
+    "scope": "Private native document-level diagnostic/source-page/PDF-navigation history and public SF unbound evidence state. Per-node provenance/full adapter/API/CLI and overall goal remain incomplete.",
+    "implementation": [
+      "Version1 document evidence in existing checked CUSTOM intent carrier: diagnostic order/duplicates, metadata PageCount, original PDF pages and physical navigation/annotation data. No editable body/text/style cache or native page-count authority.",
+      "Deep cloning preserves caller isolation. Historical order/duplicates remain exact; new warnings append with map-based deduplication, preventing repeated reopen growth.",
+      "Known native intent resources now pass canonical typed JSON validation before decoding; case aliases, duplicate keys, Unicode/scalar shape and unknown fields/versions reject.",
+      "PDFDestination.FlowBinding accepts unbound original evidence without a current flow assertion. Original resolved/missing facts, name bytes, physical parameters/geometry and last source order remain independent of current editable target availability.",
+      "Physical/history syntax validates before graph reconciliation, so edited target absence cannot repair unknown enum values. Final Document.Validate supplies the complete current graph; normal bound inference values still require anchors.",
+      "Native deletion/creation changes only historical binding assertion to unbound with explicit diagnostics, never inventing anchors/pages or resolving the original PDF. Preliminary note composition has no physical navigation authority."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_evidence.cjs",
+      "script_sha256": "514d24721c32763f75a34d33c0105cfe14dd54ab0f6bbb2e7c5ed658ebc4cf1f",
+      "packages": "Same attributed pinned Univer1.0.4 core/renderer/docs/drawing/hyperlink packages and hash-pinned Colleaf validator; no new package or UI-handler extraction.",
+      "source": "Root physical evidence from existing published-format synthetic PDF recovery fixture; independently authored current body. Two source pages, six physical view/name records including two source-missing identities, supported annotation records and nullable/FitR parameters.",
+      "results": [
+        "Diagnostic order/duplicates, Unicode/newlines, original page count/pages/navigation retained exactly across two actual registered-plugin saves/reopens. Evidence payload keys exclude body/text trees.",
+        "Actual current native skeleton has one page versus two stored source pages. Authored13pt/bold/#123456 emoji remains whole. Source evidence never dictates native pagination or overwrites current body/style.",
+        "Actual TextX insertion, bookmark deletion and creation preserve original evidence; strict Go/.vdocs/SF import reconciles the current graph with exact expected diagnostics and no invented target.",
+        "Full root/SF/strict-native round trips and repeated edited reopen stability pass, including pointer-bearing clone isolation, malformed case/null/version/page/binding and invalid diagnostic-text checks.",
+        "Structural-cursor normalized native fixed point now retains all historical diagnostics; the explicit clearing workaround is removed. Updated pinned original/normalized/edited cursor probe passes.",
+        "Public SF validation/round trips retain unbound source history while enforcing graph membership for normal bound inference values."
+      ],
+      "limits": "Synthetic root-source-history and headless save/edit/skeleton/glyph evidence. This does not qualify full imported-PDF per-node provenance, actual browser font/paint/caret/scroll/events, or complete native fidelity."
+    },
+    "checks": {
+      "tests": "Final all-package tests with actual saved/edited/deleted/created evidence and normalized-cursor artifacts pass library16.949s/CLI0.411s/internal cached.",
+      "race": "Final all-package race with all those artifacts passes library171.301s/CLI2.180s/internal cached. Earlier pre physical-history-validation full race172.294s/CLI1.782s also passed; focused actual cases passed before the final malformed-history regression.",
+      "vet": "pass after final source/test changes",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "Final focused tests0.404s, host CLI build/--help and Linux amd64/arm64 cross-builds pass. Cross-builds are not Linux execution evidence.",
+      "fuzz": "Final evidence payload target105180 executions/10.556s,2workers pass; earlier campaign115427 executions before physical-history-validation change also passed. Short safety campaigns are not exhaustive proof.",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go/std-library production only; no dependency/runtime executable/service/CGO/license server/upload, app/backend change or permission/quota gate. SF profile keeps existing JSON attribute shape and adds an explicitly documented binding value; original corpus/oracles unchanged. Generated QA artifacts ignored.",
+    "remaining": "Native per-block/run/cell/item/note provenance and marker appearance/remaining nonvisual intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md docs/PDF_NAVIGATION.md",
+      "MANYDOC_COLLEAF_EVIDENCE_QA=output/colleaf-qa/document-evidence.json GOWORK=off go test -run TestColleafDocumentEvidence -count=1 .",
+      "node scripts/verify_colleaf_evidence.cjs",
+      "MANYDOC_COLLEAF_EVIDENCE_SAVED=output/colleaf-qa/document-evidence-saved.json MANYDOC_COLLEAF_EVIDENCE_EDITED=output/colleaf-qa/document-evidence-edited.json MANYDOC_COLLEAF_EVIDENCE_DELETED=output/colleaf-qa/document-evidence-deleted.json MANYDOC_COLLEAF_EVIDENCE_CREATED=output/colleaf-qa/document-evidence-created.json GOWORK=off go test -run TestColleafDocumentEvidence -count=1 .",
+      "rg -n 'Source != nil|KindInferred|LabelSource|Source.validate' colleaf_text.go colleaf_tables.go colleaf_lists.go colleaf_notes.go"
+    ]
   }
 }

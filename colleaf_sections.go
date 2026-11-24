@@ -51,13 +51,14 @@ type colleafLayoutBinding struct {
 	Empty         bool                  `json:"empty,omitempty"`
 }
 type colleafDocumentIntent struct {
-	Unresolved   []string               `json:"unresolved,omitempty"`
-	Author       string                 `json:"author,omitempty"`
-	Subject      string                 `json:"subject,omitempty"`
-	EmptyTitle   bool                   `json:"emptyTitle,omitempty"`
-	Sectioned    bool                   `json:"sectioned,omitempty"`
-	Layouts      []colleafLayoutBinding `json:"layouts"`
-	EmptyStories map[string]bool        `json:"emptyStories,omitempty"`
+	Evidence     *colleafDocumentEvidence `json:"evidence,omitempty"`
+	Unresolved   []string                 `json:"unresolved,omitempty"`
+	Author       string                   `json:"author,omitempty"`
+	Subject      string                   `json:"subject,omitempty"`
+	EmptyTitle   bool                     `json:"emptyTitle,omitempty"`
+	Sectioned    bool                     `json:"sectioned,omitempty"`
+	Layouts      []colleafLayoutBinding   `json:"layouts"`
+	EmptyStories map[string]bool          `json:"emptyStories,omitempty"`
 }
 
 func colleafFloat(v float64) *float64 { return &v }
@@ -148,6 +149,9 @@ func colleafResourceMap(records []colleafResource, name string, target any) erro
 			return fmt.Errorf("duplicate native intent record %q", name)
 		}
 		found = true
+		if err := validateTypedJSON(context.Background(), []byte(r.Data), reflect.TypeOf(target)); err != nil {
+			return err
+		}
 		if err := strictSFAttrs(json.RawMessage(r.Data), target); err != nil {
 			return err
 		}
@@ -173,6 +177,7 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 	}
 	resolved := resolveNumberingDocument(d)
 	plain := *resolved
+	plain.PDFNavigation = nil // preliminary note composition has no physical navigation authority
 	if hasSectionBlocks(d.Blocks) {
 		plain.Blocks = resolved.Blocks[0].Section.Blocks
 		plain.Headers = nil
@@ -207,7 +212,11 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 	if err != nil {
 		return out, err
 	}
-	intent := colleafDocumentIntent{Unresolved: append([]string(nil), d.UnresolvedDestinations...), Author: d.Metadata.Author, Subject: d.Metadata.Subject, EmptyTitle: d.Metadata.Title == "", Sectioned: hasSectionBlocks(d.Blocks), EmptyStories: map[string]bool{}}
+	evidence, err := colleafEvidence(d)
+	if err != nil {
+		return out, err
+	}
+	intent := colleafDocumentIntent{Evidence: evidence, Unresolved: append([]string(nil), d.UnresolvedDestinations...), Author: d.Metadata.Author, Subject: d.Metadata.Subject, EmptyTitle: d.Metadata.Title == "", Sectioned: hasSectionBlocks(d.Blocks), EmptyStories: map[string]bool{}}
 	out.Title = d.Metadata.Title
 	if out.Title == "" {
 		out.Title = "Untitled"
@@ -918,6 +927,9 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 		return nil, err
 	}
 	if err = finishColleafNavigation(ctx, opened, doc, intent.Unresolved); err != nil {
+		return nil, err
+	}
+	if err = restoreColleafEvidence(doc, intent.Evidence); err != nil {
 		return nil, err
 	}
 	if err = doc.Validate(); err != nil {
