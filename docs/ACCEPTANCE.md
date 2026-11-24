@@ -145,3 +145,10 @@ reference-detachment and exact SF evidence, including parent numbering/ordinal
 qualification, inherited/lost ownership and stable repeated round trips. Other
 container/anchor sources and full native intent/API/UI/corpus/final acceptance
 remain required.
+
+
+Native named inline-anchor sources now have synthetic actual save/point-lookup/
+TextX/move/rename/detachment and strict SF evidence, with conservative paragraph-
+context qualification and changed-owner archival. Remaining section/break/standalone
+sources, identityless empty-text source policy and full native intent/API/UI/corpus/
+final acceptance remain required.

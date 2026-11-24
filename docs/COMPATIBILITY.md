@@ -1118,3 +1118,13 @@ not acquire ownership. Source-only metadata changes do not stale enclosing/item
 semantics. Synthetic actual save/edit/restart/detachment and strict SF evidence
 qualify this component; other container/anchor slots and full native intent/API/UI/
 corpus/final acceptance remain unfinished.
+
+
+Private native sourced inline anchors now round-trip unformatted named points.
+Identity or paragraph-context edits conservatively qualify original facts historical;
+missing inline owners archive facts unbound. Current point placement remains native-
+authoritative, original geometry remains physical source evidence, and source-only
+binding edits do not stale other anchors. Rich body-mark prefix projection preserves
+unchanged context. Formatted anchors remain invalid; identityless empty-text source
+output still rejects. Remaining block sources and full native/API/UI/corpus/final
+acceptance remain incomplete.

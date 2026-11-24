@@ -2162,3 +2162,21 @@ changes out of both parent and item semantics; encode only the selected item sub
 per item hash. Qualify actual TextX edits, rendered2/3-to9/10 restart, source-reference
 removal, lost/inherited ownership, strict SF and repeated stability. Remaining source/
 marker/API/UI/final acceptance stays required; no application policy is introduced.
+
+
+## 2026-11-24 Qualify inline-anchor source facts by current context
+
+Permit Source on an otherwise unformatted named Run.Anchor. Store reference-only
+bookmark metadata plus original facts/context hashes in document evidence. Hash
+current anchor identity and source-free paragraph semantics, not raw editor offsets
+or cached text. This conservatively marks surrounding context edits historical and
+keeps original source geometry separate from current native layout. Source-only
+binding removal does not edit paragraph context.
+
+Validate markers even after current placement changes their owner kind. If an
+inline source no longer has an inline owner, archive facts with a diagnostic rather
+than attach them to an unrelated block source slot. Capture original context before
+note-body marker projection; keep formatted anchors invalid. Replace the former
+anchor-source output rejection test with positive native/SF/save/edit coverage,
+retaining identityless empty-text rejection. Container-source/empty-text policy and
+remaining native/API/UI/final acceptance stay required.

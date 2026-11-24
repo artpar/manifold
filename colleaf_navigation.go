@@ -21,6 +21,7 @@ type colleafBookmarkHint struct {
 	PointCarrier string `json:"pointCarrier,omitempty"`
 }
 type colleafBookmarkProperties struct {
+	Origin     *colleafOrigin       `json:"manydocOrigin,omitempty"`
 	BookmarkID string               `json:"bookmarkId,omitempty"`
 	Hint       *colleafBookmarkHint `json:"manydocNavigation,omitempty"`
 }
@@ -34,6 +35,11 @@ func readColleafBookmark(a colleafRangeRecord) (colleafBookmarkProperties, error
 	}
 	if len(a.Properties) > 0 {
 		if err := json.Unmarshal(a.Properties, &p); err != nil {
+			return p, err
+		}
+	}
+	if p.Origin != nil {
+		if _, err := readColleafOriginProfile(sfAttrs(p.Origin), colleafAnchorOriginProfile); err != nil {
 			return p, err
 		}
 	}
@@ -388,7 +394,7 @@ func colleafBookmarkLosses(doc *Document, a colleafRangeRecord) error {
 		return err
 	}
 	for name := range fields {
-		if name != "bookmarkId" && name != "manydocNavigation" {
+		if name != "bookmarkId" && name != "manydocNavigation" && name != "manydocOrigin" {
 			doc.warn("colleaf_bookmark_metadata", "Native bookmark metadata outside identity and placement is not represented in SF")
 		}
 	}

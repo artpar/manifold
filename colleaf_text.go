@@ -65,6 +65,11 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 		if (block.Kind != Paragraph && block.Kind != Heading) || block.Source != nil {
 			return body, fmt.Errorf("%w: native text worker requires paragraph/heading content without unmapped provenance", ErrUnsupported)
 		}
+		var err error
+		block, err = prepareColleafAnchorOrigins(block)
+		if err != nil {
+			return body, err
+		}
 		p := colleafParagraphRecord{ID: fmt.Sprintf("p%d", serial)}
 		serial++
 		properties := map[string]any{}
@@ -103,10 +108,21 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 				}
 				copy := run
 				copy.Anchor = ""
+				copy.Source = nil
+				copy.colleafAnchorOrigin = nil
 				if !reflect.DeepEqual(copy, Run{}) {
 					return body, fmt.Errorf("%w: annotated native anchor atom", ErrUnsupported)
 				}
-				body.CustomRanges = append(body.CustomRanges, writeColleafBookmark(run.Anchor, offset, p.ID, "run"))
+				point := writeColleafBookmark(run.Anchor, offset, p.ID, "run")
+				if run.colleafAnchorOrigin != nil {
+					props, err := readColleafBookmark(point)
+					if err != nil {
+						return body, err
+					}
+					props.Origin = run.colleafAnchorOrigin
+					point.Properties = sfAttrs(props)
+				}
+				body.CustomRanges = append(body.CustomRanges, point)
 				continue
 			}
 			if strings.ContainsAny(run.Text, "\r\f\v\b\x1a\x1b\x1c\x1d\x0e\x0f\x1e\x1f") {
@@ -386,7 +402,7 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 				return nil, err
 			}
 			for name := range fields {
-				if name != "bookmarkId" && name != "manydocNavigation" {
+				if name != "bookmarkId" && name != "manydocNavigation" && name != "manydocOrigin" {
 					doc.warn("colleaf_bookmark_metadata", "Native bookmark metadata outside identity and placement is not represented in SF")
 				}
 			}
@@ -400,7 +416,7 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 			if bp.Hint != nil && bp.Hint.Role == "block" && a.StartIndex == node.start && bp.Hint.ParagraphID == p.ID {
 				block.Anchors = append(block.Anchors, bp.BookmarkID)
 			} else {
-				points[a.StartIndex] = append(points[a.StartIndex], Run{Anchor: bp.BookmarkID})
+				points[a.StartIndex] = append(points[a.StartIndex], Run{Anchor: bp.BookmarkID, colleafAnchorOrigin: bp.Origin})
 				if bp.Hint != nil && bp.Hint.Role != "run" && bp.Hint.Role != "list" && bp.Hint.Role != "point" {
 					doc.warn("colleaf_stale_bookmark_placement", "Edited native bookmark position is retained as a current inline point rather than old block placement")
 				}

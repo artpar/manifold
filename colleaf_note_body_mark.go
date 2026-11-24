@@ -67,6 +67,11 @@ func prepareColleafBodyMark(n Note, catalog *noteCatalog) ([]Block, *colleafBody
 			}
 			blocks[0].colleafOrigin = origin
 		}
+		prepared, err := prepareColleafAnchorOrigins(blocks[0])
+		if err != nil {
+			return nil, nil, 0, err
+		}
+		blocks[0] = prepared
 		blocks[0].Runs = append(prefix, blocks[0].Runs...)
 	} else {
 		hint.Separate = true

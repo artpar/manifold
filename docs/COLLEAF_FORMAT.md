@@ -1334,3 +1334,32 @@ checks326 nodes/marks/attributes. Go separately qualifies inherited/contradictor
 lost ownership, unmarked paragraphs, malformed pools and source-only bullet-item
 context. This synthetic headless evidence does not complete other container/anchor
 source slots, remaining appearance/intent or native/API/browser/final acceptance.
+
+
+## Current inline-anchor origin component
+
+Native bookmark properties.manydocOrigin carries manydoc.anchor-origin/version1/ref.
+Root evidence.anchorOrigins stores deduplicated SourceInfo and source-free hashes
+of canonical anchor identity plus paragraph semantics. No context/text cache is
+stored. Original paragraph context is captured before temporary rich note-body
+marker prefix insertion. Only Source is admitted beyond the existing unformatted
+Run.Anchor contract; formatting/text/note/link annotations remain invalid.
+
+Current native point names and locations remain authoritative. Context or identity
+changes retain historical facts with colleaf_anchor_source_historical; this is
+conservative, including surrounding edits that leave the anchor name unchanged.
+Missing inline owners archive facts with colleaf_anchor_source_unbound. A current
+block-owned point does not silently acquire an inline source as its block source.
+Every bookmark reference still validates, even when current placement does not
+consume the source as inline ownership. Source-only metadata removal does not stale
+other anchors, and no source geometry becomes current native coordinates.
+
+scripts/verify_colleaf_anchor_origins.cjs checks seven main/list/cell/header/footer/
+note sources, rich body-mark projection, typed point lookup and bold13pt emoji,
+two actual plugin saves/reopens, TextX shift and moved/renamed/detached snapshots.
+Strict .vdocs/Go/SF compares point identities/placement/source states/diagnostics and
+repeated stability. ProseMirror checks157 nodes/marks/attributes. Go also checks
+changed owner kind, malformed/unconsumed/contradictory references and formatting
+rejection. Synthetic headless evidence does not qualify browser caret/scroll/paint,
+remaining section/break/standalone source slots, identityless empty-text policy or
+full native/API/final acceptance.

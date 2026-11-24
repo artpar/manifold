@@ -1733,3 +1733,17 @@ Changed semantics retain historical facts; unused records archive unbound. All
 native references validate, inherited styles do not own sources and unconsumed
 private markers clear before return. Actual save/edit/marker-restart/SF checks
 qualify this component; remaining container/anchor/native/API/UI/final work remains.
+
+
+## Native inline-anchor origin bindings
+
+colleaf_anchor_origins.go carries source references in native bookmark properties
+and a deduplicated evidence pool. Source-free paragraph context plus current point
+identity supplies a conservative semantic hash; surrounding edits may qualify the
+anchor historical without any claim of current physical geometry. Current point
+placement remains native-authoritative. Unowned facts archive unbound, every native
+reference validates and transient pointers clear before return. Note-body prefix
+projection captures the original paragraph hash before temporary visible mark text.
+Paragraph hashes are computed once per sourced paragraph in each encoder/restorer
+pass. Actual save/edit/lookup/SF evidence qualifies this component; remaining block
+sources, identityless empty-text policy and native/API/UI/final work stay open.

@@ -157,9 +157,9 @@ func TestColleafRunOriginMalformedAndUnsupportedSlots(t *testing.T) {
 			}
 		})
 	}
-	// Source-bearing zero-width empty-text/anchor slots are still explicitly rejected.
+	// Source-bearing empty text without a point identity is still explicitly rejected.
 	source := cloneSourceInfo(d.Blocks[0].Runs[0].Source)
-	for _, r := range []Run{{Source: source}, {Anchor: "point", Source: source}} {
+	for _, r := range []Run{{Source: source}} {
 		if _, err = encodeColleafTextBody(ctx, []Block{{Kind: Paragraph, Runs: []Run{r}}}); err == nil {
 			t.Fatal("unmapped empty source silently discarded")
 		}

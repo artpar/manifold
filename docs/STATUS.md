@@ -39,7 +39,46 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: list and item source bindings
+## Latest progress: sourced inline anchors
+
+Private native bookmark properties now carry manydoc.anchor-origin/version1 source
+references. evidence.anchorOrigins stores original SourceInfo and source-free hashes
+of anchor identity plus paragraph context, with no text/context cache. Current
+point names/positions/relationships stay authoritative. Paragraph context is a
+conservative qualification: surrounding content edits can mark an unchanged anchor
+historical; no original geometry is asserted as current native positioning.
+Missing inline owners archive source facts unbound, including a marker changed to
+block placement. Every native reference validates even if not consumed as an
+inline owner; formatted anchor atoms still reject.
+
+Note-body marker projection captures anchor context before its temporary prefix,
+so unchanged rich body marks do not stale anchor provenance. Source-only binding
+removal does not stale other anchors. Seven synthetic sources across main/list/
+cell/header/footer/note paths pass actual pinned save/reopen, typed point lookup,
+emoji style, TextX shift and moved/renamed/detached snapshot checks. Strict .vdocs/
+Go/SF compares positions, names, source states and repeated stability; ProseMirror
+checks157 nodes/marks/attributes. Negative tests cover bad pools, contradictory
+inline metadata and changed-owner references. The old anchor-source rejection
+regression is narrowed to still-unmapped identityless empty text, because named
+sourced anchors now have an implemented positive round-trip contract.
+
+Final tests16.536s/CLI0.355s, vet/modules, CGO-disabled focused tests0.495s, host
+CLI/--help and Linux amd64/arm64 cross-builds pass. Bookmark scanner fuzz passes
+102382 executions/11.128s, a short safety sample. Full race passes171.870s/
+CLI2.132s. verification.json records scopes and limitations. Goal active/incomplete: remaining container
+sources (sections/breaks/standalone points), identityless empty-text source policy,
+appearance/nonvisual intent, public native API/CLI, full-preset/browser and broader
+PDF/source/resource/final acceptance audits remain. No external blocker exists.
+
+```sh
+MANYDOC_COLLEAF_ANCHOR_ORIGIN_QA=output/colleaf-qa/anchor-origins.json GOWORK=off go test -run TestColleafAnchorOrigins -count=1 .
+node scripts/verify_colleaf_anchor_origins.cjs
+MANYDOC_COLLEAF_ANCHOR_ORIGIN_SAVED=output/colleaf-qa/anchor-origins-saved.json MANYDOC_COLLEAF_ANCHOR_ORIGIN_EDITED=output/colleaf-qa/anchor-origins-edited.json MANYDOC_COLLEAF_ANCHOR_ORIGIN_MOVED=output/colleaf-qa/anchor-origins-moved.json MANYDOC_COLLEAF_ANCHOR_ORIGIN_RENAMED=output/colleaf-qa/anchor-origins-renamed.json MANYDOC_COLLEAF_ANCHOR_ORIGIN_DETACHED=output/colleaf-qa/anchor-origins-detached.json GOWORK=off go test -run TestColleafAnchorOrigins -count=1 .
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/colleaf-qa/anchor-origins-saved.json.sf output/colleaf-qa/anchor-origins-edited.json.sf output/colleaf-qa/anchor-origins-moved.json.sf output/colleaf-qa/anchor-origins-renamed.json.sf output/colleaf-qa/anchor-origins-detached.json.sf
+rg -n 'Source != nil|Source:' colleaf_tables.go colleaf_sections.go colleaf_standalone_points.go
+```
+
+## Earlier progress: list and item source bindings
 
 Private direct leading-paragraph properties now carry manydoc.list-origin and
 manydoc.item-origin/version1 references in manydocListOrigin / manydocItemOrigin.

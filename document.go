@@ -153,10 +153,11 @@ type Run struct {
 	// Destination is an internal name, separate from generic URI Link references.
 	Destination string `json:"destination,omitempty"`
 	// Anchor declares a zero-width named navigation point between text runs.
-	Anchor           string         `json:"anchor,omitempty"`
-	Note             *NoteReference `json:"note,omitempty"`
-	Source           *SourceInfo    `json:"source,omitempty"`
-	colleafRunOrigin *colleafOrigin
+	Anchor              string         `json:"anchor,omitempty"`
+	Note                *NoteReference `json:"note,omitempty"`
+	Source              *SourceInfo    `json:"source,omitempty"`
+	colleafAnchorOrigin *colleafOrigin
+	colleafRunOrigin    *colleafOrigin
 }
 type Row struct {
 	// RepeatHeader repeats a contiguous prefix of rows on table continuation pages.
