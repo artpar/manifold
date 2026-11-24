@@ -5660,5 +5660,51 @@
       "MANYDOC_COLLEAF_LIST_EDIT=output/colleaf-qa/lists-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
       "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafLists$\" -fuzztime=10s -parallel=2 ."
     ]
+  },
+  "colleaf_embedded_images_2026_11_24": {
+    "scope": "Private embedded PNG/JPEG drawing transport through SF across main/cell/list/note stories; native adapter and full goal incomplete, no public native API/CLI.",
+    "semantics": [
+      "Real embedded data URI source, drawing atom/source/order, alt text and pixel frame relationships",
+      "Globally distinct story-scoped drawing IDs satisfy flat native registry and note-local source ownership",
+      "Shared Go PNG/JPEG pixel validation/cache and raster allocation bound; no app quotas, uploads or runtime services",
+      "Sparse checked asset hash/original/projected geometry hints retain optional dimensions and fractional point precision without byte/text duplication",
+      "Native resize/description/asset edits win; stale intent diagnoses; malformed/cache/media/relationship/orphan/appearance errors reject",
+      "Inline image/text fragments retain visible order, styles, actual marked-paragraph list-item ownership and leading break-before, with reflow diagnostics",
+      "Exact model/SF/native records cover transparent PNG and unchanged original MQTT JPEG bytes"
+    ],
+    "independent_reader": {
+      "packages": "Existing core/engine-render plus newly installed optional @univerjs/docs-drawing and @univerjs/drawing1.0.4 (Apache-2.0); ignored QA only",
+      "docs_drawing_tarball_sha256": "ca7bbeb97e1888296371b323f27017411e88618b16e0d2fb9950e0c0c19df0a3",
+      "image_types_sha256": "a28b45bd2a56bea07f6d405133c60e4038eb9112b90ffb8308795b5a5c0da62e",
+      "doc_drawing_types_sha256": "148f3a85ee5fee674f3afd18fa4346ec80972283aa2b422b3a856ae4392aab70",
+      "ignored_qa_lock_sha256": "91d9e723708bced559d3cd95aec34cdce3c301b65513cc675739221e42d4698f",
+      "script": "scripts/verify_colleaf_images.cjs",
+      "script_sha256": "be726b8f6b12f1a0ebcd51cde32f7b8f92c8cbee864a270b343740cfd7da29cf",
+      "result": "Pinned hash-checked app validator accepts generated/edited envelopes; actual collectDocDrawings/findDocDrawing identifies all5 image occurrences and correct note scope; actual skeleton boxes match main/cell/list and isolated-note frames;64x32px resize/description edit saves and Go re-imports48x24pt/Resized PNG with stale-intent diagnostic0.369s",
+      "pixels": "scripts/verify_colleaf_images.py independently uses Pillow to decode3 PNG occurrences with exact32x16 size/RGBA samples (including alpha128) and2 byte-identical original JPEG occurrences; pass",
+      "pixels_script_sha256": "05c9d65c65db1fc4e832165029c9fe3affdad7a3fb03f59985b6f96814366918",
+      "original_jpeg_sha256": "fe9737d0cb4f905917054c7938fc3ccf4b83f0623df9cd5d62192dbaae26b510",
+      "limits": "No browser bitmap painting/full editor unknown-resource persistence or contextual page/cell/note fitting qualification; transforms/floating/linked/other appearance and running stories still need mappings."
+    },
+    "checks": {
+      "full_tests": "final go test ./... pass library16.479s/CLI cached after marked-inline-paragraph fix",
+      "full_race": "final go test -race ./... pass after final production/test changes; library166.391s/CLI cached",
+      "vet": "pass after final changes",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "final native focus0.441s pass, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass (cross-builds not execution)",
+      "malformed_input_fuzz": "Final FuzzColleafImages120194 executions/11.450s, two workers; pass after last source/test changes. Earlier image campaign7600 executions passed; short campaigns not exhaustive.",
+      "diff_check": "pass before commit",
+      "native_regressions": "Fresh Go artifacts0.376s and all six pinned stream/text/tables/notes/lists/images reader/edit/save scripts plus independent Pillow pass after final composition changes; expected Node experimental TypeScript-stripping warning"
+    },
+    "runtime": "Pure Go, no new production dependency/executable/service/CGO/upload/app/backend/authorization/quota gate. New Node drawing packages are optional QA only; no implementation code copied/translated. Existing original source/oracle files unchanged.",
+    "remaining": "Native contextual fitting/page/section/story settings, actual browser paint/editor save and resource persistence; rich note label/marker and list-policy/picture-bullet intent, remaining drawing appearance, strict native JSON/envelope/surrogates; broader untagged PDF recovery and final source/resource/API/acceptance audit.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_IMAGE_QA=output/colleaf-qa/images.json GOWORK=off go test -run TestColleafEmbeddedImagesAllStoriesAndSF -count=1 .",
+      "node scripts/verify_colleaf_images.cjs",
+      "output/qa-venv/bin/python scripts/verify_colleaf_images.py",
+      "MANYDOC_COLLEAF_IMAGE_EDIT=output/colleaf-qa/images-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
+      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafImages$\" -fuzztime=10s -parallel=2 ."
+    ]
   }
 }

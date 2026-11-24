@@ -464,7 +464,14 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int) ([]Bl
 				break
 			}
 			item := ListItem{Blocks: []Block{flow[cursor].Block}}
+			position := flow[cursor].Position
 			cursor++
+			// A single native paragraph explicitly owns its inline image/table
+			// fragments even when no list-item continuation resource exists.
+			for cursor < len(flow) && flow[cursor].Position == position {
+				item.Blocks = append(item.Blocks, flow[cursor].Block)
+				cursor++
+			}
 			for cursor < len(flow) {
 				nested, ok := r.listParagraphs[flow[cursor].Position]
 				if !ok || len(flow[cursor].Bullet) == 0 || nested.Bullet.Level <= info.Bullet.Level {

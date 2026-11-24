@@ -1684,3 +1684,23 @@ ignored deeper placeholders safely and restore sparse original intent only when
 it still matches native fields. Reject the other private unmapped cases explicitly;
 these are unfinished work, not public adapter completion/support exceptions. Keep
 browser/resource persistence and visual fidelity qualification open.
+
+
+## 2026-11-24 Store native image bytes once and check size intent against edits
+
+Use real embedded PNG/JPEG data URIs and drawing records; reject external/hosted
+sources rather than requiring services or silently dropping assets. Keep note
+sources in their native story while using globally distinct drawing IDs for the
+flat render registry. Native dimension units are pixels; SF stores preferred
+points, optional dimensions and fractional precision.
+
+Preserve only that missing size intent in a sparse resource bound to asset digest
+and actual projected box. Never cache another copy of the bytes/text. Resizes or
+asset substitutions invalidate old intent, preserving native edits. Reuse existing
+Go pixel decoding/allocation checks and share the cache across main/note stories;
+application image/snapshot quotas remain outside the library.
+
+Qualify actual drawing ownership and layout boxes plus independent pixel/alpha
+and original-byte checks. Those do not prove browser painting, editor resource
+persistence or contextual image fitting. Keep those and remaining appearance/
+profile mappings open, rather than exposing a partial native public format.

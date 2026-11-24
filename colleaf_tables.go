@@ -36,16 +36,21 @@ type colleafNativeTable struct {
 }
 
 type colleafBodyWriter struct {
-	ctx            context.Context
-	stream         strings.Builder
-	body           colleafBody
-	tables         map[string]json.RawMessage
-	offset, serial int
-	noteIDs        map[noteKey]string
-	lists          map[string]json.RawMessage
-	listBindings   []colleafListBinding
-	listDepth      int
-	listGroup      string
+	ctx                 context.Context
+	stream              strings.Builder
+	body                colleafBody
+	tables              map[string]json.RawMessage
+	offset, serial      int
+	noteIDs             map[noteKey]string
+	lists               map[string]json.RawMessage
+	listBindings        []colleafListBinding
+	listDepth           int
+	listGroup           string
+	documentID, storyID string
+	drawings            map[string]json.RawMessage
+	drawingOrder        []string
+	imageGeometry       []colleafImageBinding
+	imageCache          outputImageCache
 }
 
 func (w *colleafBodyWriter) text(s string) { w.stream.WriteString(s); w.offset += colleafUTF16Len(s) }
@@ -107,7 +112,11 @@ func (w *colleafBodyWriter) flow(blocks []Block, depth int) error {
 		if err := w.ctx.Err(); err != nil {
 			return err
 		}
-		if b.Kind == ListBlock {
+		if b.Kind == Picture {
+			if err := w.picture(b); err != nil {
+				return err
+			}
+		} else if b.Kind == ListBlock {
 			if err := w.list(b, depth+1); err != nil {
 				return err
 			}
@@ -224,15 +233,14 @@ func encodeColleafBodyWithNotes(ctx context.Context, blocks []Block, noteIDs map
 }
 
 func encodeColleafListBody(ctx context.Context, blocks []Block, noteIDs map[noteKey]string) (colleafBody, map[string]json.RawMessage, map[string]json.RawMessage, []colleafListBinding, error) {
-	w := colleafBodyWriter{ctx: ctx, noteIDs: noteIDs, tables: map[string]json.RawMessage{}, lists: map[string]json.RawMessage{}, body: colleafBody{TextRuns: []colleafTextRun{}}}
-	if err := w.blocks(blocks, 0); err != nil {
+	encoded, err := encodeColleafAssetBody(ctx, blocks, noteIDs, "manydoc", "", nil)
+	if err != nil {
 		return colleafBody{}, nil, nil, nil, err
 	}
-	w.body.DataStream = w.stream.String()
-	if _, err := indexColleafBody(ctx, w.body); err != nil {
-		return colleafBody{}, nil, nil, nil, err
+	if len(encoded.Drawings) > 0 {
+		return colleafBody{}, nil, nil, nil, fmt.Errorf("%w: native images require drawing source/geometry transport", ErrUnsupported)
 	}
-	return w.body, w.tables, w.lists, w.listBindings, nil
+	return encoded.Body, encoded.Tables, encoded.Lists, encoded.ListsOwnership, nil
 }
 
 // Decode a paragraph fragment using original effective intervals and hyperlink
@@ -294,9 +302,14 @@ type colleafBodyReader struct {
 	atomPositions  []int
 	listParagraphs map[int]colleafListParagraph
 	listBindings   map[string]colleafListBinding
+	images         map[string]*Image
+	imageBindings  map[string]colleafImageBinding
 }
 
 func (r *colleafBodyReader) paragraph(start, end int, p colleafParagraphRecord) ([]Block, error) {
+	return r.imageParagraph(start, end, p)
+}
+func (r *colleafBodyReader) textParagraph(start, end int, p colleafParagraphRecord) ([]Block, error) {
 	p.Bullet = nil
 	fragment, err := r.paragraphFragment(start, end, p)
 	if err != nil {
@@ -319,6 +332,9 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 	var flow []colleafFlowBlock
 	push := func(bs []Block, p colleafParagraphRecord) {
 		for _, b := range bs {
+			if len(flow) > 0 && flow[len(flow)-1].Position == p.StartIndex {
+				p.Bullet = nil
+			}
 			flow = append(flow, colleafFlowBlock{Block: b, ID: p.ID, Bullet: p.Bullet, Position: p.StartIndex})
 		}
 	}
@@ -330,6 +346,7 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 			return nil, fmt.Errorf("invalid native body child")
 		}
 		p := r.paragraphs[node.end-1]
+		p.StartIndex = node.end - 1
 		if len(node.children) == 0 {
 			part, err := r.paragraph(node.start, node.end-1, p)
 			if err != nil {
@@ -340,6 +357,13 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 		}
 		cursor := node.start
 		mixed := false
+		if len(p.Bullet) > 0 && node.children[0].start == node.start {
+			empty, err := r.paragraph(node.start, node.start, p)
+			if err != nil {
+				return nil, err
+			}
+			push(empty, p)
+		}
 		for _, child := range node.children {
 			if cursor < child.start {
 				part, err := r.paragraph(cursor, child.start, p)
@@ -645,12 +669,42 @@ func decodeColleafBody(ctx context.Context, body colleafBody, settings colleafTe
 		}
 	}
 	for _, atom := range index.blocks {
+		if atom.Type != nil && *atom.Type == 0 {
+			if _, ok := settings.Drawings[atom.ID]; !ok {
+				return nil, fmt.Errorf("native drawing atom lacks source")
+			}
+			if atom.NoteID != "" || atom.NoteType != "" {
+				return nil, fmt.Errorf("contradictory native image/note atom")
+			}
+			continue
+		}
 		key, ok := settings.NoteIDs[atom.NoteID]
 		if !ok || (atom.Type != nil && *atom.Type != 1) || (atom.NoteType != "" && key.kind != atom.NoteType) {
 			return nil, fmt.Errorf("%w: unmapped/contradictory native atom", ErrUnsupported)
 		}
 	}
 	r := colleafBodyReader{ctx: ctx, body: body, index: index, settings: settings, tables: tables, doc: &Document{}, paragraphs: map[int]colleafParagraphRecord{}, used: map[string]bool{}}
+	r.images = map[string]*Image{}
+	r.imageBindings = map[string]colleafImageBinding{}
+	for _, binding := range settings.ImageBindings {
+		if binding.ID == "" {
+			return nil, fmt.Errorf("invalid image geometry binding")
+		}
+		if _, ok := r.imageBindings[binding.ID]; ok {
+			return nil, fmt.Errorf("duplicate image geometry binding")
+		}
+		r.imageBindings[binding.ID] = binding
+	}
+	order := map[string]bool{}
+	for _, id := range settings.DrawingOrder {
+		if order[id] {
+			return nil, fmt.Errorf("duplicate native drawing order ID")
+		}
+		if _, ok := settings.Drawings[id]; !ok {
+			return nil, fmt.Errorf("native drawing order lacks source")
+		}
+		order[id] = true
+	}
 	for position := range index.blocks {
 		r.atomPositions = append(r.atomPositions, position)
 	}
@@ -687,6 +741,9 @@ func decodeColleafBody(ctx context.Context, body colleafBody, settings colleafTe
 	r.doc.Blocks = blocks
 	if len(r.used) != len(tables) {
 		return nil, fmt.Errorf("native table source is orphaned")
+	}
+	if len(r.images) != len(settings.Drawings) {
+		return nil, fmt.Errorf("native drawing source is unbound/orphaned")
 	}
 	return r.doc, nil
 }

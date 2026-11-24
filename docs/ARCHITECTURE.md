@@ -1233,3 +1233,29 @@ syntax and nondecimal zero formats differ: private workers reject rather than em
 wrong/crashing markers. Full policy/intent mapping remains open. SDK QA inspects
 actual GlyphType.LIST content, not only the mutable counter history cache. Browser
 layout and full editor resource persistence remain separate required evidence.
+
+
+## Private Colleaf embedded image transport
+
+colleaf_images.go composes actual inline drawing atoms, embedded data-URI sources,
+per-story drawings/order and pixel docTransform boxes. All occurrences have distinct
+IDs including a story prefix: the actual drawing registry is flat across notes.
+The shared body encoder now returns a typed composition containing text/tables/
+lists/assets/checked intent rather than dropping extra maps through narrow tuple
+helpers. Narrow helpers explicitly reject assets they cannot transport.
+
+Point preferred sizes project to pixel boxes; omitted dimensions derive the
+intrinsic ratio. manydoc.image-geometry.v1 stores only asset digest and checked
+original/native size intent, not another image/text payload. Original precision/
+omission is restored only when current bytes and frame agree with the computed
+projection. Asset/resize edits invalidate stale hints and retain actual geometry.
+Image and output validators share the existing raster expansion bound/cache.
+No app-specific5MiB/2MiB quota or network/hosting dependency is introduced.
+
+The rich paragraph decoder separates native image atoms from styled text/note
+atoms. Mixed inline flow has explicit grouping diagnostics, hidden anchors reject,
+and leading paragraph break-before remains an actual paragraph property. Linked,
+floating/cropped/rotated/hidden/translucent appearance still requires mapping before
+public native support. Node pinned reader/drawing scope/skeleton/save checks and
+Pillow byte/pixel/alpha checks qualify basic asset transport. Browser paint,
+contextual fitting and editor resource-manager persistence remain open.

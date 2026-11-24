@@ -21,7 +21,7 @@ type colleafNativeNote struct {
 	Mark              *string                    `json:"customMark,omitempty"`
 	ReferenceStyle    json.RawMessage            `json:"referenceTextStyle,omitempty"`
 	ShowBodyReference *bool                      `json:"showBodyReference,omitempty"`
-	Drawings          json.RawMessage            `json:"drawings,omitempty"`
+	Drawings          map[string]json.RawMessage `json:"drawings,omitempty"`
 	DrawingOrder      []string                   `json:"drawingsOrder,omitempty"`
 	Lists             map[string]json.RawMessage `json:"lists,omitempty"`
 }
@@ -34,17 +34,20 @@ type colleafNoteIdentities struct {
 	Bindings []colleafNoteBinding `json:"bindings"`
 }
 type colleafNoteSnapshot struct {
-	Body      colleafBody                  `json:"body"`
-	Tables    map[string]json.RawMessage   `json:"tableSource,omitempty"`
-	Notes     map[string]colleafNativeNote `json:"notes,omitempty"`
-	Resources []colleafResource            `json:"resources,omitempty"`
-	Lists     map[string]json.RawMessage   `json:"lists,omitempty"`
+	Body         colleafBody                  `json:"body"`
+	Tables       map[string]json.RawMessage   `json:"tableSource,omitempty"`
+	Notes        map[string]colleafNativeNote `json:"notes,omitempty"`
+	Resources    []colleafResource            `json:"resources,omitempty"`
+	Lists        map[string]json.RawMessage   `json:"lists,omitempty"`
+	ID           string                       `json:"id,omitempty"`
+	Drawings     map[string]json.RawMessage   `json:"drawings,omitempty"`
+	DrawingOrder []string                     `json:"drawingsOrder,omitempty"`
 }
 
 // Native note IDs share one namespace; SF identities are scoped by kind. This
 // sparse resource binds identities/order only, never another copy of note text.
 func encodeColleafNotes(ctx context.Context, d *Document) (colleafNoteSnapshot, error) {
-	var out colleafNoteSnapshot
+	out := colleafNoteSnapshot{ID: "manydoc"}
 	if err := d.Validate(); err != nil {
 		return out, err
 	}
@@ -52,6 +55,8 @@ func encodeColleafNotes(ctx context.Context, d *Document) (colleafNoteSnapshot, 
 	ids := map[noteKey]string{}
 	bindings := colleafNoteIdentities{}
 	ownership := colleafListOwnership{Stories: map[string][]colleafListBinding{}}
+	imageGeometry := colleafImageGeometry{Stories: map[string][]colleafImageBinding{}}
+	imageCache := outputImageCache{}
 	out.Notes = map[string]colleafNativeNote{}
 	for i, n := range d.Notes {
 		if err := ctx.Err(); err != nil {
@@ -66,13 +71,16 @@ func encodeColleafNotes(ctx context.Context, d *Document) (colleafNoteSnapshot, 
 		id := fmt.Sprintf("manydoc-note-%d", i+1)
 		ids[noteIdentity(n)] = id
 		bindings.Bindings = append(bindings.Bindings, colleafNoteBinding{NativeID: id, Kind: n.Kind, ID: n.ID})
-		body, tables, lists, listBindings, err := encodeColleafListBody(ctx, n.Blocks, nil)
+		encoded, err := encodeColleafAssetBody(ctx, n.Blocks, nil, out.ID, id, imageCache)
 		if err != nil {
 			return out, err
 		}
-		note := colleafNativeNote{ID: id, Kind: n.Kind, Body: body, Tables: tables, Lists: lists}
-		if len(listBindings) > 0 {
-			ownership.Stories[id] = listBindings
+		note := colleafNativeNote{ID: id, Kind: n.Kind, Body: encoded.Body, Tables: encoded.Tables, Lists: encoded.Lists, Drawings: encoded.Drawings, DrawingOrder: encoded.DrawingOrder}
+		if len(encoded.ListsOwnership) > 0 {
+			ownership.Stories[id] = encoded.ListsOwnership
+		}
+		if len(encoded.ImageGeometry) > 0 {
+			imageGeometry.Stories[id] = encoded.ImageGeometry
 		}
 		if n.Label != "" {
 			mark := n.Label
@@ -84,15 +92,20 @@ func encodeColleafNotes(ctx context.Context, d *Document) (colleafNoteSnapshot, 
 		}
 		out.Notes[id] = note
 	}
-	body, tables, lists, listBindings, err := encodeColleafListBody(ctx, d.Blocks, ids)
+	encoded, err := encodeColleafAssetBody(ctx, d.Blocks, ids, out.ID, "", imageCache)
 	if err != nil {
 		return out, err
 	}
-	out.Body = body
-	out.Tables = tables
-	out.Lists = lists
-	if len(listBindings) > 0 {
-		ownership.Stories[""] = listBindings
+	out.Body = encoded.Body
+	out.Tables = encoded.Tables
+	out.Lists = encoded.Lists
+	out.Drawings = encoded.Drawings
+	out.DrawingOrder = encoded.DrawingOrder
+	if len(encoded.ListsOwnership) > 0 {
+		ownership.Stories[""] = encoded.ListsOwnership
+	}
+	if len(encoded.ImageGeometry) > 0 {
+		imageGeometry.Stories[""] = encoded.ImageGeometry
 	}
 	if len(bindings.Bindings) > 0 {
 		data, err := json.Marshal(bindings)
@@ -107,6 +120,13 @@ func encodeColleafNotes(ctx context.Context, d *Document) (colleafNoteSnapshot, 
 			return out, err
 		}
 		out.Resources = append(out.Resources, colleafResource{Name: colleafListResource, Data: string(data)})
+	}
+	if len(imageGeometry.Stories) > 0 {
+		data, err := json.Marshal(imageGeometry)
+		if err != nil {
+			return out, err
+		}
+		out.Resources = append(out.Resources, colleafResource{Name: colleafImageResource, Data: string(data)})
 	}
 	return out, nil
 }
@@ -135,7 +155,22 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 	seenResource := false
 	ownership := colleafListOwnership{}
 	seenLists := false
+	seenImages := false
+	imageGeometry := colleafImageGeometry{}
+	if settings.ImageCache == nil {
+		settings.ImageCache = outputImageCache{}
+	}
 	for _, resource := range input.Resources {
+		if resource.Name == colleafImageResource {
+			if seenImages {
+				return nil, fmt.Errorf("duplicate native image geometry resource")
+			}
+			seenImages = true
+			if err := strictSFAttrs(json.RawMessage(resource.Data), &imageGeometry); err != nil {
+				return nil, err
+			}
+			continue
+		}
 		if resource.Name == colleafListResource {
 			if seenLists {
 				return nil, fmt.Errorf("duplicate native list ownership resource")
@@ -199,13 +234,14 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 			return nil, fmt.Errorf("native note identity bindings alias distinct definitions")
 		}
 		originals[key] = true
-		if (len(n.Drawings) > 0 && string(n.Drawings) != "{}") || len(n.DrawingOrder) > 0 {
-			return nil, fmt.Errorf("%w: native note drawings/lists require their rich mapping", ErrUnsupported)
-		}
+
 		bodySettings := settings
 		bodySettings.NoteIDs = map[string]noteKey{id: ids[id]}
 		bodySettings.Lists = n.Lists
 		bodySettings.ListBindings = ownership.Stories[id]
+		bodySettings.Drawings = n.Drawings
+		bodySettings.DrawingOrder = n.DrawingOrder
+		bodySettings.ImageBindings = imageGeometry.Stories[id]
 		body, err := decodeColleafBody(ctx, n.Body, bodySettings, n.Tables)
 		if err != nil {
 			return nil, err
@@ -216,7 +252,7 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 		var bodyMarker *Run
 		if len(n.Body.CustomBlocks) > 0 {
 			for _, atom := range n.Body.CustomBlocks {
-				if atom.StartIndex != 0 {
+				if atom.StartIndex != 0 || atom.NoteID != id || (atom.Type != nil && *atom.Type == 0) {
 					continue
 				}
 				if len(note.Blocks) == 0 || (note.Blocks[0].Kind != Paragraph && note.Blocks[0].Kind != Heading) || len(note.Blocks[0].Runs) == 0 || note.Blocks[0].Runs[0].Note == nil {
@@ -269,6 +305,9 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 	settings.NoteIDs = ids
 	settings.Lists = input.Lists
 	settings.ListBindings = ownership.Stories[""]
+	settings.Drawings = input.Drawings
+	settings.DrawingOrder = input.DrawingOrder
+	settings.ImageBindings = imageGeometry.Stories[""]
 	for story := range ownership.Stories {
 		if story != "" {
 			if _, ok := input.Notes[story]; !ok {

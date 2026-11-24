@@ -156,3 +156,13 @@ validator is loaded from its pinned ignored source only during QA. The native
 reference JSON fixture is manydoc-authored test data. See COLLEAF_FORMAT.md for
 exact versions, source hashes, unit/token discrepancies, commands and remaining
 semantic-adapter work.
+
+
+The optional pinned native image QA additionally uses @univerjs/docs-drawing and
+@univerjs/drawing1.0.4 (Apache-2.0). Published IDocImage/IImageData declarations and
+actual drawing registry/scope APIs qualify embedded asset fields; no implementation
+code is copied/translated or linked into manydoc. Their downloads/installations and
+lockfile remain ignored QA material. The existing original OASIS MQTT reference's
+JPEG is reused unchanged by image transport tests, with its original byte oracle.
+Pillow is an optional independent raster reader only. COLLEAF_FORMAT.md records
+primary source/hash, commands, measured boxes/pixels and remaining qualification.

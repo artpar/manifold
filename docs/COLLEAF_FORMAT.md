@@ -388,3 +388,70 @@ actual full editor save is qualified yet. Remaining native work includes those
 list policies/marker presentation/picture bullets, rich note label/style intent,
 drawings/assets/resources, section/story/page metadata and strict envelope/JSON/
 surrogate handling. No public native format/API/CLI or runtime dependency was added.
+
+
+## Private embedded PNG/JPEG assets and checked geometry intent
+
+colleaf_images.go now composes actual blockType0 drawing atoms, drawingType0 image
+sources with imageSourceType:BASE64, data URIs, descriptions, drawingsOrder and
+inline docTransform boxes. Sizes are pixels, independently confirmed by the
+published FDocumentImage.getSize contract and executable skeleton. SF preferred
+point widths/heights project by4/3; omitted dimensions use the intrinsic ratio.
+The shared typed body composition transports all maps/intent together. Old narrow
+helpers reject image content rather than losing drawing sources.
+
+Pinned published @univerjs/docs-drawing and @univerjs/drawing1.0.4 declarations
+establish IDocImage/IImageData fields and note-aware persisted source ownership.
+The former's tarball is retrieved from the primary npm registry; SHA256
+ca7bbeb97e1888296371b323f27017411e88618b16e0d2fb9950e0c0c19df0a3.
+Optional QA installs both beside the existing readers (no scripts/runtime modules
+in Go). IDs include the story scope: collectDocDrawings has a flat registry, while
+findDocDrawing must still return notes/<id>/drawings paths for note sources.
+The private composition supplies a native document ID for its real drawing-space
+relationships; this is document format identity, not application authorization.
+
+manydoc.image-geometry.v1 stores per-story drawing ID, asset digest and original/
+projected dimensions only. It duplicates no bytes/alternative text or complete SF.
+A hint applies only if current asset hash/box and recomputed projection all match.
+This retains omitted dimensions and fractional point precision. Native asset,
+resize and alt-text edits remain authoritative; stale geometry has diagnostics.
+Removing hints still recovers actual explicit frame dimensions and native bytes.
+
+Shared Go PNG/JPEG validation rejects corrupt data, media/pixel contradictions and
+excessive raster expansion before pixel allocation. Source/cache contradictions,
+missing/orphan sources and duplicate order IDs reject. Runtime never fetches URLs,
+uses image hosting or applies Colleaf's app5MiB/2MiB quotas. Mixed inline text/images
+become ordered blocks with grouping diagnostics; surrounding styles/text and
+picture-leading paragraph break-before survive. Inline fragments of one explicitly
+marked native paragraph stay in the same list item, even without ownership hints. Hidden image anchors/drawings,
+linked images and unrepresented floating/crop/rotation/flip/opacity/shape appearance
+reject in these private workers rather than becoming incorrect visible pictures.
+Those appearance policies remain unfinished, not new public support exceptions.
+
+Tests cover main/cell/list/note ownership, PNG alpha, the unchanged original MQTT
+JPEG (SHA256 fe9737d0cb4f905917054c7938fc3ccf4b83f0623df9cd5d62192dbaae26b510),
+all supported implicit/explicit dimension forms, fractional precision through SF,
+native asset replacement, malformed relationships/bytes/cache/appearance and
+hidden-anchor/break policies. scripts/verify_colleaf_images.cjs executes the
+hash-checked pinned app validator and actual collectDocDrawings/findDocDrawing/
+DocumentSkeleton APIs. All five occurrences have correct scopes; main/nested-cell/
+list/note boxes match actual drawing sizes. A native64×32px resize and description
+edit save/re-import as48×24pt/Resized PNG, overriding stale size intent. Optional
+Pillow independently decodes three32×16 alpha PNGs with exact color/alpha samples
+and two original JPEG byte-identical occurrences. No source fixture/oracle changed.
+
+```sh
+npm install --prefix output/colleaf-qa --ignore-scripts --no-audit --no-fund @univerjs/docs-drawing@1.0.4
+MANYDOC_COLLEAF_IMAGE_QA=output/colleaf-qa/images.json GOWORK=off go test -run TestColleafEmbeddedImagesAllStoriesAndSF -count=1 .
+node scripts/verify_colleaf_images.cjs
+output/qa-venv/bin/python scripts/verify_colleaf_images.py
+MANYDOC_COLLEAF_IMAGE_EDIT=output/colleaf-qa/images-edited.json GOWORK=off go test -run TestColleaf -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafImages$' -fuzztime=10s -parallel=2 .
+```
+
+Actual browser bitmap painting/font/layout and unknown-resource persistence through
+full editor save remain unqualified. This layer transports preferred image boxes;
+page/cell/note contextual fitting needs the remaining native section/layout context.
+Header/footer stories, rich label/marker/list-policy intent and strict native
+JSON/envelope/surrogate handling remain required before the public native adapter.
+Production modules/API/CLI and application/backend boundaries are unchanged.

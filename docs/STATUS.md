@@ -39,7 +39,24 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: native rich list ownership/numbering (internal, incomplete)
+## Latest progress: native embedded raster assets (internal, incomplete)
+
+Private image workers now map embedded PNG/JPEG bytes, alternative text, drawing
+atoms/sources/order and preferred boxes through SF in main bodies, nested cells,
+list continuations and notes. Drawing IDs are globally distinct across stories,
+matching the native flat registry while retaining note-local source ownership.
+Checked image geometry hints preserve omitted dimensions and exact fractional
+point intent without duplicating bytes/text; native asset/resize edits win.
+
+Pinned app/drawing lookup/skeleton box/save/Go re-import checks and independent
+Pillow pixel/alpha checks pass, including the unchanged original MQTT JPEG hash.
+Mixed inline image/text becomes ordered SF blocks with diagnostics. Malformed or
+contradictory sources, orphans, remote/hosted sources and unmapped hidden/transformed
+appearance reject instead of silently changing/dropping content. No public native
+API/CLI exists. Browser bitmap painting/editor resource persistence, contextual
+page/cell/note fitting, running stories and remaining profile mappings are open.
+The full adapter and overall goal remain active/incomplete.
+
 
 Private list workers now map native bullets/list sources and checked item ownership
 through SF, including nested lists, continuation paragraphs/tables, separate adjacent

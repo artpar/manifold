@@ -16,6 +16,10 @@ type colleafTextContext struct {
 	NoteIDs          map[string]noteKey
 	Lists            map[string]json.RawMessage
 	ListBindings     []colleafListBinding
+	Drawings         map[string]json.RawMessage
+	DrawingOrder     []string
+	ImageBindings    []colleafImageBinding
+	ImageCache       outputImageCache
 }
 
 func colleafRawInt(style colleafStyleMap, key string) (int, bool, error) {
