@@ -328,9 +328,6 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 		sectionBlocks = []Block{{Kind: SectionBlock, Section: &Section{Blocks: resolved.Blocks}}}
 	}
 	for i, b := range sectionBlocks {
-		if b.Source != nil {
-			return out, fmt.Errorf("%w: native section provenance needs mapping", ErrUnsupported)
-		}
 		section := b.Section
 		sectionOffset := w.offset
 		firstRange := len(w.body.CustomRanges)
@@ -338,6 +335,16 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 			return out, err
 		}
 		record := &w.body.SectionBreaks[len(w.body.SectionBreaks)-1]
+		if b.Source != nil {
+			origin, err := newColleafFlowOrigin(b)
+			if err != nil {
+				return out, err
+			}
+			if record.Extra == nil {
+				record.Extra = map[string]json.RawMessage{}
+			}
+			record.Extra["manydocFlowOrigin"] = sfAttrs(origin)
+		}
 		oldSectionID := record.ID
 		record.ID = fmt.Sprintf("manydoc-section-%d", i+1)
 		if err = rebindColleafPointScope(&w.body, oldSectionID, record.ID, firstRange); err != nil {
@@ -498,6 +505,9 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 		return out, err
 	}
 	out.Resources = colleafReplaceResource(out.Resources, colleafImageResource, geometry)
+	if err = collectColleafFlowOrigins(&out, &intent.Evidence); err != nil {
+		return out, err
+	}
 	if err = collectColleafAnchorOrigins(&out, &intent.Evidence); err != nil {
 		return out, err
 	}
@@ -854,7 +864,7 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 		record := sectionRecords[node.end-1]
 		var extras []string
 		for key := range record.Extra {
-			if key == "noteProperties" {
+			if key == "noteProperties" || key == "manydocFlowOrigin" {
 				continue
 			}
 			extras = append(extras, key)
@@ -911,7 +921,11 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 			}
 			section.FirstPage = *record.FirstPage == 1
 		}
-		doc.Blocks = append(doc.Blocks, Block{Kind: SectionBlock, Section: section, Anchors: reader.sectionPoints[node.start]})
+		origin, err := readColleafOriginProfile(record.Extra["manydocFlowOrigin"], colleafFlowOriginProfile)
+		if err != nil {
+			return nil, err
+		}
+		doc.Blocks = append(doc.Blocks, Block{Kind: SectionBlock, Section: section, Anchors: reader.sectionPoints[node.start], colleafFlowOrigin: origin})
 		previous = actual
 	}
 	if len(intent.Layouts) > 0 && !intent.Sectioned && len(doc.Blocks) == 1 && len(doc.Blocks[0].Anchors) == 0 && !doc.EvenAndOddHeaders && !doc.Blocks[0].Section.FirstPage && doc.Blocks[0].Section.Headers.First == nil && doc.Blocks[0].Section.Headers.Even == nil && doc.Blocks[0].Section.Footers.First == nil && doc.Blocks[0].Section.Footers.Even == nil {
@@ -980,6 +994,9 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 	if err = restoreColleafTableOrigins(doc, intent.Evidence, opened); err != nil {
 		return nil, err
 	}
+	if err = restoreColleafFlowOrigins(doc, intent.Evidence, opened); err != nil {
+		return nil, err
+	}
 	if err = doc.Validate(); err != nil {
 		return nil, err
 	}
@@ -1009,6 +1026,17 @@ func (r *colleafBodyReader) breakParagraph(start, end int, p colleafParagraphRec
 	for _, position := range r.body.RenderedPageBreaks {
 		soft[position] = true
 	}
+	var flowOrigin *colleafOrigin
+	if text == "\f" {
+		props, err := colleafStyleObject(p.Style)
+		if err != nil {
+			return nil, err
+		}
+		flowOrigin, err = readColleafOriginProfile(props["manydocFlowOrigin"], colleafFlowOriginProfile)
+		if err != nil {
+			return nil, err
+		}
+	}
 	var blocks []Block
 	cursor := start
 	join := false
@@ -1037,7 +1065,7 @@ func (r *colleafBodyReader) breakParagraph(start, end int, p colleafParagraphRec
 			r.doc.warn("colleaf_soft_page_break", "Native rendered soft page boundary omitted from logical flow; literal content is retained")
 			join = true
 		} else {
-			blocks = append(blocks, Block{Kind: PageBreak, Anchors: r.containerPoints[position]})
+			blocks = append(blocks, Block{Kind: PageBreak, Anchors: r.containerPoints[position], colleafFlowOrigin: flowOrigin})
 			join = false
 		}
 		cursor = position + 1

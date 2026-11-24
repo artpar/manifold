@@ -1128,3 +1128,16 @@ binding edits do not stale other anchors. Rich body-mark prefix projection prese
 unchanged context. Formatted anchors remain invalid; identityless empty-text source
 output still rejects. Remaining block sources and full native/API/UI/corpus/final
 acceptance remain incomplete.
+
+
+Private native section/hard-break/standalone-group sources now round-trip through
+current semantic owners. Changed semantics retain historical facts; unused sources
+archive unbound. Soft/mixed paragraphs do not assert hard-break ownership. Original
+source geometry stays independent of native pages. Synthetic save/edit/group/source/
+SF checks qualify these slots; combined real-source and full native/API/UI/corpus/
+final acceptance remain incomplete.
+
+SF output now rejects Source on identityless empty text instead of silently dropping
+it. Use Document.UnboundSources for detached facts, a named Anchor for a point, or
+an empty paragraph Source for paragraph ownership. Ordinary source-free empty runs
+continue to normalize away. Source ownership is never invented during conversion.

@@ -156,6 +156,9 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 			for _, r := range b.Runs {
 				r = canonicalCitationRun(r)
 				if r.Text == "" && r.Note == nil && r.Anchor == "" {
+					if r.Source != nil {
+						return nil, fmt.Errorf("%w: empty text has no SF source owner; retain detached facts in UnboundSources", ErrUnsupported)
+					}
 					continue
 				}
 				t := StructuredNode{Type: "text", Text: r.Text}

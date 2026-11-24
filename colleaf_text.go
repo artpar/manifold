@@ -402,7 +402,7 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 				return nil, err
 			}
 			for name := range fields {
-				if name != "bookmarkId" && name != "manydocNavigation" && name != "manydocOrigin" {
+				if name != "bookmarkId" && name != "manydocNavigation" && name != "manydocOrigin" && name != "manydocFlowOrigin" {
 					doc.warn("colleaf_bookmark_metadata", "Native bookmark metadata outside identity and placement is not represented in SF")
 				}
 			}
@@ -595,6 +595,8 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 		sort.Strings(keys)
 		for _, key := range keys {
 			switch key {
+			case "manydocFlowOrigin":
+				doc.warn("colleaf_flow_origin_context", "Native flow source metadata outside a current standalone flow owner is not asserted")
 			case "manydocListOrigin", "manydocItemOrigin":
 				if (key == "manydocListOrigin" && block.colleafListOrigin == nil) || (key == "manydocItemOrigin" && block.colleafItemOrigin == nil) {
 					doc.warn("colleaf_list_origin_inheritance", "Inherited native source properties are not treated as direct list/item ownership")

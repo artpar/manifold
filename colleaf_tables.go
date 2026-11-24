@@ -180,14 +180,19 @@ func (w *colleafBodyWriter) flow(blocks []Block, depth int) error {
 				return err
 			}
 		} else if b.Kind == PageBreak {
-			if b.Source != nil {
-				return fmt.Errorf("%w: native page-break provenance requires mapping", ErrUnsupported)
-			}
 			if err := w.containerAnchors(b.Anchors, w.offset, "break", "page-break"); err != nil {
 				return err
 			}
 			w.text("\f")
-			w.body.Paragraphs = append(w.body.Paragraphs, colleafParagraphRecord{StartIndex: w.offset, ID: w.id("p")})
+			origin, err := newColleafFlowOrigin(b)
+			if err != nil {
+				return err
+			}
+			var props json.RawMessage
+			if origin != nil {
+				props = sfAttrs(map[string]any{"manydocFlowOrigin": origin})
+			}
+			w.body.Paragraphs = append(w.body.Paragraphs, colleafParagraphRecord{StartIndex: w.offset, ID: w.id("p"), Style: props})
 			w.text("\r")
 		} else if b.Kind == Picture {
 			if err := w.picture(b); err != nil {

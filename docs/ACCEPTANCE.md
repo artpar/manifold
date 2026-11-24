@@ -152,3 +152,10 @@ TextX/move/rename/detachment and strict SF evidence, with conservative paragraph
 context qualification and changed-owner archival. Remaining section/break/standalone
 sources, identityless empty-text source policy and full native intent/API/UI/corpus/
 final acceptance remain required.
+
+
+Native section/break/standalone source slots now have synthetic actual save/edit/
+soft-boundary/group-rename/detachment and strict SF evidence. Identityless empty-source
+SF output now rejects explicitly; detached facts round-trip through UnboundSources.
+Combined real-source qualification and remaining native intent/API/UI/corpus/final
+acceptance remain required.

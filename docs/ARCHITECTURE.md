@@ -1747,3 +1747,19 @@ projection captures the original paragraph hash before temporary visible mark te
 Paragraph hashes are computed once per sourced paragraph in each encoder/restorer
 pass. Actual save/edit/lookup/SF evidence qualifies this component; remaining block
 sources, identityless empty-text policy and native/API/UI/final work stay open.
+
+
+## Native section/break/standalone origin bindings
+
+colleaf_flow_origins.go stores source refs on native section extras, single-hard-
+break paragraph properties and the first standalone-group bookmark. Final owners
+restore source facts after all content/layout/group composition. SF semantic hashes
+qualify changed sources historical; unused records archive facts unbound. Soft or
+mixed paragraphs cannot assert single-hard-break ownership. All carrier references
+validate without rewriting caller input. No alternate body/group cache or current
+geometry authority is introduced. Actual save/edit/page-count/source/SF probes
+qualify the component; combined real-source and native/API/UI/final audits remain.
+
+SF encoding rejects Source on identityless empty runs, which ProseMirror cannot
+retain as text nodes. Callers can explicitly retain detached facts in UnboundSources;
+named anchors and empty paragraphs retain distinct supported ownership semantics.

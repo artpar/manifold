@@ -17,13 +17,15 @@ func (w *colleafBodyWriter) pointFlow(blocks []Block, depth int, scope, owner st
 	return w.flow(blocks, depth)
 }
 func (w *colleafBodyWriter) standalonePoint(b Block) error {
-	if b.Source != nil {
-		return fmt.Errorf("%w: native point provenance needs mapping", ErrUnsupported)
-	}
 	copy := b
 	copy.Anchors = nil
+	copy.Source = nil
 	if !reflect.DeepEqual(copy, Block{Kind: AnchorPoint}) || len(b.Anchors) == 0 {
 		return fmt.Errorf("invalid standalone native point")
+	}
+	origin, err := newColleafFlowOrigin(b)
+	if err != nil {
+		return err
 	}
 	w.pointSerial++
 	for i, id := range b.Anchors {
@@ -32,6 +34,14 @@ func (w *colleafBodyWriter) standalonePoint(b Block) error {
 		}
 		a := writeColleafBookmark(id, w.offset, "", "point")
 		a.Properties = sfAttrs(colleafBookmarkProperties{BookmarkID: id, Hint: &colleafBookmarkHint{Version: 1, Role: "point", OwnerID: w.pointOwner, PointScope: w.pointScope, PointOrder: w.pointSerial, PointIndex: i}})
+		if i == 0 && origin != nil {
+			props, err := readColleafBookmark(a)
+			if err != nil {
+				return err
+			}
+			props.FlowOrigin = origin
+			a.Properties = sfAttrs(props)
+		}
 		w.body.CustomRanges = append(w.body.CustomRanges, a)
 	}
 	return nil
@@ -59,13 +69,14 @@ type colleafPointSlot struct {
 	position, order, index int
 }
 type colleafStandalonePoint struct {
+	origin                    *colleafOrigin
 	id, scope, owner, carrier string
 	position, order, index    int
 }
 
 func (r *colleafBodyReader) registerStandalone(a colleafRangeRecord, p colleafBookmarkProperties) error {
 	h := p.Hint
-	point := colleafStandalonePoint{p.BookmarkID, h.PointScope, h.OwnerID, h.PointCarrier, a.StartIndex, h.PointOrder, h.PointIndex}
+	point := colleafStandalonePoint{origin: p.FlowOrigin, id: p.BookmarkID, scope: h.PointScope, owner: h.OwnerID, carrier: h.PointCarrier, position: a.StartIndex, order: h.PointOrder, index: h.PointIndex}
 	key := colleafPointSlot{point.scope, point.owner, point.position, point.order, point.index}
 	if r.pointSlots[key] {
 		return fmt.Errorf("duplicate standalone point order slot")
@@ -100,6 +111,9 @@ func (r *colleafBodyReader) standaloneBlocks(scope, owner string, position int) 
 		}
 		n := len(blocks) - 1
 		blocks[n].Anchors = append(blocks[n].Anchors, p.id)
+		if blocks[n].colleafFlowOrigin == nil {
+			blocks[n].colleafFlowOrigin = p.origin
+		}
 	}
 	return blocks
 }

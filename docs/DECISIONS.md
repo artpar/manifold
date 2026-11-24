@@ -2180,3 +2180,21 @@ note-body marker projection; keep formatted anchors invalid. Replace the former
 anchor-source output rejection test with positive native/SF/save/edit coverage,
 retaining identityless empty-text rejection. Container-source/empty-text policy and
 remaining native/API/UI/final acceptance stay required.
+
+
+## 2026-11-24 Bind flow sources to current native owners
+
+Store section sources on section metadata, hard-break sources on a paragraph whose
+literal content is exactly one hard break, and standalone-point group sources on
+its first bookmark. Keep existing group aliases/ordering/layout authoritative.
+Validate all references, restore exact current owners, qualify changed semantics
+historical and archive missing owners. Soft boundaries and mixed paragraphs do not
+become hard-break owners merely because metadata survived an edit. Do not store a
+cached section or group tree. Qualify actual saves, current3-to2 native page counts,
+TextX edit, group rename, source detachment and hard-to-soft conversion with strict
+SF/source/diagnostic stability.
+
+Reject identityless empty text with Source during SF output; silently skipping it
+would discard source facts. UnboundSources is the explicit existing representation
+for detached facts; named anchors and empty paragraphs have their own semantics.
+Keep production pure Go and the broader native/source/API/UI acceptance queue open.

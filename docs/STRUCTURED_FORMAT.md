@@ -808,3 +808,10 @@ existing optional table_widths/table_spans (default null), matching SourceInfo.
 An attribute-coverage regression guards the public source fields against silent
 loss in an actual ProseMirror reader. Native run binding status uses the existing
 historical/unbound states; no new canonical content schema is introduced.
+
+
+Identityless empty text runs cannot carry a source mark in ProseMirror. ToStructured
+now returns ErrUnsupported for an empty run with Source instead of silently dropping
+its facts. Use UnboundSources explicitly for detached provenance. Named anchor atoms
+and empty paragraph blocks remain separate supported owner types; source-free empty
+runs still normalize away.

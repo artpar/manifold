@@ -241,3 +241,8 @@ dependency or third-party implementation is introduced.
 The anchor-origin probe reuses the same attributed pinned SDK/renderer/plugins,
 hash-pinned Colleaf validator and existing ProseMirror reader. No new production
 dependency or third-party implementation is introduced.
+
+
+The flow-origin probe reuses the same attributed pinned SDK/renderer/plugins,
+hash-pinned Colleaf validator and existing ProseMirror reader. No new production
+dependency or third-party implementation is introduced.

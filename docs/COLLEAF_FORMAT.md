@@ -1363,3 +1363,30 @@ changed owner kind, malformed/unconsumed/contradictory references and formatting
 rejection. Synthetic headless evidence does not qualify browser caret/scroll/paint,
 remaining section/break/standalone source slots, identityless empty-text policy or
 full native/API/final acceptance.
+
+
+## Current section/break/standalone origin component
+
+Section-record manydocFlowOrigin, direct single-break paragraphStyle.manydocFlowOrigin
+and standalone bookmark properties.manydocFlowOrigin contain manydoc.flow-origin,
+version1 and ref only. evidence.flowOrigins deduplicates original SourceInfo and
+source-free SF hashes. Section hashes include current body/layout/running content;
+break hashes include break semantics/anchors; standalone hashes include group alias
+identity/order. The first group bookmark carries the group source. No body/group
+cache is stored and original physical geometry never dictates native pagination.
+
+Final composition restores owners, uses colleaf_flow_source_historical for changed
+semantics and colleaf_flow_source_unbound for unused facts. Every carrier reference
+validates, including non-owning metadata. A rendered soft boundary or mixed text
+paragraph does not own a single-hard-break source. Caller snapshot bytes remain
+unchanged. scripts/verify_colleaf_flow_origins.cjs checks nine sources across two
+sections, break and main/running/note groups; two plugin saves/reopens; styled emoji;
+TextX edit, alias rename, binding removal and soft-boundary snapshot edits. Current
+native skeleton pages are3 with the hard break and2 after soft conversion. Strict
+.vdocs/Go/SF compares full structures/layout/source states/diagnostics and repeated
+stability; ProseMirror checks117 nodes/marks/attributes. This synthetic headless
+component does not complete combined real-source/browser/native/API/final audits.
+
+Source on identityless empty text is now explicitly rejected by SF encoding rather
+than silently skipped. Detached facts can be represented in UnboundSources. Named
+points and empty paragraph blocks retain their distinct supported semantics.

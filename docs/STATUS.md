@@ -39,7 +39,51 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: sourced inline anchors
+## Latest progress: section, break and standalone-point sources
+
+Private section metadata, single-hard-break paragraph properties and the first
+bookmark of a standalone-point group now carry manydoc.flow-origin/version1 refs.
+A deterministic evidence.flowOrigins pool stores original SourceInfo and source-free
+SF semantic hashes, without section/body/group caches. Current layout/content and
+point groups stay authoritative. Changed semantics retain historical facts; missing
+owners archive facts unbound. All native references validate even if current
+composition does not consume an owner. Soft rendered boundaries do not acquire
+hard-break provenance, and break metadata in mixed text does not assert ownership.
+
+Pinned actual plugins/validator/skeleton check nine sources across two sections,
+hard break, main/running/note standalone groups and aliases; two saves/reopens,
+styled emoji, TextX edit, alias rename, section-binding removal and hard-to-soft
+boundary snapshots. The fixture has3 current native pages with a hard break and2
+with the soft boundary; original source pages never dictate that geometry. Strict
+.vdocs/Go/SF compares current structures/layout/source states/diagnostics and stable
+repeated round trips. ProseMirror checks117 nodes/marks/attributes. This is synthetic
+headless component evidence, not browser or full imported-PDF qualification.
+
+SF encoding now explicitly rejects source facts attached to identityless empty text
+rather than silently normalizing them away. Detached facts can be retained through
+Document.UnboundSources / SF unboundSources; named points and empty paragraphs have
+separate supported owners. A regression checks rejection, input immutability and
+the explicit unbound alternative. This closes the previously undocumented empty-run
+source-loss case without inventing text or point identities.
+
+Final tests16.196s/CLI0.694s, vet/modules, CGO-disabled focused tests0.525s, host
+CLI/--help and Linux amd64/arm64 cross-builds pass. Flow-scanner fuzz passes112133
+executions/11.005s, a short safety sample. Full race passes172.597s/CLI1.754s.
+verification.json records scopes and limitations. Goal active/incomplete:
+remaining appearance/nonvisual intent, public native API/CLI, full-preset/browser,
+nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final
+acceptance audits remain required. Other source bindings still need combined real-
+source qualification. Production stays pure Go; no application/backend change.
+
+```sh
+MANYDOC_COLLEAF_FLOW_ORIGIN_QA=output/colleaf-qa/flow-origins.json GOWORK=off go test -run 'TestColleafFlowOrigins|TestStructuredIdentityless' -count=1 .
+node scripts/verify_colleaf_flow_origins.cjs
+MANYDOC_COLLEAF_FLOW_ORIGIN_SAVED=output/colleaf-qa/flow-origins-saved.json MANYDOC_COLLEAF_FLOW_ORIGIN_EDITED=output/colleaf-qa/flow-origins-edited.json MANYDOC_COLLEAF_FLOW_ORIGIN_RENAMED=output/colleaf-qa/flow-origins-renamed.json MANYDOC_COLLEAF_FLOW_ORIGIN_DETACHED=output/colleaf-qa/flow-origins-detached.json MANYDOC_COLLEAF_FLOW_ORIGIN_SOFT=output/colleaf-qa/flow-origins-soft.json GOWORK=off go test -run TestColleafFlowOrigins -count=1 .
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/colleaf-qa/flow-origins-saved.json.sf output/colleaf-qa/flow-origins-edited.json.sf output/colleaf-qa/flow-origins-renamed.json.sf output/colleaf-qa/flow-origins-detached.json.sf output/colleaf-qa/flow-origins-soft.json.sf
+rg -n 'ErrUnsupported|requires mapping|annotations|EastAsiaLanguage' colleaf_*.go
+```
+
+## Earlier progress: sourced inline anchors
 
 Private native bookmark properties now carry manydoc.anchor-origin/version1 source
 references. evidence.anchorOrigins stores original SourceInfo and source-free hashes
