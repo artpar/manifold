@@ -176,3 +176,10 @@ mkdir -p output/pdf-constant-lists/word
 output/qa-venv/bin/python scripts/verify_pdf_constant_lists.py
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFConstantListNumbering$' -fuzztime=10s -parallel=2 .
 ```
+
+
+Literal labels that cannot be represented by the above automatic/constant rules
+now retain their list/item/label content in the existing SF profile via ListMarker.
+This includes annotated and pictorial labels formerly flattened into paragraphs.
+The current milestone is extraction/persistence only; literal-marker generation
+is required unfinished work, guarded before output. See LITERAL_LIST_MARKERS.md.

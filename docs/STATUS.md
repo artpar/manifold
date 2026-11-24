@@ -40,7 +40,41 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: fixed ordered-list labels retain PDF structure
+## Latest progress: explicit literal markers retain rich list labels
+
+The completion audit found a remaining core structural gap: irregular, annotated
+or pictorial labels could flatten an otherwise explicit PDF L/LI tree. List items
+now have a separate optional ListMarker owner for literal blocks and source facts.
+SF adds list_marker before the item body through the existing ProseMirror profile.
+JSON/SF/gzip preserve the complete label/body graph, including styles, note and
+anchor identities, URI relationships, original source bounds and raster assets.
+Automatic/constant counter recovery still takes precedence; literal recovery
+never claims an unobserved counter rule. Unknown list kind is separately diagnosed.
+
+Existing source bytes, literal text/body paragraph boundaries, URI and original
+red image pixel are unchanged. Logical assertions now additionally require actual
+list/item/marker ownership. Independent pypdf checks four source fixtures/six items;
+actual ProseMirror validates 68 nodes/marks/attributes across five SFs.
+
+Generation is explicitly unfinished: DOCX/PDF/VDOCS reject this new marker content
+before writing rather than silently discard it. This is a transitional guard,
+not an exception to the all-four-path goal. Next implement shared label/body PDF
+layout and DOCX/native mappings with the same semantic/asset oracles. Read
+LITERAL_LIST_MARKERS.md for API/schema, required work and exact commands.
+
+Final tests pass (library 26.206s/CLI 0.807s); full race passes (library 319.028s/CLI
+cached) after strengthening the formerly flattened-stage paragraph oracle. Final
+focused race (1.577s) covers the last unsupported-control classification and source/
+identity checks. Vet/modules, CGO-disabled focused tests (0.377s), host CLI build/help/
+extraction and Linux amd64/arm64 cross-builds pass. Fuzz passes 10,500 executions/
+11.458s/two workers (short safety sample). CLI SF matches API byte-for-byte, and
+unfinished output rejection leaves an existing destination and no temporary file.
+verification.json records scope, the superseded failed assertion and final checks.
+The full goal remains active/incomplete, with
+literal-marker generation now a concrete core priority. Native repeated-note
+placement and wider source/resource/reflow/API/visual qualification remain open.
+
+## Earlier progress: fixed ordered-list labels retain PDF structure
 
 Tagged ordered lists whose labels are all the same now retain their explicit L/LI
 hierarchy as a constant ListNumbering template when a canonical counter sequence
@@ -338,8 +372,10 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-1. Reproduce and resolve the native repeated-footnote body-order failure in
-   COLLEAF_BROWSER.md while preserving the source graph and original oracle.
+1. Complete literal-marker PDF layout/paint, DOCX generation/recovery and native
+   mapping using LITERAL_LIST_MARKERS.md. The current output rejection is temporary
+   required work, not a completed support-contract exception. Reproduce the native
+   repeated-footnote failure in COLLEAF_BROWSER.md without weakening its oracle.
    Broaden source/structure and resource audits beyond the newly qualified
    reciprocal ParentTree checks, using malformed and independently authored sources.
    Retain current physical and explicit/inferred source oracles; never recover from an embedded SF cache.
@@ -355,7 +391,7 @@ QA only. Historical codec timings are retained in the verification ledger.
    after every original criterion is proven. No external blocker is established.
 
 ```sh
-cat docs/ACCEPTANCE.md docs/COLLEAF_BROWSER.md docs/COLLEAF_FORMAT.md
+cat docs/ACCEPTANCE.md docs/LITERAL_LIST_MARKERS.md docs/COLLEAF_BROWSER.md
 rg -n 'ParentTree|StructParent|MCID|OBJR' pdf_structure*.go pdf_marked.go
 GOWORK=off go test -run 'TestGeneratedPDF|TestPDFTagged|TestCLIVDOCSSemantics' -count=1 ./...
 output/qa-venv/bin/python scripts/verify_pdf_parent_tree.py testdata/real/copyright-office-circular-1-2021.pdf

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"image/png"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -192,13 +193,17 @@ func TestPDFCounterAnnotationsStayLiteral(t *testing.T) {
 			`<< /Type /StructElem /S /Link /P 10 0 R /K [0 << /Type /OBJR /Obj 13 0 R >>] >>`,
 			`<< /Type /Annot /Subtype /Link /Rect [20 310 32 296] /A << /S /URI /URI (`+href+`) >> >>`)
 		objects[2] = strings.Replace(objects[2], "/Contents 5 0 R", "/Contents 5 0 R /Annots [13 0 R]", 1)
-		d := readRecovery(t, recoveryPDF(objects...))
-		if len(d.Blocks) != 1 || d.Blocks[0].Kind != Paragraph || !hasDiagnostic(d, "pdf_structure_list_labels") {
-			t.Fatal("annotated label incorrectly became automatic numbering")
+		raw := recoveryPDF(objects...)
+		d := readRecovery(t, raw)
+		if len(d.Blocks) != 1 || d.Blocks[0].Kind != ListBlock || len(d.Blocks[0].Items) != 1 || !hasDiagnostic(d, "pdf_list_literal") {
+			t.Fatal("explicit list hierarchy lost")
 		}
-		if len(d.Blocks[0].Runs) < 2 || d.Blocks[0].Runs[0].Text != "3." || d.Blocks[0].Runs[0].Link != href || !strings.Contains(d.Text(), "Body") {
-			t.Fatal("literal label relationship lost", d)
+		marker := d.Blocks[0].Items[0].Marker
+		if len(marker.Blocks) != 1 || len(marker.Blocks[0].Runs) != 1 || marker.Blocks[0].Runs[0].Text != "3." || marker.Blocks[0].Runs[0].Link != href || d.Text() != "3. Body" {
+			t.Fatal("literal label/relationship/body oracle changed")
 		}
+		assertRecoverySF(t, d)
+		exportLiteralMarkerQA(t, "annotation", raw, d)
 	}
 }
 
@@ -237,14 +242,28 @@ func TestPDFPictorialCounterStaysVisible(t *testing.T) {
 		`<< /Type /StructElem /S /LBody /P 9 0 R /K 1 >>`,
 		`<< /Type /StructElem /S /Figure /P 10 0 R /Alt (MARKER_ICON) /K 2 >>`)
 	objects[5] = recoveryStream(`/Type /XObject /Subtype /Image /Width 1 /Height 1 /ColorSpace /DeviceRGB /BitsPerComponent 8`, string([]byte{255, 0, 0}))
-	d := readRecovery(t, recoveryPDF(objects...))
-	if len(d.Blocks) != 3 || d.Blocks[0].Kind != Paragraph || d.Blocks[1].Kind != Picture || d.Blocks[1].Image.Alt != "MARKER_ICON" || len(d.Blocks[1].Image.Data) == 0 || !hasDiagnostic(d, "pdf_structure_list_labels") {
-		t.Fatal("pictorial counter discarded or hidden by automatic numbering")
+	raw := recoveryPDF(objects...)
+	d := readRecovery(t, raw)
+	if len(d.Blocks) != 1 || d.Blocks[0].Kind != ListBlock || len(d.Blocks[0].Items) != 1 || !hasDiagnostic(d, "pdf_list_literal") {
+		t.Fatal("pictorial label lost list ownership")
 	}
-	if paragraphText(d.Blocks[0]) != "3." || paragraphText(d.Blocks[2]) != "Body" {
-		t.Fatal("literal counter/body order lost")
+	item := d.Blocks[0].Items[0]
+	if len(item.Marker.Blocks) != 2 || item.Marker.Blocks[0].Kind != Paragraph || item.Marker.Blocks[1].Kind != Picture || item.Marker.Blocks[1].Image.Alt != "MARKER_ICON" || paragraphText(item.Marker.Blocks[0]) != "3." || paragraphText(item.Blocks[0]) != "Body" {
+		t.Fatal("literal marker/body order or asset lost")
+	}
+	decoded, err := png.Decode(bytes.NewReader(item.Marker.Blocks[1].Image.Data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	red, green, blue, alpha := decoded.At(0, 0).RGBA()
+	if red != 65535 || green != 0 || blue != 0 || alpha != 65535 {
+		t.Fatal("original red marker pixel changed")
+	}
+	if d.Text() != "3.\nMARKER_ICON\nBody" {
+		t.Fatal("original literal text oracle changed", d.Text())
 	}
 	assertRecoverySF(t, d)
+	exportLiteralMarkerQA(t, "picture", raw, d)
 }
 
 func TestPDFNestedCounterKeepsLiteralObservedContext(t *testing.T) {

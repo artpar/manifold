@@ -76,8 +76,15 @@ func TestPDFCustomListLabelKeepsExplicitBodyParagraphs(t *testing.T) {
 		"<< /Type /StructElem /S /LBody /P 9 0 R /K [12 0 R 13 0 R] >>",
 		"<< /Type /StructElem /S /P /P 11 0 R /K 1 >>",
 		"<< /Type /StructElem /S /P /P 11 0 R /K 2 >>"))
-	if len(d.Blocks) != 2 || paragraphText(d.Blocks[0]) != "iv. First" || paragraphText(d.Blocks[1]) != "Second" || d.Blocks[1].Source.Structure != "explicit" || !hasDiagnostic(d, "pdf_structure_list_labels") {
-		t.Fatalf("custom list boundaries: %+v", d.Blocks)
+	if len(d.Blocks) != 1 || d.Blocks[0].Kind != ListBlock || len(d.Blocks[0].Items) != 1 {
+		t.Fatal("explicit custom list hierarchy lost")
+	}
+	item := d.Blocks[0].Items[0]
+	if item.Marker == nil || paragraphText(item.Marker.Blocks[0]) != "iv." || len(item.Blocks) != 2 || paragraphText(item.Blocks[0]) != "First" || paragraphText(item.Blocks[1]) != "Second" || item.Blocks[0].Source.Structure != "explicit" || item.Blocks[1].Source.Structure != "explicit" || !hasDiagnostic(d, "pdf_list_literal") || !hasDiagnostic(d, "pdf_list_kind_unobserved") {
+		t.Fatal("original marker/body/paragraph/source boundaries changed")
+	}
+	if d.Text() != "iv. First\nSecond" {
+		t.Fatal("original literal text oracle changed", d.Text())
 	}
 	assertRecoverySF(t, d)
 }

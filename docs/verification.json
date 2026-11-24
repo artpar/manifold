@@ -7446,5 +7446,43 @@
       "output/qa-venv/bin/python scripts/verify_pdf_constant_lists.py",
       "cat docs/STATUS.md docs/ACCEPTANCE.md"
     ]
+  },
+  "literal_marker_import_milestone": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "gap": "Regular explicit PDF lists with variable/annotated/pictorial labels were flattened when automatic counter recovery failed, despite recoverable L/LI/Lbl hierarchy.",
+    "behavior": "ListItem.Marker (*ListMarker) owns literal blocks and Source independently of body content and automatic rules. SF profile adds a non-group list_marker before the required body paragraph/heading. JSON/SF/gzip retain rich marker/body graphs. Unknown kind and unobserved counter intent are diagnosed; canonical/constant recovery still takes precedence.",
+    "scope": "Extraction/persistence milestone only. DOCX/PDF/VDOCS generation for literal markers remains required unfinished work and now rejects before any output, even AllowLossy; not a completion exemption. Page/section controls and standalone anchor blocks in markers reject; ordinary inline/paragraph anchor and note graphs validate.",
+    "walkers": "Marker trees participate in note/destination identity validation, source/fidelity admission, region union, PDF navigation binding, partial-link diagnostics and text extraction. Marker Source separately retains actual Lbl identity/parent/regions.",
+    "oracles": "Original annotation/picture/iv. sources unchanged. URI, red pixel, image dimensions/position and literal text/body paragraph boundary oracles retained. Logical assertions now additionally require actual list/item/marker/source ownership. The old flattened-stage paragraph-count assertion initially failed, was replaced by stronger explicit hierarchy plus unchanged iv. First / Second text, then full checks reran. Superseded race run was deliberately terminated after the authoritative assertion failure, not after an observation timeout.",
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_literal_markers.py",
+      "verifier_sha256": "7607ff77c6b2416cd1abbaa577a09713a52060005721625ab7ebd02443e69437",
+      "source_fixtures": 4,
+      "explicit_items": 6,
+      "checks": "Actual original L/LI/Lbl references and parents, source bounds, variable label/body correspondence, URI, exact red raster pixel,10pt image dimensions and quad all pass. No generated-output support claimed.",
+      "ProseMirror": "68 actual nodes/marks/attributes across5 SF files pass, including note/anchor and rich label nodes.",
+      "visual_scope": "No newly generated DOCX/PDF deliverables; marker generation is intentionally still rejected. This is structural/content/asset persistence evidence, not a new visual claim."
+    },
+    "checks": {
+      "go_test_all": "passed final library26.206s/CLI0.807s",
+      "race": "passed library319.028s/CLI cached after structural-oracle update; before final unsupported-control error wrapping only",
+      "focused_race": "passed1.577s final marker/source/identity/control/fuzz-seed tests",
+      "vet": "passed final",
+      "modules": "all modules verified",
+      "CGO_disabled_focused": "passed final0.377s",
+      "builds": "CGO-disabled host CLI build/help/extraction execute; Linux amd64/arm64 cross-builds pass, not execution. CLI extracted SF equals API byte-for-byte.",
+      "atomic_CLI": "AllowLossy PDF conversion rejects with unfinished-generation error; existing destination unchanged and no temporary file left.",
+      "fuzz": "FuzzLiteralMarkerSF passes10500 executions/11.458s/two workers/three original seeds; short safety sample",
+      "diff_check": "passed"
+    },
+    "production_dependencies": "unchanged; profile/model and independently authored parser/walkers only; existing optional pypdf/Pillow/ProseMirror QA components reused.",
+    "remaining": "Implement literal-marker shared PDF layout/painting, DOCX generation/recovery and native mapping without flattening or text caches. Native repeated-footnote order, broader source/resource/reflow/API/visual and original acceptance audits remain open.",
+    "next_commands": [
+      "cat docs/LITERAL_LIST_MARKERS.md docs/STATUS.md",
+      "rg -n 'listMarker|case ListBlock|pdfOutputLabels' pdf_lists.go pdf_cell_layout.go pdf_output_structure.go",
+      "MANYDOC_LITERAL_MARKER_QA=output/literal-markers GOWORK=off go test -run 'TestLiteralMarker|TestPDFVariableLiteral|TestPDFCounter|TestPDFPictorial|TestPDFCustomListLabel' -count=1 .",
+      "output/qa-venv/bin/python scripts/verify_literal_markers.py"
+    ]
   }
 }

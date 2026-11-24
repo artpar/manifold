@@ -40,6 +40,11 @@ func walkNoteRuns(bs []Block, visit func(Run) error) error {
 			}
 		}
 		for _, item := range b.Items {
+			if item.Marker != nil {
+				if err := walkNoteRuns(item.Marker.Blocks, visit); err != nil {
+					return err
+				}
+			}
 			if err := walkNoteRuns(item.Blocks, visit); err != nil {
 				return err
 			}

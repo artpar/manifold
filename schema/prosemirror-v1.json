@@ -118,12 +118,16 @@
       }
     },
     "list_item": {
-      "content": "(paragraph | heading) block*",
+      "content": "list_marker? (paragraph | heading) block*",
       "attrs": {
         "source": {
           "default": null
         }
       }
+    },
+    "list_marker": {
+      "content": "block+",
+      "attrs": { "source": { "default": null } }
     },
     "table": {
       "group": "block",

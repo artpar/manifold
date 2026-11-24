@@ -562,18 +562,9 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 		kind = ""
 	}
 	if kind == "" {
-		s.warn("pdf_structure_list_labels", "Unsupported/custom list labels retain their literal text and item order in paragraphs; automatic list semantics are not represented")
-		var out []Block
-		for i, body := range bodies {
-			parts := append([]Block{}, labels[i]...)
-			if len(parts) > 0 && len(body) > 0 && parts[len(parts)-1].Kind == Paragraph && body[0].Kind == Paragraph {
-				s.joinParagraph(&parts[len(parts)-1], body[0])
-				body = body[1:]
-			}
-			out = append(out, append(parts, body...)...)
-		}
-		return out, nil
+		return s.literalList(n, numbering, labels, bodies, texts)
 	}
+
 	if markerPresentation {
 		s.warn("pdf_list_label_presentation", "List marker typography is not an editable numbering property; original label text and physical style evidence are retained while marker appearance may normalize on reflow")
 	}
@@ -617,6 +608,57 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 				s.warn("pdf_list_numbering_inferred", "Ordered list start and literal pattern are inferred from displayed labels; explicit format attributes select the family when present, and original labels are retained")
 			}
 		}
+	}
+	return []Block{list}, nil
+}
+
+// Literal labels retain explicit L/LI/Lbl ownership even when no automatic
+// counter rule can represent their text, links, images or mixed presentation.
+func (s *pdfStructureRecovery) literalList(n *pdfStructureNode, numbering string, labels, bodies [][]Block, texts []string) ([]Block, error) {
+	list := Block{Kind: ListBlock, List: "bullet"}
+	knownKind := true
+	switch numbering {
+	case "Decimal", "UpperRoman", "LowerRoman", "UpperAlpha", "LowerAlpha":
+		list.List = "number"
+	case "Disc", "Circle", "Square":
+	default:
+		knownKind = false
+	}
+	for i, body := range bodies {
+		if len(body) == 0 || (body[0].Kind != Paragraph && body[0].Kind != Heading) {
+			body = append([]Block{{Kind: Paragraph}}, body...)
+		}
+		marker := labels[i]
+		if len(marker) == 0 {
+			marker = []Block{{Kind: Paragraph}}
+		}
+		if err := validateLiteralMarker(marker, 0); err != nil {
+			return nil, err
+		}
+		source := sourceFromBlocks(append(append([]Block(nil), marker...), body...), n.kids[i])
+		source.Label = texts[i]
+		var markerSource *SourceInfo
+		for _, child := range n.kids[i].kids {
+			if child.role == "Lbl" {
+				if markerSource != nil {
+					markerSource = nil
+					s.warn("pdf_list_multiple_labels", "Multiple Lbl children retain their source-bearing content in one literal marker without assigning a single source owner")
+					break
+				}
+				markerSource = sourceFromBlocks(marker, child)
+			}
+		}
+		list.Items = append(list.Items, ListItem{Marker: &ListMarker{Blocks: marker, Source: markerSource}, Blocks: body, Source: source})
+	}
+	list.Source = sourceFromBlocks([]Block{list}, n)
+	list.Source.Evidence += ";literal_labels"
+	s.warn("pdf_list_literal", "Literal list labels retain their content, relationships and explicit item hierarchy; automatic counter/restart intent is not reconstructed")
+	if list.List == "number" {
+		list.Source.Evidence += ";start_unobserved"
+	}
+	if !knownKind {
+		list.Source.Evidence += ";list_kind_unobserved"
+		s.warn("pdf_list_kind_unobserved", "ListNumbering is absent, None or unrepresented; literal labels preserve display while the list uses an unordered editing container without inventing a counter rule")
 	}
 	return []Block{list}, nil
 }

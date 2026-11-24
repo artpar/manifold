@@ -418,7 +418,7 @@ func (d *Document) hasPDFSource() bool {
 				}
 			}
 			for _, item := range b.Items {
-				if item.Source != nil || walk(item.Blocks) {
+				if item.Source != nil || item.Marker != nil && (item.Marker.Source != nil || walk(item.Marker.Blocks)) || walk(item.Blocks) {
 					return true
 				}
 			}

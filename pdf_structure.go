@@ -603,6 +603,10 @@ func sourceFromBlocks(blocks []Block, n *pdfStructureNode) *SourceInfo {
 			}
 			for _, item := range b.Items {
 				add(item.Source)
+				if item.Marker != nil {
+					add(item.Marker.Source)
+					walk(item.Marker.Blocks)
+				}
 				walk(item.Blocks)
 			}
 		}

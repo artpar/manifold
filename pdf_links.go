@@ -190,6 +190,9 @@ func (r *pdfReader) diagnosePartialLinks() {
 				}
 			}
 			for _, item := range b.Items {
+				if item.Marker != nil {
+					walk(item.Marker.Blocks)
+				}
 				walk(item.Blocks)
 			}
 		}

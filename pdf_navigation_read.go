@@ -409,6 +409,9 @@ func (r *pdfReader) bindPDFNavigation() {
 				candidates[b.Source.Page] = append(candidates[b.Source.Page], pdfFlowCandidate{b, 0, b.Source})
 			}
 			for j := range b.Items {
+				if b.Items[j].Marker != nil {
+					walk(b.Items[j].Marker.Blocks)
+				}
 				walk(b.Items[j].Blocks)
 			}
 			for j := range b.Rows {

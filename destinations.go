@@ -43,6 +43,11 @@ func walkDestinationRuns(bs []Block, visit func(Run) error) error {
 			}
 		}
 		for _, i := range b.Items {
+			if i.Marker != nil {
+				if err := walkDestinationRuns(i.Marker.Blocks, visit); err != nil {
+					return err
+				}
+			}
 			if err := walkDestinationRuns(i.Blocks, visit); err != nil {
 				return err
 			}

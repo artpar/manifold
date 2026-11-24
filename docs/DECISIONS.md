@@ -2321,3 +2321,15 @@ require the retained list/template, not a false decimal counter. Do not infer
 ordered semantics from absent attributes or discard annotated/nontext markers.
 Independent Word rendering confirms multi-character/percent/empty constant labels.
 An exploratory bullet-only encoding truncated marker text, so it was not adopted.
+
+
+## 2026-11-25 Retain literal list labels as first-class content
+
+Preserve explicit list structure independently of reconstructing an automatic
+counter. Put rich literal label blocks and their own source owner on ListMarker,
+mirroring a non-group leading list_marker in the established SF profile. Keep
+source-only facts separate from current editable content and include markers in
+identity/source validation. Preserve existing fixtures/text/pixels and strengthen
+the structural oracle. Unknown ordered/bullet intent must be diagnosed. Guard
+DOCX/PDF/native output before writes until proper generation exists; that guard
+is temporary required work, not a narrowed completion criterion.

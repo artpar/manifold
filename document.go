@@ -128,6 +128,17 @@ type Block struct {
 
 // ListItem owns its ordered blocks, including continuation paragraphs and nested lists.
 type ListItem struct {
+	// Marker owns an explicit literal label instead of an automatic counter or
+	// bullet. Nil selects the list's automatic rule. An empty paragraph represents
+	// a deliberately empty label. Marker content is independent of item body text.
+	Marker *ListMarker `json:"marker,omitempty"`
+	Blocks []Block     `json:"blocks"`
+	Source *SourceInfo `json:"source,omitempty"`
+}
+
+// ListMarker retains literal visible label content and its independent source owner.
+// It does not define an automatic numbering or restart rule.
+type ListMarker struct {
 	Blocks []Block     `json:"blocks"`
 	Source *SourceInfo `json:"source,omitempty"`
 }
@@ -312,6 +323,9 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 	if err := d.Validate(); err != nil {
 		return err
 	}
+	if (format == DOCX || format == PDF || format == VDOCS) && d.hasLiteralListMarkers() {
+		return fmt.Errorf("%w: literal list marker generation is not yet implemented for %s", ErrUnsupported, format)
+	}
 	if format != JSON && format != SF && format != SFGzip && format != VDOCS && format != Text && len(d.Diagnostics) > 0 && !opts.AllowLossy {
 		return fmt.Errorf("%w: %s", ErrLossy, d.Diagnostics[0].Message)
 	}
@@ -392,6 +406,20 @@ func textBlocks(b *strings.Builder, blocks []Block) {
 			}
 		case ListBlock:
 			for _, item := range v.Items {
+				if item.Marker != nil {
+					var marker strings.Builder
+					textBlocks(&marker, item.Marker.Blocks)
+					text := strings.TrimRight(marker.String(), "\n")
+					if text != "" {
+						b.WriteString(text)
+						last := item.Marker.Blocks[len(item.Marker.Blocks)-1].Kind
+						if last == Paragraph || last == Heading {
+							b.WriteByte(' ')
+						} else {
+							b.WriteByte('\n')
+						}
+					}
+				}
 				textBlocks(b, item.Blocks)
 			}
 		case Picture:
@@ -523,6 +551,20 @@ func (d *Document) Validate() error {
 				}
 
 				for _, item := range b.Items {
+					if item.Marker != nil {
+						if err := item.Marker.Source.validate(d.Pages); err != nil {
+							return err
+						}
+						if len(item.Marker.Blocks) == 0 {
+							return errors.New("literal list marker requires content; use an empty paragraph for an empty label")
+						}
+						if err := validateLiteralMarker(item.Marker.Blocks, depth+1); err != nil {
+							return err
+						}
+						if err := walk(item.Marker.Blocks, depth+1); err != nil {
+							return err
+						}
+					}
 					if err := item.Source.validate(d.Pages); err != nil {
 						return err
 					}

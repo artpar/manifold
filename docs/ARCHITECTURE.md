@@ -1887,3 +1887,16 @@ retains empty labels without paint references. Source evidence distinguishes the
 unobserved hidden start from observed counter parsing; default one is diagnosed.
 This is not a new SF schema, source body cache or proof of original authoring
 restart/template intent. Annotation/nontext guards still preserve literal content.
+
+
+## Literal list-marker ownership
+
+ListItem.Marker (*ListMarker) owns literal Blocks and Source independently of
+automatic numbering and body blocks. SF list_marker is an optional leading child
+of list_item, with ordinary source-bearing block content. Identity/source/link
+walkers include this tree; no source metadata becomes editable content by itself.
+PDF irregular-label fallback now retains actual L/LI/Lbl structure, assets and
+relationships instead of flattening paragraphs. Unknown kind/counter intent is
+explicit. Output generation is deliberately guarded until the label/body planner
+and format mappings are implemented. LITERAL_LIST_MARKERS.md records required
+unfinished work; no completion follows from the extraction/persistence milestone.

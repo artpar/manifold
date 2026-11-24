@@ -222,6 +222,13 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 				if err != nil {
 					return nil, err
 				}
+				if item.Marker != nil {
+					label, err := encodeSFBlocks(item.Marker.Blocks)
+					if err != nil {
+						return nil, err
+					}
+					content = append([]StructuredNode{{Type: "list_marker", Attrs: encodeSourceAttrs(nil, item.Marker.Source), Content: label}}, content...)
+				}
 				n.Content = append(n.Content, StructuredNode{Type: "list_item", Attrs: encodeSourceAttrs(nil, item.Source), Content: content})
 			}
 		case Table:
@@ -590,11 +597,29 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 				if err := emptySFAttrs(attrs); err != nil {
 					return nil, err
 				}
-				blocks, err := decodeSFBlocks(item.Content, depth+1)
+				children := item.Content
+				var marker *ListMarker
+				if len(children) > 0 && children[0].Type == "list_marker" {
+					label := children[0]
+					markerAttrs, markerSource, e := decodeSourceAttrs(label.Attrs)
+					if e != nil {
+						return nil, e
+					}
+					if label.Text != "" || len(label.Marks) > 0 || emptySFAttrs(markerAttrs) != nil || len(label.Content) == 0 {
+						return nil, fmt.Errorf("invalid literal list marker")
+					}
+					markerBlocks, err := decodeSFBlocks(label.Content, depth+1)
+					if err != nil {
+						return nil, err
+					}
+					marker = &ListMarker{Blocks: markerBlocks, Source: markerSource}
+					children = children[1:]
+				}
+				blocks, err := decodeSFBlocks(children, depth+1)
 				if err != nil {
 					return nil, err
 				}
-				b.Items = append(b.Items, ListItem{Blocks: blocks, Source: itemSource})
+				b.Items = append(b.Items, ListItem{Marker: marker, Blocks: blocks, Source: itemSource})
 			}
 
 		case "table":
