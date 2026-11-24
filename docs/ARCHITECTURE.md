@@ -1993,3 +1993,17 @@ position evidence; pypdf's longEarlyChange0 failure remains an executable separa
 oracle. No app admission/identity/quota logic or dependency version upgrade. Images
 and initial xref/object-stream decoding remain separate unfinished resource paths.
 PDF_SYNTAX_STREAMS.md gives limits, source references and original-corpus evidence.
+
+
+## 2026-11-25 Bound image expansion and retain sample precision
+
+Decode image/stencil/mask byte filters before invoking raster renderers; Indexed
+lookup streams also use the bounded decoder. Image stages retain the existing200MB
+allowance, sharing256MiB decoded work; actual raster work is bounded100million
+pixels with the existing25million individual bound. JPEG headers precede pixel
+allocation; CCITT uses validated dimensions. Native packed/16-bit RGB/gray Decode
+mapping and16-bit mask composition preserve sample precision. Device-color and
+JPEG interpolation differences retain their original strict independent oracles.
+No API/dependency-version/runtime-service/app-permission changes. Original publication
+and MQTT SF remain identical. PDF_IMAGE_DECODING.md records exact fixtures, independent
+readers, visual inspection, reproduction and initial-parser/full-goal remaining work.

@@ -7806,5 +7806,62 @@
       "rg -n 'Decode\\(|ExtractImage|SMask' pdf_images.go",
       "GOWORK=off go test ./..."
     ]
+  },
+  "pdf_image_decode_bounds": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "Bound image/stencil/soft-mask byte filters before raster rendering; Indexed lookup streams also bounded. JPEG configuration precedes pixel decode, CCITT uses validated dimensions. Native packed1/2/4 and8/16-bit RGB/gray Decode mapping preserves source samples;16-bit soft alpha no longer truncates colors. Non8-bit CMYK conversion explicitly diagnoses device-color loss. No API/dependency-version/runtime-service/app-permission change.",
+    "bounds": {
+      "image_stage_bytes": 200000000,
+      "lookup_stage_bytes": 67108864,
+      "shared_decoded_work_bytes": 268435456,
+      "individual_image_pixels": 25000000,
+      "cumulative_raster_pixels": 100000000,
+      "filters_per_image_including_terminal": 16
+    },
+    "source_oracles": "Exact a239b38 Git-archive CLI accepted unchanged corrupt image and Indexed-palette zlib checksums. Baseline16-bitRGB source1234/5678/9abc became8-bit18/52/86 and RGB Decode inversion was ignored; native interpretation now retains the actual source component values. Repeated occurrences retain identity, distinct order/transform and complete SF semantics.",
+    "independent": {
+      "positive_source_pdfs": 20,
+      "negative_source_pdfs": 6,
+      "readers": "pypdf original samples, MuPDF displayed pixels/placements, Pillow original JPEG and CLI SF; exact16-bit low bytes/alpha checked in Go. Six negative CLI probes preserve an existing output file. Chunked independent zlib counts actual200000001-byte public-stage fixture.",
+      "poppler_mask_center_rgb": [
+        136,
+        170,
+        204
+      ],
+      "mupdf_mask_center_rgb": [
+        135,
+        169,
+        203
+      ],
+      "visual": "Inspected enlarged source/asset swatches and original publication reflow page1. Targeted evidence only.",
+      "retained_strict_failures": [
+        "--require-cmyk: MuPDF managed red237/28/36 versus native device conversion255/0/0, with explicit diagnostic",
+        "--require-mupdf-jpeg: sharp JPEG edge chroma interpolation differs; Pillow agrees with Go within one8-bit level. Original source/oracle retained."
+      ]
+    },
+    "original_corpus": {
+      "publication_full_sf_sha256": "2d630c8ff72ec594b95b67542d66bf2df13886380672f6a213e5713b8095a7b2",
+      "mqtt_full_sf_sha256": "14742c55e8295feb0058a74cc33afe394f1ac340fa82aa422af3ad325524f526",
+      "assessment": "Complete SF byte-identical to exact a239b38 CLI for both originals. MQTT includes one image node; publication has none. Publication source/structure/DOCX/content and9-page PDF reflow checker passes unchanged."
+    },
+    "checks": {
+      "go_test_all": "passed current library28.648s/CLIcached; prior fresh current production28.863s/CLI0.802s",
+      "race_all": "passed final production library346.391s/CLI3.223s; precedes only Group3 test-table addition, covered by final focused race",
+      "focused_race": "passed8.543s after Group3 test-only addition",
+      "full_public_stage_probe": "passed1.038s with MANYDOC_PDF_IMAGE_LARGE=1;200000001 expanded bytes rejected before rendering",
+      "cgo_disabled_focus": "passed0.377s",
+      "vet": "passed",
+      "modules": "all modules verified; no go.mod/go.sum changes",
+      "builds": "CGO-disabled host and Linux amd64/arm64 cross-builds pass; not Linux execution",
+      "shared_decoder_fuzz": "FuzzPDFSyntaxFilters passed11577executions/11.469s/two workers; short syntax-codec sample, not image-codec fuzz or exhaustive safety",
+      "diff_check": "passed"
+    },
+    "remaining": "Initial dependency xref/object-stream decoding remains outside these guards; read.go saveDecodedStreamContent uses StreamDict.Decode and parseObjectStream uses source First for prolog decoding. Full semantic/reflow/native/API/visual acceptance audit remains active. CMYK/JPEG reader differences and previously documented native footnote/Word-PDF annotation/CID/pypdf discrepancies retain original strict oracles. No overall blocker/completion waiver.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/ACCEPTANCE.md docs/PDF_IMAGE_DECODING.md",
+      "rg -n 'ReadWithContext|DecodeLength|saveDecodedStreamContent|parseObjectStream' pdf_read.go /Users/artpar/go/pkg/mod/github.com/pdfcpu/pdfcpu@v0.11.1/pkg/pdfcpu/read.go",
+      "GOWORK=off go test ./..."
+    ]
   }
 }

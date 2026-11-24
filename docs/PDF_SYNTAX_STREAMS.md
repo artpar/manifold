@@ -3,8 +3,9 @@
 The page content, Form/annotation appearance and ToUnicode paths now use a shared
 in-process decoder instead of unbounded dependency stream decoding. It supports
 raw, Flate, ASCIIHex, ASCII85, RunLength and LZW (EarlyChange0/1), including filter
-pipelines and TIFF/PNG predictors. Images and the dependency's initial xref/object-
-stream parser remain separate paths; this is not exhaustive PDF memory protection.
+pipelines and TIFF/PNG predictors. Image pipelines now reuse this decoder with
+separate raster allowances (PDF_IMAGE_DECODING.md). The dependency's initial
+xref/object-stream parser remains separate; this is not exhaustive PDF memory protection.
 
 ## Work bounds and integrity
 
@@ -93,4 +94,5 @@ output/qa-venv/bin/python scripts/verify_published_pdf.py output/pdf-stream-publ
 The independent negative CLI probes require a fresh output directory with no
 *-rejected.sf files. Optional Python/MuPDF remain QA only; runtime decoding stays
 inside Go with no CGO, executables, services or document uploads. The remaining
-image/initial-parser resource audit and full original acceptance audit remain open.
+initial-parser resource audit and full original acceptance audit remain open.
+The subsequent image-stage/pixel audit is recorded in PDF_IMAGE_DECODING.md.

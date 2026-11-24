@@ -7,7 +7,6 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
-	"io"
 	"math"
 
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
@@ -56,13 +55,16 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 		}
 		copySD.Dict["ColorSpace"] = spaces[string(name)]
 	}
-	if n := len(copySD.FilterPipeline); n > 0 && (copySD.FilterPipeline[n-1].Name == "ASCIIHexDecode" || copySD.FilterPipeline[n-1].Name == "ASCII85Decode") {
-		if err := copySD.Decode(); err != nil {
+	if cs := copySD.Dict["ColorSpace"]; cs != nil {
+		copySD.Dict["ColorSpace"], err = r.preparePDFColorSpace(cs, 0)
+		if err != nil {
 			return err
 		}
-		copySD.Raw = copySD.Content
-		copySD.FilterPipeline = nil
 	}
+	if err := r.preparePDFImage(&copySD, w, h); err != nil {
+		return err
+	}
+
 	if copySD.Dict["Mask"] != nil {
 		return fmt.Errorf("%w: PDF explicit/color-key image masks", ErrUnsupported)
 	}
@@ -102,9 +104,7 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 		if state.fillUnknown {
 			return fmt.Errorf("%w: stencil requires unresolved general fill color", ErrUnsupported)
 		}
-		if err := copySD.Decode(); err != nil {
-			return err
-		}
+		copySD.Content = copySD.Raw
 		row := (w + 7) / 8
 		if len(copySD.Content) != row*h {
 			return fmt.Errorf("invalid stencil image sample length")
@@ -145,6 +145,11 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 			}
 		}
 		pixels = dst
+	} else if decoded, handled, e := r.deviceImage(&copySD, w, h); handled {
+		if e != nil {
+			return e
+		}
+		pixels = decoded
 	} else {
 		extracted, e := pdfcpu.ExtractImage(r.pdf, &copySD, false, "", 0, false)
 		if e != nil {
@@ -153,7 +158,7 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 		if extracted == nil || extracted.Reader == nil {
 			return fmt.Errorf("%w: PDF image decoding produced no asset", ErrUnsupported)
 		}
-		data, e := io.ReadAll(io.LimitReader(extracted.Reader, 200_000_001))
+		data, e := readPDFDecoded(r.ctx, extracted.Reader, maxPDFImageBytes)
 		if e != nil {
 			return e
 		}
@@ -215,16 +220,44 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 		if cs := mask.NameEntry("ColorSpace"); cs == nil || *cs != "DeviceGray" {
 			return fmt.Errorf("invalid soft-mask color space")
 		}
-		im, e := pdfcpu.ExtractImage(r.pdf, mask, false, "", 0, false)
+		if mask.Dict["SMask"] != nil || mask.Dict["Mask"] != nil {
+			return fmt.Errorf("invalid nested soft mask")
+		}
+		maskCopy := *mask
+		maskCopy.Dict = types.Dict{}
+		for k, v := range mask.Dict {
+			maskCopy.Dict[k] = v
+		}
+		if e = r.preparePDFImage(&maskCopy, mw, mh); e != nil {
+			return e
+		}
+		alpha, handled, e := r.deviceImage(&maskCopy, mw, mh)
 		if e != nil {
 			return e
 		}
-		if im == nil || im.Reader == nil {
-			return fmt.Errorf("unsupported soft-mask codec")
-		}
-		alpha, _, e := image.Decode(im.Reader)
-		if e != nil {
-			return e
+		if !handled {
+			im, e := pdfcpu.ExtractImage(r.pdf, &maskCopy, false, "", 0, false)
+			if e != nil {
+				return e
+			}
+			if im == nil || im.Reader == nil {
+				return fmt.Errorf("unsupported soft-mask codec")
+			}
+			encoded, e := readPDFDecoded(r.ctx, im.Reader, maxPDFImageBytes)
+			if e != nil {
+				return e
+			}
+			cfg, _, e := image.DecodeConfig(bytes.NewReader(encoded))
+			if e != nil {
+				return e
+			}
+			if cfg.Width != mw || cfg.Height != mh {
+				return fmt.Errorf("soft-mask dimensions disagree")
+			}
+			alpha, _, e = image.Decode(bytes.NewReader(encoded))
+			if e != nil {
+				return e
+			}
 		}
 		if alpha.Bounds().Dx() != mw || alpha.Bounds().Dy() != mh {
 			return fmt.Errorf("soft-mask dimensions disagree")
@@ -232,16 +265,36 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 		if mw != w || mh != h {
 			r.warnPage("pdf_mask_resampling", "Differently sized soft mask is resampled using nearest neighbors")
 		}
-		dst := image.NewNRGBA(image.Rect(0, 0, w, h))
-		draw.Draw(dst, dst.Bounds(), pixels, pixels.Bounds().Min, draw.Src)
-		for y := 0; y < h; y++ {
-			for x := 0; x < w; x++ {
-				a := color.GrayModel.Convert(alpha.At(x*mw/w, y*mh/h)).(color.Gray).Y
-				offset := dst.PixOffset(x, y)
-				dst.Pix[offset+3] = uint8(uint16(dst.Pix[offset+3]) * uint16(a) / 255)
-			}
+		highDepth := func(im image.Image) bool {
+			m := im.ColorModel()
+			return m == color.NRGBA64Model || m == color.RGBA64Model || m == color.Gray16Model
 		}
-		pixels = dst
+		if highDepth(pixels) || highDepth(alpha) {
+			dst := image.NewNRGBA64(image.Rect(0, 0, w, h))
+			for y := 0; y < h; y++ {
+				if err := r.ctx.Err(); err != nil {
+					return err
+				}
+				for x := 0; x < w; x++ {
+					c := color.NRGBA64Model.Convert(pixels.At(x, y)).(color.NRGBA64)
+					a := color.Gray16Model.Convert(alpha.At(x*mw/w, y*mh/h)).(color.Gray16).Y
+					c.A = uint16(uint32(c.A) * uint32(a) / 65535)
+					dst.SetNRGBA64(x, y, c)
+				}
+			}
+			pixels = dst
+		} else {
+			dst := image.NewNRGBA(image.Rect(0, 0, w, h))
+			draw.Draw(dst, dst.Bounds(), pixels, pixels.Bounds().Min, draw.Src)
+			for y := 0; y < h; y++ {
+				for x := 0; x < w; x++ {
+					a := color.GrayModel.Convert(alpha.At(x*mw/w, y*mh/h)).(color.Gray).Y
+					offset := dst.PixOffset(x, y)
+					dst.Pix[offset+3] = uint8(uint16(dst.Pix[offset+3]) * uint16(a) / 255)
+				}
+			}
+			pixels = dst
+		}
 	}
 	var encoded bytes.Buffer
 	if err := png.Encode(&encoded, pixels); err != nil {

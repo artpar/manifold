@@ -40,7 +40,24 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: bounded syntax-stream decoding and strict integrity
+## Latest progress: bounded image decoding and exact sample precision
+
+PDF image/stencil/mask byte filters and Indexed lookups now expand within explicit
+limits before raster rendering. JPEG headers are checked before pixel decoding;
+CCITT uses bounded declared dimensions. Native packed/16-bit RGB/gray samples and
+Decode arrays retain their components;16-bit soft alpha no longer truncates colors.
+See PDF_IMAGE_DECODING.md for stage/work bounds, exact pixel/SF/placement tests,
+original-corpus hashes and independent reader/visual evidence. Original publication
+and MQTT complete SF remain unchanged. CMYK management and JPEG chroma interpolation
+have retained strict independent discrepancies, not revised source oracles.
+The full goal remains active/incomplete; initial xref/object-stream parsing and the
+remaining acceptance audit are still open. Required checks pass: current full
+tests28.648s, final-production full race346.391s,
+focused current race8.543s, vet/module verification, CGO-disabled tests and host/
+Linux cross-builds. The public200MB stage probe and independent checks pass.
+Exact scopes, retained strict failures and timings are in verification.json.
+
+## Prior progress: bounded syntax-stream decoding and strict integrity
 
 Page contents, Forms/annotation appearances and ToUnicode now use a shared native
 Go decoder. Raw/Flate/ASCIIHex/ASCII85/RunLength/LZW(EarlyChange0/1), pipelines and
@@ -607,8 +624,14 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
+The image-stage audit is now qualified in PDF_IMAGE_DECODING.md. Review the initial
+pdfcpu xref/object-stream path next: read.go xRefStreamDict/saveDecodedStreamContent
+still calls StreamDict.Decode before the library owns the parsed objects, and
+parseObjectStream decodes the prolog using source First. This is a concrete remaining
+resource path, not an overall blocker or an excuse to defer semantic acceptance.
+
 1. Continue the wider source/resource/reflow/native corpus audit, including
-   image and initial xref/object-stream resources after the syntax-stream fix. The
+   initial xref/object-stream resources after the image-stage fix. The
    native repeated-footnote failure is revalidated in COLLEAF_BROWSER.md; retain
    its original oracle and seek new evidence rather than repeating the same check.
    Broaden source/structure and resource audits beyond the newly qualified
@@ -626,8 +649,10 @@ QA only. Historical codec timings are retained in the verification ledger.
    after every original criterion is proven. No external blocker is established.
 
 ```sh
-cat docs/ACCEPTANCE.md docs/LITERAL_LIST_MARKERS.md docs/COLLEAF_BROWSER.md
-rg -n 'ParentTree|StructParent|MCID|OBJR' pdf_structure*.go pdf_marked.go
+cat docs/ACCEPTANCE.md docs/PDF_IMAGE_DECODING.md docs/COLLEAF_BROWSER.md
+GOWORK=off MANYDOC_PDF_IMAGE_QA=output/pdf-image-qa go test -run 'TestPDFImage|TestPDFRaster' -count=1 .
+output/qa-venv/bin/python scripts/verify_pdf_images.py output/pdf-image-qa
+rg -n 'ReadContext|Decode\(|ObjectStream|XRefStream' pdf_read.go /Users/artpar/go/pkg/mod/github.com/pdfcpu/pdfcpu@v0.11.1/pkg/pdfcpu/read.go
 GOWORK=off go test -run 'TestGeneratedPDF|TestPDFTagged|TestCLIVDOCSSemantics' -count=1 ./...
 output/qa-venv/bin/python scripts/verify_pdf_parent_tree.py testdata/real/copyright-office-circular-1-2021.pdf
 rg -n 'ErrUnsupported|requires mapping' colleaf_*.go

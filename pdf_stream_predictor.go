@@ -6,13 +6,17 @@ import (
 )
 
 func unpredictPDF(ctx context.Context, data []byte, predictor, colors, columns, bits int) ([]byte, error) {
+	return unpredictPDFLimit(ctx, data, predictor, colors, columns, bits, maxPDFStreamBytes)
+}
+
+func unpredictPDFLimit(ctx context.Context, data []byte, predictor, colors, columns, bits, limit int) ([]byte, error) {
 	if predictor != 2 && (predictor < 10 || predictor > 15) {
 		return nil, fmt.Errorf("%w: PDF stream predictor %d", ErrUnsupported, predictor)
 	}
 	if colors < 1 || columns < 1 || (bits != 1 && bits != 2 && bits != 4 && bits != 8 && bits != 16) {
 		return nil, fmt.Errorf("invalid PDF predictor dimensions/sample depth")
 	}
-	if int64(colors) > int64(maxPDFStreamBytes)*8/int64(bits)/int64(columns) {
+	if int64(colors) > int64(limit)*8/int64(bits)/int64(columns) {
 		return nil, fmt.Errorf("PDF predictor row exceeds decoded stream limit")
 	}
 	samples := colors * columns

@@ -11,7 +11,7 @@ included. Third-party components remain under their respective licenses.
 | github.com/benoitkugler/textlayout | v0.3.2 | Adobe glyph names/encodings, TrueType layout and HarfBuzz glyph shaping | MIT |
 | github.com/rivo/uniseg | v0.4.7 | Unicode 15 grapheme/line segmentation (not terminal-cell width) | MIT; Unicode data terms |
 | golang.org/x/text | v0.30.0 | NFC normalization, font-name case folding, BCP47/script metadata and bidi properties | BSD-3-Clause; Unicode data terms |
-| golang.org/x/image | v0.32.0 | Go/Go Mono fonts, font glyph inspection and TIFF decoding | BSD-3-Clause; additional Go font notice |
+| golang.org/x/image | v0.32.0 | Go/Go Mono fonts, font glyph inspection and TIFF/CCITT decoding | BSD-3-Clause; additional Go font notice |
 
 The embedded Go fonts are copyright 2016 Bigelow & Holmes Inc. Their full
 notice is in `third_party/licenses/Go-fonts.txt`. Direct and runtime transitive

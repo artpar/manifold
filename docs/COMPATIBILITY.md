@@ -1269,3 +1269,13 @@ truncated compression and incomplete RunLength data now reject. Valid raw/Flate/
 ASCII85/ASCIIHex/RunLength/LZW0/1/predictor content retains exact source graphs within
 these parser bounds. Initial xref/object streams and images have separate handling;
 no general memory-safety/RSS guarantee follows. See PDF_SYNTAX_STREAMS.md.
+
+
+PDF raster filters/Indexed lookups now decode within explicit stage/document work
+bounds before rendering. JPEG headers and CCITT dimensions are checked first.
+Native DeviceRGB/Gray supports packed1/2/4-bit and8/16-bit samples plus Decode;
+16-bit color/soft-alpha precision is retained in PNG assets. Non8-bit CMYK conversion
+is explicitly diagnosed; managed CMYK colors and JPEG chroma interpolation can
+still differ between readers. Original strict comparisons remain executable.
+See PDF_IMAGE_DECODING.md for bounds, source/placement/SF/independent evidence and
+remaining initial-parser/full-acceptance work. This is not exhaustive PDF safety.

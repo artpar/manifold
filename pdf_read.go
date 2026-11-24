@@ -194,6 +194,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 
 type pdfReader struct {
 	streamBudget             *pdfStreamBudget
+	rasterPixels             int64
 	contentBytes             int
 	xobjectTotal             int
 	artifactTotal            int

@@ -37,6 +37,10 @@ func readPDFDecoded(ctx context.Context, src io.Reader, limit int) ([]byte, erro
 }
 
 func (r *pdfReader) decodePDFStream(object types.Object, sd *types.StreamDict) ([]byte, error) {
+	return r.decodePDFStreamLimit(object, sd, maxPDFStreamBytes)
+}
+
+func (r *pdfReader) decodePDFStreamLimit(object types.Object, sd *types.StreamDict, streamLimit int) ([]byte, error) {
 	if err := r.ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -48,8 +52,8 @@ func (r *pdfReader) decodePDFStream(object types.Object, sd *types.StreamDict) (
 		return data, nil
 	}
 	charge := func(data []byte) error {
-		if len(data) > maxPDFStreamBytes {
-			return fmt.Errorf("PDF decoded stream exceeds %d bytes", maxPDFStreamBytes)
+		if len(data) > streamLimit {
+			return fmt.Errorf("PDF decoded stream exceeds %d bytes", streamLimit)
 		}
 		if len(data) > maxPDFDecodedBytes-r.streamBudget.total {
 			return fmt.Errorf("PDF decoded streams exceed %d bytes", maxPDFDecodedBytes)
@@ -69,7 +73,7 @@ func (r *pdfReader) decodePDFStream(object types.Object, sd *types.StreamDict) (
 			}
 		}
 		for _, f := range sd.FilterPipeline {
-			limit := min(maxPDFStreamBytes, maxPDFDecodedBytes-r.streamBudget.total)
+			limit := min(streamLimit, maxPDFDecodedBytes-r.streamBudget.total)
 			if err := r.ctx.Err(); err != nil {
 				return nil, err
 			}
@@ -113,7 +117,7 @@ func (r *pdfReader) decodePDFStream(object types.Object, sd *types.StreamDict) (
 				return nil, fmt.Errorf("%w: PDF syntax stream filter %q", ErrUnsupported, f.Name)
 			}
 			if err != nil {
-				if errors.Is(err, errPDFDecodedLimit) && limit < maxPDFStreamBytes {
+				if errors.Is(err, errPDFDecodedLimit) && limit < streamLimit {
 					return nil, fmt.Errorf("PDF decoded streams exceed %d bytes: %w", maxPDFDecodedBytes, err)
 				}
 				return nil, fmt.Errorf("PDF stream %s: %w", f.Name, err)
@@ -139,7 +143,7 @@ func (r *pdfReader) decodePDFStream(object types.Object, sd *types.StreamDict) (
 					if e != nil {
 						return nil, e
 					}
-					data, err = unpredictPDF(r.ctx, data, predictor, colors, columns, bits)
+					data, err = unpredictPDFLimit(r.ctx, data, predictor, colors, columns, bits, streamLimit)
 					if err != nil {
 						return nil, err
 					}

@@ -207,3 +207,12 @@ bytes/positions. Original publication SF remains identical. The pinned pypdf lon
 EarlyChange0 limitation retains a strict failing oracle; no blanket reader/fidelity
 claim follows. Images/initial-parser resources and the full acceptance audit remain
 open. See PDF_SYNTAX_STREAMS.md.
+
+
+Image-stage/source qualification now bounds image, stencil, soft-mask and Indexed
+lookup expansion, checks JPEG headers before decoding and retains packed/16-bit
+RGB/gray samples and soft alpha. Exact pixels/placements/SF, public-stage rejection,
+independent readers and original publication/MQTT complete-SF equality qualify the
+milestone. CMYK managed color and JPEG chroma interpolation differences retain
+strict oracles. See PDF_IMAGE_DECODING.md and verification.json. Initial parser
+resources and the full acceptance audit remain open; the goal is active/incomplete.
