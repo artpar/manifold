@@ -5367,5 +5367,35 @@
     "remaining": "heterogeneous/internal mixed-direction note labels; nested/enclosing-ActualText and broader untagged graphs; actual native Colleaf adapter; broader original DOCX corpus/visual qualification; final acceptance",
     "next_commands": "rg -n 'pdfNoteMark|recoverNote|structureReplacement|ActualText' pdf_structure_notes.go pdf_structure*.go; GOWORK=off go test -race -run 'TestDOCXFractional|TestDOCXSize|TestDOCXSectionedStyledNote|TestXMLDuplicate' -count=1 .",
     "goal": "active/incomplete"
+  },
+  "rich_body_label_content_and_word_ranges": {
+    "date": "2026-11-24",
+    "exists": "Note.BodyLabelContent / SF notes[].body_label_content uses ordinary literal text runs/nodes with existing marks and per-fragment source. Excludes BodyLabel/BodyLabelStyle; identity/citation/counters stay separate. Uniform PDF Lbl retains previous template; heterogeneous Lbl retains individual fonts/sizes/colors/emphasis/links/regions instead of common intersection.",
+    "word": "Visible ordinary r/hyperlink content inside checked matching standard bookmark boundaries, mdnoterich1_kind_wireID identity and noteBodyContent roles; no second label string. Ordinary/sectioned paths, legitimate text edits, authority/hidden/nontext/private-role/namespace/range errors and reserved-prefix user destinations tested.",
+    "final_visible_editing": "Inserted/moved text retained; deleted history and comment markers use ordinary diagnostics. Empty/deleted final marks become explicit markerless override; empty-span formatting/navigation normalization disclosed. Remaining literal-range fields/nontext/hidden constructs reject rather than silently consume.",
+    "bidi_layout": "Rich native foot/endnote marker measurement uses ordinary fonts/shaping/bidi; marker alignment normalized to its own advance before gutter paint. Supplied-DejaVu Arabic/Latin body marks fit and separate from body on both gutter sides. Heterogeneous/internal mixed-direction citation atoms remain required next work.",
+    "independent": {
+      "source": "hand-authored PDF MCID2 paints black10pt asterisk then red8pt digit; pypdf operator oracle unchanged, source/SF/Word/native individual styles and regions pass",
+      "assets": "rich note list/table and exact red/blue2x1 raster pixels retained; source/Word editable semantics compared after declared physical-provenance omission",
+      "word_reader_fix": "Content-control prototype moved/restyled labels in LibreOffice; rejected. Final bookmark ranges preserve expected literal styles before note body with independently measured separation. No source/oracle revised to accept the prototype.",
+      "example": "three rich marks survive sectioned SF/Word exactly; native three fragment URI links and three named backlinks; actual ProseMirror138 nodes/marks/attrs across source/Word/example/mixed-script SF, plus fractional rich-label combination checked separately; fractional rich-label sectioned SF/Word content/note equality and82 actual ProseMirror nodes/marks/attributes also pass",
+      "visual": "eight native/Word/mixed-script pages inspected, showing readable body/note/list/table/raster and distinct mark sizes/colors",
+      "producer_limits": "LibreOffice installed-font substitution and note-label PDF hyperlink omissions persist. Example main page419.556pt square and dedicated endnote page612x792; native420x420 on both. Standard settings/model semantics verified separately; no exact Word geometry/fidelity claim."
+    },
+    "checks": {
+      "full_tests_final": "20.069s library;0.820s CLI; all packages pass after final empty-span and atom guards",
+      "full_race": "189.960s library;2.217s CLI; all packages pass after rich ranges/revision support. Predates final ordinary-empty-span normalization.",
+      "final_focused_race": "3.360s pass after all final production/test additions",
+      "vet": "pass after final changes",
+      "modules": "all modules verified; production dependencies unchanged",
+      "cgo_disabled": "final host CLI build/focused execution0.633s pass; Linux amd64/arm64 cross-builds pass (not execution evidence)",
+      "fuzz_final": "10s/two workers each: DOCX167/SF357 executions including new rich sectioned seeds, pass12.074s/11.486s; short source-heavy campaigns are not exhaustive",
+      "diff_check": "pass"
+    },
+    "evidence": "docs/RICH_NOTE_LABELS.md; note_rich_body_test.go; scripts/generate_pdf_semantic_audit.py and verify_rich_note_labels.py; actual PM verify_structured.cjs; examples/notes -rich-body-labels; ignored output/rich-note-labels",
+    "runtime_boundary": "pure Go, unchanged go.mod/go.sum/THIRD_PARTY, no required executables/CGO/services/uploads/app changes or performer permission/quota gates; QA readers optional",
+    "remaining": "heterogeneous/internal mixed-direction citation atoms; nested/enclosing-ActualText and broader untagged note graphs; actual Colleaf adapter; broader original DOCX note/story/revision/field corpus and producer qualification; final acceptance audit",
+    "next_commands": "rg -n 'noteMarkLevel|structureReplacement|citation|run.Note' pdf_structure_notes.go pdf_text.go pdf_bidi.go; GOWORK=off go test -race -run 'TestRichBodyLabel|TestPDFRichBodyLabel' -count=1 .",
+    "goal": "active/incomplete"
   }
 }

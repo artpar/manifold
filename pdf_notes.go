@@ -426,10 +426,11 @@ func (r *pdfRenderer) finishNotes() error {
 		r.pdf.SetLink(r.noteLinks[key], r.y, -1)
 		start, _ := strconv.Atoi(noteBodyLabel(r.notes, key))
 		list := Block{Kind: ListBlock, List: "number", Start: listStartPointer(start), Items: []ListItem{{Blocks: blocks}}}
-		if note.Label != "" || note.BodyLabel != nil || note.BodyLabelStyle != nil {
+		if note.Label != "" || note.BodyLabel != nil || note.BodyLabelStyle != nil || note.BodyLabelContent != nil {
 			label := noteBodyLabel(r.notes, key)
 			list.pdfListMarker = &label
 			list.pdfListMarkerStyle = note.BodyLabelStyle
+			list.pdfListMarkerContent = note.BodyLabelContent
 		}
 		if err := r.list(list, r.bodyWidth(), r.bodyLeft()); err != nil {
 			return err
@@ -441,12 +442,13 @@ func (r *pdfRenderer) finishNotes() error {
 // Body marks use the normal font/glyph/shaping path too. A distinct body label
 // must never bypass validation merely because the citation used other glyphs.
 func (r *pdfRenderer) footnoteLabel(key noteKey, width float64) (pdfLine, float64, error) {
-	lines, err := r.lines([]Run{noteBodyLabelRun(r.notes, key)}, width, 8)
+	lines, err := r.lines(noteBodyLabelRuns(r.notes, key), width, 8)
 	if err != nil {
 		return nil, 0, err
 	}
 	if len(lines) != 1 {
 		return nil, 0, fmt.Errorf("%w: footnote label exceeds its content width", ErrUnsupported)
 	}
+	placePDFLine(lines[0], pdfAdvance(lines[0]))
 	return lines[0], pdfAdvance(lines[0]), nil
 }

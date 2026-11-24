@@ -11,6 +11,7 @@ import (
 const docxNoteAnchorMark = "\u200b"
 
 type docxNoteDisplay struct {
+	Rich      bool    `json:"rich,omitempty"`
 	Label     string  `json:"label"`
 	BodyLabel *string `json:"body_label"`
 	Value     string  `json:"value"`
@@ -65,7 +66,7 @@ func (w *docxWriter) noteDisplayMetadata(n Note) string {
 		return ""
 	}
 	key := noteIdentity(n)
-	value := docxNoteDisplay{Label: n.Label, BodyLabel: n.BodyLabel, Value: w.noteLabels[key], Variant: w.noteVariants[key], Styled: n.BodyLabelStyle != nil}
+	value := docxNoteDisplay{Label: n.Label, BodyLabel: n.BodyLabel, Value: w.noteLabels[key], Variant: w.noteVariants[key], Styled: n.BodyLabelStyle != nil, Rich: n.BodyLabelContent != nil}
 	raw, _ := json.Marshal(value)
 	return ` md:display="` + escape(string(raw)) + `"`
 }
@@ -83,8 +84,11 @@ func readNoteDisplay(n *xmlNode) (*docxNoteDisplay, error) {
 	if dec.Decode(new(any)) != io.EOF {
 		return nil, fmt.Errorf("invalid note display metadata")
 	}
-	if (value.BodyLabel != nil || value.Styled) && !value.Variant {
+	if (value.BodyLabel != nil || value.Styled || value.Rich) && !value.Variant {
 		return nil, fmt.Errorf("body override requires variant wire format")
+	}
+	if value.Rich && (value.Styled || value.BodyLabel != nil) {
+		return nil, fmt.Errorf("rich label has conflicting body text/style authorities")
 	}
 	if value.Value == "" {
 		return nil, fmt.Errorf("empty canonical note mark metadata")

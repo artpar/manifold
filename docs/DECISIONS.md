@@ -1497,3 +1497,21 @@ a real panic; do not mask it as unsupported section content. Reject duplicate
 expanded XML attributes, including aliases, exposed by malformed precision tests.
 These changes do not broaden native PDF's .01pt contract or add font substitution,
 services or application permission gates. See DOCX_PRECISION.md.
+
+
+## 2026-11-24 Preserve heterogeneous body marks as ordinary rich text
+
+Use a literal Run sequence / established ProseMirror text nodes instead of another
+copy of the body-label string plus style offsets. Keep template/default numbering
+as the separate alternative and reject conflicting authorities. Preserve per-run
+source positions and links; do not collapse a differently styled leading Lbl to
+its common intersection. Normalize bidi placement to the measured marker box.
+
+Independent LibreOffice paint proved an inline content control moved/restyled the
+mark, so emit ordinary visible runs inside a checked standard bookmark range.
+Identity/bounds are metadata, actual label text remains editable authority. Reject
+hidden/nontext/unbound content and protect user destinations sharing wire prefixes.
+Keep observed font/hyperlink/endnote-page producer differences explicit; do not
+revise source operators, expected styles or page claims to accept the prototype.
+RICH_NOTE_LABELS.md records native/Word/raster/structure evidence and remaining
+heterogeneous/mixed-direction citation and graph work.

@@ -77,3 +77,25 @@ adjacent[7]=adjacent[7].replace('/Ref [9 0 R] ','')
 adjacent[8]=adjacent[8].replace('/Ref [8 0 R 18 0 R] ','').replace('/P 6 0 R','/P 7 0 R').replace('/S /FENote /A << /O /FENote /NoteType /Footnote >>','/S /Note')
 (out/'adjacent-note.pdf').write_bytes(pdf(adjacent))
 print('Wrote published adjacent Reference/Note pattern without explicit Ref links')
+
+
+# Individual styles inside one leading Lbl are independent paint facts, not a
+# common-style template. Graphics-state isolation keeps the other oracles intact.
+rich_label=objects.copy()
+mixed='q BT /F 10 Tf /P << /MCID 2 >> BDC 20 80 Td (*) Tj /F 8 Tf 1 0 0 rg (1) Tj EMC ET Q\n'
+rich_label[4]=stream(content.replace(text(2,20,80,'*1'),mixed))
+(out/'rich-label-note.pdf').write_bytes(pdf(rich_label))
+print('Wrote one Lbl with individually sized/colored literal runs')
+
+
+# An authored SF probe exercises one rich mixed-direction mark on either gutter.
+import json
+mixed_notes=[]
+for kind in ('footnote','endnote'):
+    mixed_notes.append({'id':kind,'kind':kind,'label':'F' if kind=='footnote' else 'E',
+        'body_label_content':[{'type':'text','text':'بب','marks':[{'type':'textStyle','attrs':{'fontFamily':'DejaVu','fontSize':10}}]},
+                              {'type':'text','text':'A','marks':[{'type':'textStyle','attrs':{'fontFamily':'DejaVu','fontSize':9,'color':'#FF0000'}}]}],
+        'content':[{'type':'paragraph','attrs':{'dir':'rtl'} if kind=='endnote' else {},'content':[{'type':'text','text':'BODY_'+kind.upper()}]}]})
+mixed_sf={'type':'doc','attrs':{'schema':'manydoc-prosemirror/1','layout':{'width':420,'height':420,'margin':36},'notes':mixed_notes},
+          'content':[{'type':'paragraph','content':[{'type':'text','text':'Mixed body labels '},{'type':'note_reference','attrs':{'kind':'footnote','id':'footnote'}},{'type':'text','text':' and '},{'type':'note_reference','attrs':{'kind':'endnote','id':'endnote'}}]}]}
+(out/'mixed-note-labels.sf').write_text(json.dumps(mixed_sf,ensure_ascii=False))

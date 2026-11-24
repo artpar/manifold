@@ -1064,6 +1064,21 @@ roles, no second text authority, and a conservative derived gutter. See
 PDF_NOTES.md for empty labels, exact checks and independent-reader limitations.
 
 
+## Rich literal body marks
+
+Note.BodyLabelContent / SF body_label_content is an alternative literal sequence
+of ordinary text runs/nodes with existing marks, excluding string/template body
+fields. Shared validation/catalog/source traversal includes each fragment.
+PDF recovery retains heterogeneous Lbl runs and aggregate LabelSource independently;
+normal font/glyph/bidi and marker measurement render them. Marker placement is
+normalized to intrinsic advance before gutter painting. docx_note_rich.go groups
+checked direct inline bookmark ranges, validates actual runs, and reuses ordinary
+paragraph decoding without duplicate label text. Final-visible revisions/comments
+use the ordinary paragraph policy; empty final marks normalize to explicit
+markerless display with diagnostics. Both Word paths share the note
+catalog; reserved names cannot steal user destinations. Ordinary paragraphs avoid
+rich-range allocation. Read RICH_NOTE_LABELS.md for evidence and remaining scope.
+
 ## DOCX portable font-size precision
 
 The dispatcher passes AllowLossy to both DOCX writers. docx_precision.go projects

@@ -94,7 +94,7 @@ semantic failures.
 
 This milestone closes the audit's zero-typed-note failure for explicit unambiguous
 relationships, including rich/repeated/reverse-linked cases. Broader note recovery
-still needs rich multi-node/internal mixed-direction labels, nested/enclosing-ActualText graphs, and carefully identified adjacency/
+still needs rich multi-node/internal mixed-direction citations, nested/enclosing-ActualText graphs, and carefully identified adjacency/
 geometric inference where no Ref exists. Differing, literal and explicitly empty
 citation/body marks now have their own representation, described below. Enclosing
 ActualText/nested cases retain content and source evidence but do not yet expose a full editable note graph. Do not relabel
@@ -267,7 +267,8 @@ explicit empty template. No second copy of visible label text is authoritative.
 Invalid mark/source/atom/destination combinations reject through normal validators.
 
 Recovery uses the leading Lbl's independently recovered common style/navigation;
-heterogeneous styling still follows common-style intersection diagnostics. Native
+heterogeneous leading body labels now use BodyLabelContent and preserve each
+style (RICH_NOTE_LABELS.md). Citation intersections remain separate next work. Native
 PDF uses normal measured text and font/shaping admission. A body mark taller than
 the compact footnote line gets an atomic measured line before its rich body;
 continuations do not reintroduce that tall marker. Styled endnote gutter and
@@ -298,7 +299,8 @@ verified. This does not establish that every Word consumer preserves navigation.
 The original guide's 6.959646pt sizes now export with acknowledged half-point
 projection and checked original intent; see DOCX_PRECISION.md for full original
 Word round-trip/reader evidence. Strict output still rejects inexact sizes.
-Heterogeneous/mixed-direction labels and nested/ActualText graphs remain open.
+Heterogeneous/mixed-direction body labels are qualified in RICH_NOTE_LABELS.md;
+rich/internal mixed-direction citations and nested/ActualText graphs remain open.
 
 ```sh
 GOWORK=off go run ./examples/notes -variant-labels -styled-labels -out output/note-styles
@@ -308,3 +310,11 @@ output/qa-venv/bin/python scripts/verify_note_styles.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/note-styles/notes.sf output/note-styles/notes-docx.sf output/note-inference/guide-styled.sf.gz
 GOWORK=off go test -race -run 'TestNoteBodyLabelStyle|TestStyledNoteBody|TestMarkerlessStyled|TestTallNote' -count=1 .
 ```
+
+
+Rich body labels now have a literal text-node alternative, BodyLabelContent /
+body_label_content, with individually retained styles/links/source evidence.
+It excludes the simple body string/template and does not change note identity or
+citation counters. Standard visible Word runs use checked bookmark boundaries;
+source paint/Word/native style/geometry/asset and mixed-script gutter checks pass.
+RICH_NOTE_LABELS.md contains complete behavior, producer limits and commands.

@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/artpar/manydoc"
@@ -26,6 +27,7 @@ func main() {
 	styledLabels := flag.Bool("styled-labels", false, "preserve independent body mark typography and backlinks; acknowledge static Word numbering")
 	fractionalSizes := flag.Bool("fractional-sizes", false, "export SF/DOCX with fractional authoring sizes (native PDF requires 0.01pt)")
 	sectioned := flag.Bool("sectioned", false, "wrap content and running stories in an explicit section")
+	richBodyLabels := flag.Bool("rich-body-labels", false, "use multiple independently styled/linkable body-label text runs")
 	flag.Parse()
 	ctx := context.Background()
 	sf, err := manydoc.ReadStructured(ctx, bytes.NewReader(source))
@@ -67,6 +69,14 @@ func main() {
 			d.Notes[i].BodyLabelStyle = &manydoc.Run{FontFamily: "Go", FontSize: 9.5, Bold: true, Italic: true, Color: "#203040", Underline: true, Destination: "citation-return", Link: "#citation-return", Language: "en"}
 		}
 	}
+	if *richBodyLabels {
+		d.Blocks[0].Anchors = append(d.Blocks[0].Anchors, "rich-return")
+		for i := range d.Notes {
+			d.Notes[i].BodyLabel = nil
+			d.Notes[i].BodyLabelStyle = nil
+			d.Notes[i].BodyLabelContent = []manydoc.Run{{Text: "N", Bold: true, FontFamily: "Go", FontSize: 9, Color: "#203040", Link: "#rich-return", Destination: "rich-return"}, {Text: "-" + strconv.Itoa(i+1), Italic: true, FontFamily: "Go", FontSize: 8, Link: "https://example.org/label"}}
+		}
+	}
 	if *fractionalSizes {
 		for i := range d.Blocks {
 			for j := range d.Blocks[i].Runs {
@@ -75,10 +85,16 @@ func main() {
 		}
 		d.Blocks[0].Runs[0].FontSize = 19.24999
 		for i := range d.Notes {
-			if d.Notes[i].BodyLabelStyle == nil {
-				d.Notes[i].BodyLabelStyle = &manydoc.Run{}
+			if d.Notes[i].BodyLabelContent != nil {
+				for j := range d.Notes[i].BodyLabelContent {
+					d.Notes[i].BodyLabelContent[j].FontSize = 6.959646 + float64(j)
+				}
+			} else {
+				if d.Notes[i].BodyLabelStyle == nil {
+					d.Notes[i].BodyLabelStyle = &manydoc.Run{}
+				}
+				d.Notes[i].BodyLabelStyle.FontSize = 6.959646
 			}
-			d.Notes[i].BodyLabelStyle.FontSize = 6.959646
 			if len(d.Notes[i].Blocks) > 0 && len(d.Notes[i].Blocks[0].Runs) > 0 {
 				d.Notes[i].Blocks[0].Runs[0].FontSize = 9.959491
 			}
@@ -120,7 +136,7 @@ func main() {
 	for _, format := range formats {
 		name := filepath.Join(*out, "notes."+string(format))
 		var buf bytes.Buffer
-		if err := manydoc.Write(ctx, &buf, d, format, manydoc.WriteOptions{AllowLossy: *variantLabels || *styledLabels || *fractionalSizes}); err != nil {
+		if err := manydoc.Write(ctx, &buf, d, format, manydoc.WriteOptions{AllowLossy: *variantLabels || *styledLabels || *fractionalSizes || *richBodyLabels}); err != nil {
 			log.Fatal(err)
 		}
 		if err := os.WriteFile(name, buf.Bytes(), 0644); err != nil {

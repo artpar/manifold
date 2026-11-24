@@ -34,7 +34,7 @@ func (w *docxWriter) styledNoteBodyMark(n Note) (string, error) {
 	} else {
 		inline = strings.Replace(inline, `<w:r`, `<w:r md:noteBodyStyle="1"`, 1)
 	}
-	return inline + `<w:r md:noteBodySeparator="1"><w:tab/><w:t xml:space="preserve">  </w:t></w:r>`, nil
+	return inline + docxBodyLabelSeparator, nil
 }
 func (r *docxReader) readStyledBodyMark(n *xmlNode, rels map[string]docxRelation) error {
 	if !r.expectedBodyStyle || r.expectedBodyLabel == nil || r.inNote == 0 || r.bodyLabelSeen || n.attributeNS(docxNotesNS, "noteBodyStyle") != "1" {
@@ -111,7 +111,7 @@ func (r *docxReader) readStyledBodyMark(n *xmlNode, rels map[string]docxRelation
 	return nil
 }
 func (r *docxReader) readBodyLabelSeparator(n *xmlNode) error {
-	if n.attributeNS(docxNotesNS, "noteBodySeparator") != "1" || !r.expectedBodyStyle || !r.bodyLabelSeen || r.bodySeparatorSeen || r.inNote == 0 || len(n.Children) != 2 || n.Children[0].Name.Local != "tab" || len(n.Children[0].Children) != 0 || n.Children[1].Name.Local != "t" || len(n.Children[1].Children) != 0 || n.Children[1].Text != "  " || n.content() != "  " {
+	if n.attributeNS(docxNotesNS, "noteBodySeparator") != "1" || (!r.expectedBodyStyle && !r.expectedBodyRich) || !r.bodyLabelSeen || r.bodySeparatorSeen || r.inNote == 0 || len(n.Children) != 2 || n.Children[0].Name.Local != "tab" || len(n.Children[0].Children) != 0 || n.Children[1].Name.Local != "t" || len(n.Children[1].Children) != 0 || n.Children[1].Text != "  " || n.content() != "  " {
 		return fmt.Errorf("invalid styled label separator")
 	}
 	if err := checkVariantNamespaces(n); err != nil {
@@ -131,6 +131,9 @@ func docxNoteLabelGutter(label string, size float64) float64 {
 // Only the derived layout of our checked styled mark is implicit. A foreign
 // indentation/tab edit still gets the ordinary representation-loss diagnostic.
 func (r *docxReader) implicitNoteIndent(n *xmlNode) string {
+	if r.expectedBodyRich {
+		return r.richBodyIndent(n)
+	}
 	if !r.expectedBodyStyle || r.expectedBodyLabel == nil {
 		return "360"
 	}

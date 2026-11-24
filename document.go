@@ -109,6 +109,7 @@ type Block struct {
 	docxNumberLevel         int
 	pdfListMarker           *string
 	pdfListMarkerStyle      *Run
+	pdfListMarkerContent    []Run
 	docxIndent              int
 	docxExplicitBreakBefore bool
 	docxBeforeList          bool
@@ -171,6 +172,9 @@ type Image struct {
 	Height    float64 `json:"height,omitempty"`
 }
 type Note struct {
+	// BodyLabelContent owns a literal rich body mark. It excludes BodyLabel and
+	// BodyLabelStyle; only nonempty text runs are allowed, without nested atoms.
+	BodyLabelContent []Run `json:"body_label_content,omitempty"`
 	// BodyLabelStyle supplies formatting/navigation for the resolved body mark, without text or atoms.
 	BodyLabelStyle *Run `json:"body_label_style,omitempty"`
 	// BodyLabel overrides the body mark, independently of citation marks.
@@ -554,6 +558,22 @@ func (d *Document) Validate() error {
 		}
 	}
 	for _, n := range d.Notes {
+		if n.BodyLabelContent != nil {
+			if n.BodyLabel != nil || n.BodyLabelStyle != nil || len(n.BodyLabelContent) == 0 {
+				return fmt.Errorf("rich body label requires one content authority")
+			}
+			for _, run := range n.BodyLabelContent {
+				if run.Text == "" || run.Note != nil || run.Anchor != "" {
+					return fmt.Errorf("rich body label requires nonempty text runs without atoms")
+				}
+			}
+			if err := validateNoteLabel(noteLabelContentText(n.BodyLabelContent)); err != nil {
+				return err
+			}
+			if err := walk([]Block{{Kind: Paragraph, Runs: n.BodyLabelContent}}, 0); err != nil {
+				return err
+			}
+		}
 		if n.BodyLabelStyle != nil {
 			style := *n.BodyLabelStyle
 			if style.Text != "" || style.Note != nil || style.Anchor != "" || style.Source != nil {

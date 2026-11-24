@@ -166,6 +166,10 @@ type docxReader struct {
 	variantDefaultMarks   map[noteKey][]string
 	expectedBodyLabel     *string
 	expectedBodyStyle     bool
+	expectedBodyRich      bool
+	expectedBodyWire      noteKey
+	parsedBodyContent     []Run
+	parsedBodyMarkerless  bool
 	parsedBodyStyle       *Run
 	bodySeparatorSeen     bool
 	bodyLabelSeen         bool
@@ -439,6 +443,9 @@ func (r *docxReader) blocks(n *xmlNode, rels map[string]docxRelation, depth int)
 		}
 		switch c.Name.Local {
 		case "bookmarkStart", "bookmarkEnd":
+			if c.attributeNS(docxNotesNS, "noteBodyContent") != "" {
+				return nil, fmt.Errorf("rich note label range must be inline")
+			}
 			if name := r.bookmark(c); name != "" {
 				group := r.bookmarkPoints[c].group
 				if group != "" && len(out) > 0 && out[len(out)-1].docxAnchorGroup == group {
@@ -544,6 +551,10 @@ func (r *docxReader) blocks(n *xmlNode, rels map[string]docxRelation, depth int)
 	return packBlockAnchors(out), nil
 }
 func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Block, error) {
+	children, richRanges, err := r.collectRichBodyRanges(n)
+	if err != nil {
+		return nil, err
+	}
 	b := Block{Kind: Paragraph}
 	ppr := n.child("pPr")
 	noteIndent := r.implicitNoteIndent(n)
@@ -614,6 +625,12 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 	var customMark strings.Builder
 	var walk func(*xmlNode, docxRunStyle) error
 	walk = func(c *xmlNode, style docxRunStyle) error {
+		if rich, ok := richRanges[c]; ok {
+			return r.readRichBodyRuns(rich, rels)
+		}
+		if c.attributeNS(docxNotesNS, "noteBodyContent") != "" {
+			return fmt.Errorf("unbound rich note label role")
+		}
 		if pendingCustom != nil && c.Name.Local != "t" {
 			return fmt.Errorf("%w: nontext content inside custom note mark", ErrUnsupported)
 		}
@@ -877,7 +894,6 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			r.doc.warn("field", "Cached field text is retained; field evaluation is not supported")
 			return nil
 		case "sdt":
-
 			r.doc.warn("content_control", "Content control content is retained; control properties are not represented")
 		case "bookmarkStart", "bookmarkEnd":
 			if c.Name.Local == "bookmarkStart" && strings.HasPrefix(c.attr("name"), "mdnote1_") {
@@ -1007,7 +1023,7 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 
 		return nil
 	}
-	for _, c := range n.Children {
+	for _, c := range children {
 		if err := walk(c, base); err != nil {
 			return nil, err
 		}

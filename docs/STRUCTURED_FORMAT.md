@@ -736,3 +736,13 @@ both standard sizes agree; docx_font_size_precision diagnoses portable appearanc
 Stripping private intent exposes standard half-points. This extends output behavior,
 not the SF schema; no second canonical font-size authority is introduced. See
 DOCX_PRECISION.md for standard/intent bounds and independent checks.
+
+
+Optional attrs.notes[].body_label_content is a nonempty array of ordinary text
+nodes with existing ProseMirror formatting/link/source marks. It owns a literal
+body mark; body_label and body_label_marks must be absent. Empty text runs,
+nontext atoms and blank/multiline joined marks reject. Per-fragment source data is
+allowed, independently of aggregate label_source. This maps to Note.BodyLabelContent
+([]Run), without changing citation/default label or counters. Native/Word use the
+shared rich runs; no duplicate literal body text is stored in Word metadata.
+See RICH_NOTE_LABELS.md for exact range validation, bidi/gutter and reader evidence.

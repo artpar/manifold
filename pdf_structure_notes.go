@@ -258,12 +258,18 @@ func (s *pdfStructureRecovery) recoverNote(n *pdfStructureNode, note *pdfRecover
 						note.definition.BodyLabel = &value
 					}
 					labelBlocks = bs
-					labelRun := s.structureReplacement(bs, label, sourceFromBlocks(bs, kid))
-					note.definition.LabelSource = labelRun.Source
-					labelRun.Text = ""
-					labelRun.Source = nil
-					note.definition.BodyLabelStyle = &labelRun
-					s.warn("pdf_note_label_presentation", "The explicit leading note label becomes the literal semantic mark; body label formatting/navigation is retained separately from its text, with original geometry/font/paint in label_source")
+					if len(bs) > 0 && pdfNoteLabelNeedsRichContent(bs[0].Runs) {
+						note.definition.BodyLabelContent = append([]Run(nil), bs[0].Runs...)
+						note.definition.BodyLabel = nil
+						note.definition.LabelSource = sourceFromBlocks(bs, kid)
+					} else {
+						labelRun := s.structureReplacement(bs, label, sourceFromBlocks(bs, kid))
+						note.definition.LabelSource = labelRun.Source
+						labelRun.Text = ""
+						labelRun.Source = nil
+						note.definition.BodyLabelStyle = &labelRun
+						s.warn("pdf_note_label_presentation", "The explicit leading note label becomes the literal semantic mark; body label formatting/navigation is retained separately from its text, with original geometry/font/paint in label_source")
+					}
 					continue
 				}
 				s.warn("pdf_note_body_label", "A distinct or complex explicit note-body label remains visible in the rich body; it is not discarded as an automatic mark")
@@ -464,4 +470,21 @@ func (s *pdfStructureRecovery) inferLinkedNotes(nodes []*pdfStructureNode, targe
 		s.warn("pdf_note_relationship_inferred", "A logically owned GoTo Link targets one matching Note label region within two physical points; note ownership is inferred, while original annotation/view geometry remains explicit")
 	}
 	return nil
+}
+
+func pdfNoteLabelNeedsRichContent(runs []Run) bool {
+	if len(runs) < 2 {
+		return false
+	}
+	for _, run := range runs {
+		if run.Text == "" {
+			return false
+		}
+	}
+	for _, run := range runs[1:] {
+		if !samePDFStyle(runs[0], run) {
+			return true
+		}
+	}
+	return false
 }

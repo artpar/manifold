@@ -184,6 +184,9 @@ func noteReferenceLabel(c *noteCatalog, ref *NoteReference) string {
 	return c.labels[referenceKey(ref)]
 }
 func noteBodyLabel(c *noteCatalog, key noteKey) string {
+	if content := c.definitions[key].BodyLabelContent; content != nil {
+		return noteLabelContentText(content)
+	}
 	if value := c.definitions[key].BodyLabel; value != nil {
 		return *value
 	}
@@ -192,7 +195,7 @@ func noteBodyLabel(c *noteCatalog, key noteKey) string {
 func variantNoteKeys(d *Document) map[noteKey]bool {
 	keys := map[noteKey]bool{}
 	for _, n := range d.Notes {
-		if n.BodyLabel != nil || n.BodyLabelStyle != nil {
+		if n.BodyLabel != nil || n.BodyLabelStyle != nil || n.BodyLabelContent != nil {
 			keys[noteIdentity(n)] = true
 		}
 	}
@@ -212,4 +215,18 @@ func noteBodyLabelRun(c *noteCatalog, key noteKey) Run {
 	}
 	run.Text = noteBodyLabel(c, key)
 	return run
+}
+
+func noteLabelContentText(runs []Run) string {
+	var text strings.Builder
+	for _, run := range runs {
+		text.WriteString(run.Text)
+	}
+	return text.String()
+}
+func noteBodyLabelRuns(c *noteCatalog, key noteKey) []Run {
+	if content := c.definitions[key].BodyLabelContent; content != nil {
+		return content
+	}
+	return []Run{noteBodyLabelRun(c, key)}
 }

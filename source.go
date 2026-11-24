@@ -412,7 +412,7 @@ func (d *Document) hasPDFSource() bool {
 		return true
 	}
 	for _, n := range d.Notes {
-		if n.Source != nil || n.LabelSource != nil || walk(n.Blocks) {
+		if n.Source != nil || n.LabelSource != nil || walk(n.Blocks) || walk([]Block{{Kind: Paragraph, Runs: n.BodyLabelContent}}) {
 			return true
 		}
 	}

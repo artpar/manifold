@@ -42,6 +42,11 @@ for (const filename of process.argv.slice(2)) {
   verifyTree(input.attrs.footers);
   for (const note of input.attrs.notes || []) {
     verifyTree(note.content);
+    if (note.body_label_content !== undefined) {
+      assert.ok(Array.isArray(note.body_label_content) && note.body_label_content.length);
+      assert.ok(note.body_label_content.every(n => n.type === 'text'));
+      verifyTree(note.body_label_content);
+    }
     if (note.body_label_marks !== undefined) {
       assert.ok(Array.isArray(note.body_label_marks));
       verifyTree([{type: 'text', text: 'label', marks: note.body_label_marks}]);

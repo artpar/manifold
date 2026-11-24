@@ -54,14 +54,8 @@ func (w *docxWriter) writeNoteParts(notes []Note) error {
 			}
 			count++
 			indent := 360
-			if n.BodyLabelStyle != nil {
-				size := n.BodyLabelStyle.FontSize
-				if size == 0 {
-					size = 11
-				}
-				// Word owns glyph layout; budget one em per display column plus
-				// a six-point gap instead of assuming the ordinary 18pt gutter.
-				gutter := docxNoteLabelGutter(noteBodyLabel(w.noteCatalog, noteIdentity(n)), size)
+			if n.BodyLabelStyle != nil || n.BodyLabelContent != nil {
+				gutter := docxNoteContentGutter(noteBodyLabelRuns(w.noteCatalog, noteIdentity(n)))
 				if gutter >= w.contentWidth {
 					return fmt.Errorf("%w: styled note label leaves no DOCX body width", ErrUnsupported)
 				}
@@ -96,6 +90,13 @@ func (w *docxWriter) writeNoteParts(notes []Note) error {
 						return err
 					}
 					marker = `<w:r><w:` + kind + `Ref/></w:r>` + styled
+				}
+				if n.BodyLabelContent != nil {
+					rich, err := w.richNoteBodyMark(n)
+					if err != nil {
+						return err
+					}
+					marker = `<w:r><w:` + kind + `Ref/></w:r>` + rich
 				}
 				w.bookmarks++
 				marker = fmt.Sprintf(`<w:bookmarkStart w:id="%d" w:name="%s"/><w:bookmarkEnd w:id="%d"/>`, w.bookmarks, noteBodyName(noteKey{kind, strconv.Itoa(w.noteIDs[noteIdentity(n)])}), w.bookmarks) + marker
@@ -223,6 +224,10 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 			r.expectedBodyLabel = nil
 			r.bodyLabelSeen = false
 			r.expectedBodyStyle = display != nil && display.Styled
+			r.expectedBodyRich = display != nil && display.Rich
+			r.expectedBodyWire = serialized
+			r.parsedBodyContent = nil
+			r.parsedBodyMarkerless = false
 			r.parsedBodyStyle = nil
 			r.bodySeparatorSeen = false
 			if display != nil && display.Variant {
@@ -238,7 +243,7 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 			r.inNote++
 			bs, err := r.blocks(n, partRels, 0)
 			r.inNote--
-			if display != nil && display.Variant && (!r.bodyLabelSeen || (display.Styled && !r.bodySeparatorSeen)) {
+			if display != nil && display.Variant && (!r.bodyLabelSeen || ((display.Styled || display.Rich) && !r.bodySeparatorSeen)) {
 				return fmt.Errorf("variant note body label missing")
 			}
 			r.expectedBodyLabel = nil
@@ -275,6 +280,10 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 				}
 				label = display.Label
 				bodyLabel = display.BodyLabel
+				if display.Rich && r.parsedBodyMarkerless {
+					empty := ""
+					bodyLabel = &empty
+				}
 			}
 
 			if metadata := n.attributeNS(docxNotesNS, "label"); metadata != "" && metadata != label {
@@ -284,7 +293,7 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 			if inferred != "" && inferred != "1" {
 				return fmt.Errorf("invalid inferred note kind metadata")
 			}
-			r.doc.Notes = append(r.doc.Notes, Note{ID: publicID, Kind: kind, Blocks: bs, Label: label, KindInferred: inferred == "1", BodyLabel: bodyLabel, BodyLabelStyle: r.parsedBodyStyle})
+			r.doc.Notes = append(r.doc.Notes, Note{ID: publicID, Kind: kind, Blocks: bs, Label: label, KindInferred: inferred == "1", BodyLabel: bodyLabel, BodyLabelStyle: r.parsedBodyStyle, BodyLabelContent: r.parsedBodyContent})
 			total++
 		}
 	}

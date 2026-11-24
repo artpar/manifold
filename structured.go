@@ -37,15 +37,16 @@ type StructuredAttributes struct {
 	UnresolvedDestinations []string         `json:"unresolvedDestinations,omitempty"`
 }
 type StructuredNote struct {
-	BodyLabelMarks *[]StructuredMark `json:"body_label_marks,omitempty"`
-	BodyLabel      *string           `json:"body_label,omitempty"`
-	LabelSource    *SourceInfo       `json:"label_source,omitempty"`
-	KindInferred   bool              `json:"kind_inferred,omitempty"`
-	Source         *SourceInfo       `json:"source,omitempty"`
-	Label          string            `json:"label,omitempty"`
-	ID             string            `json:"id"`
-	Kind           string            `json:"kind"`
-	Content        []StructuredNode  `json:"content"`
+	BodyLabelContent []StructuredNode  `json:"body_label_content,omitempty"`
+	BodyLabelMarks   *[]StructuredMark `json:"body_label_marks,omitempty"`
+	BodyLabel        *string           `json:"body_label,omitempty"`
+	LabelSource      *SourceInfo       `json:"label_source,omitempty"`
+	KindInferred     bool              `json:"kind_inferred,omitempty"`
+	Source           *SourceInfo       `json:"source,omitempty"`
+	Label            string            `json:"label,omitempty"`
+	ID               string            `json:"id"`
+	Kind             string            `json:"kind"`
+	Content          []StructuredNode  `json:"content"`
 }
 
 // Attrs contains the attributes defined for this node type, encoded as an object.
@@ -106,7 +107,15 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 			}
 			marks = &value
 		}
-		s.Attrs.Notes = append(s.Attrs.Notes, StructuredNote{BodyLabelMarks: marks, ID: n.ID, Kind: n.Kind, Content: bs, Label: n.Label, Source: n.Source, KindInferred: n.KindInferred, LabelSource: n.LabelSource, BodyLabel: n.BodyLabel})
+		var rich []StructuredNode
+		if n.BodyLabelContent != nil {
+			encoded, err := encodeSFBlocks([]Block{{Kind: Paragraph, Runs: n.BodyLabelContent}})
+			if err != nil {
+				return nil, err
+			}
+			rich = encoded[0].Content
+		}
+		s.Attrs.Notes = append(s.Attrs.Notes, StructuredNote{BodyLabelContent: rich, BodyLabelMarks: marks, ID: n.ID, Kind: n.Kind, Content: bs, Label: n.Label, Source: n.Source, KindInferred: n.KindInferred, LabelSource: n.LabelSource, BodyLabel: n.BodyLabel})
 	}
 	if _, err := FromStructured(s); err != nil {
 		return nil, err
@@ -305,7 +314,23 @@ func FromStructured(s *StructuredDocument) (*Document, error) {
 			run.Text = ""
 			style = &run
 		}
-		d.Notes = append(d.Notes, Note{BodyLabelStyle: style, ID: n.ID, Kind: n.Kind, Blocks: bs, Label: n.Label, Source: n.Source, KindInferred: n.KindInferred, LabelSource: n.LabelSource, BodyLabel: n.BodyLabel})
+		var rich []Run
+		if n.BodyLabelContent != nil {
+			if len(n.BodyLabelContent) == 0 {
+				return nil, fmt.Errorf("empty rich body label")
+			}
+			for _, node := range n.BodyLabelContent {
+				if node.Type != "text" {
+					return nil, fmt.Errorf("rich body labels require text nodes")
+				}
+			}
+			decoded, err := decodeSFBlocks([]StructuredNode{{Type: "paragraph", Content: n.BodyLabelContent}}, 0)
+			if err != nil {
+				return nil, err
+			}
+			rich = decoded[0].Runs
+		}
+		d.Notes = append(d.Notes, Note{BodyLabelContent: rich, BodyLabelStyle: style, ID: n.ID, Kind: n.Kind, Blocks: bs, Label: n.Label, Source: n.Source, KindInferred: n.KindInferred, LabelSource: n.LabelSource, BodyLabel: n.BodyLabel})
 	}
 	for _, diag := range d.Diagnostics {
 		if err := validateString(diag.Code); err != nil {

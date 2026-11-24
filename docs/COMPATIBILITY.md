@@ -953,7 +953,9 @@ DOCX variants use real notes and body-target hyperlinks. Mixed automatic numberi
 requires AllowLossy because portable Word labels are literal; checked metadata
 restores SF automatic intent. Body glyphs/widths are validated. Homogeneous RTL
 citation marks shape correctly; internal mixed-direction atomic marks fail
-explicitly. Rich multi-node labels and nested/non-Ref graph recovery remain open.
+explicitly. Rich/mixed-direction body marks are now qualified in RICH_NOTE_LABELS.md;
+heterogeneous/internal mixed-direction citations and broader nested/untagged graph
+recovery remain open.
 Read PDF_NOTES.md for exact evidence and output/editing limits.
 
 Tagged PDF note relationships can now be inferred from matching immediate
@@ -964,7 +966,8 @@ Explicit links win; empty/different/complex, partial/far/overlapping or conflict
 evidence retains flow/navigation. The published original guide qualifies two real
 nonadjacent cases. Editable common label typography/backlinks now survive through
 BodyLabelStyle/body_label_marks; physical provenance and inferred bindings remain
-separate. Heterogeneous label graphs remain open; acknowledged DOCX size projection is
+separate. Rich body labels now retain their individual styles; heterogeneous citation and
+nested label graphs remain open. Acknowledged DOCX size projection is
 qualified in DOCX_PRECISION.md. See
 PDF_NOTES.md for source, rule bounds and exact independent qualification.
 
@@ -980,3 +983,21 @@ unavailable Go fonts and omits their hyperlinks from its PDF export; no broader
 consumer navigation claim. Fractional source sizes now require AllowLossy for
 checked portable half-point projection; strict output still rejects. See
 DOCX_PRECISION.md and PDF_NOTES.md for remaining work.
+
+
+Rich literal body marks now use BodyLabelContent / body_label_content as the only
+body-text authority. Existing text marks, fonts, links and per-fragment source
+geometry persist. Differently styled PDF leading Lbl content is no longer reduced
+to common typography. Checked Word bookmark ranges preserve visible ordinary runs
+and allow label text edits without hidden duplicate strings. Native markers use
+their own bidi alignment box, including mixed-script body labels. Source operators,
+independent Word/native paint/geometry/assets and actual ProseMirror qualify this
+scope. Internal mixed-direction citation atoms remain an explicit error/current
+required gap. Producer font/hyperlink/endnote-page differences remain documented
+in RICH_NOTE_LABELS.md; no full Word print-equivalence claim is made.
+
+Rich Word body-mark ranges retain final-visible inserted/moved text, exclude and
+diagnose deleted history, and diagnose comment-marker loss. Empty/deleted final
+marks become explicit markerless overrides; empty-span editing styles/navigation
+are normalized with diagnostics. No inherited number is invented. Unsupported
+fields/nontext/hidden content in the checked literal range still reject.

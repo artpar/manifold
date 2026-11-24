@@ -25,7 +25,11 @@ func (r *pdfRenderer) listMarker(b Block, index int, width, size float64) (pdfLi
 		run = *b.pdfListMarkerStyle
 		run.Text = text
 	}
-	lines, err := r.lines([]Run{run}, width, size)
+	runs := []Run{run}
+	if b.pdfListMarkerContent != nil {
+		runs = b.pdfListMarkerContent
+	}
+	lines, err := r.lines(runs, width, size)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -40,6 +44,7 @@ func (r *pdfRenderer) listMarker(b Block, index int, width, size float64) (pdfLi
 	if width <= indent {
 		return nil, 0, fmt.Errorf("%w: list indentation leaves no text width", ErrUnsupported)
 	}
+	placePDFLine(lines[0], markerWidth)
 	return lines[0], indent, nil
 }
 func (r *pdfRenderer) list(b Block, width, x float64) error {
@@ -83,7 +88,7 @@ func (r *pdfRenderer) list(b Block, width, x float64) error {
 		}
 		markerTop, markerPage := r.y, r.pdf.PageNo()
 		markerY := markerTop + pdfLineSize(firstLines[0], size) - size
-		if b.pdfListMarkerStyle != nil {
+		if b.pdfListMarkerStyle != nil || b.pdfListMarkerContent != nil {
 			markerY = markerTop
 		}
 		r.drawLine(marker, markerX, markerY, size)
