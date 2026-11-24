@@ -1637,8 +1637,9 @@ last source order rather than inventing anchors/pages or viewer state. Known
 intent resources pass typed canonical JSON validation before decoding.
 
 Actual pinned save/edit/current-skeleton evidence and strict native/SF tests cover
-root history, source geometry and target edits. Per-block/run/cell/item/note Source
-bindings and remaining appearance/intent/API/browser/final work are unfinished.
+root history, source geometry and target edits. Full per-node Source transport and
+remaining appearance/intent/API/browser/final work are unfinished; paragraph and
+note components are described below.
 
 
 ## Native paragraph origin bindings
@@ -1657,3 +1658,20 @@ historical and unbound states independently of original explicit/inferred recove
 qualifiers. Actual pinned save/edit/skeleton and ProseMirror checks qualify synthetic
 paragraph-source transport. Other per-node source slots and broader native/API/UI/
 acceptance work remain required.
+
+
+## Native note origin bindings
+
+colleaf_note_origins.go stores version1 source facts, kind-inference flags and
+separate source-free SF body/marker fingerprints in document evidence. Hashing
+removes source marks and empty source-only attrs as well as source values, so
+provenance-only changes do not change content identity. Native note
+identity bindings, actual native IDs/kinds and current SF note identities must agree
+before ownership is restored. Composition keeps current bodies/markers authoritative.
+Edited definitions/labels retain historical provenance with diagnostics; absent
+bindings archive sources and diagnose the original inferred placement. This adds
+no alternate body/label cache or current layout authority. Internal subset note
+encoding still rejects unsupported provenance; whole-document composition owns
+its projection and final restoration. Body-mark insertion retains the first sourced
+paragraph's pre-projection fingerprint. Other native source slots and full API/UI/
+corpus/final qualification remain required.

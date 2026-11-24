@@ -1158,8 +1158,8 @@ check full root data/current graph, malformed evidence, isolation and repeated
 stability. The structural-cursor semantic fixed point now retains its diagnostics;
 the clearing workaround is removed. This is document-level history qualification,
 not full imported-PDF body provenance, browser painting or adapter completion.
-Per-block/run/cell/item/note Source mappings, remaining appearance/intent/API/UI
-and final acceptance work remain required.
+Full per-node Source transport, remaining appearance/intent/API/UI and final
+acceptance remain required; paragraph/note components are qualified below.
 
 
 ## Current paragraph origin component
@@ -1181,7 +1181,36 @@ authored emoji/style, two saves/reopens, TextX and reference detachment. Strict 
 round trips. Actual ProseMirror validates70 nodes/marks/attributes, including the
 new root archive and historical flags. Explicit section stories/citation paragraphs,
 clone isolation, malformed records and formatting admission also have regressions.
-These are synthetic paragraph-level sources; run/citation, table/image/container,
-cell/item, note-definition/label and other provenance remain required, as do native
-appearance/API/preset/browser and the broader final audit. No body cache, service,
+These are synthetic paragraph-level sources; note-definition/label sources are
+qualified separately below. Run/citation, table/image/container, cell/item and other
+provenance remain required, as do native appearance/API/preset/browser and the
+broader final audit. No body cache, service,
 CGO dependency, app modification or permission gate is introduced.
+
+
+## Current note origin component
+
+Whole-document evidence.noteOrigins contains version1 native/scoped identities,
+Source/LabelSource, KindInferred and separate source-free SF body/marker hashes.
+Source marks and empty source-only attrs are normalized out of hashes; binding
+changes alone do not edit note semantics. No editable note body, literal label or
+alternate style tree is stored. Restoration
+follows numbering, citation, navigation and paragraph-origin composition. Ownership
+requires both current native identity binding and matching current SF note identity.
+Body edits qualify definition Source as historical; marker edits qualify definition
+and LabelSource. Missing identity bindings archive available sources unbound and
+diagnose original inferred placement without asserting a new note's kind. Native
+mark state remains authoritative: loss of an automatic-label identity hint may
+leave its persisted native literal mark rather than recreate old automatic intent.
+Typed/version/hash-shape/source-page/duplicate checks reject malformed evidence.
+
+The original first paragraph fingerprint is taken before a visible body-mark prefix
+is projected. Removing that prefix at import therefore preserves unchanged source
+binding. scripts/verify_colleaf_note_origins.cjs checks three source/inference records,
+scoped foot/end IDs, no text cache, actual styled glyphs and neutral body marks,
+two saves/reopens, actual TextX body/label edits and identity detachment. Strict Go/
+.vdocs/SF tests check full structures, independent source historical states, archive
+isolation and repeated stability; actual ProseMirror checks61 nodes/marks/attrs.
+Go also checks detached sourced-note archives and malformed records. This synthetic
+headless qualification does not complete run/citation/container/cell/item provenance,
+marker/API/preset/browser or the full imported-PDF/final acceptance audit.

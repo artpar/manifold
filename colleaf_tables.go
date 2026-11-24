@@ -69,9 +69,12 @@ func (w *colleafBodyWriter) paragraph(block Block) error {
 	if err != nil {
 		return err
 	}
-	origin, err := newColleafOrigin(sourceBlock)
-	if err != nil {
-		return err
+	origin := sourceBlock.colleafOrigin
+	if origin == nil {
+		origin, err = newColleafOrigin(sourceBlock)
+		if err != nil {
+			return err
+		}
 	}
 	if origin != nil {
 		for i := range fragment.Paragraphs {

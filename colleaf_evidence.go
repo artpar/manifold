@@ -5,13 +5,14 @@ import "fmt"
 // Original source evidence and diagnostic history are nonvisual intent, not a
 // cached body and not a claim about the native editor's current page geometry.
 type colleafDocumentEvidence struct {
-	Origins        []colleafOrigin `json:"origins,omitempty"`
-	UnboundSources []SourceInfo    `json:"unboundSources,omitempty"`
-	Version        int             `json:"version"`
-	Diagnostics    []Diagnostic    `json:"diagnostics,omitempty"`
-	PageCount      int             `json:"pageCount,omitempty"`
-	Pages          []PDFPage       `json:"pages,omitempty"`
-	PDFNavigation  *PDFNavigation  `json:"pdfNavigation,omitempty"`
+	NoteOrigins    []colleafNoteOrigin `json:"noteOrigins,omitempty"`
+	Origins        []colleafOrigin     `json:"origins,omitempty"`
+	UnboundSources []SourceInfo        `json:"unboundSources,omitempty"`
+	Version        int                 `json:"version"`
+	Diagnostics    []Diagnostic        `json:"diagnostics,omitempty"`
+	PageCount      int                 `json:"pageCount,omitempty"`
+	Pages          []PDFPage           `json:"pages,omitempty"`
+	PDFNavigation  *PDFNavigation      `json:"pdfNavigation,omitempty"`
 }
 
 func colleafEvidence(d *Document) (*colleafDocumentEvidence, error) {
@@ -46,6 +47,16 @@ func (e *colleafDocumentEvidence) validate() error {
 		if err := e.UnboundSources[i].validate(e.Pages); err != nil {
 			return err
 		}
+	}
+	seenNotes := map[string]bool{}
+	for _, o := range e.NoteOrigins {
+		if err := o.validate(e.Pages); err != nil {
+			return err
+		}
+		if seenNotes[o.NativeID] {
+			return fmt.Errorf("duplicate native note source record")
+		}
+		seenNotes[o.NativeID] = true
 	}
 	for _, o := range e.Origins {
 		if err := validateColleafOrigin(o, e.Pages); err != nil {

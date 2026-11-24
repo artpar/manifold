@@ -1067,3 +1067,12 @@ explicit/inferred provenance and physical geometry remain source evidence, not
 current native layout claims. Formatting output requires AllowLossy for this
 provenance. Private native paragraph bindings use these states; other source slots
 and full native/API/UI qualification remain unfinished.
+
+
+Private whole-document native note bindings now retain definition/label provenance
+and kind-inference flags. Current body/marker edits qualify their respective sources
+historical; lost identity bindings archive sources and diagnose old inferred-kind
+history. Actual native body/label/kind state remains authoritative. A body-mark
+prefix alone does not stale original paragraph provenance. Independent synthetic
+save/edit/SF checks cover this component; run/citation/container/cell/item source
+mappings and full native/API/UI/corpus qualification remain unfinished.

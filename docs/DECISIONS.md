@@ -2082,3 +2082,17 @@ Reject malformed/contradictory identities. Qualify actual editor saves/edits,
 independent ProseMirror attributes and exact SF structures. This starts per-node
 provenance; run/container/cell/item/note slots and full source corpus/API/UI/final
 acceptance remain required. No app/backend or permission/quota policy is added.
+
+
+## 2026-11-24 Qualify note provenance independently of editable note bodies
+
+Bind note-definition/label source records through checked native note identities,
+not array positions at import. Keep independent source-free SF body and marker
+fingerprints: body edits stale definition provenance, marker edits stale definition
+and label provenance, and unchanged kind bindings retain KindInferred. Missing or
+changed identity bindings retain sources unbound and record original inferred
+placement in explicit history diagnostics. Do not reinterpret a new native kind
+as the old inferred kind. Native marker/numbering state stays authoritative when
+identity intent disappears. Preserve paragraph source fingerprints before temporary
+body-mark prefix insertion. Qualify actual saves, TextX body/marker edits, identity
+detachment and exact SF, while retaining the larger source/API/UI acceptance queue.

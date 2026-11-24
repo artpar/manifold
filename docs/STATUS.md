@@ -39,7 +39,49 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: paragraph origin bindings and unbound source facts
+## Latest progress: note definition and label source bindings
+
+Whole-document native composition now carries note Source, LabelSource and
+KindInferred in version1 evidence.noteOrigins records, checked against native
+identity bindings and original physical pages. Separate source-free SF body/marker
+fingerprints retain unchanged provenance, mark edited definition/label sources
+historical with diagnostics, and never overwrite current content. Missing or changed
+identity bindings archive available source facts in unboundSources; an explicit
+history diagnostic retains an orphaned inferred-kind fact without asserting the
+current kind. Footnote/endnote identities remain separately scoped.
+
+Visible body-mark projection now fingerprints a sourced first paragraph before
+prefix insertion, so an unchanged body mark does not falsely stale paragraph
+provenance. Actual pinned plugins/validator/skeleton check three note records,
+scoped identities, no body/label cache, styled emoji and rich body marks, two saves/
+reopens, TextX body and marker edits, and detached inference-only identity. Strict
+.vdocs/Go/SF comparisons and repeated round trips pass; ProseMirror checks61 nodes/
+marks/attributes. Go also covers detached sourced-note archives and malformed
+version/hash/page/duplicate records. Source-only mark/attribute removal leaves
+semantic fingerprints unchanged. This is synthetic, headless component evidence,
+not full imported-PDF or browser qualification.
+
+Final checks pass: tests16.865s/CLI0.776s, race172.304s/CLI2.146s, vet/modules,
+CGO-disabled focused tests0.445s, host CLI/--help and Linux amd64/arm64 cross-builds.
+The final note-origin payload fuzz sample passes118517 executions/10.563s; it is
+not exhaustive coverage. Source marks/empty source-only attrs normalize out of
+semantic hashes; source-only differences and visible edits have distinct regression
+checks. verification.json records scopes and limitations. The goal stays
+active/incomplete. Next implement run/citation and table/image/container/cell/item
+source mappings, then remaining marker appearance/nonvisual intent, public native
+API/CLI and full-preset/browser qualification. Nonmain lookup limits, per-page/
+decorated notes and broader PDF/source/resource/final acceptance audits remain.
+No external blocker exists. Production stays pure Go; no app/backend change.
+
+```sh
+MANYDOC_COLLEAF_NOTE_ORIGIN_QA=output/colleaf-qa/note-origins.json GOWORK=off go test -run TestColleafNoteOrigins -count=1 .
+node scripts/verify_colleaf_note_origins.cjs
+MANYDOC_COLLEAF_NOTE_ORIGIN_SAVED=output/colleaf-qa/note-origins-saved.json MANYDOC_COLLEAF_NOTE_ORIGIN_BODY_EDITED=output/colleaf-qa/note-origins-edited.json MANYDOC_COLLEAF_NOTE_ORIGIN_MARK_EDITED=output/colleaf-qa/note-origins-marked.json MANYDOC_COLLEAF_NOTE_ORIGIN_DETACHED=output/colleaf-qa/note-origins-detached.json GOWORK=off go test -run TestColleafNoteOrigins -count=1 .
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/colleaf-qa/note-origins-saved.json.sf output/colleaf-qa/note-origins-edited.json.sf output/colleaf-qa/note-origins-marked.json.sf output/colleaf-qa/note-origins-detached.json.sf
+rg -n 'Source != nil|manydocOrigin' colleaf_styles.go colleaf_tables.go colleaf_lists.go colleaf_images.go
+```
+
+## Earlier progress: paragraph origin bindings and unbound source facts
 
 Private native paragraph/heading output now places a version1 source reference
 in direct paragraph properties. A deterministic deduplicated origin pool in the

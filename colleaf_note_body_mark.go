@@ -60,6 +60,13 @@ func prepareColleafBodyMark(n Note, catalog *noteCatalog) ([]Block, *colleafBody
 	prefix := append([]Run(nil), runs...)
 	prefix = append(prefix, Run{Text: "\t"})
 	if len(blocks) > 0 && (blocks[0].Kind == Paragraph || blocks[0].Kind == Heading) {
+		if blocks[0].Source != nil {
+			origin, err := newColleafOrigin(blocks[0])
+			if err != nil {
+				return nil, nil, 0, err
+			}
+			blocks[0].colleafOrigin = origin
+		}
 		blocks[0].Runs = append(prefix, blocks[0].Runs...)
 	} else {
 		hint.Separate = true

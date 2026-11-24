@@ -177,6 +177,12 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 	}
 	resolved := resolveNumberingDocument(d)
 	plain := *resolved
+	plain.Notes = append([]Note(nil), resolved.Notes...)
+	for i := range plain.Notes {
+		plain.Notes[i].Source = nil
+		plain.Notes[i].LabelSource = nil
+		plain.Notes[i].KindInferred = false
+	}
 	plain.PDFNavigation = nil // preliminary note composition has no physical navigation authority
 	if hasSectionBlocks(d.Blocks) {
 		plain.Blocks = resolved.Blocks[0].Section.Blocks
@@ -214,6 +220,9 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 	}
 	evidence, err := colleafEvidence(d)
 	if err != nil {
+		return out, err
+	}
+	if err = collectColleafNoteOrigins(resolved, &evidence); err != nil {
 		return out, err
 	}
 	intent := colleafDocumentIntent{Evidence: evidence, Unresolved: append([]string(nil), d.UnresolvedDestinations...), Author: d.Metadata.Author, Subject: d.Metadata.Subject, EmptyTitle: d.Metadata.Title == "", Sectioned: hasSectionBlocks(d.Blocks), EmptyStories: map[string]bool{}}
@@ -936,6 +945,9 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 		return nil, err
 	}
 	if err = restoreColleafOrigins(doc, intent.Evidence); err != nil {
+		return nil, err
+	}
+	if err = restoreColleafNoteOrigins(doc, intent.Evidence, opened, identities); err != nil {
 		return nil, err
 	}
 	if err = doc.Validate(); err != nil {

@@ -6602,5 +6602,45 @@
       "node scripts/verify_colleaf_origins.cjs",
       "rg -n 'Source != nil|LabelSource|manydocOrigin' colleaf_styles.go colleaf_notes.go colleaf_tables.go colleaf_lists.go"
     ]
+  },
+  "colleaf_note_origins_2026_11_24": {
+    "scope": "Whole-document private native note-definition/label source and kind-inference bindings, plus sourced-paragraph body-mark projection. Overall goal remains active/incomplete.",
+    "implementation": [
+      "Version1 evidence.noteOrigins records hold native/scoped identities, source facts, kind-inference flags and separate source-free SF body/marker fingerprints; no editable body/label/style cache.",
+      "Restoration follows final numbering/citation/navigation/paragraph composition. Current native identity and SF identity must agree. Body edits qualify definition source historical; marker edits qualify definition and label source. Current content is never restored from evidence.",
+      "Missing/changed identity bindings archive available sources unbound and explicitly diagnose original inferred placement. Native mark state remains authoritative after automatic-label identity intent disappears.",
+      "Original sourced paragraph fingerprint is retained before temporary visible body-mark prefix projection, avoiding false historical qualification for unchanged paragraphs. Typed/version/hash-shape/source-page/duplicate validation rejects malformed evidence. Source marks and empty source-only attrs normalize out of semantic hashes, so source-only changes do not stale note content; a dedicated regression also verifies visible edits change both hashes. Source-free hashing removes source marks and empty source-only attribute containers, so provenance-only edits do not stale note content."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_note_origins.cjs",
+      "script_sha256": "4fd0b7469f3d04a80114c8098aa547eab45c4fdae532c6eb05366b1ebad0e940",
+      "packages": "Previously attributed pinned Univer1.0.4 core/renderer/docs/drawing/docs-drawing/hyperlink plugins, hash-pinned Colleaf validator and prosemirror-model1.25.13; no new package.",
+      "results": [
+        "Three synthetic source/inference records include separately scoped footnote/endnote n identities and an inference-only record; no text/body/label cache. Original physical pages and source facts remain independent of native layout.",
+        "Actual skeleton retains styled emoji and bold13pt rich body mark without ownership decoration. Two actual registered-plugin saves/reopens preserve current streams and original evidence.",
+        "Actual TextX body Q insertion and styled marker alpha-to-beta replacement retain edits; strict .vdocs/Go/SF comparisons verify separate historical source flags and diagnostics. Actual detached inference-only identity retains old placement history without asserting current kind.",
+        "Go tests also verify detached sourced-note archives, source clone isolation, malformed records and stable repeated SF/native round trips. Current native literal mark1 is retained when its automatic-label identity hint disappears.",
+        "Actual ProseMirror checks61 nodes/marks/attributes across saved/body-edited/marker-edited/detached SF. Existing paragraph-origin and body-mark independent probes pass."
+      ],
+      "limits": "Synthetic headless component qualification, not full imported-PDF per-node provenance, actual browser font/paint/caret/scroll/events or full native API fidelity."
+    },
+    "checks": {
+      "tests": "Final all-package tests with all four actual saved/edited/detached note artifacts pass library16.865s/CLI0.776s/internal cached after final source-free fingerprint normalization.",
+      "race": "Final all-package race after source-only fingerprint normalization and regression passes library172.304s/CLI2.146s/internal cached, with all four actual artifacts. Earlier pre-normalization full race172.865s/CLI2.154s also passed.",
+      "vet": "pass",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "Final focused paragraph/note/source-free tests0.445s with actual artifacts, host CLI build/--help and Linux amd64/arm64 cross-builds pass. Cross-builds are not execution evidence.",
+      "fuzz": "Final note-origin typed payload target passes118517 executions/10.563s with2workers; earlier114456/11.465s before normalization also passed. Short safety campaigns, not exhaustive coverage.",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go/std-library production; no dependency/runtime executable/service/CGO/license server/upload, application/backend change or permission/quota gate. Public SF schema and original corpus/oracles unchanged; generated artifacts ignored.",
+    "remaining": "Run/citation/table/image/container/cell/item source mappings; marker appearance and remaining nonvisual intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_NOTE_ORIGIN_QA=output/colleaf-qa/note-origins.json GOWORK=off go test -run TestColleafNoteOrigins -count=1 .",
+      "node scripts/verify_colleaf_note_origins.cjs",
+      "MANYDOC_COLLEAF_NOTE_ORIGIN_SAVED=output/colleaf-qa/note-origins-saved.json MANYDOC_COLLEAF_NOTE_ORIGIN_BODY_EDITED=output/colleaf-qa/note-origins-edited.json MANYDOC_COLLEAF_NOTE_ORIGIN_MARK_EDITED=output/colleaf-qa/note-origins-marked.json MANYDOC_COLLEAF_NOTE_ORIGIN_DETACHED=output/colleaf-qa/note-origins-detached.json GOWORK=off go test -run TestColleafNoteOrigins -count=1 .",
+      "rg -n 'Source != nil|manydocOrigin' colleaf_styles.go colleaf_tables.go colleaf_lists.go colleaf_images.go"
+    ]
   }
 }

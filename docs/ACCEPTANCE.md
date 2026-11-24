@@ -110,3 +110,10 @@ artifact records express Header properties and linked content. Broader note case
 remain required as listed in PDF_NOTES.md. See COLLEAF_FORMAT.md for
 pinned remote schema evidence. The complete goal stays active, with no external
 blocker preventing the next implementation.
+
+
+Native note-definition/label provenance and KindInferred now have synthetic actual
+save/edit/identity-detachment and SF evidence. Paragraph provenance survives body-
+mark prefix projection without false staling. Run/citation/container/cell/item source
+bindings, marker appearance/nonvisual intent, public API/CLI and full native/browser/
+corpus/final audits remain required; this milestone does not complete that queue.
