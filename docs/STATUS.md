@@ -40,7 +40,23 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: parser-stream integrity and member ownership
+## Latest progress: direct encryption dictionaries now decrypt
+
+The four preserved MuPDF RC4/AES failures now pass the unchanged full-SF oracle
+through a pure-Go in-memory trailer adaptation. Original ciphertext/object/file-ID
+identities remain intact; passwords still authenticate through the existing Go
+handler. Rich deterministic R2 and actual MuPDF sources qualify metadata, styles,
+URI, raster bytes, geometry and both reader/owner passwords with denied copy bits.
+Wrong/empty passwords reject atomically. Full tests45.412s, final-production
+race458.796s, focused current race1.936s, vet/module verification and CGO-disabled
+host/Linux builds pass (cross-builds are not execution). Exact scopes are in the
+ledger. PDF_DIRECT_ENCRYPTION.md records default
+Go tests, independent source/asset/visual evidence and retained repair-shaped reader
+discrepancies. Original publication/MQTT SF remains unchanged. The full goal stays
+active/incomplete; this closes the direct Encrypt defect, not all parser allocation
+or rich-document acceptance work. Exact checks/scopes are in verification.json.
+
+## Prior progress: parser-stream integrity and member ownership
 
 Retained xref/object streams now validate original decoded source before page
 access, sharing the existing stage/work bounds. Corrupt checksums and inconsistent
@@ -54,11 +70,11 @@ vet/module verification and CGO-disabled host/Linux cross-builds pass. The first
 timed header-fuzz run reported a deadline failure; the unchanged fixed-count
 100,000-execution campaign passes. Both outcomes remain in the ledger.
 
-This audit also reproduces a separate real compatibility gap: MuPDF encrypted
+That audit also reproduced a separate real compatibility gap: MuPDF encrypted
 exports with direct Encrypt dictionaries fail before this validator because the
 initial parser recognizes only indirect Encrypt. Independent readers decrypt all
-four supplied-password variants. The strict original success oracle remains
-FAILING. Fix that combination next; it is not a completed unsupported exception.
+four supplied-password variants. The original failure is now fixed and its strict full-SF success oracle passes;
+see PDF_DIRECT_ENCRYPTION.md. It was not waived as unsupported.
 The goal remains active/incomplete, with no overall external blocker.
 
 ## Prior progress: bounded image decoding and exact sample precision
@@ -645,20 +661,21 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-The retained parser-stream audit is now qualified in PDF_PARSER_STREAMS.md, with
-its earlier allocation boundary still explicit. Prioritize the newly reproduced
-direct Encrypt/object-stream compatibility failure before returning to the wider
-source/reflow/API/visual acceptance matrix. The exact strict oracle is:
+The direct Encrypt compatibility defect is now fixed and independently qualified
+in PDF_DIRECT_ENCRYPTION.md. Return to the original acceptance matrix. Prioritize
+actual untagged note sources against their original DOCX graphs, preserving
+physical source/asset/relationship oracles and explicit inference uncertainty.
+Initial parser allocations remain a separate concern; no decoder hook was added.
 
 ```sh
-cat docs/PDF_PARSER_STREAMS.md docs/ACCEPTANCE.md
-GOWORK=off MANYDOC_PDF_PARSER_QA=output/pdf-parser-qa go test -run 'TestPDFParser|TestPDFObjectStream' -count=1 .
-output/qa-venv/bin/python scripts/verify_pdf_parser_streams.py output/pdf-parser-qa --generate-encrypted --require-encrypted
-rg -n 'parseTrailer|IndirectRefEntry\("Encrypt"|checkForEncryption' /Users/artpar/go/pkg/mod/github.com/pdfcpu/pdfcpu@v0.11.1/pkg/pdfcpu/read.go
+cat docs/ACCEPTANCE.md docs/PDF_NOTES.md docs/REAL_DOCX_CORPUS.md
+rg -n 'untagged|infer|remaining' pdf_infer.go pdf_structure_notes*.go docs/PDF_NOTES.md
+rg --files output | rg '(footnotes|endnotes).*\.pdf$'
+GOWORK=off go test -run 'TestPDF.*Note|TestGeneratedPDF|TestCLIVDOCSSemantics' -count=1 ./...
 ```
 
 1. Continue the wider source/resource/reflow/native corpus audit, including
-   the remaining initial parser boundary and direct encryption dictionaries. The
+   the remaining initial parser boundary and broader semantic recovery. The
    native repeated-footnote failure is revalidated in COLLEAF_BROWSER.md; retain
    its original oracle and seek new evidence rather than repeating the same check.
    Broaden source/structure and resource audits beyond the newly qualified

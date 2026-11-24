@@ -7919,5 +7919,53 @@
       "output/qa-venv/bin/python scripts/verify_pdf_parser_streams.py output/pdf-parser-qa --generate-encrypted --require-encrypted",
       "GOWORK=off go test ./..."
     ]
+  },
+  "pdf_direct_encryption_dictionaries": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "Before pdfcpu loading, expose direct Encrypt dictionaries through an in-memory incremental trailer/reference. Preserve original object numbers/ciphertext/file IDs and ordinary trailer metadata. Select fresh identity above declared/xref-range/history bounds, avoid shadowing original members, preserve hybrid/incremental sources. Password validation/decryption stays in the existing Go security handler; no app identity/permission/quota gates, services, executables, CGO, dependency changes or application/vendor patches.",
+    "read_view": "Optional pre-header bytes are excluded from the parser view, retaining document-relative offsets; caller input is unmodified. Only the virtual read view receives an appended trailer. There is no public API or persisted source-file mutation. Discovery has64MiB per-tail/256MiB copied-work bounds and leaves unrelated/undiscovered input to existing parser repair behavior. Earlier parser allocations remain outside the retained-stream verifier.",
+    "original_failure": "Exact pre-change62badc0 Git-archive CLI fails all four preserved MuPDF direct-Encrypt/object-stream files with decodeObjectStreamObjects/zlib invalid header; source hashes below unchanged. Current CLI passes unchanged complete control SF, not merely text/status.",
+    "preserved_ciphertext_sha256": {
+      "encrypted-aes128.pdf": "de6f4200642e141bb7038751f9bc56d1074ee9a957561fb481b9697843f3996a",
+      "encrypted-aes256.pdf": "f5948ef742735366132afa5df174ef69eefae42728beb262586a5d8c3a6ea8e7",
+      "encrypted-rc4-128.pdf": "53efa168ec8e13fc82b09425bf89c352cf6b89edb18131c61619c3b43455c65e",
+      "encrypted-rc4-40.pdf": "5fedd8e71299d02ad7334eb06712bdfc8aa5cc7d41a3d5fe019a6328a7a629b2"
+    },
+    "default_go_tests": "Independently authored deterministic standard-security R2 source with ordinary/hybrid and stream xrefs, compressed metadata/dictionaries, regular/bold Courier, URI,2x1 red/green image and denied copy bits. Reader/owner passwords retain complete Document and SF. Empty/wrong passwords yield no partial Document. Original bytes unchanged; adapter idempotence, prefix/inherited/low-Size variants, unrelated-input no-op, cancellation and malformed trailer fields checked.",
+    "independent": {
+      "rich_encrypted_sources": 11,
+      "adapted_base_views": 2,
+      "reader_versions": "pypdf7.1.1,MuPDF/PyMuPDF1.28.2",
+      "positive": "Four actual rich MuPDF saves plus2Go R2 sources and5repair/incremental variants. Original metadata/fonts/URI/image bytes/positions/pages checked. Both-password CLI SF equals complete clear control; both negative passwords preserve an existing destination. Independent adapted-view checks retain encryption dictionary values, file IDs and objects5/6/10 decoded payloads.",
+      "visual": "Clear,Go R2 and MuPDF AES256 complete physical source render pixels match in MuPDF; enlarged regular/bold text and red/green image swatches visually inspected. No new output-layout/general-fidelity claim.",
+      "retained_strict_reader_differences": [
+        "--require-pypdf-prefix: original header-relative pre-header-noise source fails pypdf; MuPDF reads original, pypdf checks canonical view",
+        "--require-mupdf-repairs: original update omits inherited Encrypt/ID; MuPDF fails to decrypt, pypdf reads original and MuPDF checks adapted view. No conformance/universal-repair claim."
+      ]
+    },
+    "original_corpus": {
+      "publication_sf_sha256": "2d630c8ff72ec594b95b67542d66bf2df13886380672f6a213e5713b8095a7b2",
+      "mqtt_sf_sha256": "14742c55e8295feb0058a74cc33afe394f1ac340fa82aa422af3ad325524f526",
+      "assessment": "Complete SF byte-identical to exact62badc0 for both originals. Original publication structure/content/DOCX and9-page PDF reflow verifier passes unchanged."
+    },
+    "checks": {
+      "normal_all": "passed library45.412s/CLIcached; earlier29.313s/CLI0.818s",
+      "race_all": "passed final production library458.796s/CLI2.796s; precedes later test-only exports and malformed-trailer additions, covered by focused race",
+      "focused_race": "passed current1.936s",
+      "cgo_disabled_focus": "passed0.875s",
+      "vet": "passed final",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "builds": "CGO-disabled host and Linux amd64/arm64 cross-builds pass; not Linux execution",
+      "malformed": "Full existing malformed suite plus new trailer metadata/size/ID, unrelated discovery and cancellation checks pass. No exhaustive parser safety claim.",
+      "diff_check": "passed"
+    },
+    "oracle_change": "Retired the old optional known-encrypted-failure bypass: encrypted source success is unconditional whenever present. --require-encrypted remains a compatibility alias. Original source/control SF expectations unchanged; original strict repair-shape reader checks remain executable.",
+    "remaining": "Initial parser allocation boundary and full original source/semantic/untagged-note/reflow/native/API/visual acceptance audit remain open. Native repeated-footnote and other retained prior reader discrepancies are not resolved by this input compatibility fix. No overall blocker or completion waiver.",
+    "next_commands": [
+      "cat docs/ACCEPTANCE.md docs/PDF_NOTES.md docs/REAL_DOCX_CORPUS.md",
+      "rg -n 'untagged|infer|remaining' pdf_infer.go pdf_structure_notes*.go docs/PDF_NOTES.md",
+      "GOWORK=off go test ./..."
+    ]
   }
 }

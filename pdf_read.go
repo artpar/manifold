@@ -34,6 +34,10 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 	if err != nil {
 		return nil, err
 	}
+	b, err = adaptDirectPDFEncryption(ctx, b)
+	if err != nil {
+		return nil, err
+	}
 	conf := &model.Configuration{Reader15: true, ValidationMode: model.ValidationRelaxed, UserPW: opts.Password, OwnerPW: opts.Password, Offline: true}
 	p, err := pdfcpu.ReadWithContext(ctx, bytes.NewReader(b), conf)
 	if err != nil {

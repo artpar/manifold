@@ -2020,3 +2020,17 @@ app permission gate or vendor patch. PDF_PARSER_STREAMS.md records original sour
 independent full-SF/geometry checks, original corpus equality, and the next exact
 compatibility defect: direct Encrypt dictionaries in MuPDF compressed exports.
 Its strict original success oracle remains failing and is next work, not a waiver.
+
+
+## 2026-11-25 Adapt direct encryption dictionaries without replacing source content
+
+A private in-memory incremental trailer gives direct Encrypt dictionaries an
+indirect identity understood by the existing Go security handler. Original objects,
+ciphertext/file IDs and semantic/source/asset graphs persist; prefix noise is
+removed only from the parser view. Inspect Size/xref ranges/previous sections to
+avoid identity collisions. Password checks remain mandatory; valid reader passwords
+work with denied copy bits, without app permission gates. No vendor/application
+patch, API/dependency-version change or runtime executable/service. The original
+four MuPDF failures now pass unconditionally. PDF_DIRECT_ENCRYPTION.md records
+independent rich source/visual/full-SF evidence, exact prior ciphertexts, repair-shape
+reader discrepancies, initial-parser boundary and remaining original-goal work.

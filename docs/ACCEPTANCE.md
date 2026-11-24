@@ -222,7 +222,17 @@ Retained initial-stream integrity/ownership now has exact source and independent
 full-SF/geometry evidence: ten positive sources, nine atomically rejected invalid
 sources and original publication/MQTT equality. Earlier dependency allocations
 remain outside these guards. The audit exposed direct Encrypt dictionaries in
-MuPDF object-stream exports as a concrete next library compatibility defect; all
-four independent-reader password cases succeed while the library strict oracle
-still fails (`--require-encrypted`). PDF_PARSER_STREAMS.md records reproduction and the intended next
-adaptation boundary. No overall blocked state or completion exception follows.
+MuPDF object-stream exports as a concrete library compatibility defect. At that
+milestone the independent-reader password cases succeeded while the library strict
+oracle failed. The following direct-encryption milestone resolves it while keeping
+its original source/full-SF oracle. No overall blocked state or completion exception follows.
+
+
+The direct Encrypt defect identified by the parser audit is now fixed. The same
+four original ciphertexts pass exact full-SF expectations with pure-Go password
+handling. Rich ordinary/hybrid/stream-xref, metadata/font/URI/raster/geometry and
+reader/owner/negative-password cases have independent evidence, including actual
+MuPDF saves. Strict original repair-shape reader differences remain executable.
+See PDF_DIRECT_ENCRYPTION.md and verification.json. Return to the original broader
+source/untagged-note/reflow/native/API/visual acceptance work; this milestone does
+not complete the active goal or remove the initial-parser allocation concern.

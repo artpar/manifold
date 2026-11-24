@@ -69,10 +69,10 @@ protection against all earlier expansion, object allocation or source-file size.
 No upstream/module-cache/vendor patch or executable workaround was adopted.
 This remains an audit/engineering concern, not an overall external blocker.
 
-## Newly reproduced encrypted-export failure: next compatibility fix
+## Historical encrypted-export failure: now fixed
 
-MuPDF exports with object streams and a direct Encrypt dictionary fail in both
-73fb39e and the current reader, before the new validator. RC4-40, RC4-128, AES-128
+MuPDF exports with object streams and a direct Encrypt dictionary failed in
+73fb39e and62badc0, before this validator. RC4-40, RC4-128, AES-128
 and AES-256 sources all decrypt/extract correctly in independent pypdf/MuPDF using
 the supplied reader password. Their original source dictionaries and strict success
 oracle remain in the verifier. They use only owned synthetic fixture content.
@@ -80,19 +80,19 @@ oracle remain in the verifier. They use only owned synthetic fixture content.
 The dependency's `parseTrailer` records Encrypt only via IndirectRefEntry. For
 these direct dictionaries it never initializes encryption and attempts to read
 ciphertext as Flate, yielding `decodeObjectStreamObjects ... zlib: invalid header`.
-The optional strict `--require-encrypted` command currently FAILS on aes128.
-This is a manydoc/dependency compatibility defect, not an independent-reader
-limitation or a completed unsupported-feature exception. Existing encrypted corpus
-checks cover other shapes; they do not establish this missing combination.
+The original strict command now passes all four unchanged sources; the default
+verifier also requires encrypted success. See PDF_DIRECT_ENCRYPTION.md for the fix.
+This was a manydoc/dependency compatibility defect. Existing encrypted corpus
+successes did not establish this previously missing combination.
 
-Next investigate a pure-Go adaptation for direct encryption dictionaries that
+The subsequent pure-Go adaptation handles direct encryption dictionaries and
 preserves original object numbers, ciphertext, file IDs and actual document
-semantics. Do not bypass passwords, introduce performer permission gates, patch
+semantics. The fix does not bypass passwords, introduce performer permission gates, patch
 vendor/application code or substitute decrypted text from an external tool.
 Keep the original strict source/relationship/position oracle during the fix. The
 generator preserves existing encrypted files; exact failing source SHA256 values
-are in verification.json. A successful fix must also retain the complete control
-SF, not merely return a readable string or exit successfully.
+are in verification.json. The fix retains the complete control SF, not merely a readable string or a
+successful exit code.
 
 ## Reproduce and continue
 
@@ -100,7 +100,7 @@ SF, not merely return a readable string or exit successfully.
 GOWORK=off MANYDOC_PDF_PARSER_QA=output/pdf-parser-qa go test -run 'TestPDFParser|TestPDFObjectStream' -count=1 .
 GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
 output/qa-venv/bin/python scripts/verify_pdf_parser_streams.py output/pdf-parser-qa --large --generate-encrypted
-# Current library compatibility failure; strict original success oracle:
+# Original library compatibility failure is fixed; strict success remains required:
 output/qa-venv/bin/python scripts/verify_pdf_parser_streams.py output/pdf-parser-qa --require-encrypted
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFObjectStreamHeader$' -fuzztime=100000x -parallel=2 .
 GOWORK=off go test ./...

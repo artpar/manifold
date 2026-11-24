@@ -1289,8 +1289,18 @@ replacement remains supported. See PDF_PARSER_STREAMS.md for independent source,
 full-SF and atomic-rejection evidence.
 
 The encrypted corpus checks above do not cover every encryption-dictionary shape.
-MuPDF exports with a direct Encrypt dictionary and object streams currently fail
-before this validator for RC4-40/128 and AES-128/256, while independent readers
-successfully decrypt with the supplied password. This is a concrete library
-compatibility defect queued for correction, not an unsupported-feature completion
-exception. PDF_PARSER_STREAMS.md preserves its strict reproduction.
+The direct Encrypt/object-stream combination in MuPDF RC4-40/128 and AES-128/256
+exports previously failed before this validator. It now decrypts with the supplied
+password through the adaptation in PDF_DIRECT_ENCRYPTION.md. The original strict
+reproduction and full-SF oracle remain unchanged.
+
+
+Direct Encrypt dictionaries now work through an in-process trailer adaptation
+while retaining original ciphertext/object/file-ID identities. The previously failing
+MuPDF RC4-40/128 and AES-128/256 sources now pass exact full-SF checks; both reader
+and owner passwords retain metadata, styles, links and image pixels. Wrong/empty
+passwords reject atomically. Header-prefix/inherited-trailer repair variants have
+separately retained reader disagreements. PDF_DIRECT_ENCRYPTION.md records the
+precise contract, independent evidence and initial-parser boundary. This resolves
+the direct-dictionary defect above; it does not establish universal PDF security,
+repair or structured-recovery compatibility.

@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('directory', type=Path)
 parser.add_argument('--binary', type=Path, default=Path('bin/manydoc'))
 parser.add_argument('--generate-encrypted', action='store_true')
-parser.add_argument('--require-encrypted', action='store_true')
+parser.add_argument('--require-encrypted', action='store_true', help='Compatibility alias: encrypted sources are always required when present')
 parser.add_argument('--large', action='store_true')
 args = parser.parse_args()
 root = args.directory
@@ -147,11 +147,6 @@ for path in sorted(root.glob('*.pdf')):
         command[2:2] = ['-password-env', 'MANYDOC_QA_PASSWORD']
     result = subprocess.run(command, capture_output=True, text=True,
                             env=dict(os.environ, MANYDOC_QA_PASSWORD='reader'))
-    if encrypted and result.returncode and not args.require_encrypted:
-        assert '/Encrypt' in reader.trailer and isinstance(reader.trailer.raw_get('/Encrypt'), dict)
-        assert 'decodeObjectStreamObjects' in result.stderr and 'zlib: invalid header' in result.stderr
-        print(name + ': independent decode passes; known pre-validation direct Encrypt incompatibility, strict oracle retained')
-        continue
     assert result.returncode == 0, (name, result.stderr)
     sf = json.loads(destination.read_text())
     assert len(sf['content']) == 1 and sf['content'][0]['type'] == 'paragraph'
