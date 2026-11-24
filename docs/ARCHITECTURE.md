@@ -1876,3 +1876,14 @@ body order. COLLEAF_BROWSER.md and scripts/verify_colleaf_note_order.cjs preserv
 the original first-reference-order oracle and passing no-repeat control. Ordinary
 Go tests do not run this optional native-reader check, which currently FAILS.
 No application/vendor/production change or full browser/fidelity claim is made.
+
+
+## Constant PDF list labels
+
+After canonical counter recovery fails, pdfConstantListNumbering can retain a
+known explicit ordered family with identical displayed labels through the existing
+constant Numbering.Template. It verifies counter independence with two values and
+retains empty labels without paint references. Source evidence distinguishes the
+unobserved hidden start from observed counter parsing; default one is diagnosed.
+This is not a new SF schema, source body cache or proof of original authoring
+restart/template intent. Annotation/nontext guards still preserve literal content.

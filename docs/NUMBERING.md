@@ -141,3 +141,38 @@ output/qa-venv/bin/python scripts/verify_pdf_list_numbering.py
 
 No authoring counter state, automatic legal/ancestor intent or Word-equivalent
 layout is claimed to have been recovered from PDF.
+
+
+## Fixed ordered labels recovered from PDF
+
+An explicit standard ordered family can display a constant template without a
+counter placeholder. If canonical sequence recovery fails, all current labels
+must be identical and the existing renderer must reproduce that exact template
+for two different counter values. The 512-byte template bound and normal
+validation still apply. This includes an empty label; it does not invent painted
+content for an empty Lbl. None/unknown/bullet families and annotated/non-text labels
+retain their previous outcomes, and variable custom-label semantics remain open.
+
+The family/hierarchy is explicit, but constant-template intent is inferred from
+the current display. Hidden start/restart cannot be recovered: use unused start
+one with pdf_list_constant_inferred and start_unobserved evidence, never
+start_from_label. Once imported, SF/DOCX retain this declared normalized state.
+A conflicting nondecimal attribute with displayed 3. can now retain a literal 3.
+template rather than becoming a false decimal counter; its original 3. Body
+physical oracle remains unchanged. Source fixture bytes are unchanged.
+
+TestGeneratedPDFConstantListFourPaths covers section/word/percent/empty constants,
+exact current markers, body styling/URI, source evidence and SF/DOCX round trips.
+Direct DOCX retains the authored unused start 42; only the unobservable PDF state
+receives the diagnosed default one.
+The independent script checks actual L/LI/Lbl, native/Word displayed labels,
+OOXML definitions and the explicit start uncertainty. Four native/Word rendered
+section/empty pages were visually inspected; no universal layout claim follows.
+
+```sh
+MANYDOC_PDF_CONSTANT_LIST_QA=output/pdf-constant-lists GOWORK=off go test -run 'TestPDFConstant|TestGeneratedPDFConstant' -count=1 .
+mkdir -p output/pdf-constant-lists/word
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-constant-list-qa --headless --convert-to pdf --outdir output/pdf-constant-lists/word output/pdf-constant-lists/*.docx
+output/qa-venv/bin/python scripts/verify_pdf_constant_lists.py
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFConstantListNumbering$' -fuzztime=10s -parallel=2 .
+```

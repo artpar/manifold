@@ -1,6 +1,6 @@
 # Current status and recovery
 
-Updated 2026-11-24. Read this first, then AGENTS.md, ARCHITECTURE.md and DECISIONS.md.
+Updated 2026-11-25. Read this first, then AGENTS.md, ARCHITECTURE.md and DECISIONS.md.
 Commit verified milestones with corresponding KT/evidence updates, as requested
 by the user. Generated documents, binaries, source downloads and QA environments
 remain ignored. Git history and verification.json retain the historical milestones;
@@ -40,7 +40,50 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: actual native browser probe exposes note-order failure
+## Latest progress: fixed ordered-list labels retain PDF structure
+
+Tagged ordered lists whose labels are all the same now retain their explicit L/LI
+hierarchy as a constant ListNumbering template when a canonical counter sequence
+cannot be established. This uses the existing SF/model representation, including
+empty templates; there is no new schema or public API. Explicit Decimal/Roman/Alpha
+family attributes remain authoritative. None/absent/unknown/bullet families do not
+acquire invented ordered semantics, and annotated/non-text markers keep their
+literal-content fallback.
+
+The unused hidden counter start/restart is not observable in PDF. Constant
+recovery defaults it to one with pdf_list_constant_inferred and start_unobserved
+source evidence; it never claims start_from_label. Percent placeholders that the
+renderer would interpret are not mistaken for literal text. Variable custom labels
+still require broader representation work; this closes the existing supported
+constant-template PDF round-trip gap without a body cache or vendor patch.
+
+Four two-item cases (section sign, words, literal percent and empty labels) retain
+body bold/italic/URI, original labels and SF/DOCX numbering. Independent pypdf,
+OOXML and actual Word-reader rendering check their displayed labels and structure;
+empty Lbl nodes own no phantom painted MCIDs. Actual ProseMirror validates 32 nodes.
+Native and Word section/empty page PNGs were inspected: labels and bodies are
+legible without clipping or invented markers; indentation/fonts differ as expected
+for independent reflow. This is targeted visual evidence, not Word equivalence.
+
+```sh
+MANYDOC_PDF_CONSTANT_LIST_QA=output/pdf-constant-lists GOWORK=off go test -run 'TestPDFConstant|TestGeneratedPDFConstant' -count=1 .
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-constant-list-qa --headless --convert-to pdf --outdir output/pdf-constant-lists/word output/pdf-constant-lists/*.docx
+output/qa-venv/bin/python scripts/verify_pdf_constant_lists.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/pdf-constant-lists/*.sf
+```
+
+Full tests pass (final library 25.701s/CLI cached; preceding CLI 0.826s),
+full race passes (318.104s/2.787s),
+vet/modules, CGO-disabled focused tests (0.402s), host CLI build/help/extraction and
+Linux amd64/arm64 cross-builds pass. Empty-template CLI SF is byte-identical to API
+output. Constant-pattern fuzz passes 13,155 executions/11.457s/two workers (short
+safety sample). Final focused checks also verify direct DOCX retains authored hidden
+start 42; only PDF's unobservable state defaults to one. verification.json records
+scope and the final focused results. Goal active/incomplete: native repeated-note
+placement below remains unresolved, along with wider source/resource/untagged,
+variable/rich custom labels, native settings/browser and final acceptance audits.
+
+## Open native browser failure: repeated-note body order
 
 The full pinned Colleaf/Univer desktop mount now builds in an isolated optional
 QA harness. The unmodified actual mount/validator are hash-checked and all vendor
@@ -88,7 +131,7 @@ GOWORK=off go test -run 'TestPDFAttribute|TestPDFPublished' -count=1 .
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFAttributeGraph$' -fuzztime=10s -parallel=2 .
 ```
 
-Final evidence is being recorded. The goal remains active/incomplete; this closes
+Evidence is recorded below and in verification.json. The goal remains active/incomplete; this closes
 the concrete unbounded attribute-walk gap, not general PDF resource safety or the
 remaining native/semantic/reflow/API/visual acceptance audits.
 

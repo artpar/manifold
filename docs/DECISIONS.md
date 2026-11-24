@@ -2308,3 +2308,16 @@ reverses repeated footnotes. Separate the no-repeat control from the acceptance
 input and do not patch applications or substitute static cached bodies. Preserve
 the failing native checker and exact source/package pins until a real solution
 is qualified. This does not turn the overall goal into a blocked state.
+
+
+## 2026-11-25 Preserve supported constant list templates on PDF import
+
+Use the existing ordered-list constant template for identical labels under an
+explicit ordered family, after ordinary counter recovery fails. Require exact
+regeneration with two different values, preserve structure/source/body formatting
+and diagnose the unused start-one default because hidden counters are unobservable.
+Keep original physical literal oracles unchanged and strengthen logical tests to
+require the retained list/template, not a false decimal counter. Do not infer
+ordered semantics from absent attributes or discard annotated/nontext markers.
+Independent Word rendering confirms multi-character/percent/empty constant labels.
+An exploratory bullet-only encoding truncated marker text, so it was not adopted.

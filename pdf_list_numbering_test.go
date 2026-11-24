@@ -71,13 +71,19 @@ func TestPDFListNumberingCanonicalPatterns(t *testing.T) {
 func TestPDFListNumberingConflictingFamilyStaysLiteral(t *testing.T) {
 	for _, family := range []string{"LowerRoman", "UpperRoman", "LowerAlpha", "UpperAlpha"} {
 		t.Run(family, func(t *testing.T) {
-			d := readRecovery(t, taggedTestPDF(markedText(0, 20, 300, "3.")+markedText(1, 40, 300, "Body"), "<< /Type /StructTreeRoot /K 8 0 R >>",
+			raw := taggedTestPDF(markedText(0, 20, 300, "3.")+markedText(1, 40, 300, "Body"), "<< /Type /StructTreeRoot /K 8 0 R >>",
 				"<< /Type /StructElem /S /L /P 7 0 R /Pg 3 0 R /A << /O /List /ListNumbering /"+family+" >> /K 9 0 R >>",
 				"<< /Type /StructElem /S /LI /P 8 0 R /K [10 0 R 11 0 R] >>",
 				"<< /Type /StructElem /S /Lbl /P 9 0 R /K 0 >>",
-				"<< /Type /StructElem /S /LBody /P 9 0 R /K 1 >>"))
-			if len(d.Blocks) != 1 || d.Blocks[0].Kind != Paragraph || d.Text() != "3. Body" || !hasDiagnostic(d, "pdf_structure_list_labels") {
-				t.Fatalf("conflicting explicit family assigned false counters: %+v", d.Blocks)
+				"<< /Type /StructElem /S /LBody /P 9 0 R /K 1 >>")
+			d := readRecovery(t, raw)
+			assertPDFNumberedLabels(t, d, 1, []string{"3."})
+			if d.Blocks[0].Numbering == nil || d.Blocks[0].Numbering.Template != "3." || d.Blocks[0].Items[0].Source.Label != "3." || !hasDiagnostic(d, "pdf_list_constant_inferred") || strings.Contains(d.Blocks[0].Source.Evidence, "start_from_label") {
+				t.Fatal("conflicting family became a false dynamic counter")
+			}
+			physical, err := ReadPDF(context.Background(), bytes.NewReader(raw), ReadOptions{PDFSkipStructure: true, PDFSkipInference: true})
+			if err != nil || physical.Text() != "3. Body" {
+				t.Fatal("original literal paint oracle changed", err)
 			}
 			assertRecoverySF(t, d)
 		})

@@ -16,6 +16,38 @@ type pdfListPattern struct {
 	numbering *ListNumbering
 }
 
+// A declared ordered family can also display a fixed template with no counter.
+// PDF does not reveal its hidden start. Keep the current literal labels and
+// hierarchy, using an explicitly diagnosed editorial default of one.
+func pdfConstantListNumbering(attribute string, labels []string) (*pdfListPattern, bool) {
+	if len(labels) == 0 || len(labels[0]) > 512 {
+		return nil, false
+	}
+	format := map[string]string{"Decimal": "decimal", "UpperRoman": "upperRoman", "LowerRoman": "lowerRoman", "UpperAlpha": "upperLetter", "LowerAlpha": "lowerLetter"}[attribute]
+	if format == "" {
+		return nil, false
+	}
+	for _, label := range labels {
+		if label != labels[0] {
+			return nil, false
+		}
+	}
+	n := &ListNumbering{Template: labels[0], Formats: []string{format}}
+	if validateNumbering(n) != nil {
+		return nil, false
+	}
+	list := Block{Kind: ListBlock, List: "number", Numbering: n}
+	// Check two distinct values even for one item: a literal %1..%9 token
+	// cannot be treated as a fixed template if rendering would interpret it.
+	for i := 0; i < 2; i++ {
+		actual, err := numberedLabel(list, i)
+		if err != nil || actual != labels[0] {
+			return nil, false
+		}
+	}
+	return &pdfListPattern{start: 1, numbering: n}, true
+}
+
 func pdfCounterValue(format, text string) (int, bool) {
 	if len(text) == 0 || len(text) > 4096 {
 		return 0, false

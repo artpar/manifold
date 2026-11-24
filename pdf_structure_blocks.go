@@ -528,6 +528,11 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 		}
 	}
 	pattern, recoveredPattern := pdfListNumberingPattern(numbering, texts)
+	constantPattern := false
+	if !recoveredPattern {
+		pattern, constantPattern = pdfConstantListNumbering(numbering, texts)
+		recoveredPattern = constantPattern
+	}
 	// Decimal fallback only applies to its declared family or absent attributes.
 	// Conflicting explicit Roman/Alpha evidence must not become decimal counters.
 	if numbering != "Decimal" && numbering != "None" {
@@ -600,10 +605,17 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 		s.warn("pdf_list_kind_inferred", "List kind is inferred from explicit Lbl text because ListNumbering is None/absent")
 	}
 	if kind == "number" {
-		list.Source.Evidence += ";start_from_label"
+		if constantPattern {
+			list.Source.Evidence += ";constant_label_from_display;start_unobserved"
+			s.warn("pdf_list_constant_inferred", "Fixed list labels are retained as a constant template; hidden counter/restart intent is unobservable, so the unused start defaults to one")
+		} else {
+			list.Source.Evidence += ";start_from_label"
+		}
 		if list.Numbering != nil {
 			list.Source.Evidence += ";numbering_from_labels"
-			s.warn("pdf_list_numbering_inferred", "Ordered list start and literal pattern are inferred from displayed labels; explicit format attributes select the family when present, and original labels are retained")
+			if !constantPattern {
+				s.warn("pdf_list_numbering_inferred", "Ordered list start and literal pattern are inferred from displayed labels; explicit format attributes select the family when present, and original labels are retained")
+			}
 		}
 	}
 	return []Block{list}, nil

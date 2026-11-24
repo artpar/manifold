@@ -7405,5 +7405,46 @@
       "node scripts/verify_colleaf_note_order.cjs",
       "cat docs/COLLEAF_BROWSER.md docs/STATUS.md"
     ]
+  },
+  "pdf_constant_list_recovery_milestone": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "Known explicit ordered families with identical displayed labels retain L/LI hierarchy via existing constant ListNumbering.Template after canonical sequence recovery fails. No new public model/SF schema/dependency. None/unknown/bullet families, variable labels and annotations/nontext guards keep existing explicit outcomes.",
+    "uncertainty": "Hidden counter start/restart is unobservable: unused start defaults to1 with pdf_list_constant_inferred and start_unobserved evidence; never start_from_label. Constant candidates must reproduce exactly with two different counter values and satisfy512-byte template bound; interpreted percent placeholders reject.",
+    "oracles": "Original conflicting-family3./Body source bytes and physical3. Body text oracle unchanged. Logical expectation strengthened to a typed list with literal3. template, original source label and diagnosed unobserved start, rather than false decimal counters. No source/golden changed merely to pass.",
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_pdf_constant_lists.py",
+      "verifier_sha256": "0dcd61c85493502bb3e751e1a7b26109d829563e07b704ff29e2e25e0b726d2e",
+      "cases": 4,
+      "items": 8,
+      "labels": [
+        "§ fixed",
+        "Case A",
+        "100% done",
+        ""
+      ],
+      "checks": "pypdf actual L/LI/Lbl/LBody, declared LowerRoman family, empty labels without phantom MCIDs; SF constant template/editorial start/source uncertainty/body strong/em/URI; standard OOXML format/template/start/numbered paragraphs; exact displayed labels in native PDF and LibreOffice-rendered DOCX PDF all pass.",
+      "ProseMirror": "32 actual nodes/marks/attributes across four SFs pass",
+      "visual": "Poppler scale-to1000 native/Word section-sign and empty-label pages inspected: legible labels/body styling, no clipping/invented markers; Word indentation/fonts differ. Four targeted page inspections, not universal Word fidelity.",
+      "Word_research": "An independent bullet-only prototype truncated multi-character/percent labels, so that encoding was not adopted. Existing ordered constant templates pass actual Word rendering."
+    },
+    "checks": {
+      "go_test_all": "passed final library25.701s/CLI cached; preceding library27.164s/CLI0.826s",
+      "race": "passed library318.104s/CLI2.787s; final direct-DOCX test addition checked with focused race",
+      "focused_race": "passed final direct-DOCX/constant-list/fuzz-seed subset; preceding focus1.815s",
+      "CGO_disabled_focused": "passed0.402s",
+      "vet": "passed",
+      "modules": "all modules verified",
+      "builds": "CGO-disabled host CLI build/help and empty-template extraction execute; extracted SF byte-identical to API output. Linux amd64/arm64 cross-builds pass, not execution.",
+      "fuzz": "FuzzPDFConstantListNumbering passed13155 executions/11.457s/two workers/four seeds; short safety sample",
+      "diff_check": "passed"
+    },
+    "remaining": "Native repeated-note placement remains unresolved; raw reordering demonstrably regresses after TextX edit. Variable/rich custom label representation, wider source/resource/untagged/native settings/browser and final semantic/API/visual acceptance remain open.",
+    "next_commands": [
+      "node scripts/verify_colleaf_note_order.cjs",
+      "MANYDOC_PDF_CONSTANT_LIST_QA=output/pdf-constant-lists GOWORK=off go test -run 'TestPDFConstant|TestGeneratedPDFConstant' -count=1 .",
+      "output/qa-venv/bin/python scripts/verify_pdf_constant_lists.py",
+      "cat docs/STATUS.md docs/ACCEPTANCE.md"
+    ]
   }
 }

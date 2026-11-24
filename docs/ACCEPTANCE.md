@@ -144,3 +144,12 @@ body order. COLLEAF_BROWSER.md and scripts/verify_colleaf_note_order.cjs preserv
 the original first-reference-order oracle and passing no-repeat control. Ordinary
 Go tests do not run this optional native-reader check, which currently FAILS.
 No application/vendor/production change or full browser/fidelity claim is made.
+
+
+Fixed labels under explicit ordered PDF families now retain L/LI hierarchy as
+constant templates when canonical counter parsing fails. Hidden start/restart
+intent remains unobserved, with a diagnosed unused start-one default and separate
+source evidence. Four cases/eight items have actual PDF/SF/OOXML/Word display and
+body-style/link checks, including empty markers without phantom painted content.
+NUMBERING.md records commands, source/physical-oracle policy and remaining variable/
+rich-label limitations. Native repeated-note browser placement remains unresolved.
