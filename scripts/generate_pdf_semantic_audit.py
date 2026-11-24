@@ -54,3 +54,17 @@ objects += [stream(content), '<< /Type /StructTreeRoot /K [7 0 R 9 0 R] >>',
  '<< /Type /StructElem /S /Figure /P 9 0 R /Alt (RED BLUE) /K 10 >>']
 (out/'rich-explicit-note.pdf').write_bytes(pdf(objects))
 print('Wrote rich explicit Footnote/custom marks/reverse Ref/list/table/raster/navigation probe')
+
+# Distinct citation/body marks use the same explicit graph, with new paint facts.
+variant=objects.copy()
+variant[4]=stream(content.replace('125 300 Td (*1)','125 300 Td (OTHER)').replace('20 80 Td (*1)','20 80 Td (N-1)'))
+(out/'variant-explicit-note.pdf').write_bytes(pdf(variant))
+markerless=objects.copy()
+empty=content
+for value in (text(1,60,300,'*1'),text(7,125,300,'*1'),text(2,20,80,'*1')):empty=empty.replace(value,'')
+markerless[4]=stream(empty)
+markerless[7]=markerless[7].replace('/K 1 >>','/K [] >>')
+markerless[17]=markerless[17].replace('/K 7 >>','/K [] >>')
+markerless[9]=markerless[9].replace('/K 2 >>','/K [] >>')
+(out/'markerless-explicit-note.pdf').write_bytes(pdf(markerless))
+print('Wrote differing-mark and markerless explicit relationship probes')

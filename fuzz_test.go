@@ -39,6 +39,11 @@ func TestMalformedInputsNeverPanic(t *testing.T) {
 	}
 }
 func FuzzReadDOCX(f *testing.F) {
+	var variant bytes.Buffer
+	if err := Write(context.Background(), &variant, variantNoteDocument(), DOCX, WriteOptions{AllowLossy: true}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(variant.Bytes())
 	var destinations bytes.Buffer
 	if err := Write(context.Background(), &destinations, destinationDocument(), DOCX, WriteOptions{}); err != nil {
 		f.Fatal(err)

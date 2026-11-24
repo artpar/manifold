@@ -1020,3 +1020,17 @@ edges, including unresolved relationships and contributing aggregate bounds.
 Explicit FENote NoteType is separate from KindInferred editorial reflow defaults.
 Navigation candidate traversal includes relocated note bodies. Read PDF_NOTES.md
 for current evidence, precise fallbacks and remaining required note work.
+
+
+## Citation and body label variants
+
+NoteReference.Label and Note.BodyLabel are optional literal display overrides;
+nil inherits and empty means markerless. Catalog identity/counters remain separate.
+PDF recovery joins all explicit sites even with distinct marks, retaining the body
+label/source independently. Unknown paint is not evidence of an empty mark.
+Native body labels use normal font/glyph/shaping/width checks. docx_note_variants.go
+writes standard note anchors/body bookmarks/literal hyperlinks with checked roles
+and style/namespace/content validation. DOCX mixed automatic/variant export requires
+AllowLossy for literal portable numbering, while checked metadata retains automatic
+SF intent. Ordinary note representation stays unchanged. PDF_NOTES.md is the full
+current behavior/qualification contract.

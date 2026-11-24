@@ -9,10 +9,11 @@ PDF_NOTES.md qualifies forward/reverse/repeated typed references, rich definitio
 and kind uncertainty.
 Artifact properties/membership remain qualified in PDF_ARTIFACTS.md.
 
-1. Complete differing citation/body marks, complex/markerless references, nested/
+1. Complete rich multi-node/internal mixed-direction labels and nested/
    enclosing-ActualText graphs and identified adjacency/geometric note inference.
    Preserve explicit edges/content; do not claim the complete note contract from
-   the newly passing unambiguous Ref probes alone.
+   the passing explicit Ref/different/empty mark probes alone.
+   Differing citation/body labels and proven markerless references are implemented.
 2. Implement/qualify a standalone Colleaf native Univer 1.0.4 snapshot adapter
    through SF. Read COLLEAF_FORMAT.md first: actual .vdocs data is an indexed
    IDocumentData snapshot with rich source maps and a versioned app envelope.

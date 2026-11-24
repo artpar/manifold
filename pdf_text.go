@@ -172,11 +172,11 @@ func (r *pdfRenderer) textAtomsDirection(runs []Run, size float64, direction str
 			if r.notes == nil {
 				return nil, fmt.Errorf("missing note catalog")
 			}
-			label, ok := r.notes.labels[referenceKey(run.Note)]
+			_, ok := r.notes.labels[referenceKey(run.Note)]
 			if !ok {
 				return nil, fmt.Errorf("missing note reference label")
 			}
-			cluster = label
+			cluster = noteReferenceLabel(r.notes, run.Note)
 			drawSize = math.Round(drawSize*.7*100) / 100
 		}
 		checked := run
@@ -194,7 +194,10 @@ func (r *pdfRenderer) textAtomsDirection(runs []Run, size float64, direction str
 			// Generated decimal note labels are an LTR inline object even in
 			// an RTL source context. Placement still follows the anchor level.
 			if run.Note != nil {
-				glyphLevel = 0
+				glyphLevel, err = r.noteMarkLevel(cluster, run.Direction)
+				if err != nil {
+					return nil, err
+				}
 			}
 			glyphs, err = r.shapeGlyphTextLevel(face, cluster, run, 1024, 0, glyphLevel)
 			if err != nil {
@@ -551,7 +554,7 @@ func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 		red, green, blue := textRGB(span.run.Color)
 		r.pdf.SetTextColor(red, green, blue)
 		r.paintSpan(span, x, y+baseline-rise, drawSize)
-		if span.run.Note != nil {
+		if span.run.Note != nil && span.width > 0 {
 			r.pdf.Link(x, y+baseline-span.ascent, span.width, math.Max(textSize(span.run, size), span.ascent+span.descent), r.noteLinks[referenceKey(span.run.Note)])
 		}
 		if span.run.Destination != "" && span.width > 0 {
@@ -638,4 +641,30 @@ func pdfLineHeight(line pdfLine, fallback, factor float64) float64 {
 		below = fallback * (factor - 1)
 	}
 	return pdfLineSize(line, fallback) + below
+}
+
+// An atomic mark has its own directional content. Decimal marks remain LTR
+// inside RTL prose; homogeneous RTL marks must be shaped RTL, not reversed LTR.
+func (r *pdfRenderer) noteMarkLevel(text, direction string) (uint8, error) {
+	paragraphs, err := pdfBidiParagraphs(r.ctx, text, direction)
+	if err != nil {
+		return 0, err
+	}
+	if len(paragraphs) == 0 {
+		return 0, nil
+	}
+	if len(paragraphs) != 1 {
+		return 0, fmt.Errorf("%w: multiline note mark", ErrUnsupported)
+	}
+	levels := paragraphs[0].levels
+	if len(levels) == 0 {
+		return 0, nil
+	}
+	level := levels[0]
+	for _, other := range levels {
+		if other%2 != level%2 {
+			return 0, fmt.Errorf("%w: mixed-direction atomic note mark requires independent internal layout", ErrUnsupported)
+		}
+	}
+	return level, nil
 }

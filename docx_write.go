@@ -37,6 +37,8 @@ type docxWriter struct {
 	bookmarks          int
 	noteIDs            map[noteKey]int
 	noteLabels         map[noteKey]string
+	noteVariants       map[noteKey]bool
+	noteCatalog        *noteCatalog
 	noteCustomLabels   map[noteKey]string
 	seenNoteRefs       map[noteKey]bool
 }
@@ -71,9 +73,14 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 	w := &docxWriter{ctx: ctx, parts: map[string][]byte{}, next: 1, contentWidth: g.contentWidth(), contentHeight: g.contentHeight(), validatedImages: make(outputImageCache)}
 	w.noteIDs = map[noteKey]int{}
 	w.noteLabels = notes.labels
+	w.noteCatalog = notes
+	w.noteVariants = variantNoteKeys(d)
 	w.noteCustomLabels = map[noteKey]string{}
 	for key, note := range notes.definitions {
 		w.noteCustomLabels[key] = note.Label
+		if len(w.noteVariants) > 0 {
+			w.noteCustomLabels[key] = notes.labels[key]
+		}
 	}
 	w.seenNoteRefs = map[noteKey]bool{}
 	noteCounts := map[string]int{}
@@ -290,6 +297,14 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 						return "", err
 					}
 					out.WriteString(v)
+					continue
+				}
+				if r.Note != nil && w.noteVariants[referenceKey(r.Note)] {
+					value, err := w.variantNoteReference(r, b)
+					if err != nil {
+						return "", err
+					}
+					out.WriteString(value)
 					continue
 				}
 				repeated := false

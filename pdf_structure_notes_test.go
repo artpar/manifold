@@ -117,8 +117,8 @@ func TestPDFNoteAmbiguityAndMalformedRelationships(t *testing.T) {
 	content := strings.SplitN(strings.SplitN(objects[4], "stream\n", 2)[1], "\nendstream", 2)[0]
 	objects[4] = recoveryStream("", strings.Replace(content, "125 300 Tm (*1)", "125 300 Tm (DIFFERENT)", 1))
 	d := readRecovery(t, recoveryPDF(objects...))
-	if len(d.Notes) != 0 || !hasDiagnostic(d, "pdf_note_label") || !strings.Contains(d.Text(), "DIFFERENT") || strings.Count(d.Text(), "NOTE BODY") != 1 {
-		t.Fatal("ambiguous label content lost or silently normalized", d.Text(), d.Diagnostics)
+	if len(d.Notes) != 1 || hasDiagnostic(d, "pdf_note_label") || strings.Count(d.Text(), "NOTE BODY") != 1 {
+		t.Fatal("explicit differing labels did not recover", d.Text(), d.Diagnostics)
 	}
 	found := false
 	for _, b := range d.Blocks {

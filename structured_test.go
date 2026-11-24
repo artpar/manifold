@@ -241,6 +241,11 @@ func TestStructuredListBoundaryRoundTrip(t *testing.T) {
 }
 
 func FuzzReadStructured(f *testing.F) {
+	var variant bytes.Buffer
+	if err := Write(context.Background(), &variant, variantNoteDocument(), SF, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(variant.Bytes())
 	note, err := ReadPDF(context.Background(), bytes.NewReader(recoveryPDF(explicitNoteObjects("Note")...)), ReadOptions{})
 	if err != nil {
 		f.Fatal(err)

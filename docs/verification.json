@@ -5233,5 +5233,36 @@
     "production_dependencies": "unchanged; pure Go, no services/executables/CGO/uploads or app/backend changes",
     "remaining_required": "differing citation/body marks, differently labelled/complex/markerless references, nested/enclosing ActualText editable graphs and identified non-Ref adjacency/geometric inference; native Colleaf snapshot adapter, broader original DOCX corpus/visual evidence and final acceptance",
     "goal": "active/incomplete; unambiguous explicit recovery milestone only"
+  },
+  "independent_note_display": {
+    "date": "2026-11-24",
+    "model": "NoteReference.Label and Note.BodyLabel optional strings: nil inherited, literal overrides including explicit empty; identity and counter order unchanged",
+    "recovery": "different literal citation/body marks and proven empty reference containers retain typed forward/reverse sites and rich definitions; missing MCR/paint does not prove an empty marker; LabelSource retains independent body label geometry/font/paint",
+    "docx": "standard real-note zero-width custom anchors, body bookmarks, styled literal citation hyperlinks and checked body marks; target/content/style/namespace metadata validated; automatic intent restores from metadata",
+    "docx_editing_loss": "mixed automatic/variant Word export requires AllowLossy because portable labels are literal; ordinary nonvariant notes retain prior representation",
+    "native": "body labels use normal font/glyph/shaping/measured-width checks; missing body glyphs error before output; empty marks retain admission without zero-width link rectangles; homogeneous RTL citation shaping and existing LTR-decimal-in-RTL semantics pass; internal mixed-direction atomic marks explicitly error",
+    "independent": {
+      "source": "pypdf original paint, ID/Ref owners/targets and explicitly empty K containers; two typed sites per note; different versus inherited versus empty values checked",
+      "roundtrip": "all editable source body/reference fields, rich hierarchy, styles, body anchors and exact raster bytes match PDF→SF→DOCX→SF; JSON/SF/gzip Go round trips pass",
+      "readers": "python-docx/lxml standard anchor/body bookmark/hyperlink/style/label markup; pypdf/PyMuPDF native and LibreOffice outputs exact label/body counts, no visible anchor glyphs, visible first/repeated citations link to actual body coordinates",
+      "pixels": "source two-pixel red/blue asset and alternative text preserved",
+      "visual": "all four native/LibreOffice two-page variant example pages inspected; body labels separated and citations superscript; no duplicated mark; normal nonvariant custom-label example also independently passes",
+      "prosemirror": "110 nodes/marks/attributes across variant example, different/markerless PDF imports and their DOCX round trips"
+    },
+    "checks": {
+      "final_full_tests": "15.737s library;0.363s CLI; all packages pass",
+      "full_race_final_production": "181.448s library;2.114s CLI; all packages pass",
+      "focused_final_race_new_tests_and_fuzz_seeds": "2.727s pass",
+      "vet": "pass",
+      "modules": "all modules verified",
+      "cgo_disabled": "host build/execution 0.408s pass; Linux amd64/arm64 cross-built only",
+      "fuzz": "ten seconds each/two workers: DOCX331, SF57871 executions including seed coverage; pass",
+      "diff_check": "pass"
+    },
+    "evidence": "docs/PDF_NOTES.md; examples/notes -variant-labels; scripts/verify_note_variants.py; ignored output/note-variants",
+    "production_dependencies": "unchanged, pure Go; no services/uploads/executables/CGO or Daptin/Colleaf edits",
+    "oracles": "original publisher fixture/oracle bytes intact; prior differing-label conservative fallback expectation now requires the newly supported explicit per-site typed behavior using the same source paint; malformed/uncertainty expectations retained",
+    "remaining": "rich multi-node/internal mixed-direction labels, nested/enclosing-ActualText graphs and identified non-Ref adjacency/geometric inference; native Colleaf snapshot adapter; broader original DOCX producer/corpus/visual qualification; final full-goal audit",
+    "goal": "active/incomplete"
   }
 }

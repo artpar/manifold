@@ -68,6 +68,16 @@ func (w *docxWriter) writeNoteParts(notes []Note) error {
 				return err
 			}
 			marker := `<w:r><w:rPr><w:rStyle w:val="` + strings.Title(kind) + `Reference"/></w:rPr><w:` + kind + `Ref/><w:tab/></w:r>`
+
+			if w.noteVariants[noteIdentity(n)] {
+				label := noteBodyLabel(w.noteCatalog, noteIdentity(n))
+				if label != "" {
+					label += " "
+				}
+				marker = `<w:r><w:` + kind + `Ref/></w:r><w:r md:noteBodyLabel="1"><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr><w:t xml:space="preserve">` + escape(label) + `</w:t><w:tab/></w:r>`
+				w.bookmarks++
+				marker = fmt.Sprintf(`<w:bookmarkStart w:id="%d" w:name="%s"/><w:bookmarkEnd w:id="%d"/>`, w.bookmarks, noteBodyName(noteKey{kind, strconv.Itoa(w.noteIDs[noteIdentity(n)])}), w.bookmarks) + marker
+			}
 			leading := ""
 			if len(n.Blocks) > 0 && (n.Blocks[0].Kind == Paragraph || n.Blocks[0].Kind == Heading) {
 				at := strings.Index(body, `</w:pPr>`)
@@ -84,6 +94,7 @@ func (w *docxWriter) writeNoteParts(notes []Note) error {
 				body = `<w:p><w:pPr><w:tabs><w:tab w:val="left" w:pos="360"/></w:tabs><w:ind w:left="360" w:hanging="360"/></w:pPr>` + marker + `</w:p>` + body
 				leading = ` md:leadingMarker="1"`
 			}
+			leading += w.noteDisplayMetadata(n)
 			if n.KindInferred {
 				leading += ` md:kindInferred="1"`
 			}
@@ -110,6 +121,7 @@ func (w *docxWriter) writeNoteParts(notes []Note) error {
 func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 	identities := map[noteKey]string{}
 	orders := map[noteKey]int{}
+	displays := map[noteKey]*docxNoteDisplay{}
 	total := 0
 	customSeparators := map[string]bool{}
 	for _, kind := range []string{Footnote, Endnote} {
@@ -182,9 +194,29 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 			identities[serialized] = publicID
 			previousImplicit := r.implicitNoteLayout
 			r.implicitNoteLayout = n.attributeNS(docxNotesNS, "originalId") != "" && n.attributeNS(docxNotesNS, "order") != ""
+			display, err := readNoteDisplay(n)
+			if err != nil {
+				return err
+			}
+			r.expectedBodyLabel = nil
+			r.bodyLabelSeen = false
+			if display != nil && display.Variant {
+				value := display.Value
+				if display.BodyLabel != nil {
+					value = *display.BodyLabel
+				}
+				r.expectedBodyLabel = &value
+				if err := validateNoteBodyBookmark(n, serialized); err != nil {
+					return err
+				}
+			}
 			r.inNote++
 			bs, err := r.blocks(n, partRels, 0)
 			r.inNote--
+			if display != nil && display.Variant && !r.bodyLabelSeen {
+				return fmt.Errorf("variant note body label missing")
+			}
+			r.expectedBodyLabel = nil
 			r.implicitNoteLayout = previousImplicit
 			if err != nil {
 				return err
@@ -196,6 +228,9 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 				bs = bs[1:]
 			}
 			key := noteKey{kind, publicID}
+			if display != nil {
+				displays[key] = display
+			}
 			if order := n.attributeNS(docxNotesNS, "order"); order != "" {
 				value, err := strconv.Atoi(order)
 				if err != nil || value < 0 {
@@ -204,6 +239,19 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 				orders[key] = value
 			}
 			label := r.customNoteLabels[serialized]
+			var bodyLabel *string
+			if display != nil {
+				if display.Variant {
+					if !r.variantAnchors[serialized] || !r.variantCitations[serialized] {
+						return fmt.Errorf("variant note lacks anchor/citation graph")
+					}
+				} else if label != display.Value {
+					return fmt.Errorf("static note label contradicts display metadata")
+				}
+				label = display.Label
+				bodyLabel = display.BodyLabel
+			}
+
 			if metadata := n.attributeNS(docxNotesNS, "label"); metadata != "" && metadata != label {
 				return fmt.Errorf("note label metadata contradicts reference")
 			}
@@ -211,7 +259,7 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 			if inferred != "" && inferred != "1" {
 				return fmt.Errorf("invalid inferred note kind metadata")
 			}
-			r.doc.Notes = append(r.doc.Notes, Note{ID: publicID, Kind: kind, Blocks: bs, Label: label, KindInferred: inferred == "1"})
+			r.doc.Notes = append(r.doc.Notes, Note{ID: publicID, Kind: kind, Blocks: bs, Label: label, KindInferred: inferred == "1", BodyLabel: bodyLabel})
 			total++
 		}
 	}
@@ -258,7 +306,9 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 				if !ok {
 					return fmt.Errorf("missing %s note %q", key.kind, key.id)
 				}
-				run.Note = &NoteReference{ID: id, Kind: key.kind}
+				copy := *run.Note
+				copy.ID = id
+				run.Note = &copy
 			}
 			for ii := range b.Items {
 				if err := resolve(b.Items[ii].Blocks); err != nil {
@@ -287,6 +337,40 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 	}
 	r.checkEffectiveNoteProperties()
 
+	catalog, err := catalogNotes(r.doc, false)
+	if err != nil {
+		return err
+	}
+	for key, display := range displays {
+		if catalog.labels[key] != display.Value {
+			return fmt.Errorf("note display metadata contradicts canonical label")
+		}
+	}
+	for key, marks := range r.variantDefaultMarks {
+		id, ok := identities[key]
+		if !ok {
+			return fmt.Errorf("variant citation has missing note")
+		}
+		for _, mark := range marks {
+			if mark != catalog.labels[noteKey{key.kind, id}] {
+				return fmt.Errorf("default citation label contradicts canonical numbering")
+			}
+		}
+	}
+	for key := range r.variantCitations {
+		id, ok := identities[key]
+		if !ok || !r.variantAnchors[key] || displays[noteKey{key.kind, id}] == nil || !displays[noteKey{key.kind, id}].Variant {
+			return fmt.Errorf("variant citation lacks verified anchor/body graph")
+		}
+	}
+	for key := range r.variantAnchors {
+		if !r.variantCitations[key] {
+			return fmt.Errorf("unreferenced variant anchor")
+		}
+		if _, ok := identities[key]; !ok {
+			return fmt.Errorf("missing variant note definition")
+		}
+	}
 	for id := range r.noteBookmarkIDs {
 		if !r.noteBookmarkEnds[id] {
 			return fmt.Errorf("unclosed note reference bookmark")

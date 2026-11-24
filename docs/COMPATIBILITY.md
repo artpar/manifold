@@ -940,3 +940,15 @@ source IDs and Ref object edges persist in SF/JSON/gzip; native/Word retain thei
 existing acknowledged source-provenance/reflow policy. Broader differing marks,
 complex/nested/ActualText graphs and non-Ref inference remain required work, with
 visible content/source edges retained in current fallbacks. See PDF_NOTES.md.
+
+
+Note citation/body display overrides now preserve different literal marks and
+explicit empties through SF/JSON/gzip, DOCX and native PDF. Nil inherits the
+canonical label; identity/counters remain separate. Explicitly empty PDF reference
+containers recover markerless atoms; unresolved paint remains uncertain in flow.
+DOCX variants use real notes and body-target hyperlinks. Mixed automatic numbering
+requires AllowLossy because portable Word labels are literal; checked metadata
+restores SF automatic intent. Body glyphs/widths are validated. Homogeneous RTL
+citation marks shape correctly; internal mixed-direction atomic marks fail
+explicitly. Rich multi-node labels and nested/non-Ref graph recovery remain open.
+Read PDF_NOTES.md for exact evidence and output/editing limits.

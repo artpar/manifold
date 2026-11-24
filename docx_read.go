@@ -152,6 +152,11 @@ type docxReader struct {
 	noteBookmarkNames     map[string]bool
 	cachedNoteMarks       map[string][]string
 	customNoteLabels      map[noteKey]string
+	variantAnchors        map[noteKey]bool
+	variantCitations      map[noteKey]bool
+	variantDefaultMarks   map[noteKey][]string
+	expectedBodyLabel     *string
+	bodyLabelSeen         bool
 	rangeNumIDs           map[string]bool
 	listSequences         map[*ListNumbering]string
 	types                 map[string]string
@@ -608,6 +613,24 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 		case "ins", "moveTo":
 			r.doc.warn("revision_history", "Final visible revision content is retained; revision history is not represented")
 		case "r":
+			if c.attributeNS(docxNotesNS, "noteBodyLabel") != "" {
+				if err := r.variantBodyMark(c); err != nil {
+					return err
+				}
+				skipNoteSeparator = false
+				return nil
+			}
+			if c.attributeNS(docxNotesNS, "noteAnchor") != "" {
+				ref, err := r.hiddenNoteAnchor(c)
+				if err != nil {
+					return err
+				}
+				if activeNoteReference == nil || *activeNoteReference != *ref || seenNoteReference {
+					return fmt.Errorf("variant note anchor lacks matching reference bookmark")
+				}
+				seenNoteReference = true
+				return nil
+			}
 			if props := c.child("rPr"); props != nil {
 				for _, p := range props.Children {
 					switch p.Name.Local {
@@ -642,6 +665,38 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				style.Bold = value == "1"
 			}
 		case "hyperlink":
+			if c.attributeNS(docxNotesNS, "noteCitation") != "" {
+				ref, err := r.variantCitation(c)
+				if err != nil {
+					return err
+				}
+				run := c.child("r")
+				if err := r.textStyleChain(&style, run.child("rPr").child("rStyle").attr("val")); err != nil {
+					return err
+				}
+				if err := r.textProperties(&style, run.child("rPr"), false); err != nil {
+					return err
+				}
+				if err := r.restoreTextImplicit(&style, run, b.Level); err != nil {
+					return err
+				}
+				applyRunProps(&style.Run, run.child("rPr"))
+				if value := run.attributeNS(docxNotesNS, "headingBold"); value != "" {
+					explicit, err := docxOnOff(run.child("rPr").child("b"))
+					if b.Kind != Heading || (value != "0" && value != "1") || err != nil || explicit != (value == "1") {
+						return fmt.Errorf("citation heading bold metadata contradicts content")
+					}
+					style.Bold = value == "1"
+				}
+				style.Text = ""
+				style.Note = ref
+				parts, err := r.textRuns(style)
+				if err != nil {
+					return err
+				}
+				b.Runs = append(b.Runs, parts...)
+				return nil
+			}
 			if id := c.attr("id"); id != "" {
 				rel, ok := rels[id]
 				if !ok {

@@ -18,7 +18,7 @@ func docxDestinationName(id string) string {
 			valid = false
 		}
 	}
-	for _, prefix := range []string{"mdnote1_", "mdlist1_", "mditem1_", "mdanchor1_"} {
+	for _, prefix := range []string{"mdnote1_", "mdnotebody1_", "mdlist1_", "mditem1_", "mdanchor1_"} {
 		if strings.HasPrefix(id, prefix) {
 			valid = false
 		}
@@ -94,7 +94,7 @@ func (r *docxReader) scanDestinations(root *xmlNode) error {
 				}
 				name = original
 			}
-			internal := original == "" && (strings.HasPrefix(name, "mdlist1_") || strings.HasPrefix(name, "mditem1_") || strings.HasPrefix(name, "mdnote1_"))
+			internal := original == "" && (strings.HasPrefix(name, "mdlist1_") || strings.HasPrefix(name, "mditem1_") || strings.HasPrefix(name, "mdnote1_") || strings.HasPrefix(name, "mdnotebody1_"))
 			point := docxBookmarkPoint{}
 			if !internal {
 				if err := destinationID(name); err != nil {

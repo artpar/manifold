@@ -2326,3 +2326,17 @@ table boundary. Final full checks, original artifact/ProseMirror checks and fuzz
 counts are in verification.json; ignored evidence uses output/audit/notes-*.
 Remaining graph/mark/inference cases are explicit requirements in PDF_NOTES.md,
 not a claim that all note semantics or the complete project are finished.
+
+
+## Note display variants and markerless references
+
+PDF_NOTES.md lists all example/source-generation/CLI/independent-reader commands.
+scripts/verify_note_variants.py checks original painted marks/explicit empty K
+containers, distinct and empty fields, rich hierarchy/raster pixels, exact editable
+DOCX round trips, standard package anchors/hyperlinks, and actual visible
+citation-to-body coordinates in native and LibreOffice PDFs. Four example pages
+were visually inspected. Unit tests cover public nil/empty semantics, automatic
+editing-loss admission, malformed/retargeted/visible-content metadata, missing body
+glyphs, RTL/unsupported internal bidi, and missing-paint uncertainty. DOCX/SF fuzz
+seeds now include display variants; final campaign counts/checks are recorded in
+verification.json. Generated artifacts remain ignored under output/note-variants.

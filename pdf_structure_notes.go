@@ -124,7 +124,7 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 			}
 			s.cachedRefs[ref] = blocks
 			text, ok := pdfNoteMark(blocks)
-			if !ok || (label != "" && label != text) {
+			if !ok || (text == "" && ref.actual == nil && pdfNoteHasContentReference(ref)) {
 				valid = false
 			}
 			if label == "" {
@@ -132,8 +132,8 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 			}
 
 		}
-		if !valid || label == "" {
-			s.warn("pdf_note_label", "Note references do not have one consistent literal text mark; exact content and Ref identities are retained in flow")
+		if !valid {
+			s.warn("pdf_note_label", "Note references do not have recoverable literal text marks; exact content and Ref identities are retained in flow")
 			continue
 		}
 		kind, inferred, err := s.pdfNoteKind(n)
@@ -149,14 +149,24 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 		}
 		ids[noteKey{kind, id}] = true
 		note.definition = Note{ID: id, Kind: kind, KindInferred: inferred, Label: label}
+		if label == "" {
+			value := ""
+			note.definition.BodyLabel = &value
+			s.warn("pdf_note_markerless", "Explicit empty citation marks are preserved; empty body display is the default unless a leading label exists, without inventing visible numbering")
+		}
 		s.notes[n] = note
 		for _, ref := range refs {
 			blocks := s.cachedRefs[ref]
 			source := sourceFromBlocks(blocks, ref)
 			source.Evidence = "pdf_note_explicit_ref"
-			run := s.structureReplacement(blocks, label, source)
+			citation, _ := pdfNoteMark(blocks)
+			run := s.structureReplacement(blocks, citation, source)
 			run.Text, run.Link, run.Destination = "", "", ""
 			run.Note = &NoteReference{ID: id, Kind: kind}
+			if citation != label || label == "" {
+				value := citation
+				run.Note.Label = &value
+			}
 			s.cachedRefs[ref] = []Block{{Kind: Paragraph, Runs: []Run{run}, Source: source}}
 			s.noteRefs[ref] = note
 		}
@@ -165,6 +175,9 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 }
 
 func pdfNoteMark(blocks []Block) (string, bool) {
+	if len(blocks) == 0 {
+		return "", true
+	}
 	if len(blocks) != 1 || (blocks[0].Kind != Paragraph && blocks[0].Kind != Heading) {
 		return "", false
 	}
@@ -176,7 +189,7 @@ func pdfNoteMark(blocks []Block) (string, bool) {
 		out.WriteString(run.Text)
 	}
 	text := out.String()
-	return text, text != "" && validateNoteLabel(text) == nil
+	return text, validateNoteLabel(text) == nil
 }
 
 func (s *pdfStructureRecovery) pdfNoteKind(n *pdfStructureNode) (string, bool, error) {
@@ -227,7 +240,11 @@ func (s *pdfStructureRecovery) recoverNote(n *pdfStructureNode, note *pdfRecover
 				return nil, err
 			}
 			if i == 0 && kid.kind == "StructElem" && kid.role == "Lbl" {
-				if label, ok := pdfNoteMark(bs); ok && label == note.definition.Label {
+				if label, ok := pdfNoteMark(bs); ok {
+					if label != note.definition.Label {
+						value := label
+						note.definition.BodyLabel = &value
+					}
 					labelBlocks = bs
 					labelRun := s.structureReplacement(bs, label, sourceFromBlocks(bs, kid))
 					note.definition.LabelSource = labelRun.Source
@@ -245,4 +262,16 @@ func (s *pdfStructureRecovery) recoverNote(n *pdfStructureNode, note *pdfRecover
 	s.reader.doc.Notes = append(s.reader.doc.Notes, note.definition)
 	s.warn("pdf_note_reflow", "Explicit PDF note relationships are editable notes; source regions retain physical placement while output applies foot/endnote layout")
 	return nil, nil
+}
+
+func pdfNoteHasContentReference(n *pdfStructureNode) bool {
+	if n.kind != "StructElem" {
+		return true
+	}
+	for _, kid := range n.kids {
+		if pdfNoteHasContentReference(kid) {
+			return true
+		}
+	}
+	return false
 }

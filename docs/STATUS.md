@@ -39,39 +39,39 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: explicit PDF note relationships
+## Latest progress: independent citation/body display
 
-The original Note/Reference/Ref audit probe now recovers a typed note and reference
-site. Forward/reverse explicit edges and repeated marks recover one rich definition,
-with paragraphs, formatting, lists, tables, raster/alt content and note-body view
-bindings. Note.Source/LabelSource, raw binary StructureID and source Ref
-owner/targets persist
-through SF/JSON/gzip. Explicit FENote NoteType stays distinct from the documented
-endnote reflow default with KindInferred=true. Read PDF_NOTES.md.
+NoteReference.Label and Note.BodyLabel now distinguish inherited, literal and
+explicitly empty display independently from kind/ID and automatic counter order.
+Explicit PDF forward/reverse references with different marks retain typed sites
+and one rich body; leading Lbl values/LabelSource remain independent. Proven empty
+reference containers recover markerless atoms. Missing paint/MCR associations stay
+uncertain and do not establish empty marks. PDF_NOTES.md is the current contract.
 
-The custom-label prerequisite is committed as 44fe42f. Independent pypdf object,
-python-docx, actual ProseMirror, PyMuPDF and LibreOffice checks qualify exact note
-sites/labels/bodies, strong marks, nested structures, links and red/blue image pixels.
-Native and Word rich-note renders were inspected. A real LibreOffice list/table
-failure required an empty checked paragraph cancelling numbering; forcing tiny
-exact line heights clipped/hidden table content and was rejected during QA.
+DOCX variants use standard real-note anchors, literal body labels and visible
+hyperlinks to body bookmarks, with checked shape/target/style/namespace metadata.
+Mixed automatic/variant Word export requires AllowLossy for literal portable
+numbering; SF automatic intent round-trips in checked metadata. Ordinary note
+output keeps its existing representation. Native body labels now validate fonts,
+glyphs/shaping and widths. Homogeneous RTL citations work; mixed-direction atomic
+labels produce an explicit shaping error. Per-site run formatting is retained.
 
-The full goal stays incomplete. Remaining required note work includes differing
-citation/body marks, complex/markerless or differently labelled citations, nested/
-enclosing-ActualText graphs, and separately identified adjacency/geometric inference
-without Ref. Current fallback keeps visible content, source edges and diagnostics;
-it does not prove a complete editable note contract. Native Colleaf interoperability,
-original DOCX producer/corpus/visual coverage and final acceptance remain open.
+Independent original paint/empty-container, python-docx/lxml, pypdf/PyMuPDF and
+actual ProseMirror checks cover distinct/empty fields, rich bodies/raster pixels,
+all editable DOCX round-trip values and visible citation-to-body coordinates.
+All four native/LibreOffice example pages were inspected. New fuzz seeds include
+variants. Final full tests (15.737s/0.363s), full production race (181.448s/2.114s),
+final focused/new-seed race (2.727s), vet/modules, host CGO-disabled execution
+(0.408s), Linux amd64/arm64 cross-builds, DOCX/SF fuzz (331/57,871 executions) and
+diff checks pass. Exact check scope is in verification.json. Evidence is ignored
+under output/note-variants. Primary source/oracle bytes and dependencies are intact.
 
-Final full tests pass (15.644s/0.715s), full race passes (178.359s/2.110s), and
-final focused race passes (2.328s). Vet/modules, host CGO-disabled build/focused
-execution (0.420s), Linux amd64/arm64 cross-builds, malformed-input cases, PDF/SF
-fuzz (261/273 executions including seeds) and diff checks pass. Complete original
-MQTT SF values remain exact (semantic SHA256 69f09f6d…447b3). Exact outcomes/scope
-are in verification.json; ignored logs use output/audit/notes-* and output/note-labels. Original artifact evidence is retained:
-1,530 MQTT groups/15,324 memberships and 25 InDesign groups/160 memberships still
-match independently, separate from authorial running-template inference. See
-PDF_ARTIFACTS.md for the committed physical-artifact contract (10459dd).
+The full goal remains active/incomplete. Required work includes rich multi-node/
+internal mixed-direction label layout, nested/enclosing-ActualText graphs,
+identified adjacency/geometric note inference without Ref, native Colleaf adapter,
+broader original DOCX producer/corpus/visual qualification and final acceptance.
+The previous explicit PDF note graph/provenance milestone is 60bf496; literal
+labels are 44fe42f and physical artifact structure is 10459dd.
 
 ## Existing verified evidence to preserve
 
@@ -107,7 +107,7 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
 
 ## Next concrete implementation order
 
-1. Complete remaining note graph/label variants and clearly identified inference;
+1. Complete rich label layout and remaining note graphs/identified inference;
    use the concrete cases in PDF_NOTES.md, preserving source evidence and content.
 2. Implement/qualify the actual Colleaf native snapshot adapter through the shared
    SF. Include UTF-16 boundaries, rich source maps, notes/stories and resources;

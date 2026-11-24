@@ -1431,3 +1431,22 @@ SF block semantics. Keep normal paragraph layout: tiny exact heights hid/clipped
 the table in the independent reader and were rejected. Original sources/oracles
 are unchanged; this is a generation interoperability fix discovered by the new
 rich-note probe, not a golden update to accept missing content.
+
+
+## 2026-11-24 Separate citation, body and inherited note display
+
+Identity is still kind/ID. Use optional per-reference and body literal overrides,
+with nil/empty distinct, instead of requiring all source marks to match or
+silently flattening explicit relationships. Preserve different leading Lbl text
+and its source evidence once. Treat unresolved MCR/paint as uncertainty, not proof
+of a physically empty marker. Validate body-label glyphs/shaping too: independent
+labels cannot rely on citation validation to catch missing characters.
+
+Independent LibreOffice experiments showed that hidden note-body Ref runs still
+produce an automatic prefix. A zero-width standard custom-note anchor plus literal
+citation/body display preserves the actual visible marks and body links. Checked
+roles restore semantic intent without hiding arbitrary content. Word's portable
+labels become literal when variants coexist with automatic numbering; explicitly
+gate that editing loss with AllowLossy and retain checked automatic intent for SF.
+No generated Word editing/fidelity or full note-graph claim is implied. See
+PDF_NOTES.md and the independent source/reader/visual verifier.

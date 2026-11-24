@@ -38,7 +38,14 @@ func (r *pdfRenderer) measureFootnote(key noteKey) (pdfNoteChunk, error) {
 	}
 	r.pdf.SetFont("Go", "", 8)
 	r.pdf.SetTextColor(0, 0, 0)
-	indent := math.Max(18, r.pdf.GetStringWidth(r.notes.labels[key])+6)
+	_, labelWidth, err := r.footnoteLabel(key, r.bodyWidth())
+	if err != nil {
+		return pdfNoteChunk{}, err
+	}
+	indent := math.Max(18, labelWidth+6)
+	if indent >= r.bodyWidth() {
+		return pdfNoteChunk{}, fmt.Errorf("%w: footnote label leaves no body width", ErrUnsupported)
+	}
 	lines, err := r.cellFlow(definition.Blocks, r.bodyWidth()-indent, 0, r.bodyHeight()-footnoteSeparatorHeight-10)
 	if err != nil {
 		return pdfNoteChunk{}, fmt.Errorf("footnote %q: %w", key.id, err)
@@ -264,12 +271,16 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 		}
 		r.pdf.SetFont("Go", "", 8)
 		r.pdf.SetTextColor(0, 0, 0)
+		label, labelWidth, err := r.footnoteLabel(chunk.key, chunk.width)
+		if err != nil {
+			return err
+		}
 		labelX, bodyX := chunk.left, chunk.left+chunk.indent
 		if chunk.rtl {
-			labelX = chunk.left + chunk.width - r.pdf.GetStringWidth(r.notes.labels[chunk.key])
+			labelX = chunk.left + chunk.width - labelWidth
 			bodyX = chunk.left
 		}
-		r.pdf.Text(labelX, y+8, r.notes.labels[chunk.key])
+		r.drawLine(label, labelX, y, 8)
 		noticeTop := y
 		for _, fragment := range chunk.lines {
 			if err := r.drawFragment(fragment, bodyX, y); err != nil {
@@ -403,12 +414,28 @@ func (r *pdfRenderer) finishNotes() error {
 			return err
 		}
 		r.pdf.SetLink(r.noteLinks[key], r.y, -1)
-		start, _ := strconv.Atoi(r.notes.labels[key])
+		start, _ := strconv.Atoi(noteBodyLabel(r.notes, key))
 		list := Block{Kind: ListBlock, List: "number", Start: listStartPointer(start), Items: []ListItem{{Blocks: blocks}}}
-		list.pdfListMarker = note.Label
+		if note.Label != "" || note.BodyLabel != nil {
+			label := noteBodyLabel(r.notes, key)
+			list.pdfListMarker = &label
+		}
 		if err := r.list(list, r.bodyWidth(), r.bodyLeft()); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// Body marks use the normal font/glyph/shaping path too. A distinct body label
+// must never bypass validation merely because the citation used other glyphs.
+func (r *pdfRenderer) footnoteLabel(key noteKey, width float64) (pdfLine, float64, error) {
+	lines, err := r.lines([]Run{{Text: noteBodyLabel(r.notes, key)}}, width, 8)
+	if err != nil {
+		return nil, 0, err
+	}
+	if len(lines) != 1 {
+		return nil, 0, fmt.Errorf("%w: footnote label exceeds its content width", ErrUnsupported)
+	}
+	return lines[0], pdfAdvance(lines[0]), nil
 }

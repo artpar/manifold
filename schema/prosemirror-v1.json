@@ -206,6 +206,7 @@
       "inline": true,
       "atom": true,
       "attrs": {
+        "label": {"default": null},
         "id": {
           "validate": "string"
         },

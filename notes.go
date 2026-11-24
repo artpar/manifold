@@ -14,8 +14,10 @@ const (
 // NoteReference identifies a note independently of its displayed automatic number.
 // IDs are scoped by Kind and may be application identifiers rather than integers.
 type NoteReference struct {
-	ID   string `json:"id"`
-	Kind string `json:"kind"`
+	// Label overrides this citation only. Nil inherits the note label; empty is markerless.
+	Label *string `json:"label,omitempty"`
+	ID    string  `json:"id"`
+	Kind  string  `json:"kind"`
 }
 type noteKey struct{ kind, id string }
 
@@ -59,6 +61,11 @@ func validateNotes(d *Document) error {
 		}
 		if err := validateString(n.ID); err != nil {
 			return err
+		}
+		if n.BodyLabel != nil {
+			if err := validateNoteLabel(*n.BodyLabel); err != nil {
+				return err
+			}
 		}
 		if err := validateNoteLabel(n.Label); err != nil {
 			return err
@@ -104,6 +111,11 @@ func validateNotes(d *Document) error {
 		}
 		if r.Text != "" || r.Link != "" {
 			return fmt.Errorf("note reference cannot also contain text or an external link")
+		}
+		if r.Note.Label != nil {
+			if err := validateNoteLabel(*r.Note.Label); err != nil {
+				return err
+			}
 		}
 		if !notes[referenceKey(r.Note)] {
 			return fmt.Errorf("dangling %s note reference %q", r.Note.Kind, r.Note.ID)
@@ -157,8 +169,36 @@ func validateNoteLabel(label string) error {
 	if err := validateString(label); err != nil {
 		return err
 	}
-	if strings.ContainsAny(label, "\t\r\n") || (label != "" && strings.TrimSpace(label) == "") {
+	if strings.ContainsAny(label, "\t\r\n\u0085\u2028\u2029") || (label != "" && strings.TrimSpace(label) == "") {
 		return fmt.Errorf("note label must be a nonblank single-line mark")
 	}
 	return nil
+}
+
+func noteReferenceLabel(c *noteCatalog, ref *NoteReference) string {
+	if ref.Label != nil {
+		return *ref.Label
+	}
+	return c.labels[referenceKey(ref)]
+}
+func noteBodyLabel(c *noteCatalog, key noteKey) string {
+	if value := c.definitions[key].BodyLabel; value != nil {
+		return *value
+	}
+	return c.labels[key]
+}
+func variantNoteKeys(d *Document) map[noteKey]bool {
+	keys := map[noteKey]bool{}
+	for _, n := range d.Notes {
+		if n.BodyLabel != nil {
+			keys[noteIdentity(n)] = true
+		}
+	}
+	_ = walkNoteRuns(d.Blocks, func(r Run) error {
+		if r.Note != nil && r.Note.Label != nil {
+			keys[referenceKey(r.Note)] = true
+		}
+		return nil
+	})
+	return keys
 }

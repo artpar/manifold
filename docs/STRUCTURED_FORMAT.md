@@ -704,3 +704,11 @@ roles/regions remain explicit. Source marks/objects accept `structure_id` (origi
 binary PDF ID as base64) and `references` (array of `{element, targets}` explicit
 Ref owners/object targets, including unresolved edges and aggregate contributors).
 These are provenance, not a second copy of editable note bodies. Read PDF_NOTES.md.
+
+
+Optional `note_reference.attrs.label` and note `body_label` distinguish inherited
+(null/omitted) from literal overrides, including explicitly empty strings. These
+change display only; kind/ID remains the relationship key and counter order is
+unchanged. Per-reference run marks still carry citation formatting. See
+PDF_NOTES.md for source recovery, Word's checked variant representation/automatic
+editing loss, glyph and bidi behavior, and independent checks.

@@ -107,7 +107,7 @@ type Block struct {
 	docxList                *docxListRef
 	docxNumberID            int
 	docxNumberLevel         int
-	pdfListMarker           string
+	pdfListMarker           *string
 	docxIndent              int
 	docxExplicitBreakBefore bool
 	docxBeforeList          bool
@@ -170,6 +170,8 @@ type Image struct {
 	Height    float64 `json:"height,omitempty"`
 }
 type Note struct {
+	// BodyLabel overrides the body mark, independently of citation marks.
+	BodyLabel *string `json:"body_label,omitempty"`
 	// KindInferred distinguishes an editorial placement choice from an explicit source kind.
 	KindInferred bool        `json:"kind_inferred,omitempty"`
 	LabelSource  *SourceInfo `json:"label_source,omitempty"`
@@ -285,6 +287,13 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 	}
 	if (format == DOCX || format == PDF) && d.hasPDFSource() && !opts.AllowLossy {
 		return fmt.Errorf("%w: positioned PDF source content will be reflowed and provenance omitted", ErrLossy)
+	}
+	if format == DOCX && !opts.AllowLossy && len(variantNoteKeys(d)) > 0 {
+		for _, n := range d.Notes {
+			if n.Label == "" {
+				return fmt.Errorf("%w: DOCX variant note marks require static portable labels; automatic intent is retained in checked metadata", ErrLossy)
+			}
+		}
 	}
 	if format == DOCX || format == PDF {
 		d = resolveNumberingDocument(d)
