@@ -6944,5 +6944,62 @@
       "MANYDOC_COLLEAF_REAL_SAVED=output/colleaf-qa/real-source-saved.json GOWORK=off go test -run TestColleafPublishedPDFSourceGraph -count=1 .",
       "rg -n 'nonvisual|EastAsiaLanguage|ComplexLanguage|ComplexScript' colleaf_styles.go text_style.go"
     ]
+  },
+  "colleaf_run_languages_2026_11_24": {
+    "status": "verified component milestone; full goal active/incomplete",
+    "implementation": {
+      "native_altLang": "Current native scalar is authoritative for SF EastAsiaLanguage. Typed manydoc.run-languages/version1 style marker identifies the slot and independently retains ComplexLanguage; no alternate value/text cache.",
+      "foreign_altLang": "Preserved in the East Asian language slot with colleaf_alternate_language_inferred unless a recognized slot marker is present.",
+      "rendering_limit": "Native complex-language shaping is unproven. Run.Direction and ComplexScript output still reject explicitly. Persistence does not claim native shaping/paint equivalence."
+    },
+    "real_sources": [
+      "poi-footnotes.docx",
+      "poi-endnotes.docx",
+      "poi-headerFooter.docx",
+      "poi-HeaderFooterUnicode.docx",
+      "poi-DiffFirstPageHeadFoot.docx"
+    ],
+    "originals": "Original DOCX files and independent source-only oracles remain unchanged. Full test suite checks the existing source corpus.",
+    "native_save_language_run_counts": {
+      "poi-footnotes.docx": 5,
+      "poi-endnotes.docx": 14,
+      "poi-headerFooter.docx": 5,
+      "poi-HeaderFooterUnicode.docx": 19,
+      "poi-DiffFirstPageHeadFoot.docx": 22,
+      "synthetic": 24
+    },
+    "synthetic_scope": "Main, list, cell, header, footer, note text; literal/rich/default/empty body/citation marks; native glyph lang/altLang/private complex-language/bold/size propagation.",
+    "independent_QA": {
+      "script": "scripts/verify_colleaf_languages.cjs",
+      "script_sha256": "bd0084996e9667fe57bc23e830fd8c23b9b8b3f2c92e6a996ccbccda24239267",
+      "sdk": "Actual registered Univer1.0.4 Docs/Drawing/DocsDrawing/HyperLink plugins, FUniver createDocument/save in fresh instances, DocumentSkeleton glyph-style propagation; same hash-pinned Colleaf validator.",
+      "cases": 6,
+      "saves_per_baseline": 2,
+      "edits": "Synthetic altLang ja-JP→zh-Hant and authored ComplexLanguage ar-SA→he-IL; separate altLang deletion. All five real documents remain in each artifact map.",
+      "Go_reimport": "Strict .vdocs envelope plus another Go/native cycle compares full SF graphs for all saved/edited/cleared cases.",
+      "ProseMirror": {
+        "artifacts": 18,
+        "nodes_marks_attributes_checked": 516
+      },
+      "scope_limit": "No browser paint/pagination, native complex-language shaping equivalence, every producer or full native settings/API qualification."
+    },
+    "tests": {
+      "go_test_all": "passed; library21.197s/CLI0.723s; internal cached",
+      "race": "passed; library240.353s/CLI1.756s; internal cached",
+      "vet": "passed",
+      "modules": "all modules verified",
+      "CGO_disabled_focused": "passed0.386s",
+      "builds": "CGO-disabled host build and --help execution; Linux amd64/arm64 cross-builds pass, not Linux execution",
+      "malformed_and_semantic": "Tag/profile/version/slot/unknown/miscased/duplicate/null fields, inherited/default/direct style and private-marker clearing, foreign-slot diagnostic, forced-script/run-direction rejection and edited run/paragraph source historical states.",
+      "fuzz": "FuzzColleafRunLanguages passed107375 executions/10.518s/2workers; short safety sample",
+      "diff_check": "passed"
+    },
+    "remaining": "Native rendering/intent/settings, public API/CLI, full-preset/browser, other source/producer qualification, note policy/decorations and broader PDF/source/resource/final acceptance stay open.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/ACCEPTANCE.md",
+      "MANYDOC_COLLEAF_LANGUAGES_QA=output/colleaf-qa/languages.json GOWORK=off go test -run TestColleafRealDOCXLanguageRoundTrips -count=1 .",
+      "node scripts/verify_colleaf_languages.cjs",
+      "rg -n 'ErrUnsupported|requires mapping|ComplexScript|run.Direction' colleaf_*.go"
+    ]
   }
 }

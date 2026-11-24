@@ -1423,3 +1423,35 @@ poi-footnotes/endnotes/headerFooter/HeaderFooterUnicode/DiffFirstPageHeadFoot).
 They are not counted as native qualification. An exploratory
 large MQTT audit was interrupted after50s without a result; it is not a pass or a
 proven conversion failure. Broader source/resource/producer audits remain required.
+
+
+## Native script-specific language settings and original DOCX round trips
+
+The pinned ITextStyle exposes lang and altLang. Renderer punctuation layout uses
+CJK altLang before lang; it does not expose an independent ComplexLanguage field.
+SF EastAsiaLanguage now maps to native altLang. A text-style manydocLanguages
+object has profile manydoc.run-languages, version 1, alternateKind eastAsia and
+optional complexLanguage (a checked BCP47 string). The latter preserves distinct
+authored intent; native locale-specific complex shaping is not established. The
+marker contains no alternate-language value or text cache: the current native
+altLang, including its removal, remains authoritative. Foreign altLang without a
+recognized marker is retained in the SF East Asian slot with
+colleaf_alternate_language_inferred. Default/named/direct style inheritance uses
+the existing resolver; clearing the private property clears its complex setting.
+Null private markers clear their setting; null scalar fields and invalid,
+duplicate, miscased or unknown fields/profile/version/slot/tag values reject. Run.Direction and ComplexScript remain explicitly rejected on output.
+
+TestColleafRealDOCXLanguageRoundTrips covers the five original exported DOCX files
+listed in the preceding audit (their original bytes and source oracles unchanged),
+plus a synthetic body/list/cell/header/footer/note/citation/body-mark fixture. All
+compare complete SF graphs, not text alone. verify_colleaf_languages.cjs checks the
+pinned actual app validator, two registered-plugin facade saves/reopens per case,
+stream/style persistence and synthetic native glyph lang/altLang/private language/
+bold/size. It saves alternate/complex-language edits and altLang deletion; strict
+Go .vdocs reimport and another Go cycle preserve exact current semantics. Actual
+ProseMirror checks 516 nodes/marks/attributes across 18 artifacts. Source-bearing
+language edits retain historical run/paragraph facts with explicit diagnostics.
+
+This closes the earlier five-document language-guard failures, not native
+complex-script shaping, run-direction rendering, browser paint/pagination, every
+producer or the remaining native settings/API/full-preset acceptance queue.

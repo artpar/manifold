@@ -253,3 +253,10 @@ Office InDesign PDF, pinned Colleaf validator, Univer1.0.4 plugins/facade and
 ProseMirror reader. Standard gzip uses Go compress/gzip at runtime and Node zlib
 only for independent QA. No new production dependency or third-party implementation
 is incorporated. Source publication rights and original hash remain unchanged.
+
+
+The native language probe reuses the already attributed Apache POI original
+DOCX fixtures, pinned Univer1.0.4 types/renderer/plugins/facade, hash-pinned Colleaf
+validator and ProseMirror reader. No new production dependency or third-party
+implementation is introduced. The original fixtures and source-only oracles are
+unchanged; native shaping/paint equivalence is not claimed.

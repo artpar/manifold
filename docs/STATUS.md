@@ -39,7 +39,49 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: real-source native transport and compact intent
+## Latest progress: native run language intent and original DOCX graphs
+
+Private native conversion now maps SF EastAsiaLanguage to the current native
+altLang field. A typed manydoc.run-languages/version 1 text-style marker identifies
+that slot and retains the distinct ComplexLanguage setting. Language metadata
+inherits through the existing text-style resolver; current native edits/removal
+remain authoritative. Unmarked foreign altLang values are retained in the SF East
+Asian slot with an explicit inference diagnostic. Invalid language tags, mixed
+profile/version/slot declarations, malformed/duplicate/unknown fields reject.
+Forced complex-script and run-direction output still reject pending an accurate
+rendering mapping. Preserving language settings does not establish that the native
+engine uses ComplexLanguage for shaping; its pinned renderer has no separate field.
+
+All five original DOCX note/story fixtures that hit the former guard now preserve
+their complete SF graphs through Go conversion, strict .vdocs reimport, two actual
+registered-plugin save/reopen cycles and repeated conversion. A synthetic case
+covers main/list/cell/running/note text and literal/rich/default/empty body/citation
+marks. Actual native glyph styles retain lang/altLang/authored complex language and
+bold/size. Actual saved edits to altLang/complex language and deletion of altLang
+remain authoritative. ProseMirror validates 516 nodes/marks/attributes across 18
+saved/edited/cleared SF artifacts. Source-bearing language edits correctly qualify
+original run/paragraph facts historical. Original DOCX bytes/oracles are unchanged.
+This qualifies component semantics/persistence, not browser paint, language-specific
+shaping equivalence, all native settings or arbitrary producer documents.
+
+Full tests pass (library 21.197s/CLI 0.723s), full race passes (240.353s/1.756s),
+vet/modules and CGO-disabled focused tests (0.386s), host build/--help and Linux
+amd64/arm64 cross-builds pass. Language-parser fuzz passes 107375 executions in
+10.518s with two workers (short safety sample). verification.json records scope.
+The goal remains active/incomplete. Next: marker appearance, remaining run/setting
+intent, native public API/CLI and full-preset/browser, nonmain lookup limits,
+per-page/decorated notes, broader PDF/source/resource and final acceptance audits.
+
+```sh
+MANYDOC_COLLEAF_LANGUAGES_QA=output/colleaf-qa/languages.json GOWORK=off go test -run TestColleafRealDOCXLanguageRoundTrips -count=1 .
+node scripts/verify_colleaf_languages.cjs
+MANYDOC_COLLEAF_LANGUAGES_SAVED=output/colleaf-qa/languages-saved.json MANYDOC_COLLEAF_LANGUAGES_EDITED=output/colleaf-qa/languages-edited.json MANYDOC_COLLEAF_LANGUAGES_CLEARED=output/colleaf-qa/languages-cleared.json GOWORK=off go test -run TestColleafRealDOCXLanguageRoundTrips -count=1 .
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/colleaf-qa/languages-saved.json-*.sf output/colleaf-qa/languages-edited.json-*.sf output/colleaf-qa/languages-cleared.json-*.sf
+GOWORK=off go test -run TestColleafLanguage -count=1 .
+rg -n 'ErrUnsupported|requires mapping|ComplexScript|run.Direction' colleaf_*.go
+```
+
+## Earlier progress: real-source native transport and compact intent
 
 The original ten-page Copyright Office InDesign PDF now passes full PDF→SF→native
 →SF comparisons, including source facts, diagnostics, navigation, formatting and

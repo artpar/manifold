@@ -1776,3 +1776,16 @@ trailing bytes, cancellation and strict typed JSON/resource validation apply bef
 interpretation. The carrier holds only existing sparse metadata/source pools, never
 an alternative editable document. Real published PDF full-graph/save checks now
 qualify combined paragraph/run/list provenance; browser and broader audits remain.
+
+
+## Native language-style intent
+
+colleaf_languages.go validates a versioned manydocLanguages text-style property.
+The native altLang scalar remains the authority for SF EastAsiaLanguage; the
+marker declares that interpretation and preserves ComplexLanguage separately.
+These are inheritable authored styles, not source ownership or cached text.
+Foreign unmarked altLang maps with an inference diagnostic. Native value edits
+and deletion survive; current SF language semantics participate in existing source
+fingerprints. The pinned engine has no distinct complex-language layout property:
+retaining that setting is persistence evidence, not native shaping equivalence.
+Run direction/forced complex-script rendering remain separate required mappings.

@@ -166,6 +166,7 @@ func colleafBool(raw json.RawMessage) (bool, error) {
 }
 func colleafStyleRun(style colleafStyleMap, doc *Document) (Run, error) {
 	var out Run
+	qualifiedAlternate := false
 	keys := make([]string, 0, len(style))
 	for key := range style {
 		keys = append(keys, key)
@@ -179,6 +180,19 @@ func colleafStyleRun(style colleafStyleMap, doc *Document) (Run, error) {
 		switch key {
 		case "manydocOrigin":
 			doc.warn("colleaf_run_origin_context", "Native source properties outside direct text intervals do not assert run ownership")
+		case "manydocLanguages":
+			value, err := readColleafLanguages(raw)
+			if err != nil {
+				return out, err
+			}
+			if value != nil {
+				out.ComplexLanguage = value.ComplexLanguage
+				qualifiedAlternate = true
+			}
+		case "altLang":
+			if err := json.Unmarshal(raw, &out.EastAsiaLanguage); err != nil {
+				return out, err
+			}
 		case "lang":
 			if err := json.Unmarshal(raw, &out.Language); err != nil {
 				return out, err
@@ -280,6 +294,9 @@ func colleafStyleRun(style colleafStyleMap, doc *Document) (Run, error) {
 			doc.warn("colleaf_text_presentation", "Native text property "+key+" is not represented; supported typography and literal text are retained")
 		}
 	}
+	if out.EastAsiaLanguage != "" && !qualifiedAlternate {
+		doc.warn("colleaf_alternate_language_inferred", "Native alternate language is retained in the SF East Asian language slot without an explicit slot binding")
+	}
 	return out, validateTextStyle(out)
 }
 func colleafRGB(color string) (string, error) {
@@ -312,8 +329,8 @@ func colleafRunStyle(run Run) (json.RawMessage, error) {
 	if err := validateTextStyle(run); err != nil {
 		return nil, err
 	}
-	if run.EastAsiaLanguage != "" || run.ComplexLanguage != "" || run.ComplexScript || run.Direction != "" {
-		return nil, fmt.Errorf("%w: native nonvisual run annotations need the checked profile mapping", ErrUnsupported)
+	if run.ComplexScript || run.Direction != "" {
+		return nil, fmt.Errorf("%w: native forced complex-script or run direction needs a qualified rendering mapping", ErrUnsupported)
 	}
 
 	if run.Source != nil && run.Text == "" && run.Note == nil {
@@ -334,6 +351,12 @@ func colleafRunStyle(run Run) (json.RawMessage, error) {
 	}
 	if run.Language != "" {
 		style["lang"] = run.Language
+	}
+	if run.EastAsiaLanguage != "" {
+		style["altLang"] = run.EastAsiaLanguage
+	}
+	if run.EastAsiaLanguage != "" || run.ComplexLanguage != "" {
+		style["manydocLanguages"] = colleafLanguages{Profile: colleafLanguageProfile, Version: 1, AlternateKind: "eastAsia", ComplexLanguage: run.ComplexLanguage}
 	}
 	if run.FontFamily != "" {
 		style["ff"] = run.FontFamily

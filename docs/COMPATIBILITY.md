@@ -1149,3 +1149,12 @@ passes full-graph Go/SF and actual validator/plugin save checks (COLLEAF_FORMAT.
 The unchanged app 5 MiB limit still applies; this does not qualify arbitrary native
 sizes, browser layout or exported DOCX nonvisual run annotations. Expanded metadata
 has a 128 MiB parser bound with explicit rejection, separate from app admission.
+
+
+Private native conversion now preserves East Asian and complex language settings
+through actual editor saves and current language edits. Five original DOCX note/
+story graphs and a multi-context synthetic fixture qualify persistence. Native
+altLang is authoritative for the East Asian slot; unmarked foreign slot inference
+is diagnosed. ComplexLanguage survives as typed authored style metadata; its use
+for native shaping is unproven. Forced complex-script and run-direction output
+still reject. See COLLEAF_FORMAT.md for exact scope and remaining native work.

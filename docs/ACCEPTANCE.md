@@ -1,6 +1,6 @@
 # Active goal acceptance audit
 
-Audited after rich citations, exact ActualText, original editor exports and nested note/wrapper qualification, 2026-11-24.
+Audited after actual native save/source/language qualification, 2026-11-24.
 **The full goal remains incomplete.** This is the current requirement audit;
 older milestone narratives are preserved in Git history and verification.json.
 The objective remains all four rich-document paths around one shared SF, pure Go,
@@ -12,8 +12,8 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
 | Objective requirement | Current authoritative evidence | Assessment / unfinished work |
 | --- | --- | --- |
 | Establish an existing rich SF first, document alternatives/tradeoffs | STRUCTURED_FORMAT.md; structured.go; schema/prosemirror-v1.json; original corpus and full 205,918-node actual ProseMirror check in SF_CODEC.md | Established ProseMirror profile exists and is qualified; new actual Univer/Colleaf comparison is in COLLEAF_FORMAT.md |
-| Inspect Colleaf's actual representation when available | Read-only GitHub inspection pinned to Colleaf 5ce2ef5; actual validator/editor/save source and matching npm schema inspected | Inspection fulfilled; executable pinned Colleaf/Univer validator/core/view/tree probes now qualify an internal UTF-16/container foundation. Private rich text/table/list/image/note/section/story mappings and actual facade save now have pinned reader evidence; corrected U+FFFC note ranges have glyph/placed-body evidence. Foreign automatic counters now have literal SF mapping and actual glyph/body/save evidence; Independent/rich body marks now have real source/glyph/edit/save proof; Per-citation literal/rich/default/empty marks now have actual glyph/edit/save proof; remaining intent, strict envelope/public API and full browser qualification remain unfinished |
-| Rich manipulation, persistence and Colleaf integration | Typed Go tree/bridge, strict profile, plain/gzip SF, reference/asset validation; current native application contract now known | Core manipulation/persistence implemented. Private native workers now have actual reader/save and frame/note-placement checks; public adapter, remaining intent/settings and browser qualification remain unfinished |
+| Inspect Colleaf's actual representation when available | Read-only GitHub inspection pinned to Colleaf 5ce2ef5; actual validator/editor/save source and matching npm schema inspected | Inspection fulfilled; executable pinned Colleaf/Univer validator/core/view/tree probes now qualify an internal UTF-16/container foundation. Private rich text/table/list/image/note/section/story mappings and actual facade save now have pinned reader evidence; corrected U+FFFC note ranges have glyph/placed-body evidence. Foreign automatic counters now have literal SF mapping and actual glyph/body/save evidence; Independent/rich body marks now have real source/glyph/edit/save proof; Per-citation literal/rich/default/empty marks now have actual glyph/edit/save proof; strict native envelopes and per-owner sources are checked. Five original DOCX language graphs and one original PDF full-source graph now pass actual plugin saves. Remaining native rendering/intent, public API/CLI, full preset/browser and broader corpus qualification remain unfinished |
+| Rich manipulation, persistence and Colleaf integration | Typed Go tree/bridge, strict profile, plain/gzip SF, reference/asset validation; current native application contract now known | Core manipulation/persistence implemented. Private native workers now have actual reader/save and frame/note-placement checks; actual source graphs and language metadata now persist through pinned saves/edits. Public adapter, remaining rendering/intent/settings and browser qualification remain unfinished |
 | DOCX→SF | docx_read.go and scoped package/list/table/note/section/font code; unchanged original Word source/oracles; real_docx_test.go | Common required rich content preserved with explicit losses. Original PDF-guide→SF→Word now preserves exact editable structure/styles/assets within declared physical image precision (DOCX_PRECISION.md). Eight additional original editor exports now qualify notes/stories/review/fields in REAL_DOCX_CORPUS.md; no universal OOXML claim |
 | SF→DOCX | docx_write.go and related modules; exact supported source SF round trips; python-docx/standard XML/LibreOffice checks and visual examples in verification.json | Implemented rich path; eight additional original exports and33 original/native/Word pages now qualify note/story/review/field output; producer limits remain explicit |
 | SF→PDF wrapping/pagination/tables/fonts/Unicode | pdf_write/text/shaping/bidi/glyph/table/note modules; independent font/GID/geometry/pixel/continuation checks; 189-page real-source render | Implemented declared support contract. Unsupported shaping/missing glyphs explicitly error; no automatic font substitution. Do not turn this into an unstated requirement for every script or Word pagination |
@@ -112,6 +112,11 @@ pinned remote schema evidence. The complete goal stays active, with no external
 blocker preventing the next implementation.
 
 
+## Historical implementation milestones
+
+These chronological entries retain scoped evidence and earlier next steps. The
+requirement table above, latest entry below and STATUS.md define the current queue.
+
 Native note-definition/label provenance and KindInferred now have synthetic actual
 save/edit/identity-detachment and SF evidence. Paragraph provenance survives body-
 mark prefix projection without false staling. Run/citation/container/cell/item source
@@ -169,3 +174,13 @@ and the unchanged validator passes.153 paragraph / 8,651 run / 67 list/item reco
 8,872 actual ProseMirror nodes qualify this producer/component. Other owner kinds,
 exported DOCX nonvisual intent, native browser/API and broader resource/final audits
 remain required. No blocked required capability is reclassified as complete.
+
+
+Latest native language evidence closes the five exported-DOCX language-guard
+failures. The distinct language settings survive actual registered-plugin saves,
+current edits/removal, strict native reimport and exact SF graph comparison. A
+synthetic fixture covers the shared body/list/cell/running/note/label contexts;
+actual ProseMirror checks 516 nodes across 18 saved/edited/cleared artifacts.
+Persistence is qualified; complex-language native shaping and forced-script/run
+direction rendering are not. Remaining native settings/API/browser and broader
+PDF/resource/final acceptance remain required.

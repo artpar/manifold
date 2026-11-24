@@ -2211,3 +2211,16 @@ publication snapshot to 3.6 MiB while preserving its complete SF/source graph af
 actual registered-plugin saves. Compression does not guarantee that arbitrary
 documents fit Colleaf limits and does not introduce a library authorization gate.
 DOCX nonvisual run intent and full native/UI/API acceptance remain open.
+
+
+## 2026-11-24 Preserve script-specific language settings explicitly
+
+Use native altLang for the East Asian language slot, matching its pinned CJK
+punctuation usage. Preserve the separate complex-language setting in typed
+manydoc.run-languages/version 1 style metadata instead of collapsing it into lang.
+The metadata records the alternate slot, not an old altLang value; editor changes
+and removal remain authoritative. Diagnose slot inference for foreign unmarked
+altLang. Validate tags/profile/version/slot/keys. Do not infer forced complex-script
+or run-direction rendering from these fields; the existing explicit guards remain.
+Qualify original DOCX graphs, all shared text contexts, style inheritance/clearing,
+actual saves/edits and source uncertainty separately from native shaping/paint.
