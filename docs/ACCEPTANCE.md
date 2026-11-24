@@ -70,7 +70,9 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
    nested/story/empty-section save/edit/SF and selection evidence; soft-boundary
    point retention has a Go regression. Standalone AnchorPoint projection now has
    actual save/edit/SF/group/alias/carrier/text and selection-request evidence;
-   remaining structural cursors, nonmain lookup limits and actual rendered caret/
+   foreign row/cell/terminator controls now have explicit normalized SF targets
+   and original/normalized/edited native selection evidence. Nonmain lookup limits,
+   historical diagnostic/provenance intent and actual rendered caret/
    scroll/browser behavior remain required.
 4. **Corpus/visual and final audit:** eight pinned, legally attributed original
    Word/Mac Word/LibreOffice inputs now qualify notes/running/review/field policies

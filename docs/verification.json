@@ -6432,5 +6432,93 @@
       "MANYDOC_COLLEAF_STANDALONE_SAVED=output/colleaf-qa/standalone-points-saved.json MANYDOC_COLLEAF_STANDALONE_EDITED=output/colleaf-qa/standalone-points-edited.json GOWORK=off go test -run TestColleafStandalone -count=1 .",
       "rg -n 'structural cursor|cellNode|rowNode' colleaf_navigation.go colleaf_tables.go"
     ]
+  },
+  "colleaf_foreign_control_cursors_2026_11_24": {
+    "scope": "Private foreign row/cell/terminator bookmark recovery as disclosed logical SF boundaries. Full native adapter/public API/CLI and overall goal remain incomplete.",
+    "implementation": [
+      "Validated stream-tree control index; row first/last-cell boundaries, cell start/end and section/table/image/page-break paragraph terminators retain bookmark IDs and link targets in AnchorPoint blocks.",
+      "Horizontal/vertical covered cells resolve through the actual occupancy grid to the spanning origin. Deferred projection runs after origins exist; source-order boundary blocks retain identities and visible content/grid/assets.",
+      "Flow After data carries boundary-only blocks without manufacturing duplicate paragraph IDs or invalidating valid list-item continuation ownership.",
+      "colleaf_structural_cursor records current source UTF16 position/story and normalized logical target. Exact native control cursor identity is explicitly lost. Existing span/metadata/placement diagnostics remain explicit.",
+      "Projection-local warning sets avoid scanning all earlier position-specific diagnostics. Final destination coverage still rejects genuinely unrepresented points rather than silently dropping them."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_structural_cursors.cjs",
+      "script_sha256": "4da62b195e04d7cf037218555c347f37e5e97a08c1ab57065488ea6f7cbc5b15",
+      "packages": "Same attributed pinned Univer1.0.4 plugins/validator, hash-pinned unmodified handler/helper and actual selection manager used by prior navigation probes.",
+      "original_offsets": {
+        "row-start": 9,
+        "origin-start": 10,
+        "origin-lf": 18,
+        "origin-end": 19,
+        "b-start": 20,
+        "b-lf": 23,
+        "b-end": 24,
+        "row-end": 25,
+        "row-two-start": 26,
+        "covered-start": 27,
+        "covered-cr": 28,
+        "covered-lf": 29,
+        "covered-end": 30,
+        "c-start": 31,
+        "c-lf": 34,
+        "c-end": 35,
+        "row-two-end": 36,
+        "table-end": 37,
+        "table-cr": 38,
+        "image-cr": 40,
+        "main-lf": 63
+      },
+      "normalized_offsets": {
+        "row-start": 11,
+        "origin-start": 11,
+        "origin-lf": 18,
+        "origin-end": 18,
+        "b-start": 21,
+        "b-lf": 23,
+        "b-end": 23,
+        "row-end": 23,
+        "row-two-start": 11,
+        "covered-start": 11,
+        "covered-cr": 11,
+        "covered-lf": 18,
+        "covered-end": 18,
+        "c-start": 32,
+        "c-lf": 34,
+        "c-end": 34,
+        "row-two-end": 34,
+        "table-end": 39,
+        "table-cr": 39,
+        "image-cr": 41,
+        "main-lf": 63
+      },
+      "results": [
+        "21 exact original foreign targets and21 deliberately different normalized targets, including covered-cell source rowSpan0 ownership. Each original/normalized/edited inspect call issues21 exact collapsed internal selection requests.",
+        "App validation, skeleton construction, two actual original saves/reopens and actual TextX insertion pass. Source main stream and image source bytes match normalized output; edited stream is exactly Q+original and all original offsets shift by1.",
+        "Go strict .vdocs/SF checks compare complete original/saved/edited structures, merges/widths, assets, references and exact diagnostic sets. Original source snapshot remains immutable.",
+        "SF round trips retain diagnostics exactly. Separate normalized native fixed-point/actual-save tests explicitly clear historical diagnostics, whose native-intent transport remains unfinished.",
+        "All63 scalar boundaries of the64-unit rich reference retain exactly one probe identity. Horizontal continuations, header/footer/note contexts, valid list ownership and hard-break paragraph terminators have Go structural regressions.",
+        "Earlier pinned standalone/flow/container probes pass unchanged."
+      ],
+      "limits": "Headless model/save/edit/token/source and selection-refresh evidence with stub render manager; actual browser caret/scroll/paint/events and universal native cursor identity are unqualified. No original corpus/oracle changes."
+    },
+    "checks": {
+      "tests": "Final all-package tests with actual saved/edited/normalized native artifacts pass library15.867s, CLI/internal cached. Earlier pre-break-terminator run16.211s/CLI0.693s passed.",
+      "race": "Final all-package race with actual saved/edited/normalized artifacts passes library169.965s/CLI2.147s/internal cached. Focused saved/edited/normalized structural race1.566s passed before adding scalar-sweep and page-break-terminator regressions. Superseded full race was stopped after that source/test addition.",
+      "vet": "pass after final source/test changes",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "Final focused Colleaf tests0.567s, host CLI build/--help and Linux amd64/arm64 cross-builds pass. Cross-builds are not Linux execution evidence.",
+      "fuzz": "Final foreign structural property/offset target72173 executions/10.508s,2workers pass; earlier campaign63890 executions passed before break-terminator addition. Short safety campaigns, not exhaustive coverage.",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go/std-library production only. No new dependency, runtime executable/service/CGO/license server/upload, application/backend change or permission/quota gate. Optional QA artifacts ignored; SF schema and original corpus/oracles unchanged.",
+    "remaining": "Native marker appearance and nonvisual/provenance intent, including historical diagnostic transport; public native API/CLI and actual full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_CURSOR_QA=output/colleaf-qa/structural-cursors.json MANYDOC_COLLEAF_CURSOR_NORMALIZED_QA=output/colleaf-qa/structural-cursors-normalized.json GOWORK=off go test -run TestColleafForeignStructural -count=1 .",
+      "node scripts/verify_colleaf_structural_cursors.cjs",
+      "MANYDOC_COLLEAF_CURSOR_SAVED=output/colleaf-qa/structural-cursors-saved.json MANYDOC_COLLEAF_CURSOR_EDITED=output/colleaf-qa/structural-cursors-edited.json MANYDOC_COLLEAF_CURSOR_NORMALIZED_SAVED=output/colleaf-qa/structural-cursors-normalized-saved.json GOWORK=off go test -run TestColleafForeignStructural -count=1 .",
+      "rg -n 'Diagnostics|Source|PDFNavigation|KindInferred' colleaf_sections.go colleaf_notes.go colleaf_images.go colleaf_text.go"
+    ]
   }
 }

@@ -53,6 +53,7 @@ type colleafListOwnership struct {
 	Stories map[string][]colleafListBinding `json:"stories"`
 }
 type colleafFlowBlock struct {
+	After    []Block
 	Block    Block
 	ID       string
 	Bullet   json.RawMessage
@@ -403,6 +404,7 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int, secti
 			info, ok := r.listParagraphs[flow[i].Position]
 			if !ok || len(flow[i].Bullet) == 0 {
 				out = append(out, flow[i].Block)
+				out = append(out, flow[i].After...)
 				i++
 				continue
 			}
@@ -477,7 +479,8 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int, secti
 					if err != nil {
 						return Block{}, 0, err
 					}
-					block.Items = append(block.Items, ListItem{Blocks: append([]Block{flow[item.start].Block}, children...)})
+					firstBlocks := append([]Block{flow[item.start].Block}, flow[item.start].After...)
+					block.Items = append(block.Items, ListItem{Blocks: append(firstBlocks, children...)})
 				}
 				if valid {
 					r.promoteListPoints(&block, flow[start].ID, flow[start].Position)
@@ -495,13 +498,14 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int, secti
 			if !ok || len(flow[cursor].Bullet) == 0 || current.Bullet.Level != info.Bullet.Level || current.Bullet.ID != info.Bullet.ID || current.Bullet.Type != info.Bullet.Type || !sameColleafNumbering(info, current) || (info.Kind == "number" && current.Value != info.Value+len(block.Items)) {
 				break
 			}
-			item := ListItem{Blocks: []Block{flow[cursor].Block}}
+			item := ListItem{Blocks: append([]Block{flow[cursor].Block}, flow[cursor].After...)}
 			position := flow[cursor].Position
 			cursor++
 			// A single native paragraph explicitly owns its inline image/table
 			// fragments even when no list-item continuation resource exists.
 			for cursor < len(flow) && flow[cursor].Position == position {
 				item.Blocks = append(item.Blocks, flow[cursor].Block)
+				item.Blocks = append(item.Blocks, flow[cursor].After...)
 				cursor++
 			}
 			for cursor < len(flow) {

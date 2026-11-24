@@ -1596,5 +1596,25 @@ retain the profile's paragraph-first contract.
 
 Pinned save/edit/selection and full Go/SF structural/asset/relationship evidence
 qualify standalone projection, including256 items and point-only stories/cells.
-Other foreign structural cursor recovery, provenance/appearance/API/browser and
-the broader goal acceptance audit remain required.
+Foreign control normalization is described below. Remaining provenance/appearance/
+API/browser and the broader goal acceptance audit remain required.
+
+
+## Foreign native control cursors
+
+colleaf_structural_cursors.go indexes row/cell edges, section/table terminators
+and bare image/page-break paragraph terminators in the validated stream tree.
+Recognized current points retain existing exact mappings; foreign control points
+become explicit logical SF boundaries with source-position/story and target-loss
+diagnostics. Covered-cell positions resolve through the validated occupancy grid
+to the spanning origin. Deferred projections run after origins exist. Boundary
+blocks use flow After data rather than duplicate paragraph IDs, preserving list
+continuation ownership. Position-specific diagnostics use a projection-local set.
+
+Independent pinned native saves/edits/selection requests assert both original and
+normalized offsets, unchanged text/assets and covered-cell source records. Exact
+SF structure/loss checks and a normalized native semantic fixed point are separate:
+historical diagnostic transport in native intent remains required work. SF keeps
+those diagnostics. Every scalar boundary of the rich fixture, horizontal/vertical
+continuations and story/list/break cases have structural regressions. Browser UI,
+remaining appearance/provenance/API and final acceptance work remain open.

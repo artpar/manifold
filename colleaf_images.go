@@ -371,6 +371,11 @@ func (r *colleafBodyReader) imageParagraph(start, end int, p colleafParagraphRec
 	if len(positions) > 1 || start != positions[0] || end != positions[0]+1 || len(p.Bullet) > 0 {
 		r.doc.warn("colleaf_inline_image_reflow", "Native inline images and text sharing one paragraph become ordered SF blocks; image bytes, dimensions and visible text are retained")
 	}
+	after, err := r.cursorBlocks(end, "boundary after image paragraph", false)
+	if err != nil {
+		return nil, err
+	}
+	blocks = append(blocks, after...)
 	if authoredPresentation {
 		r.doc.warn("colleaf_image_paragraph", "Native picture paragraph presentation is normalized to SF image block flow; image and supported surrounding text remain")
 	}

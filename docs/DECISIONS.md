@@ -2017,3 +2017,26 @@ requests and unchanged native text, then compare full strict .vdocs/SF structure
 assets, relationships and expected diagnostics. This is headless interoperability,
 not browser caret/scroll/paint fidelity. Other foreign structural cursors and the
 remaining intent/API/browser/final acceptance work still gate completion.
+
+
+## 2026-11-24 Recover foreign control points with disclosed normalization
+
+SF lacks a row/cell control-token cursor. Preserve bookmark IDs/links at the
+owning logical cell start/end; row edges use their first/last cells. Covered
+continuations project to the spanning origin, using the actual validated grid.
+Table and bare image/page-break paragraph terminators project after the block;
+section terminators project to current flow ends. Retain explicit source position,
+story context and target in diagnostics. Do not claim native cursor identity or
+silently invent another canonical coordinate format.
+
+Keep boundary blocks with native paragraph flow ownership instead of manufacturing
+additional paragraph identities that invalidate list-item bounds. Apply cell
+projections after earlier-row origins exist. Deduplicate potentially numerous
+position-specific warnings without scanning all previous cursor diagnostics.
+
+Qualify original, normalized and edited offsets independently in the actual pinned
+handler/save path, with unchanged native text/assets and exact SF content/grid/
+relationships. Historical diagnostics are verified in SF and deliberately cleared
+only for the separate normalized native fixed-point test; their native intent
+transport remains unfinished. No source oracle is changed. Browser/preset and
+broader intent/API/resource/final acceptance gates remain open.

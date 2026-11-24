@@ -401,6 +401,9 @@ func (r *colleafBodyReader) paragraphFragment(start, end int, p colleafParagraph
 }
 
 type colleafBodyReader struct {
+	cursorWarningSet   map[string]bool
+	cursorKinds        map[int]string
+	cursorBookmarks    map[int][]colleafRangeRecord
 	pointSlots         map[colleafPointSlot]bool
 	standalone         []colleafStandalonePoint
 	standaloneIDs      map[string]bool
@@ -458,6 +461,10 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 	var flow []colleafFlowBlock
 	push := func(bs []Block, p colleafParagraphRecord, start int) {
 		for _, b := range bs {
+			if b.Kind == AnchorPoint && len(flow) > 0 && flow[len(flow)-1].Position == p.StartIndex {
+				flow[len(flow)-1].After = append(flow[len(flow)-1].After, b)
+				continue
+			}
 			if len(flow) > 0 && flow[len(flow)-1].Position == p.StartIndex {
 				p.Bullet = nil
 			}
@@ -509,6 +516,18 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 				return nil, err
 			}
 			push([]Block{table}, p, child.start)
+			after, err := r.cursorBlocks(child.end-1, "boundary after table", false)
+			if err != nil {
+				return nil, err
+			}
+			flow[len(flow)-1].After = append(flow[len(flow)-1].After, after...)
+			if child.end == node.end-1 {
+				after, err = r.cursorBlocks(node.end-1, "boundary after table", false)
+				if err != nil {
+					return nil, err
+				}
+				flow[len(flow)-1].After = append(flow[len(flow)-1].After, after...)
+			}
 			cursor = child.end
 		}
 		// Preserve authored suffix text/paragraph properties. An otherwise empty
@@ -539,6 +558,11 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 			r.doc.warn("colleaf_stale_point_ownership", "Standalone point retains its current native location because its owning flow or boundary changed")
 		}
 	}
+	terminal, err := r.cursorBlocks(sections[0].end-1, "end of current section flow", false)
+	if err != nil {
+		return nil, err
+	}
+	blocks = append(blocks, terminal...)
 	return blocks, nil
 }
 func colleafUnitPoints(unit colleafNumberUnit) (float64, error) {
@@ -616,6 +640,7 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 	}
 	// Occupancy names the single origin covering each logical slot. Vertical
 	// continuation bodies are validated as empty before they can be omitted in SF.
+	var cursorProjections []colleafCellCursorProjection
 	occupied := make([][]*tableCellPosition, len(table.Rows))
 	for i := range occupied {
 		occupied[i] = make([]*tableCellPosition, columns)
@@ -639,6 +664,7 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 		}
 		col := 0
 		previousSpan := 0
+		var previousOrigin *tableCellPosition
 		for ci, cellRaw := range row.Cells {
 			properties, err := colleafStyleObject(cellRaw)
 			if err != nil {
@@ -675,6 +701,13 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 					if previousSpan <= 1 {
 						return block, fmt.Errorf("unowned native horizontal continuation")
 					}
+					projection, err := r.cellCursorProjection(rowNode, cellNode, ci, len(row.Cells), previousOrigin, true)
+					if err != nil {
+						return block, err
+					}
+					if len(projection.before)+len(projection.after) > 0 {
+						cursorProjections = append(cursorProjections, projection)
+					}
 					previousSpan--
 					continue
 				}
@@ -685,6 +718,14 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 					if occupied[ri][cc] != occupied[ri][col] {
 						return block, fmt.Errorf("contradictory native continuation")
 					}
+				}
+				previousOrigin = occupied[ri][col]
+				projection, err := r.cellCursorProjection(rowNode, cellNode, ci, len(row.Cells), previousOrigin, true)
+				if err != nil {
+					return block, err
+				}
+				if len(projection.before)+len(projection.after) > 0 {
+					cursorProjections = append(cursorProjections, projection)
 				}
 				col += cs
 				previousSpan = cs
@@ -706,6 +747,14 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 			if err != nil {
 				return block, err
 			}
+			projection, err := r.cellCursorProjection(rowNode, cellNode, ci, len(row.Cells), origin, false)
+			if err != nil {
+				return block, err
+			}
+			if len(projection.before)+len(projection.after) > 0 {
+				cursorProjections = append(cursorProjections, projection)
+			}
+			previousOrigin = origin
 			sfCell := Cell{Blocks: content}
 			if rs > 1 {
 				sfCell.RowSpan = rs
@@ -736,6 +785,24 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 			}
 		}
 		block.Rows = append(block.Rows, outRow)
+	}
+	// Apply all projections after origin cells exist, including earlier-row
+	// origins of covered native cells. Preserve source order within each edge.
+	beforeByOrigin := map[*tableCellPosition][]Block{}
+	afterByOrigin := map[*tableCellPosition][]Block{}
+	var origins []*tableCellPosition
+	seenOrigin := map[*tableCellPosition]bool{}
+	for _, p := range cursorProjections {
+		if !seenOrigin[p.origin] {
+			seenOrigin[p.origin] = true
+			origins = append(origins, p.origin)
+		}
+		beforeByOrigin[p.origin] = append(beforeByOrigin[p.origin], p.before...)
+		afterByOrigin[p.origin] = append(afterByOrigin[p.origin], p.after...)
+	}
+	for _, origin := range origins {
+		cell := &block.Rows[origin.Row].Cells[origin.Cell]
+		cell.Blocks = append(append(beforeByOrigin[origin], cell.Blocks...), afterByOrigin[origin]...)
 	}
 	if _, err := tableGrid(block.Rows); err != nil {
 		return block, err
@@ -855,6 +922,9 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 	if err != nil {
 		return nil, err
 	}
+	if err := r.indexStructuralCursors(); err != nil {
+		return nil, err
+	}
 	r.bookmarkUsed = map[string]bool{}
 	r.containerPoints = map[int][]string{}
 	r.sectionPoints = map[int][]string{}
@@ -899,6 +969,10 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 				return nil, err
 			}
 			if claimed {
+				continue
+			}
+			if _, ok := r.cursorKinds[a.StartIndex]; ok && !(p.Hint != nil && p.Hint.Role == "point" && r.cursorKinds[a.StartIndex] == "section terminator") {
+				r.cursorBookmarks[a.StartIndex] = append(r.cursorBookmarks[a.StartIndex], a)
 				continue
 			}
 			if p.Hint != nil && p.Hint.Role == "list" {

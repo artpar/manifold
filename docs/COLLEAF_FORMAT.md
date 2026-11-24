@@ -1096,5 +1096,37 @@ actual TextX movement. Strict Go/.vdocs/SF comparison checks complete saved/edit
 structures, assets, note/link relationships and expected diagnostics. Dense256-
 item, explicit-section and invalid-carrier regressions add structural coverage.
 No actual browser caret/scroll/paint/event or whole-native fidelity is claimed.
-Foreign structural controls beyond these mapped positions, nonmain lookup,
+Foreign control normalization is described below. Nonmain lookup, remaining
 appearance/provenance/API/browser and final acceptance remain required.
+
+
+## Current foreign control-cursor projection
+
+Foreign bookmarks at row/cell controls, section/table terminators and bare image/
+page-break paragraph terminators now recover as logical SF AnchorPoint boundaries.
+Row edges use first/last cells; covered horizontal/vertical cells retain their
+identities at the validated spanning origin. Table/image/break terminators become
+following boundaries. colleaf_structural_cursor discloses original UTF-16 offset,
+story context and normalized logical target. Exact native control-cursor identity
+is not represented. Known current table/image/paragraph/standalone mappings keep
+their existing semantics; unsupported interpreted constructs still reject.
+
+Flow After data retains terminal points without duplicate paragraph IDs, so list
+continuations stay owned. Deferred cell projection covers earlier-row origins.
+Projection-local warning deduplication avoids scanning the entire diagnostic
+history per cursor. No visible text, asset or cached SF body is inserted.
+
+scripts/verify_colleaf_structural_cursors.cjs reuses pinned packages/validator/
+unmodified handler and actual selection manager. It asserts 21 original and 21
+normalized targets, covered-cell sources, unchanged native text/image bytes, two
+saves/reopens and actual TextX shifts; each probe issues 21 exact internal requests.
+Go strict .vdocs/SF checks compare full saved/edited graphs and diagnostic evidence.
+All 63 scalar boundaries of the rich reference, horizontal continuations,
+header/footer/note contexts, list ownership and hard-break termini have regressions.
+
+SF preserves the historical loss diagnostics exactly. The separate normalized
+native semantic fixed-point test clears them explicitly, because native nonvisual
+intent transport remains unfinished. Original source expectations stay unchanged.
+Headless requests do not prove browser caret/scroll/paint/events. Nonmain lookup,
+remaining appearance/nonvisual/provenance/API/preset and final acceptance work
+remain required.

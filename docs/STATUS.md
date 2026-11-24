@@ -39,7 +39,53 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: standalone zero-height navigation blocks
+## Latest progress: foreign native control-cursor recovery
+
+Private native import now projects bookmarks on row/cell boundaries and section,
+table, image-paragraph and page-break-paragraph terminators into SF AnchorPoint
+boundaries. Row edges follow first/last logical cells. Vertical/horizontal covered
+cell cursors retain identities at the spanning origin's start/end; source positions
+and normalized targets are disclosed with colleaf_structural_cursor diagnostics.
+Exact native control cursor identity is not claimed. This changes previously
+unrepresented points from rejection to explicit logical recovery without dropping
+relationships or changing visible text, assets, merge grids or ordinary styles.
+
+Boundary-only blocks travel with their native paragraph's flow ownership, so new
+table/image-end points do not invalidate valid list continuation bounds. Deferred
+cell projections apply after origins exist, including earlier-row merges. Loss
+warnings include source UTF-16 position and story context; a projection-local set
+avoids repeatedly scanning all prior position-specific diagnostics.
+
+Pinned actual app/plugins/skeleton/two saves/reopens/TextX checks qualify 21 exact
+original targets and their deliberately changed normalized targets. Native text,
+image bytes and covered-cell records remain unchanged; each original/normalized/
+edited probe issues 21 exact internal selection-manager requests. Go strict
+.vdocs/SF checks compare original/saved/edited full structures, relationships,
+assets and exact diagnostic sets. The normalized native fixed point is checked
+separately after explicitly clearing historical diagnostics: their transport in
+native nonvisual intent remains unfinished, while SF itself preserves them.
+Horizontal continuations, header/footer/note contexts, list ownership, hard-break
+terminators and all 63 scalar boundaries of the rich reference have regressions.
+Browser caret/scroll/paint and universal native cursor fidelity are not claimed.
+
+Final checks pass: full tests15.867s, full race169.965s/CLI2.147s, vet/modules,
+CGO-disabled focused tests/host CLI execution and Linux amd64/arm64 cross-builds.
+Final structural property/offset fuzz passed72,173 executions; short campaigns
+are not exhaustive coverage. Pinned readers and diff checks pass; verification.json
+records exact scope. Cross-builds are not Linux execution evidence. The full goal
+stays active/incomplete. Next complete native marker appearance and nonvisual/provenance
+intent (especially historical diagnostics), public native API/CLI and actual
+full-preset/browser qualification. Nonmain lookup limits, per-page/decorated notes
+and broader PDF/source/resource/final acceptance audits remain required. No
+external blocker exists; runtime stays pure Go and applications are untouched.
+
+```sh
+MANYDOC_COLLEAF_CURSOR_QA=output/colleaf-qa/structural-cursors.json MANYDOC_COLLEAF_CURSOR_NORMALIZED_QA=output/colleaf-qa/structural-cursors-normalized.json GOWORK=off go test -run TestColleafForeignStructural -count=1 .
+node scripts/verify_colleaf_structural_cursors.cjs
+MANYDOC_COLLEAF_CURSOR_SAVED=output/colleaf-qa/structural-cursors-saved.json MANYDOC_COLLEAF_CURSOR_EDITED=output/colleaf-qa/structural-cursors-edited.json MANYDOC_COLLEAF_CURSOR_NORMALIZED_SAVED=output/colleaf-qa/structural-cursors-normalized-saved.json GOWORK=off go test -run TestColleafForeignStructural -count=1 .
+```
+
+## Earlier progress: standalone zero-height navigation blocks
 
 Private native workers now preserve standalone SF AnchorPoint blocks at real
 UTF-16 cursors without adding visible characters or extra paragraphs to ordinary

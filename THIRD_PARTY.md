@@ -199,3 +199,6 @@ unmodified handler source for list/break/section save/edit/selection evidence.
 
 The standalone-point probe reuses those same attributed pinned QA packages,
 validator and unmodified handler for text-free point/group/save/edit evidence.
+
+The structural-cursor probe reuses the same attributed pinned packages, validator
+and unmodified handler for original/normalized/save/edit selection evidence.

@@ -995,5 +995,10 @@ func (r *colleafBodyReader) breakParagraph(start, end int, p colleafParagraphRec
 		}
 		appendPart(part)
 	}
+	after, err := r.cursorBlocks(end, "boundary after page-break paragraph", false)
+	if err != nil {
+		return nil, err
+	}
+	blocks = append(blocks, after...)
 	return blocks, nil
 }
