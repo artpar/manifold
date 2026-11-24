@@ -26,10 +26,11 @@ type colleafNativeNote struct {
 	Lists             map[string]json.RawMessage `json:"lists,omitempty"`
 }
 type colleafNoteBinding struct {
-	AutoLabel *string `json:"autoLabel,omitempty"`
-	NativeID  string  `json:"nativeId"`
-	Kind      string  `json:"kind"`
-	ID        string  `json:"id"`
+	BodyMarkRange string  `json:"bodyMarkRange,omitempty"`
+	AutoLabel     *string `json:"autoLabel,omitempty"`
+	NativeID      string  `json:"nativeId"`
+	Kind          string  `json:"kind"`
+	ID            string  `json:"id"`
 }
 type colleafNoteIdentities struct {
 	Bindings []colleafNoteBinding `json:"bindings"`
@@ -81,12 +82,10 @@ func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *no
 		if err := ctx.Err(); err != nil {
 			return out, err
 		}
-		if n.Source != nil || n.LabelSource != nil || n.KindInferred || n.BodyLabelContent != nil || n.BodyLabelStyle != nil {
-			return out, fmt.Errorf("%w: native note body mark/provenance requires checked intent mapping", ErrUnsupported)
+		if n.Source != nil || n.LabelSource != nil || n.KindInferred {
+			return out, fmt.Errorf("%w: native note provenance requires checked intent mapping", ErrUnsupported)
 		}
-		if n.BodyLabel != nil && *n.BodyLabel != "" {
-			return out, fmt.Errorf("%w: native independent note body mark requires its literal mapping", ErrUnsupported)
-		}
+
 		id := fmt.Sprintf("manydoc-note-%d", i+1)
 		ids[noteIdentity(n)] = id
 		binding := colleafNoteBinding{NativeID: id, Kind: n.Kind, ID: n.ID}
@@ -94,8 +93,15 @@ func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *no
 			label := catalog.labels[noteIdentity(n)]
 			binding.AutoLabel = &label
 		}
+		blocks, bodyMark, markLength, err := prepareColleafBodyMark(n, catalog)
+		if err != nil {
+			return out, err
+		}
+		if bodyMark != nil {
+			binding.BodyMarkRange = "manydoc-body-mark-" + id
+		}
 		bindings.Bindings = append(bindings.Bindings, binding)
-		encoded, err := encodeColleafAssetBody(ctx, n.Blocks, nil, out.ID, id, imageCache)
+		encoded, err := encodeColleafAssetBody(ctx, blocks, nil, out.ID, id, imageCache)
 		if err != nil {
 			return out, err
 		}
@@ -116,6 +122,18 @@ func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *no
 		if n.BodyLabel != nil {
 			show := false
 			note.ShowBodyReference = &show
+		}
+		if bodyMark != nil {
+			if bodyMark.Empty {
+				style, err := colleafRunStyle(*n.BodyLabelStyle)
+				if err != nil {
+					return out, err
+				}
+				note.ReferenceStyle = style
+			}
+			if err := sealColleafBodyMark(&note, *bodyMark, markLength); err != nil {
+				return out, err
+			}
 		}
 		out.Notes[id] = note
 	}
@@ -178,6 +196,7 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 	doc := &Document{}
 	ids := map[string]noteKey{}
 	autoLabels := map[noteKey]string{}
+	expectedBodyMarks := map[string]string{}
 	keys := make([]string, 0, len(input.Notes))
 	for id, n := range input.Notes {
 		if err := ctx.Err(); err != nil {
@@ -267,6 +286,7 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 				continue
 			}
 			ids[binding.NativeID] = noteKey{binding.Kind, binding.ID}
+			expectedBodyMarks[binding.NativeID] = binding.BodyMarkRange
 			if binding.AutoLabel != nil && n.Mark != nil && *n.Mark == *binding.AutoLabel {
 				autoLabels[ids[binding.NativeID]] = *binding.AutoLabel
 			}
@@ -288,7 +308,14 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		n := input.Notes[id]
+		n, bodyMarkScope, err := openColleafBodyMark(ctx, input.Notes[id])
+		if err != nil {
+			return nil, err
+		}
+		if expected := expectedBodyMarks[id]; expected != "" && (bodyMarkScope == nil || bodyMarkScope.RangeID != expected) {
+			doc.warn("colleaf_stale_note_body_mark", "Expected native body-mark ownership is absent or changed; actual visible story text is retained")
+			bodyMarkScope = nil
+		}
 		key := ids[id]
 		if originals[key] {
 			return nil, fmt.Errorf("native note identity bindings alias distinct definitions")
@@ -360,10 +387,15 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 				return nil, err
 			}
 			note.BodyLabelStyle = &run
-			doc.warn("colleaf_note_marker_style", "Native generated marker style is retained on the note body; citation style comes from its native text interval")
+			if bodyMarkScope == nil {
+				doc.warn("colleaf_note_marker_style", "Native generated marker style is retained on the note body; citation style comes from its native text interval")
+			}
 		}
 		if bodyMarker != nil {
 			note.BodyLabelStyle = bodyMarker
+		}
+		if err = restoreColleafBodyMark(ctx, n, bodyMarkScope, &note, doc); err != nil {
+			return nil, err
 		}
 		doc.Notes = append(doc.Notes, note)
 	}

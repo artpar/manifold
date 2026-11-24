@@ -1788,3 +1788,24 @@ geometry default: native constructor/save fills 30px, so import must use 22.5pt.
 Do not revise the source or ignore layout in the equality check. Independent
 Word/PDF output relationships, annotation boxes and four visually inspected PDF
 pages qualify this targeted case; they do not establish native-browser/Word parity.
+
+
+## 2026-11-24 Keep independent body marks in editable native source
+
+The native note schema has one generated shared marker. Independent/rich body
+marks must be real runs and hyperlinks in the native note story, with the generated
+body marker suppressed. Recover their SF role using a small local annotation and
+checked paragraph/delimiter identity. Do not store another copy of the visible
+label/body/SF or force old text over a real editor edit.
+
+Executable rendering exposed a CUSTOM-range color/underline override even though
+source styles were correct. Use neutral native active/textColorMode settings and
+retain the failing-render regression alongside actual glyph/style/link assertions.
+Actual TextX replacement also moved the annotation start past inserted text;
+recover the leading mark through the stable paragraph and owned delimiter. Missing
+or stale bindings preserve visible text with diagnostics instead of hiding it.
+
+Qualify literal/rich/styled, table-first, empty and markerless-style cases through
+real facade save/reopen and actual text/style edits. These prove this body-mark
+projection, not per-citation rich output, browser paint/interaction, total-story
+layout or native adapter completion. Keep those on the required next-work queue.

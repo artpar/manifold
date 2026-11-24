@@ -677,3 +677,53 @@ pdftoppm -r 100 -png output/colleaf-qa/note-numbering.pdf output/colleaf-qa/note
 Next implement literal/rich citation and independent body-mark output with checked
 native ownership, then remaining mappings/strict envelope and public API/CLI;
 qualify actual browser/preset behavior. The full adapter and goal stay incomplete.
+
+
+## Editable independent/rich note-body marks
+
+Private SF→native output now handles BodyLabel literals, BodyLabelContent and
+BodyLabelStyle using actual native runs/styles/hyperlinks. The mark precedes a tab
+in the first paragraph/heading; table/list/image/empty bodies get a separate leading
+paragraph. showBodyReference=false prevents a duplicate generated marker. Empty
+styled intent uses native referenceTextStyle without adding a visible tab.
+
+The note story carries one rangeType5 manydoc.note-body-mark annotation, version1,
+containing mode/native note ID/paragraph ID/separate/default/empty flags and neutral
+render properties. It contains no label text, duplicated styles or body/SF cache.
+The root checked identity record names the expected body-mark range, so deleting
+that annotation cannot silently change semantics. Literal/rich contents are derived
+from real source text intervals; default omission is restored only while actual
+label/default-marker values still agree.
+
+The pinned renderer applies blue.600 and underline to ordinary CUSTOM ranges by
+default. The new ownership range explicitly uses active=false and textColorMode=text;
+scripts/verify_colleaf_body_marks.cjs reproduces the original visible override and
+checks actual corrected glyph color/size/bold/italic/underline and hyperlink lookup.
+A nonneutral/unknown ownership version rejects rather than silently dropping its
+appearance. This remains subject to the required full browser/interaction audit.
+
+Actual TextX replacement moved the annotation start to the tab while inserting a
+new mark before it. The stable first-paragraph ID and owned terminal tab define the
+current leading marker; recovery uses those bounds and actual runs, not a cached
+old value. Rich edits stay rich. Formatting a former literal becomes rich label
+content with diagnostics. Enabling the generated marker or removing/changing
+ownership preserves visible prefix/body text and discloses stale intent. Separate
+paragraphs are removed only while no new ordinary body text remains there.
+
+The fixed six-note fixture covers independent 9, rich linked *2 with different
+styles, styled automatic 3, table-first 9, otherwise empty 9, and empty styled intent.
+Actual skeleton bodies/citations, neutral annotation rendering, facade save/fresh
+reopen, native text/style edits and exact Go/SF/native round trips pass. Browser
+paint/font metrics/wrapping and rich per-citation output are not claimed.
+
+```sh
+MANYDOC_COLLEAF_BODY_MARK_QA=output/colleaf-qa/body-marks.json GOWORK=off go test -run TestColleaf -count=1 .
+node scripts/verify_colleaf_body_marks.cjs
+MANYDOC_COLLEAF_BODY_MARK_SAVED=output/colleaf-qa/body-marks-saved.json MANYDOC_COLLEAF_BODY_MARK_EDITED=output/colleaf-qa/body-marks-edited.json GOWORK=off go test -run TestColleaf -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafBodyMarks$' -fuzztime=10s -parallel=2 .
+```
+
+Next implement native literal/rich per-citation markers with checked ownership,
+then remaining intent/strict envelope and public adapter/browser qualification.
+Body provenance/nonvisual style policies remain on the wider mapping queue. No
+production dependency, app/backend change or runtime external tool was added.

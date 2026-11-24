@@ -5875,5 +5875,45 @@
       "MANYDOC_COLLEAF_NUMBER_SAVED=output/colleaf-qa/note-numbering-saved.json GOWORK=off go test -run TestColleaf -count=1 .",
       "output/qa-venv/bin/python scripts/verify_colleaf_note_outputs.py"
     ]
+  },
+  "colleaf_editable_body_marks_2026_11_24": {
+    "scope": "Private native independent literal/rich/styled body-mark output and exact semantic recovery. Per-citation rich output/native public API/CLI/full goal remain incomplete.",
+    "implementation": [
+      "Real editable runs/styles/hyperlinks before owned tab, inline in first paragraph/heading or separate before nonparagraph/empty content. showBodyReference=false prevents duplicate generated markers.",
+      "Version1 manydoc.note-body-mark local annotation stores mode/native note/paragraph IDs and separate/default/empty/render flags only; no copied label text, styles, body or SF cache. Root identity binding records expected range ID.",
+      "Native CUSTOM annotations otherwise force blue.600/underline. Output active=false and textColorMode=text; unknown/nonneutral ownership appearance rejects.",
+      "Import derives actual edited labels/styles/links from native runs and uses stable first paragraph plus owned terminal tab. TextX replacement can move start past inserted text; no stale text cache overrides that edit.",
+      "Lost/stale ownership preserves visible prefix/story text with diagnostics. Literal formatting edits become rich content; separate prefix paragraph removed only when no new body text remains. Empty style persists in actual referenceTextStyle with terminal LF annotation."
+    ],
+    "independent_reader": {
+      "packages": "Pinned actual Univer1.0.4 and hash-pinned unmodified app validator, optional ignored Node QA",
+      "script": "scripts/verify_colleaf_body_marks.cjs",
+      "script_sha256": "9c2945fb0920a1e0873084ce2573f46f74a6ddd4151fafc2a2b75027263adb98",
+      "results": [
+        "Six native citations1..6 and six actual placed bodies; independent9, rich *2 with red12pt bold/8pt italic link, green10pt bold/underline default3, table-first9, otherwise-empty9, empty styled intent",
+        "Actual rendered glyph style fields, hyperlink lookup, table placement and suppression of all generated body markers verified; original unneutralized CUSTOM override reproduced as a regression",
+        "Actual FDocument.save/fresh reopen/save preserves source annotations and exact Go/SF semantics. Real TextX9-to8 replacement and rich style edits survive saved Go import.",
+        "Fresh artifacts and all11 stream/text/tables/notes/lists/images/facade/sections/image_fit/note_numbering/body_marks scripts plus Pillow/note-output Python checks pass; combined edited/saved Go re-import0.448s passes."
+      ],
+      "limits": "Headless structure/glyph/style/link/save evidence only. Browser font/paint/wrapping/interaction and total-story layout remain required qualification, including ownership activation behavior."
+    },
+    "checks": {
+      "full_tests": "go test ./... pass library17.345s/CLI0.799s; all example/internal packages pass",
+      "full_race": "go test -race ./... pass library167.140s/CLI2.180s/internal13.880s",
+      "vet": "pass",
+      "modules": "all modules verified; production dependencies unchanged",
+      "cgo_disabled": "Focused native tests0.522s, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass (cross-builds not execution)",
+      "fuzz": "FuzzColleafBodyMarks1000 executions/0.618s pass after an initial short9-execution/11.841s pass; FuzzColleafDocument51866 executions/11.479s pass. Two workers each; short campaigns not exhaustive.",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure Go/std library and shared existing workers only; no new dependency, required tool/service/CGO/customer upload/application/backend edit or authorization/quota gate. Original source/oracle files unchanged.",
+    "remaining": "Native literal/rich per-citation output and broader nonvisual/provenance/list/appearance/navigation intent; remaining per-page/decorated policies and strict envelope/JSON/surrogates/public API/CLI; full browser/preset qualification, broader untagged PDF recovery and final source/resource/API/acceptance audit.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_BODY_MARK_QA=output/colleaf-qa/body-marks.json GOWORK=off go test -run TestColleaf -count=1 .",
+      "node scripts/verify_colleaf_body_marks.cjs",
+      "MANYDOC_COLLEAF_BODY_MARK_SAVED=output/colleaf-qa/body-marks-saved.json MANYDOC_COLLEAF_BODY_MARK_EDITED=output/colleaf-qa/body-marks-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzColleafBodyMarks$' -fuzztime=1000x -parallel=2 ."
+    ]
   }
 }

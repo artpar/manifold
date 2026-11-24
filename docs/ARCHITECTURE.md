@@ -1369,3 +1369,33 @@ references. Uncaptured section properties survive raw snapshot marshaling for re
 reader checks, while SF interpretation still diagnoses/rejects representation loss.
 Foreign omitted running distances now follow native constructor defaults 30px;
 explicit own projection values are unaffected.
+
+
+## Native editable body-mark projection and recovery
+
+colleaf_note_body_mark.go projects existing Note.BodyLabel/BodyLabelStyle/
+BodyLabelContent into real text/style/link records at the beginning of the note
+story. It prepends to the first paragraph/heading or adds a dedicated paragraph
+before table/list/image/empty content. A terminal tab separates the mark from body
+text. Generated native markers are suppressed with showBodyReference=false.
+The local manydoc.note-body-mark version1 annotation stores only mode, native note/
+paragraph IDs, separate/default/empty flags and neutral-render settings. The root
+identity binding retains the expected range ID to diagnose metadata loss. There is
+no duplicate label text, style cache, note body or SF payload in that annotation.
+
+Univer CUSTOM ranges style text by default. active=false plus properties.
+textColorMode=text makes this ownership annotation neutral; actual SDK glyph tests
+reproduce the former blue/underline override and verify the correction. Import
+rejects an unknown/nonneutral ownership version rather than silently interpreting
+presentation it cannot preserve. Local annotations survive actual facade saves.
+
+Recovery removes only guarded leading marker runs and their owned delimiter from
+ordinary decoded note text, deriving actual rich marks/styles/links from those
+runs. Paragraph identity plus the terminal tab survive TextX replacement even
+when the annotation start moves to the delimiter. New text/styles remain current;
+changed/default-style representation becomes rich label content with diagnostics.
+Separate marker paragraphs disappear only if no new body text remains. Missing/
+stale ownership leaves actual visible text in the body and discloses the loss.
+Empty styled marks use the real referenceTextStyle and a terminal-LF annotation.
+Per-citation rich output and broader nonvisual intent remain separate unfinished
+workers; this body-mark layer does not expose a partial public native format.

@@ -39,7 +39,39 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: foreign native note numbering and output proof
+## Latest progress: editable independent and rich native body marks
+
+Private native output now writes literal, rich and uniformly styled independent
+note-body marks as actual editable runs, including links, table-first and otherwise
+empty note bodies. Native generated body markers are suppressed. A small local
+body annotation binds role/representation to the paragraph and delimiter; marker
+text/styles remain solely in normal source runs. Empty styled intent uses the real
+referenceTextStyle field with nonvisible ownership metadata.
+
+Pinned renderer/facade checks confirm six placed bodies, distinct citation/body
+marks, actual red/green/font-size/bold/italic/underline/link fields, table placement
+and empty variants. Actual TextX replacement and style edits survive Go re-import.
+Native CUSTOM annotations otherwise override authored colors/underline: output
+sets active=false and textColorMode=text, with a retained failing-render regression.
+TextX can detach the start boundary during replacement, so recovery uses stable
+paragraph identity and the owned terminal tab, rather than stale original text.
+Missing/stale ownership retains visible story text and emits diagnostics; malformed
+or nonneutral ownership rejects explicitly. Native API/CLI remains private.
+
+Final milestone checks pass: tests 17.345s/0.799s, race 167.140s/2.180s,
+vet/modules, CGO-disabled focused tests/host CLI execution and Linux amd64/arm64
+cross-builds. Body-mark fuzz 1,000 executions and document fuzz 51,866 executions
+pass; diff check and all eleven pinned reader/save scripts plus independent Python
+regressions pass. Cross-builds are not Linux execution evidence. verification.json
+records exact scope, timings and the remaining UI/font/layout qualification.
+
+Next implement per-citation literal/rich output, then remaining list/appearance/
+provenance intent, strict native envelope/JSON/surrogates and public native API/CLI.
+Actual browser/preset paint/wrapping/interaction and total story qualification also
+remain required. Prior foreign-numbering/import and DOCX/PDF checks stay valid;
+this milestone does not claim full adapter or overall goal completion.
+
+## Earlier progress: foreign native note numbering and output proof
 
 colleaf_note_numbering.go now recovers native automatic citation/body marks from
 root and section settings: starts/restarts, decimal/zero/letter/Roman defaults,
@@ -70,8 +102,8 @@ cross-builds; document/note fuzz 22,371/2,551 executions and diff check. All ten
 pinned reader/save scripts, Pillow, independent note-output readers and combined
 Go edited/saved import pass. Cross-builds are not Linux execution evidence.
 
-The adapter remains private/incomplete. Next implement checked native literal/rich
-citation and independent body-mark output, remaining list/appearance/provenance
+The adapter remains private/incomplete. Independent/rich body-mark output is now qualified above. Next implement native
+literal/rich citation output, remaining list/appearance/provenance
 intent, strict envelope/JSON/surrogates, then public native API/CLI and actual
 browser/preset qualification. Automatic per-page note counters still require an
 authoritative layout strategy; editable separators/notices and remaining native

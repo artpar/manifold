@@ -52,6 +52,7 @@ type colleafBlockRecord struct {
 	NoteType   string `json:"noteType,omitempty"`
 }
 type colleafRangeRecord struct {
+	Active     *bool           `json:"active,omitempty"`
 	StartIndex int             `json:"startIndex"`
 	EndIndex   int             `json:"endIndex"`
 	ID         string          `json:"rangeId"`
