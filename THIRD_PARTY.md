@@ -275,3 +275,11 @@ CC BY4.0; PDF Association/PDF Reuse TWG/PDF-UA TWG,2024) and ISO document-interc
 errata (https://pdf-issues.pdfa.org/32000-2-2020/clause14.html). No implementation
 code is copied or translated. Existing attributed gofpdf/pdfcpu run in-process;
 pypdf/MuPDF/Poppler are optional independent QA. No new production dependency.
+
+
+Tagged PDF list recovery uses independently authored canonical parsing against
+the Adobe PDF1.7 reference's standard ListNumbering families
+(https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf)
+and the existing attributed OOXML numbering contract. No implementation code is
+copied/translated. Optional independent pypdf/OOXML checks add no production
+dependency; existing source fixtures and physical expected labels are unchanged.

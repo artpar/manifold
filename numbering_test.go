@@ -143,7 +143,9 @@ func TestNumberingNestedEditsAndFourPaths(t *testing.T) {
 		if err := Write(context.Background(), &out, d, format, WriteOptions{}); err != nil {
 			t.Fatal(format, err)
 		}
-		back, err := Read(context.Background(), &out, format, ReadOptions{})
+		// This assertion checks painted marker strings. Logical list semantics
+		// are checked separately by TestGeneratedPDFNumberedListSemantics.
+		back, err := Read(context.Background(), &out, format, ReadOptions{PDFSkipStructure: true, PDFSkipInference: true})
 		if err != nil {
 			t.Fatal(format, err)
 		}

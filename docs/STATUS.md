@@ -40,7 +40,52 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: painted PDF structure and typed-note recovery
+## Latest progress: editable PDF list numbering
+
+Tagged PDF Roman and Latin alphabetic lists now recover as editable ordered lists
+when one canonical sequence reproduces every displayed label. Starting values,
+case, repeated-letter alphabetic passes, two-digit decimal padding and consistent
+literal prefixes/suffixes persist through SF and DOCX. Standard explicit format
+families select parsing; start/pattern inference is separately diagnosed and
+recorded in source evidence. Absent/None format attributes retain conservative
+decimal/bullet inference. Observed nested prefixes remain literal; no hidden
+ancestor-counter relationship is invented.
+
+Padded decimal output now declares Decimal and legal numbering declares its actual
+rendered decimal family. Markers containing links, bookmarks, notes or non-text
+content stay literal paragraphs with diagnostics, preserving their content and
+relationships. Marker typography may normalize on reflow and is diagnosed. Mixed
+punctuation retains the existing decimal normalization policy; unsupported,
+noncanonical, ambiguous and out-of-range sequences are not assigned false counters.
+This is explicit partial recovery, not arbitrary label/locale/template fidelity.
+
+Six PDF→SF→DOCX cases preserve 18 editable items, body style/URI relationships,
+source labels and starts/templates/formats. Independent pypdf/SF/OOXML checks
+confirm actual PDF attributes/rendered labels and emitted Word numbering. The
+original iv./Body source fixture is unchanged: the former unsupported-stage test
+now requires a typed Roman list, original label and inference disclosure. Existing
+physical nested-marker strings are unchanged and inspected using the explicit
+physical view; separate logical tests verify nested item structure/context.
+
+```sh
+MANYDOC_PDF_LIST_NUMBERING_QA=output/pdf-list-numbering GOWORK=off go test -run TestGeneratedPDFNumberedListSemantics -count=1 .
+output/qa-venv/bin/python scripts/verify_pdf_list_numbering.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/pdf-list-numbering/*.sf
+GOWORK=off go test -run 'TestPDFListNumbering|TestGeneratedPDFNumbered|TestPDFNestedCounter|TestPDFCounterAnnotations|TestPDFPictorialCounter' -count=1 .
+```
+
+Full tests pass (library 26.969s/CLI 0.477s), vet/modules and CGO-disabled
+host/Linux amd64/arm64 builds pass. Full race passes before the final explicit-
+family guard (319.868s/3.235s); the final guarded paths pass focused race (2.018s)
+and CGO-disabled tests (0.423s). A complete final race rerun is in progress.
+Canonical-pattern fuzz passes 53,792 executions/11.466s/two workers (short safety
+sample). Actual ProseMirror validates 66 nodes across six SFs; diff check passes.
+verification.json records commands/scope. Goal active/incomplete:
+remaining literal/custom list representation, PDF inverse/source/resource and
+reflow audits, native rendering/intent/browser, note policies and final acceptance
+remain open. No new production dependency, backend or permission gate is added.
+
+## Earlier progress: painted PDF structure and typed-note recovery
 
 PDF output now emits a PDF 2.0 logical tree tied to actual page-scoped MCIDs,
 MCRs, reciprocal parent-tree entries and named structure IDs. Paragraphs/headings,
@@ -1317,30 +1362,25 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
 
 ## Next concrete implementation order
 
-1. Implement/qualify the actual Colleaf native snapshot adapter through the shared
-   SF. Include UTF-16 boundaries, rich source maps, notes/stories and resources;
-   do not stop at plain-text wrapping. Leave applications/backends untouched.
-2. Qualify remaining broader untagged note recovery and original source consistency,
-   using PDF_NOTES.md and preserving source facts/content. Newly qualified nested
-   definition/wrapper cases must remain regression evidence, not repeated blockers.
-3. Preserve the now broadened original DOCX corpus and independent expectations;
-   carry its measured source/producer/review/field limits into the final audit.
-   Fix further real failures without changing original oracles.
-4. Audit remaining source-structure consistency/resource and public API evidence,
-   repeat the full acceptance matrix and final checks, and complete the goal only
-   after every original criterion is proven. There is no external blocker now.
+1. Audit PDF inverse ParentTree/forward ownership consistency and resource limits
+   against malformed and independently authored sources. Retain current physical
+   and explicit/inferred source oracles; never recover from an embedded SF cache.
+2. Qualify remaining native rendering/intent/settings and browser/preset behavior
+   against the pinned Colleaf/Univer packages. The public offline VDOCS adapter,
+   rich mappings, source persistence and plugin saves already exist; do not repeat
+   their implementation or modify the applications.
+3. Complete the remaining note-policy, custom/literal-list representation and
+   broader untagged/source/reflow audits. Record exact scope and reproducible
+   failures rather than treating a current rejection as completed capability.
+4. Preserve the original corpus and independent expectations, refresh the full
+   acceptance matrix and visual/API/resource checks, and complete the goal only
+   after every original criterion is proven. No external blocker is established.
 
 ```sh
-# Next: implement actual native integration from the pinned schema.
-cat docs/COLLEAF_FORMAT.md
-rg -n 'IDocumentData|dataStream|customRanges|tableSource' output/codec
-GOWORK=off go test -race -run 'TestPDFNested|TestPDFRedundantNote|TestPDFNoteWrapper' -count=1 .
-# Full nested source/generation/reader commands: PDF_NOTES.md
-output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
-bin/manydoc extract -format sf -o output/audit/explicit-note.sf output/audit/explicit-note.pdf
-bin/manydoc extract -format sf -o output/audit/pagination-artifact.sf output/audit/pagination-artifact.pdf
-output/qa-venv/bin/python scripts/verify_pdf_notes.py
-# Full probe/generation/reader commands: docs/PDF_NOTES.md
+cat docs/ACCEPTANCE.md docs/PDF_NOTES.md docs/COLLEAF_FORMAT.md
+rg -n 'ParentTree|StructParent|MCID|OBJR' pdf_structure*.go pdf_marked.go
+GOWORK=off go test -run 'TestGeneratedPDF|TestPDFTagged|TestCLIVDOCSSemantics' -count=1 ./...
+output/qa-venv/bin/python scripts/verify_pdf_list_numbering.py
 ```
 
 ## Code map and recovery commands

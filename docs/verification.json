@@ -7182,5 +7182,47 @@
       "cat docs/STATUS.md docs/ACCEPTANCE.md",
       "rg -n 'ParentTree|OBJR|Ref|pdf_note_reflow' pdf_structure.go pdf_structure_notes.go pdf_output_structure.go"
     ]
+  },
+  "pdf_counter_recovery_milestone": {
+    "date": "2026-11-24",
+    "goal": "active/incomplete",
+    "behavior": "Canonical tagged PDF Roman/repeated-Latin-letter/padded decimal counters recover as editable SF/DOCX lists. Explicit family selects parsing, unique label sequence determines inferred start/literal template; no ancestor/legal intent invented. Writer declares actual decimal family for legal/padded counters.",
+    "guards": "4096-byte labels, 512-byte numbering templates, signed 32-bit counters, exact canonical regeneration and unique token position. Conflicting explicit family, unsupported alphabets, ambiguity, marker links/anchors/notes/images remain literal with diagnostics. Marker typography normalization diagnosed.",
+    "oracles": "Original iv./Body fixture bytes unchanged, strengthened to typed lowerRoman/start4/source label/inference checks. Existing physical nested marker strings unchanged; explicit physical read selects painted marker oracle, separate logical tests verify nested ownership/context.",
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_pdf_list_numbering.py",
+      "verifier_sha256": "fdf917086028b553ade73e68645a3299c15eea22850926b9657c5804ad43dea9",
+      "cases": 6,
+      "items": 18,
+      "families": [
+        "lowerRoman",
+        "upperRoman",
+        "upperLetter",
+        "lowerLetter",
+        "decimalZero",
+        "legal upperRoman rendered as decimal"
+      ],
+      "checks": "pypdf actual L/LI/Lbl/LBody tree, ListNumbering family and exact painted labels; source SF item labels/start/template/format/strong/URI; independent OOXML numbering.xml/document.xml formats, template, starts and numbered paragraph counts all pass.",
+      "ProseMirror": "66 nodes and marks/attributes across six SF files pass actual schema reader",
+      "scope": "Semantic import and family attributes; no layout changes or new visual/fidelity claim, arbitrary alphabet/template or browser/Word rendering claim."
+    },
+    "checks": {
+      "go_test_all": "passed library26.969s/CLI0.477s; final repeat cached",
+      "race": "passed library319.868s/CLI3.235s before final explicit-family guard; final guarded path race passes2.018s; complete final rerun in progress",
+      "focused_race": "passed2.018s including conflicting-family guard",
+      "CGO_disabled_focused": "passed0.423s",
+      "vet": "passed",
+      "modules": "all modules verified",
+      "builds": "CGO-disabled host CLI build/help executed, Linux amd64/arm64 cross-builds pass; no Linux execution claim",
+      "fuzz": "FuzzPDFListNumberingPattern passed53792 executions/11.466s/two workers; 113 cached/baseline cases, short safety sample",
+      "diff_check": "passed"
+    },
+    "production_dependencies": "unchanged; independent published PDF numbering behavior, no proprietary implementation copied",
+    "remaining": "Literal/custom list representation, broader PDF inverse/source/resource/reflow audits, native settings/rendering/browser, note policies and final API/visual acceptance remain open.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/ACCEPTANCE.md",
+      "rg -n 'ParentTree|StructParent|MCID|OBJR' pdf_structure*.go pdf_marked.go",
+      "GOWORK=off go test -run 'TestGeneratedPDF|TestPDFTagged|TestCLIVDOCSSemantics' -count=1 ./..."
+    ]
   }
 }

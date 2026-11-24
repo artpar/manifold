@@ -100,3 +100,44 @@ visible; expected labels and counter values are unchanged. It independently chec
 Go import of every format/template/start and LibreOffice literal labels. The two
 implicit-parent sequences are separate research evidence, including the explicitly
 documented Word/LibreOffice empty-override disagreement.
+
+
+## Tagged PDF lists: displayed pattern recovery
+
+The [standard PDF ListNumbering families](https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf)
+now select Decimal, UpperRoman, LowerRoman, UpperAlpha or LowerAlpha parsing.
+Roman tokens must be canonical; the existing SF/OOXML Latin alphabetic scheme
+repeats letters after Z. Two-digit decimal padding can be recovered as decimalZero.
+Non-Latin alphabets and other alphabetic sequences are not silently translated.
+
+One maximal token position supplies a candidate start and literal prefix/suffix.
+Every current label must regenerate exactly through the SF renderer, with 512-byte
+template, 4096-byte label and 32-bit counter limits. None/absent attributes retain
+conservative decimal/bullet inference, not speculative Roman/Alpha recognition.
+Ambiguity, inconsistent formats/sequences and unsupported percent templates retain
+literal content with diagnostics; established mixed-punctuation decimal recovery
+may still normalize punctuation with its existing diagnostic.
+
+The logical list hierarchy/format attribute is explicit. Start/template and any
+padding are display-derived, recorded in evidence and pdf_list_numbering_inferred.
+Nested observed prefixes remain fixed literal text; dynamic ancestor bindings
+cannot be established from matching strings alone. Annotation/note/bookmark or
+picture-bearing labels stay literal rather than being consumed into an automatic
+counter. Marker typography is not an editable numbering property and gets
+pdf_list_label_presentation when relevant. General literal/custom list hierarchy
+and appearance representation remains unfinished; current fallbacks are not goal
+completion exemptions.
+
+The writer emits Decimal for decimalZero and for legal-numbered output, matching
+its actual visible family rather than the hidden original format. Six generated
+cases/18 items now have exact marker/start/template/format, SF, body-style/link,
+DOCX and independent PDF/OOXML checks. The unchanged iv./Body source now requires
+a typed lowerRoman list/start4/source label and inference disclosure.
+
+```sh
+MANYDOC_PDF_LIST_NUMBERING_QA=output/pdf-list-numbering GOWORK=off go test -run TestGeneratedPDFNumberedListSemantics -count=1 .
+output/qa-venv/bin/python scripts/verify_pdf_list_numbering.py
+```
+
+No authoring counter state, automatic legal/ancestor intent or Word-equivalent
+layout is claimed to have been recovered from PDF.

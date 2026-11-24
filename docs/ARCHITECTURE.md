@@ -1824,3 +1824,21 @@ No alternate text/body/SF cache is stored. Default import uses that graph;
 PDFSkipStructure provides a diagnosed positioned view, and PDFSkipInference also
 disables geometric grouping. Physical test oracles explicitly select that view;
 separate logical tests check relationships/content/assets/formatting.
+
+
+## Tagged PDF numbering recovery
+
+pdf_list_numbering.go recognizes canonical numeric tokens under explicit PDF
+Decimal/Roman/Alpha families (or conservative decimal inference for None). One
+maximal token position must reproduce every trimmed Lbl through the existing SF
+numbering renderer. Starts and prefix/suffix templates are inferred, bounded and
+validated; ambiguous, noncanonical or unrepresentable patterns retain literal
+content. The source L/LI hierarchy is explicit when a counter is recovered, while
+source evidence/diagnostics distinguish display-derived start/template values.
+
+Rich/non-text/annotated label blocks never become automatic counters that would
+drop their relationships/assets. Their current literal fallback remains explicit
+loss of editable list semantics. Marker typography has a separate diagnostic.
+Nested prefixes stay literal observed context, with no inferred dynamic ancestry.
+The writer's standard attribute describes the rendered family, including legal
+decimal and decimalZero as the Decimal family.

@@ -124,9 +124,9 @@ func preparePDFOutputStructure(d *Document) (*Document, *pdfOutputStructure) {
 				format := types.Name("Disc")
 				if b.List == "number" {
 					format = "Decimal"
-					if b.Numbering != nil && b.Numbering.Level < len(b.Numbering.Formats) {
+					if b.Numbering != nil && !b.Numbering.Legal && b.Numbering.Level < len(b.Numbering.Formats) {
 						switch b.Numbering.Formats[b.Numbering.Level] {
-						case "decimal":
+						case "decimal", "decimalZero":
 							format = "Decimal"
 						case "lowerRoman":
 							format = "LowerRoman"

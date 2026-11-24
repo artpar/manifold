@@ -481,22 +481,28 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 	}
 	kind := ""
 	switch numbering {
-	case "Decimal":
+	case "Decimal", "UpperRoman", "LowerRoman", "UpperAlpha", "LowerAlpha":
 		kind = "number"
 	case "Disc", "Circle", "Square":
 		kind = "bullet"
 	}
 	texts := make([]string, len(labels))
 	allDecimal, allBullet := true, true
+	textOnlyLabels, markerPresentation := true, false
 	start := -1
 	for i, label := range labels {
 		var text strings.Builder
 		for _, b := range label {
-			if b.Kind != Paragraph && b.Kind != Heading {
+			if b.Kind != Paragraph || len(b.Anchors) != 0 {
 				allDecimal = false
 				allBullet = false
+				textOnlyLabels = false
 			}
 			for _, r := range b.Runs {
+				if r.Note != nil || r.Anchor != "" || r.Link != "" || r.Destination != "" {
+					textOnlyLabels = false
+				}
+				markerPresentation = markerPresentation || r.Bold || r.Italic || r.Underline || r.Strike || r.Color != "" && r.Color != "#000000" && r.Color != "auto"
 				text.WriteString(r.Text)
 			}
 		}
@@ -521,7 +527,23 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 			allBullet = false
 		}
 	}
+	pattern, recoveredPattern := pdfListNumberingPattern(numbering, texts)
+	// Decimal fallback only applies to its declared family or absent attributes.
+	// Conflicting explicit Roman/Alpha evidence must not become decimal counters.
+	if numbering != "Decimal" && numbering != "None" {
+		allDecimal = false
+	}
+	if !textOnlyLabels {
+		recoveredPattern = false
+		allDecimal = false
+		allBullet = false
+	}
 	inferred := false
+	if recoveredPattern {
+		kind = "number"
+		start = pattern.start
+		inferred = numbering == "None"
+	}
 	if kind == "" && numbering == "None" {
 		if allDecimal {
 			kind = "number"
@@ -531,7 +553,7 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 			inferred = true
 		}
 	}
-	if (kind == "number" && (!allDecimal || start < 0 || int64(start)+int64(len(bodies))-1 > 2147483647)) || (kind == "bullet" && !allBullet) {
+	if (kind == "number" && (!(allDecimal || recoveredPattern) || start < 0 || int64(start)+int64(len(bodies))-1 > 2147483647)) || (kind == "bullet" && !allBullet) {
 		kind = ""
 	}
 	if kind == "" {
@@ -547,9 +569,15 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 		}
 		return out, nil
 	}
+	if markerPresentation {
+		s.warn("pdf_list_label_presentation", "List marker typography is not an editable numbering property; original label text and physical style evidence are retained while marker appearance may normalize on reflow")
+	}
 	list := Block{Kind: ListBlock, List: kind}
 	if kind == "number" {
 		list.Start = listStartPointer(start)
+		if recoveredPattern {
+			list.Numbering = pattern.numbering
+		}
 	}
 	for i, body := range bodies {
 		if len(body) == 0 || (body[0].Kind != Paragraph && body[0].Kind != Heading) {
@@ -558,7 +586,7 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 		src := sourceFromBlocks(append(append([]Block{}, labels[i]...), body...), n.kids[i])
 		src.Label = texts[i]
 
-		if kind == "number" && texts[i] != strconv.Itoa(start+i)+"." {
+		if kind == "number" && list.Numbering == nil && texts[i] != strconv.Itoa(start+i)+"." {
 			s.warn("pdf_list_label_normalized", "Ordered list punctuation is normalized to decimal dot markers; source labels are retained")
 		}
 		if kind == "bullet" && texts[i] != "•" {
@@ -573,6 +601,10 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 	}
 	if kind == "number" {
 		list.Source.Evidence += ";start_from_label"
+		if list.Numbering != nil {
+			list.Source.Evidence += ";numbering_from_labels"
+			s.warn("pdf_list_numbering_inferred", "Ordered list start and literal pattern are inferred from displayed labels; explicit format attributes select the family when present, and original labels are retained")
+		}
 	}
 	return []Block{list}, nil
 }

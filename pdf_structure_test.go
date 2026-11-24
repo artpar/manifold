@@ -178,11 +178,13 @@ func TestPDFTaggedActualTextAndEmptyParagraph(t *testing.T) {
 	}
 	assertRecoverySF(t, d)
 }
-func TestPDFTaggedUnsupportedLabelPreservesLiteralText(t *testing.T) {
+func TestPDFTaggedRomanLabelPreservesEditableNumbering(t *testing.T) {
 	d := readRecovery(t, taggedTestPDF(markedText(0, 20, 300, "iv.")+markedText(1, 40, 300, "Body"), "<< /Type /StructTreeRoot /K 8 0 R >>", "<< /Type /StructElem /S /L /P 7 0 R /Pg 3 0 R /A << /O /List /ListNumbering /LowerRoman >> /K 9 0 R >>", "<< /Type /StructElem /S /LI /P 8 0 R /K [10 0 R 11 0 R] >>", "<< /Type /StructElem /S /Lbl /P 9 0 R /K 0 >>", "<< /Type /StructElem /S /LBody /P 9 0 R /K 1 >>"))
-	if !strings.Contains(d.Text(), "iv.") || !strings.Contains(d.Text(), "Body") || !hasDiagnostic(d, "pdf_structure_list_labels") {
-		t.Fatal("unsupported label silently dropped")
+	assertPDFNumberedLabels(t, d, 4, []string{"iv."})
+	if d.Blocks[0].Items[0].Source.Label != "iv." || !strings.Contains(d.Text(), "Body") || !hasDiagnostic(d, "pdf_list_numbering_inferred") || hasDiagnostic(d, "pdf_structure_list_labels") {
+		t.Fatal("Roman content/explicit source/inference disclosure lost")
 	}
+
 	assertRecoverySF(t, d)
 }
 

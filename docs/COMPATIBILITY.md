@@ -13,7 +13,7 @@ current rejection behavior must not be read as an exemption from that goal.
 | --- | --- | --- |
 | DOCX read | Paragraphs/headings, family/size/RGB/auto plus bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans/repeating header prefixes, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
 | DOCX write | Paragraphs/headings/runs/links with named families/half-point sizes/RGB/auto, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, section boundaries, four-edge layouts/distances and default/first/even header/footer variants, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
-| PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; more complex inference, semantic note recovery and OCR unfinished; unsupported codecs/encodings/operators reject |
+| PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; explicit typed notes/reciprocal citations recover; broader untagged inference and OCR unfinished; unsupported codecs/encodings/operators reject |
 | PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, per-section body margins/paper settings, metadata, rich measured headers/footers, linked rich footnotes/endnotes with continuation | Built-in Go coverage plus explicit supplied TTFs; qualified Hebrew/Arabic bidi below, broader scripts unfinished; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
 | SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; richer required features remain unfinished |
 | Legacy JSON | Public model with base64 image data and diagnostics | Unknown JSON fields rejected; this is manydoc's model, not Colleaf's .vdocs schema |
@@ -94,7 +94,7 @@ missing glyphs return errors before output. CJK can be extracted from supported
 PDF encodings but cannot currently be generated with these built-in fonts.
 Hebrew/Arabic directional output now works with suitable caller-supplied TTFs
 (qualified below). Built-in Go faces lack that coverage; missing glyphs still reject.
-Devanagari and other guarded scripts remain required unfinished work. The output is not claimed to be PDF/A or tagged PDF. Common typographic spaces
+Devanagari and other guarded scripts remain required unfinished work. Output includes a painted PDF 2.0 logical tree; PDF/A, PDF/UA and WTPDF conformance are not claimed. Common typographic spaces
 now use measured font/em advances with standard ActualText, so the published
 InDesign source renders to nine bounded pages. The earlier implied-paragraph
 fragmentation in tagged list-body import is fixed, with original /K membership
@@ -111,8 +111,9 @@ and omit that provenance. The option does not suppress
 unsupported-feature or missing-glyph errors.
 
 Applications such as Daptin/Colleaf retain authority over identity, permission,
-storage, actions and quotas. No Daptin integration or .vdocs adapter is included
-in this project yet.
+storage, actions and quotas. No Daptin integration is included. A public offline .vdocs adapter maps the
+qualified Colleaf/Univer profile through SF; native browser behavior remains
+unqualified. See COLLEAF_FORMAT.md.
 
 ## Merged table cells
 
@@ -1182,3 +1183,12 @@ with PDFSkipInference for paint order. Running/repeated rendering stays physical
 artifact evidence, not reusable authoring-template reconstruction. Namespaced
 colliding note IDs are stable across reflow. This is not accessibility certification
 or arbitrary PDF/SF/Word fidelity. General untagged and source/resource audits remain.
+
+
+Tagged PDF list recovery now supports canonical Roman, repeated-Latin-letter and
+padded-decimal sequences, with consistent literal prefix/suffix preservation in
+SF/DOCX. Explicit family and inferred start/pattern remain distinct in diagnostics
+and evidence. This does not infer hidden ancestor/legal intent or arbitrary
+alphabets. Ambiguous, annotated or non-text labels retain literal rich content
+with disclosed loss of editable list semantics. Marker appearance may normalize
+on reflow with a diagnostic. NUMBERING.md records exact scopes and checks.

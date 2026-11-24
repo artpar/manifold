@@ -2257,3 +2257,19 @@ expected values; select the new explicit physical view when testing those values
 Readers still apply logical structure by default; skipping it is diagnosed.
 Independently inspect the tree/actual paint and compare rendered pixels against
 the pre-tagging commit, then keep the broader completion audit open.
+
+
+## 2026-11-24 Recover canonical PDF counter patterns
+
+Support the standard Roman/Alpha families already emitted by the writer, rather
+than flatten every nondecimal list. Parse canonical values, infer one literal
+prefix/suffix and require exact regeneration across all current labels. Keep the
+explicit family distinct from inferred start/pattern; do not invent nested ancestor
+bindings or a different alphabet when labels disagree. Preserve the established
+mixed-punctuation decimal normalization behavior and its diagnostics.
+
+Reject automatic-marker recovery for label content/relationships the SF numbering
+slot cannot own. Preserve those rich labels literally with a diagnostic instead
+of losing linked text or pictures. Keep marker appearance/reflow limits explicit.
+Advance the old unsupported Roman expectation to stronger typed/source checks
+without changing its source fixture; retain literal geometry oracles unchanged.

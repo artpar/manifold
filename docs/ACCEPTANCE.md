@@ -1,6 +1,6 @@
 # Active goal acceptance audit
 
-Audited after actual native save/source/language qualification, 2026-11-24.
+Audited after native transport, painted PDF structure and counter recovery, 2026-11-24.
 **The full goal remains incomplete.** This is the current requirement audit;
 older milestone narratives are preserved in Git history and verification.json.
 The objective remains all four rich-document paths around one shared SF, pure Go,
@@ -53,8 +53,8 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
 3. **Actual Colleaf boundary:** implement/qualify a standalone native Univer 1.0.4
    snapshot adapter through the shared SF, including rich structures and UTF-16
    ranges. Private exact-envelope/strict-JSON/Unicode and actual facade saved-envelope
-   reimport now exist (COLLEAF_FORMAT.md); public native API/CLI, remaining mappings
-   and browser/preset qualification are still unfinished. Dynamic literal-percent/
+   reimport now exist (COLLEAF_FORMAT.md); the public offline native API/CLI is implemented; remaining intent/settings mappings
+   and browser/preset qualification are unfinished. Dynamic literal-percent/
    digit-suffix and zero/legal native list templates now have real glyph/save/edit
    evidence; remaining marker appearance and browser controls are still open.
    Do not merely wrap plain text or rename SF. No Daptin or Colleaf edits
@@ -196,8 +196,8 @@ PDF has no StructTreeRoot and reimports zero typed notes. All visible bodies
 remain, which proves placement/text but not structured recovery.
 
 MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 enables the retained three-note/two-footnote/
-one-endnote CLI oracle; it currently fails. Standard unit/race runs explicitly
-skip this acceptance gate. That green suite is not goal completion evidence.
+one-endnote CLI oracle enabled the historical failing check. That gate was
+removed after the painted-structure fix below; standard runs now enforce it. That green suite is not goal completion evidence.
 Fix the painted logical graph/recovery next, retain the source and expected values,
 and rerun independent structural/visual and final acceptance checks afterward.
 
@@ -223,3 +223,14 @@ Independent source-SF-driven recursive-table and repeated-header checks also pas
 7 and5 pages, respectively, with table/row/cell-span/image/citation ownership and
 original literal marker counts. Only the two-page notes example has the fresh
 pre-tagging pixel baseline and visual inspection in this milestone.
+
+
+Latest PDF numbering evidence: six explicit-family generated cases preserve 18
+editable items, source labels, starts/templates/formats and body style/URI through
+SF and DOCX. Independent pypdf/SF/OOXML checks verify actual attributes, labels
+and numbered paragraphs; a nested case preserves observed literal context without
+inventing ancestry. Canonical bounds/ambiguity/unsupported alphabet and annotated/
+pictorial label guards retain source content with explicit losses. The original
+Roman fixture remains unchanged and now has stronger positive structural/source
+expectations. Literal/custom marker representation and broader inverse/source/
+resource/native/reflow/final audits remain open.
