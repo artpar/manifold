@@ -283,3 +283,10 @@ the Adobe PDF1.7 reference's standard ListNumbering families
 and the existing attributed OOXML numbering contract. No implementation code is
 copied/translated. Optional independent pypdf/OOXML checks add no production
 dependency; existing source fixtures and physical expected labels are unchanged.
+
+
+Reciprocal PDF ownership validation is independently authored against PDF 2.0
+clause 14.7.5.4 and its public corrections:
+https://pdf-issues.pdfa.org/32000-2-2020/clause14.html#14754-finding-structure-elements-from-content-items
+Optional pypdf checks reuse the previously attributed original Copyright Office
+PDF and generated notes; no production dependency or proprietary code is added.

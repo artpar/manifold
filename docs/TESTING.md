@@ -2411,3 +2411,16 @@ MANYDOC_COLLEAF_QA_TREE emits an optional private tree for the independent actua
 Univer parser comparison. COLLEAF_FORMAT.md contains the full pinned install/source
 and reader commands. These are foundation checks; no public native conversion or
 complete SF/native mapping is claimed yet.
+
+
+## Reciprocal PDF ParentTree checks
+
+PDF_PARENT_TREE.md records the current import contract and commands. The tests
+check actual forward/inverse content ownership, page/Form scopes and annotation
+scalar owners, alongside malformed key/range/shape/cycle and bounded sparse-array
+cases. FuzzPDFParentTree must never let index changes alter forward content/order.
+Independent pypdf checks use both the unchanged original InDesign PDF and actual
+painted generated notes, then create separate contradictory-owner variants whose
+decoded page streams remain unchanged. CLI rejection and absence of committed
+output are checked separately. This evidence concerns ownership consistency,
+not full PDF resource safety, standards certification or visual equivalence.

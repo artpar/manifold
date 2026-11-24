@@ -18,7 +18,7 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
 | SF→DOCX | docx_write.go and related modules; exact supported source SF round trips; python-docx/standard XML/LibreOffice checks and visual examples in verification.json | Implemented rich path; eight additional original exports and33 original/native/Word pages now qualify note/story/review/field output; producer limits remain explicit |
 | SF→PDF wrapping/pagination/tables/fonts/Unicode | pdf_write/text/shaping/bidi/glyph/table/note modules; independent font/GID/geometry/pixel/continuation checks; 189-page real-source render | Implemented declared support contract. Unsupported shaping/missing glyphs explicitly error; no automatic font substitution. Do not turn this into an unstated requirement for every script or Word pagination |
 | PDF→SF text/images/pages/positions/structure | pdf_read/geometry/images/marked/structure/infer/rulings modules; original 90 tables/3,009 origins/eleven continuation refs; PDF_NAVIGATION.md | Rich extraction exists. Explicit artifact properties/membership now recover in physical page/source records (PDF_ARTIFACTS.md). Explicit forward/reverse/repeated Note/Ref relationships now recover typed rich notes (PDF_NOTES.md); independently cited nested definitions and same-target ownership wrappers now qualify in PDF_NOTES.md; broader untagged inference remains required; rich body marks and atomic rich/mixed-direction citations are qualified in RICH_NOTE_LABELS.md and RICH_CITATIONS.md; common editable label backlinks are qualified in PDF_NOTES.md |
-| Distinguish explicit/inferred/uncertain PDF meanings | SourceInfo; explicit logical roles separate from geometric/table/span/width/destination inference; original source identity/geometry oracles | Implemented for current recovery. Artifact page roles/properties now remain explicit, separate from authoring templates. Notes now separate explicit roles/edges from KindInferred reflow defaults. Rich/nested explicit note graphs are qualified; broader untagged recovery and inverse ParentTree consistency remain unqualified |
+| Distinguish explicit/inferred/uncertain PDF meanings | SourceInfo; explicit logical roles separate from geometric/table/span/width/destination inference; original source identity/geometry oracles | Implemented for current recovery. Artifact page roles/properties now remain explicit, separate from authoring templates. Notes now separate explicit roles/edges from KindInferred reflow defaults. Rich/nested explicit note graphs are qualified; present reciprocal page/Form/annotation ownership is now checked with original-source and malformed-input evidence (PDF_PARENT_TREE.md); broader untagged/resource/source qualification remains open |
 | Paragraphs/headings/formatting/links/lists | Shared model/profile, DOCX style/theme/slot/direction and numbering code; NUMBERING.md, URI_TARGETS.md, PDF_NAVIGATION.md; tests/independent source/render checks | Implemented for declared subset. Audit found ActualText dropped typed internal targets; current fix and regression tests close that concrete failure, with mixed ownership still diagnosed |
 | Tables including merged cells and widths | table_grid, DOCX merges/grids, native recursive continuation/repetition, tagged/painted PDF recovery; TABLE_WIDTHS.md and TAGGED_TABLE_SPANS.md | Declared semantics implemented and independently qualified, including actual Word/PDF cells. Complex ambiguous grids must retain content and disclose uncertainty |
 | Images/assets/metadata/page settings | Image decode/bounds/fitting, JPEG preservation, metadata, margins/sections/story ownership, multiple independent raster and relationship checks | Implemented current contract. Preserve practical source/asset qualification in final representative corpus; unsupported image variants have explicit outcomes |
@@ -33,67 +33,35 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
 | Tests/race/vet/malformed-input/CGO-disabled builds | verification.json and newest raw logs; strict archive/XML/PDF/SF/gzip cases, fuzz campaigns and source tests | Latest checked milestones pass. Required complete checks must run again after the remaining implementation, not substitute for missing feature evidence |
 | Accurate recovery docs, limitations, commands, ongoing commits | STATUS, ARCHITECTURE, DECISIONS, COMPATIBILITY, feature contracts and verification.json; user-requested milestone commits | Keep current. Historical pending statements are not current evidence; this audit and STATUS are the current queue |
 
-## Concrete contradictions and next implementation order
+## Current implementation and qualification queue
 
-1. **ActualText navigation:** structural replacement previously copied href while
-   dropping Run.Destination; the common-style intersection also ignored typed
-   destination identity. The current fix retains matching internal targets and
-   clears mixed URI/internal/different-target ownership. Single/multiple-run parent
-   ActualText, SF, DOCX and intersection tests establish the corrected behavior.
-2. **Explicit PDF story semantics:** the original zero-note Note/Reference/Ref
-   probe now recovers a typed note. Rich/repeated/reverse-linked cases preserve
-   label, ID bytes, style, list/table/image hierarchy/pixels and note-body navigation.
-   KindInferred explicitly separates the endnote editorial default from source
-   NoteType. PDF_NOTES.md records qualification and implemented different/empty citation and body labels,
-   identified logical/physical inference and original guide cases, and still-required
-   broader untagged graphs; independently cited nested definitions/Ref wrappers and exact nested/enclosing ActualText correspondence
-   is now qualified in PDF_NOTES.md, while opaque replacements retain uncertainty. Rich/internal mixed-direction
-   citations now have the independent evidence in RICH_CITATIONS.md. Artifact page roles and
-   membership remain independently qualified without inventing running templates.
-3. **Actual Colleaf boundary:** implement/qualify a standalone native Univer 1.0.4
-   snapshot adapter through the shared SF, including rich structures and UTF-16
-   ranges. Private exact-envelope/strict-JSON/Unicode and actual facade saved-envelope
-   reimport now exist (COLLEAF_FORMAT.md); the public offline native API/CLI is implemented; remaining intent/settings mappings
-   and browser/preset qualification are unfinished. Dynamic literal-percent/
-   digit-suffix and zero/legal native list templates now have real glyph/save/edit
-   evidence; remaining marker appearance and browser controls are still open.
-   Do not merely wrap plain text or rename SF. No Daptin or Colleaf edits
-   are authorized by this standalone project goal; their access/quotas/save guards
-   remain application responsibilities.
-   Registered hyperlink URL-resource precedence and scoped main/running identities
-   now have actual plugin save/edit/Go/SF evidence. Source-only external handler
-   execution with window.open stubbed does not qualify browser interaction or
-   full native navigation. Current bookmark/heading point data, typed targets and
-   real selection-manager refresh requests now have save/edit/Go/SF evidence.
-   Real table/image-start anchors now have nested/list/story save/edit/SF and
-   exact selection-request evidence. List/section/page-break anchors now also have
-   nested/story/empty-section save/edit/SF and selection evidence; soft-boundary
-   point retention has a Go regression. Standalone AnchorPoint projection now has
-   actual save/edit/SF/group/alias/carrier/text and selection-request evidence;
-   foreign row/cell/terminator controls now have explicit normalized SF targets
-   and original/normalized/edited native selection evidence. Nonmain lookup limits,
-   document-level diagnostic/page/view evidence now survives actual native saves
-   and edited target graphs. Per-node provenance/remaining intent and rendered caret/
-   scroll/browser behavior remain required. Document-level diagnostic/page/view
-   history now has actual save/edit/SF evidence and explicit unbound physical
-   views after editable-target changes; native pagination remains independent.
-   Paragraph origins now have actual save/edit/SF/provenance-pool evidence, typed
-   historical/unbound states and ProseMirror qualification; full imported-PDF per-
-   node source transport remains incomplete.
-4. **Corpus/visual and final audit:** eight pinned, legally attributed original
-   Word/Mac Word/LibreOffice inputs now qualify notes/running/review/field policies
-   through source-only oracles, full semantic round trips, independent readers
-   and33 visually inspected pages (REAL_DOCX_CORPUS.md). Preserve the positional-tab
-   fix and explicit font/field/review/producer limits. Complete consistency/resource/
-   API qualification, then repeat every requirement and full check.
+- The ActualText typed-navigation defect is fixed: matching internal targets
+  persist and mixed URI/internal/different-target ownership is diagnosed.
+- Generated PDF now contains painted structure and reciprocal typed notes. The
+  unchanged three-note CLI acceptance check runs unconditionally. Explicit source
+  note graphs, rich labels/citations and running-artifact facts are qualified;
+  broader untagged note/source/reflow cases remain in PDF_NOTES.md.
+- Present inverse ParentTree validation now checks page/Form/annotation ownership.
+  Original-source reciprocal graphs and wrong-owner mutations qualify this gap;
+  broader source/resource safety remains required. See PDF_PARENT_TREE.md.
+- The public offline native adapter, rich graph transport, language/source metadata
+  and registered-plugin saves already exist. Remaining native settings/rendering,
+  marker appearance and full-preset/browser behavior stay unqualified. Read
+  COLLEAF_FORMAT.md for exact mappings and source probes; do not reimplement the
+  existing adapter or modify Daptin/Colleaf.
+- Eight additional original Word/Mac Word/LibreOffice exports qualify notes,
+  running content, reviews and fields through source-only oracles, full semantic
+  round trips and 33 visually inspected pages (REAL_DOCX_CORPUS.md). Preserve their
+  actual source bytes, positional-tab fix and measured producer/font/field limits.
+- Finish the scoped consistency/resource/semantic-reflow/API/visual audit, then
+  repeat the complete matrix and required checks. Component successes alone do
+  not close the full goal.
 
-
-Further source-structure consistency and allocation/editor costs remain explicit
-qualification concerns. Do not escalate the contract into every PDF drawing,
-image codec, script or Word layout rule; the required standard is the stated rich
-features, declared support contract, meaningful structure recovery and explicit
-uncertainty/omissions. No required feature in the queue may be excused merely by
-labeling it unsupported.
+Allocation/editor costs remain explicit qualification concerns. Do not escalate
+the contract into every PDF drawing, image codec, script or Word layout rule; the
+required standard is the stated rich features, declared support contract,
+meaningful structure recovery and explicit uncertainty/omissions. Required work
+cannot be excused merely by labeling it unsupported.
 
 ## Reproduce implemented probes and remaining cases
 
@@ -112,95 +80,9 @@ pinned remote schema evidence. The complete goal stays active, with no external
 blocker preventing the next implementation.
 
 
-## Historical implementation milestones
-
-These chronological entries retain scoped evidence and earlier next steps. The
-requirement table above, latest entry below and STATUS.md define the current queue.
-
-Native note-definition/label provenance and KindInferred now have synthetic actual
-save/edit/identity-detachment and SF evidence. Paragraph provenance survives body-
-mark prefix projection without false staling. Run/citation/container/cell/item source
-bindings, marker appearance/nonvisual intent, public API/CLI and full native/browser/
-corpus/final audits remain required; this milestone does not complete that queue.
-
-
-Native nonempty run/link/rich-body-mark/citation-source transport now has synthetic
-actual save/split/edit/reference-detachment and exact SF evidence. ProseMirror
-source-mark attribute coverage now includes historical and optional table facts.
-Zero-width anchor/container/cell/item source bindings and the remaining native
-intent/API/UI/corpus/final audits remain required.
-
-
-Native table/cell source transport now has synthetic actual merged/nested/running/
-note-table save/edit/detached/covered-marker and exact SF evidence. Original width/
-span facts remain explicit and edited bindings use historical/unbound states.
-Image/list/item/other container/anchor sources and full native intent/API/UI/corpus/
-final acceptance remain required.
-
-
-Native image sources now have synthetic actual plugin-save/resize/replacement/
-detachment and exact asset/SF evidence, including registered mirror consistency and
-original JPEG bytes. Source facts remain separate from current native geometry.
-List/item/other container/anchor sources and full native intent/API/UI/corpus/final
-acceptance remain required; browser bitmap painting is not qualified by these probes.
-
-
-Native list/item sources now have synthetic actual save/TextX edit/rendered restart/
-reference-detachment and exact SF evidence, including parent numbering/ordinal
-qualification, inherited/lost ownership and stable repeated round trips. Other
-container/anchor sources and full native intent/API/UI/corpus/final acceptance
-remain required.
-
-
-Native named inline-anchor sources now have synthetic actual save/point-lookup/
-TextX/move/rename/detachment and strict SF evidence, with conservative paragraph-
-context qualification and changed-owner archival. Remaining section/break/standalone
-sources, identityless empty-text source policy and full native intent/API/UI/corpus/
-final acceptance remain required.
-
-
-Native section/break/standalone source slots now have synthetic actual save/edit/
-soft-boundary/group-rename/detachment and strict SF evidence. Identityless empty-source
-SF output now rejects explicitly; detached facts round-trip through UnboundSources.
-Combined real-source qualification and remaining native intent/API/UI/corpus/final
-acceptance remain required.
-
-
-Latest combined native source evidence: the unchanged original Copyright Office
-PDF now preserves its full SF graph through repeated private Go conversion and
-two actual registered-plugin saves/reopens. Its11MiB snapshot initially failed the
-actual app 5 MiB validator; checked lossless metadata compression reduces it to 3.6 MiB
-and the unchanged validator passes.153 paragraph / 8,651 run / 67 list/item records and
-8,872 actual ProseMirror nodes qualify this producer/component. Other owner kinds,
-exported DOCX nonvisual intent, native browser/API and broader resource/final audits
-remain required. No blocked required capability is reclassified as complete.
-
-
-Latest native language evidence closes the five exported-DOCX language-guard
-failures. The distinct language settings survive actual registered-plugin saves,
-current edits/removal, strict native reimport and exact SF graph comparison. A
-synthetic fixture covers the shared body/list/cell/running/note/label contexts;
-actual ProseMirror checks 516 nodes across 18 saved/edited/cleared artifacts.
-Persistence is qualified; complex-language native shaping and forced-script/run
-direction rendering are not. Remaining native settings/API/browser and broader
-PDF/resource/final acceptance remain required.
-
-
-## Historical public-native milestone and PDF note failure (now fixed below)
-
-The checked offline native profile now has public API/CLI/example coverage and
-actual validator/save/SF evidence. Remaining native browser/rendering/intent work
-is still open. The generated-PDF semantic gap is now reproducible: the notes
-example preserves three typed definitions through native/SF/DOCX, but generated
-PDF has no StructTreeRoot and reimports zero typed notes. All visible bodies
-remain, which proves placement/text but not structured recovery.
-
-MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 enables the retained three-note/two-footnote/
-one-endnote CLI oracle enabled the historical failing check. That gate was
-removed after the painted-structure fix below; standard runs now enforce it. That green suite is not goal completion evidence.
-Fix the painted logical graph/recovery next, retain the source and expected values,
-and rerun independent structural/visual and final acceptance checks afterward.
-
+Earlier chronological component evidence and resolved failures remain in Git
+history and verification.json. The current table/queue above supersede their
+historical unfinished-work statements.
 
 ## Current generated-PDF structure acceptance result
 
@@ -216,7 +98,7 @@ citations; MuPDF confirms two pages pixel-identical to the pre-tagging commit,
 with Poppler visual inspection. Physical oracles retain expected values and select
 PDFSkipStructure explicitly; default reads verify the logical graph separately.
 No PDF/UA/WTPDF conformance or full goal completion follows from this component
-evidence. Remaining native/browser, note policies, untagged/inverse/source/resource
+evidence. Remaining native/browser, note policies, broader untagged/source/resource
 and final acceptance work stays open.
 
 Independent source-SF-driven recursive-table and repeated-header checks also pass:
@@ -234,3 +116,13 @@ pictorial label guards retain source content with explicit losses. The original
 Roman fixture remains unchanged and now has stronger positive structural/source
 expectations. Literal/custom marker representation and broader inverse/source/
 resource/native/reflow/final audits remain open.
+
+
+Latest inverse-ownership evidence: unchanged real InDesign source has 413 forward
+elements/550 reciprocal owners; generated notes have 40/24. Independent pypdf
+confirms them and creates wrong-owner mutations with unchanged decoded page content
+streams. CLI must reject those contradictions. Go tests cover page/Form scopes,
+annotations, missing/null/extra entries, malformed shape/ranges/owners/cycles and
+resource bounds. Missing reciprocal metadata is disclosed without dropping forward
+content. This closes the specific ignored-ParentTree gap, not general source or
+resource safety, accessibility conformance or full goal acceptance.

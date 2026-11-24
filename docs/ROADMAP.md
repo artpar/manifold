@@ -1,35 +1,32 @@
 # Current implementation queue
 
 The complete original objective remains active/incomplete. ACCEPTANCE.md is the
-current requirement-by-requirement audit; historical milestone narratives remain
-in Git history and verification.json. Do not use an old pending statement as proof
-that a feature is still missing or that a requirement can be dropped.
+current requirement audit; STATUS.md supplies the latest evidence and exact next
+commands. Git history and verification.json preserve chronological milestones.
+Historical unfinished-work statements do not reopen resolved features.
 
-PDF_NOTES.md qualifies forward/reverse/repeated typed references, rich definitions
-and kind uncertainty.
-Artifact properties/membership remain qualified in PDF_ARTIFACTS.md.
+The shared ProseMirror profile, four conversion paths, public offline VDOCS
+adapter, actual registered-plugin saves/source/language persistence, original
+DOCX/PDF corpus and painted generated-PDF note/list graphs already exist.
+Present inverse ParentTree ownership now has original-source/negative-mutation
+qualification. These are scoped results, not full goal acceptance.
 
-1. Complete rich multi-node/internal mixed-direction labels, editable label backlinks and nested/
-   enclosing-ActualText graphs and broader untagged note recovery.
-   Preserve explicit edges/content; do not claim the complete note contract from
-   the passing explicit Ref/different/empty mark probes alone.
-   Differing citation/body labels, proven markerless references, identified adjacency
-   and unique physical note-link inference are implemented. The original guide
-   qualifies two real notes and exposes the editable-label-backlink gap.
-2. Implement/qualify a standalone Colleaf native Univer 1.0.4 snapshot adapter
-   through SF. Read COLLEAF_FORMAT.md first: actual .vdocs data is an indexed
-   IDocumentData snapshot with rich source maps and a versioned app envelope.
-   No Daptin/Colleaf writes, permission/quota gates or app transport changes belong
-   in this library. Preserve/reject meanings explicitly and test real reader APIs.
-3. Broaden original DOCX source/producer and rich-note/running/review/field corpus
-   coverage with rights, pinned bytes and independent structural/asset oracles.
-   Render meaningful source/output samples; correct failures rather than edit goldens.
-4. Re-audit remaining structure consistency and resource/interop costs, run the
-   complete tests/race/vet/module/malformed/CGO-disabled and independent/visual
-   checks, then prove every original acceptance item before completing the goal.
+1. Broaden source/structure consistency, malformed-input and resource/interop-cost
+   audits beyond reciprocal ownership. Preserve original content/asset/provenance
+   oracles and independently generated source expectations.
+2. Qualify remaining native rendering/settings/marker appearance and full-preset/
+   browser behavior against pinned Colleaf/Univer APIs. No application writes,
+   authorization/quota gates or app transport changes belong in this library.
+3. Complete remaining untagged note/source/reflow, literal/custom list
+   representation and note-policy audits using PDF_NOTES.md, NUMBERING.md and
+   COLLEAF_FORMAT.md. Rich mixed-direction labels, explicit nested graphs,
+   label backlinks and the public native API are already qualified within their
+   documented scopes; do not repeat their implementation.
+4. Re-audit every original acceptance item, public API and representative visual
+   evidence. Run complete tests/race/vet/module/malformed/CGO-disabled and relevant
+   independent checks, then mark complete only when the original goal is proven.
 
-Current font/shaping behavior is governed by its declared contract and explicit
-missing-glyph/unsupported-shaping errors. Full Word/UniOffice/UniPDF parity and
-Word-equivalent pagination are outside the original completion criteria. This is
-not permission to omit required paragraphs, formatting, links, lists, merged
-structures, images, metadata, page/running/note semantics or meaningful PDF recovery.
+Font/shaping behavior follows its declared contract and explicit missing-glyph/
+unsupported-shaping outcomes. Full Word/UniOffice/UniPDF parity and Word-equivalent
+pagination are outside the original criteria. This does not exempt required rich
+features, meaningful PDF structure recovery or disclosure of losses/uncertainty.

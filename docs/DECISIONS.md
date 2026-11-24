@@ -2273,3 +2273,15 @@ slot cannot own. Preserve those rich labels literally with a diagnostic instead
 of losing linked text or pictures. Keep marker appearance/reflow limits explicit.
 Advance the old unsupported Roman expectation to stronger typed/source checks
 without changing its source fixture; retain literal geometry oracles unchanged.
+
+
+## 2026-11-24 Validate reciprocal PDF content ownership
+
+Cross-check present ParentTree data before reconstructing content, rather than
+trusting one graph direction silently. Follow published PDF 2.0 clause 14.7.5.4:
+page/Form MCIDs index owner arrays, whole-object StructParent indexes a scalar.
+Keep containers separate and reject explicit contradictions. Missing reciprocal
+metadata is a diagnosed partial-source condition; it does not erase otherwise
+recoverable forward content. Inverse-only entries do not authorize invented content
+or ordering. Validate number-tree shape, ordering, Limits when present, cycles and
+bounded owner slots. This is not a full conformance/accessibility certification.

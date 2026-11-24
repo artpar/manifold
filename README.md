@@ -8,6 +8,10 @@ or a Word-compatible layout engine.
 
 The library reads and writes DOCX, extracts positioned text, raster images and supported tagged structure or disclosed geometric inference from PDF, generates PDFs from
 structured content, and exchanges documents as ProseMirror JSON (`.sf`, optionally gzip-compressed as `.sf.gz`), legacy JSON and text.
+The public offline `.vdocs` adapter maps the qualified Colleaf/Univer profile
+through SF; see [native integration](docs/COLLEAF_FORMAT.md) for its contract and
+remaining rendering/browser limits. PDF output carries a logical tree tied to
+painted content; import checks present reciprocal ownership indexes.
 The [structured-format decision](docs/STRUCTURED_FORMAT.md) records the schema,
 tradeoffs and required unfinished expansion.
 Sectioned SF supports separate body frames and default/first/even running stories.
@@ -47,8 +51,8 @@ bin/manydoc extract -format sf -o document.sf input.docx
 bin/manydoc convert -allow-lossy -o report.docx document.sf
 bin/manydoc convert -allow-lossy -o report.pdf document.sf
 bin/manydoc extract -format sf -o recovered.sf report.pdf
-# Inspect untagged physical paint order instead of geometric structure:
-bin/manydoc extract -pdf-skip-inference -format sf -o physical.sf report.pdf
+# Inspect physical paint order without logical or geometric reconstruction:
+bin/manydoc extract -pdf-skip-structure -pdf-skip-inference -format sf -o physical.sf report.pdf
 ```
 
 Flags precede the input filename. SF uses the versioned ProseMirror profile;

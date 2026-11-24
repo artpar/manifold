@@ -47,7 +47,7 @@ uris={str(a.get_object()['/A']['/URI']) for p in r.pages for a in p.get('/Annots
 assert len(uris)==16
 sf_path=out/'publication.sf'
 subprocess.run(['bin/manydoc','extract','-format','sf','-o',str(sf_path),str(fixture)],check=True)
-sf=json.loads(sf_path.read_text());node_counts=Counter();links=set();text=[];body=[];converted_items=[];converted_bodies=[]
+sf=json.loads(sf_path.read_text());node_counts=Counter();links=set();internal_targets=set();text=[];body=[];converted_items=[];converted_bodies=[]
 def converted(nodes):
     for n in nodes:
         node_counts[n['type']]+=1
@@ -62,7 +62,12 @@ def converted(nodes):
         if n['type']=='text':
             text.append(n['text']);body.append(n['text'])
             for mark in n.get('marks',[]):
-                if mark['type']=='link':links.add(mark['attrs']['href'])
+                if mark['type']=='link':
+                    # Typed internal targets are navigation, not external URIs.
+                    # Keep the original 16-URI oracle; check internal identity
+                    # separately against the actual source GoTo/name entries.
+                    if mark['attrs'].get('destination'):internal_targets.add(mark['attrs']['destination'])
+                    else:links.add(mark['attrs']['href'])
         converted(n.get('content',[]))
 converted(sf['content'])
 assert node_counts['ordered_list']+node_counts['bullet_list']==10 and node_counts['list_item']==57 and node_counts['heading']==0
@@ -71,6 +76,9 @@ joined=''.join(body)
 for word in ('owner\u00adship','panto\u00admime','pan\u00adtomime','depend\u00ading'):
     assert word in joined,repr(word)
 assert links==uris
+source_internal={str(a.get_object()['/A']['/D']) for p in r.pages for a in p.get('/Annots',[]) if a.get_object().get('/A',{}).get('/S')=='/GoTo'}
+assert len(source_internal)==1 and source_internal<=set(r.named_destinations)
+assert internal_targets==source_internal
 normalized=lambda s: Counter(''.join(unicodedata.normalize('NFKC',s).split()))
 with pymupdf.open(fixture) as doc:
     original_text=''.join(p.get_text() for p in doc)

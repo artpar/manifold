@@ -60,7 +60,10 @@ ownership. Tag presence alone is insufficient. Classes/local attributes and
 ListNumbering inheritance are handled; unsupported labels retain literal text
 with a list-semantics diagnostic. Label punctuation/shapes normalize explicitly.
 Unknown roles/attributes, namespaces/revisions and extra accessibility properties
-have diagnostics. Inverse ParentTree validation is not implemented.
+have diagnostics. Present inverse ParentTree entries are checked against forward page/Form and
+whole-object ownership. Contradictions reject; missing reciprocal metadata and
+inverse-only entries have explicit diagnostics. See PDF_PARENT_TREE.md for bounds
+and the scoped contract; this does not certify PDF conformance.
 
 Untagged whitespace/geometry-based reading order, aligned paragraph grouping,
 relative-size headings, consecutive marker lists/nesting/starts/continuations

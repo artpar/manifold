@@ -328,7 +328,10 @@ paragraph/heading/list/table/image roles; table spans use the shared checked gri
 sidecar. Cross-page logical blocks have source regions rather than invented page
 breaks. Source Stream/Role/Element keep paint and semantic provenance distinct;
 list items own label/source metadata independently from paragraph provenance.
-This walk does not yet validate the inverse ParentTree index or full PDF conformance.
+The reciprocal ParentTree pass now checks present inverse ownership before
+materialization; missing information is diagnosed and contradictions reject.
+PDF_PARENT_TREE.md describes bounds and recovery policy. Full PDF conformance is
+not certified.
 
 `pdf_links.go` reads URI annotations and binds tagged Link/OBJR ownership, with
 whole-span geometric fallback for untagged text. Partial/overlapping geometry,
@@ -1842,3 +1845,14 @@ loss of editable list semantics. Marker typography has a separate diagnostic.
 Nested prefixes stay literal observed context, with no inferred dynamic ancestry.
 The writer's standard attribute describes the rendered family, including legal
 decimal and decimalZero as the Decimal family.
+
+
+## Reciprocal PDF ownership validation
+
+`pdf_parent_tree.go` independently parses the number tree and compares its
+container/MCID or whole-object slots against parsed forward content owners before
+notes/materialization. Typed content-object references remain private parser state;
+there is no SF schema expansion. Missing indexes/keys/slots and inverse-only
+ownership remain explicit uncertainty; they never change forward ordering.
+Malformed/cyclic ranges, unknown/nonindirect owners, shared container keys, wrong
+slot shape and contradictory owners reject. See PDF_PARENT_TREE.md.

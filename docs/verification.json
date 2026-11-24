@@ -7208,7 +7208,7 @@
     },
     "checks": {
       "go_test_all": "passed library26.969s/CLI0.477s; final repeat cached",
-      "race": "passed library319.868s/CLI3.235s before final explicit-family guard; final guarded path race passes2.018s; complete final rerun in progress",
+      "race": "passed final library318.303s/CLI3.164s; final guarded paths also pass focused race2.018s",
       "focused_race": "passed2.018s including conflicting-family guard",
       "CGO_disabled_focused": "passed0.423s",
       "vet": "passed",
@@ -7223,6 +7223,45 @@
       "cat docs/STATUS.md docs/ACCEPTANCE.md",
       "rg -n 'ParentTree|StructParent|MCID|OBJR' pdf_structure*.go pdf_marked.go",
       "GOWORK=off go test -run 'TestGeneratedPDF|TestPDFTagged|TestCLIVDOCSSemantics' -count=1 ./..."
+    ]
+  },
+  "pdf_parent_tree_validation_milestone": {
+    "date": "2026-11-24",
+    "goal": "active/incomplete",
+    "behavior": "Present PDF ParentTree cross-checks forward page/Form MCIDs and whole-object annotation owners before materialization. Contradictory owners/key-sharing/shape and malformed number trees reject. Missing indexes/container keys/slots and inverse-only entries are diagnosed while preserving forward content/order.",
+    "limits": "64 levels; 200000 combined index nodes/key entries;400000 combined index entries/owner slots; optional Limits validated when present, omitted nonroot Limits tolerated. Not full PDF conformance/resource safety.",
+    "source_policy": "No original corpus/source/golden expectation changed. Typed content references are private parser state; no public API/SF expansion or output-layout change.",
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_pdf_parent_tree.py testdata/real/copyright-office-circular-1-2021.pdf",
+      "verifier_sha256": "edee03f41fefe6a0f9360748054ed5fedbe2e1b79edb21f894fd014f387d7a3a",
+      "original_InDesign": {
+        "forward_elements": 413,
+        "reciprocal_content_owners": 550
+      },
+      "generated_notes": {
+        "forward_elements": 40,
+        "reciprocal_content_owners": 24
+      },
+      "mutations": "Both replace a present owner with another existing forward element, preserving every decoded page content stream. Both CLI logical imports reject with ParentTree contradicts forward content owner; temporary output destinations remain absent.",
+      "ProseMirror": "8872 actual schema nodes/marks/attributes pass in original-source SF",
+      "visual_scope": "No output painting/layout change; no new visual or universal fidelity claim.",
+      "broader_regressions": "Independent combined tagged paragraph/list/merged-table/image/Form/URI and reflow-DOCX/PDF verifier passes. Original InDesign source verifier passes10 lists/57 items/exact K membership/16 URIs/20531 normalized characters/DOCX metadata and9 reflowed PDF pages/space counts/bounds. Its stale URI classifier now separates typed internal destinations and additionally checks the actual source GoTo/name identity; original source bytes and16-URI oracle unchanged."
+    },
+    "checks": {
+      "go_test_all": "passed library26.800s/CLI cached; preceding uncached CLI0.863s",
+      "race": "passed library317.351s/CLI3.184s including resource-bound tests; final focused race1.825s checks test-only fuzz injection guard",
+      "vet": "passed",
+      "modules": "all modules verified",
+      "CGO_disabled_focused": "passed0.656s",
+      "builds": "CGO-disabled host CLI built and independent mutation checks executed; Linux amd64/arm64 cross-builds passed, not execution",
+      "fuzz": "FuzzPDFParentTree final passed24063 executions/11.459s/two workers/134 cached baseline cases;4 original seeds. Prior campaign30019/11.446s; short safety samples. Object/xref injection is excluded so this target changes only the index, not the fixed forward fixture.",
+      "diff_check": "passed"
+    },
+    "remaining": "Broader source/structure/resource/untagged and custom-list/native-settings/browser/note-policy/reflow/API/visual acceptance audits remain open; no full goal completion claim.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/ACCEPTANCE.md docs/PDF_PARENT_TREE.md",
+      "GOWORK=off go test -run 'TestPDFParentTree|TestPDFTagged|TestGeneratedPDF' -count=1 .",
+      "output/qa-venv/bin/python scripts/verify_pdf_parent_tree.py testdata/real/copyright-office-circular-1-2021.pdf"
     ]
   }
 }

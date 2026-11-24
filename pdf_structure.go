@@ -46,6 +46,7 @@ type pdfStructureNode struct {
 	alt, actual                         *string
 	refs                                []string
 	originalID                          []byte
+	contentObject                       types.Object
 }
 type pdfStructureRecovery struct {
 	reader         *pdfReader
@@ -122,6 +123,9 @@ func (r *pdfReader) recoverStructure(root types.Object) error {
 	}
 	kids, err := s.parse(d["K"], 0, fmt.Sprint(root), 0)
 	if err != nil {
+		return err
+	}
+	if err := s.validateParentTree(d["ParentTree"], kids); err != nil {
 		return err
 	}
 	if err := s.prepareNotes(kids); err != nil {
@@ -263,6 +267,7 @@ func (s *pdfStructureRecovery) parse(value types.Object, page int, parent string
 				return nil, fmt.Errorf("MCR Stm is not a stream")
 			}
 			n.stream = fmt.Sprint(ref)
+			n.contentObject = ref
 		}
 	case "OBJR":
 		ref, ok := d["Obj"].(types.IndirectRef)
@@ -270,6 +275,7 @@ func (s *pdfStructureRecovery) parse(value types.Object, page int, parent string
 			return nil, fmt.Errorf("OBJR requires an indirect object")
 		}
 		n.object = fmt.Sprint(ref)
+		n.contentObject = ref
 	case "StructElem":
 		if id != "" {
 			if s.seen[id] {
