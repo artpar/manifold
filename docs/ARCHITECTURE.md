@@ -1897,6 +1897,17 @@ of list_item, with ordinary source-bearing block content. Identity/source/link
 walkers include this tree; no source metadata becomes editable content by itself.
 PDF irregular-label fallback now retains actual L/LI/Lbl structure, assets and
 relationships instead of flattening paragraphs. Unknown kind/counter intent is
-explicit. Output generation is deliberately guarded until the label/body planner
-and format mappings are implemented. LITERAL_LIST_MARKERS.md records required
+explicit. PDF generation uses a borderless parallel flow plan through the existing table
+continuation machinery, with real Lbl/LBody content owners and no logical layout
+table. Block-bearing labels remain literal on recovery. DOCX/native generation is
+still guarded until proper format mappings are implemented. LITERAL_LIST_MARKERS.md records required
 unfinished work; no completion follows from the extraction/persistence milestone.
+
+
+Generated PDF ordinary Span groups now carry standard structural ActualText tied
+to actual MCIDs. Groups cross contiguous authored run boundaries so shaping/paint
+fragments do not duplicate replacement text. Exact matching removes synthetic
+geometry gaps without discarding styles/links. A strict missing-whitespace matcher
+restores only unpainted Unicode whitespace, preserves every painted character,
+and diagnoses inherited whitespace style. The narrow RTL marker regression proves
+CHILD survives its CHIL / D wrap; LITERAL_LIST_MARKERS.md records source/spec/QA.

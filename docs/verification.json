@@ -7484,5 +7484,44 @@
       "MANYDOC_LITERAL_MARKER_QA=output/literal-markers GOWORK=off go test -run 'TestLiteralMarker|TestPDFVariableLiteral|TestPDFCounter|TestPDFPictorial|TestPDFCustomListLabel' -count=1 .",
       "output/qa-venv/bin/python scripts/verify_literal_markers.py"
     ]
+  },
+  "literal_marker_pdf_generation_milestone": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "PDF renders ListItem.Marker through layout-only borderless parallel table flows. Actual content owns standard L/LI/Lbl/LBody nodes and real MCIDs; nested tables retain their borders/structure. Labels and bodies wrap/continue independently, with note reservation, images, URI/internal destinations and running artifacts. Marker trees join immutable numbering resolution and minimum-body/image fitting.",
+    "layout_policy": "Label column min(120pt,25% available width),6pt cell padding,remaining body column;RTL mirrors columns. Body list default11pt/1.4;cell/note/running inherits compact flow style. Reflow policy,not source indentation or Word fidelity.",
+    "recovery": "Explicit block-bearing Lbl children stay literal even for numeric/bullet/empty text. Direct inline canonical/constant counters retain their prior policy.",
+    "wrap_fix": "Original narrow nested RTL CHILD source painted CHIL / D and recovered CHIL D. Standard ActualText on contiguous ordinary Span groups preserves logical characters tied to actual paint. Exact alignment preserves styles/links. Strict missing-whitespace alignment retains every painted character;only missing Unicode whitespace can be inserted,with explicit no-quad evidence and adjacent-style diagnostic.",
+    "failed_trial": "Per-authored-run structure owners duplicated a cross-style shaped cluster in unchanged FuzzPDFPaintContext/seed#0 (officeAVTo -> officeAV / ToTo). Restored contiguous owners,using linear builders. No seed/fixture/text/pixel oracle changed. Superseded race process tree was explicitly terminated after the authoritative full-test failure,not an observation timeout.",
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_literal_marker_output.py",
+      "verifier_sha256": "9cad8368dcabae6b0b801b91785dc69592a1589924186a89f104a751bed2a3d0",
+      "cases": 5,
+      "pages": 9,
+      "checks": "pypdf actual roles/Ref edges,empty-marker no phantom paint,URI/named destinations,red image pixels,real nested tables,running artifacts,borderless list path operators and CHILD replacement vs real MCID fragments CHIL/D pass.",
+      "ProseMirror": "225 recovered nodes/marks/attributes across five cases pass; authored CLI source/recovery also validates.",
+      "ParentTree": "27 forward elements/eight reciprocal content owners pass for rich case;contradictory-owner mutation retains all decoded page streams and importer rejects.",
+      "visual": "All nine case pages plus authored CLI example rendered with Poppler and inspected:legible parallel flow,columns continue,note labels/bodies/red figures retained,real table borders only. Final nine case-page PNGs equal inspected pixels. Targeted synthetic evidence,not universal fidelity."
+    },
+    "checks": {
+      "go_test_all": "passed final library26.734s/CLI0.809s",
+      "race": "pending final complete run; earlier pre-wrap revision passed320.226s/CLI3.180s",
+      "focused_race": "passed final2.719s marker/ActualText/whitespace/paint-seed checks",
+      "CGO_disabled_focused": "passed0.432s before final whitespace diagnostic only",
+      "vet": "passed before final whitespace diagnostic only",
+      "modules": "all modules verified",
+      "builds": "CGO-disabled host and Linux amd64/arm64 cross-builds pass before final whitespace diagnostic only;host CLI example generation/extraction execute. Cross-builds are not execution.",
+      "fuzz": "FuzzPDFPaintContext passed eight executions/12.335s/two workers/six baseline seeds;very short sample,not broad safety evidence.",
+      "diff_check": "passed"
+    },
+    "production_dependencies": "unchanged;existing optional pypdf/Pillow/ProseMirror/Poppler QA only.",
+    "remaining": "DOCX and VDOCS literal-marker generation/recovery remain required unfinished mappings and currently reject atomically. Native repeated-footnote placement and broader source/resource/reflow/API/visual/original acceptance audits remain open. No completion exemption or overall blocker established.",
+    "next_commands": [
+      "cat docs/LITERAL_LIST_MARKERS.md docs/STATUS.md",
+      "rg -n 'taggedList|bookmark|docxListTag|docxItemTag' docx_lists.go docx_destinations.go docx_read.go",
+      "cat docx_table.go docx_table_widths.go",
+      "MANYDOC_LITERAL_OUTPUT_QA=output/literal-output GOWORK=off go test -run 'TestPDFLiteralMarker|TestPDFWrappedReplacement|TestPDFActualWhitespace' -count=1 .",
+      "output/qa-venv/bin/python scripts/verify_literal_marker_output.py"
+    ]
   }
 }

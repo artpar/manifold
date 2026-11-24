@@ -216,13 +216,15 @@ func (r *pdfRenderer) paintTablePage(plan *pdfTableLayout, page pdfTablePage, x,
 			p := c.position
 			cx, cw := x+plan.columns[p.Column], (plan.columns[p.Column+p.ColSpan] - plan.columns[p.Column])
 			r.pdf.SetDrawColor(120, 120, 120)
-			r.pdf.Line(cx, y, cx, y+band.height)
-			r.pdf.Line(cx+cw, y, cx+cw, y+band.height)
-			if c.top {
-				r.pdf.Line(cx, y, cx+cw, y)
-			}
-			if c.bottom {
-				r.pdf.Line(cx, y+band.height, cx+cw, y+band.height)
+			if !plan.borderless {
+				r.pdf.Line(cx, y, cx, y+band.height)
+				r.pdf.Line(cx+cw, y, cx+cw, y+band.height)
+				if c.top {
+					r.pdf.Line(cx, y, cx+cw, y)
+				}
+				if c.bottom {
+					r.pdf.Line(cx, y+band.height, cx+cw, y+band.height)
+				}
 			}
 			fy := y + 6
 			for _, f := range c.flow {
@@ -233,6 +235,9 @@ func (r *pdfRenderer) paintTablePage(plan *pdfTableLayout, page pdfTablePage, x,
 			}
 		}
 		y += band.height
+	}
+	if plan.borderless {
+		return r.pdf.Error()
 	}
 	// Close page fragments, while interior bands retain true rowspan borders.
 	r.pdf.SetDrawColor(120, 120, 120)

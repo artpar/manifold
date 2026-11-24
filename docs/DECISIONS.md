@@ -2333,3 +2333,26 @@ identity/source validation. Preserve existing fixtures/text/pixels and strengthe
 the structural oracle. Unknown ordered/bullet intent must be diagnosed. Guard
 DOCX/PDF/native output before writes until proper generation exists; that guard
 is temporary required work, not a narrowed completion criterion.
+
+
+## 2026-11-25 Reuse parallel flow for literal PDF labels
+
+Measure literal labels and bodies with the existing two-column cell/continuation
+planner, suppressing only layout borders. Keep actual nested table borders and
+standard L/LI/Lbl/LBody roles; no layout table enters the logical structure tree.
+Use a deterministic capped-quarter-width label column, mirror for RTL, inherit
+context text defaults, and preserve the ordinary note/image/font admission path.
+Block-bearing Lbl content is explicit editable structure, even when text looks
+numeric; preserve it rather than infer an automatic counter and lose style/blocks.
+Keep direct inline-label counter recovery unchanged. No cached SF body/marker
+text is embedded. DOCX/native marker mappings remain required unfinished work.
+
+
+Use standard ActualText on contiguous ordinary Span groups to preserve logical
+text across mid-word and word-boundary wraps. Tie every replacement to real paint
+MCIDs; retain references as separate owners, never replace the document with a
+cached SF payload. Keep shaping groups across authored paint changes: a per-run
+owner trial duplicated the unchanged paint-context seed and was discarded. Exact
+alignment preserves original styles/links; missing-whitespace-only alignment
+cannot alter painted characters and diagnoses its adjacent-style assignment.
+See LITERAL_LIST_MARKERS.md for the unchanged narrow RTL word oracle and sources.

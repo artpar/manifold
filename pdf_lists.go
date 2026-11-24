@@ -55,6 +55,22 @@ func (r *pdfRenderer) listMarker(b Block, index int, width, size float64) (pdfLi
 }
 func (r *pdfRenderer) list(b Block, width, x float64) error {
 	for index, item := range b.Items {
+		if item.Marker != nil {
+			if err := r.paragraphBreakBefore(item.Blocks[0]); err != nil {
+				return err
+			}
+			plan, err := r.measureLiteralItem(item, width, r.bodyHeight(), pdfFlowStyle{size: 11, leading: 1.4})
+			if err != nil {
+				return err
+			}
+			if index == 0 {
+				plan.anchors = b.Anchors
+			}
+			if err := r.renderTablePlan(plan, x); err != nil {
+				return err
+			}
+			continue
+		}
 		size := 11.0
 		first := item.Blocks[0]
 		if err := r.paragraphBreakBefore(first); err != nil {
@@ -106,4 +122,24 @@ func (r *pdfRenderer) list(b Block, width, x float64) error {
 		}
 	}
 	return r.pdf.Error()
+}
+
+// Rich labels and bodies use parallel independent flows. The synthetic table is
+// geometry only: original content already owns Lbl/LBody structure nodes. The
+// column policy is deliberately deterministic, not a recovered authoring indent.
+func (r *pdfRenderer) measureLiteralItem(item ListItem, width, height float64, style pdfFlowStyle) (*pdfTableLayout, error) {
+	labelWidth := math.Min(120, width/4)
+	cells := []Cell{{Blocks: item.Marker.Blocks}, {Blocks: item.Blocks}}
+	widths := []float64{labelWidth, width - labelWidth}
+	if item.Blocks[0].Direction == "rtl" {
+		cells[0], cells[1] = cells[1], cells[0]
+		widths[0], widths[1] = widths[1], widths[0]
+	}
+	b := Block{Kind: Table, ColumnWidths: widths, Rows: []Row{{Cells: cells}}}
+	plan, err := r.measureTableStyle(b, width, height, style)
+	if err != nil {
+		return nil, err
+	}
+	plan.borderless = true
+	return plan, nil
 }

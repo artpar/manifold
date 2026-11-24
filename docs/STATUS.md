@@ -40,7 +40,7 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: explicit literal markers retain rich list labels
+## Latest progress: rich literal labels render through PDF parallel flow
 
 The completion audit found a remaining core structural gap: irregular, annotated
 or pictorial labels could flatten an otherwise explicit PDF L/LI tree. List items
@@ -56,23 +56,40 @@ red image pixel are unchanged. Logical assertions now additionally require actua
 list/item/marker ownership. Independent pypdf checks four source fixtures/six items;
 actual ProseMirror validates 68 nodes/marks/attributes across five SFs.
 
-Generation is explicitly unfinished: DOCX/PDF/VDOCS reject this new marker content
-before writing rather than silently discard it. This is a transitional guard,
-not an exception to the all-four-path goal. Next implement shared label/body PDF
-layout and DOCX/native mappings with the same semantic/asset oracles. Read
-LITERAL_LIST_MARKERS.md for API/schema, required work and exact commands.
+PDF generation now uses the existing measured cell/table continuation planner for
+parallel label/body flows. Layout columns have no borders or logical Table node;
+actual marker/body content owns Lbl/LBody paint. Rich nested tables/images, citation
+notes, URI/internal destinations, continued lists and repeated running artifacts
+retain their ordinary handling. Explicit block-bearing labels stay literal on
+recovery even for numeric/bullet text. Numbering resolution and minimum-body/image
+fitting now include marker trees without mutating caller content.
 
-Final tests pass (library 26.206s/CLI 0.807s); full race passes (library 319.028s/CLI
-cached) after strengthening the formerly flattened-stage paragraph oracle. Final
-focused race (1.577s) covers the last unsupported-control classification and source/
-identity checks. Vet/modules, CGO-disabled focused tests (0.377s), host CLI build/help/
-extraction and Linux amd64/arm64 cross-builds pass. Fuzz passes 10,500 executions/
-11.458s/two workers (short safety sample). CLI SF matches API byte-for-byte, and
-unfinished output rejection leaves an existing destination and no temporary file.
-verification.json records scope, the superseded failed assertion and final checks.
-The full goal remains active/incomplete, with
-literal-marker generation now a concrete core priority. Native repeated-note
-placement and wider source/resource/reflow/API/visual qualification remain open.
+Five output cases/nine pages pass independent pypdf ownership/Ref/asset/destination/
+operator checks; actual ProseMirror validates 225 recovered nodes. Every case page
+and the authored CLI example were visually inspected after Poppler rendering.
+No layout grid, clipping or omitted label figures was observed. This is scoped
+synthetic evidence, not Word-equivalent fidelity. The independent ParentTree audit
+also passes; a contradictory-owner mutation rejects with unchanged paint streams.
+A narrow RTL nested marker also exposed mid-word wrapping recovery (CHIL D for
+CHILD). Standard inline ActualText groups now retain the original text, while
+strict matching preserves painted styles/relationships and restores only missing
+whitespace with explicit adjacent-style uncertainty. A per-run ownership trial
+failed the unchanged paint-context seed by duplicating a shaped cluster; contiguous
+ownership fixes that failure without changing its oracle.
+Read LITERAL_LIST_MARKERS.md and examples/literal-markers/README.md for policy,
+implementation and reproducible commands. Original import fixture oracles remain.
+
+Current full tests pass (library26.734s/CLI0.809s), final focused race passes
+(2.719s), vet/modules/CGO-disabled focused tests and builds pass. The final full
+race run is still live; verification.json records the pending run separately from
+the earlier pre-wrap passing revision. The short paint-context fuzz sample passes
+(eight executions/12.335s); it is not broad fuzz evidence.
+
+DOCX/VDOCS literal-marker generation remains required unfinished work and rejects
+before output. The native repeated-footnote ordering failure and wider source/
+resource/reflow/API/visual acceptance audits remain open; the goal is incomplete.
+Final checks for this milestone are being recorded in verification.json. Prior
+import milestone checks and evidence remain in its historical ledger entry.
 
 ## Earlier progress: fixed ordered-list labels retain PDF structure
 
@@ -372,7 +389,7 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-1. Complete literal-marker PDF layout/paint, DOCX generation/recovery and native
+1. Complete literal-marker DOCX generation/recovery and native
    mapping using LITERAL_LIST_MARKERS.md. The current output rejection is temporary
    required work, not a completed support-contract exception. Reproduce the native
    repeated-footnote failure in COLLEAF_BROWSER.md without weakening its oracle.

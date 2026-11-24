@@ -181,5 +181,6 @@ GOWORK=off go test -run '^$' -fuzz '^FuzzPDFConstantListNumbering$' -fuzztime=10
 Literal labels that cannot be represented by the above automatic/constant rules
 now retain their list/item/label content in the existing SF profile via ListMarker.
 This includes annotated and pictorial labels formerly flattened into paragraphs.
-The current milestone is extraction/persistence only; literal-marker generation
-is required unfinished work, guarded before output. See LITERAL_LIST_MARKERS.md.
+PDF generation now preserves rich labels through borderless parallel measured
+flows and actual Lbl/LBody ownership; explicit block-bearing labels remain literal
+on recovery. DOCX/native literal-marker mappings remain required unfinished work. See LITERAL_LIST_MARKERS.md.

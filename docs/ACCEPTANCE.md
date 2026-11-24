@@ -158,7 +158,10 @@ rich-label limitations. Native repeated-note browser placement remains unresolve
 Literal-marker list extraction/persistence now retains explicit PDF L/LI/Lbl
 ownership, variable/rich labels, relationships and assets through ListItem.Marker
 and the additive list_marker SF node. Unknown kind/counter intent is diagnosed.
-DOCX/PDF/VDOCS generation for this new node remains required unfinished work and
-currently rejects before output; it is not excused by that rejection. Existing
+PDF now renders literal labels through borderless parallel measured flows with
+actual Lbl/LBody paint ownership, rich nested blocks, notes and pagination. Explicit
+block-bearing labels remain literal on recovery, including numeric/bullet text.
+DOCX/VDOCS generation remains required unfinished work and rejects before output;
+it is not excused by that rejection. Existing
 source/text/pixel oracles remain unchanged while structural assertions strengthen.
 LITERAL_LIST_MARKERS.md records the schema, evidence and next implementation.

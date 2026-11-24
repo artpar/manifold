@@ -78,6 +78,11 @@ func resolveNumberingDocument(d *Document) *Document {
 					}
 					next[level] = counter{listStart(*b) + ii, format}
 				}
+				if marker := b.Items[ii].Marker; marker != nil {
+					m := *marker
+					m.Blocks = walk(m.Blocks, next, level+1)
+					b.Items[ii].Marker = &m
+				}
 				b.Items[ii].Blocks = walk(b.Items[ii].Blocks, next, level+1)
 			}
 		}

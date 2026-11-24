@@ -42,6 +42,9 @@ func (s *pdfStructureRecovery) node(n *pdfStructureNode) ([]Block, error) {
 		}
 		if exact {
 			blocks = aligned
+		} else if aligned, ok := alignPDFActualWhitespace(blocks, *n.actual, n); ok {
+			blocks = aligned
+			s.warn("pdf_actualtext_whitespace", "Explicit ActualText restores whitespace absent from paint; adjacent text style is used because that whitespace has no painted style evidence")
 		} else {
 			// A prepared note atom must never disappear into a replacement.
 			// The preparation pass normally keeps opaque ancestors in flow.
@@ -448,6 +451,7 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 	}
 	var labels [][]Block
 	var bodies [][]Block
+	explicitLabelBlocks := false
 	for _, item := range n.kids {
 		var label, body []Block
 		for _, child := range item.kids {
@@ -456,6 +460,13 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 				return nil, e
 			}
 			if child.role == "Lbl" {
+				// A block-bearing label owns editable structure independently of
+				// its current displayed number. Do not infer away those blocks.
+				for _, content := range child.kids {
+					if content.kind == "StructElem" && (pdfParagraphRole(content.role) || content.role == "Table" || content.role == "L" || content.role == "Figure") {
+						explicitLabelBlocks = true
+					}
+				}
 				label = append(label, blocks...)
 			} else {
 				body = append(body, blocks...)
@@ -488,7 +499,7 @@ func (s *pdfStructureRecovery) list(n *pdfStructureNode) ([]Block, error) {
 	}
 	texts := make([]string, len(labels))
 	allDecimal, allBullet := true, true
-	textOnlyLabels, markerPresentation := true, false
+	textOnlyLabels, markerPresentation := !explicitLabelBlocks, false
 	start := -1
 	for i, label := range labels {
 		var text strings.Builder

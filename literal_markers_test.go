@@ -75,7 +75,7 @@ func TestLiteralMarkerSFJSONGzipAndIdentityGraphs(t *testing.T) {
 func TestLiteralMarkerGenerationRejectsBeforeOutput(t *testing.T) {
 	// This is an explicit unfinished renderer capability, not permission to drop
 	// new marker content or narrow the all-four-path completion criteria.
-	for _, format := range []Format{DOCX, PDF, VDOCS} {
+	for _, format := range []Format{DOCX, VDOCS} {
 		var out bytes.Buffer
 		err := Write(context.Background(), &out, literalMarkerDocument(), format, WriteOptions{AllowLossy: true})
 		if !errors.Is(err, ErrUnsupported) || out.Len() != 0 {

@@ -33,6 +33,7 @@ type pdfImageLayout struct {
 	width, height float64
 }
 type pdfTableLayout struct {
+	borderless             bool // parallel list columns; genuine nested tables retain borders
 	width, height          float64
 	columns                []float64
 	anchors                []string
@@ -214,6 +215,16 @@ func (r *pdfRenderer) cellFlowStyle(bs []Block, width, indent, height float64, s
 			}
 		case ListBlock:
 			for index, item := range b.Items {
+				if item.Marker != nil {
+					plan, err := r.measureLiteralItem(item, width-indent, height, style)
+					if err != nil {
+						return nil, err
+					}
+					for _, g := range plan.groups {
+						flow = append(flow, pdfFragment{Table: &pdfTableSlice{table: plan, group: g}, Indent: indent, Height: g.height})
+					}
+					continue
+				}
 				marker, step, err := r.listMarker(b, index, width-indent, style.size)
 				if err != nil {
 					return nil, err
@@ -473,7 +484,9 @@ func (r *pdfRenderer) paintTableGroup(plan *pdfTableLayout, g pdfTableGroup, x, 
 		cy := top + plan.offsets[p.Row] - plan.offsets[g.start]
 		ch := plan.offsets[p.Row+p.RowSpan] - plan.offsets[p.Row]
 		r.pdf.SetDrawColor(120, 120, 120)
-		r.pdf.Rect(cx, cy, (plan.columns[p.Column+p.ColSpan] - plan.columns[p.Column]), ch, "D")
+		if !plan.borderless {
+			r.pdf.Rect(cx, cy, (plan.columns[p.Column+p.ColSpan] - plan.columns[p.Column]), ch, "D")
+		}
 		y := cy + 6
 		for _, f := range c.flow {
 			if err := r.drawFragment(f, cx+6, y); err != nil {
@@ -489,6 +502,10 @@ func (r *pdfRenderer) table(b Block, width, x float64) error {
 	if err != nil {
 		return err
 	}
+	return r.renderTablePlan(plan, x)
+}
+
+func (r *pdfRenderer) renderTablePlan(plan *pdfTableLayout, x float64) error {
 	for _, g := range plan.groups {
 		minimum, err := r.minimumNewFootnotes(g.keys, true, g.height)
 		if err != nil {

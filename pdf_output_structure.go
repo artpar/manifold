@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"sort"
+	"strings"
 	"unicode/utf16"
 
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
@@ -11,7 +12,8 @@ import (
 )
 
 // This tree contains role/relationship intent and references to actual paint,
-// never a cached text/body representation. MCIDs are contiguous within a page.
+// with standard inline replacement text, never a cached SF/body representation.
+// MCIDs are contiguous within a page.
 type pdfOutputNode struct {
 	role     string
 	parent   *pdfOutputNode
@@ -20,6 +22,7 @@ type pdfOutputNode struct {
 	refs     []*pdfOutputNode
 	attrs    types.Dict
 	id, alt  string
+	actual   *strings.Builder
 }
 type pdfOutputMark struct{ page, mcid int }
 type pdfOutputStructure struct {
@@ -94,9 +97,13 @@ func preparePDFOutputStructure(d *Document) (*Document, *pdfOutputStructure) {
 				}
 				ordinary = nil
 			} else if r.Anchor == "" && r.Text != "" {
+				// Contiguous ordinary runs share an owner so a shaped cluster
+				// crossing a paint boundary remains one replacement range.
 				if ordinary == nil {
 					ordinary = s.node("Span", parent)
+					ordinary.actual = new(strings.Builder)
 				}
+				ordinary.actual.WriteString(r.Text)
 				r.pdfOutput = ordinary
 			}
 		}
@@ -147,6 +154,11 @@ func preparePDFOutputStructure(d *Document) (*Document, *pdfOutputStructure) {
 				for j := range b.Items {
 					item := s.node("LI", n)
 					b.pdfOutputLabels = append(b.pdfOutputLabels, s.node("Lbl", item))
+					if marker := b.Items[j].Marker; marker != nil {
+						m := *marker
+						m.Blocks = blocks(m.Blocks, b.pdfOutputLabels[j])
+						b.Items[j].Marker = &m
+					}
 					b.Items[j].Blocks = blocks(b.Items[j].Blocks, s.node("LBody", item))
 				}
 			case Table:
@@ -287,6 +299,9 @@ func (r *pdfRenderer) finishOutputStructure(p *model.Context) error {
 		}
 		if n.alt != "" {
 			d["Alt"] = pdfOutputString(n.alt)
+		}
+		if n.actual != nil && len(n.marks) > 0 {
+			d["ActualText"] = pdfOutputString(n.actual.String())
 		}
 		if len(n.refs) > 0 {
 			targets := types.Array{}

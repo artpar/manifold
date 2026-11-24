@@ -34,6 +34,11 @@ func validatePDFRunning(bs []Block) error {
 			return fmt.Errorf("%w: PDF running content cannot contain page controls", ErrUnsupported)
 		}
 		for _, item := range b.Items {
+			if item.Marker != nil {
+				if err := validatePDFRunning(item.Marker.Blocks); err != nil {
+					return err
+				}
+			}
 			if err := validatePDFRunning(item.Blocks); err != nil {
 				return err
 			}
@@ -296,6 +301,15 @@ func (r *pdfRenderer) minimumRunningBlocks(bs []Block, cell bool) ([]Block, erro
 		}
 		b.Items = append([]ListItem(nil), b.Items...)
 		for j := range b.Items {
+			if marker := b.Items[j].Marker; marker != nil {
+				m := *marker
+				var err error
+				m.Blocks, err = r.minimumRunningBlocks(m.Blocks, true)
+				if err != nil {
+					return nil, err
+				}
+				b.Items[j].Marker = &m
+			}
 			children, err := r.minimumRunningBlocks(b.Items[j].Blocks, cell)
 			if err != nil {
 				return nil, err
@@ -338,6 +352,9 @@ func (r *pdfRenderer) minimumRunningBody(blocks []Block) (float64, error) {
 				minimum = math.Max(minimum, (26-float64(b.Level)*2)*1.4)
 			}
 			for _, item := range b.Items {
+				if item.Marker != nil {
+					bodyDefaults(item.Marker.Blocks)
+				}
 				bodyDefaults(item.Blocks)
 			}
 		}
