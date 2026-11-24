@@ -471,7 +471,9 @@ joining/bidi and broader Unicode qualification remain incomplete.
 
 Admitted TTF faces can now render LTR supplementary outline glyphs and combining
 marks remaining after NFC via glyph IDs/GPOS. No fallback face is selected implicitly.
-The original full font is embedded, once per used glyph face; ordinary authored text also uses the glyph path; virtual controls and internal
+A TrueType embedding subset retains original GIDs, used outlines/components,
+metrics/notices and hinting once per used glyph face; ordinary authored text also
+uses the glyph path; virtual controls and internal
 fixed-Go note labels/captions retain primitives. PDFs using this graph serialize as PDF 1.7. CIDToGIDMap,
 nominal widths, original descriptors/TTF and ActualText/ToUnicode preserve visual
 and logical glyph relationships. Baseline placement matches the primitive writer's
@@ -479,14 +481,16 @@ and logical glyph relationships. Baseline placement matches the primitive writer
 vertical layout space. Graphemes over 1,024 scalars, per-face inventories over 65,535
 CIDs, invalid glyphs or offsets outside PDF coordinate bounds reject atomically.
 Font admission remains conservative, including the existing BMP cmap/embedding-flag
-requirements even though glyph transport itself uses full programs.
+requirements. Internal glyph embedding omits unused outlines and already-applied
+layout/signature tables; see FONT_SUBSETTING.md.
 
 The original path supports LTR graphemes. Language-tagged text now also uses
 contextual LTR runs and line re-shaping, as detailed below. Bidi, arbitrary script/
 language support, color fonts and supplementary fallback remain unfinished. Existing explicit
 broader complex-script/cross-style-grapheme errors remain until implemented.
 These are required expansion work, not completion exemptions. Independent evidence
-uses Noto Sans marks and DejaVu Sans monochrome U+1F600, full program hashes and
+uses Noto Sans marks and DejaVu Sans monochrome U+1F600, pinned source-font hashes,
+independently checked subset outlines/metrics/notices and
 MuPDF reference GIDs/offsets; it does not qualify all fonts or Word-equivalent layout.
 PDF recovery preserves actual span positions and logical text with source precision;
 ambiguous noncollinear replacement paragraphs retain paint order and diagnostics.

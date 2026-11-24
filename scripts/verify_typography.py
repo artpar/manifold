@@ -8,7 +8,7 @@ from pypdf import PdfReader
 from pypdf.generic import ContentStream
 import pymupdf
 import uharfbuzz as hb
-from font_oracles import verify_go_program
+from font_oracles import verify_pdf_glyph_program, original_font_name
 
 parser=argparse.ArgumentParser();parser.add_argument('directory',nargs='?',type=Path,default=Path('output/typography'))
 a=parser.parse_args();root=a.directory
@@ -31,9 +31,9 @@ expected={1:5.5,2:11,3:11/3,4:11/4,5:11/6,6:11*widths[48]/1000,7:11*widths[46]/1
 # Ordinary A now uses the shaped original font, while virtual-space widths
 # intentionally retain the declared primitive-font policy. Derive A from its
 # actual original program instead of assuming it appears in the control subset.
-shaped=next(f.get_object() for f in r.pages[0]['/Resources']['/Font'].values() if f.get_object()['/BaseFont']=='/GoRegular')
+shaped=next(f.get_object() for f in r.pages[0]['/Resources']['/Font'].values() if original_font_name(str(f.get_object()['/BaseFont']))=='GoRegular')
 raw=shaped['/DescendantFonts'][0].get_object()['/FontDescriptor']['/FontFile2'].get_data()
-verify_go_program('GoRegular',raw)
+verify_pdf_glyph_program(shaped)
 face=hb.Face(raw);original=hb.Font(face)
 a_advance=11*original.get_glyph_h_advance(original.get_nominal_glyph(65))/face.upem
 chars_for=lambda page:[c for b in page.get_text('rawdict')['blocks'] if b['type']==0 for line in b['lines'] for span in line['spans'] for c in span['chars']]

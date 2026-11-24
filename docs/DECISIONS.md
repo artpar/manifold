@@ -1282,3 +1282,16 @@ clipping/effect/budget rules and the unique grid/cell matcher. All 42 original
 omitted-span grids now recover, including exact Word-oracle page-89 spans/text. A
 genuinely missing connector remains uncertain. See TAGGED_TABLE_SPANS.md; no row-tag
 border invention or broader snap tolerance was introduced.
+
+
+## 2026-11-24 Subset already-shaped glyph fonts without renumbering
+
+Retain original GIDs and their composite closure to preserve CIDToGIDMap, widths,
+shaping and ToUnicode, while emptying unused outlines. Preserve names/notices, cmap and
+metrics; strip already-applied layout tables and invalidated signatures, rebuild
+sfnt/checksums, and identify each PDF subset uniquely. Work on admitted in-memory
+programs instead of the installed-font registry/cache required by pdfcpu Subset. Keep
+original font hash oracles for sources; validate optimized output with independent
+fontTools outline/metric/notice and pinned raster comparisons. Do not normalize the
+newly discovered Unicode URI corruption to make a corpus audit pass. See
+FONT_SUBSETTING.md.

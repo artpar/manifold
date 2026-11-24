@@ -2,6 +2,7 @@
 import ctypes as c
 import ctypes.util
 import hashlib
+from font_oracles import verify_pdf_glyph_program
 import re
 import sys
 import unicodedata
@@ -29,7 +30,8 @@ for page in reader.pages:
         f = ref.get_object()
         if '/DescendantFonts' not in f: continue
         d = f['/DescendantFonts'][0].get_object(); descriptor = d['/FontDescriptor']
-        if hashlib.sha256(descriptor['/FontFile2'].get_data()).hexdigest() != sha: continue
+        if str(descriptor.get('/FontFamily','')) != 'DejaVu Sans': continue
+        verify_pdf_glyph_program(f,program)
         mapping = d['/CIDToGIDMap'].get_data()
         cmap = {int(a,16): bytes.fromhex(b.decode()).decode('utf-16-be') for a,b in re.findall(rb'<([0-9A-F]{4})>\s*<([0-9A-F]*)>', f['/ToUnicode'].get_data())}
         widths = {}; w = d['/W']; i = 0

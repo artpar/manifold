@@ -2062,3 +2062,17 @@ tagged/untagged shifted-axis cases preserve seven origins;
 absent/clipped/transparent/uncertain-effect connectors cannot prove a grid, and isolated
 patches create no axes. See verification.json and TAGGED_TABLE_SPANS.md for checks and
 remaining work.
+
+
+## 2026-11-24 GID-preserving subsets and independent raster baselines
+
+Run examples/font-subset for all four paths with the vendored DejaVu test font or an
+explicitly supplied licensed font. The original source fonts/hashes are unchanged.
+scripts/font_oracles.py verifies subset composite closure, original
+GIDs/outlines/instructions, metrics/cmap/notices, checksums and unused empty outlines
+using fontTools 4.68.0. Six e1bb449 baseline pages have exact commands and every 1.5x
+pixel; the Han preview has exact 2x pixels and text. Glyph/default-shaping, typography,
+style, paint-context, bidi and language/HarfBuzz oracles pass. Source URI verification
+intentionally fails three mojibake fragments on the 207-page native Word render; its
+fonts/asset/metadata/character evidence is reported separately. See FONT_SUBSETTING.md
+and verification.json for commands, logs, exact checks and incomplete acceptance work.

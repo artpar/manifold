@@ -47,7 +47,7 @@
       "current_conversion_evidence": {
         "DOCX_to_SF": "4998 nonempty body paragraphs, 291 headings, 59 tables/756 rows/3009 origin cells, all merged spans and per-cell content hashes, one original JPEG; formatting/numbering losses remain diagnosed",
         "SF_to_DOCX": "exact normalized SF after caller acknowledgement of diagnostics; original source diagnostics retained in source SF, not claimed to survive a normalized DOCX",
-        "SF_to_PDF": "fails without required source-font mappings; mapped Go faces reject U+2A6D4 because they lack its glyph. Source is not normalized to remove this character."
+        "SF_to_PDF": "Renders 207 pages/4990468 bytes using explicit DejaVu four-style, Go Mono and supplied BabelStone Han mappings; original U+2A6D4 and U+2012 retained. Font subset/asset/metadata evidence passes, but independent source URI audit fails three Unicode fragment targets and widths/numbering/reflow remain required work. No full-source qualification; see docs/FONT_SUBSETTING.md."
       },
       "application": "Microsoft Office Word",
       "app_version": "16.0000"

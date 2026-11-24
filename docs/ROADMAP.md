@@ -181,3 +181,13 @@ distinct axes. Next qualify an appropriately licensed reusable static font for s
 U+2A6D4, then render the actual full Word source with explicit font mappings to expose
 further layout/numbering/width/shading requirements. Keep original fixtures and oracles.
 See TAGGED_TABLE_SPANS.md.
+
+
+## 2026-11-24 Next: Unicode PDF URI targets, then widths and numbering
+
+Glyph embedding and the original supplementary character are now qualified with
+caller-supplied static fonts; no font is vendored. Fix the three concrete Unicode
+fragment targets found by scripts/verify_mqtt_render.py without changing its expected
+source set. Then preserve source column widths and numbering formats, driven by the
+native 207-page Word-source render. Continue other required recovery/layout/corpus and
+provenance/codec performance work. See FONT_SUBSETTING.md.

@@ -3,6 +3,7 @@ package manydoc
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
@@ -362,7 +363,7 @@ func glyphStream(p *model.Context, data []byte) (*types.IndirectRef, error) {
 	}
 	return p.IndRefForNewObject(*s)
 }
-func (f *pdfGlyphFace) embed(p *model.Context) (*types.IndirectRef, error) {
+func (f *pdfGlyphFace) embed(ctx context.Context, p *model.Context, tag string) (*types.IndirectRef, error) {
 	parsed := f.original.parsed
 	var buf sfnt.Buffer
 	name, err := parsed.Name(&buf, sfnt.NameIDPostScript)
@@ -385,7 +386,16 @@ func (f *pdfGlyphFace) embed(p *model.Context) (*types.IndirectRef, error) {
 	if err != nil {
 		return nil, err
 	}
-	program, err := glyphStream(p, f.original.data)
+	used := make([]uint16, len(f.entries))
+	for i, e := range f.entries {
+		used[i] = e.glyph
+	}
+	fontProgram, err := subsetGlyphTrueType(ctx, f.original.data, used)
+	if err != nil {
+		return nil, err
+	}
+	name = tag + "+" + name
+	program, err := glyphStream(p, fontProgram)
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +403,7 @@ func (f *pdfGlyphFace) embed(p *model.Context) (*types.IndirectRef, error) {
 	if err != nil {
 		return nil, err
 	}
-	stream.InsertInt("Length1", len(f.original.data))
+	stream.InsertInt("Length1", len(fontProgram))
 	flags := 32
 	subfamily, _ := parsed.Name(&buf, sfnt.NameIDSubfamily)
 	lower := strings.ToLower(subfamily)
@@ -480,14 +490,23 @@ func (r *pdfRenderer) finishGlyphFonts(input []byte) (output []byte, err error) 
 		ordered = append(ordered, face)
 	}
 	sort.Slice(ordered, func(i, j int) bool { return ordered[i].name < ordered[j].name })
-	for _, face := range ordered {
+	for index, face := range ordered {
 		if err = r.ctx.Err(); err != nil {
 			return nil, err
 		}
 		if len(face.entries) == 0 {
 			continue
 		}
-		ref, e := face.embed(p)
+		var tag [6]byte
+		n := index
+		for i := 5; i >= 0; i-- {
+			tag[i] = byte('A' + n%26)
+			n /= 26
+		}
+		if n != 0 {
+			return nil, fmt.Errorf("%w: too many glyph font subsets", ErrUnsupported)
+		}
+		ref, e := face.embed(r.ctx, p, string(tag[:]))
 		if e != nil {
 			return nil, e
 		}

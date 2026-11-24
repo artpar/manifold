@@ -203,3 +203,13 @@ distinct axes and matches all 79 original Word-oracle span/content facts. Indepe
 readers check 5,852 sides and actual short-connector paint continuity. Other source
 semantics, fonts/scripts, rendering and full corpus requirements remain open; see
 TAGGED_TABLE_SPANS.md.
+
+
+## 2026-11-24 Glyph font efficiency and real-source render evidence
+
+The actual non-BMP Han font now produces a 464KB preview instead of 20.3MB, with exact
+independent glyph/text/raster evidence. Six earlier pages retain exact commands/pixels
+and all shaping/GID/GPOS oracles pass. The complete original source now renders 207
+pages with explicit family/style mappings, but its URI audit fails three Unicode
+fragments and widths/numbering/other source fidelity remain open. The full objective is
+not complete; see FONT_SUBSETTING.md.

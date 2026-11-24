@@ -107,21 +107,11 @@ tools are required at runtime. Complete-source pretty SF is about 451 MB; the
 example deliberately emits a small three-table sample and full table audit.
 Provenance/codec performance remains required work.
 
-Next qualify a reusable static font covering actual source U+2A6D4 with explicit
-family mappings and independent glyph/content/visual checks. Do not remove the
-character or silently substitute fonts. The publisher's
-[BabelStone Han page](https://www.babelstone.co.uk/Fonts/Han.html) identifies a
-candidate static TTF and its original Arphic license. The unmodified 16.0.3 TTF
-was downloaded to ignored output/font-research (51,971,284 bytes; SHA-256
-`d8bb747b3fdccd84a60bd0aa56bb90937270d0bd15f1101cd8f2a5a3709dd0a3`).
-Independent fontTools confirms U+2A6D4 maps to u2A6D4 in its 65,534-glyph static
-glyf/loca font. Go validation/rendering, reuse/integration and independent full-source
-qualification remain open. A subsequent CGO-disabled one-glyph preview succeeds;
-pypdf and MuPDF both extract exact U+2A6D4, and its raster was visually inspected.
-It is 20,348,885 bytes, exposing a font-subsetting/transport efficiency requirement.
-This does not qualify the complete original source or original-font appearance.
-No font is vendored or linked into the runtime.
-Source numbering templates, shading, unequal widths and broader font/script,
-layout, link/content/asset recovery and corpus acceptance remain required. All
-other source diagnostics persist; recovering these table grids is not full-source
-fidelity or full-goal completion.
+The supplementary source character now has a qualified explicitly supplied static
+font and efficient glyph embedding; see FONT_SUBSETTING.md for immutable source
+hashes, licensing provenance and independent glyph/raster evidence. No external
+font is vendored or linked into the runtime. The full Word source now renders
+207 native pages, but a new independent audit rejects three corrupted Unicode
+URI fragments. Fix that exact failure, then source widths/numbering and broader
+layout/content/link/assets and PDF→SF provenance/codec performance under the
+original full goal. This table checkpoint is not complete-document acceptance.

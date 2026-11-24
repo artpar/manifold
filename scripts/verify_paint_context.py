@@ -1,5 +1,6 @@
 """Independent native shaping/GDEF/clip/color/link oracle, QA only."""
 import hashlib
+from font_oracles import verify_pdf_glyph_program
 from pathlib import Path
 from collections import defaultdict
 import json
@@ -41,7 +42,7 @@ for name in ['paint','emergency']:
  for key,obj in page['/Resources']['/Font'].items():
   if not str(key).startswith('/MDG'):continue
   f=obj.get_object();cid=f['/DescendantFonts'][0].get_object();desc=cid['/FontDescriptor']
-  assert hashlib.sha256(desc['/FontFile2'].get_data()).digest()==hashlib.sha256(original).digest()
+  verify_pdf_glyph_program(f,original)
   widths={};values=cid['/W'];j=0
   while j<len(values):
    start=int(values[j]);j+=1

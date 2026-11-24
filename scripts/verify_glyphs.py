@@ -6,7 +6,7 @@ from docx import Document
 from pathlib import Path
 from pypdf import PdfReader
 import pymupdf
-from font_oracles import verify_go_program
+from font_oracles import verify_pdf_glyph_program
 
 out=Path('output/glyphs')
 word=Document(out/'glyphs.docx')
@@ -22,7 +22,7 @@ with ZipFile(out/'glyphs.docx') as z:
  assert b'https://example.invalid/glyph' in z.read('word/_rels/document.xml.rels')
 r=PdfReader(out/'glyphs.pdf',strict=True)
 assert len(r.pages)==2 and r.metadata.title=='Positioned glyphs'
-# Full embedding is deliberate; verify real programs, not font names alone.
+# Verify used outlines, component closure, metrics/notices and original GIDs.
 seen={}
 for page in r.pages:
  for key,obj in page['/Resources']['/Font'].items():
@@ -31,10 +31,10 @@ for page in r.pages:
   cid=f['/DescendantFonts'][0].get_object();assert cid['/Subtype']=='/CIDFontType2'
   desc=cid['/FontDescriptor'];family=str(desc['/FontFamily'])
   raw=desc['/FontFile2'].get_data()
-  if family=='Go':verify_go_program(str(f['/BaseFont'])[1:],raw)
+  if family=='Go':verify_pdf_glyph_program(f)
   else:
    source=Path('testdata/assets')/('NotoSans-Regular.ttf' if family=='Noto Sans' else 'DejaVuSans.ttf')
-   assert hashlib.sha256(raw).digest()==hashlib.sha256(source.read_bytes()).digest()
+   verify_pdf_glyph_program(f,source.read_bytes())
   assert desc['/FontFile2']['/Length1']==len(raw)
   mapping=cid['/CIDToGIDMap'].get_data();assert len(mapping)%2==0
   assert len(mapping)>2 and any(mapping[2:])
@@ -81,4 +81,4 @@ with pymupdf.open(out/'glyphs.pdf') as doc:
  ann=[a.get_object() for a in r.pages[0]['/Annots']]
  assert any(a.get('/A',{}).get('/URI')=='https://example.invalid/glyph' for a in ann)
  assert any('/Dest' in a for a in ann)
-print('Glyph transport passed: two pages; original full TTF hashes/shared CID resources; correct supplementary GID; exact ActualText/ToUnicode strings; independent MuPDF reference GIDs/GPOS offsets; URI/note links and running content')
+print('Glyph transport passed: two pages; subset outlines/components/metrics/notices and shared CID resources; correct supplementary GID; exact ActualText/ToUnicode strings; independent MuPDF reference GIDs/GPOS offsets; URI/note links and running content')

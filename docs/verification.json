@@ -4279,5 +4279,214 @@
         "limitation": "about 20 MB for one glyph; full-font transport/subsetting efficiency remains required work"
       }
     }
+  },
+  "glyph_font_subsetting": {
+    "date": "2026-11-24",
+    "status": "verified embedding milestone; full goal incomplete; no external blocker",
+    "checks": {
+      "go_test_all": "passed: library 16.401s; subsequent final all-package scope cached; new font-subset example compiled",
+      "go_test_race_all": "passed: library 159.708s; subsequent final all-package scope cached",
+      "go_vet_all": "passed final scope",
+      "module_verify": "all modules verified",
+      "cgo_disabled_host": "built; all four paths executed in new example for DejaVu and supplied Han; native source render executed",
+      "cgo_disabled_linux_amd64": "cross-build passed; not executed",
+      "font_malformed_fuzz": "FuzzPDFGlyphFont: 500 executions, two workers, passed 1.025s",
+      "valid_gid_selection_fuzz": "FuzzGlyphSubsetSelection: 500 executions, two workers, passed 1.077s",
+      "diff_check": "passed"
+    },
+    "implementation": "Private in-memory TrueType embedding subset with retained GIDs/component closure, source metrics/cmap/names/notices/hinting; rebuilt aligned glyf/loca/directory/checksums and unique PDF subset prefixes; no caller mutation or public API/SF/runtime dependency change",
+    "independent_subset_and_raster_evidence": [
+      {
+        "case": "glyphs/glyphs.pdf",
+        "pages": 2,
+        "before_bytes": 758586,
+        "after_bytes": 110807,
+        "page_commands": "exact",
+        "raster": "exact at 1.5x"
+      },
+      {
+        "case": "default-shaping/default.pdf",
+        "pages": 2,
+        "before_bytes": 451574,
+        "after_bytes": 75362,
+        "page_commands": "exact",
+        "raster": "exact at 1.5x"
+      },
+      {
+        "case": "default-shaping/emergency.pdf",
+        "pages": 1,
+        "before_bytes": 289371,
+        "after_bytes": 34567,
+        "page_commands": "exact",
+        "raster": "exact at 1.5x"
+      },
+      {
+        "case": "default-shaping/marked-space.pdf",
+        "pages": 1,
+        "before_bytes": 289448,
+        "after_bytes": 34725,
+        "page_commands": "exact",
+        "raster": "exact at 1.5x"
+      },
+      {
+        "case": "Han U+2A6D4",
+        "before_bytes": 20348885,
+        "after_bytes": 464435,
+        "raster": "exact at 2x",
+        "text": "exact in pypdf and MuPDF",
+        "program": {
+          "source_bytes": 51971284,
+          "subset_bytes": 1371528,
+          "glyph_ids": 65534,
+          "used_and_component_glyphs": 2
+        }
+      }
+    ],
+    "baseline_commit": "e1bb449",
+    "baseline_worktree": "removed after retaining ignored baseline PDFs under output/font-subset/before",
+    "original_source_font_oracles": "pinned original Go hashes and vendored fonts unchanged; independent output oracle now verifies used outlines, transitive components, instructions, advances/cmap/name/license bytes and unused empty outlines instead of claiming output remains a full original font",
+    "additional_oracles": {
+      "glyphs": "passed: two pages, supplementary GIDs, ActualText/ToUnicode, notes/table/header/footer/links",
+      "default_shaping": "passed: 24 native-HarfBuzz runs, six ligature runs, three source programs",
+      "paint_context": "passed: eight native-HarfBuzz rows, six caret clips and carriers",
+      "bidi": "passed: 29 native-HarfBuzz groups, FriBidi levels/order, RTL ligatures and carriers",
+      "language": "passed: four localized rows, all-story OOXML and three emergency lines",
+      "typography": "passed: fifteen measured control/space advances, text/decorations/links",
+      "text_styles": "passed: four native pages, actual styles/sizes/colors/baselines and explicit supplied face"
+    },
+    "prosemirror": {
+      "files": 6,
+      "nodes_with_marks_and_attributes": 18,
+      "result": "passed actual schema"
+    },
+    "font_program_han": {
+      "source_bytes": 51971284,
+      "source_sha256": "d8bb747b3fdccd84a60bd0aa56bb90937270d0bd15f1101cd8f2a5a3709dd0a3",
+      "source": "https://www.babelstone.co.uk/Fonts/Download/BabelStoneHan.ttf",
+      "version": "16.0.3",
+      "source_gids_retained": 65534,
+      "used_and_component_glyphs": 2,
+      "subset_font_bytes": 1371528,
+      "old_pdf_bytes": 20348885,
+      "new_pdf_bytes": 464435,
+      "raster": "every 2x pixel exact",
+      "text": "U+2A6D4 exact in independent readers",
+      "distribution": "ignored QA input only; no font vendored or linked into runtime"
+    },
+    "full_word_source": {
+      "pages": 207,
+      "bytes": 4990468,
+      "title": "MQTT Version 5.0",
+      "uri_targets": 434,
+      "expected_source_uri_targets": 434,
+      "missing_uri_targets": [
+        "#_CONNACK_\u2013_Connect",
+        "#_CONNECT_\u2013_Connection",
+        "#_Figure_4.3_\u2013"
+      ],
+      "unexpected_uri_targets": [
+        "#_CONNACK_\u00e2\u2022\ufb01_Connect",
+        "#_CONNECT_\u00e2\u2022\ufb01_Connection",
+        "#_Figure_4.3_\u00e2\u2022\ufb01"
+      ],
+      "image_programs": 1,
+      "original_jpeg_sha_preserved": true,
+      "supplementary_character_count": 1,
+      "figure_dash_count": 4,
+      "unique_glyph_font_programs": [
+        {
+          "name": "DejaVuSans-Bold",
+          "source_bytes": 705684,
+          "subset_bytes": 148968,
+          "glyph_ids": 6196,
+          "used_and_component_glyphs": 85
+        },
+        {
+          "name": "DejaVuSans",
+          "source_bytes": 757076,
+          "subset_bytes": 152288,
+          "glyph_ids": 6253,
+          "used_and_component_glyphs": 100
+        },
+        {
+          "name": "GoRegular",
+          "source_bytes": 148672,
+          "subset_bytes": 25700,
+          "glyph_ids": 712,
+          "used_and_component_glyphs": 13
+        },
+        {
+          "name": "DejaVuSans-BoldOblique",
+          "source_bytes": 643292,
+          "subset_bytes": 125712,
+          "glyph_ids": 5413,
+          "used_and_component_glyphs": 33
+        },
+        {
+          "name": "BabelStoneHan",
+          "source_bytes": 51971284,
+          "subset_bytes": 1371528,
+          "glyph_ids": 65534,
+          "used_and_component_glyphs": 2
+        },
+        {
+          "name": "GoMono",
+          "source_bytes": 173248,
+          "subset_bytes": 34452,
+          "glyph_ids": 712,
+          "used_and_component_glyphs": 66
+        },
+        {
+          "name": "DejaVuSans-Oblique",
+          "source_bytes": 635416,
+          "subset_bytes": 130680,
+          "glyph_ids": 5355,
+          "used_and_component_glyphs": 59
+        }
+      ],
+      "selected_pages_for_visual_inspection": [
+        1,
+        24,
+        130
+      ],
+      "limitation": "Explicit caller font normalization and acknowledged source diagnostics. This does not prove complete source text/structure/layout recovery or Word-equivalent reflow; widths/numbering/shading and further corpus work remain."
+    },
+    "full_word_source_result": "required open failure: three Unicode fragment URI targets corrupted to mojibake; exact source set of 434 preserved as oracle, not relaxed; fonts/asset/metadata/character checks pass separately",
+    "visual": {
+      "glyph_pages": [
+        1,
+        2
+      ],
+      "full_source_pages": [
+        1,
+        24,
+        130
+      ],
+      "observations": [
+        "glyph rasters stable against baseline",
+        "page-130 equal-column widths split description into narrow fragments",
+        "numbering/reflow differs and cached PAGE 6/7 repeats",
+        "no Word-equivalence or full-source content/structure qualification"
+      ]
+    },
+    "commands": [
+      "GOWORK=off CGO_ENABLED=0 go run ./examples/font-subset",
+      "GOWORK=off CGO_ENABLED=0 go run ./examples/font-subset -font output/font-research/BabelStoneHan.ttf -family 'BabelStone Han' -text \ud869\uded4 -out output/font-subset/han-example",
+      "output/qa-venv/bin/python scripts/verify_font_subsets.py --han-font output/font-research/BabelStoneHan.ttf",
+      "output/qa-venv/bin/python scripts/verify_glyphs.py",
+      "output/qa-venv/bin/python scripts/verify_default_shaping.py",
+      "output/qa-venv/bin/python scripts/verify_mqtt_render.py (known three-target failure)"
+    ],
+    "next_commands": [
+      "rg -n 'LinkString|URI' pdf_text.go pdf_links.go",
+      "output/qa-venv/bin/python scripts/verify_mqtt_render.py"
+    ],
+    "open_required_work": [
+      "Unicode PDF URI serialization; preserve expected target strings",
+      "source table widths, numbering formats, remaining rich-layout/source interpretation/recovery/corpus acceptance",
+      "large PDF-to-SF provenance/codec overhead"
+    ],
+    "kt": "docs/FONT_SUBSETTING.md",
+    "logs": "ignored output/font-subset/"
   }
 }

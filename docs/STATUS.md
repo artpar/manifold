@@ -21,7 +21,43 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: short painted connectors recover the remaining grid
+## Latest milestone: in-process glyph-font subsets and real-source output
+
+The positioned-glyph PDF path now embeds a TrueType subset with original GIDs,
+used outlines and transitive composite components, retaining metrics, cmap,
+names/notices and hinting. It rebuilds loca/directory/checksums, omits unused
+outlines and layout/signature tables, uses unique six-letter PDF subset names,
+and leaves caller bytes unchanged. No public API/schema or Go dependency changed.
+
+The actual U+2A6D4 BabelStone Han preview shrinks from 20,348,885 to 464,435 bytes;
+its 2x raster is pixel-exact, and pypdf/MuPDF retain the exact character. Six
+pinned e1bb449 reference pages keep exact page commands and 1.5x pixels. Independent
+fontTools checks retained outlines/components/instructions/metrics/notices and
+unused empty outlines. Native HarfBuzz, bidi, paint-context, language, typography,
+style and glyph oracles pass; source font hashes remain unchanged. Optional QA
+now pins fontTools 4.68.0. New examples/font-subset runs all four SF paths with an
+explicit supplied font. No external font is vendored or linked into the binary.
+
+The full Word source now renders with explicit DejaVu family/style, Go Mono and
+BabelStone Han mappings: 207 pages/4,990,468 bytes. Fonts, original JPEG SHA,
+metadata, Han and figure dash checks pass. The broader audit **fails** on three
+Unicode fragment URI targets, serialized as mojibake by the current LinkString
+path. It reports all 434 actual/expected targets but three differ; do not bless
+that difference or mark the full source qualified. Visual samples 1/24/130 show
+narrow equal-width table columns, changed numbering and cached PAGE 6/7; no
+Word-equivalent layout or complete source-content qualification is claimed.
+
+The full goal remains **incomplete**, with no external blocker. Next fix Unicode
+PDF URI serialization with primary-format evidence, preserve the new failing
+oracle, then implement/qualify source table widths and numbering patterns driven
+by this actual render. Full-source PDF→SF provenance/codec size also remains work.
+Read [FONT_SUBSETTING.md](FONT_SUBSETTING.md) for commands, exact verification and
+source-font provenance; final checks/evidence are in verification.json.
+Next commands: `output/qa-venv/bin/python scripts/verify_mqtt_render.py` (known
+three-target failure); `rg -n 'LinkString|URI' pdf_text.go pdf_links.go`;
+`GOWORK=off CGO_ENABLED=0 go run ./examples/font-subset`.
+
+## Previous milestone: short painted connectors recover the remaining grid
 
 The original MQTT PDF now recovers all 42 omitted-span table grids, including
 page 89, with all 90 tables/756 rows/3,020 logical cell identities preserved.

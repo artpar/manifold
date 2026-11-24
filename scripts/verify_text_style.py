@@ -8,7 +8,7 @@ from docx import Document
 from lxml import etree
 from pypdf import PdfReader
 import pymupdf
-from font_oracles import verify_go_program
+from font_oracles import verify_pdf_glyph_program, original_font_name, verify_go_program
 
 p=argparse.ArgumentParser()
 p.add_argument('directory',nargs='?',type=Path,default=Path('output/text-style'))
@@ -35,13 +35,15 @@ glyph_fonts=[v.get_object() for key,v in reader.pages[0]['/Resources']['/Font'].
 # Four configured faces are used. App Sans deliberately supplies the same Go
 # Regular program as the default, so actual physical names correctly coincide.
 assert len(glyph_fonts)==4
-assert sorted(str(f['/BaseFont']) for f in glyph_fonts)==['/Go-Bold','/GoMono','/GoRegular','/GoRegular']
+assert sorted(original_font_name(str(f['/BaseFont'])) for f in glyph_fonts)==['Go-Bold','GoMono','GoRegular','GoRegular']
 for f in glyph_fonts:
  desc=f['/DescendantFonts'][0].get_object()['/FontDescriptor']
- verify_go_program(str(f['/BaseFont'])[1:],desc['/FontFile2'].get_data())
-assert (out/'app-sans.ttf').read_bytes() in [f['/DescendantFonts'][0].get_object()['/FontDescriptor']['/FontFile2'].get_data() for f in glyph_fonts]
+ verify_pdf_glyph_program(f)
+verify_go_program('GoRegular',(out/'app-sans.ttf').read_bytes())
+for f in glyph_fonts:
+ if original_font_name(str(f['/BaseFont']))=='GoRegular':verify_pdf_glyph_program(f,(out/'app-sans.ttf').read_bytes())
 assert all('/FontFile2' in f['/DescendantFonts'][0].get_object()['/FontDescriptor'] for f in fonts)
-mono=next(f for f in glyph_fonts if str(f['/BaseFont'])=='/GoMono')
+mono=next(f for f in glyph_fonts if original_font_name(str(f['/BaseFont']))=='GoMono')
 assert int(mono['/DescendantFonts'][0].get_object()['/FontDescriptor']['/Flags'])&1
 links=[]
 for i,page in enumerate(reader.pages):

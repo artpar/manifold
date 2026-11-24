@@ -114,3 +114,17 @@ contains independently extracted counts, geometry and content hashes, not anothe
 edition of the standard. Original embedded fonts/marks remain inside the originals
 and are not reused as manydoc output fonts. No endorsement is implied. Optional
 QA conversions stay ignored.
+
+
+Optional font-subset verification now pins fontTools 4.68.0 (MIT) in
+scripts/requirements.txt. It is used only by independent development oracles,
+not by the Go library or CLI. The glyph subsetter retains original embedded name
+records/notices and honors the existing TrueType embedding/subsetting flags.
+
+The ignored BabelStone Han 16.0.3 QA input is obtained from its
+[primary publisher](https://www.babelstone.co.uk/Fonts/Han.html), under the original
+Arphic Public License embedded in its name table. Source/derived font files are
+not redistributed in this repository or linked into the binary. Caller-supplied
+font programs remain subject to their own reuse/embedding terms. FONT_SUBSETTING.md
+records hashes, checks and scope; no publisher/customer PDF font was extracted
+or repurposed as a manydoc output font.

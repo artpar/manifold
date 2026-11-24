@@ -889,3 +889,14 @@ identities/original rows. Candidates use copies, bounded alignment and per-page 
 caching. Ambiguous grids retain explicit cells with uncertainty, not guessed padding.
 Small filled rectangles provide coverage along established axes without creating
 axes or connecting components. See TAGGED_TABLE_SPANS.md for contracts and limits.
+
+
+## Glyph embedding subsets remain in process
+
+font_subset.go builds a GID-preserving TrueType embedding program after shaping.
+Iterative component closure/cycle checks retain used outlines and hinting, with original
+metrics/cmap/name/license tables. Rebuilt loca/directory/checksums and deterministic PDF
+subset tags replace full-program glyph embedding without changing CID mappings, text,
+positions or caller bytes. Optional fontTools QA independently compares outlines and
+metadata. No SF/public API/runtime dependency changes. See FONT_SUBSETTING.md for
+source-font qualification and the newly reproduced three-target Unicode URI failure.

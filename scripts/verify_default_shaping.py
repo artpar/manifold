@@ -9,7 +9,7 @@ from pypdf import PdfReader
 from pypdf.generic import ContentStream
 import pymupdf
 import uharfbuzz as hb
-from font_oracles import verify_go_program
+from font_oracles import verify_go_program, verify_pdf_glyph_program, original_font_name
 
 out=Path('output/default-shaping')
 sf=json.loads((out/'default.sf').read_text())
@@ -53,8 +53,8 @@ for name,pages in [('default',2),('emergency',1),('marked-space',1)]:
   fonts={}
   for key,obj in page['/Resources']['/Font'].items():
    if not str(key).startswith('/MDG'):continue
-   f=obj.get_object();ps=str(f['/BaseFont'])[1:];cid=f['/DescendantFonts'][0].get_object();desc=cid['/FontDescriptor']
-   raw=desc['/FontFile2'].get_data();assert hashlib.sha256(raw).digest()==hashlib.sha256(originals[ps]).digest()
+   f=obj.get_object();ps=original_font_name(str(f['/BaseFont']));cid=f['/DescendantFonts'][0].get_object();desc=cid['/FontDescriptor']
+   raw=desc['/FontFile2'].get_data();verify_pdf_glyph_program(f,originals[ps])
    assert desc['/FontFile2']['/Length1']==len(raw)
    if ps=='GoMono':assert int(desc['/Flags'])&1
    fonts[str(key)]=(cid['/CIDToGIDMap'].get_data(),ps)
