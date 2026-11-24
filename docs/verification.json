@@ -6642,5 +6642,47 @@
       "MANYDOC_COLLEAF_NOTE_ORIGIN_SAVED=output/colleaf-qa/note-origins-saved.json MANYDOC_COLLEAF_NOTE_ORIGIN_BODY_EDITED=output/colleaf-qa/note-origins-edited.json MANYDOC_COLLEAF_NOTE_ORIGIN_MARK_EDITED=output/colleaf-qa/note-origins-marked.json MANYDOC_COLLEAF_NOTE_ORIGIN_DETACHED=output/colleaf-qa/note-origins-detached.json GOWORK=off go test -run TestColleafNoteOrigins -count=1 .",
       "rg -n 'Source != nil|manydocOrigin' colleaf_styles.go colleaf_tables.go colleaf_lists.go colleaf_images.go"
     ]
+  },
+  "colleaf_run_origins_2026_11_24": {
+    "scope": "Private native nonempty run/link/story/body-mark/citation source bindings plus ProseMirror source-mark declaration completeness. Full native integration and overall goal remain active/incomplete.",
+    "implementation": [
+      "Direct textRun.ts.manydocOrigin carries only manydoc.run-origin/version1/ref. Deterministic evidence.runOrigins contains deduplicated SourceInfo and source-free SF run fingerprints, no editable body/text/label cache.",
+      "Restoration follows native last-record-wins text intervals and final citation/body-mark composition. Unchanged runs retain source facts; changed/split fragments retain original facts qualified historical with a diagnostic. No invented fragment geometry.",
+      "Absent current owners archive facts unbound. Inherited defaults and overwritten intervals do not assert ownership. Strict profile/version/digest/reference/duplicate/inline-contradiction checks reject malformed evidence; source properties outside direct interval context diagnose.",
+      "Paragraph fingerprints strip nested run sources without changing previous source-free paragraph hashing. Default projected labels do not duplicate citation-atom source ownership; internal markers do not alter uniform-label interpretation.",
+      "The independent ProseMirror reader exposed a missing source-mark historical declaration. Added historical plus existing optional table_widths/table_spans attributes, and a regression checks every public SourceInfo JSON field against the source mark. Go/SF value model stays unchanged."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_run_origins.cjs",
+      "script_sha256": "02ca679d848328bdec1726f2f3c156302a2b10f66f5a9fbb3bc2e9e7cfece8e6",
+      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned Colleaf validator and prosemirror-model1.25.13; no new dependency.",
+      "results": [
+        "Eleven synthetic source records across main/list/cell/header/footer/note bodies, link text, rich body mark, rich citation label and rich/default citation atoms. Direct properties contain only references; evidence has no text/body caches.",
+        "Actual registered-plugin saves/reopens preserve streams/evidence and whole bold13pt emoji. Actual TextX insertion splits the first source interval around unowned Q; Go verifies both surviving fragments historical, Q source-free, and edited paragraph provenance historical.",
+        "Actual TextX rich-citation replacement retains source references and edited label; strict .vdocs/Go/SF verifies both citation-atom and label sources historical, with no label-interpretation corruption.",
+        "Actual reference removal retains text/styles and archives source unbound without falsely staling paragraph semantics. Strict SF/native repeated round trips preserve exact structures, relationships, source states and diagnostic stability.",
+        "Actual ProseMirror checks110 nodes/marks/attributes across saved/split/citation-edited/detached SF, including historical source marks. Existing paragraph-origin and note-origin independent probes pass.",
+        "Go negative tests cover overwritten/inherited ownership, malformed digest/version/missing/duplicate records, contradictory reference metadata and explicit zero-width empty-text/anchor output rejection. Public BodyLabelStyle excludes Source by existing contract; LabelSource retains marker provenance."
+      ],
+      "limits": "Synthetic headless component evidence, not complete imported-PDF per-node provenance, browser paint/caret/scroll/events, zero-width/container source mappings or full native API/CLI qualification."
+    },
+    "checks": {
+      "tests": "Final all-package tests with all four actual run artifacts pass library16.228s/CLI/internal cached. Earlier pre-collector-refactor full tests16.271s/CLI0.698s passed.",
+      "race": "Final all-package race with all four actual run artifacts passes library170.284s/CLI/internal cached. Earlier pre-collector-refactor full race174.108s/CLI2.134s passed.",
+      "vet": "pass after final source changes",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "Final focused run/source-mark tests0.535s with actual artifacts, host CLI build/--help and Linux amd64/arm64 cross-builds pass. Cross-builds are not execution evidence.",
+      "fuzz": "Unchanged origin-profile parser target108862 executions/11.456s with2workers passes before final collector refactor; short malformed-input safety sample, not exhaustive coverage.",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go/std-library production only. No dependency/runtime executable/service/CGO/license server/upload, application/backend/permission/quota change or modified original corpus/oracle. Generated QA artifacts ignored.",
+    "remaining": "Zero-width anchor/empty-text source policy and table/image/container/cell/item source bindings; remaining marker appearance/nonvisual run/settings intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_RUN_ORIGIN_QA=output/colleaf-qa/run-origins.json GOWORK=off go test -run TestColleafRunOrigin -count=1 .",
+      "node scripts/verify_colleaf_run_origins.cjs",
+      "MANYDOC_COLLEAF_RUN_ORIGIN_SAVED=output/colleaf-qa/run-origins-saved.json MANYDOC_COLLEAF_RUN_ORIGIN_EDITED=output/colleaf-qa/run-origins-edited.json MANYDOC_COLLEAF_RUN_ORIGIN_CITATION=output/colleaf-qa/run-origins-citation.json MANYDOC_COLLEAF_RUN_ORIGIN_DETACHED=output/colleaf-qa/run-origins-detached.json GOWORK=off go test -run TestColleafRunOrigin -count=1 .",
+      "rg -n 'Source != nil|manydocOrigin' colleaf_navigation.go colleaf_tables.go colleaf_lists.go colleaf_images.go"
+    ]
   }
 }

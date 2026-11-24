@@ -2096,3 +2096,22 @@ as the old inferred kind. Native marker/numbering state stays authoritative when
 identity intent disappears. Preserve paragraph source fingerprints before temporary
 body-mark prefix insertion. Qualify actual saves, TextX body/marker edits, identity
 detachment and exact SF, while retaining the larger source/API/UI acceptance queue.
+
+
+## 2026-11-24 Bind run provenance to actual editable intervals
+
+Use direct native winning text intervals and a deduplicated source/hash pool,
+then restore source ownership after citation/body-mark composition. Keep original
+source facts and original physical geometry when an editor splits or changes a
+run, but qualify surviving nonmatching fragments historical. Archive a source
+without current owners rather than restoring old text. Inherited defaults and
+overwritten records cannot silently acquire ownership. Do not duplicate a citation
+atom's source on its projected default label, or treat internal source markers as
+a visible style difference. Strip nested run sources from paragraph fingerprints.
+
+Independent ProseMirror qualification must check source marks as well as opaque
+paragraph attributes. Declare historical and all existing optional SourceInfo
+attributes and test declaration coverage. This qualifies a run/citation component;
+zero-width/container/cell/item provenance and native/API/UI/final acceptance remain
+required. BodyLabelStyle source stays excluded by the existing shared-model
+contract; Note.LabelSource owns marker provenance.

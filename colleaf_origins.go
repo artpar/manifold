@@ -22,6 +22,10 @@ type colleafOrigin struct {
 
 func paragraphFingerprint(b Block) (string, error) {
 	b.Source = nil
+	b.Runs = append([]Run(nil), b.Runs...)
+	for i := range b.Runs {
+		b.Runs[i] = colleafSourceFreeRun(b.Runs[i])
+	}
 	nodes, err := encodeSFBlocks([]Block{b})
 	if err != nil {
 		return "", err
@@ -52,6 +56,9 @@ func newColleafOrigin(b Block) (*colleafOrigin, error) {
 	return &colleafOrigin{Profile: colleafOriginProfile, Version: 1, Ref: hex.EncodeToString(sum[:]), Fingerprint: fingerprint, Source: cloneSourceInfo(b.Source)}, nil
 }
 func readColleafOrigin(raw json.RawMessage) (*colleafOrigin, error) {
+	return readColleafOriginProfile(raw, colleafOriginProfile)
+}
+func readColleafOriginProfile(raw json.RawMessage, profile string) (*colleafOrigin, error) {
 	if len(raw) == 0 {
 		return nil, nil
 	}
@@ -62,7 +69,7 @@ func readColleafOrigin(raw json.RawMessage) (*colleafOrigin, error) {
 	if err := strictSFAttrs(raw, &o); err != nil {
 		return nil, err
 	}
-	if o.Profile != colleafOriginProfile || o.Version != 1 || len(o.Ref) != 64 {
+	if o.Profile != profile || o.Version != 1 || len(o.Ref) != 64 {
 		return nil, fmt.Errorf("%w: native paragraph origin", ErrUnsupported)
 	}
 	if _, err := hex.DecodeString(o.Ref); err != nil {
@@ -141,7 +148,10 @@ func collectColleafOrigins(out *colleafNoteSnapshot, e **colleafDocumentEvidence
 	return nil
 }
 func validateColleafOrigin(o colleafOrigin, pages []PDFPage) error {
-	checked, err := readColleafOrigin(sfAttrs(o))
+	return validateColleafOriginProfile(o, pages, colleafOriginProfile)
+}
+func validateColleafOriginProfile(o colleafOrigin, pages []PDFPage, profile string) error {
+	checked, err := readColleafOriginProfile(sfAttrs(o), profile)
 	if err != nil {
 		return err
 	}
@@ -190,7 +200,7 @@ func restoreColleafOrigins(d *Document, e *colleafDocumentEvidence) error {
 				if !ok {
 					return fmt.Errorf("native paragraph references missing source record")
 				}
-				if o.Source != nil && !reflect.DeepEqual(*o, record) {
+				if (o.Source != nil || o.Fingerprint != "") && !reflect.DeepEqual(*o, record) {
 					return fmt.Errorf("contradictory inline/native source record")
 				}
 				hash, err := paragraphFingerprint(*b)

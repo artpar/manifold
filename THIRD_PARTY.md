@@ -215,3 +215,8 @@ attributes. No additional package or production dependency is introduced.
 The note-origin probe reuses those same pinned/attributed SDK plugins, renderer and
 hash-pinned Colleaf validator for nonvisual evidence, rich-marker glyphs and actual
 save/edit checks. No new dependency or third-party production source is added.
+
+
+The run-origin probe reuses the attributed pinned Univer SDK/renderer/plugins,
+hash-pinned Colleaf validator and existing ProseMirror reader. No additional
+package, production dependency or copied third-party implementation is introduced.

@@ -117,3 +117,10 @@ save/edit/identity-detachment and SF evidence. Paragraph provenance survives bod
 mark prefix projection without false staling. Run/citation/container/cell/item source
 bindings, marker appearance/nonvisual intent, public API/CLI and full native/browser/
 corpus/final audits remain required; this milestone does not complete that queue.
+
+
+Native nonempty run/link/rich-body-mark/citation-source transport now has synthetic
+actual save/split/edit/reference-detachment and exact SF evidence. ProseMirror
+source-mark attribute coverage now includes historical and optional table facts.
+Zero-width anchor/container/cell/item source bindings and the remaining native
+intent/API/UI/corpus/final audits remain required.

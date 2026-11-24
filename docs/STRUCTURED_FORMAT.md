@@ -801,3 +801,10 @@ preserve these nonvisual facts and clone nested values; formatting output requir
 explicit provenance-loss acknowledgement. Native paragraph binding currently uses
 these states after edits or removed references. Other native per-node slots remain
 unfinished; no Word-equivalent layout/source recovery claim is implied.
+
+
+The source mark declaration includes historical (Boolean, default false), plus
+existing optional table_widths/table_spans (default null), matching SourceInfo.
+An attribute-coverage regression guards the public source fields against silent
+loss in an actual ProseMirror reader. Native run binding status uses the existing
+historical/unbound states; no new canonical content schema is introduced.

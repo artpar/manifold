@@ -377,3 +377,28 @@ func FuzzReadStructured(f *testing.F) {
 		}
 	})
 }
+
+// The published ProseMirror mark must retain every typed public source fact.
+func TestStructuredSourceMarkAttributes(t *testing.T) {
+	raw, err := os.ReadFile("schema/prosemirror-v1.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var spec struct {
+		Marks map[string]struct {
+			Attrs map[string]json.RawMessage `json:"attrs"`
+		} `json:"marks"`
+	}
+	if err = json.Unmarshal(raw, &spec); err != nil {
+		t.Fatal(err)
+	}
+	attrs := spec.Marks["source"].Attrs
+	typ := reflect.TypeFor[SourceInfo]()
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		name := strings.Split(field.Tag.Get("json"), ",")[0]
+		if _, ok := attrs[name]; !ok {
+			t.Errorf("source mark omits public source field %s", name)
+		}
+	}
+}

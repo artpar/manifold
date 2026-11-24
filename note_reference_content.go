@@ -51,7 +51,7 @@ func canonicalCitationRun(r Run) Run {
 			c.FontSize = r.FontSize
 		}
 	}
-	return Run{Text: r.Text, Link: r.Link, Destination: r.Destination, Anchor: r.Anchor, Source: r.Source, Note: &ref}
+	return Run{colleafRunOrigin: r.colleafRunOrigin, Text: r.Text, Link: r.Link, Destination: r.Destination, Anchor: r.Anchor, Source: r.Source, Note: &ref}
 }
 
 type sfNoteReference struct {

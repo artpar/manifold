@@ -286,6 +286,9 @@
     },
     "source": {
       "attrs": {
+        "historical": {"default": false, "validate": "boolean"},
+        "table_widths": {"default": null},
+        "table_spans": {"default": null},
         "parent_element": {"default": "", "validate": "string"},
         "structure_id": {"default": null},
         "references": {"default": []},

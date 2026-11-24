@@ -1074,5 +1074,16 @@ and kind-inference flags. Current body/marker edits qualify their respective sou
 historical; lost identity bindings archive sources and diagnose old inferred-kind
 history. Actual native body/label/kind state remains authoritative. A body-mark
 prefix alone does not stale original paragraph provenance. Independent synthetic
-save/edit/SF checks cover this component; run/citation/container/cell/item source
-mappings and full native/API/UI/corpus qualification remain unfinished.
+save/edit/SF checks cover this component; full per-node source mappings and
+full native/API/UI/corpus qualification remain unfinished.
+
+
+Private native run bindings now retain nonempty text/link/body/rich-label and
+citation-atom sources. Exact current runs retain provenance; changed/split runs
+retain historical original facts with diagnostics. Absent owners archive sources
+unbound. Native source intervals do not imply current PDF geometry. Inherited or
+overwritten style records do not assert ownership. Source-only changes do not
+stale paragraph fingerprints. Zero-width empty-text/anchor source output still
+rejects; container/cell/item and broader native/API/UI/corpus qualification remain
+unfinished. The published source-mark schema now declares historical and all
+existing optional table-source fields, checked against the public SourceInfo type.

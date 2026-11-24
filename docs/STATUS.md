@@ -39,7 +39,69 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: note definition and label source bindings
+## Latest progress: run and citation source bindings
+
+Private whole-document native composition now carries source references in direct
+winning text-style intervals, using manydoc.run-origin/version1 and a deterministic
+source/fingerprint pool in evidence.runOrigins. Ordinary nonempty text, links,
+main/list/cell/header/footer/note bodies, rich body marks, rich citation label runs
+and rich/default citation atoms retain their SourceInfo after final composition.
+Current text/styles/relationships stay authoritative. Changed or split fragments
+retain original facts as historical with an explicit diagnostic; disappearance of
+all current owners archives facts unbound. Inherited defaults and overwritten text
+records do not assert ownership. Contradictory inline metadata and invalid profile/
+version/digest/missing/duplicate records reject.
+
+Paragraph fingerprints now exclude nested run sources, so a source-only edit does
+not falsely stale paragraph semantics. Projected default citation labels do not
+acquire a duplicate source owner, and internal origin markers do not turn uniform
+citations into rich labels. Actual ProseMirror exposed a source-mark declaration
+omission: historical plus optional table_widths/table_spans are now declared, with
+a regression comparing every public SourceInfo field against the schema.
+
+Pinned actual plugins/validator/skeleton qualify eleven synthetic run sources,
+reference-only properties/no text cache, styled emoji, two saves/reopens, TextX
+interval splitting and rich-citation replacement, and reference removal. Strict
+.vdocs/Go/SF compares exact fragments/styles/source states and stable repeated
+round trips. ProseMirror checks110 nodes/marks/attributes. Negative tests also
+cover inherited/overwritten ownership, contradictions and unsupported zero-width
+empty-text/anchor sources. BodyLabelStyle.Source remains invalid in the shared
+model; use Note.LabelSource for that provenance. This is headless component
+qualification, not full imported-PDF source transport or browser fidelity.
+
+Final checks are recorded in verification.json before commit. The goal stays
+active/incomplete. Next implement zero-width anchor and table/image/container/
+cell/item source bindings, then remaining marker appearance/nonvisual intent,
+public native API/CLI and full-preset/browser qualification. Nonmain lookup limits,
+per-page/decorated notes and broader PDF/source/resource/final acceptance audits
+remain. There is no external blocker; production stays pure Go.
+
+```sh
+MANYDOC_COLLEAF_RUN_ORIGIN_QA=output/colleaf-qa/run-origins.json GOWORK=off go test -run 'TestColleafRunOrigin|TestStructuredSourceMark' -count=1 .
+node scripts/verify_colleaf_run_origins.cjs
+MANYDOC_COLLEAF_RUN_ORIGIN_SAVED=output/colleaf-qa/run-origins-saved.json MANYDOC_COLLEAF_RUN_ORIGIN_EDITED=output/colleaf-qa/run-origins-edited.json MANYDOC_COLLEAF_RUN_ORIGIN_CITATION=output/colleaf-qa/run-origins-citation.json MANYDOC_COLLEAF_RUN_ORIGIN_DETACHED=output/colleaf-qa/run-origins-detached.json GOWORK=off go test -run 'TestColleafRunOrigin|TestStructuredSourceMark' -count=1 .
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/colleaf-qa/run-origins-saved.json.sf output/colleaf-qa/run-origins-edited.json.sf output/colleaf-qa/run-origins-citation.json.sf output/colleaf-qa/run-origins-detached.json.sf
+rg -n 'Source != nil|manydocOrigin' colleaf_tables.go colleaf_lists.go colleaf_images.go colleaf_navigation.go
+```
+
+Final tests16.228s (CLI/internal cached), vet/modules, CGO-disabled focused tests
+0.535s, host CLI/--help and Linux amd64/arm64 cross-builds pass. The unchanged
+origin-profile parser passed108862 fuzz executions/11.456s, a short safety sample.
+Final full race passes170.284s (CLI/internal cached). verification.json records
+check scopes and limitations.
+The goal remains active/incomplete. Next implement zero-width anchor and table/
+image/container/cell/item source bindings, then remaining appearance/nonvisual
+intent, public native API/CLI, full-preset/browser and the broader final audit.
+
+```sh
+MANYDOC_COLLEAF_RUN_ORIGIN_QA=output/colleaf-qa/run-origins.json GOWORK=off go test -run TestColleafRunOrigin -count=1 .
+node scripts/verify_colleaf_run_origins.cjs
+MANYDOC_COLLEAF_RUN_ORIGIN_SAVED=output/colleaf-qa/run-origins-saved.json MANYDOC_COLLEAF_RUN_ORIGIN_EDITED=output/colleaf-qa/run-origins-edited.json MANYDOC_COLLEAF_RUN_ORIGIN_CITATION=output/colleaf-qa/run-origins-citation.json MANYDOC_COLLEAF_RUN_ORIGIN_DETACHED=output/colleaf-qa/run-origins-detached.json GOWORK=off go test -run TestColleafRunOrigin -count=1 .
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/colleaf-qa/run-origins-saved.json.sf output/colleaf-qa/run-origins-edited.json.sf output/colleaf-qa/run-origins-citation.json.sf output/colleaf-qa/run-origins-detached.json.sf
+rg -n 'Source != nil|manydocOrigin' colleaf_navigation.go colleaf_tables.go colleaf_lists.go colleaf_images.go
+```
+
+## Earlier progress: note definition and label source bindings
 
 Whole-document native composition now carries note Source, LabelSource and
 KindInferred in version1 evidence.noteOrigins records, checked against native

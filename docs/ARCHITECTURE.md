@@ -1675,3 +1675,19 @@ encoding still rejects unsupported provenance; whole-document composition owns
 its projection and final restoration. Body-mark insertion retains the first sourced
 paragraph's pre-projection fingerprint. Other native source slots and full API/UI/
 corpus/final qualification remain required.
+
+
+## Native run origin bindings
+
+colleaf_run_origins.go stores direct text-style source references and a separate
+version1 run-origin pool. Native last-record-wins spans and final citation/body-mark
+composition determine current owners. A semantic hash mismatch marks a surviving
+fragment historical; no surviving reference archives original source facts unbound.
+Inherited style metadata does not assert ownership. Rich citation labels retain
+independent sources; projected default label text does not duplicate the citation
+atom's source. Private pending markers survive canonicalization/collapse and clear
+before public return. Paragraph hashing strips nested run provenance without
+changing old source-free paragraph hashes. Schema source marks now enumerate all
+public SourceInfo fields, including historical and optional table provenance.
+Zero-width anchor/container/cell/item mappings and broader native/API/UI/final
+qualification remain required; empty text source output rejects explicitly.

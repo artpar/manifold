@@ -135,6 +135,8 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 						}
 						r := run
 						r.Note = nil
+						r.Source = nil
+						r.colleafRunOrigin = nil
 						r.Text = text
 						label = []Run{r}
 					}
@@ -177,6 +179,9 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 				continue
 			}
 			if run.Text == "" {
+				if run.Source != nil {
+					return body, fmt.Errorf("%w: empty native run provenance requires a point binding", ErrUnsupported)
+				}
 				continue
 			}
 			style, err := colleafRunStyle(run)
@@ -446,6 +451,7 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 				record = spans[position].record
 			}
 			style := defaults
+			var runOrigin *colleafOrigin
 			if record >= 0 {
 				raw := body.TextRuns[record]
 				character, err := resolver.resolve(raw.StyleID, 0)
@@ -460,11 +466,24 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 				if err != nil {
 					return nil, err
 				}
+				runOrigin, err = readColleafOriginProfile(direct["manydocOrigin"], colleafRunOriginProfile)
+				if err != nil {
+					return nil, err
+				}
 				style = mergeColleafStyle(mergeColleafStyle(defaults, inherited), direct)
 			}
-			run, err := colleafStyleRun(style, doc)
+			decodedStyle := style
+			if len(style["manydocOrigin"]) > 0 {
+				decodedStyle = mergeColleafStyle(nil, style)
+				delete(decodedStyle, "manydocOrigin")
+			}
+			run, err := colleafStyleRun(decodedStyle, doc)
 			if err != nil {
 				return nil, err
+			}
+			run.colleafRunOrigin = runOrigin
+			if runOrigin == nil && len(style["manydocOrigin"]) > 0 {
+				doc.warn("colleaf_run_origin_inheritance", "Inherited native source properties are not treated as direct run ownership")
 			}
 			run.Text = strings.ReplaceAll(text, "\v", "\n")
 			if text == "\b" || (text == "\ufffc" && index.blocks[start].NoteID != "") {

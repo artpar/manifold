@@ -177,6 +177,8 @@ func colleafStyleRun(style colleafStyleMap, doc *Document) (Run, error) {
 			continue
 		}
 		switch key {
+		case "manydocOrigin":
+			doc.warn("colleaf_run_origin_context", "Native source properties outside direct text intervals do not assert run ownership")
 		case "lang":
 			if err := json.Unmarshal(raw, &out.Language); err != nil {
 				return out, err
@@ -310,8 +312,12 @@ func colleafRunStyle(run Run) (json.RawMessage, error) {
 	if err := validateTextStyle(run); err != nil {
 		return nil, err
 	}
-	if run.EastAsiaLanguage != "" || run.ComplexLanguage != "" || run.ComplexScript || run.Direction != "" || run.Source != nil {
+	if run.EastAsiaLanguage != "" || run.ComplexLanguage != "" || run.ComplexScript || run.Direction != "" {
 		return nil, fmt.Errorf("%w: native nonvisual run annotations need the checked profile mapping", ErrUnsupported)
+	}
+
+	if run.Source != nil && run.Text == "" && run.Note == nil {
+		return nil, fmt.Errorf("%w: empty native run provenance requires a point binding", ErrUnsupported)
 	}
 	style := map[string]any{"bl": 0, "it": 0, "ul": map[string]int{"s": 0}, "st": map[string]int{"s": 0}}
 	if run.Bold {
@@ -341,6 +347,13 @@ func colleafRunStyle(run Run) (json.RawMessage, error) {
 		} else {
 			style["cl"] = map[string]string{"rgb": run.Color}
 		}
+	}
+	origin, err := newColleafRunOrigin(run)
+	if err != nil {
+		return nil, err
+	}
+	if origin != nil {
+		style["manydocOrigin"] = origin
 	}
 	return sfAttrs(style), nil
 }

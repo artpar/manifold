@@ -229,8 +229,10 @@ func (s *colleafCitationState) collapse(ctx context.Context, doc *Document) erro
 					base := run
 					base.Note = nil
 					base.Text = ""
+					base.colleafRunOrigin = nil
 					for _, r := range label {
 						r.Text = ""
+						r.colleafRunOrigin = nil
 						uniform = uniform && reflect.DeepEqual(r, base)
 					}
 					if uniform {

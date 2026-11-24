@@ -1212,5 +1212,40 @@ two saves/reopens, actual TextX body/label edits and identity detachment. Strict
 .vdocs/SF tests check full structures, independent source historical states, archive
 isolation and repeated stability; actual ProseMirror checks61 nodes/marks/attrs.
 Go also checks detached sourced-note archives and malformed records. This synthetic
-headless qualification does not complete run/citation/container/cell/item provenance,
-marker/API/preset/browser or the full imported-PDF/final acceptance audit.
+headless qualification does not complete full per-node provenance, marker/API/
+preset/browser or the full imported-PDF/final acceptance audit. The run/citation
+component is qualified separately below.
+
+
+## Current run origin component
+
+Direct textRun.ts.manydocOrigin carries only manydoc.run-origin/version1/ref.
+Root evidence.runOrigins stores each original SourceInfo and source-free SF run
+fingerprint once. Restoration follows current winning native text intervals and
+final citation/body-mark composition, not old offsets or cached text. Exact run
+semantics retain source facts. Changed or split fragments retain original geometry/
+structure with historical=true and colleaf_run_source_historical; no source-free
+subgeometry is invented. Missing owners archive facts with colleaf_run_source_unbound.
+Inherited style metadata is diagnosed without ownership; overwritten intervals do
+not own provenance. Sources outside direct interval context are explicitly diagnosed.
+Profile/version/digest/reference/duplicate/inline contradictions reject.
+
+Nonempty ordinary text, links, story/cell/list/note body runs, rich body marks,
+rich citation-label runs and rich/default citation atoms have source mappings.
+Default projected labels do not duplicate an atom's source. Internal markers do
+not change uniform-label interpretation. Paragraph hashes exclude nested sources,
+so dropping only a run binding does not stale paragraph provenance. Original
+source-free paragraph hash behavior remains intact.
+
+scripts/verify_colleaf_run_origins.cjs uses pinned SDK/validator/renderer and checks
+eleven sources/reference-only fields, whole bold13pt emoji, two saves/reopens,
+actual TextX split/replacement and binding removal. Strict .vdocs/Go/SF compares
+exact fragments, styles, labels, sources, historical/unbound states and repeated
+stability. ProseMirror checks110 nodes/marks/attrs and exposed the missing source
+mark historical declaration, now fixed alongside optional table_widths/table_spans;
+a Go regression checks every public SourceInfo field against source-mark attrs.
+Go also qualifies overwritten/inherited ownership and malformed evidence. This is
+synthetic headless qualification. Zero-width empty-text/anchor sources still reject;
+BodyLabelStyle.Source is invalid in the existing shared model (use LabelSource).
+Container/cell/item/anchor provenance and remaining intent/API/preset/browser/final
+acceptance work remain required.
