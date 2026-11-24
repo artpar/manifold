@@ -888,3 +888,13 @@ PDFNavigation. Editable ownership is inferred and diagnosed separately. Formatti
 output reflows anchor points; it does not preserve source physical fit/zoom or
 annotation appearance. Non-URI/non-GoTo actions remain explicit diagnostics, not
 executed programs. See PDF_NAVIGATION.md for scope and independent source evidence.
+
+## SF JSON and gzip persistence
+
+Plain SF now writes compact JSON; existing indented SF remains readable. SFGzip
+(.sf.gz) is standard gzip around the same ProseMirror JSON. Formats are explicit,
+with CRC/truncation/trailing-data checks and no automatic inference from generic
+.gz extensions. Both transports retain full provenance/assets and schema/graph
+validation. The complete tree is still materialized; source-heavy PDFs can require
+substantial memory even with small compressed files. See SF_CODEC.md for exact
+real-source proof, measured costs and unchanged profile/API behavior.

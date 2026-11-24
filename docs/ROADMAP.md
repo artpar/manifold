@@ -1,5 +1,11 @@
 # Next capability work
 
+Current SF codec slice: compact JSON and explicit .sf.gz retain all original values,
+assets and provenance, with complete independent real-source ProseMirror checks.
+Transport size drops from 477.6 MB to 8.88 MB; large full-tree allocation/editor
+costs remain explicit. Next is a bounded current-state acceptance/source/corpus/
+visual/resource audit, not an automatic completion claim. See SF_CODEC.md.
+
 Current PDF navigation slice: explicit named/direct views, nullable settings,
 byte identities and annotation geometry now recover through SF with separately
 inferred flow anchors; three-source independent checks pass. This closes the

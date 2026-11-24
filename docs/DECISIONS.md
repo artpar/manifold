@@ -1362,3 +1362,14 @@ and geometric URI/GoTo ownership share a typed target. SF/JSON preserve this sou
 provenance; native/Word reflow follows editable points and normalizes PDF viewing
 state with source diagnostics. Full source view/rectangle/flow checks pass without
 rewriting original source oracles. See PDF_NAVIGATION.md.
+
+## 2026-11-24 Preserve provenance while reducing SF transport and codec overhead
+
+The original export's 205,161 provenance records are required source evidence.
+Keep them intact, retain the established ProseMirror profile, and use compact JSON
+plus explicit standard gzip transport instead of inventing a compressed schema or
+silently coarsening source positions. Reuse validated internal bridge results while
+keeping all public graph checks. Stream body encoding to avoid another complete
+output buffer. Independent normalized JSON hashes and all 205,918 ProseMirror nodes
+prove retention. Full-tree allocation/editor costs remain explicit and must be
+considered in the remaining acceptance audit. See SF_CODEC.md.

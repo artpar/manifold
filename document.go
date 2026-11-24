@@ -3,6 +3,7 @@
 package manydoc
 
 import (
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"errors"
@@ -21,8 +22,10 @@ const (
 	PDF  Format = "pdf"
 	JSON Format = "json"
 	// SF is versioned ProseMirror JSON, stored with the .sf extension.
-	SF   Format = "sf"
-	Text Format = "txt"
+	SF Format = "sf"
+	// SFGzip is the same ProseMirror JSON in an RFC 1952 gzip stream (.sf.gz).
+	SFGzip Format = "sf.gz"
+	Text   Format = "txt"
 )
 
 // Document is manydoc's interchange model. Diagnostics describe input features
@@ -196,6 +199,9 @@ type WriteOptions struct {
 }
 
 func FormatFromName(name string) (Format, error) {
+	if strings.HasSuffix(strings.ToLower(name), ".sf.gz") {
+		return SFGzip, nil
+	}
 	f := Format(strings.ToLower(strings.TrimPrefix(filepath.Ext(name), ".")))
 	switch f {
 	case DOCX, PDF, JSON, SF, Text:
@@ -213,11 +219,19 @@ func Read(ctx context.Context, r io.Reader, format Format, opts ReadOptions) (*D
 	case PDF:
 		return ReadPDF(ctx, r, opts)
 	case SF:
-		s, err := ReadStructured(ctx, r)
-		if err != nil {
-			return nil, err
+		_, d, err := readStructured(ctx, r)
+		return d, err
+	case SFGzip:
+		if r == nil {
+			return nil, errors.New("nil document reader")
 		}
-		return FromStructured(s)
+		compressed, err := gzip.NewReader(contextReader{ctx, r})
+		if err != nil {
+			return nil, fmt.Errorf("structured gzip: %w", err)
+		}
+		defer compressed.Close()
+		_, d, err := readStructured(ctx, compressed)
+		return d, err
 	case JSON:
 		var d Document
 		dec := json.NewDecoder(r)
@@ -258,7 +272,7 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 	if err := d.Validate(); err != nil {
 		return err
 	}
-	if format != JSON && format != SF && format != Text && len(d.Diagnostics) > 0 && !opts.AllowLossy {
+	if format != JSON && format != SF && format != SFGzip && format != Text && len(d.Diagnostics) > 0 && !opts.AllowLossy {
 		return fmt.Errorf("%w: %s", ErrLossy, d.Diagnostics[0].Message)
 	}
 	if (format == DOCX || format == PDF) && d.hasPDFSource() && !opts.AllowLossy {
@@ -272,12 +286,12 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 		return writeDOCX(ctx, w, d)
 	case PDF:
 		return writePDFWithFonts(ctx, w, d, opts.PDFFonts, opts.PDFFontMap)
-	case SF:
+	case SF, SFGzip:
 		s, err := ToStructured(d)
 		if err != nil {
 			return err
 		}
-		return WriteStructured(ctx, w, s)
+		return encodeStructured(ctx, w, s, format == SFGzip)
 	case JSON:
 		enc := json.NewEncoder(w)
 		enc.SetIndent("", "  ")

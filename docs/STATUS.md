@@ -21,7 +21,36 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: PDF physical navigation and inferred flow bindings
+## Latest milestone: compact SF and lossless gzip transport
+
+SF remains the same ProseMirror profile. Plain output is compact; optional
+SFGzip / .sf.gz uses standard Go gzip. Read reuses its checked bridge, Write reuses
+ToStructured's checked result, and body encoding streams nodes. Public validation,
+all source records and original fixtures/oracles remain intact. Read SF_CODEC.md.
+
+Independent old/new JSON comparison matches every value: the real export shrinks
+from 477,613,781 to 8,880,248 bytes. All 205,918 actual ProseMirror nodes and their
+marks/attributes pass. The original 51 accepted corpus cases also round-trip through
+gzip. Strict CRC/truncation/trailing-data, cancellation, output errors and CLI
+atomic-output checks pass. The old indented read took 16.95s; optimized compressed
+read took 3.93s, with identical text hashes. These are host measurements; full-tree
+memory/editor costs remain material, not hidden by transport compression.
+
+Full checks pass: tests (15.129s / 0.371s), race (175.287s / 2.119s), vet,
+module verification, host CGO-disabled build/execution, Linux/amd64 and arm64 cross-
+builds and diff checks. Ten-second gzip/plain SF fuzz campaigns pass (128,050 / 260
+executions, two workers). Full ProseMirror read/check took 6.29s on this host.
+Durable evidence is in verification.json; generated logs/artifacts remain ignored.
+
+The overall goal remains **incomplete**. Next perform the bounded requirement-by-
+requirement acceptance/source/corpus/visual/resource audit. Concrete commands:
+`cat docs/ACCEPTANCE.md`;
+`GOWORK=off go test -run 'TestStructuredCompressed|TestStructuredCodec|TestCLIGzip' -count=1 ./...`;
+`output/qa-venv/bin/python scripts/verify_sf_codec.py output/navigation-import/mqtt.sf output/codec/mqtt-stream.sf.gz`.
+No external blocker prevents continuing. Keep committing verified implementation
+and corresponding KT/evidence updates as requested by the user.
+
+## Previous milestone: PDF physical navigation and inferred flow bindings
 
 PDF→SF now preserves named/direct GoTo views, nullable parameters, all eight view
 modes, namespace/raw name-byte identity, forward page references, transformed

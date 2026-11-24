@@ -7,7 +7,7 @@ behavior and remaining work. This is not a drop-in UniOffice/UniPDF replacement
 or a Word-compatible layout engine.
 
 The library reads and writes DOCX, extracts positioned text, raster images and supported tagged structure or disclosed geometric inference from PDF, generates PDFs from
-structured content, and exchanges documents as ProseMirror JSON (`.sf`), legacy JSON and text.
+structured content, and exchanges documents as ProseMirror JSON (`.sf`, optionally gzip-compressed as `.sf.gz`), legacy JSON and text.
 The [structured-format decision](docs/STRUCTURED_FORMAT.md) records the schema,
 tradeoffs and required unfinished expansion.
 Sectioned SF supports separate body frames and default/first/even running stories.
@@ -291,3 +291,12 @@ through SF/DOCX/PDF. Set `Layout.Margins` to override the scalar fallback and us
 optional distance pointers to retain explicit zero. The source SF/DOCX round trip
 and independent bounds/assets checks are in `scripts/verify_page_layout.py`.
 Section-specific stories and signed running/body overlap remain unfinished.
+
+## Compact structured interchange
+
+SF writes compact ProseMirror JSON. `.sf.gz` is the same schema/values in standard
+Go gzip, useful for source-heavy PDF provenance. CLI conversion infers that suffix;
+extraction selects it with `manydoc extract -format sf.gz -o document.sf.gz input.pdf`.
+Go callers use `manydoc.Read` / `manydoc.Write` with `manydoc.SFGzip`.
+Schema/graph/checksum validation and all assets/source fields remain intact. Full
+large-document trees still take memory; see [codec evidence and limits](docs/SF_CODEC.md).

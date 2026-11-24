@@ -2249,3 +2249,16 @@ all supported annotation targets/regions and actual selected flow page/order, no
 just text. Original MQTT export is 477,613,781 bytes; full SF/provenance/codec costs
 remain required work. Small imported SFs pass actual ProseMirror (8,904 nodes); no
 477 MB ProseMirror check is claimed. See PDF_NAVIGATION.md for exact source evidence.
+
+## SF codec and gzip transport
+
+Read SF_CODEC.md for exact commands, semantic hashes and memory/latency evidence.
+The original 477 MB input is unchanged; output/codec/mqtt-stream.sf.gz is the 8.88 MB
+new export. verify_sf_codec.py compares all normalized JSON values/type counts with
+standard Python gzip/json, independent of the Go reader. verify_structured.cjs now
+accepts .sf.gz with Node's standard zlib; the complete real file passes all 205,918
+nodes/marks/attributes. Go tests round-trip all 51 accepted original corpus cases
+through gzip, including source/assets/relationships. Invalid stream finalization,
+unknown SF content, cancellation, short writes and CLI atomic failures are checked.
+A ten-second gzip fuzz campaign (two workers) passed 128,050 executions. These are
+codec robustness/retention checks, not new layout-fidelity or completion evidence.

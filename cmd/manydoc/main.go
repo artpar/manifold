@@ -25,7 +25,7 @@ func main() {
 }
 func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 || args[0] == "help" || args[0] == "-h" || args[0] == "--help" {
-		fmt.Fprintln(stdout, "Usage:\n  manydoc convert -o output.docx|pdf|sf|json|txt [-allow-lossy] input.docx|pdf|sf|json|txt\n  manydoc extract [-format txt|sf|json] [-o output|-] input.docx|pdf\n\nOptions precede the input filename. PDF passwords may be supplied with -password-env NAME.\nPDF fonts: -pdf-font Family[/B|I|BI]=path.ttf and -pdf-font-map Requested=Target (repeatable).")
+		fmt.Fprintln(stdout, "Usage:\n  manydoc convert -o output.docx|pdf|sf|sf.gz|json|txt [-allow-lossy] input.docx|pdf|sf|sf.gz|json|txt\n  manydoc extract [-format txt|sf|sf.gz|json] [-o output|-] input.docx|pdf\n\nOptions precede the input filename. PDF passwords may be supplied with -password-env NAME.\nPDF fonts: -pdf-font Family[/B|I|BI]=path.ttf and -pdf-font-map Requested=Target (repeatable).")
 		return nil
 	}
 	command := args[0]
@@ -35,7 +35,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	fs := flag.NewFlagSet(command, flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	output := fs.String("o", "", "output filename, or - for stdout")
-	format := fs.String("format", "txt", "extract output format: txt, sf or json")
+	format := fs.String("format", "txt", "extract output format: txt, sf, sf.gz or json")
 	lossy := fs.Bool("allow-lossy", false, "acknowledge imported document fidelity diagnostics")
 	passwordEnv := fs.String("password-env", "", "environment variable containing the PDF password")
 	pdfSkipInference := fs.Bool("pdf-skip-inference", false, "retain untagged PDF paint order instead of inferring geometric structure")
@@ -59,8 +59,8 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	var outFormat manydoc.Format
 	if command == "extract" {
 		outFormat = manydoc.Format(*format)
-		if outFormat != manydoc.Text && outFormat != manydoc.JSON && outFormat != manydoc.SF {
-			return errors.New("extract format must be txt, sf or json")
+		if outFormat != manydoc.Text && outFormat != manydoc.JSON && outFormat != manydoc.SF && outFormat != manydoc.SFGzip {
+			return errors.New("extract format must be txt, sf, sf.gz or json")
 		}
 		if *output == "" {
 			*output = "-"

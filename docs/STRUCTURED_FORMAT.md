@@ -662,3 +662,13 @@ views and annotation links, including base64 name bytes, nullable source paramet
 display geometry and separately labeled flow binding/order. These values are
 validated and deeply cloned in SF bridges. They are provenance rather than an
 instruction to retain original page/zoom state after reflow; see PDF_NAVIGATION.md.
+
+## Compact JSON and optional gzip transport
+
+The profile and values are unchanged. WriteStructured and Write(SF) emit compact
+JSON; ReadStructured/Read(SF) accept both compact and indented JSON. Write/Read with
+SFGzip use standard gzip around exactly that JSON, with .sf.gz extension inference
+and CLI extract -format sf.gz. ReadStructured remains a plain JSON API; callers
+can wrap a standard gzip reader or convert through Read(SFGzip)/ToStructured.
+Compressed and uncompressed inputs receive the same strict schema/graph checks.
+See SF_CODEC.md for full-value/provenance proofs and retained allocation costs.

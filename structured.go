@@ -4,6 +4,7 @@ package manydoc
 // Document remains the conversion engine's Go model and legacy JSON API.
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -638,25 +639,39 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 
 // ReadStructured reads and validates the supported ProseMirror schema.
 func ReadStructured(ctx context.Context, r io.Reader) (*StructuredDocument, error) {
+	s, _, err := readStructured(ctx, r)
+	return s, err
+}
+
+// Return the already-validated bridge result to Read(SF), avoiding a second
+// decoding/allocation of every source mark and asset in the same operation.
+func readStructured(ctx context.Context, r io.Reader) (*StructuredDocument, *Document, error) {
 	if r == nil {
-		return nil, fmt.Errorf("nil document reader")
+		return nil, nil, fmt.Errorf("nil document reader")
 	}
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var s StructuredDocument
 	dec := json.NewDecoder(contextReader{ctx, r})
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&s); err != nil {
-		return nil, fmt.Errorf("structured JSON: %w", err)
+		return nil, nil, fmt.Errorf("structured JSON: %w", err)
 	}
 	if err := dec.Decode(new(any)); err != io.EOF {
-		return nil, fmt.Errorf("structured JSON must contain one value")
+		if err != nil {
+			return nil, nil, fmt.Errorf("structured JSON trailing data: %w", err)
+		}
+		return nil, nil, fmt.Errorf("structured JSON must contain one value")
 	}
-	if _, err := FromStructured(&s); err != nil {
-		return nil, err
+	d, err := FromStructured(&s)
+	if err != nil {
+		return nil, nil, err
 	}
-	return &s, nil
+	if err := ctx.Err(); err != nil {
+		return nil, nil, err
+	}
+	return &s, d, nil
 }
 
 // WriteStructured validates before emitting the persistent representation.
@@ -670,9 +685,39 @@ func WriteStructured(ctx context.Context, w io.Writer, s *StructuredDocument) er
 	if _, err := FromStructured(s); err != nil {
 		return err
 	}
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-	return enc.Encode(s)
+	return encodeStructured(ctx, w, s, false)
+}
+
+// The caller has already checked the complete SF graph. Keep JSON compact:
+// source-heavy documents otherwise spend most persisted bytes on indentation.
+func encodeStructured(ctx context.Context, w io.Writer, s *StructuredDocument, compressed bool) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if !compressed {
+		return encodeStructuredJSON(contextWriter{ctx, w}, s)
+	}
+	gz := gzip.NewWriter(contextWriter{ctx, w})
+	if err := encodeStructuredJSON(contextWriter{ctx, gz}, s); err != nil {
+		return err
+	}
+	return gz.Close()
+}
+
+type contextWriter struct {
+	ctx context.Context
+	w   io.Writer
+}
+
+func (w contextWriter) Write(p []byte) (int, error) {
+	if err := w.ctx.Err(); err != nil {
+		return 0, err
+	}
+	n, err := w.w.Write(p)
+	if err == nil && n < len(p) {
+		err = io.ErrShortWrite
+	}
+	return n, err
 }
 
 func encodeSourceAttrs(raw json.RawMessage, source *SourceInfo) json.RawMessage {

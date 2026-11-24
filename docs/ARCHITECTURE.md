@@ -960,3 +960,13 @@ and binds points only after tagged/geometric recovery, with separate inference.
 SF root pdfNavigation and legacy JSON preserve physical evidence; formatting
 output uses editable flow points rather than reproducing source viewer state.
 See PDF_NAVIGATION.md for exact source checks and the remaining completion audit.
+
+## SF persistence and compression (2026-11-24)
+
+Plain SF writes compact JSON. SFGzip (.sf.gz) is the same checked JSON in standard
+Go gzip, not a new canonical schema. The private reader returns both tree and checked
+bridge so Read does not decode provenance twice; Write reuses ToStructured's checked
+result. Public tree APIs still validate their inputs. structured_encode.go streams
+body nodes; root attributes and individual node/asset values remain materialized.
+Context/error checks cover encoding and gzip finalization. See SF_CODEC.md for
+full original-value/provenance proof, independent ProseMirror checks and memory costs.

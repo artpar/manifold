@@ -1,6 +1,7 @@
 // Optional independent reader; install prosemirror-model in an ignored directory.
 // NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/report.sf
 const fs = require('node:fs');
+const zlib = require('node:zlib');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const {Schema} = require('prosemirror-model');
@@ -33,7 +34,8 @@ function verifyTree(nodes) {
   }
 }
 for (const filename of process.argv.slice(2)) {
-  const input = JSON.parse(fs.readFileSync(filename));
+  const bytes = fs.readFileSync(filename);
+  const input = JSON.parse(filename.toLowerCase().endsWith('.sf.gz') ? zlib.gunzipSync(bytes).toString('utf8') : bytes.toString('utf8'));
   assert.equal(input.attrs.schema, 'manydoc-prosemirror/1');
   verifyTree([input]);
   verifyTree(input.attrs.headers);

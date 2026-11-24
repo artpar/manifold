@@ -4935,5 +4935,94 @@
     "evidence": "output/navigation-import and output/destinations; scripts/verify_navigation_import.py; docs/PDF_NAVIGATION.md",
     "production_dependencies": "unchanged",
     "next": "Measure and fix large SF/provenance/codec costs, then bounded requirement-by-requirement source/corpus/visual completion audit"
+  },
+  "sf_codec_milestone": {
+    "status": "codec/persistence improvements verified; full rich-document goal remains incomplete",
+    "format": "unchanged manydoc-prosemirror/1; compact plain SF plus explicit SFGzip/.sf.gz standard gzip transport",
+    "implementation": [
+      "reuse already-validated reader bridge in Read(SF)",
+      "reuse ToStructured checked result in Write(SF/SFGzip)",
+      "stream body nodes instead of one whole output JSON buffer",
+      "preserve public validation and all provenance/assets",
+      "context/output/short-write/finalization errors propagated"
+    ],
+    "original_source": {
+      "old_pretty_sf_bytes": 477613781,
+      "independent_compact_json_bytes": 168130798,
+      "new_compact_payload_bytes": 168131166,
+      "new_gzip_bytes": 8880248,
+      "provenance_records": 205161,
+      "actual_prosemirror_nodes_checked": 205918,
+      "semantic_comparison": [
+        {
+          "path": "output/navigation-import/mqtt.sf",
+          "bytes": 477613781,
+          "semantic_sha256": "4b9ccc6f060fc45958494e3cfdf85ed3bad4d54076a97e79a153662e7d1d1d1b",
+          "types": {
+            "doc": 1,
+            "paragraph": 6075,
+            "text": 195686,
+            "textStyle": 195686,
+            "source": 195692,
+            "image": 1,
+            "strong": 8107,
+            "link": 10907,
+            "em": 820,
+            "heading": 294,
+            "anchor": 6,
+            "table": 90,
+            "table_row": 756,
+            "table_cell": 3009
+          }
+        },
+        {
+          "path": "output/codec/mqtt-stream.sf.gz",
+          "bytes": 8880248,
+          "semantic_sha256": "4b9ccc6f060fc45958494e3cfdf85ed3bad4d54076a97e79a153662e7d1d1d1b",
+          "types": {
+            "doc": 1,
+            "paragraph": 6075,
+            "text": 195686,
+            "textStyle": 195686,
+            "source": 195692,
+            "image": 1,
+            "strong": 8107,
+            "link": 10907,
+            "em": 820,
+            "heading": 294,
+            "anchor": 6,
+            "table": 90,
+            "table_row": 756,
+            "table_cell": 3009
+          }
+        }
+      ],
+      "original_fixtures_and_oracles": "unchanged"
+    },
+    "host_measurements": {
+      "old_indented_read_seconds": 16.95,
+      "optimized_indented_read_seconds": 7.54,
+      "optimized_compressed_read_seconds": 3.93,
+      "old_peak_memory_footprint_bytes": 1591759104,
+      "compressed_read_peak_memory_footprint_bytes": 754993984,
+      "text_sha256": "3562d99826de3d24b08012e684c9b3a91de382425edd633702688c8949bd3747",
+      "scope": "observations on this host; some new operations overlapped other checks; RSS varies and is retained separately in logs, no latency/constant-memory guarantee"
+    },
+    "checks": {
+      "full_test": "library 15.129s; CLI 0.371s; all packages pass",
+      "full_race": "library 175.287s; CLI 2.119s; all packages pass",
+      "vet": "pass",
+      "modules": "all modules verified",
+      "cgo_disabled": "host built/executed real SF/gzip/text; Linux/amd64 and arm64 cross-build only",
+      "compressed_corpus": "all 51 accepted original inputs preserve canonical SF semantics",
+      "malformed_io": "CRC/truncation/trailing bytes/multiple values/unknown schema/nil/cancellation/output errors/atomic CLI output pass",
+      "fuzz": "ten seconds/two workers each: gzip 128,050; plain SF 260; pass",
+      "independent": "standard Python gzip/JSON all-value hash/type counts; full actual ProseMirror gzip read/check; three identical plain-text hashes",
+      "diff_check": "pass"
+    },
+    "evidence": "output/codec; scripts/verify_sf_codec.py; scripts/verify_structured.cjs; docs/SF_CODEC.md",
+    "production_dependencies": "unchanged; Go standard compress/gzip only",
+    "retained_costs": "complete parse/model/bridge tree remains materialized; root attributes and inline asset/node values still marshaled; high-fidelity glyph tree has substantial memory/editor cost",
+    "next": "bounded current-state acceptance/source/corpus/visual/resource audit; no completion claim based on transport optimization"
   }
 }

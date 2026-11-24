@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -83,8 +84,52 @@ func TestCLIStructuredPaths(t *testing.T) {
 		if err := run(context.Background(), []string{"extract", "-format", "sf", rendered}, &out, &bytes.Buffer{}); err != nil {
 			t.Fatal(err)
 		}
-		if !strings.Contains(out.String(), `"schema": "manydoc-prosemirror/1"`) {
+		var tree struct {
+			Attrs struct {
+				Schema string `json:"schema"`
+			} `json:"attrs"`
+		}
+		if err := json.Unmarshal(out.Bytes(), &tree); err != nil {
+			t.Fatal(err)
+		}
+		if tree.Attrs.Schema != "manydoc-prosemirror/1" {
 			t.Fatal("missing structured schema")
 		}
+	}
+}
+
+func TestCLIGzipStructuredPaths(t *testing.T) {
+	dir := t.TempDir()
+	input := filepath.Join("..", "..", "testdata", "corpus", "docx_basic.docx")
+	compressed := filepath.Join(dir, "document.sf.gz")
+	ctx := context.Background()
+	if e := run(ctx, []string{"extract", "-format", "sf.gz", "-o", compressed, input}, &bytes.Buffer{}, &bytes.Buffer{}); e != nil {
+		t.Fatal(e)
+	}
+	for _, ext := range []string{"sf", "docx", "pdf"} {
+		out := filepath.Join(dir, "roundtrip."+ext)
+		if e := run(ctx, []string{"convert", "-allow-lossy", "-pdf-font-map", "Calibri=Go", "-pdf-font-map", "Cambria=Go", "-o", out, compressed}, &bytes.Buffer{}, &bytes.Buffer{}); e != nil {
+			t.Fatal(ext, e)
+		}
+	}
+	// A corrupted trailer is detected before atomic output replacement.
+	b, e := os.ReadFile(compressed)
+	if e != nil {
+		t.Fatal(e)
+	}
+	b[len(b)-8] ^= 1
+	if e = os.WriteFile(compressed, b, 0600); e != nil {
+		t.Fatal(e)
+	}
+	keep := filepath.Join(dir, "keep.sf")
+	if e = os.WriteFile(keep, []byte("KEEP"), 0600); e != nil {
+		t.Fatal(e)
+	}
+	if e = run(ctx, []string{"convert", "-o", keep, compressed}, &bytes.Buffer{}, &bytes.Buffer{}); e == nil {
+		t.Fatal("bad checksum accepted")
+	}
+	after, e := os.ReadFile(keep)
+	if e != nil || string(after) != "KEEP" {
+		t.Fatal("atomic output changed", e)
 	}
 }
