@@ -153,14 +153,18 @@ mkdir -p output/literal-docx/word output/literal-docx/odt
 output/qa-venv/bin/python scripts/verify_docx_literal_markers.py
 # Retained additional Word-PDF annotation oracle currently fails:
 output/qa-venv/bin/python scripts/verify_docx_literal_markers.py --require-pdf-links
-NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/literal-docx/*.sf
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/literal-docx/{rich,mixed-0,mixed-7,nested,running,continued,page-start,explicit-break,rtl,endnote}.sf
 ```
 
 ## Required unfinished mapping
 
 VDOCS still rejects literal markers with ErrUnsupported before writing output,
 even with AllowLossy. The native mapping remains required work, not a completion
-exemption. Word's ordinary bullet glyph path truncated multi-character labels in
+exemption. The current native reader dispatches list ownership through bullet
+paragraphs and explicitly rejects a table as the first item block. Native tables
+already have structural anchoring paragraphs; the next mapping must connect real
+label/body table or flow owners before ordinary bullet reconstruction, rather
+than scalarize rich labels into glyphSymbol. Word's ordinary bullet glyph path truncated multi-character labels in
 the earlier experiment and is not a generic encoding. Keep actual editable content
 and assets authoritative in the checked native mapping as in DOCX/PDF.
 

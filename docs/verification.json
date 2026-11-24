@@ -7543,8 +7543,8 @@
       "native_PDF": "CLI DOCX→SF→native Go PDF retains actual marker URI/internal annotations and Greek text; distinct from the Word-PDF export discrepancy."
     },
     "checks": {
-      "go_test_all": "passed final library27.262s/CLI0.809s",
-      "race": "passed library320.160s/CLI2.782s before duplicate-container/namespace hardening; new final full run pending; focused final hardening passed1.879s",
+      "go_test_all": "passed final library26.621s/CLI0.794s",
+      "race": "passed final library318.480s/CLI3.177s with duplicate-container/namespace hardening; current focused race1.819s includes additional spoofed-namespace regression; prior pre-hardening full run320.160s/CLI2.782s",
       "vet": "passed",
       "modules": "all modules verified",
       "CGO_disabled_focus": "passed final0.396s",

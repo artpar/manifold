@@ -57,10 +57,10 @@ Ten targeted cases retain structure/assets through independent OOXML/Word reader
 checks; 17 rendered Word pages were inspected after Poppler rendering. Actual
 ProseMirror validates 324 recovered nodes. This is scoped synthetic evidence.
 
-Full tests pass (library27.262s/CLI0.809s); the pre-hardening full race passed
-(library320.160s/CLI2.782s). Final duplicate-container/namespace hardening passes
-focused race checks, with a new full race run currently live. Vet/modules, final
-CGO-disabled focus (0.396s), host CLI and
+Full tests pass (library26.621s/CLI0.794s); final full race passes
+(library318.480s/CLI3.177s), including duplicate-container/namespace hardening.
+Focused race also passes (1.819s), including the additional spoofed-namespace
+regression. Vet/modules, final CGO-disabled focus (0.396s), host CLI and
 Linux amd64/arm64 builds pass. Linux compilation is not execution. CLI SF extraction
 matches API output byte-for-byte; DOCX→SF→native PDF keeps actual marker URI/internal
 annotations. No new fuzz campaign is claimed; full suite includes existing seeds
