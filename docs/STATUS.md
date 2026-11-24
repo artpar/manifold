@@ -39,7 +39,54 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: list, page-break and section navigation
+## Latest progress: standalone zero-height navigation blocks
+
+Private native workers now preserve standalone SF AnchorPoint blocks at real
+UTF-16 cursors without adding visible characters or extra paragraphs to ordinary
+flows. Sparse version1 point intent records the native owning section/item ID,
+point-group order and alias index. Section and item owners distinguish the same
+cursor inside a list item from the point outside the list. Consecutive point
+blocks, alias order, item/section ends, cells, images/breaks, headers and notes
+retain their SF structure. Scope rebinding visits only current flow ranges; point
+and temporary scope counters do not change ordinary native content IDs.
+
+A point-only flow uses the same required empty native paragraph as an empty flow.
+The sparse carrier ID authorizes removing it only while its current position,
+owner, empty content and presentation still agree. Unrelated/edited authored
+paragraphs remain. Native edits that move points off a current flow boundary keep
+current inline/container locations with explicit ownership diagnostics. Terminal
+LF points remain represented. Final-tree carrier cleanup follows actual grouping;
+tentative list assembly cannot authorize removing a point from discarded output.
+
+Pinned actual plugins/app validation/skeleton/two saves/reopens/TextX movement
+qualify point groups/aliases, item/root shared cursors, cell and terminal points,
+point-only carriers and fifteen exact internal selection-manager requests. Native
+text stays unchanged; real insertion adds only Q and moves points. Go strict
+.vdocs/SF checks compare complete saved/edited structures/assets/relationships,
+exact expected ownership diagnostics and source immutability. Dense256-item,
+point-only, explicit-section, malformed-order and unrelated-carrier regressions
+pass. Browser caret/scroll/paint remains unqualified.
+
+Final checks pass: full tests 16.913s/CLI0.380s, full race170.046s/CLI2.315s,
+focused actual standalone race1.867s, vet/modules, CGO-disabled focused tests/host
+CLI execution and Linux amd64/arm64 cross-builds. The short property/offset fuzz
+run passed79,713 executions; it is not exhaustive ownership/carrier coverage.
+Pinned readers and diff checks pass; verification.json records exact scope.
+Cross-builds are not Linux execution evidence. The full goal stays active/
+incomplete. Next recover remaining foreign structural row/cell/section
+cursors, then finish marker appearance/nonvisual/provenance intent, public native
+API/CLI and actual full-preset/browser qualification. Nonmain lookup limits,
+per-page/decorated notes and broader PDF/source/resource/final acceptance audits
+remain required. No external blocker exists; production stays pure Go and
+applications/backends are untouched.
+
+```sh
+MANYDOC_COLLEAF_STANDALONE_QA=output/colleaf-qa/standalone-points.json GOWORK=off go test -run TestColleafStandalone -count=1 .
+node scripts/verify_colleaf_standalone_points.cjs
+MANYDOC_COLLEAF_STANDALONE_SAVED=output/colleaf-qa/standalone-points-saved.json MANYDOC_COLLEAF_STANDALONE_EDITED=output/colleaf-qa/standalone-points-edited.json GOWORK=off go test -run TestColleafStandalone -count=1 .
+```
+
+## Earlier progress: list, page-break and section navigation
 
 Private native workers now map list container anchors, hard-page-break anchors
 and explicit section anchors through real BOOKMARK3 points. List ownership hints

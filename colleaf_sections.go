@@ -315,11 +315,16 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 		}
 		section := b.Section
 		sectionOffset := w.offset
+		firstRange := len(w.body.CustomRanges)
 		if err = w.blocks(section.Blocks, 0); err != nil {
 			return out, err
 		}
 		record := &w.body.SectionBreaks[len(w.body.SectionBreaks)-1]
+		oldSectionID := record.ID
 		record.ID = fmt.Sprintf("manydoc-section-%d", i+1)
+		if err = rebindColleafPointScope(&w.body, oldSectionID, record.ID, firstRange); err != nil {
+			return out, err
+		}
 		if err = w.containerAnchors(b.Anchors, sectionOffset, "section", record.ID); err != nil {
 			return out, err
 		}
@@ -905,6 +910,7 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 		return nil, err
 	}
 	doc.Diagnostics = append(doc.Diagnostics, hyperlinkDiagnostics...)
+	reader.finishStandalone(doc.Blocks)
 	reader.finishListPoints()
 	doc.Diagnostics = append(doc.Diagnostics, reader.doc.Diagnostics...)
 	doc.Diagnostics = append(doc.Diagnostics, diagnostics...)

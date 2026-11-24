@@ -57,6 +57,7 @@ type colleafFlowBlock struct {
 	ID       string
 	Bullet   json.RawMessage
 	Position int
+	Start    int
 }
 type colleafListParagraph struct {
 	Bullet          colleafBullet
@@ -191,7 +192,7 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 				return err
 			}
 		}
-		if err := w.flow(item.Blocks[1:], depth); err != nil {
+		if err := w.pointFlow(item.Blocks[1:], depth, "item", firstID); err != nil {
 			return err
 		}
 		lastID := w.body.Paragraphs[len(w.body.Paragraphs)-1].ID
@@ -371,7 +372,7 @@ func nativeListBlock(info colleafListParagraph, binding *colleafListBinding) Blo
 	}
 	return block
 }
-func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int) ([]Block, error) {
+func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int, sectionID string, lower, upper int) ([]Block, error) {
 	ids := map[string]int{}
 	duplicates := map[string]bool{}
 	for i, f := range flow {
@@ -382,13 +383,23 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int) ([]Bl
 	}
 	bindings := r.listBindings
 	var consume func(int, int, string) (Block, int, error)
-	var group func(int, int, int, string) ([]Block, error)
-	group = func(start, end, depth int, parent string) ([]Block, error) {
+	var group func(int, int, int, string, string, string, int, int) ([]Block, error)
+	group = func(start, end, depth int, parent, scope, owner string, lower, upper int) ([]Block, error) {
 		if depth > 64 {
 			return nil, fmt.Errorf("native list ownership nesting exceeds64")
 		}
 		var out []Block
+		seen := map[int]bool{}
+		if start == end {
+			out = append(out, r.standaloneBlocks(scope, owner, lower)...)
+			seen[lower] = true
+		}
 		for i := start; i < end; {
+			pos := flow[i].Start
+			if !seen[pos] {
+				out = append(out, r.standaloneBlocks(scope, owner, pos)...)
+				seen[pos] = true
+			}
 			info, ok := r.listParagraphs[flow[i].Position]
 			if !ok || len(flow[i].Bullet) == 0 {
 				out = append(out, flow[i].Block)
@@ -407,6 +418,9 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int) ([]Bl
 			if info.Loss {
 				r.doc.warn("colleaf_list_presentation", "Native marker presentation is normalized; supported numbering and item text are retained")
 			}
+		}
+		if !seen[upper] {
+			out = append(out, r.standaloneBlocks(scope, owner, upper)...)
 		}
 		return out, nil
 	}
@@ -459,7 +473,7 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int) ([]Bl
 						valid = false
 						break
 					}
-					children, err := group(item.start+1, item.end+1, depth+1, info.Bullet.ID)
+					children, err := group(item.start+1, item.end+1, depth+1, info.Bullet.ID, "item", flow[item.start].ID, flow[item.start].Position+1, flow[item.end].Position+1)
 					if err != nil {
 						return Block{}, 0, err
 					}
@@ -508,5 +522,5 @@ func (r *colleafBodyReader) groupLists(flow []colleafFlowBlock, depth int) ([]Bl
 		r.promoteListPoints(&block, flow[start].ID, flow[start].Position)
 		return block, cursor, nil
 	}
-	return group(0, len(flow), depth, "")
+	return group(0, len(flow), depth, "", "section", sectionID, lower, upper)
 }

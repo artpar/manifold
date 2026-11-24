@@ -1573,3 +1573,28 @@ preliminary first-section note projection temporarily declares only links whose
 anchors were omitted by that projection; the final native intent uses original
 unresolved identities and final composition checks the complete real graph.
 Standalone AnchorPoint export and other structural cursors remain unfinished.
+
+
+## Native standalone point projection
+
+colleaf_standalone_points.go adds sparse point scope/group/order/carrier intent to
+real BOOKMARK3 ranges. Native section IDs bind ordinary/cell flows; the first
+paragraph ID binds list items. Grouping inserts zero-height blocks at current
+flow boundaries after list ownership reconstruction. Existing inline/container
+points remain as carriers until the final tree contains the corresponding point
+blocks; only then are duplicate carriers removed. Changed ownership/boundaries
+retain current source positions with diagnostics. Terminal LFs receive a current
+boundary fallback rather than losing points.
+
+Point-only flows require the same CR/LF paragraph as empty native flows. A checked
+carrier ID removes that paragraph only with matching owner/position and unchanged
+empty content/presentation. Metadata cannot remove an unrelated authored empty
+paragraph. Point order slots are unique; typed malformed metadata rejects. Binding
+rebases visit only ranges emitted by the current flow, avoiding repeated scans of
+prior items; ordinary content ID allocation stays unchanged. Native list items
+retain the profile's paragraph-first contract.
+
+Pinned save/edit/selection and full Go/SF structural/asset/relationship evidence
+qualify standalone projection, including256 items and point-only stories/cells.
+Other foreign structural cursor recovery, provenance/appearance/API/browser and
+the broader goal acceptance audit remain required.

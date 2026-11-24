@@ -36,22 +36,25 @@ type colleafNativeTable struct {
 }
 
 type colleafBodyWriter struct {
-	citationProjection  map[noteKey]string
-	ctx                 context.Context
-	stream              strings.Builder
-	body                colleafBody
-	tables              map[string]json.RawMessage
-	offset, serial      int
-	noteIDs             map[noteKey]string
-	lists               map[string]json.RawMessage
-	listBindings        []colleafListBinding
-	listDepth           int
-	listGroup           string
-	documentID, storyID string
-	drawings            map[string]json.RawMessage
-	drawingOrder        []string
-	imageGeometry       []colleafImageBinding
-	imageCache          outputImageCache
+	pointScopeSerial       int
+	pointScope, pointOwner string
+	pointSerial            int
+	citationProjection     map[noteKey]string
+	ctx                    context.Context
+	stream                 strings.Builder
+	body                   colleafBody
+	tables                 map[string]json.RawMessage
+	offset, serial         int
+	noteIDs                map[noteKey]string
+	lists                  map[string]json.RawMessage
+	listBindings           []colleafListBinding
+	listDepth              int
+	listGroup              string
+	documentID, storyID    string
+	drawings               map[string]json.RawMessage
+	drawingOrder           []string
+	imageGeometry          []colleafImageBinding
+	imageCache             outputImageCache
 }
 
 func (w *colleafBodyWriter) text(s string) { w.stream.WriteString(s); w.offset += colleafUTF16Len(s) }
@@ -102,15 +105,45 @@ func (w *colleafBodyWriter) blocks(blocks []Block, depth int) error {
 	if depth > 64 {
 		return fmt.Errorf("native body nesting exceeds64")
 	}
+	allPoints := len(blocks) > 0
+	for _, b := range blocks {
+		allPoints = allPoints && b.Kind == AnchorPoint
+	}
 	if len(blocks) == 0 {
 		if err := w.paragraph(Block{Kind: Paragraph}); err != nil {
 			return err
 		}
 	}
-	if err := w.flow(blocks, depth); err != nil {
+	scope := w.pointScopeID()
+	firstRange := len(w.body.CustomRanges)
+	if err := w.pointFlow(blocks, depth, "section", scope); err != nil {
 		return err
 	}
-	w.body.SectionBreaks = append(w.body.SectionBreaks, colleafSectionRecord{StartIndex: w.offset, ID: w.id("s")})
+	if allPoints {
+		if err := w.paragraph(Block{Kind: Paragraph}); err != nil {
+			return err
+		}
+		carrier := w.body.Paragraphs[len(w.body.Paragraphs)-1].ID
+		for i := firstRange; i < len(w.body.CustomRanges); i++ {
+			a := &w.body.CustomRanges[i]
+			if a.Type != 3 {
+				continue
+			}
+			p, err := readColleafBookmark(*a)
+			if err != nil {
+				return err
+			}
+			if p.Hint != nil && p.Hint.Role == "point" && p.Hint.OwnerID == scope {
+				p.Hint.PointCarrier = carrier
+				a.Properties = sfAttrs(p)
+			}
+		}
+	}
+	sectionID := w.id("s")
+	if err := rebindColleafPointScope(&w.body, scope, sectionID, firstRange); err != nil {
+		return err
+	}
+	w.body.SectionBreaks = append(w.body.SectionBreaks, colleafSectionRecord{StartIndex: w.offset, ID: sectionID})
 	w.text("\n")
 	return nil
 }
@@ -122,7 +155,11 @@ func (w *colleafBodyWriter) flow(blocks []Block, depth int) error {
 		if err := w.ctx.Err(); err != nil {
 			return err
 		}
-		if b.Kind == PageBreak {
+		if b.Kind == AnchorPoint {
+			if err := w.standalonePoint(b); err != nil {
+				return err
+			}
+		} else if b.Kind == PageBreak {
 			if b.Source != nil {
 				return fmt.Errorf("%w: native page-break provenance requires mapping", ErrUnsupported)
 			}
@@ -364,6 +401,12 @@ func (r *colleafBodyReader) paragraphFragment(start, end int, p colleafParagraph
 }
 
 type colleafBodyReader struct {
+	pointSlots         map[colleafPointSlot]bool
+	standalone         []colleafStandalonePoint
+	standaloneIDs      map[string]bool
+	pointsAt           map[int][]colleafStandalonePoint
+	pointCarriers      map[string]bool
+	sectionIDs         map[int]string
 	sectionPoints      map[int][]string
 	listPointPositions map[string]int
 	listPointOwners    map[string]string
@@ -413,12 +456,12 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 		return nil, fmt.Errorf("%w: native sections require settings mapping", ErrUnsupported)
 	}
 	var flow []colleafFlowBlock
-	push := func(bs []Block, p colleafParagraphRecord) {
+	push := func(bs []Block, p colleafParagraphRecord, start int) {
 		for _, b := range bs {
 			if len(flow) > 0 && flow[len(flow)-1].Position == p.StartIndex {
 				p.Bullet = nil
 			}
-			flow = append(flow, colleafFlowBlock{Block: b, ID: p.ID, Bullet: p.Bullet, Position: p.StartIndex})
+			flow = append(flow, colleafFlowBlock{Block: b, ID: p.ID, Bullet: p.Bullet, Position: p.StartIndex, Start: start})
 		}
 	}
 	for _, node := range sections[0].children {
@@ -435,7 +478,9 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 			if err != nil {
 				return nil, err
 			}
-			push(part, p)
+			if !r.emptyPointCarrier(p, node.start, node.end-1, r.sectionIDs[sections[0].end-1], part) {
+				push(part, p, node.start)
+			}
 			continue
 		}
 		cursor := node.start
@@ -445,7 +490,7 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 			if err != nil {
 				return nil, err
 			}
-			push(empty, p)
+			push(empty, p, node.start)
 		}
 		for _, child := range node.children {
 			if cursor < child.start {
@@ -453,7 +498,7 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 				if err != nil {
 					return nil, err
 				}
-				push(part, p)
+				push(part, p, cursor)
 				mixed = true
 			}
 			if child.kind != "table" {
@@ -463,7 +508,7 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 			if err != nil {
 				return nil, err
 			}
-			push([]Block{table}, p)
+			push([]Block{table}, p, child.start)
 			cursor = child.end
 		}
 		// Preserve authored suffix text/paragraph properties. An otherwise empty
@@ -473,14 +518,28 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 			if err != nil {
 				return nil, err
 			}
-			push(part, p)
+			push(part, p, cursor)
 			mixed = true
 		}
 		if mixed {
 			r.doc.warn("colleaf_table_paragraph", "Native table and text sharing one paragraph become ordered SF blocks; visible content and supported paragraph styles are retained")
 		}
 	}
-	return r.groupLists(flow, depth)
+	blocks, err := r.groupLists(flow, depth, r.sectionIDs[sections[0].end-1], sections[0].start, sections[0].end-1)
+	if err != nil {
+		return nil, err
+	}
+	// A point at a terminal LF has no text carrier. Retain a changed scope at
+	// this actual current boundary rather than dropping it.
+	scope := r.sectionIDs[sections[0].end-1]
+	represented := colleafStandaloneBlockIDs(blocks)
+	for _, p := range r.pointsAt[sections[0].end-1] {
+		if !represented[p.id] && (p.scope != "section" || p.owner != scope) {
+			blocks = append(blocks, Block{Kind: AnchorPoint, Anchors: []string{p.id}})
+			r.doc.warn("colleaf_stale_point_ownership", "Standalone point retains its current native location because its owning flow or boundary changed")
+		}
+	}
+	return blocks, nil
 }
 func colleafUnitPoints(unit colleafNumberUnit) (float64, error) {
 	if math.IsNaN(unit.Value) || math.IsInf(unit.Value, 0) || unit.Value < 0 {
@@ -799,9 +858,15 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 	r.bookmarkUsed = map[string]bool{}
 	r.containerPoints = map[int][]string{}
 	r.sectionPoints = map[int][]string{}
+	r.standaloneIDs = map[string]bool{}
+	r.pointSlots = map[colleafPointSlot]bool{}
+	r.pointsAt = map[int][]colleafStandalonePoint{}
+	r.pointCarriers = map[string]bool{}
+	r.sectionIDs = map[int]string{}
 	sectionEndIDs := map[int]string{}
 	for _, s := range body.SectionBreaks {
 		sectionEndIDs[s.StartIndex] = s.ID
+		r.sectionIDs[s.StartIndex] = s.ID
 	}
 	sectionStartIDs := map[int]string{}
 	for _, s := range index.sections {
@@ -816,6 +881,11 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 			p, err := readColleafBookmark(a)
 			if err != nil {
 				return nil, err
+			}
+			if p.Hint != nil && p.Hint.Role == "point" {
+				if err := r.registerStandalone(a, p); err != nil {
+					return nil, err
+				}
 			}
 			if p.Hint != nil && p.Hint.Role == "section" && p.Hint.OwnerID == sectionStartIDs[a.StartIndex] {
 				if err = colleafBookmarkLosses(r.doc, a); err != nil {
@@ -841,6 +911,9 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 		if a.Type != 8 && a.Type != 9 {
 			r.ranges = append(r.ranges, a)
 		}
+	}
+	for _, p := range r.standalone {
+		r.pointsAt[p.position] = append(r.pointsAt[p.position], p)
 	}
 	sort.SliceStable(r.bookmarks, func(i, j int) bool { return r.bookmarks[i].StartIndex < r.bookmarks[j].StartIndex })
 	sort.Slice(r.ranges, func(i, j int) bool { return r.ranges[i].StartIndex < r.ranges[j].StartIndex })
@@ -895,6 +968,7 @@ func decodeColleafBody(ctx context.Context, body colleafBody, settings colleafTe
 		return nil, err
 	}
 	r.doc.Blocks = blocks
+	r.finishStandalone(blocks)
 	r.finishListPoints()
 	if len(r.used) != len(tables) {
 		return nil, fmt.Errorf("native table source is orphaned")

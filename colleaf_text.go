@@ -383,7 +383,7 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 				block.Anchors = append(block.Anchors, bp.BookmarkID)
 			} else {
 				points[a.StartIndex] = append(points[a.StartIndex], Run{Anchor: bp.BookmarkID})
-				if bp.Hint != nil && bp.Hint.Role != "run" && bp.Hint.Role != "list" {
+				if bp.Hint != nil && bp.Hint.Role != "run" && bp.Hint.Role != "list" && bp.Hint.Role != "point" {
 					doc.warn("colleaf_stale_bookmark_placement", "Edited native bookmark position is retained as a current inline point rather than old block placement")
 				}
 			}

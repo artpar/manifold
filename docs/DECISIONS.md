@@ -1992,3 +1992,28 @@ input validation. Persist the original unresolved declarations and validate fina
 composition against the complete actual graph. This is document interpretation,
 not an application authorization or quota gate. Standalone/other structural
 points, UI/API and the broader acceptance queue remain required.
+
+
+## 2026-11-24 Preserve standalone points with sparse native flow ownership
+
+Keep AnchorPoint zero-height semantics without inserting visible or invisible
+text. A native cursor alone cannot distinguish consecutive point blocks or an
+item-end point from one outside its list. Persist only owning section/item IDs,
+group order and alias indices on real bookmark points; never persist body/text/
+style caches. Rebind current flow ranges, using separate temporary counters so
+ordinary native content IDs remain stable.
+
+Insert standalone blocks only at current reconstructed flow boundaries. Preserve
+current inline/container locations and disclose ownership loss after edits. Base
+carrier removal on the actual final grouped tree, since tentative list groups can
+be discarded. Retain terminal LF points. A point-only flow needs the existing
+empty native paragraph; remove it only with a current matched owner/position and
+unchanged bare-empty content/presentation. A metadata reference alone cannot
+remove an unrelated authored paragraph. Preserve the SF paragraph-first item
+contract rather than adding a new list schema.
+
+Qualify actual registered-plugin saves/reopens, TextX movement, exact selection
+requests and unchanged native text, then compare full strict .vdocs/SF structure,
+assets, relationships and expected diagnostics. This is headless interoperability,
+not browser caret/scroll/paint fidelity. Other foreign structural cursors and the
+remaining intent/API/browser/final acceptance work still gate completion.

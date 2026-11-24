@@ -6371,5 +6371,66 @@
       "MANYDOC_COLLEAF_FLOW_SAVED=output/colleaf-qa/flow-navigation-saved.json MANYDOC_COLLEAF_FLOW_EDITED=output/colleaf-qa/flow-navigation-edited.json GOWORK=off go test -run TestColleafFlowNavigation -count=1 .",
       "rg -n 'AnchorPoint|structural cursor' colleaf_tables.go colleaf_navigation.go"
     ]
+  },
+  "colleaf_standalone_points_2026_11_24": {
+    "scope": "Private standalone SF AnchorPoint projection through real native bookmarks. Complete adapter/API/CLI and full goal remain incomplete.",
+    "implementation": [
+      "Sparse version1 pointScope (section/item), ownerId, pointOrder/pointIndex and optional pointCarrier metadata binds actual UTF16 points without text/body/style/asset caches.",
+      "Current reconstructed flow boundaries insert ordered zero-height point blocks. Scope IDs distinguish item-end and outside-list points at the same native cursor. Final-tree cleanup removes only corresponding duplicate inline/container carriers after actual grouping.",
+      "Point-only native flows use the same required CR/LF paragraph as empty flows. A current matched owner/position and bare-empty unchanged content/presentation authorize carrier omission; unrelated/edited authored paragraphs stay, with diagnostics.",
+      "Current edits away from boundaries remain at current inline/container positions with ownership diagnostics. Terminal LF points retain current boundary representation. Duplicate order slots and malformed typed intent reject.",
+      "Scope rebinding visits only ranges emitted by the current flow, with separate temporary counters to preserve ordinary content IDs. Native item paragraph-first profile is unchanged."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_standalone_points.cjs",
+      "script_sha256": "e68bbddd820f8dc9ce28404b5627446f302f8bd4dac62c32f31af5a9c2a9a567",
+      "packages": "Same attributed pinned Univer1.0.4 plugins, app validator, hash-pinned unmodified internal UI handler/helper and actual selection manager used by previous navigation probes.",
+      "main_offsets": {
+        "a": 0,
+        "alias": 0,
+        "b": 0,
+        "before-list": 8,
+        "list": 8,
+        "item-first": 13,
+        "item-mid": 13,
+        "item-end": 18,
+        "item-two-end": 22,
+        "after-list": 22,
+        "cell-start": 25,
+        "cell-end": 30,
+        "only-cell": 33,
+        "before-image": 39,
+        "before-break": 41,
+        "end": 165
+      },
+      "other_offsets": "header-start0/header-end7, only-note0",
+      "results": [
+        "18 standalone identities in17 ordered groups across main/list/cell/header/note flows plus the separate list anchor; aliases and consecutive groups remain distinct. Shared item/root cursor ownership is checked.",
+        "Fifteen exact collapsed internal selection-refresh requests pass, including cell/terminal/empty-carrier native positions. App validation, skeleton construction and two actual registered-plugin saves/reopens pass.",
+        "Native text stays unchanged after saves. Actual TextX Q insertion produces exactly Q+original main stream and shifts all main points by1; leading point groups now lie inside actual text.",
+        "Strict .vdocs/SF saved and edited reimport checks complete structures, grouping/alias order, assets, note/link relationships and exact expected ownership diagnostics; baseline source snapshot stays unchanged.",
+        "256-item end-point graph, point-only root/cells/notes, explicit section coexistence, moved inline points, duplicate/malformed order and unrelated empty-carrier protection regressions pass.",
+        "Previous pinned flow/container/navigation probes pass unchanged."
+      ],
+      "limits": "Headless identity/token/source/save/edit and selection-refresh evidence with stub render manager. No actual browser caret/scroll/paint/events or full native compatibility claim."
+    },
+    "checks": {
+      "tests": "All-package tests with actual saved/edited native artifacts pass library16.913s/CLI0.380s/internal cached; all examples build.",
+      "race": "Full final-source all-package race with actual saved/edited artifacts passes library170.046s/CLI2.315s/internal cached. Focused final standalone saved/edited/section/carrier/malformed/dense checks1.867s also passed.",
+      "vet": "pass after final source/test changes",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "Focused standalone tests0.428s, host CLI build/--help and Linux amd64/arm64 cross-builds pass. Cross-builds are not Linux execution evidence.",
+      "fuzz": "Existing small navigation property/offset fuzz target79713 executions/10.514s,2workers pass; short safety campaign, not exhaustive standalone ownership/carrier coverage.",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go production changes; no new dependency, runtime executable/service/CGO/license server/upload, application/backend change or permission/quota gate. Optional QA installations/artifacts ignored. Original source corpus/oracles and SF schema unchanged.",
+    "remaining": "Foreign row/cell/section and other structural cursor projection; nonmain editor target lookup limits; marker appearance/nonvisual/provenance intent, public native API/CLI and actual full-preset/browser qualification; per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_STANDALONE_QA=output/colleaf-qa/standalone-points.json GOWORK=off go test -run TestColleafStandalone -count=1 .",
+      "node scripts/verify_colleaf_standalone_points.cjs",
+      "MANYDOC_COLLEAF_STANDALONE_SAVED=output/colleaf-qa/standalone-points-saved.json MANYDOC_COLLEAF_STANDALONE_EDITED=output/colleaf-qa/standalone-points-edited.json GOWORK=off go test -run TestColleafStandalone -count=1 .",
+      "rg -n 'structural cursor|cellNode|rowNode' colleaf_navigation.go colleaf_tables.go"
+    ]
   }
 }

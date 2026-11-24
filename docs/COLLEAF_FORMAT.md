@@ -1050,8 +1050,8 @@ moves within the same paragraph. Explicit section and child points can share an
 offset without collapsing ownership. Empty section anchors survive save/reopen.
 A point on a native rendered soft page break becomes a zero-height SF AnchorPoint
 when that layout boundary is omitted, with the ordinary soft-break diagnostic.
-Standalone AnchorPoint native export remains unfinished, including that imported
-case; it is still required work rather than a completion exception.
+Standalone AnchorPoint native export is now mapped as described below, including
+that imported case; other foreign structural cursor recovery remains required.
 
 The preliminary note composition sees a first-section subset. Its temporary
 unresolved set admits references to omitted root/other-section anchors; the final
@@ -1066,3 +1066,35 @@ Go strict .vdocs/SF reimport checks all structures, relationships, actual interv
 boundaries and exact stale-section diagnostics. Render manager remains stubbed;
 actual browser caret/scroll/paint/events and remaining structural/API/intent
 qualification remain open.
+
+
+## Current standalone zero-height block component
+
+Real BOOKMARK3 points now carry optional role point metadata: pointScope selects
+native section or list-item ownership, ownerId binds its native section/first-
+paragraph ID, positive pointOrder identifies an ordered zero-height block and nonnegative
+pointIndex orders its aliases. pointCarrier optionally binds the existing required empty
+paragraph for a point-only native flow. No extra characters, serialized SF body,
+text, styles or assets are stored. Ordinary native content ID allocation remains
+unchanged; rebinding visits only ranges from the current flow.
+
+The rich reader inserts point groups at current reconstructed flow boundaries,
+then removes duplicate inline/container carriers only where the final grouped
+tree contains the standalone blocks. This preserves item-end and outside-list
+points at the same cursor. Edits away from those boundaries retain actual current
+locations with colleaf_stale_point_ownership. Terminal LF points remain represented.
+Bare-empty carrier omission requires current owner/position/content/presentation;
+unrelated or edited paragraphs stay, with colleaf_stale_point_carrier when needed.
+Order-slot duplicates and malformed bindings reject. The SF paragraph-first list
+item contract is unchanged.
+
+scripts/verify_colleaf_standalone_points.cjs reuses the same pinned packages,
+validator and unmodified internal handler/actual selection manager. It qualifies
+ordered groups/aliases, shared cursors, cell/terminal/point-only positions, fifteen
+exact main selection requests, unchanged native text after two saves/reopens and
+actual TextX movement. Strict Go/.vdocs/SF comparison checks complete saved/edited
+structures, assets, note/link relationships and expected diagnostics. Dense256-
+item, explicit-section and invalid-carrier regressions add structural coverage.
+No actual browser caret/scroll/paint/event or whole-native fidelity is claimed.
+Foreign structural controls beyond these mapped positions, nonmain lookup,
+appearance/provenance/API/browser and final acceptance remain required.

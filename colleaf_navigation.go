@@ -11,10 +11,14 @@ import (
 )
 
 type colleafBookmarkHint struct {
-	Version     int    `json:"version"`
-	Role        string `json:"role"`
-	ParagraphID string `json:"paragraphId,omitempty"`
-	OwnerID     string `json:"ownerId,omitempty"`
+	Version      int    `json:"version"`
+	Role         string `json:"role"`
+	ParagraphID  string `json:"paragraphId,omitempty"`
+	OwnerID      string `json:"ownerId,omitempty"`
+	PointScope   string `json:"pointScope,omitempty"`
+	PointOrder   int    `json:"pointOrder,omitempty"`
+	PointIndex   int    `json:"pointIndex,omitempty"`
+	PointCarrier string `json:"pointCarrier,omitempty"`
 }
 type colleafBookmarkProperties struct {
 	BookmarkID string               `json:"bookmarkId,omitempty"`
@@ -47,13 +51,20 @@ func readColleafBookmark(a colleafRangeRecord) (colleafBookmarkProperties, error
 		if err = strictSFAttrs(fields["manydocNavigation"], p.Hint); err != nil {
 			return p, err
 		}
-		validRole := p.Hint.Role == "run" || p.Hint.Role == "block" || p.Hint.Role == "table" || p.Hint.Role == "picture" || p.Hint.Role == "list" || p.Hint.Role == "break" || p.Hint.Role == "section"
+		validRole := p.Hint.Role == "run" || p.Hint.Role == "block" || p.Hint.Role == "table" || p.Hint.Role == "picture" || p.Hint.Role == "list" || p.Hint.Role == "break" || p.Hint.Role == "section" || p.Hint.Role == "point"
 		if p.Hint.Version != 1 || !validRole {
 			return p, fmt.Errorf("%w: native bookmark placement intent", ErrUnsupported)
 		}
-		structural := p.Hint.Role == "table" || p.Hint.Role == "picture" || p.Hint.Role == "list" || p.Hint.Role == "break" || p.Hint.Role == "section"
+		structural := p.Hint.Role == "table" || p.Hint.Role == "picture" || p.Hint.Role == "list" || p.Hint.Role == "break" || p.Hint.Role == "section" || p.Hint.Role == "point"
 		if structural && (p.Hint.OwnerID == "" || p.Hint.ParagraphID != "") || !structural && p.Hint.OwnerID != "" {
 			return p, fmt.Errorf("invalid native bookmark owner binding")
+		}
+		if p.Hint.Role == "point" {
+			if (p.Hint.PointScope != "section" && p.Hint.PointScope != "item") || p.Hint.PointOrder <= 0 || p.Hint.PointIndex < 0 {
+				return p, fmt.Errorf("invalid standalone point binding")
+			}
+		} else if p.Hint.PointScope != "" || p.Hint.PointOrder != 0 || p.Hint.PointIndex != 0 || p.Hint.PointCarrier != "" {
+			return p, fmt.Errorf("unexpected standalone point binding")
 		}
 	}
 	return p, nil
@@ -409,7 +420,7 @@ func (r *colleafBodyReader) containerBookmark(a colleafRangeRecord) (bool, error
 	if err = colleafBookmarkLosses(r.doc, a); err != nil {
 		return false, err
 	}
-	if p.Hint != nil && (p.Hint.Role != role || p.Hint.OwnerID != owner) {
+	if p.Hint != nil && p.Hint.Role != "point" && (p.Hint.Role != role || p.Hint.OwnerID != owner) {
 		r.doc.warn("colleaf_stale_bookmark_placement", "Edited native bookmark position binds to its current container rather than stale placement intent")
 	}
 	r.containerPoints[a.StartIndex] = append(r.containerPoints[a.StartIndex], p.BookmarkID)
@@ -423,7 +434,14 @@ func (r *colleafBodyReader) promoteListPoints(block *Block, firstID string, posi
 	if len(block.Items) == 0 || len(block.Items[0].Blocks) == 0 {
 		return
 	}
-	p := &block.Items[0].Blocks[0]
+	first := 0
+	for first < len(block.Items[0].Blocks) && block.Items[0].Blocks[first].Kind == AnchorPoint {
+		first++
+	}
+	if first == len(block.Items[0].Blocks) {
+		return
+	}
+	p := &block.Items[0].Blocks[first]
 	runs := make([]Run, 0, len(p.Runs))
 	for _, run := range p.Runs {
 		if owner, ok := r.listPointOwners[run.Anchor]; ok && owner == firstID && r.listPointPositions[run.Anchor] == r.paragraphStarts[position] {

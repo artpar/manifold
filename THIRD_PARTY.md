@@ -196,3 +196,6 @@ No additional dependency or third-party production source is incorporated.
 
 The flow-navigation probe reuses the same attributed pinned QA packages and
 unmodified handler source for list/break/section save/edit/selection evidence.
+
+The standalone-point probe reuses those same attributed pinned QA packages,
+validator and unmodified handler for text-free point/group/save/edit evidence.
