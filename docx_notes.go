@@ -560,3 +560,26 @@ func (r *docxReader) checkEffectiveNoteProperties() {
 		r.doc.warn("note_default_numbering", "Endnote format omitted; OOXML decimal default used (Word may display lowerRoman)")
 	}
 }
+
+// Both sectioned and ordinary packages must use the same note identity/display
+// catalog; per-story relationships and geometry remain owned by each writer.
+func (w *docxWriter) initializeNotes(d *Document, notes *noteCatalog) map[string]int {
+	w.noteIDs = map[noteKey]int{}
+	w.noteLabels = notes.labels
+	w.noteCatalog = notes
+	w.noteVariants = variantNoteKeys(d)
+	w.noteCustomLabels = map[noteKey]string{}
+	for key, note := range notes.definitions {
+		w.noteCustomLabels[key] = note.Label
+		if len(w.noteVariants) > 0 {
+			w.noteCustomLabels[key] = notes.labels[key]
+		}
+	}
+	w.seenNoteRefs = map[noteKey]bool{}
+	noteCounts := map[string]int{}
+	for _, n := range d.Notes {
+		noteCounts[n.Kind]++
+		w.noteIDs[noteIdentity(n)] = noteCounts[n.Kind]
+	}
+	return noteCounts
+}

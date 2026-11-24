@@ -23,6 +23,7 @@ const xmlHeader = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`
 const wordNamespaces = ` xmlns:w="` + wordNS + `" xmlns:r="` + relNS + `" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"`
 
 type docxWriter struct {
+	allowLossy         bool
 	destinationNames   map[string]string
 	ctx                context.Context
 	parts              map[string][]byte
@@ -54,9 +55,9 @@ func (w *docxWriter) addRel(kind, target string, external bool) string {
 	return id
 }
 
-func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
+func writeDOCX(ctx context.Context, out io.Writer, d *Document, allowLossy bool) error {
 	if hasSectionBlocks(d.Blocks) {
-		return writeSectionedDOCX(ctx, out, d)
+		return writeSectionedDOCX(ctx, out, d, allowLossy)
 	}
 	notes, err := catalogNotes(d, true)
 	if err != nil {
@@ -70,24 +71,8 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 		return fmt.Errorf("%w: DOCX running anchor lies outside the page", ErrUnsupported)
 	}
 	wid, hei := g.width, g.height
-	w := &docxWriter{ctx: ctx, parts: map[string][]byte{}, next: 1, contentWidth: g.contentWidth(), contentHeight: g.contentHeight(), validatedImages: make(outputImageCache)}
-	w.noteIDs = map[noteKey]int{}
-	w.noteLabels = notes.labels
-	w.noteCatalog = notes
-	w.noteVariants = variantNoteKeys(d)
-	w.noteCustomLabels = map[noteKey]string{}
-	for key, note := range notes.definitions {
-		w.noteCustomLabels[key] = note.Label
-		if len(w.noteVariants) > 0 {
-			w.noteCustomLabels[key] = notes.labels[key]
-		}
-	}
-	w.seenNoteRefs = map[noteKey]bool{}
-	noteCounts := map[string]int{}
-	for _, n := range d.Notes {
-		noteCounts[n.Kind]++
-		w.noteIDs[noteIdentity(n)] = noteCounts[n.Kind]
-	}
+	w := &docxWriter{allowLossy: allowLossy, ctx: ctx, parts: map[string][]byte{}, next: 1, contentWidth: g.contentWidth(), contentHeight: g.contentHeight(), validatedImages: make(outputImageCache)}
+	noteCounts := w.initializeNotes(d, notes)
 	imageHeight, bodyHeight, err := w.fitRunning(d, g)
 	if err != nil {
 		return err
@@ -339,6 +324,7 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 				}
 				out.WriteString(`<w:r`)
 				out.WriteString(docxTextImplicit(r))
+				out.WriteString(docxFontSizeIntent(r))
 				if b.Kind == Heading {
 					if r.Bold {
 						out.WriteString(` md:headingBold="1"`)
@@ -347,7 +333,7 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 					}
 				}
 				out.WriteString(`><w:rPr>`)
-				textStyle, err := docxTextStyle(r)
+				textStyle, err := docxTextStyle(r, w.allowLossy)
 				if err != nil {
 					return "", err
 				}

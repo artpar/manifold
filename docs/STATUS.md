@@ -39,41 +39,40 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: editable note-body typography and backlinks
+## Latest progress: acknowledged DOCX precision and sectioned note parity
 
-Note.BodyLabelStyle is a text-free Run template. SF notes expose optional
-body_label_marks using established ProseMirror marks, separately from label text,
-identity, counter intent and label_source. Nil and explicitly empty style remain
-distinct. SF/JSON/gzip and checked DOCX round trips preserve formatting and links;
-native PDF measures the resolved mark with ordinary glyph/font/shaping checks.
-Tall footnote marks own an atomic measured line; styled endnote markers reserve
-height. Word uses visible standard text/hyperlinks/rPr and a checked layout
-separator, with a conservative gutter. No hidden content or duplicate label text
-becomes authority. Read PDF_NOTES.md for exact support and reproduction.
+AllowLossy now permits nearest half-point DOCX font-size projection, ties upward,
+with at most .25pt deviation and checked original intent in md:fontSize. Strict
+output retains ErrUnsupported. Both standard sz/szCs must agree before original
+precision is restored; reimport diagnoses portable precision. Values outside the
+representable range reject without partial output or caller mutation. This applies
+to body/heading/table/list/stories/notes and first/repeated/variant styled marks.
+Native PDF's existing .01pt precision and explicit font/glyph rules are unchanged.
 
-The unchanged original 71-page guide now retains both label backlinks and exact
-6.959646pt SourceSansPro style in SF. Independent original MCID operators/fonts,
-GoTo annotations, semantic anchor bindings and body hashes pass. A current
-nonempty text/reference/leading-label projection matches all 87,442 records in
-the previous extraction (a different projection from the earlier 87,381-record
-report). Actual ProseMirror validates 89,431 nodes/marks/attributes across this
-original plus styled SF and Word round trip. Four generated native/Word note
-pages were visually inspected; independent font/style/geometry checks pass.
+A new sectioned styled-note regression reproduced a nil-pointer panic: separate
+writer initialization omitted custom/variant/style catalogs. Both paths now share
+initializeNotes; full note semantics round trip. Duplicate expanded XML attributes,
+including aliases, now reject instead of selecting an ambiguous first value.
+Read DOCX_PRECISION.md for exact behavior, checks and reproduction.
 
-Qualification limits remain concrete: LibreOffice substitutes unavailable Go
-with Liberation Serif and omits custom note-label hyperlinks from its PDF export.
-Standard DOCX bookmark/hyperlink relationships and native PDF backlinks are
-independently verified. Original fractional PDF sizes still reject DOCX output
-rather than silently rounding; a checked, acknowledged precision policy is next
-work. Rich heterogeneous/mixed-direction labels, nested/enclosing-ActualText and
-broader untagged graphs, actual Colleaf adapter, original DOCX producer/corpus
-qualification and final acceptance remain required. The full goal is incomplete.
-No module/runtime/app/access/quota boundary changed.
+The unchanged original 71-page tagging guide now exports to DOCX. Independent
+standard XML checks cover all 87,442 projected runs; editable structure, all
+formatting/original point sizes, note definitions/sites/backlinks and seven image
+instances retain semantics/assets on reimport. Fourteen image dimensions differ
+within one EMU. LibreOffice's reflowed 39 pages include both notes once on page 39;
+cover/contents, technical text/code/list and notes pages were inspected. A sectioned
+example's two Word pages show both 6.959646pt marks at the declared portable 7pt.
+Actual ProseMirror validates 89,433 nodes/marks/attributes across those round trips.
+No original pagination, font substitution or Word-equivalent fidelity is claimed.
 
-Current check results and final scope are recorded in verification.json. Ignored
-source and QA output live in output/note-inference and output/note-styles.
-Previous identified relationship inference is 894ee74; display variants 09315a1;
-explicit graph/provenance 60bf496; literal labels 44fe42f.
+Previous body-label templates/backlinks are 580411d; identified note relationships
+894ee74; display variants 09315a1; explicit graph/provenance 60bf496. Existing native
+and standard Word links remain independently checked. LibreOffice's missing custom
+note-label PDF hyperlinks and installed-font substitution remain reader limits.
+Current checks/results are in verification.json; ignored evidence is in
+output/note-precision and output/note-inference. No production modules, runtime
+services/executables/CGO/uploads, app code or access/quota boundaries changed.
+The full goal remains active/incomplete; remaining work is ordered below.
 
 ## Existing verified evidence to preserve
 
@@ -109,8 +108,8 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
 
 ## Next concrete implementation order
 
-1. Complete fractional DOCX text-size policy, heterogeneous/mixed-direction labels
-   and remaining nested/ActualText/untagged graphs;
+1. Complete heterogeneous/mixed-direction note labels and remaining
+   nested/ActualText/untagged graphs;
    use the original-guide evidence in PDF_NOTES.md, preserving source facts/content.
 2. Implement/qualify the actual Colleaf native snapshot adapter through the shared
    SF. Include UTF-16 boundaries, rich source maps, notes/stories and resources;
@@ -123,11 +122,12 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
    after every original criterion is proven. There is no external blocker now.
 
 ```sh
-# Next implementation: acknowledged half-point output precision with checked
-# original intent; cover ordinary/variant/section/note paths without mutation.
-rg -n 'docxTextStyle|writeDOCX|writeSectionedDOCX|textImplicit' docx*.go
-GOWORK=off go run ./examples/notes -variant-labels -styled-labels -out output/note-styles
-output/qa-venv/bin/python scripts/verify_note_styles.py
+# Next implementation: rich label content through established SF inline nodes,
+# retaining exact marks/relationships, with one text authority and normal layout.
+rg -n 'pdfNoteMark|recoverNote|structureReplacement|ActualText' pdf_structure_notes.go pdf_structure*.go
+GOWORK=off go run ./examples/notes -variant-labels -styled-labels -fractional-sizes -sectioned -out output/note-precision/sectioned
+bin/manydoc extract -format sf -o output/note-precision/sectioned/notes-docx.sf output/note-precision/sectioned/notes.docx
+output/qa-venv/bin/python scripts/verify_docx_precision.py
 GOWORK=off go test -race -run 'TestPDFAdjacent|TestPDFPhysicalLinkNoteInference|TestDOCXNoteRelationshipInference|TestPDFNoteLinkAmbiguity' -count=1 .
 output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
 bin/manydoc extract -format sf -o output/audit/explicit-note.sf output/audit/explicit-note.pdf

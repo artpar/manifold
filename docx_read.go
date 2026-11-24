@@ -42,6 +42,15 @@ func parseXML(ctx context.Context, b []byte) (*xmlNode, error) {
 		}
 		switch v := t.(type) {
 		case xml.StartElement:
+			if len(v.Attr) > 1 {
+				seen := make(map[xml.Name]bool, len(v.Attr))
+				for _, attr := range v.Attr {
+					if seen[attr.Name] {
+						return nil, fmt.Errorf("duplicate XML attribute %s", attr.Name.Local)
+					}
+					seen[attr.Name] = true
+				}
+			}
 			if len(stack) > 256 {
 				return nil, errors.New("XML nesting exceeds 256 levels")
 			}

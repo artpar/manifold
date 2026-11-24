@@ -2,7 +2,6 @@ package manydoc
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 )
@@ -147,7 +146,7 @@ func (r *docxReader) textProperties(run *docxRunStyle, pr *xmlNode, styleDefinit
 	}
 	return validateTextStyle(run.Run)
 }
-func docxTextStyle(run Run) (string, error) {
+func docxTextStyle(run Run, allowLossy bool) (string, error) {
 	var out strings.Builder
 	if run.ComplexScript {
 		out.WriteString(`<w:cs/>`)
@@ -168,9 +167,12 @@ func docxTextStyle(run Run) (string, error) {
 		fmt.Fprintf(&out, `<w:rFonts w:ascii="%s" w:hAnsi="%s" w:eastAsia="%s" w:cs="%s"/>`, escape(run.FontFamily), escape(run.FontFamily), escape(run.FontFamily), escape(run.FontFamily))
 	}
 	if run.FontSize > 0 {
-		h := run.FontSize * 2
-		if h != math.Trunc(h) || h < 1 || h > math.MaxUint32 {
-			return "", fmt.Errorf("%w: DOCX font size requires positive half-points", ErrUnsupported)
+		h, err := docxFontHalfPoints(run.FontSize)
+		if err != nil {
+			return "", err
+		}
+		if run.FontSize*2 != h && !allowLossy {
+			return "", fmt.Errorf("%w: DOCX font size requires half-points; AllowLossy permits rounding with checked original intent", ErrUnsupported)
 		}
 		fmt.Fprintf(&out, `<w:sz w:val="%.0f"/><w:szCs w:val="%.0f"/>`, h, h)
 	}

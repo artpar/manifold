@@ -153,6 +153,11 @@ func (r *docxReader) implicitNoteIndent(n *xmlNode) string {
 			if err == nil {
 				size = float64(value) / 2
 			}
+			if original := run.attributeNS(docxNotesNS, "fontSize"); original != "" {
+				if exact, err := strconv.ParseFloat(original, 64); err == nil && finite(exact) {
+					size = exact
+				}
+			}
 		}
 	}
 	return strconv.Itoa(int(math.Ceil(docxNoteLabelGutter(*r.expectedBodyLabel, size) * 20)))

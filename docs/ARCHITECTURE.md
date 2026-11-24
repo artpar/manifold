@@ -1062,3 +1062,16 @@ footnote labels and measured endnote minimum height. docx_note_style.go reuses
 ordinary visible run/hyperlink encoding and parsing, with checked label/separator
 roles, no second text authority, and a conservative derived gutter. See
 PDF_NOTES.md for empty labels, exact checks and independent-reader limitations.
+
+
+## DOCX portable font-size precision
+
+The dispatcher passes AllowLossy to both DOCX writers. docx_precision.go projects
+font sizes to standard half-points, stores exact original intent on the actual run,
+and restores it only after standard ordinary/complex size validation. The common
+run encoder/parser covers all stories and checked note roles. No model clone is
+mutated for quantization; original styles still drive the conservative envelope.
+Both writers now initializeNotes through one catalog; the sectioned path previously
+omitted variant/custom/style setup. parseXML rejects duplicate expanded attribute
+names before interpretation. DOCX_PRECISION.md records the original-guide and
+independent-reader qualification, precise bounds and remaining PDF precision policy.

@@ -357,7 +357,7 @@ func (r *docxReader) restoreTextImplicit(style *docxRunStyle, n *xmlNode, headin
 		}
 		style.sizeCS = 0
 	}
-	return nil
+	return r.restoreFontSizeIntent(style, n)
 }
 
 func (r *docxReader) readFontCharsets(table *xmlNode) error {

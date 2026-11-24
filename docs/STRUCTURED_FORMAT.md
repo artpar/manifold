@@ -728,3 +728,11 @@ without text, atoms or source. Source marks/anchors are invalid here; use
 label_source for provenance. Link destinations use the same shared catalog as
 body text. Independent reader verification now checks these marks too. See
 PDF_NOTES.md for Word layout/precision and reader qualification limits.
+
+
+DOCX half-point projection under AllowLossy leaves SF original fontSize values
+unchanged. Checked actual-run metadata restores those original values only if
+both standard sizes agree; docx_font_size_precision diagnoses portable appearance.
+Stripping private intent exposes standard half-points. This extends output behavior,
+not the SF schema; no second canonical font-size authority is introduced. See
+DOCX_PRECISION.md for standard/intent bounds and independent checks.

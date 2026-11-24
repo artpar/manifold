@@ -382,8 +382,10 @@ Selected advances, effective sizes and font metrics drive wrapping, shared
 baselines and paragraph/list/cell/note/running-content line reserves. Explicit
 small fonts and their trailing empty lines retain their metrics. Decorations use
 run colors. PDF sizes require 0.01pt precision and fit the page coordinate range;
-derived 70% note sizes round to 0.01pt. DOCX requires exact half-points; unsupported
-precision returns an error. NFC/Unicode ActualText behavior remains; bidi/joining controls and Hebrew/Arabic
+derived 70% note sizes round to 0.01pt. Strict DOCX requires exact half-points;
+AllowLossy permits nearest half-points (ties up, at most .25pt), with checked original
+intent retained and a reimport precision diagnostic. Out-of-range sizes still reject.
+See DOCX_PRECISION.md. NFC/Unicode ActualText behavior remains; bidi/joining controls and Hebrew/Arabic
 now use the directional path below. Other common complex scripts still need shaping/itemization qualification.
 Supported LTR/RTL marks use HarfBuzz positioning. Broader scripts/font formats remain required.
 
@@ -416,8 +418,9 @@ warns for ambiguous ones; homogeneous replacements retain their paint evidence.
 
 Missing imported family/style still rejects PDF output unless callers supply fonts
 or explicit mappings. Imported point sizes need not match writer precision; users
-must choose and disclose retypesetting when necessary. Neither AllowLossy nor PDF
-import silently substitutes output fonts or rounds source styles. Full rich-document
+must choose and disclose retypesetting when necessary. AllowLossy permits the
+explicit DOCX projection above; native PDF and PDF import do not silently
+substitute fonts or round source styles. Full rich-document
 acceptance remains unfinished, including broader source-font/color/shaping coverage.
 
 
@@ -961,7 +964,8 @@ Explicit links win; empty/different/complex, partial/far/overlapping or conflict
 evidence retains flow/navigation. The published original guide qualifies two real
 nonadjacent cases. Editable common label typography/backlinks now survive through
 BodyLabelStyle/body_label_marks; physical provenance and inferred bindings remain
-separate. Heterogeneous label graphs and fractional DOCX size policy remain open. See
+separate. Heterogeneous label graphs remain open; acknowledged DOCX size projection is
+qualified in DOCX_PRECISION.md. See
 PDF_NOTES.md for source, rule bounds and exact independent qualification.
 
 
@@ -973,5 +977,6 @@ measured line; Word uses visible standard rPr/hyperlinks and a derived gutter.
 Independent original guide operators/backlinks and generated package/native
 navigation/styles were checked. LibreOffice renders styled labels but substitutes
 unavailable Go fonts and omits their hyperlinks from its PDF export; no broader
-consumer navigation claim. Fractional source font sizes outside half-points still
-reject DOCX, rather than rounding silently. See PDF_NOTES.md for next work.
+consumer navigation claim. Fractional source sizes now require AllowLossy for
+checked portable half-point projection; strict output still rejects. See
+DOCX_PRECISION.md and PDF_NOTES.md for remaining work.

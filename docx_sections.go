@@ -10,17 +10,13 @@ import (
 	"strings"
 )
 
-func writeSectionedDOCX(ctx context.Context, out io.Writer, d *Document) error {
+func writeSectionedDOCX(ctx context.Context, out io.Writer, d *Document, allowLossy bool) error {
 	notes, err := catalogNotes(d, true)
 	if err != nil {
 		return err
 	}
-	w := &docxWriter{ctx: ctx, parts: map[string][]byte{}, next: 1, validatedImages: make(outputImageCache), noteIDs: map[noteKey]int{}, noteLabels: notes.labels, seenNoteRefs: map[noteKey]bool{}}
-	counts := map[string]int{}
-	for _, note := range d.Notes {
-		counts[note.Kind]++
-		w.noteIDs[noteIdentity(note)] = counts[note.Kind]
-	}
+	w := &docxWriter{allowLossy: allowLossy, ctx: ctx, parts: map[string][]byte{}, next: 1, validatedImages: make(outputImageCache)}
+	counts := w.initializeNotes(d, notes)
 	w.addRel("styles", "styles.xml", false)
 	w.addRel("numbering", "numbering.xml", false)
 	resolved := documentSections(d)

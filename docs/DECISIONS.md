@@ -1481,3 +1481,19 @@ new semantics. LibreOffice font substitution and omitted custom-label PDF links
 remain reader limitations, not native/package success claims. Keep fractional
 DOCX size policy and heterogeneous/mixed-direction labels in the required queue;
 no silent rounding or oracle/source changes were used. See PDF_NOTES.md.
+
+
+## 2026-11-24 Acknowledge portable precision while preserving checked intent
+
+Use AllowLossy for nearest half-point DOCX font sizes with a .25pt bound; strict
+output keeps its previous rejection. Store the original float on the visible run,
+validate explicit sz/szCs before restoring it, and diagnose the portable difference.
+Do not round the canonical SF or mutate caller/source data. The original publisher
+guide independently qualifies every projected run, assets and structured round trip;
+14 image dimensions differ within one EMU rather than matching a revised oracle.
+
+Unify note catalog initialization after a new sectioned styled-note test reproduced
+a real panic; do not mask it as unsupported section content. Reject duplicate
+expanded XML attributes, including aliases, exposed by malformed precision tests.
+These changes do not broaden native PDF's .01pt contract or add font substitution,
+services or application permission gates. See DOCX_PRECISION.md.

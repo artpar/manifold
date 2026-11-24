@@ -24,6 +24,8 @@ func main() {
 	customLabels := flag.Bool("custom-labels", false, "use literal foot/endnote marks without advancing automatic numbering")
 	variantLabels := flag.Bool("variant-labels", false, "use independent citation/body marks; acknowledge static Word numbering")
 	styledLabels := flag.Bool("styled-labels", false, "preserve independent body mark typography and backlinks; acknowledge static Word numbering")
+	fractionalSizes := flag.Bool("fractional-sizes", false, "export SF/DOCX with fractional authoring sizes (native PDF requires 0.01pt)")
+	sectioned := flag.Bool("sectioned", false, "wrap content and running stories in an explicit section")
 	flag.Parse()
 	ctx := context.Background()
 	sf, err := manydoc.ReadStructured(ctx, bytes.NewReader(source))
@@ -65,6 +67,38 @@ func main() {
 			d.Notes[i].BodyLabelStyle = &manydoc.Run{FontFamily: "Go", FontSize: 9.5, Bold: true, Italic: true, Color: "#203040", Underline: true, Destination: "citation-return", Link: "#citation-return", Language: "en"}
 		}
 	}
+	if *fractionalSizes {
+		for i := range d.Blocks {
+			for j := range d.Blocks[i].Runs {
+				d.Blocks[i].Runs[j].FontSize = 10.24999
+			}
+		}
+		d.Blocks[0].Runs[0].FontSize = 19.24999
+		for i := range d.Notes {
+			if d.Notes[i].BodyLabelStyle == nil {
+				d.Notes[i].BodyLabelStyle = &manydoc.Run{}
+			}
+			d.Notes[i].BodyLabelStyle.FontSize = 6.959646
+			if len(d.Notes[i].Blocks) > 0 && len(d.Notes[i].Blocks[0].Runs) > 0 {
+				d.Notes[i].Blocks[0].Runs[0].FontSize = 9.959491
+			}
+		}
+		for i := range d.Headers {
+			for j := range d.Headers[i].Runs {
+				d.Headers[i].Runs[j].FontSize = 8.51
+			}
+		}
+		for i := range d.Footers {
+			for j := range d.Footers[i].Runs {
+				d.Footers[i].Runs[j].FontSize = 8.49
+			}
+		}
+	}
+	if *sectioned {
+		d.Blocks = []manydoc.Block{{Kind: manydoc.SectionBlock, Section: &manydoc.Section{Blocks: d.Blocks, Headers: manydoc.RunningStories{Default: &manydoc.RunningStory{Blocks: d.Headers}}, Footers: manydoc.RunningStories{Default: &manydoc.RunningStory{Blocks: d.Footers}}}}}
+		d.Headers = nil
+		d.Footers = nil
+	}
 	if *longNote {
 		for i := range d.Notes {
 			if d.Notes[i].Kind == manydoc.Footnote {
@@ -79,10 +113,14 @@ func main() {
 	if err := os.MkdirAll(*out, 0755); err != nil {
 		log.Fatal(err)
 	}
-	for _, format := range []manydoc.Format{manydoc.SF, manydoc.DOCX, manydoc.PDF} {
+	formats := []manydoc.Format{manydoc.SF, manydoc.DOCX, manydoc.PDF}
+	if *fractionalSizes {
+		formats = []manydoc.Format{manydoc.SF, manydoc.DOCX}
+	}
+	for _, format := range formats {
 		name := filepath.Join(*out, "notes."+string(format))
 		var buf bytes.Buffer
-		if err := manydoc.Write(ctx, &buf, d, format, manydoc.WriteOptions{AllowLossy: *variantLabels || *styledLabels}); err != nil {
+		if err := manydoc.Write(ctx, &buf, d, format, manydoc.WriteOptions{AllowLossy: *variantLabels || *styledLabels || *fractionalSizes}); err != nil {
 			log.Fatal(err)
 		}
 		if err := os.WriteFile(name, buf.Bytes(), 0644); err != nil {

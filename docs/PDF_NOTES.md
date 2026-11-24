@@ -252,7 +252,7 @@ GOWORK=off go test -race -run 'TestPDFAdjacent|TestPDFPhysicalLinkNoteInference|
 
 No required runtime component, module dependency, app integration or quota/access
 boundary changed. General untagged note recognition, richer/nested/ActualText label
-graphs, heterogeneous label layout/precision policy, Colleaf snapshot integration and remaining
+graphs, heterogeneous label layout, Colleaf snapshot integration and remaining
 original DOCX corpus/visual qualification are still open.
 
 
@@ -295,8 +295,9 @@ LibreOffice renders 9.5pt bold italic colored labels but substitutes unavailable
 Go with Liberation Serif and omits the custom label hyperlinks from its PDF.
 Standard DOCX targets/relationships and native PDF named backlinks are separately
 verified. This does not establish that every Word consumer preserves navigation.
-The original guide's 6.959646pt sizes still reject DOCX export under the current
-half-point contract; acknowledged precision handling remains required work.
+The original guide's 6.959646pt sizes now export with acknowledged half-point
+projection and checked original intent; see DOCX_PRECISION.md for full original
+Word round-trip/reader evidence. Strict output still rejects inexact sizes.
 Heterogeneous/mixed-direction labels and nested/ActualText graphs remain open.
 
 ```sh

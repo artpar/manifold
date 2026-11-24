@@ -5336,5 +5336,36 @@
     "next_commands": "rg -n 'docxTextStyle|writeDOCX|writeSectionedDOCX|textImplicit' docx*.go; GOWORK=off go run ./examples/notes -variant-labels -styled-labels -out output/note-styles; output/qa-venv/bin/python scripts/verify_note_styles.py",
     "production_boundary": "pure Go; no new modules/required executables/CGO/services/uploads; no Daptin/Colleaf changes or access/quota gates",
     "goal": "active/incomplete"
+  },
+  "docx_font_size_precision_and_sectioned_notes": {
+    "date": "2026-11-24",
+    "contract": "Strict DOCX keeps ErrUnsupported for non-half-point sizes. AllowLossy permits nearest half-points, ties up, max.25pt deviation; below/above representable range rejects atomically. md:fontSize retains exact authoring float on actual visible runs; both explicit standard sz/szCs and effective values/namespaces must agree before restoration, with docx_font_size_precision diagnostic. No caller mutation or automatic output-font substitution.",
+    "sectioned_regression": "New TestDOCXSectionedStyledNoteSemantics reproduced nil-pointer panic in noteBodyLabel/writeNoteParts before change. Both writers now initializeNotes for IDs/order/custom/variant/style/repeat catalogs; same graph and fractional cases round trip. No source fixture/oracle changed.",
+    "malformed": "Contradictory/missing/nonfinite/empty/redundant intent, lookalike size/val namespaces, stripped intent, script-size conflicts and bounds tested. XML duplicate expanded attributes, including aliases, now reject; distinct namespaces remain distinct.",
+    "coverage": "ordinary and sectioned body, headings, lists and tables; default/first/even running stories, ordinary/custom/variant first/repeat references, note bodies and body templates; complex-script size intent; gzip SF persistence and immutable originals",
+    "original_guide": {
+      "input_sha256": "8185a30793869379ea4c2d82f214a930368b3fa7520faba61df38c52a502335e",
+      "rights": "unchanged ignored QA source/mirror pinned in PDF_NOTES.md; no redistribution-license claim or vendored file",
+      "standard_projections": 87442,
+      "independent": "lxml actual Word rPr/metadata projection, python-docx package open; exact editable source-versus-Word-SF structure/styles/original floats/note relationships/backlinks after acknowledged physical-source omission",
+      "assets": "7 relationship-resolved image instances retain SHA256 byte identity;14 physical dimensions differ within1EMU (1/12700pt), explicitly measured, no oracle normalization",
+      "word_render": "LibreOffice39 reflowed pages; NOTE_1 and NOTE_2 bodies each occur once on page39. Pages1/20/39 visually inspected for cover/contents, technical text/code/list and notes. No original pagination/fidelity or installed-font-equivalence claim."
+    },
+    "independent_example": "Sectioned styled/variant fractional example has17 projected runs, exact editable SF/Word intent. MuPDF reads both6.959646pt marks painted at portable7pt in2-page LibreOffice output; both pages inspected. Actual ProseMirror89433 nodes/marks/attrs across example SF, Word SF and original guide Word SF.",
+    "checks": {
+      "full_tests_final": "18.463s library;0.698s CLI; all packages pass after final namespace guard and conditional-story/complex-script cases",
+      "full_race": "190.254s library;2.212s CLI; all packages pass. Precedes final empty/lookalike namespace guards and added conditional-story/complex-script cases.",
+      "final_focused_race": "1.790s pass after final code/test additions",
+      "vet": "pass after final production changes",
+      "modules": "all modules verified; production dependencies unchanged",
+      "cgo_disabled": "final host CLI build/focused execution0.438s pass; Linux amd64/arm64 cross-builds pass (not Linux execution)",
+      "fuzz_final": "10s/two workers each, DOCX492/SF291 executions including precision-section seeds; pass11.676s/11.875s. Short source-heavy campaigns are not exhaustive.",
+      "diff_check": "pass"
+    },
+    "evidence": "docs/DOCX_PRECISION.md; docx_precision_test.go; scripts/verify_docx_precision.py; examples/notes -fractional-sizes -sectioned; ignored output/note-precision",
+    "runtime_boundary": "Pure Go and unchanged modules; optional Python/Node/LibreOffice QA only; no CGO/executables/services/uploads/app modifications or performer-level access/quota gates",
+    "remaining": "heterogeneous/internal mixed-direction note labels; nested/enclosing-ActualText and broader untagged graphs; actual native Colleaf adapter; broader original DOCX corpus/visual qualification; final acceptance",
+    "next_commands": "rg -n 'pdfNoteMark|recoverNote|structureReplacement|ActualText' pdf_structure_notes.go pdf_structure*.go; GOWORK=off go test -race -run 'TestDOCXFractional|TestDOCXSize|TestDOCXSectionedStyledNote|TestXMLDuplicate' -count=1 .",
+    "goal": "active/incomplete"
   }
 }

@@ -202,8 +202,9 @@ type ReadOptions struct {
 	PDFSkipInference bool
 }
 type WriteOptions struct {
-	// AllowLossy acknowledges diagnostics on an imported document. Unsupported
-	// writer features still return errors rather than silently producing bad output.
+	// AllowLossy acknowledges import/reflow diagnostics and documented output
+	// normalizations, including DOCX half-point font-size rounding with checked
+	// original intent. Unsupported writer features still return errors.
 	AllowLossy bool
 	// PDFFonts supplies in-memory TTF faces; missing families/styles never substitute.
 	PDFFonts []FontFace
@@ -303,7 +304,7 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 	}
 	switch format {
 	case DOCX:
-		return writeDOCX(ctx, w, d)
+		return writeDOCX(ctx, w, d, opts.AllowLossy)
 	case PDF:
 		return writePDFWithFonts(ctx, w, d, opts.PDFFonts, opts.PDFFontMap)
 	case SF, SFGzip:
