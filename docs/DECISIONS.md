@@ -1643,3 +1643,22 @@ Inspect skeTables as a Map, not a JSON object: earlier JSON dumps hid its entrie
 Table geometry is now qualified without claiming browser/font/visual fidelity.
 Keep native edits authoritative, diagnose mixed paragraph normalization and extra
 presentation, and keep the rich adapter private until remaining mappings work.
+
+
+## 2026-11-24 Bind native note identities without a second text authority
+
+Native notes have one ID namespace; SF scopes IDs by foot/endnote kind and retains
+definition order. Preserve these authoring identities in a sparse named native
+resource, checked against real note ID/kind records. Do not cache note text, labels
+or the entire SF there. Native edits to bodies/custom marks/styles remain real
+fields and win directly. Ignore stale identity bindings with diagnostics; reject
+bindings that alias distinct definitions. Removing the resource leaves native
+IDs usable with deterministic definition order.
+
+Treat the matching first body-note atom as the explicit body marker allowed by
+the schema, not a recursive note reference. Preserve its style, reject nonleading
+recursive atoms and contradictory hidden/explicit markers. Basic graph/text/style/
+merged-table semantics now cross SF and actual reader/edit/save checks. Advanced
+citation/body-label variants, note settings/assets/lists/provenance and generated
+note placement remain unfinished private mappings. Headless metadata checks do
+not qualify note layout or substitute for the final acceptance audit.

@@ -41,6 +41,7 @@ type colleafBodyWriter struct {
 	body           colleafBody
 	tables         map[string]json.RawMessage
 	offset, serial int
+	noteIDs        map[noteKey]string
 }
 
 func (w *colleafBodyWriter) text(s string) { w.stream.WriteString(s); w.offset += colleafUTF16Len(s) }
@@ -49,7 +50,7 @@ func (w *colleafBodyWriter) id(prefix string) string {
 	return fmt.Sprintf("%s%d", prefix, w.serial)
 }
 func (w *colleafBodyWriter) paragraph(block Block) error {
-	fragment, err := encodeColleafTextBody(w.ctx, []Block{block})
+	fragment, err := encodeColleafTextBodyWithNotes(w.ctx, []Block{block}, w.noteIDs)
 	if err != nil {
 		return err
 	}
@@ -70,6 +71,11 @@ func (w *colleafBodyWriter) paragraph(block Block) error {
 		r.EndIndex += shift
 		r.ID = w.id("link")
 		w.body.CustomRanges = append(w.body.CustomRanges, r)
+	}
+	for _, atom := range fragment.CustomBlocks {
+		atom.StartIndex += shift
+		atom.ID = w.id("note")
+		w.body.CustomBlocks = append(w.body.CustomBlocks, atom)
 	}
 	return nil
 }
@@ -186,7 +192,10 @@ func (w *colleafBodyWriter) table(block Block, depth int) error {
 	return nil
 }
 func encodeColleafBody(ctx context.Context, blocks []Block) (colleafBody, map[string]json.RawMessage, error) {
-	w := colleafBodyWriter{ctx: ctx, tables: map[string]json.RawMessage{}, body: colleafBody{TextRuns: []colleafTextRun{}}}
+	return encodeColleafBodyWithNotes(ctx, blocks, nil)
+}
+func encodeColleafBodyWithNotes(ctx context.Context, blocks []Block, noteIDs map[noteKey]string) (colleafBody, map[string]json.RawMessage, error) {
+	w := colleafBodyWriter{ctx: ctx, noteIDs: noteIDs, tables: map[string]json.RawMessage{}, body: colleafBody{TextRuns: []colleafTextRun{}}}
 	if err := w.blocks(blocks, 0); err != nil {
 		return colleafBody{}, nil, err
 	}
@@ -229,20 +238,31 @@ func (r *colleafBodyReader) paragraphFragment(start, end int, p colleafParagraph
 		a.EndIndex = min(end-1, a.EndIndex) - start
 		out.CustomRanges = append(out.CustomRanges, a)
 	}
+	first = sort.SearchInts(r.atomPositions, start)
+	for _, position := range r.atomPositions[first:] {
+		if position >= end {
+			break
+		}
+		atom := r.index.blocks[position]
+		atom.StartIndex -= start
+		out.CustomBlocks = append(out.CustomBlocks, atom)
+	}
+
 	return out, nil
 }
 
 type colleafBodyReader struct {
-	ctx        context.Context
-	body       colleafBody
-	index      *colleafBodyIndex
-	settings   colleafTextContext
-	tables     map[string]json.RawMessage
-	doc        *Document
-	paragraphs map[int]colleafParagraphRecord
-	used       map[string]bool
-	spans      []colleafStyleSpan
-	ranges     []colleafRangeRecord
+	ctx           context.Context
+	body          colleafBody
+	index         *colleafBodyIndex
+	settings      colleafTextContext
+	tables        map[string]json.RawMessage
+	doc           *Document
+	paragraphs    map[int]colleafParagraphRecord
+	used          map[string]bool
+	spans         []colleafStyleSpan
+	ranges        []colleafRangeRecord
+	atomPositions []int
 }
 
 func (r *colleafBodyReader) paragraph(start, end int, p colleafParagraphRecord) ([]Block, error) {
@@ -587,10 +607,17 @@ func decodeColleafBody(ctx context.Context, body colleafBody, settings colleafTe
 			return nil, fmt.Errorf("%w: native annotation type %d requires mapping", ErrUnsupported, a.Type)
 		}
 	}
-	if len(index.blocks) > 0 {
-		return nil, fmt.Errorf("%w: native atoms require mapping", ErrUnsupported)
+	for _, atom := range index.blocks {
+		key, ok := settings.NoteIDs[atom.NoteID]
+		if !ok || (atom.Type != nil && *atom.Type != 1) || (atom.NoteType != "" && key.kind != atom.NoteType) {
+			return nil, fmt.Errorf("%w: unmapped/contradictory native atom", ErrUnsupported)
+		}
 	}
 	r := colleafBodyReader{ctx: ctx, body: body, index: index, settings: settings, tables: tables, doc: &Document{}, paragraphs: map[int]colleafParagraphRecord{}, used: map[string]bool{}}
+	for position := range index.blocks {
+		r.atomPositions = append(r.atomPositions, position)
+	}
+	sort.Ints(r.atomPositions)
 	r.spans, err = colleafStyleSpans(ctx, index.text, body.TextRuns)
 	if err != nil {
 		return nil, err

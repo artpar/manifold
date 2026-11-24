@@ -39,7 +39,24 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: native merged/nested table ownership (internal, incomplete)
+## Latest progress: native foot/endnote graph mapping (internal, incomplete)
+
+Private note workers now map real native foot/endnote definitions, styled UTF-16
+reference atoms, repeated citations, custom shared marks, markerless body marks
+and editable rich bodies including merged/nested tables. A sparse checked resource
+preserves kind-scoped SF IDs and definition order only; native visible text/styles/
+marks remain authoritative. Edited native identity/kind invalidates its old binding.
+Actual pinned app validation/reader/TextX note edit/save/Go re-import checks pass.
+No generated-note placement/browser/visual fidelity is claimed.
+
+Basic note graph→SF→native records round-trip exactly, including colliding foot/
+endnote IDs. A matching explicit native body-marker atom at offset zero maps to a
+body label style, not a recursive citation. Contradictory/dangling graph records
+reject. Independent rich citation/body-label variants, provenance/marker defaults,
+notes with lists/assets, note numbering/placement settings, and native generated
+note layout remain unfinished. No public native format/API/CLI is exposed.
+Next complete remaining rich native mappings and actual native rendering evidence.
+
 
 Private rich-body workers now map actual native table stream/source ownership
 through SF, including combined row/column merges, nested tables, fixed widths,

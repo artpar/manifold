@@ -1184,3 +1184,25 @@ invisible in the pinned skeleton). Named formatting stays in the shared text
 worker. Actual record/tree/geometry/edit/save probes are in
 scripts/verify_colleaf_tables.cjs; font metrics/browser rendering remain open.
 This internal composition is not a public partial native format support claim.
+
+
+## Private Colleaf note graph composition
+
+colleaf_notes.go composes the shared native text/table workers for main and note
+bodies. Note reference atoms occupy one UTF-16 BACKSPACE control and carry real
+customBlocks noteId/noteType metadata; interval styles remain native. Definition
+bodies/tables live in real notes records. Repeated references share one definition.
+The internal manydoc.note-identities.v1 resource stores native-ID/kind/SF-ID bindings
+and original definition order only. It duplicates no visible text or labels.
+Bindings apply only to matching actual native ID/kind; stale bindings diagnose
+and leave actual native identity authoritative. Definition aliasing is rejected.
+
+colleaf_text.go isolates atom boundaries alongside style/link ranges; the rich
+body reader translates custom-block metadata through paragraph/cell fragments using
+sorted atom positions. A matching leading body-marker atom maps to BodyLabelStyle;
+nonleading/self/foreign citations still fail note graph validation. Native shared
+customMark and showBodyReference=false map to existing SF label/body-label intent.
+The internal worker rejects unmapped independent/rich labels, navigation/provenance
+and assets/lists rather than dropping relationships. Complete note settings, marker
+defaults/intent and browser/native placement qualification are still needed. The
+public API/CLI and runtime dependency graph are unchanged.

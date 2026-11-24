@@ -277,3 +277,57 @@ section/story settings, source/intent mapping, strict envelope/JSON/surrogates a
 broad native rich editing/rendering still need completion. Private unsupported
 containers/relative sizing/ragged missing slots are unfinished work, not new public
 support exceptions. Public API/CLI and production dependencies remain unchanged.
+
+
+## Private foot/endnote graph mapping and sparse identity resource
+
+colleaf_notes.go now composes main and note body mappings around actual native
+customBlocks/notes/tableSource. Styled citations occupy one UTF-16 BACKSPACE;
+following text, astral scalars, repeated citations and table-cell references keep
+exact offsets. Real note bodies support the text/heading/link/table workers,
+including merged/nested cells. Shared native customMark maps to SF Note.Label;
+showBodyReference=false maps to an explicit empty BodyLabel. A matching leading
+native body marker maps to BodyLabelStyle; nonleading/self/foreign references
+still reject as recursive/contradictory graph content.
+
+SF foot/endnote identities are kind-scoped and definition order is meaningful.
+The internal resource manydoc.note-identities.v1 contains only a bindings array of
+nativeId/kind/id records in definition order. It stores no visible text, marks or
+body cache. Bindings are checked against actual native identity/kind. Native
+identity edits invalidate the stale binding with a diagnostic and keep the actual
+native ID/kind; native body/mark edits remain authoritative without consulting the
+resource. Missing resources leave native IDs usable in deterministic order.
+Duplicate resources/bindings, definition aliases, dangling/mismatched references
+and contradictory metadata reject before partial content escapes.
+
+Go tests compare the full basic note document and native records through SF,
+including one identical SF ID used by a footnote and endnote, repeated citations,
+point-size/style/language on citation atoms, custom § mark, markerless body and a
+merged table inside the definition. scripts/verify_colleaf_notes.cjs checks exact
+pinned package versions and source hash, executes the unmodified Colleaf validator
+on generated/saved envelopes, reads the real note views/references/styles/table
+sources and uses TextX to change Foot body→Edit body plus §→†. Go re-imports the
+saved native fields and retained identities. The edit creates a legitimate text-run
+boundary; the check compares combined text and retained graph rather than assuming
+one original run after a native edit.
+
+An exploratory bare headless DocumentSkeleton probe produced no generated note
+placement/marker glyph evidence. It does not qualify native note rendering; actual
+browser/plugin/font/layout integration remains a required later check. No source
+oracle was changed or native layout fidelity claimed from metadata alone.
+
+```sh
+MANYDOC_COLLEAF_NOTE_QA=output/colleaf-qa/notes.json GOWORK=off go test -run TestColleafNoteIdentityReferenceBodyAndSFRoundTrip -count=1 .
+node scripts/verify_colleaf_notes.cjs
+MANYDOC_COLLEAF_NOTE_EDIT=output/colleaf-qa/notes-edited.json GOWORK=off go test -run TestColleaf -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafNotes$' -fuzztime=10s -parallel=2 .
+```
+
+These workers remain private/incomplete. Independent literal/rich citation and body
+marks/styles, explicit empty native custom marks, inferred/provenance/navigation
+intent, marker-style inheritance and note numbering/placement settings still need
+checked mappings. Lists/drawings/assets in notes depend on the remaining shared
+body work. These are unfinished work, not new public support exceptions. The
+public format/API/CLI, production dependencies and application boundaries remain
+unchanged. Next complete rich label/intent and list/asset/section/story mappings,
+strict native envelope/JSON/surrogate decoding and native browser qualification.

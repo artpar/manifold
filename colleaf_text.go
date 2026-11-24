@@ -13,6 +13,7 @@ type colleafTextContext struct {
 	DefaultText      json.RawMessage
 	DefaultParagraph json.RawMessage
 	Styles           map[string]colleafNamedStyle
+	NoteIDs          map[string]noteKey
 }
 
 func colleafRawInt(style colleafStyleMap, key string) (int, bool, error) {
@@ -37,6 +38,9 @@ func colleafUTF16Len(text string) int {
 // These private text workers are shared by future main/story/note mappings.
 // Unsupported rich containers reject before returning partial document content.
 func encodeColleafTextBody(ctx context.Context, blocks []Block) (colleafBody, error) {
+	return encodeColleafTextBodyWithNotes(ctx, blocks, nil)
+}
+func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs map[noteKey]string) (colleafBody, error) {
 	body := colleafBody{TextRuns: []colleafTextRun{}}
 	var stream strings.Builder
 	offset := 0
@@ -75,11 +79,26 @@ func encodeColleafTextBody(ctx context.Context, blocks []Block) (colleafBody, er
 			p.Style = sfAttrs(properties)
 		}
 		for _, run := range block.Runs {
-			if run.Note != nil || run.Anchor != "" || strings.ContainsAny(run.Text, "\r\f\v\b\x1a\x1b\x1c\x1d\x0e\x0f\x1e\x1f") {
+			if run.Anchor != "" || strings.ContainsAny(run.Text, "\r\f\v\b\x1a\x1b\x1c\x1d\x0e\x0f\x1e\x1f") {
 				return body, fmt.Errorf("%w: native text atom/break needs its full structural mapping", ErrUnsupported)
 			}
 			if err := validateString(run.Text); err != nil {
 				return body, err
+			}
+			if run.Note != nil {
+				id, ok := noteIDs[referenceKey(run.Note)]
+				if !ok || run.Text != "" || run.Link != "" || run.Destination != "" || run.Note.Label != nil || run.Note.LabelContent != nil || run.Note.Inferred {
+					return body, fmt.Errorf("%w: native note citation requires a mapped definition and shared marker semantics", ErrUnsupported)
+				}
+				style, err := colleafRunStyle(run)
+				if err != nil {
+					return body, err
+				}
+				one := 1
+				body.CustomBlocks = append(body.CustomBlocks, colleafBlockRecord{StartIndex: offset, Type: &one, ID: fmt.Sprintf("note%d", len(body.CustomBlocks)), NoteID: id, NoteType: run.Note.Kind})
+				body.TextRuns = append(body.TextRuns, colleafTextRun{St: offset, Ed: offset + 1, TS: style})
+				appendText("\b")
+				continue
 			}
 			if run.Text == "" {
 				continue
@@ -126,9 +145,18 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 	if err != nil {
 		return nil, err
 	}
-	if len(index.tables) > 0 || len(index.blocks) > 0 || len(index.sections) != 1 {
+	if len(index.tables) > 0 || len(index.sections) != 1 {
 		return nil, fmt.Errorf("%w: native containers/sections require the rich body mapping", ErrUnsupported)
 	}
+	var blockBounds []int
+	for position, block := range index.blocks {
+		key, ok := settings.NoteIDs[block.NoteID]
+		if !ok || (block.Type != nil && *block.Type != 1) || (block.NoteType != "" && block.NoteType != key.kind) {
+			return nil, fmt.Errorf("%w: unmapped/contradictory native note atom", ErrUnsupported)
+		}
+		blockBounds = append(blockBounds, position, position+1)
+	}
+	sort.Ints(blockBounds)
 	doc := &Document{}
 	resolver := colleafStyleResolver{named: settings.Styles}
 	baseText, err := colleafStyleObject(settings.DefaultText)
@@ -246,6 +274,13 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 			}
 			boundaries = append(boundaries, boundary)
 		}
+		firstBlock := sort.SearchInts(blockBounds, node.start+1)
+		for _, boundary := range blockBounds[firstBlock:] {
+			if boundary >= node.end-1 {
+				break
+			}
+			boundaries = append(boundaries, boundary)
+		}
 		sort.Ints(boundaries)
 		previous := -1
 		for i := 0; i < len(boundaries)-1; i++ {
@@ -258,7 +293,7 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 			if err != nil {
 				return nil, err
 			}
-			if strings.ContainsAny(text, "\f\b\x1e\x1f") {
+			if strings.ContainsAny(text, "\f\x1e\x1f") {
 				return nil, fmt.Errorf("%w: native text control requires semantic mapping", ErrUnsupported)
 			}
 			record := -1
@@ -288,12 +323,26 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 				return nil, err
 			}
 			run.Text = strings.ReplaceAll(text, "\v", "\n")
+			if text == "\b" {
+				atom, ok := index.blocks[start]
+				if !ok {
+					return nil, fmt.Errorf("unowned native note atom")
+				}
+				key := settings.NoteIDs[atom.NoteID]
+				run.Text = ""
+				run.Note = &NoteReference{ID: key.id, Kind: key.kind}
+			} else if strings.ContainsRune(text, '\b') {
+				return nil, fmt.Errorf("native note atom was not isolated")
+			}
 			var link *colleafRangeRecord
 			position = sort.Search(len(annotations), func(i int) bool { return annotations[i].EndIndex >= start })
 			if position < len(annotations) && annotations[position].StartIndex <= start {
 				link = &annotations[position]
 			}
 			if link != nil {
+				if run.Note != nil {
+					return nil, fmt.Errorf("%w: hyperlink on native note citation requires navigation mapping", ErrUnsupported)
+				}
 				var target struct {
 					URL      string `json:"url"`
 					Bookmark string `json:"bookmarkId"`
