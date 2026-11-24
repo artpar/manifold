@@ -2383,3 +2383,13 @@ geometry and facade saves. Keep public export guarded after the red-image oracle
 fails, including a standalone control; do not blame only new table nesting or
 claim a sole root cause from the missing-transform hypothesis. Compare actual
 native image insertion next without patching applications/vendor packages.
+
+
+Native drawing registration follow-up: the initial zero-red canvas failure is
+resolved by emitting DOC_DRAWING_PLUGIN root data/order from actual native sources.
+The pinned controller consumes that resource to initialize its registry and collects
+notes separately. Source descriptors/SF/assets remain authoritative and mirror
+contradictions reject. Actual native insertion, save/reload and unchanged red-pixel
+oracles establish this fix; inactive header paint is separately pink in the editor.
+See NATIVE_LITERAL_MARKERS.md. Public literal-marker export remains guarded for
+nested ordinary counter/pagination qualification; no native fidelity claim.

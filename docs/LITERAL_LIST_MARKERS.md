@@ -209,3 +209,10 @@ pdftoppm -scale-to 1100 -png output/literal-output/continued.pdf output/literal-
 The native repeated-footnote ordering defect remains separate and unresolved.
 See COLLEAF_BROWSER.md. The complete goal stays active; native generation and remaining
 semantic/source/resource/visual acceptance work are not closed by this milestone.
+
+
+Native browser follow-up: source-map-only image paint is fixed by the required
+DOC_DRAWING_PLUGIN registration resource. Original standalone/nested/footnote red
+pixel checks now pass; inactive header paint is separately checked in its dimmed
+editor appearance. Ordinary nested counters and label pagination remain unqualified,
+so public marker export stays guarded. See NATIVE_LITERAL_MARKERS.md.

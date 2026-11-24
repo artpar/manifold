@@ -533,6 +533,20 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 	if err = sealColleafIntent(&out); err != nil {
 		return out, err
 	}
+	// Univer's drawing controller initializes its registry from this built-in
+	// resource, not the persisted source map alone. Mirror only root sources:
+	// notes retain their own sources and are collected by the native controller.
+	if len(out.Drawings) > 0 || len(out.Notes) > 0 {
+		data := out.Drawings
+		if data == nil {
+			data = map[string]json.RawMessage{}
+		}
+		order := append([]string{}, out.DrawingOrder...)
+		out.Resources = colleafReplaceResource(out.Resources, "DOC_DRAWING_PLUGIN", struct {
+			Data  map[string]json.RawMessage `json:"data"`
+			Order []string                   `json:"order"`
+		}{data, order})
+	}
 	return out, nil
 }
 

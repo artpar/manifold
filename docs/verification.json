@@ -7601,5 +7601,38 @@
       "rg -n 'insertImage|renderImages|singleTransform|getImageSourceCache' output/colleaf-browser/node_modules/@univerjs/{docs-drawing-ui,drawing-ui,drawing}/lib/es/index.js",
       "node scripts/verify_colleaf_literal_markers.cjs"
     ]
+  },
+  "native_drawing_registration": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "prototype_commit": "b390dbf",
+    "behavior": "Whole native encoder emits DOC_DRAWING_PLUGIN root data/order registration resource, matching pinned SDK onLoad. Notes remain local and are collected by native controller. Source descriptors/SF/assets and existing contradiction validation remain unchanged.",
+    "discovery": "Actual FDocument.insertImage paints18020 red pixels and saved/reloaded snapshot also paints. Original Go source map alone paints0. Adding registered root mirror makes unchanged original descriptors paint. Generic-transform probes alone were insufficient.",
+    "browser": {
+      "viewport": "1000x1400x1/full page",
+      "probe_sha256": "2c3ca456207d35ed2894e2c26e39271ee73710bfbdb717b28e8b957d6352cb48",
+      "result": "Original exact decoded RGBA255,0,0,255 and strict red threshold retained: standalone441/nested441/footnote420 red pixels. Inactive header visibly dimmed to exactRGBA255,128,128,255;new separate upper-page pixel oracle passes. No runtime errors. Nested and complete header/note screenshots inspected. Scoped synthetic evidence only.",
+      "cleanup": "Owned local server terminated;isolated browser tab closed."
+    },
+    "graph": "Pinned SDK glyphs/geometry/edits/actual facade-save checker passes after registration, and exact Go saved-case/source recovery passes. New public API test checks main/header registration, local note ownership, semantic roundtrip and contradictory mirror rejection.",
+    "checks": {
+      "go_test_all": "passed library26.878s/CLI0.837s",
+      "race": "passed library321.182s/CLI3.152s on final production code; snapshot precedes new public registry test, covered by final focused race",
+      "focused_race": "passed final1.642s including new public registry test",
+      "vet": "passed",
+      "modules": "all modules verified",
+      "CGO_disabled_focus": "passed0.390s",
+      "builds": "CGO-disabled host CLI and Linux amd64/arm64 cross-builds pass;not Linux execution.",
+      "diff_check": "passed"
+    },
+    "fixture_edit": "Existing image resize test updates both actual source and mirror to model a valid native edit. Original actual-frame-wins60x30/stale-diagnostic oracle unchanged. Full suite first exposed the new contradiction;fixture corrected without weakening reader validation.",
+    "production_dependencies": "unchanged;independently authored standard Go resource mapping,existing optional pinned SDK/browser QA.",
+    "remaining": "Public VDOCS literal-marker export remains guarded: ordinary nested counter appears clipped/absent in canvas despite SDK glyph, long labels/pagination/mobile qualification remain. Native repeated-footnote order,Word-PDF annotation discrepancy and broader original acceptance audits remain open. No completion/blocker exemption claimed.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/NATIVE_LITERAL_MARKERS.md",
+      "rg -n 'indentStart|hanging|bulletAlignment' colleaf_lists.go output/colleaf-browser/node_modules/@univerjs/{docs,docs-ui,engine-render}/lib/es/index.js",
+      "node scripts/prepare_colleaf_browser.cjs output/native-literal/nested.vdocs",
+      "node scripts/verify_colleaf_literal_markers.cjs"
+    ]
   }
 }

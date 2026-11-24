@@ -1932,3 +1932,13 @@ trees. Empty automatic-label paragraphs use checked right alignment inside their
 cells. Actual SDK/facade graphs pass, but the browser red-image oracle fails even
 for a standalone control, so public export remains guarded. See
 NATIVE_LITERAL_MARKERS.md for the exact failure and required next investigation.
+
+
+Native drawing registration follow-up: the initial zero-red canvas failure is
+resolved by emitting DOC_DRAWING_PLUGIN root data/order from actual native sources.
+The pinned controller consumes that resource to initialize its registry and collects
+notes separately. Source descriptors/SF/assets remain authoritative and mirror
+contradictions reject. Actual native insertion, save/reload and unchanged red-pixel
+oracles establish this fix; inactive header paint is separately pink in the editor.
+See NATIVE_LITERAL_MARKERS.md. Public literal-marker export remains guarded for
+nested ordinary counter/pagination qualification; no native fidelity claim.

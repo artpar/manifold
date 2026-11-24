@@ -1,4 +1,4 @@
-# Native literal-marker prototype and remaining paint failure
+# Native literal-marker prototype and drawing registration
 
 The complete goal remains active. Public VDOCS generation still rejects literal
 markers before output. The internal implementation now preserves their actual
@@ -44,25 +44,37 @@ It verifies native label/body glyphs, table geometry, automatic counter glyphs,
 citation/body presence, header caches, TextX edits and actual facade saves. SDK
 geometry is not canvas paint evidence, and successful persistence is not fidelity.
 
-## Browser failure retained
+## Browser image failure resolved; layout qualification remains
 
-The unmodified pinned Colleaf mount reaches lifecycle stage 3, with no runtime
-errors. Rich alpha/beta labels, the empty label, note body, the fixed automatic
-prefixes and nested table text are visible. **The red label image is not painted.**
-The strict pixel oracle was not weakened: both nested and standalone controls
-have a real drawing record and a source image that independently decodes to
-RGBA(255,0,0,255), yet the visible canvas has zero red pixels. The running/note
-case also produced zero. Thus this is not proven to be caused only by added label
-nesting; native drawing registration/initialization/paint must be investigated.
-A nested ordinary numbered label also appeared clipped; wider native list-in-cell
-layout remains unqualified.
+The original strict pixel oracle initially failed in nested, running/note and
+standalone controls: real drawing descriptors and independently decoded pure red
+sources produced zero red pixels. Actual native `FDocument.insertImage` painted
+18020 red pixels and its saved snapshot also painted on reload. Comparing the
+registered snapshot exposed the missing `DOC_DRAWING_PLUGIN` resource. The pinned
+controller resets/registers root drawing sources from this resource on load; a
+source map alone is insufficient. The Go whole-document encoder now emits the
+SDK's root data/order mirror. Notes retain local sources and the controller
+collects them; headers retain their existing global source relationships. No
+proprietary code or vendor/application patch was used.
 
-The published drawing renderer skips images without a generic scene transform;
-our snapshot carries docTransform. Isolated input probes adding generic transforms
-at both zero and visible coordinates also produced zero red pixels. This is a
-candidate to investigate, **not an established sole cause or a shipped fix**.
-No application/vendor packages were patched, no source pixels changed, and no
-customer documents or external conversion service were used.
+Unchanged source/pixel oracles now pass at the full-page 1000×1400×1 viewport:
+standalone and nested labels each paint 441 red pixels; the running/note case paints
+420 footnote red pixels. Its header image is visibly pink because the pinned UI
+dims inactive running content (observed exact RGBA255,128,128,255). The probe adds
+an independent upper-page pink-pixel check while retaining the original strict red
+threshold and exact decoded source. This checks both displayed story copies; it
+does not reinterpret the source color. Browser screenshots were visually inspected
+for the nested case and the full-page header/note case, with no runtime errors.
+
+Generic scene-transform probes alone had failed; they were not the fix. Current
+source descriptors remain unchanged. The drawing mirror is derived registration
+of actual native sources, not a hidden SF/text cache, and contradictions still
+reject. The existing resize test now updates both source and mirror to model a
+valid native edit; its original actual-frame-wins oracle remains unchanged.
+
+A nested ordinary numbered label remains absent/clipped in the browser despite
+being present in the SDK glyph graph. Wider list-in-cell layout and long-label
+pagination remain unqualified, so public marker generation stays guarded.
 
 ## Reproduction
 
@@ -80,18 +92,23 @@ Open the owned local harness at localhost:8768. A 1000×1400 viewport exposes th
 full reference page and its footnote. Evaluate in the browser:
 
 ```js
-const probe = Function('return (' + await (await fetch('/literal-browser-probe.js')).text() + ')')();
-await probe('nested', false); // sourceDecodedRGBA:[255,0,0,255], redPixels:0
-await probe('image-control', false); // same failure without a label table
-await probe('nested', true); // retained FAIL: image was not painted
+const probe = Function('return (' + await (await fetch('/literal-browser-probe.js', {cache:'no-store'})).text() + ')')();
+await probe('nested', true); // unchanged source red; redPixels:441
+await probe('image-control', true); // redPixels:441
+await probe('stories', true); // footnote redPixels:420 plus dimmed header pixels
 ```
 
-Next compare the same image inserted through the actual native image command with
-the Go-generated snapshot, including drawing-manager registration and scene
-transforms. Locate the insertion/render contracts in the pinned docs-drawing-ui
-and drawing-ui packages. Fix the input/registration mapping where possible; retain
-this oracle if the failure is external. Then qualify image pixels, list-in-cell
-paint, long label pagination, mobile/preset saves and the original broader acceptance
-matrix before enabling public marker export. The separate repeated-footnote order
-failure remains in COLLEAF_BROWSER.md; the Word-PDF link-annotation discrepancy
-remains in LITERAL_LIST_MARKERS.md. Neither is resolved by this prototype.
+Next compare the ordinary nested-list counter's actual skeleton glyph position
+and clipping geometry against a native inserted numbered paragraph in a table.
+Preserve its original counter/text oracle. The pinned engine default bullet
+skeleton supplies indentStart/hanging21, while a concrete list definition uses
+its own paragraphProperties; the Go list definition currently omits them. Its
+layoutParagraph then defaults hanging to glyph width without a matching indent.
+This is a candidate clipping cause, not a qualified fix. Check actual native
+inserted list definitions and explicit/inferred indentation behavior before
+changing the mapping or consuming those properties in the reader.
+Qualify long label pagination,
+mobile/preset saves and the original broader acceptance matrix before enabling
+public marker export. The separate repeated-footnote order failure remains in
+COLLEAF_BROWSER.md; the Word-PDF link-annotation discrepancy remains in
+LITERAL_LIST_MARKERS.md. Neither is resolved by drawing registration.

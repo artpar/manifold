@@ -40,7 +40,31 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: native literal-label graph prototype, paint still fails
+## Latest progress: native drawing registration fixes missing image paint
+
+Committed prototype b390dbf preserved graph/save evidence and the original failing
+browser oracle. Actual native image insertion then exposed the missing built-in
+DOC_DRAWING_PLUGIN registration resource. Whole-document encoding now emits its
+root source/order mirror; notes remain local. Existing source/mirror contradiction
+checks remain enforced. A valid editor-resize test now updates both descriptors;
+its original actual-frame-wins expectation is unchanged.
+
+The original strict red-source/red-pixel oracle now passes: standalone and nested
+cases each441 red pixels, footnote420 at1000×1400×1. The header's visibly dimmed
+pink image is separately checked (exact native inactive color255,128,128,255).
+Full-page story and nested screenshots were inspected with no runtime errors.
+Native SDK glyphs/edits/facade saves and exact Go recovery still pass. This is
+scoped synthetic evidence. Nested ordinary list counters still appear clipped;
+long-label pagination/mobile qualification and public marker enablement remain open.
+See NATIVE_LITERAL_MARKERS.md for reproduction. Production dependencies unchanged.
+
+Final whole-suite tests pass (library26.878s/CLI0.837s), vet passes, CGO-disabled
+focus passes (0.390s); host/Linux amd64/arm64 CGO-disabled builds pass. Full race
+passes (library321.182s/CLI3.152s) on the final production code, before the new
+public-registry test. Final focused race (1.642s) includes that test. Modules verify
+and diff checks pass. Owned browser/server were closed after QA.
+
+## Earlier: native literal-label graph prototype, initial paint failure
 
 An internal native mapping now writes real label/body tables with checked sparse
 ownership/counter intent. It restores complete SF graphs, including source owners,
@@ -49,11 +73,12 @@ TextX edits and facade saves. Marker trees now participate in native source/iden
 image-fitting walks. Mixed automatic label paragraphs align right to prevent the
 browser clipping their prefixes; the generated fix was visually observed.
 
-The actual pinned Colleaf browser exposes a further required gap: the source red
-image decodes correctly and has a drawing record, but produces zero red canvas
-pixels, including a standalone image control. No runtime error is reported. This
-is not established as solely a label-table nesting problem. The strict pixel probe
-remains FAILING. Generic scene-transform input probes did not fix it. Public VDOCS
+At that prototype checkpoint, the pinned browser exposed a gap: the source red
+image decoded correctly and had a drawing record, but produced zero red canvas
+pixels, including a standalone image control. No runtime error was reported. This
+was subsequently resolved by registration as recorded above. The strict pixel
+probe failed at that checkpoint; generic scene-transform input probes did not
+fix it. The oracle remains in use and now passes. Public VDOCS
 marker export stays guarded; this internal milestone is not a completed native
 conversion capability or a completion exemption. Read NATIVE_LITERAL_MARKERS.md
 for exact schema, evidence, source/pixel oracles and reproduction commands.
@@ -455,7 +480,7 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-1. Resolve the native drawing paint failure in NATIVE_LITERAL_MARKERS.md, comparing
+1. Qualify the nested ordinary list counter/clipping in NATIVE_LITERAL_MARKERS.md; compare
    actual native insertion with the Go snapshot, then qualify/enable marker export.
    The checked graph prototype and DOCX/PDF mappings now exist. The current output rejection is temporary
    required work, not a completed support-contract exception. Reproduce the native

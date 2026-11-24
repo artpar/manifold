@@ -112,6 +112,9 @@ func TestColleafImageContainerProjectionAndSF(t *testing.T) {
 	_ = json.Unmarshal(wire.Drawings[id], &resized)
 	resized.Transform.Size = colleafImageSize{Width: 80, Height: 40}
 	wire.Drawings[id] = sfAttrs(resized)
+	// A native editor edit updates both its actual source and registered mirror.
+	// Leaving the old mirror is a contradictory snapshot, not a valid resize.
+	wire.Resources = colleafReplaceResource(wire.Resources, "DOC_DRAWING_PLUGIN", map[string]any{"data": wire.Drawings, "order": wire.DrawingOrder})
 	got, err = decodeColleafDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)

@@ -828,7 +828,7 @@ sequential label/body ranges in notes to avoid nested-table omission. Mixed auto
 counters use real start overrides; item page starts sit before layout cells.
 VDOCS generation remains required unfinished work and rejects before output. An
 internal checked native-table prototype now survives SDK edits/saves with exact
-SF/source graphs, but the browser image-pixel oracle fails even for a standalone
-control; see NATIVE_LITERAL_MARKERS.md. Existing
+SF/source graphs, and drawing registration now passes browser image-pixel checks; broader
+list-in-cell/pagination qualification remains; see NATIVE_LITERAL_MARKERS.md. Existing
 source/text/pixel oracles remain unchanged while structural assertions strengthen.
 LITERAL_LIST_MARKERS.md records the schema, evidence and next implementation.

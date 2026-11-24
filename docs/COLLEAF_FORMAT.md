@@ -1497,7 +1497,7 @@ No application/vendor/production change or full browser/fidelity claim is made.
 
 Native literal-marker graph support now has an internal checked table-ownership
 prototype with exact SF/source and pinned SDK/facade-save evidence. The strict
-browser red-image pixel oracle still FAILS, even for a standalone control, so
-public VDOCS marker export remains required unfinished work. No body/asset cache,
-pixel oracle change or general native fidelity claim is introduced. See
+browser image-pixel oracle now passes after native drawing resource registration;
+public VDOCS marker export remains unfinished pending nested-list and pagination
+qualification. No body/asset cache or general native fidelity claim is introduced. See
 NATIVE_LITERAL_MARKERS.md for schema, observations and reproduction.
