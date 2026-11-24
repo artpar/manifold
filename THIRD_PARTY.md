@@ -220,3 +220,8 @@ save/edit checks. No new dependency or third-party production source is added.
 The run-origin probe reuses the attributed pinned Univer SDK/renderer/plugins,
 hash-pinned Colleaf validator and existing ProseMirror reader. No additional
 package, production dependency or copied third-party implementation is introduced.
+
+
+The table-origin probe reuses the same attributed pinned SDK/renderer/plugins,
+hash-pinned Colleaf validator and existing ProseMirror reader. No new package,
+production dependency or third-party implementation is incorporated.

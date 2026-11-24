@@ -6684,5 +6684,48 @@
       "MANYDOC_COLLEAF_RUN_ORIGIN_SAVED=output/colleaf-qa/run-origins-saved.json MANYDOC_COLLEAF_RUN_ORIGIN_EDITED=output/colleaf-qa/run-origins-edited.json MANYDOC_COLLEAF_RUN_ORIGIN_CITATION=output/colleaf-qa/run-origins-citation.json MANYDOC_COLLEAF_RUN_ORIGIN_DETACHED=output/colleaf-qa/run-origins-detached.json GOWORK=off go test -run TestColleafRunOrigin -count=1 .",
       "rg -n 'Source != nil|manydocOrigin' colleaf_navigation.go colleaf_tables.go colleaf_lists.go colleaf_images.go"
     ]
+  },
+  "colleaf_table_origins_2026_11_24": {
+    "scope": "Private native table/cell source bindings, including merged/nested/running/note tables and covered-source-marker reconciliation. Full native integration and overall goal remain active/incomplete.",
+    "implementation": [
+      "Direct tableSource and tableCells metadata carry manydoc.table-origin or manydoc.cell-origin/version1/ref only. Deterministic evidence.tableOrigins deduplicates original SourceInfo plus source-free SF fingerprints; no text/row/cell/body cache.",
+      "Table and cell hashes use distinct semantic node shapes, including when both slots share identical original source facts. Source-only nested binding changes do not stale enclosing table semantics.",
+      "Final current composition restores exact owners, qualifies changed content/grid/presentation sources historical, and archives facts without current owners unbound. Original physical/table-width/span facts remain source evidence.",
+      "All native descriptor references validate, including covered cells. Covered markers do not invent SF cells or ownership; valid absent owners archive facts, missing or contradictory references reject. Existing empty-covered-body checks remain mandatory.",
+      "Known native origin properties do not generate presentation-loss warnings; private markers clear before public return. Caller snapshots and nested source facts remain isolated. No application/backend/permission/quota change."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_table_origins.cjs",
+      "script_sha256": "94df3cf8d1f633de87babff882b56a252cb62d793d761a820d836e7d48b3f1d5",
+      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned Colleaf validator and prosemirror-model1.25.13; no new dependency.",
+      "results": [
+        "Thirteen source facts across five main/nested/header/footer/note tables; explicit original width/span facts, horizontal/vertical merged cells and repeated header semantics. Direct properties contain only source references and pool has no content cache.",
+        "Actual table skeleton and whole bold13pt emoji remain valid through two registered-plugin saves/reopens; streams and source pool remain exact.",
+        "Actual TextX Q insertion into Wide cell survives .vdocs/Go/SF import; enclosing table and cell sources become historical with exact diagnostic, retaining current edited text intervals.",
+        "Actual cell marker removal archives original span/source facts unbound without staling enclosing table semantics. Actual marker moved from an origin to a covered continuation cell also archives source facts without inventing a current owner.",
+        "Strict .vdocs/Go/SF structure, source values and repeated native round-trip stability pass for all four actual artifacts. Actual ProseMirror checks165 nodes/marks/attributes.",
+        "Go also qualifies identical facts in table/cell slots, caller immutability, malformed version/digest/profile/duplicate/missing records and a missing reference on a covered cell.",
+        "Existing run-origin and foreign structural-cursor independent probes pass after integration."
+      ],
+      "limits": "Synthetic headless component evidence, not complete imported-PDF per-node provenance, browser paint/caret/scroll/events, image/list/item/anchor mappings or full native API/CLI fidelity."
+    },
+    "checks": {
+      "tests": "Final all-package tests with all four actual table artifacts pass library16.175s/CLI0.719s/internal cached.",
+      "race": "Final all-package race with all four actual table artifacts passes library170.568s/CLI1.749s/internal cached.",
+      "vet": "pass after final source changes",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "Final focused table tests0.487s with actual artifacts, host CLI build/--help and Linux amd64/arm64 cross-builds pass; cross-builds are not execution evidence.",
+      "fuzz": "Native descriptor/marker scanner target101024 executions/10.487s with2workers passes. Short malformed-input safety sample, not exhaustive coverage.",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go/std-library production only. No dependency/runtime executable/service/CGO/license server/upload, application/backend/permission/quota change or modified original corpus/oracle. SF value/schema unchanged; generated QA artifacts ignored.",
+    "remaining": "Image/list/item/other container/anchor sources and explicit zero-width empty-text source policy; remaining marker appearance/nonvisual run/settings intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_TABLE_ORIGIN_QA=output/colleaf-qa/table-origins.json GOWORK=off go test -run TestColleafTableOrigins -count=1 .",
+      "node scripts/verify_colleaf_table_origins.cjs",
+      "MANYDOC_COLLEAF_TABLE_ORIGIN_SAVED=output/colleaf-qa/table-origins-saved.json MANYDOC_COLLEAF_TABLE_ORIGIN_EDITED=output/colleaf-qa/table-origins-edited.json MANYDOC_COLLEAF_TABLE_ORIGIN_DETACHED=output/colleaf-qa/table-origins-detached.json MANYDOC_COLLEAF_TABLE_ORIGIN_COVERED=output/colleaf-qa/table-origins-covered.json GOWORK=off go test -run TestColleafTableOrigins -count=1 .",
+      "rg -n 'Source != nil|manydocOrigin' colleaf_images.go colleaf_lists.go colleaf_navigation.go"
+    ]
   }
 }

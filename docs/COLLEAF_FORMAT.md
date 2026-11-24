@@ -1249,3 +1249,31 @@ synthetic headless qualification. Zero-width empty-text/anchor sources still rej
 BodyLabelStyle.Source is invalid in the existing shared model (use LabelSource).
 Container/cell/item/anchor provenance and remaining intent/API/preset/browser/final
 acceptance work remain required.
+
+
+## Current table/cell origin component
+
+Direct tableSource[id].manydocOrigin and tableRows[].tableCells[].manydocOrigin
+carry manydoc.table-origin or manydoc.cell-origin, version1 and a reference only.
+Root evidence.tableOrigins stores deduplicated validated SourceInfo and source-free
+SF fingerprints, never editable rows/cells/text. Cell hashes cover the cell node;
+table hashes cover the table tree. Shared original facts therefore do not conflate
+owner types. Changes to nested source bindings alone do not edit those semantics.
+
+Final composition restores exact owners, marks edited content/grid/presentation
+historical with colleaf_table_source_historical, and archives missing owners with
+colleaf_table_source_unbound. Original table-width/span and physical evidence never
+claim current native geometry. Every descriptor reference validates, including
+covered cells: a valid covered marker has no SF owner and archives its facts; missing
+or contradictory covered records reject. Existing empty-continuation/content checks
+remain in force. Reads do not rewrite caller-owned source descriptors.
+
+scripts/verify_colleaf_table_origins.cjs reuses pinned SDK/validator/renderer for
+thirteen sources across five merged/nested/main/header/footer/note tables, reference-
+only metadata, styled emoji/table skeleton, two saves/reopens, actual cell TextX
+edit, binding removal and covered placement. Strict .vdocs/Go/SF compares full
+structures, width/span facts, source states and repeated stability. ProseMirror
+checks165 nodes/marks/attributes. Go also checks shared facts, malformed pools and
+missing covered references. This synthetic headless component does not complete
+image/list/item/other container/anchor source bindings or native/API/browser/final
+qualification.

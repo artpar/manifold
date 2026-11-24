@@ -1691,3 +1691,16 @@ changing old source-free paragraph hashes. Schema source marks now enumerate all
 public SourceInfo fields, including historical and optional table provenance.
 Zero-width anchor/container/cell/item mappings and broader native/API/UI/final
 qualification remain required; empty text source output rejects explicitly.
+
+
+## Native table/cell origin bindings
+
+colleaf_table_origins.go collects reference-only tableSource/tableCells markers
+into a deterministic source/fingerprint pool. Table and cell SF fingerprint shapes
+remain distinct even for shared facts; nested source attributes/marks normalize out.
+All descriptor references validate, including covered cells without current SF
+owners. Final composition restores current owners, qualifies changed table/cell
+semantics historical, and archives orphan facts unbound. It never invents covered
+content or current geometry. The read-only descriptor pass preserves input bytes.
+Merged/nested/main/running/note tables have actual save/edit/skeleton and strict SF
+component evidence. Other source slots and full native/API/UI/final work remain.

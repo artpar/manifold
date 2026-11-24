@@ -1087,3 +1087,13 @@ stale paragraph fingerprints. Zero-width empty-text/anchor source output still
 rejects; container/cell/item and broader native/API/UI/corpus qualification remain
 unfinished. The published source-mark schema now declares historical and all
 existing optional table-source fields, checked against the public SourceInfo type.
+
+
+Private native table/cell source bindings now preserve merged/nested and running/
+note-table source facts. Changed content/grid/presentation retains historical
+provenance; missing owners, including valid covered-cell marker placement, archive
+facts unbound with diagnostics. Source-only binding edits do not stale enclosing
+table semantics. All descriptor references validate and covered bodies must remain
+empty. Original geometry/width/span evidence stays distinct from native layout.
+Image/list/item/other container/anchor source slots and broader native/API/UI/corpus/
+final acceptance remain unfinished.

@@ -498,6 +498,9 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 		return out, err
 	}
 	out.Resources = colleafReplaceResource(out.Resources, colleafImageResource, geometry)
+	if err = collectColleafTableOrigins(&out, &intent.Evidence); err != nil {
+		return out, err
+	}
 	if err = collectColleafRunOrigins(&out, &intent.Evidence); err != nil {
 		return out, err
 	}
@@ -954,6 +957,9 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 		return nil, err
 	}
 	if err = restoreColleafNoteOrigins(doc, intent.Evidence, opened, identities); err != nil {
+		return nil, err
+	}
+	if err = restoreColleafTableOrigins(doc, intent.Evidence, opened); err != nil {
 		return nil, err
 	}
 	if err = doc.Validate(); err != nil {

@@ -27,6 +27,7 @@ type colleafNativeRow struct {
 	GridAfter  int               `json:"gridAfter,omitempty"`
 }
 type colleafNativeTable struct {
+	Origin  json.RawMessage   `json:"manydocOrigin,omitempty"`
 	ID      string            `json:"tableId"`
 	Rows    []json.RawMessage `json:"tableRows"`
 	Columns []struct {
@@ -213,7 +214,7 @@ func (w *colleafBodyWriter) table(block Block, depth int) error {
 	if len(block.Runs) > 0 || block.Image != nil || len(block.Items) > 0 || block.Section != nil || block.List != "" || block.Level != 0 || block.Start != nil || block.Numbering != nil {
 		return fmt.Errorf("invalid native table block")
 	}
-	if block.Source != nil || block.PageBreakBefore || block.Direction != "" {
+	if block.PageBreakBefore || block.Direction != "" {
 		return fmt.Errorf("%w: native table annotations require mapping", ErrUnsupported)
 	}
 	grid, err := tableGrid(block.Rows)
@@ -248,10 +249,18 @@ func (w *colleafBodyWriter) table(block Block, depth int) error {
 			}
 			w.text("\x1c")
 			rs := 0
+			var sourceOrigin *colleafOrigin
 			if origin.Row == ri {
 				cell := row.Cells[origin.Cell]
 				if cell.Source != nil {
-					return fmt.Errorf("%w: native cell provenance requires mapping", ErrUnsupported)
+					hash, err := colleafCellFingerprint(cell)
+					if err != nil {
+						return err
+					}
+					sourceOrigin, err = newColleafTableOrigin(cell.Source, hash, colleafCellOriginProfile)
+					if err != nil {
+						return err
+					}
 				}
 				rs = origin.RowSpan
 				if err = w.blocks(cell.Blocks, depth); err != nil {
@@ -263,7 +272,11 @@ func (w *colleafBodyWriter) table(block Block, depth int) error {
 				}
 			}
 			w.text("\x1d")
-			cells = append(cells, map[string]any{"rowSpan": rs, "columnSpan": origin.ColSpan})
+			cp := map[string]any{"rowSpan": rs, "columnSpan": origin.ColSpan}
+			if sourceOrigin != nil {
+				cp["manydocOrigin"] = sourceOrigin
+			}
+			cells = append(cells, cp)
 			col += origin.ColSpan
 		}
 		w.text("\x0e")
@@ -292,6 +305,22 @@ func (w *colleafBodyWriter) table(block Block, depth int) error {
 		total = 100
 	}
 	w.tables[id] = sfAttrs(map[string]any{"tableId": id, "tableRows": rows, "tableColumns": columns, "align": 0, "indent": colleafNumberUnit{0, 3}, "textWrap": 0, "position": map[string]any{"positionH": map[string]int{"relativeFrom": 0}, "positionV": map[string]int{"relativeFrom": 0}}, "dist": map[string]int{"distT": 0, "distB": 0, "distL": 0, "distR": 0}, "size": colleafTableWidth{1, colleafNumberUnit{total, unit}}, "layout": 1})
+	if block.Source != nil {
+		hash, err := colleafTableFingerprint(block)
+		if err != nil {
+			return err
+		}
+		props, err := colleafStyleObject(w.tables[id])
+		if err != nil {
+			return err
+		}
+		sourceOrigin, err := newColleafTableOrigin(block.Source, hash, colleafTableOriginProfile)
+		if err != nil {
+			return err
+		}
+		props["manydocOrigin"] = sfAttrs(sourceOrigin)
+		w.tables[id] = sfAttrs(props)
+	}
 	// Native tables are children of an anchoring paragraph, whose CR is structural.
 	w.body.Paragraphs = append(w.body.Paragraphs, colleafParagraphRecord{StartIndex: w.offset, ID: w.id("p")})
 	w.text("\r")
@@ -612,6 +641,11 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 	if err := json.Unmarshal(raw, &table); err != nil {
 		return block, err
 	}
+	var err error
+	block.colleafTableOrigin, err = readColleafOriginProfile(table.Origin, colleafTableOriginProfile)
+	if err != nil {
+		return block, err
+	}
 	if table.ID != record.ID || len(table.Rows) != len(node.children) || len(table.Columns) == 0 {
 		return block, fmt.Errorf("native table source/stream identity or grid mismatch")
 	}
@@ -703,7 +737,7 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 			if !hasCS {
 				cs = 1
 			}
-			r.presentationLosses(cellRaw, []string{"rowSpan", "columnSpan"}, "colleaf_cell_presentation")
+			r.presentationLosses(cellRaw, []string{"rowSpan", "columnSpan", "manydocOrigin"}, "colleaf_cell_presentation")
 			if rs < 0 || cs < 0 || rs > len(table.Rows)-ri || cs > columns {
 				return block, fmt.Errorf("invalid native cell span")
 			}
@@ -774,7 +808,11 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 				cursorProjections = append(cursorProjections, projection)
 			}
 			previousOrigin = origin
-			sfCell := Cell{Blocks: content}
+			cellOrigin, err := readColleafOriginProfile(properties["manydocOrigin"], colleafCellOriginProfile)
+			if err != nil {
+				return block, err
+			}
+			sfCell := Cell{Blocks: content, colleafOrigin: cellOrigin}
 			if rs > 1 {
 				sfCell.RowSpan = rs
 			}
@@ -851,7 +889,7 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 		"dist":     map[string]int{"distT": 0, "distB": 0, "distL": 0, "distR": 0},
 		"size":     colleafTableWidth{typeValue, colleafNumberUnit{total, unit}}, "layout": layout,
 	}
-	allowed := []string{"tableId", "tableRows", "tableColumns"}
+	allowed := []string{"tableId", "tableRows", "tableColumns", "manydocOrigin"}
 	for key, expected := range neutral {
 		var actual, canonical any
 		_ = json.Unmarshal(props[key], &actual)

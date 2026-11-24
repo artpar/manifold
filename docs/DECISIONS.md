@@ -2115,3 +2115,17 @@ attributes and test declaration coverage. This qualifies a run/citation componen
 zero-width/container/cell/item provenance and native/API/UI/final acceptance remain
 required. BodyLabelStyle source stays excluded by the existing shared-model
 contract; Note.LabelSource owns marker provenance.
+
+
+## 2026-11-24 Keep table/cell provenance on native descriptor owners
+
+Use direct table and origin-cell metadata rather than old stream offsets or an
+alternate table cache. Keep distinct table/cell semantic hashes so identical source
+facts can bind to both. Source-only changes must not stale enclosing semantics.
+Validate every descriptor marker, including covered cells; a covered marker has
+no current SF content owner, so retain its source unbound with a diagnostic instead
+of inventing content or silently dropping facts. Reject missing/contradictory source
+records. Preserve original width/span/physical facts and qualify edited content/
+grid/presentation historical. Qualify actual saves, TextX edits, marker detachment,
+covered placement, strict SF and repeated stability. Remaining source/API/UI/final
+acceptance is still required; no application policy or runtime dependency is added.

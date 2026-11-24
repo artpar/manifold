@@ -124,3 +124,10 @@ actual save/split/edit/reference-detachment and exact SF evidence. ProseMirror
 source-mark attribute coverage now includes historical and optional table facts.
 Zero-width anchor/container/cell/item source bindings and the remaining native
 intent/API/UI/corpus/final audits remain required.
+
+
+Native table/cell source transport now has synthetic actual merged/nested/running/
+note-table save/edit/detached/covered-marker and exact SF evidence. Original width/
+span facts remain explicit and edited bindings use historical/unbound states.
+Image/list/item/other container/anchor sources and full native intent/API/UI/corpus/
+final acceptance remain required.

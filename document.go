@@ -103,6 +103,7 @@ type Block struct {
 	Start                   *int           `json:"start,omitempty"`
 	Source                  *SourceInfo    `json:"source,omitempty"`
 	Section                 *Section       `json:"section,omitempty"`
+	colleafTableOrigin      *colleafOrigin
 	colleafOrigin           *colleafOrigin
 	docxSection             *xmlNode
 	docxAnchorGroup         string
@@ -165,8 +166,9 @@ type Cell struct {
 	ColSpan int     `json:"col_span,omitempty"`
 	// RowSpan includes the origin row; zero means one. Covered cells are
 	// omitted from subsequent rows, rather than stored as duplicate content.
-	RowSpan int         `json:"row_span,omitempty"`
-	Source  *SourceInfo `json:"source,omitempty"`
+	RowSpan       int         `json:"row_span,omitempty"`
+	Source        *SourceInfo `json:"source,omitempty"`
+	colleafOrigin *colleafOrigin
 }
 type Image struct {
 	Data      []byte  `json:"data"` // JSON represents bytes as base64.
