@@ -113,7 +113,7 @@ func checkColleafResourceJSON(ctx context.Context, native colleafNoteSnapshot) e
 		}
 	}
 	for _, r := range records {
-		if colleafOwnIntent(r.Name) || r.Name == "DOC_DRAWING_PLUGIN" {
+		if colleafOwnIntent(r.Name) || (r.Name == "DOC_DRAWING_PLUGIN" || r.Name == colleafHyperlinkResource) {
 			if err := validateStrictJSON(ctx, []byte(r.Data)); err != nil {
 				return fmt.Errorf("native resource JSON: %w", err)
 			}

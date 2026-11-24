@@ -166,3 +166,15 @@ lockfile remain ignored QA material. The existing original OASIS MQTT reference'
 JPEG is reused unchanged by image transport tests, with its original byte oracle.
 Pillow is an optional independent raster reader only. COLLEAF_FORMAT.md records
 primary source/hash, commands, measured boxes/pixels and remaining qualification.
+
+
+The optional native hyperlink QA uses @univerjs/docs-hyper-link1.0.4 and reads
+@univerjs/docs-hyper-link-ui1.0.4 published source (Apache-2.0). Their pinned npm
+tar URLs and source hashes are in COLLEAF_FORMAT.md. The former is registered as
+a real QA plugin; a hash-pinned unmodified click-handler/helper source region from
+the latter runs in an optional Node VM with real models and a window.open stub.
+Neither package/source is a production Go dependency or runtime requirement; no
+implementation is copied/translated into Go. Downloads/installations/UI extraction
+remain ignored. The independently authored resource mapping and synthetic fixture
+are manydoc code/data. Source-handler evidence does not establish browser/UI or
+full native navigation compatibility.

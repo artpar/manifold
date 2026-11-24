@@ -13,11 +13,15 @@ import (
 // keys. Only decoded object keys are allocated; large image/string values are
 // scanned in place. The depth bound protects this parser, not application quotas.
 func validateStrictJSON(ctx context.Context, data []byte) error {
+	return validateTypedJSON(ctx, data, nil)
+}
+
+func validateTypedJSON(ctx context.Context, data []byte, shape reflect.Type) error {
 	p := strictJSONParser{ctx: ctx, data: data}
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if err := p.value(0, nil); err != nil {
+	if err := p.value(0, shape); err != nil {
 		return err
 	}
 	if err := p.space(); err != nil {
@@ -340,18 +344,5 @@ func (p *strictJSONParser) recordFields(typ reflect.Type) map[string]reflect.Typ
 }
 
 func validateColleafJSON(ctx context.Context, data []byte) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	p := strictJSONParser{ctx: ctx, data: data}
-	if err := p.value(0, reflect.TypeFor[colleafEnvelope]()); err != nil {
-		return err
-	}
-	if err := p.space(); err != nil {
-		return err
-	}
-	if p.at != len(data) {
-		return p.invalid("trailing data")
-	}
-	return ctx.Err()
+	return validateTypedJSON(ctx, data, reflect.TypeFor[colleafEnvelope]())
 }

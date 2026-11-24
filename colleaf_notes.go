@@ -208,6 +208,10 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 	if err != nil {
 		return nil, err
 	}
+	input, hyperlinkDiagnostics, err := applyColleafHyperlinkResource(ctx, input)
+	if err != nil {
+		return nil, err
+	}
 	if settings.Citations == nil {
 		input, settings.Citations, err = openColleafCitations(ctx, input)
 		if err != nil {
@@ -223,7 +227,7 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 		settings.Citations.adaptPlan(&numberPlan)
 		settings.NoteLabels = numberPlan.Overrides
 	}
-	doc := &Document{}
+	doc := &Document{Diagnostics: hyperlinkDiagnostics}
 	ids := map[string]noteKey{}
 	autoLabels := map[noteKey]string{}
 	expectedBodyMarks := map[string]string{}

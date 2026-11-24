@@ -39,7 +39,45 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: native zero and legal-numbering mappings
+## Latest progress: registered hyperlink persistence and scoped identities
+
+The actual pinned hyperlink plugin now participates in native save/reopen QA.
+It emits DOC_HYPER_LINK_PLUGIN URL resources and applies them by global rangeId
+across main/header/footer models on load; it does not visit note bodies. Private
+import now applies that precedence before interpreting text and preserves direct
+note URLs. Current resource targets win over missing/different body URLs with an
+explicit diagnostic; inactive entries are disclosed. Duplicate resources/entries,
+ambiguous cross-story identities, malformed JSON and conflicting external/internal
+targets reject. Input snapshots stay unchanged. Export scopes running-story link
+IDs so independently authored main/header/footer links cannot collide in the plugin.
+
+Actual two-save/reopen checks preserve five links in main/cell/list/header/footer
+stories, a note-local link, astral text and authored13pt/bold/color/no-underline
+fields. A header resource-only edit updates exactly that target; Go/SF reimport
+matches both before and after actual plugin load/save. The existing unit-span SF
+normalization is explicit in the comparison, not an altered corpus/oracle. The
+hash-pinned unmodified UI click handler runs against real loaded models and selects
+the five expected external targets; window.open is stubbed. This proves handler
+logic/save transport, not browser popup/event/paint or internal bookmark navigation.
+
+Final checks pass: all-package tests with actual saved/edited fixtures16.019s/
+0.354s, full race168.814s/2.125s, additional actual byte-codec/SF race1.692s,
+vet/modules, CGO-disabled focused tests/host CLI execution and Linux amd64/arm64
+cross-builds. Resource fuzz31,987 and JSON fuzz96,466 executions pass; short campaigns
+are not exhaustive. Cross-builds are not Linux execution. Diff check is clean;
+verification.json records exact scope. Full goal stays active/incomplete. Next map actual bookmark/heading points and typed internal
+navigation, remaining marker appearance/nonvisual/provenance intent, public native
+API/CLI and real full-preset/browser interaction. Per-page/decorated notes and the
+broader PDF/source/resource/final acceptance audit remain required. No external
+blocker exists; runtime remains pure Go and applications/backends are untouched.
+
+```sh
+MANYDOC_COLLEAF_HYPERLINK_QA=output/colleaf-qa/hyperlinks.json GOWORK=off go test -run TestColleafHyperlink -count=1 .
+node scripts/verify_colleaf_hyperlinks.cjs
+MANYDOC_COLLEAF_HYPERLINK_SAVED=output/colleaf-qa/hyperlinks-saved.json MANYDOC_COLLEAF_HYPERLINK_RESOURCE_EDITED=output/colleaf-qa/hyperlinks-resource-edited.json MANYDOC_COLLEAF_HYPERLINK_EDITED_SAVED=output/colleaf-qa/hyperlinks-edited-saved.json GOWORK=off go test -run TestColleafHyperlink -count=1 .
+```
+
+## Earlier progress: native zero and legal-numbering mappings
 
 SF keeps its existing zero/legal semantics: nondecimal zero displays0 and Legal
 uses decimal for every referenced level. Private native output now uses a decimal

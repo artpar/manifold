@@ -6166,5 +6166,48 @@
       "rg -n 'unmapped|requires.*mapping|provenance|Anchor' colleaf_styles.go colleaf_text.go colleaf_lists.go colleaf_sections.go",
       "GOWORK=off go test -run TestColleaf -count=1 ."
     ]
+  },
+  "colleaf_registered_hyperlinks_2026_11_24": {
+    "scope": "Private registered hyperlink URL-resource precedence and globally scoped main/running identities; core four paths remain intact. Native public API/CLI and full goal remain incomplete.",
+    "implementation": [
+      "Interpret DOC_HYPER_LINK_PLUGIN before native text, matching pinned main/header/footer rangeId scope and resource URL precedence; direct note URLs remain separate.",
+      "Scope exported header/footer hyperlink IDs; copy modified range slices and story maps; never mutate caller snapshots.",
+      "Disclose missing/different body URL replacement and inactive resource identities. Reject duplicate resources/entries/global IDs, malformed shape/Unicode/member aliases and conflicting external/internal targets.",
+      "Shared typed strict-JSON entry point validates interpreted resource strings before decoder key/Unicode normalization. Permission resources retain application-owned handling."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_hyperlinks.cjs",
+      "script_sha256": "1a571257a2c14bbbbe4afeb1710d332b3f230a0057b1dd35c46ad30577dafb88",
+      "packages": "Actual pinned Univer1.0.4 core/renderer/docs/drawing/docs-drawing plus registered docs-hyper-link, hash-pinned published docs-hyper-link-ui handler source and unmodified Colleaf validator.",
+      "model_source_sha256": "28566260eb368abfc45fad97045943dc23bbaa54654cd9f955e51926168a4da4",
+      "ui_source_sha256": "a5055ae57c52a0f593e2e10e10b3ae39612f9df3bcf84ae4c9f8fc77ba7ac6fb",
+      "results": [
+        "Two actual registered-plugin saves/reopens preserve five main/cell/list/header/footer links, note-local URL, astral text and authored13pt/bold/#123456/no-underline glyph fields.",
+        "Actual URL-only resource edit changes the loaded header target exclusively; before/after plugin load/save, Go/SF and strict .vdocs byte-codec reimport preserve expected links/styles/structures/notes/metadata and source immutability.",
+        "Test compares only documented unit table span0/1 equivalence separately; all other expected Go fields remain exact and original corpus/oracles are unchanged.",
+        "Hash-pinned unmodified external click-handler/helper region executes against actual loaded models and selects all five targets with correct window.open arguments; window.open is stubbed."
+      ],
+      "limits": "Headless glyph/style/save/handler logic only. No UI widget mounting, real browser event/popup/paint/external navigation, internal bookmark/heading or full native fidelity claim. No external links opened/customer files uploaded."
+    },
+    "checks": {
+      "full_tests": "Final all-package tests with actual saved/resource-edited/resaved fixtures: library16.019s/CLI0.354s/internal2.201s pass. Earlier ordinary all-package run17.542s/0.379s/2.351s also passed.",
+      "race": "Full go test -race ./... pass library168.814s/CLI2.125s/internal14.185s. Additional final actual saved/edited strict-byte-codec/SF and JSON focused race checks1.692s pass.",
+      "vet": "pass after final test changes",
+      "modules": "all modules verified; production dependencies unchanged",
+      "cgo_disabled": "Focused native/JSON tests0.658s, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass. Cross-builds are not Linux execution evidence.",
+      "resource_fuzz": "31987 executions/10.679s,2workers pass; short malformed-resource/bridge campaign, not exhaustive",
+      "json_fuzz": "96466 executions/10.863s,2workers pass; short differential grammar/Unicode campaign, not exhaustive",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go/std-library production changes only; no new Go dependencies, CGO/external runtime executable/service/license server/upload, app/backend edits or library permission/quota gates. New packages/source are optional ignored QA only, attributed in THIRD_PARTY.md.",
+    "remaining": "Actual bookmark/heading point and typed internal-navigation mapping; marker appearance/nonvisual/provenance intent; public native API/CLI and real full-preset/browser qualification; per-page/decorated notes and broader PDF/source/resource/final acceptance audits. No external blocker.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_HYPERLINK_QA=output/colleaf-qa/hyperlinks.json GOWORK=off go test -run TestColleafHyperlink -count=1 .",
+      "node scripts/verify_colleaf_hyperlinks.cjs",
+      "MANYDOC_COLLEAF_HYPERLINK_SAVED=output/colleaf-qa/hyperlinks-saved.json MANYDOC_COLLEAF_HYPERLINK_RESOURCE_EDITED=output/colleaf-qa/hyperlinks-resource-edited.json MANYDOC_COLLEAF_HYPERLINK_EDITED_SAVED=output/colleaf-qa/hyperlinks-edited-saved.json GOWORK=off go test -run TestColleafHyperlink -count=1 .",
+      "rg -n 'findInternalLinkTarget|BOOKMARK|headingId' output/codec/docs-hyper-link-ui-1.0.4/package/lib/cjs/index.js",
+      "rg -n 'Anchor|Destination|annotation.Type' colleaf_text.go colleaf_tables.go colleaf_body.go destinations.go"
+    ]
   }
 }

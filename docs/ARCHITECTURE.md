@@ -1492,3 +1492,25 @@ source/ownership contradictions reject. Policy diagnostics aggregate in stable
 order. Primary-binding deduplication avoids revalidating all projections for every
 alias. Native browser/preset appearance/live-edit parity and broader resource/API
 qualification remain on the required queue.
+
+
+## Registered native hyperlink URL resource
+
+colleaf_hyperlink_resource.go interprets DOC_HYPER_LINK_PLUGIN before ordinary
+main/running text. The pinned plugin applies URL payloads to global hyperlink
+rangeIds in main/header/footer bodies, excluding notes. Export prefixes running
+link IDs by story. Import follows actual resource precedence over missing/different
+body URLs and discloses it; inactive identities also get diagnostics. Duplicate
+resource/entry/global IDs, invalid shape/Unicode/member aliases and conflicting
+external/internal targets reject. Only modified ranges/story containers are copied;
+caller snapshots remain unchanged. Other plugin resources retain their existing
+handling, including the application-owned permission boundary.
+
+The strict JSON scanner's shared typed entry point validates the nested interpreted
+resource before decoding can collapse keys or replace text. Actual plugin save/
+reopen and a resource-only header edit prove Go/SF transport across main/cell/list/
+header/footer and note-local URLs. Hash-pinned source-only execution of the actual
+external-link handler, with real loaded models and a window.open stub, qualifies
+target selection logic. It does not load UI widgets or qualify browser gestures,
+popup behavior, paint or internal navigation. Actual bookmark/heading point mapping
+and remaining intent/API/browser/resource work still gate adapter completion.

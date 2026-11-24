@@ -1902,3 +1902,27 @@ zero, legal padding, main/cell/note/header catalogs and current counter/glyph ed
 It does not qualify browser/preset controls, all live native numbering behavior or
 full adapter completion. Remaining appearance/intent/API/browser and broader goal
 requirements stay open.
+
+
+## 2026-11-24 Follow the actual registered hyperlink persistence path
+
+Core/facade tests without the hyperlink plugin did not establish the app's real
+URL persistence behavior. Pinned docs-hyper-link1.0.4 saves DOC_HYPER_LINK_PLUGIN
+and applies payloads by global rangeId across main/header/footer models on load.
+Scope exported running-story hyperlink IDs. Apply the known resource precedence,
+with diagnostics for missing/different body URLs or inactive entries, rather than
+ignoring it or treating a resource-only editor target as an unrelated mirror.
+Reject malformed/ambiguous identities and conflicting external/internal targets.
+Keep note-local URLs outside this resource, matching the actual plugin's scope.
+Copy modified containers so import never mutates caller snapshots.
+
+Qualify two actual registered-plugin saves/reopens, current URL-only resource edits
+and exact Go/SF semantics, retaining text, style and relationship checks. Compare
+only the declared0/1 unit-span normalization separately. Use hash-pinned unmodified
+UI handler source against real loaded models to test external target selection
+with a window.open stub. Explicitly distinguish that from loading widgets, browser
+popup/event/paint behavior and internal bookmark navigation; those remain open.
+Published UI source confirms bookmark/heading lookup mechanisms for the next
+mapping step, but source inspection alone is not implementation/interaction proof.
+No third-party implementation is incorporated into production Go or required at
+runtime; optional QA source/package identities and notices stay attributed.

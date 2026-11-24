@@ -380,6 +380,11 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 			data.Type = scoped
 			out.Lists[scoped] = sfAttrs(data)
 		}
+		for j := range story.Body.CustomRanges {
+			if story.Body.CustomRanges[j].Type == 0 {
+				story.Body.CustomRanges[j].ID = id + "-" + story.Body.CustomRanges[j].ID
+			}
+		}
 		for i, p := range story.Body.Paragraphs {
 			if len(p.Bullet) > 0 {
 				var bullet colleafBullet
@@ -444,6 +449,10 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 
 func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Document, error) {
 	opened, err := openColleafIntent(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+	opened, hyperlinkDiagnostics, err := applyColleafHyperlinkResource(ctx, opened)
 	if err != nil {
 		return nil, err
 	}
@@ -849,6 +858,7 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 	if err = finishColleafNoteNumbering(doc, autoLabels); err != nil {
 		return nil, err
 	}
+	doc.Diagnostics = append(doc.Diagnostics, hyperlinkDiagnostics...)
 	doc.Diagnostics = append(doc.Diagnostics, reader.doc.Diagnostics...)
 	doc.Diagnostics = append(doc.Diagnostics, diagnostics...)
 	if err = citations.collapse(ctx, doc); err != nil {

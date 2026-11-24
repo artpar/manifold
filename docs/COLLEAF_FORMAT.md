@@ -900,3 +900,54 @@ node scripts/verify_colleaf_zero_lists.cjs
 MANYDOC_COLLEAF_ZERO_SAVED=output/colleaf-qa/zero-lists-saved.json MANYDOC_COLLEAF_ZERO_EDITED=output/colleaf-qa/zero-lists-edited.json GOWORK=off go test -run TestColleafZero -count=1 .
 GOWORK=off go test -run '^$' -fuzz '^FuzzColleafNumberProjection$' -fuzztime=10s -parallel=2 .
 ```
+
+
+## Current registered hyperlink persistence and next navigation evidence
+
+The earlier core/facade probes did not register the real hyperlink plugin. Current
+private import now handles DOC_HYPER_LINK_PLUGIN from @univerjs/docs-hyper-link1.0.4.
+Its onLoad applies links[{id,payload}] by global rangeId to main/header/footer
+HYPERLINK0 records. It excludes note bodies. Export prefixes running-story hyperlink
+IDs; import copies modified containers and applies current payloads over missing/
+different body URLs with explicit diagnostics. Unused identities are disclosed.
+Duplicate resources/entries/global rangeIds, malformed shape/Unicode/typed member
+aliases and conflicting internal/external targets reject. Permission resources
+remain application-owned and introduce no document-library permission gate.
+
+Primary packages/source: Apache-2.0 npm releases
+https://registry.npmjs.org/@univerjs/docs-hyper-link/-/docs-hyper-link-1.0.4.tgz and
+https://registry.npmjs.org/@univerjs/docs-hyper-link-ui/-/docs-hyper-link-ui-1.0.4.tgz.
+The model tar's SHA512 is0d610e27f1e5eb7a0cab5ee50c2c3b123889d6206537ccb1ab45af70954d823c55a0015c54c4339e05808bd9eade5c02a0ae71d24aabd675557ce8df891534ad;
+its lib/cjs/index.js SHA256 is28566260eb368abfc45fad97045943dc23bbaa54654cd9f955e51926168a4da4.
+The UI tar's SHA512 isf942ab398775ff511e3cac04419e39d71ed0ee38af68e2ae0f07cd0fedf5ed47c0735434e90be79548f22ed4b2f75908b1637778e5c5bded775955ef2d32a39f;
+its lib/cjs/index.js SHA256 isa5055ae57c52a0f593e2e10e10b3ae39612f9df3bcf84ae4c9f8fc77ba7ac6fb.
+Downloads, npm installs/locks and source-only UI extraction remain ignored QA data.
+
+scripts/verify_colleaf_hyperlinks.cjs registers the actual model plugin and verifies
+two saves/reopens, five main/cell/list/header/footer targets, a separate note URL,
+astral boundaries and authored13pt/bold/#123456/no-underline glyph fields. A header
+resource-only edit changes the actual loaded target; Go/SF import retains it both
+before and after plugin load/save. A hash-pinned unmodified UI click-handler/helper
+region executes against real loaded models with window.open stubbed. It selects
+all five external targets and correct call arguments. This is source-handler and
+save evidence, not browser widgets/events/popups/paint or actual external navigation.
+No app/customer documents were uploaded and no external links were opened.
+
+The same UI source has BOOKMARK3 lookup by rangeId/properties.bookmarkId, and
+heading lookup through paragraphStyle.headingId, then selects a collapsed UTF-16
+main-body offset. Native bookmark/heading point output/import, real selection/
+scroll behavior and internal links remain unfinished. Do not treat published field
+names or a headless URL handler pass as proof of their completion.
+
+Optional preparation after the existing pinned core/drawing QA environment:
+
+```sh
+npm install --ignore-scripts --no-audit --no-fund --save-exact --prefix output/colleaf-qa @univerjs/docs-hyper-link@1.0.4
+mkdir -p output/codec/docs-hyper-link-ui-1.0.4
+curl -fsSL https://registry.npmjs.org/@univerjs/docs-hyper-link-ui/-/docs-hyper-link-ui-1.0.4.tgz -o output/codec/docs-hyper-link-ui-1.0.4.tgz
+shasum -a 512 output/codec/docs-hyper-link-ui-1.0.4.tgz
+tar -xzf output/codec/docs-hyper-link-ui-1.0.4.tgz -C output/codec/docs-hyper-link-ui-1.0.4
+MANYDOC_COLLEAF_HYPERLINK_QA=output/colleaf-qa/hyperlinks.json GOWORK=off go test -run TestColleafHyperlink -count=1 .
+node scripts/verify_colleaf_hyperlinks.cjs
+MANYDOC_COLLEAF_HYPERLINK_SAVED=output/colleaf-qa/hyperlinks-saved.json MANYDOC_COLLEAF_HYPERLINK_RESOURCE_EDITED=output/colleaf-qa/hyperlinks-resource-edited.json MANYDOC_COLLEAF_HYPERLINK_EDITED_SAVED=output/colleaf-qa/hyperlinks-edited-saved.json GOWORK=off go test -run TestColleafHyperlink -count=1 .
+```
