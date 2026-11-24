@@ -6564,5 +6564,43 @@
       "MANYDOC_COLLEAF_EVIDENCE_SAVED=output/colleaf-qa/document-evidence-saved.json MANYDOC_COLLEAF_EVIDENCE_EDITED=output/colleaf-qa/document-evidence-edited.json MANYDOC_COLLEAF_EVIDENCE_DELETED=output/colleaf-qa/document-evidence-deleted.json MANYDOC_COLLEAF_EVIDENCE_CREATED=output/colleaf-qa/document-evidence-created.json GOWORK=off go test -run TestColleafDocumentEvidence -count=1 .",
       "rg -n 'Source != nil|KindInferred|LabelSource|Source.validate' colleaf_text.go colleaf_tables.go colleaf_lists.go colleaf_notes.go"
     ]
+  },
+  "colleaf_paragraph_origins_2026_11_24": {
+    "scope": "Private native paragraph/heading source bindings plus public historical/unbound source states. Full imported-PDF per-node provenance and overall goal remain incomplete.",
+    "implementation": [
+      "Direct paragraph properties carry only versioned references into a deterministic deduplicated evidence pool of SourceInfo and source-free SF semantic fingerprints; no body cache.",
+      "Final restoration follows citation/flow composition across main/list/cell/header/footer/note/section stories. Unchanged semantics restore original source; edited semantics retain original facts with SourceInfo.Historical and a diagnostic.",
+      "Missing live references retain original facts in Document.UnboundSources / SF attrs.unboundSources with an explicit diagnostic. Archive clones isolate nested bytes/pointers/slices, validation checks original physical pages, and formatted output remains AllowLossy-gated.",
+      "Strict typed payload/version/digest/reference validation rejects contradictions. Unsupported run/container/cell/item/note source slots remain explicit."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_origins.cjs",
+      "script_sha256": "054819caa456554cac80f45327527168359a5685279b805acbc9a8e4049dbec1",
+      "packages": "Previously attributed pinned Univer1.0.4 plugins/renderer and hash-pinned Colleaf validator; no new dependency.",
+      "results": [
+        "Seven synthetic paragraph sources across main/list/cell/header/footer/note, direct reference-only properties and unchanged source pool across two actual saves/reopens.",
+        "Actual skeleton/glyph checks retain whole bold13pt emoji. Actual TextX Q insertion and direct reference removal preserve edits and original evidence; strict Go/SF comparisons verify historical/unbound states and stable repeated round trips.",
+        "Actual prosemirror-model1.25.13 checks70 nodes/marks/attributes in unchanged/edited/detached SF. Existing document-evidence and structural-cursor independent probes pass.",
+        "Go tests cover explicit section variant stories and citation composition, malformed payloads and public SF/archive cloning/loss admission."
+      ],
+      "limits": "Synthetic paragraph-source/headless evidence; not full imported-PDF body provenance, heading-specific independent fixture coverage, browser paint/caret/scroll/events or full native fidelity."
+    },
+    "checks": {
+      "tests": "Final go test ./... passes library16.187s/CLI0.705s/internal cached.",
+      "race": "Final go test -race ./... passes library170.104s/CLI1.838s/internal cached.",
+      "vet": "pass",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "Focused tests0.376s, host CLI build/--help and Linux amd64/arm64 cross-builds pass; cross-builds are not execution evidence.",
+      "fuzz": "Paragraph-origin payload target passes85 executions/10.912s with2workers; very low throughput, weak safety sample, not meaningful coverage.",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Production pure Go; no dependency/runtime executable/service/CGO/license server/upload or application/backend/permission/quota change. Original corpus/oracles unchanged; generated QA artifacts ignored.",
+    "remaining": "Run/citation source ranges; container/cell/item/note provenance; marker appearance and remaining nonvisual intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_ORIGIN_QA=output/colleaf-qa/paragraph-origins.json GOWORK=off go test -run 'TestColleafParagraphOrigins|TestColleafUnbound' -count=1 .",
+      "node scripts/verify_colleaf_origins.cjs",
+      "rg -n 'Source != nil|LabelSource|manydocOrigin' colleaf_styles.go colleaf_notes.go colleaf_tables.go colleaf_lists.go"
+    ]
   }
 }

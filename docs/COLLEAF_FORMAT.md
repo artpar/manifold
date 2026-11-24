@@ -1160,3 +1160,28 @@ the clearing workaround is removed. This is document-level history qualification
 not full imported-PDF body provenance, browser painting or adapter completion.
 Per-block/run/cell/item/note Source mappings, remaining appearance/intent/API/UI
 and final acceptance work remain required.
+
+
+## Current paragraph origin component
+
+Direct paragraphStyle.manydocOrigin contains profile manydoc.paragraph-origin,
+version1 and a source reference. Root evidence.origins stores each source/fingerprint
+record once. Fingerprints contain no text and are checked against source-free SF
+paragraph semantics after full native composition. Exact current bindings retain
+SourceInfo. Changed semantics retain facts with historical=true and an explicit
+colleaf_source_historical diagnostic; they never restore old content/presentation.
+Missing references archive facts in unboundSources with colleaf_source_unbound.
+Inherited source properties are not direct ownership. Malformed digests/versions,
+unknown references and contradictory inline records reject.
+
+scripts/verify_colleaf_origins.cjs reuses the pinned SDK/validator/renderer. Seven
+source records cover main/list/cell/header/footer/note paragraphs, unchanged text,
+authored emoji/style, two saves/reopens, TextX and reference detachment. Strict Go/
+.vdocs/SF compares complete baseline/edited/detached semantics and stable repeated
+round trips. Actual ProseMirror validates70 nodes/marks/attributes, including the
+new root archive and historical flags. Explicit section stories/citation paragraphs,
+clone isolation, malformed records and formatting admission also have regressions.
+These are synthetic paragraph-level sources; run/citation, table/image/container,
+cell/item, note-definition/label and other provenance remain required, as do native
+appearance/API/preset/browser and the broader final audit. No body cache, service,
+CGO dependency, app modification or permission gate is introduced.

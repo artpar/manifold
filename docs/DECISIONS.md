@@ -2064,3 +2064,21 @@ current native skeleton versus original physical page count, exact root/SF data
 and repeated stability. Remove the temporary diagnostic-clearing test workaround.
 Per-node source binding and remaining native appearance/intent/API/UI plus final
 acceptance remain required; no application permission/quota policy is introduced.
+
+
+## 2026-11-24 Bind paragraph provenance without restoring old content
+
+Use direct native paragraph metadata referencing a deterministic deduplicated pool
+of source facts and SF semantic hashes. Do not store a body cache or infer ownership
+from inherited styles. Compare semantics only after native citation/list/section
+composition. Preserve unchanged SourceInfo; mark Historical and diagnose mismatch
+after edits, retaining original geometry/structure facts without claiming current
+correspondence. Never overwrite current text/styles from provenance.
+
+Retain orphaned source facts in explicit UnboundSources metadata. Keep source facts
+and their original recovery qualifiers distinct from current binding status. Deep
+clone all nested data; keep formatting-loss acknowledgement for unbound facts.
+Reject malformed/contradictory identities. Qualify actual editor saves/edits,
+independent ProseMirror attributes and exact SF structures. This starts per-node
+provenance; run/container/cell/item/note slots and full source corpus/API/UI/final
+acceptance remain required. No app/backend or permission/quota policy is added.

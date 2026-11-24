@@ -304,6 +304,11 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 		}
 		properties := mergeColleafStyle(mergeColleafStyle(baseParagraph, namedParagraph), directParagraph)
 		block := Block{Kind: Paragraph}
+		origin, err := readColleafOrigin(directParagraph["manydocOrigin"])
+		if err != nil {
+			return nil, err
+		}
+		block.colleafOrigin = origin
 		level, hasLevel, err := colleafRawInt(properties, "outlineLevel")
 		if err != nil {
 			return nil, err
@@ -547,6 +552,10 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 		sort.Strings(keys)
 		for _, key := range keys {
 			switch key {
+			case "manydocOrigin":
+				if origin == nil {
+					doc.warn("colleaf_origin_inheritance", "Inherited native source-binding properties are not treated as direct paragraph ownership")
+				}
 			case "outlineLevel", "namedStyleType", "direction", "pageBreakBefore", "textStyle", "headingId":
 			default:
 				doc.warn("colleaf_paragraph_style", "Native paragraph property "+key+" is not represented; text and supported paragraph semantics are retained")

@@ -787,3 +787,17 @@ pdf_note_nested_definition diagnostic for the flattening. Alias wrapper owners
 retain their original explicit references on the one citation source; paragraph
 sources retain unconverted wrapper edges too. No duplicate editable body text or
 invented Ref edge is introduced. See PDF_NOTES.md for exact rule qualification.
+
+
+## Historical and unbound source facts
+
+SourceInfo.historical (default false) means original source facts no longer assert
+correspondence to the current edited content. Original source geometry, element/
+parent/reference identities and explicit/inferred qualifiers remain intact; this
+flag does not turn original explicit structure into current inferred structure.
+Root attrs.unboundSources (default[]) contains validated SourceInfo records with
+no current content owner. Legacy Document JSON uses unbound_sources. SF/JSON/gzip
+preserve these nonvisual facts and clone nested values; formatting output requires
+explicit provenance-loss acknowledgement. Native paragraph binding currently uses
+these states after edits or removed references. Other native per-node slots remain
+unfinished; no Word-equivalent layout/source recovery claim is implied.

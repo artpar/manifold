@@ -63,9 +63,25 @@ func (w *colleafBodyWriter) id(prefix string) string {
 	return fmt.Sprintf("%s%d", prefix, w.serial)
 }
 func (w *colleafBodyWriter) paragraph(block Block) error {
+	sourceBlock := block
+	block.Source = nil
 	fragment, err := encodeColleafTextBodyWithNotes(w.ctx, []Block{block}, w.noteIDs, w.citationProjection)
 	if err != nil {
 		return err
+	}
+	origin, err := newColleafOrigin(sourceBlock)
+	if err != nil {
+		return err
+	}
+	if origin != nil {
+		for i := range fragment.Paragraphs {
+			props, err := colleafStyleObject(fragment.Paragraphs[i].Style)
+			if err != nil {
+				return err
+			}
+			props["manydocOrigin"] = sfAttrs(origin)
+			fragment.Paragraphs[i].Style = sfAttrs(props)
+		}
 	}
 	paragraphIDs := map[string]string{}
 	shift := w.offset

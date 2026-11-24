@@ -5,18 +5,20 @@ import "fmt"
 // Original source evidence and diagnostic history are nonvisual intent, not a
 // cached body and not a claim about the native editor's current page geometry.
 type colleafDocumentEvidence struct {
-	Version       int            `json:"version"`
-	Diagnostics   []Diagnostic   `json:"diagnostics,omitempty"`
-	PageCount     int            `json:"pageCount,omitempty"`
-	Pages         []PDFPage      `json:"pages,omitempty"`
-	PDFNavigation *PDFNavigation `json:"pdfNavigation,omitempty"`
+	Origins        []colleafOrigin `json:"origins,omitempty"`
+	UnboundSources []SourceInfo    `json:"unboundSources,omitempty"`
+	Version        int             `json:"version"`
+	Diagnostics    []Diagnostic    `json:"diagnostics,omitempty"`
+	PageCount      int             `json:"pageCount,omitempty"`
+	Pages          []PDFPage       `json:"pages,omitempty"`
+	PDFNavigation  *PDFNavigation  `json:"pdfNavigation,omitempty"`
 }
 
 func colleafEvidence(d *Document) (*colleafDocumentEvidence, error) {
-	if len(d.Diagnostics) == 0 && d.Metadata.PageCount == 0 && len(d.Pages) == 0 && d.PDFNavigation == nil {
+	if len(d.UnboundSources) == 0 && len(d.Diagnostics) == 0 && d.Metadata.PageCount == 0 && len(d.Pages) == 0 && d.PDFNavigation == nil {
 		return nil, nil
 	}
-	e := &colleafDocumentEvidence{Version: 1, Diagnostics: append([]Diagnostic(nil), d.Diagnostics...), PageCount: d.Metadata.PageCount, Pages: clonePDFPages(d.Pages), PDFNavigation: clonePDFNavigation(d.PDFNavigation)}
+	e := &colleafDocumentEvidence{Version: 1, UnboundSources: cloneUnboundSources(d.UnboundSources), Diagnostics: append([]Diagnostic(nil), d.Diagnostics...), PageCount: d.Metadata.PageCount, Pages: clonePDFPages(d.Pages), PDFNavigation: clonePDFNavigation(d.PDFNavigation)}
 	if err := e.validate(); err != nil {
 		return nil, err
 	}
@@ -40,6 +42,16 @@ func (e *colleafDocumentEvidence) validate() error {
 	if err := validatePDFPages(e.Pages); err != nil {
 		return err
 	}
+	for i := range e.UnboundSources {
+		if err := e.UnboundSources[i].validate(e.Pages); err != nil {
+			return err
+		}
+	}
+	for _, o := range e.Origins {
+		if err := validateColleafOrigin(o, e.Pages); err != nil {
+			return err
+		}
+	}
 	return e.PDFNavigation.validate(&Document{Pages: e.Pages}, nil)
 }
 func restoreColleafEvidence(d *Document, e *colleafDocumentEvidence) error {
@@ -49,6 +61,7 @@ func restoreColleafEvidence(d *Document, e *colleafDocumentEvidence) error {
 	if err := e.validate(); err != nil {
 		return err
 	}
+	d.UnboundSources = cloneUnboundSources(e.UnboundSources)
 	d.Metadata.PageCount = e.PageCount
 	d.Pages = clonePDFPages(e.Pages)
 	d.PDFNavigation = clonePDFNavigation(e.PDFNavigation)

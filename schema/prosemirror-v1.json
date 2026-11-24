@@ -33,6 +33,7 @@
           "validate": "boolean"
         },
         "pdfNavigation": {"default": null},
+        "unboundSources": {"default": []},
         "unresolvedDestinations": {
           "default": []
         }

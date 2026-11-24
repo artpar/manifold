@@ -39,7 +39,51 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: document history and PDF evidence in native intent
+## Latest progress: paragraph origin bindings and unbound source facts
+
+Private native paragraph/heading output now places a version1 source reference
+in direct paragraph properties. A deterministic deduplicated origin pool in the
+existing evidence carrier stores validated SourceInfo and source-free SF semantic
+fingerprints, without text/body caches. References follow actual paragraph records
+through save/edit; inherited style properties do not assert direct ownership.
+Final restoration runs after citation/flow composition, across main/list/cell/
+header/footer/note bodies and explicit section stories. Unchanged paragraph
+semantics restore original source facts; changed content/presentation sets the
+new SourceInfo.Historical flag and emits a diagnostic instead of overwriting edits.
+
+Unreferenced origin facts are retained in Document.UnboundSources / SF root
+attrs.unboundSources, with explicit loss of current ownership. Physical provenance
+and existing qualifiers remain intact. Source clones isolate all nested pointer/
+byte/slice fields. Formatting output still requires AllowLossy for provenance,
+including unbound facts. Digest/version/missing-reference contradictions reject.
+No SourceInfo geometry is treated as current native page geometry.
+
+Pinned actual plugins/validator/renderer check seven source records and references
+across stories, no body caches, styled emoji, two saves/reopens, TextX insertion
+and reference removal. Strict .vdocs/Go/SF comparisons qualify unchanged/historical/
+unbound semantics and stable repeated round trips. Actual ProseMirror checks70
+nodes/marks/attributes across baseline, edited and detached SF. These are synthetic
+paragraph-source fixtures, not full imported-PDF per-node provenance qualification.
+Run, table/image/container, cell/item, note-definition/label and other source slots
+remain required; unsupported output is still explicit.
+
+Final checks pass: full tests16.187s/CLI0.705s, race170.104s/CLI1.838s,
+vet/modules, CGO-disabled focused tests0.376s and host/Linux builds. The short
+fuzz run passed85 executions/10.912s, a weak safety sample. verification.json
+records scopes and limits. The goal remains active/incomplete. Next extend these bindings to run/citation source ranges and
+container/cell/item/note provenance, then marker appearance, remaining nonvisual
+intent, public native API/CLI and full-preset/browser qualification. Nonmain lookup
+limits, per-page/decorated notes and broader PDF/source/resource/final acceptance
+audits remain required. No external blocker exists; production stays pure Go.
+
+```sh
+MANYDOC_COLLEAF_ORIGIN_QA=output/colleaf-qa/paragraph-origins.json GOWORK=off go test -run 'TestColleafParagraphOrigins|TestColleafUnbound' -count=1 .
+node scripts/verify_colleaf_origins.cjs
+MANYDOC_COLLEAF_ORIGIN_SAVED=output/colleaf-qa/paragraph-origins-saved.json MANYDOC_COLLEAF_ORIGIN_EDITED=output/colleaf-qa/paragraph-origins-edited.json MANYDOC_COLLEAF_ORIGIN_DETACHED=output/colleaf-qa/paragraph-origins-detached.json GOWORK=off go test -run 'TestColleafParagraphOrigins|TestColleafUnbound' -count=1 .
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/colleaf-qa/paragraph-origins.json.sf output/colleaf-qa/paragraph-origins-edited.json.sf output/colleaf-qa/paragraph-origins-detached.json.sf
+```
+
+## Earlier progress: document history and PDF evidence in native intent
 
 Private native composition now persists diagnostic history, metadata PageCount,
 original PDF pages and PDFNavigation in version1 document evidence, carried by

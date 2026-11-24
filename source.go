@@ -93,6 +93,8 @@ func structureReferences(a, b []SourceStructureReference) []SourceStructureRefer
 // advance/font metrics, not glyph ink outlines. Precision discloses estimates.
 // Confidence is a heuristic ranking, not a calibrated probability.
 type SourceInfo struct {
+	// Historical means the original source facts no longer assert correspondence to current edited content.
+	Historical bool `json:"historical,omitempty"`
 	// ParentElement records explicit source-tree containment, not a note reference.
 	ParentElement string `json:"parent_element,omitempty"`
 	// References retains explicit PDF structure Ref edges, including unresolved targets.
@@ -374,6 +376,9 @@ func quadBounds(q Quad) (x0, y0, x1, y1 float64) {
 
 // Renderers currently reflow content; provenance must not disappear without acknowledgment.
 func (d *Document) hasPDFSource() bool {
+	if len(d.UnboundSources) > 0 {
+		return true
+	}
 	if len(d.Pages) > 0 {
 		return true
 	}
@@ -429,4 +434,55 @@ func (d *Document) hasPDFSource() bool {
 		}
 	}
 	return false
+}
+
+func cloneSourceInfo(s *SourceInfo) *SourceInfo {
+	if s == nil {
+		return nil
+	}
+	copy := *s
+	copy.StructureID = append([]byte(nil), s.StructureID...)
+	copy.Artifacts = append([]string(nil), s.Artifacts...)
+	copy.References = append([]SourceStructureReference(nil), s.References...)
+	for i := range copy.References {
+		copy.References[i].Targets = append([]string(nil), s.References[i].Targets...)
+	}
+	if s.Quad != nil {
+		x := *s.Quad
+		copy.Quad = &x
+	}
+	if s.Baseline != nil {
+		x := *s.Baseline
+		copy.Baseline = &x
+	}
+	if s.Matrix != nil {
+		x := *s.Matrix
+		copy.Matrix = &x
+	}
+	if s.MCID != nil {
+		x := *s.MCID
+		copy.MCID = &x
+	}
+	copy.Regions = append([]SourceRegion(nil), s.Regions...)
+	copy.ColorComponents = append([]float64(nil), s.ColorComponents...)
+	if s.TableWidths != nil {
+		x := *s.TableWidths
+		copy.TableWidths = &x
+	}
+	if s.TableSpans != nil {
+		x := *s.TableSpans
+		x.Continuations = append([]SourceElementReference(nil), s.TableSpans.Continuations...)
+		copy.TableSpans = &x
+	}
+	return &copy
+}
+func cloneUnboundSources(sources []SourceInfo) []SourceInfo {
+	if sources == nil {
+		return nil
+	}
+	out := make([]SourceInfo, len(sources))
+	for i := range sources {
+		out[i] = *cloneSourceInfo(&sources[i])
+	}
+	return out
 }

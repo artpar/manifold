@@ -77,6 +77,9 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
    scroll/browser behavior remain required. Document-level diagnostic/page/view
    history now has actual save/edit/SF evidence and explicit unbound physical
    views after editable-target changes; native pagination remains independent.
+   Paragraph origins now have actual save/edit/SF/provenance-pool evidence, typed
+   historical/unbound states and ProseMirror qualification; full imported-PDF per-
+   node source transport remains incomplete.
 4. **Corpus/visual and final audit:** eight pinned, legally attributed original
    Word/Mac Word/LibreOffice inputs now qualify notes/running/review/field policies
    through source-only oracles, full semantic round trips, independent readers

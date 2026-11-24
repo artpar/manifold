@@ -24,6 +24,7 @@ type StructuredDocument struct {
 	Content []StructuredNode     `json:"content,omitempty"`
 }
 type StructuredAttributes struct {
+	UnboundSources         []SourceInfo     `json:"unboundSources,omitempty"`
 	PDFNavigation          *PDFNavigation   `json:"pdfNavigation,omitempty"`
 	Schema                 string           `json:"schema"`
 	Metadata               Metadata         `json:"metadata,omitempty"`
@@ -73,7 +74,7 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 	}
 	d = resolveNumberingDocument(d)
 	s := &StructuredDocument{Type: "doc", Attrs: StructuredAttributes{
-		PDFNavigation: clonePDFNavigation(d.PDFNavigation), Schema: StructuredSchema, Metadata: d.Metadata, Layout: cloneLayout(d.Layout), EvenAndOddHeaders: d.EvenAndOddHeaders,
+		UnboundSources: cloneUnboundSources(d.UnboundSources), PDFNavigation: clonePDFNavigation(d.PDFNavigation), Schema: StructuredSchema, Metadata: d.Metadata, Layout: cloneLayout(d.Layout), EvenAndOddHeaders: d.EvenAndOddHeaders,
 		Diagnostics: append([]Diagnostic(nil), d.Diagnostics...), Pages: clonePDFPages(d.Pages),
 		UnresolvedDestinations: append([]string(nil), d.UnresolvedDestinations...),
 	}}
@@ -287,7 +288,7 @@ func FromStructured(s *StructuredDocument) (*Document, error) {
 	if s.Attrs.Schema != StructuredSchema {
 		return nil, fmt.Errorf("%w: structured schema %q", ErrUnsupported, s.Attrs.Schema)
 	}
-	d := &Document{PDFNavigation: clonePDFNavigation(s.Attrs.PDFNavigation), EvenAndOddHeaders: s.Attrs.EvenAndOddHeaders, Metadata: s.Attrs.Metadata, Layout: cloneLayout(s.Attrs.Layout), Diagnostics: append([]Diagnostic(nil), s.Attrs.Diagnostics...), Pages: clonePDFPages(s.Attrs.Pages), UnresolvedDestinations: append([]string(nil), s.Attrs.UnresolvedDestinations...)}
+	d := &Document{UnboundSources: cloneUnboundSources(s.Attrs.UnboundSources), PDFNavigation: clonePDFNavigation(s.Attrs.PDFNavigation), EvenAndOddHeaders: s.Attrs.EvenAndOddHeaders, Metadata: s.Attrs.Metadata, Layout: cloneLayout(s.Attrs.Layout), Diagnostics: append([]Diagnostic(nil), s.Attrs.Diagnostics...), Pages: clonePDFPages(s.Attrs.Pages), UnresolvedDestinations: append([]string(nil), s.Attrs.UnresolvedDestinations...)}
 	var err error
 	if d.Blocks, err = decodeSFBlocks(s.Content, 0); err != nil {
 		return nil, err

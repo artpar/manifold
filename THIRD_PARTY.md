@@ -206,3 +206,7 @@ and unmodified handler for original/normalized/save/edit selection evidence.
 The document-evidence probe reuses the attributed pinned core/renderer/plugins
 and hash-pinned Colleaf validator for opaque history transport and glyph/skeleton
 checks. No additional package or production dependency is introduced.
+
+The paragraph-origin probe reuses the same attributed pinned SDK/renderer/plugins
+and hash-pinned validator; the existing ProseMirror reader checks new source
+attributes. No additional package or production dependency is introduced.

@@ -1639,3 +1639,21 @@ intent resources pass typed canonical JSON validation before decoding.
 Actual pinned save/edit/current-skeleton evidence and strict native/SF tests cover
 root history, source geometry and target edits. Per-block/run/cell/item/note Source
 bindings and remaining appearance/intent/API/browser/final work are unfinished.
+
+
+## Native paragraph origin bindings
+
+colleaf_origins.go stores direct manydocOrigin references in native paragraph
+properties and one deduplicated pool of SourceInfo plus source-free semantic hashes
+in document evidence. No alternate content tree is stored. Final restoration follows
+citation/list/section composition; semantic mismatch marks SourceInfo.Historical,
+retaining original facts without asserting current correspondence. Missing direct
+ownership archives facts in Document.UnboundSources / SF unboundSources. Inherited
+styles do not acquire direct provenance. Invalid digests/versions/references reject.
+
+Source clones cover nested geometry, binary IDs, references and continuation data.
+Formatting admission includes unbound provenance. Canonical SF/schema exposes both
+historical and unbound states independently of original explicit/inferred recovery
+qualifiers. Actual pinned save/edit/skeleton and ProseMirror checks qualify synthetic
+paragraph-source transport. Other per-node source slots and broader native/API/UI/
+acceptance work remain required.

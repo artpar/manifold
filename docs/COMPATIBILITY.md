@@ -1056,3 +1056,14 @@ Recursive citations inside notes retain literal/source relationships under the
 existing nonrecursive editing contract. Independent original-object/Word/native/
 asset/visual checks qualify the concrete rules in PDF_NOTES.md; broader untagged
 recovery and the final source/consistency/native integration audit remain open.
+
+
+## Edited and unbound provenance
+
+SourceInfo.Historical / source historical=true qualifies retained original facts
+after current content/presentation changes. Document.UnboundSources / SF root
+unboundSources retains source facts without a current content owner. Original
+explicit/inferred provenance and physical geometry remain source evidence, not
+current native layout claims. Formatting output requires AllowLossy for this
+provenance. Private native paragraph bindings use these states; other source slots
+and full native/API/UI qualification remain unfinished.

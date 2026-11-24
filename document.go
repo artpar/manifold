@@ -32,6 +32,8 @@ const (
 // whose structure cannot be represented. Converters reject lossy output unless
 // the caller explicitly acknowledges those diagnostics.
 type Document struct {
+	// UnboundSources retains original source facts without a current content owner.
+	UnboundSources    []SourceInfo   `json:"unbound_sources,omitempty"`
 	PDFNavigation     *PDFNavigation `json:"pdf_navigation,omitempty"`
 	Metadata          Metadata       `json:"metadata,omitempty"`
 	Layout            Layout         `json:"layout,omitempty"`
@@ -101,6 +103,7 @@ type Block struct {
 	Start                   *int           `json:"start,omitempty"`
 	Source                  *SourceInfo    `json:"source,omitempty"`
 	Section                 *Section       `json:"section,omitempty"`
+	colleafOrigin           *colleafOrigin
 	docxSection             *xmlNode
 	docxAnchorGroup         string
 	docxSectionTail         bool
@@ -393,6 +396,11 @@ func (d *Document) Validate() error {
 	}
 	if err := validatePDFPages(d.Pages); err != nil {
 		return err
+	}
+	for i := range d.UnboundSources {
+		if err := d.UnboundSources[i].validate(d.Pages); err != nil {
+			return err
+		}
 	}
 	for _, s := range []string{d.Metadata.Title, d.Metadata.Author, d.Metadata.Subject} {
 		if err := validateString(s); err != nil {
