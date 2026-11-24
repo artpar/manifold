@@ -14,6 +14,9 @@ func (r *pdfRenderer) listMarker(b Block, index int, width, size float64) (pdfLi
 			return nil, 0, err
 		}
 	}
+	if b.pdfListMarker != "" {
+		text = b.pdfListMarker
+	}
 	if text == "" {
 		return nil, 0, nil
 	}

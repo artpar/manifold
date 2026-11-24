@@ -84,6 +84,9 @@ func (w *docxWriter) writeNoteParts(notes []Note) error {
 				body = `<w:p><w:pPr><w:tabs><w:tab w:val="left" w:pos="360"/></w:tabs><w:ind w:left="360" w:hanging="360"/></w:pPr>` + marker + `</w:p>` + body
 				leading = ` md:leadingMarker="1"`
 			}
+			if n.Label != "" {
+				leading += ` md:label="` + escape(n.Label) + `"`
+			}
 			fmt.Fprintf(&out, `<w:%s w:id="%d" md:originalId="%s" md:order="%d"%s>%s</w:%s>`, kind, w.noteIDs[noteIdentity(n)], escape(n.ID), order, leading, body, kind)
 		}
 		name := kind + "s.xml"
@@ -197,7 +200,11 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 				}
 				orders[key] = value
 			}
-			r.doc.Notes = append(r.doc.Notes, Note{ID: publicID, Kind: kind, Blocks: bs})
+			label := r.customNoteLabels[serialized]
+			if metadata := n.attributeNS(docxNotesNS, "label"); metadata != "" && metadata != label {
+				return fmt.Errorf("note label metadata contradicts reference")
+			}
+			r.doc.Notes = append(r.doc.Notes, Note{ID: publicID, Kind: kind, Blocks: bs, Label: label})
 			total++
 		}
 	}

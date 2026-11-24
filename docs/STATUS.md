@@ -39,7 +39,22 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: explicit PDF artifact structure
+## Latest progress: literal note labels
+
+Note.Label / SF note label now preserves explicit custom marks independently of
+note identity. SF/gzip/JSON/DOCX round trips and native foot/endnote output retain
+multi-character labels without advancing automatic counters. Independent package,
+XML, pypdf, PyMuPDF and LibreOffice checks qualify exact labels/body counts,
+automatic numbering and reference navigation; all four rendered pages were inspected.
+One text node per Unicode scalar fixes a real LibreOffice duplication failure.
+Full tests pass (18.458s/0.840s), full race before the final portable-markup
+changes passes (172.886s/2.375s), and final focused new-case race passes (1.734s).
+Vet, modules, host CGO-disabled build/execution, Linux amd64/arm64 cross-builds
+and diff checks pass; exact scope/timings are in verification.json.
+The typed PDF Note/Reference/Ref relationship recovery remains the next step; this
+prerequisite does not close that gap or complete the goal. See TESTING.md.
+
+## Previous milestone: explicit PDF artifact structure
 
 PDFPage.Artifacts and SourceInfo.Artifacts now retain explicit physical groups,
 Type/Subtype, default-space BBox/display geometry, Attached edges and linked rich
@@ -97,7 +112,7 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
 
 ## Next concrete implementation order
 
-1. Finish/commit the explicit PDF artifact structure milestone with current checks.
+1. Finish/commit the custom note-label prerequisite with current checks.
 2. Recover explicit PDF note-reference semantics, keeping
    physical evidence separate from inferred placement/kind. Retain rich bodies,
    actual labels and uncertainty rather than flattening them silently. Explicit

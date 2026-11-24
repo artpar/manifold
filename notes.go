@@ -3,6 +3,7 @@ package manydoc
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -57,6 +58,9 @@ func validateNotes(d *Document) error {
 			return fmt.Errorf("note ID is required")
 		}
 		if err := validateString(n.ID); err != nil {
+			return err
+		}
+		if err := validateNoteLabel(n.Label); err != nil {
 			return err
 		}
 		key := noteIdentity(n)
@@ -126,8 +130,12 @@ func catalogNotes(d *Document, requireReferences bool) (*noteCatalog, error) {
 		}
 		key := referenceKey(r.Note)
 		if _, ok := c.labels[key]; !ok {
-			counters[key.kind]++
-			c.labels[key] = strconv.Itoa(counters[key.kind])
+			if label := c.definitions[key].Label; label != "" {
+				c.labels[key] = label
+			} else {
+				counters[key.kind]++
+				c.labels[key] = strconv.Itoa(counters[key.kind])
+			}
 			c.order = append(c.order, key)
 		}
 		return nil
@@ -143,4 +151,14 @@ func catalogNotes(d *Document, requireReferences bool) (*noteCatalog, error) {
 		}
 	}
 	return c, nil
+}
+
+func validateNoteLabel(label string) error {
+	if err := validateString(label); err != nil {
+		return err
+	}
+	if strings.ContainsAny(label, "\t\r\n") || (label != "" && strings.TrimSpace(label) == "") {
+		return fmt.Errorf("note label must be a nonblank single-line mark")
+	}
+	return nil
 }

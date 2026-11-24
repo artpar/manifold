@@ -151,6 +151,7 @@ type docxReader struct {
 	noteBookmarkEnds      map[string]bool
 	noteBookmarkNames     map[string]bool
 	cachedNoteMarks       map[string][]string
+	customNoteLabels      map[noteKey]string
 	rangeNumIDs           map[string]bool
 	listSequences         map[*ListNumbering]string
 	types                 map[string]string
@@ -591,8 +592,13 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 	activeNoteBookmark := ""
 	var activeNoteReference *NoteReference
 	seenNoteReference := false
+	var pendingCustom *NoteReference
+	var customMark strings.Builder
 	var walk func(*xmlNode, docxRunStyle) error
 	walk = func(c *xmlNode, style docxRunStyle) error {
+		if pendingCustom != nil && c.Name.Local != "t" {
+			return fmt.Errorf("%w: nontext content inside custom note mark", ErrUnsupported)
+		}
 		switch c.Name.Local {
 		case "pPr", "rPr":
 			return nil
@@ -670,6 +676,10 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				}
 			}
 		case "t":
+			if pendingCustom != nil {
+				customMark.WriteString(c.content())
+				return nil
+			}
 			skipNoteSeparator = false
 			style.Text = c.content()
 			parts, err := r.textRuns(style)
@@ -839,8 +849,15 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				}
 				seenNoteReference = true
 			}
-			if c.attr("customMarkFollows") != "" && c.attr("customMarkFollows") != "0" && c.attr("customMarkFollows") != "false" && c.attr("customMarkFollows") != "off" {
-				r.doc.warn("note_custom_mark", "Custom note mark semantics are not preserved; automatic reference numbering normalized")
+			switch c.attr("customMarkFollows") {
+			case "", "0", "false", "off":
+			case "1", "true", "on":
+				if pendingCustom != nil {
+					return fmt.Errorf("missing custom note mark")
+				}
+				pendingCustom = style.Note
+			default:
+				return fmt.Errorf("invalid customMarkFollows boolean")
 			}
 			parts, err := r.textRuns(style)
 			if err != nil {
@@ -878,6 +895,26 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				return err
 			}
 		}
+		if c.Name.Local == "r" && pendingCustom != nil {
+			label := customMark.String()
+			if label == "" {
+				return fmt.Errorf("missing custom note mark in reference run")
+			}
+			if err := validateNoteLabel(label); err != nil {
+				return err
+			}
+			if r.customNoteLabels == nil {
+				r.customNoteLabels = map[noteKey]string{}
+			}
+			key := referenceKey(pendingCustom)
+			if old, ok := r.customNoteLabels[key]; ok && old != label {
+				return fmt.Errorf("conflicting custom note labels")
+			}
+			r.customNoteLabels[key] = label
+			pendingCustom = nil
+			customMark.Reset()
+		}
+
 		return nil
 	}
 	for _, c := range n.Children {

@@ -1401,3 +1401,15 @@ content cm applies to glyphs, not again to that box. Validate source graph/geome
 and retain nested/ActualText/Form membership. Full original object checks and exact
 preexisting-value projection qualify this change. Typed note relationships remain
 required next work. No dependency/runtime/app boundary changed.
+
+## 2026-11-24 Preserve note marks independently of automatic numbering
+
+Add an optional literal note label before recovering PDF note relationships: an
+explicit reference glyph must not be replaced with an unrelated decimal number.
+Custom marks do not increment automatic counters, matching the published
+[OOXML customMarkFollows policy](https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.wordprocessing.footnoteendnotereferencetype.custommarkfollows?view=openxml-3.0.1).
+They remain ordinary Unicode text subject to measured layout and explicit glyph
+failures. Do not embed identity in the mark or infer relationships from equal text.
+A LibreOffice QA failure exposed duplication of multi-character custom marks in
+one w:t; scalar text nodes fix the same logical standard mark without deleting
+visible characters. Standard note-body reference atoms supply the body mark.

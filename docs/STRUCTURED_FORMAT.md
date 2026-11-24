@@ -687,3 +687,10 @@ These identify explicit physical page/stream groups with their original properti
 and displayed bounds. Membership survives nested marked content, Forms and ActualText;
 Go checks IDs/pages/coordinates and clones records across bridges. Physical page roles
 are separate from reusable header/footer templates. See PDF_ARTIFACTS.md.
+
+Optional `attrs.notes[].label` retains a literal foot/endnote display mark. Empty
+or omitted means automatic numbering by first reference order per kind. Literal
+marks do not advance that automatic counter; repeated references reuse the mark.
+Whitespace-only or multiline/tab/control labels are rejected. Label text is not a
+note identifier; the existing kind/ID graph remains authoritative. SF/gzip/JSON
+and supported DOCX round trips preserve it, including multi-character Unicode.

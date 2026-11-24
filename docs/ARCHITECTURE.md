@@ -996,3 +996,14 @@ of content cm. Nested marked/ActualText/Form operations retain contributing IDs;
 synthetic gaps retain only shared memberships. SF pages clone these pointer-bearing
 records and source marks include artifacts. Header/Footer here is physical evidence,
 not an inferred reusable authoring template. See PDF_ARTIFACTS.md.
+
+## Literal note display labels
+
+Note.Label / StructuredNote.label is an optional literal mark; empty selects the
+existing continuous per-kind counter. A custom mark does not advance that counter.
+Repeated references retain the same identity/label. The native footnote area and
+endnote section both measure the literal mark through normal glyph/shaping checks.
+DOCX uses standard customMarkFollows with same-run text nodes and a standard
+footnoteRef/endnoteRef in the note body. One Unicode scalar per text node avoids
+LibreOffice duplicating multi-character marks. Checked md:label metadata agrees
+with the actual main-story mark, preserving identity independently of appearance.

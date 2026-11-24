@@ -37,6 +37,7 @@ type docxWriter struct {
 	bookmarks          int
 	noteIDs            map[noteKey]int
 	noteLabels         map[noteKey]string
+	noteCustomLabels   map[noteKey]string
 	seenNoteRefs       map[noteKey]bool
 }
 
@@ -70,6 +71,10 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 	w := &docxWriter{ctx: ctx, parts: map[string][]byte{}, next: 1, contentWidth: g.contentWidth(), contentHeight: g.contentHeight(), validatedImages: make(outputImageCache)}
 	w.noteIDs = map[noteKey]int{}
 	w.noteLabels = notes.labels
+	w.noteCustomLabels = map[noteKey]string{}
+	for key, note := range notes.definitions {
+		w.noteCustomLabels[key] = note.Label
+	}
 	w.seenNoteRefs = map[noteKey]bool{}
 	noteCounts := map[string]int{}
 	for _, n := range d.Notes {
@@ -350,7 +355,17 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 					if repeated {
 						fmt.Fprintf(&out, `<w:t>%s</w:t></w:r></w:fldSimple>`, escape(w.noteLabels[referenceKey(r.Note)]))
 					} else {
-						fmt.Fprintf(&out, `<w:%sReference w:id="%d"/></w:r><w:bookmarkEnd w:id="%d"/>`, r.Note.Kind, id, noteBookmark)
+						if label := w.noteCustomLabels[referenceKey(r.Note)]; label != "" {
+							fmt.Fprintf(&out, `<w:%sReference w:id="%d" w:customMarkFollows="1"/>`, r.Note.Kind, id)
+							// One Unicode scalar per text node also avoids LibreOffice duplicating
+							// a multi-character custom mark on import. These are one logical mark.
+							for _, scalar := range label {
+								fmt.Fprintf(&out, `<w:t xml:space="preserve">%s</w:t>`, escape(string(scalar)))
+							}
+							fmt.Fprintf(&out, `</w:r><w:bookmarkEnd w:id="%d"/>`, noteBookmark)
+						} else {
+							fmt.Fprintf(&out, `<w:%sReference w:id="%d"/></w:r><w:bookmarkEnd w:id="%d"/>`, r.Note.Kind, id, noteBookmark)
+						}
 					}
 					continue
 				}

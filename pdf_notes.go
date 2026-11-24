@@ -405,6 +405,7 @@ func (r *pdfRenderer) finishNotes() error {
 		r.pdf.SetLink(r.noteLinks[key], r.y, -1)
 		start, _ := strconv.Atoi(r.notes.labels[key])
 		list := Block{Kind: ListBlock, List: "number", Start: listStartPointer(start), Items: []ListItem{{Blocks: blocks}}}
+		list.pdfListMarker = note.Label
 		if err := r.list(list, r.bodyWidth(), r.bodyLeft()); err != nil {
 			return err
 		}

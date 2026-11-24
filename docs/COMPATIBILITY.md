@@ -922,3 +922,11 @@ cases. SF/JSON/gzip persist the complete graph; malformed properties/undefined
 memberships reject. Physical Header/Footer page roles remain source facts rather
 than invented authorial repeat templates. No content is removed or duplicated.
 See PDF_ARTIFACTS.md for original-source/independent checks and remaining typed-note work.
+
+Literal foot/endnote labels are supported through Note.Label / SF note label,
+independently of public IDs. They do not advance automatic numbering. DOCX emits
+standard customMarkFollows and note-body Ref atoms. The importer accepts contiguous
+literal text nodes after the reference in its run; missing/empty/nontext custom
+marks are rejected explicitly rather than guessed. Automatic nondecimal numbering
+policies still have their existing normalization diagnostics. Native PDF measures
+both custom body/reference marks and reports missing glyphs/shaping/width failures.

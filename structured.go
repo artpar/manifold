@@ -37,6 +37,7 @@ type StructuredAttributes struct {
 	UnresolvedDestinations []string         `json:"unresolvedDestinations,omitempty"`
 }
 type StructuredNote struct {
+	Label   string           `json:"label,omitempty"`
 	ID      string           `json:"id"`
 	Kind    string           `json:"kind"`
 	Content []StructuredNode `json:"content"`
@@ -86,7 +87,7 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 		if err != nil {
 			return nil, err
 		}
-		s.Attrs.Notes = append(s.Attrs.Notes, StructuredNote{n.ID, n.Kind, bs})
+		s.Attrs.Notes = append(s.Attrs.Notes, StructuredNote{ID: n.ID, Kind: n.Kind, Content: bs, Label: n.Label})
 	}
 	if _, err := FromStructured(s); err != nil {
 		return nil, err
@@ -275,7 +276,7 @@ func FromStructured(s *StructuredDocument) (*Document, error) {
 		if err != nil {
 			return nil, err
 		}
-		d.Notes = append(d.Notes, Note{ID: n.ID, Kind: n.Kind, Blocks: bs})
+		d.Notes = append(d.Notes, Note{ID: n.ID, Kind: n.Kind, Blocks: bs, Label: n.Label})
 	}
 	for _, diag := range d.Diagnostics {
 		if err := validateString(diag.Code); err != nil {

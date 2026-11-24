@@ -5169,5 +5169,25 @@
     "production_dependencies": "unchanged; no runtime executables/services/CGO/app changes",
     "evidence": "output/artifacts and output/audit ignored; scripts/verify_pdf_artifacts.py; docs/PDF_ARTIFACTS.md",
     "next": "explicit PDF Note/Reference/Ref graph and rich bodies/labels with kind/placement uncertainty; native snapshot adapter and remaining original corpus/visual audit"
+  },
+  "literal_note_labels": {
+    "date": "2026-11-24",
+    "model": "Note.Label / SF attrs.notes[].label; empty automatic; custom does not advance per-kind counter; identity separate",
+    "paths": "SF/gzip SF/JSON/DOCX round trips; native PDF footnotes/endnotes; repeated references",
+    "independent": "python-docx/lxml package+standard references, pypdf/PyMuPDF native and LibreOffice PDF: two pages each, exact *α three/§E two marks, bodies each once, automatic 1 and >=4 internal links",
+    "visual": "all four native/LibreOffice pages inspected; no duplicate marks/body-note overlap; native/Word endnote heading/page reflow differences remain explicit",
+    "failure_and_fix": "LibreOffice duplicates multi-character custom mark in one w:t; one scalar per text node plus standard note-body Ref avoids duplication",
+    "checks": {
+      "full_tests_final": "18.458s library;0.840s CLI; all packages pass",
+      "full_race_before_final_portable_markup_and_boundary_changes": "172.886s library;2.375s CLI; all packages pass",
+      "focused_final_race": "1.734s all new custom mark/malformed/contradictory metadata cases pass",
+      "vet": "pass",
+      "modules": "all modules verified",
+      "cgo_disabled": "host build/focused execution 0.369s; Linux amd64/arm64 cross-builds only",
+      "diff_check": "pass"
+    },
+    "evidence": "output/note-labels ignored; scripts/verify_note_labels.py; examples/notes -custom-labels; docs/TESTING.md",
+    "next": "recover explicit PDF Note/Reference/Ref graph and rich bodies with kind/placement uncertainty; native Colleaf adapter and original DOCX corpus/visual acceptance remain open",
+    "production_dependencies": "unchanged; pure Go; no app/backend edits"
   }
 }

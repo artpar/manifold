@@ -21,6 +21,7 @@ func main() {
 	out := flag.String("out", "output/notes", "output directory")
 	longNote := flag.Bool("long-note", false, "expand the first footnote to exercise continuation pages")
 	pageHeight := flag.Float64("page-height", 0, "override page height in points to exercise pagination")
+	customLabels := flag.Bool("custom-labels", false, "use literal foot/endnote marks without advancing automatic numbering")
 	flag.Parse()
 	ctx := context.Background()
 	sf, err := manydoc.ReadStructured(ctx, bytes.NewReader(source))
@@ -30,6 +31,10 @@ func main() {
 	d, err := manydoc.FromStructured(sf)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if *customLabels {
+		d.Notes[0].Label = "§E"
+		d.Notes[1].Label = "*α"
 	}
 	if *longNote {
 		for i := range d.Notes {

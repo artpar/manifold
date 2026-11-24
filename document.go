@@ -107,6 +107,7 @@ type Block struct {
 	docxList                *docxListRef
 	docxNumberID            int
 	docxNumberLevel         int
+	pdfListMarker           string
 	docxIndent              int
 	docxExplicitBreakBefore bool
 	docxBeforeList          bool
@@ -169,6 +170,9 @@ type Image struct {
 	Height    float64 `json:"height,omitempty"`
 }
 type Note struct {
+	// Label is a literal display mark. Empty uses automatic per-kind numbering.
+	// Custom labels do not advance the automatic counter.
+	Label  string  `json:"label,omitempty"`
 	ID     string  `json:"id"`
 	Kind   string  `json:"kind"`
 	Blocks []Block `json:"blocks"`

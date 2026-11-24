@@ -2292,3 +2292,23 @@ operators and compares every group/property/coordinate/membership reference, wit
 actual original Word PDF (1,530 groups) and InDesign PDF (25) evidence. All previous
 source JSON values remain exact before additive artifact fields. Vector-only/empty
 groups may have no editable text/image member; this is disclosed rather than invented.
+
+## Literal note labels
+
+```sh
+GOWORK=off go test -race -run 'TestCustomNote|TestDOCXCustomNote' -count=1 .
+GOWORK=off go run ./examples/notes -custom-labels -out output/note-labels
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-note-labels-lo --headless --convert-to pdf --outdir output/note-labels/lo output/note-labels/notes.docx
+output/qa-venv/bin/python scripts/verify_note_labels.py
+```
+
+The independent package/XML, pypdf and PyMuPDF checks cover exact *α/§E reference
+and body counts, resume-at-one automatic numbering, four linked reference sites,
+rich body content, note-part reference atoms and repeated cached marks. Both native
+and LibreOffice outputs have two pages. All four rendered pages were inspected:
+marks appear once, references are superscript, notes/lists remain readable and do
+not overlap body text. Different endnote headings/page settings remain the existing
+native versus Word reflow policy, not an equivalence claim. The initial duplicated
+multi-character mark failure remains reproducible by joining the two w:t nodes;
+scalar nodes correct that actual reader failure. Unit tests separately check
+SF/JSON/DOCX graph semantics, counter policy and malformed/contradictory labels.
