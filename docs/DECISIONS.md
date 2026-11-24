@@ -1337,3 +1337,16 @@ behavior. Keep the actual Word URI with disclosure, preserve the old normative
 attribute oracle, and add a separately source/publisher-derived target/text oracle.
 Three authority empty-path/trailing-slash source differences remain explicit; do not
 normalize resource identities to mask them. See INTERNAL_DESTINATIONS.md.
+
+## 2026-11-24 Typed internal destinations independent of URI fragments
+
+Navigation uses explicit names and zero-width/height points in the existing SF,
+not magic URI interpretation. Explicit missing declarations preserve original
+broken references without inventing pages. DOCX retains point identity while
+reporting range-editing/column-selection loss; private checked metadata bridges
+portable Word names and standalone block grouping. Native PDF uses standard GoTo
+and destination name trees, binding after paint admission with first-paint repeated
+story policy. Inline points open their containing line at x=0, preserving shaping.
+Independent real-source paint is exact across 189 pages and all 3,106 names survive.
+PDF import still needs physical view provenance plus separately identified inferred
+flow binding. This intermediate milestone does not complete that required path.

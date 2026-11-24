@@ -15,6 +15,7 @@ import (
 // compact cell/note style; running stories carry their measured style.
 // Measurement has no drawing or page-admission effects.
 type pdfFragment struct {
+	Anchors     []string
 	TextSize    float64 // zero keeps the compact 10pt default
 	Line        pdfLine
 	Indent      float64
@@ -34,6 +35,7 @@ type pdfImageLayout struct {
 type pdfTableLayout struct {
 	width, height          float64
 	columns                []float64
+	anchors                []string
 	offsets                []float64
 	cells                  []pdfMeasuredCell
 	groups                 []pdfTableGroup
@@ -179,8 +181,14 @@ func (r *pdfRenderer) cellFlowStyle(bs []Block, width, indent, height float64, s
 		if err := r.ctx.Err(); err != nil {
 			return nil, err
 		}
+		start := len(flow)
 		switch b.Kind {
+		case AnchorPoint:
+			flow = append(flow, pdfFragment{})
 		case PageBreak:
+			if len(b.Anchors) > 0 {
+				flow = append(flow, pdfFragment{Anchors: b.Anchors})
+			}
 			flow = append(flow, pdfFragment{Break: true})
 		case Paragraph, Heading:
 			if b.PageBreakBefore {
@@ -237,6 +245,14 @@ func (r *pdfRenderer) cellFlowStyle(bs []Block, width, indent, height float64, s
 		default:
 			return nil, fmt.Errorf("%w: unknown PDF cell/footnote block %s", ErrUnsupported, b.Kind)
 		}
+		if b.Kind != PageBreak {
+			for i := start; i < len(flow); i++ {
+				if !flow[i].Break {
+					flow[i].Anchors = append(append([]string(nil), b.Anchors...), flow[i].Anchors...)
+					break
+				}
+			}
+		}
 	}
 	if len(flow) == 0 {
 		flow = append(flow, pdfFragment{TextSize: style.size, Height: style.size * style.leading})
@@ -248,6 +264,7 @@ func (r *pdfRenderer) drawFragment(f pdfFragment, x, y float64) error {
 	if err := r.ctx.Err(); err != nil {
 		return err
 	}
+	r.bindDestinations(f.Anchors, y)
 	if f.Image != nil {
 		if err := r.drawImage(f.Image, x+f.Indent, y); err != nil {
 			return err
@@ -294,7 +311,7 @@ func (r *pdfRenderer) measureTableHeaderBudget(b Block, width, height, headerBud
 	if err != nil {
 		return nil, err
 	}
-	plan := &pdfTableLayout{width: width}
+	plan := &pdfTableLayout{width: width, anchors: b.Anchors}
 	if g.Columns == 0 {
 		return plan, nil
 	}
@@ -441,6 +458,7 @@ func (r *pdfRenderer) measureTableHeaderBudget(b Block, width, height, headerBud
 	return plan, nil
 }
 func (r *pdfRenderer) paintTableGroup(plan *pdfTableLayout, g pdfTableGroup, x, top float64) error {
+	r.bindDestinations(plan.anchors, top)
 	for _, c := range plan.cells[g.first:g.last] {
 		if err := r.ctx.Err(); err != nil {
 			return err

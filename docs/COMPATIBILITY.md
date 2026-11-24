@@ -30,8 +30,7 @@ the final visible view. Revision history is not preserved. Content-control text,
 cached field results and text-box text are retained, with diagnostics for their
 unrepresented control/evaluation/layout semantics.
 
-Bookmark destinations, comment annotations and advanced page binding rules remain
-unfinished. Section-specific layouts and conditional running bindings are now represented. Static asymmetric edges and running distances are retained. Notes are
+Bookmark points and typed internal navigation now persist through SF/DOCX and native PDF; bookmark range/column editing semantics have explicit losses. PDF destination import, comment annotations and advanced page binding rules remain unfinished. Section-specific layouts and conditional running bindings are now represented. Static asymmetric edges and running distances are retained. Notes are
 extracted with typed inline identities and separate rich definitions. Automatic
 reference labels normalize to continuous decimal values; nondecimal/custom note
 marks, numbering/restart/placement changes and custom separator content have
@@ -874,3 +873,10 @@ hyperlink_word_anchor disclosure of Word/strict-OOXML behavior. Canonical SF/DOC
 keeps the resulting URI and native PDF uses existing ASCII URI encoding. Internal
 bookmark navigation is still unfinished; source missing targets are documented in
 INTERNAL_DESTINATIONS.md, not repaired by guessing.
+
+Named internal navigation has a distinct typed link attribute; generic #fragment
+URI references remain URI actions. Duplicate definitions/contradictory hrefs and
+undeclared missing names reject. Explicitly unresolved source names remain unbound.
+Inline PDF targets open the containing line at x=0; repeated story/header targets
+open the first painted instance. See INTERNAL_DESTINATIONS.md for exact scope,
+source qualification, independent-reader results and remaining PDF recovery.

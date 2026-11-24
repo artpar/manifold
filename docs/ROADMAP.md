@@ -1,5 +1,12 @@
 # Next capability work
 
+Latest navigation milestone: typed points/links and missing declarations now run
+through SF/DOCX/native PDF, with all 3,106 original Word names and unchanged native
+paint. Independent point/view checks, source graph tests and LibreOffice ODT import
+verify the current slice. PDF-to-SF physical destination recovery and inferred flow
+binding remain required next work. The complete goal remains incomplete; see
+INTERNAL_DESTINATIONS.md and STATUS.md before using historical next-step notes.
+
 Items 1–5 are unfinished work required by the active rich-document goal, rather
 than exemptions from it. SF foundation is in STRUCTURED_FORMAT.md and the full
 acceptance audit is in ACCEPTANCE.md. Items 6–7 concern separate application

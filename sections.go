@@ -160,6 +160,14 @@ func documentSections(d *Document) []resolvedSection {
 	for _, b := range d.Blocks {
 		s := b.Section
 		current := resolvedSection{layout: cloneLayout(previous.layout), start: s.Start, firstPage: s.FirstPage, headers: inheritStories(s.Headers, previous.headers), footers: inheritStories(s.Footers, previous.footers), blocks: s.Blocks}
+		if len(b.Anchors) > 0 {
+			current.blocks = append([]Block(nil), current.blocks...)
+			if len(current.blocks) == 0 {
+				current.blocks = []Block{{Kind: AnchorPoint, Anchors: b.Anchors}}
+			} else {
+				current.blocks[0].Anchors = append(append([]string(nil), b.Anchors...), current.blocks[0].Anchors...)
+			}
+		}
 		if s.Layout != nil {
 			current.layout = cloneLayout(*s.Layout)
 		}

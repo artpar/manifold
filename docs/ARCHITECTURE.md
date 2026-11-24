@@ -937,3 +937,15 @@ Word behavior from MS-OI29500 2.1.521, with an explicit compatibility diagnostic
 The shared model holds the actual URI; canonical DOCX export uses that URI directly.
 No runtime dependency or API/schema changed. Internal named destinations remain
 next work; see INTERNAL_DESTINATIONS.md for source facts and integration points.
+
+## Named navigation points (2026-11-24)
+
+`destinations.go` owns the shared graph: block-start names, standalone zero-height
+boundaries, inline atoms, typed internal references and explicit missing names.
+`docx_destinations.go` pairs part-local numeric bookmarks, maps checked portable
+names and restores points across structural paragraphs without creating content.
+`pdf_destinations.go` binds during paint after admission and finalizes a standard
+UTF-16 name tree/GoTo actions in the glyph-font rewrite stage. Measurement never
+binds targets, and inline atoms never enter shaping. Running/header repeats use
+first paint. Generic URI semantics and note identities stay separate. PDF import
+still needs typed physical views and inferred binding; see INTERNAL_DESTINATIONS.md.

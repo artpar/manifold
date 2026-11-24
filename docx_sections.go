@@ -41,12 +41,16 @@ func writeSectionedDOCX(ctx context.Context, out io.Writer, d *Document) error {
 		}
 		w.contentHeight = bodyHeight
 		noteWidth, noteHeight = math.Min(noteWidth, w.contentWidth), math.Min(noteHeight, bodyHeight)
-		part, err := w.blocks(s.Blocks)
+		part, err := w.blocks(r.blocks)
 		if err != nil {
 			return err
 		}
 		var props strings.Builder
 		props.WriteString(`<w:sectPr md:sectionModel="1"`)
+		if len(block.Anchors) > 0 {
+			raw, _ := json.Marshal(block.Anchors)
+			props.WriteString(` md:sectionAnchors="` + escape(string(raw)) + `"`)
+		}
 		if index == 0 {
 			base, _ := json.Marshal(d.Layout)
 			props.WriteString(` md:sectionBase="` + escape(string(base)) + `"`)
@@ -150,7 +154,7 @@ func writeSectionedDOCX(ctx context.Context, out io.Writer, d *Document) error {
 		w.parts["word/settings.xml"] = []byte(xmlHeader + `<w:settings xmlns:w="` + wordNS + `"><w:evenAndOddHeaders/></w:settings>`)
 		w.addRel("settings", "settings.xml", false)
 	}
-	w.parts["word/document.xml"] = []byte(xmlHeader + `<w:document` + wordNamespaces + docxMetadataNamespaces + `><w:body>` + body.String() + `</w:body></w:document>`)
+	w.parts["word/document.xml"] = []byte(xmlHeader + `<w:document` + wordNamespaces + docxMetadataNamespaces + docxUnresolvedDestinations(d) + `><w:body>` + body.String() + `</w:body></w:document>`)
 	return w.output(out, d)
 }
 func (w *docxWriter) fitSectionStories(d *Document, r resolvedSection) (float64, float64, error) {

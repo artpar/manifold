@@ -23,6 +23,7 @@ const xmlHeader = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`
 const wordNamespaces = ` xmlns:w="` + wordNS + `" xmlns:r="` + relNS + `" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"`
 
 type docxWriter struct {
+	destinationNames   map[string]string
 	ctx                context.Context
 	parts              map[string][]byte
 	rels               []string
@@ -128,7 +129,7 @@ func writeDOCX(ctx context.Context, out io.Writer, d *Document) error {
 		orientation = ` w:orient="landscape"`
 	}
 	section += fmt.Sprintf(`<w:pgSz w:w="%.0f" w:h="%.0f"%s/>`, wid*20, hei*20, orientation) + docxPageMargins(d.Layout) + `</w:sectPr>`
-	w.parts["word/document.xml"] = []byte(xmlHeader + `<w:document` + wordNamespaces + docxMetadataNamespaces + `><w:body>` + body + section + `</w:body></w:document>`)
+	w.parts["word/document.xml"] = []byte(xmlHeader + `<w:document` + wordNamespaces + docxMetadataNamespaces + docxUnresolvedDestinations(d) + `><w:body>` + body + section + `</w:body></w:document>`)
 	return w.output(out, d)
 }
 
@@ -204,27 +205,43 @@ func (w *docxWriter) blocks(blocks []Block) (string, error) { return w.blocksAt(
 func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 	var out strings.Builder
 	bs := legacyLists(blocks)
+	hasPhysical := false
 	for i := 0; i < len(bs); i++ {
 		b := bs[i]
+		for _, id := range b.Anchors {
+			v, err := w.anchor(id)
+			if err != nil {
+				return "", err
+			}
+			if b.Kind == AnchorPoint {
+				v = strings.Replace(v, ` md:anchor=`, ` md:standaloneAnchor="`+escape(b.Anchors[0])+`" md:anchor=`, 1)
+			}
+			out.WriteString(v)
+		}
+		if b.Kind == AnchorPoint {
+			continue
+		}
 		if err := w.ctx.Err(); err != nil {
 			return "", err
 		}
 		if b.Kind == PageBreak {
-			if i == 0 {
+			if !hasPhysical {
 				// An initial conditional property alone cannot request an empty
 				// first page. This checked empty anchor establishes that page.
 				out.WriteString(`<w:p md:breakRole="anchor"/>`)
 			}
-			if i+1 < len(bs) && (bs[i+1].Kind == Paragraph || bs[i+1].Kind == Heading || bs[i+1].Kind == ListBlock) {
+			if i+1 < len(bs) && len(bs[i+1].Anchors) == 0 && (bs[i+1].Kind == Paragraph || bs[i+1].Kind == Heading || bs[i+1].Kind == ListBlock) {
 				i++
 				b = bs[i]
 				b.docxExplicitBreakBefore = true
 				b.docxBeforeList = b.Kind == ListBlock
 			} else {
 				out.WriteString(`<w:p md:breakRole="control"><w:pPr><w:pageBreakBefore/></w:pPr></w:p>`)
+				hasPhysical = true
 				continue
 			}
 		}
+		hasPhysical = true
 		switch b.Kind {
 		case Paragraph, Heading:
 			out.WriteString(`<w:p`)
@@ -256,6 +273,14 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 			}
 			out.WriteString(`</w:pPr>`)
 			for _, r := range b.Runs {
+				if r.Anchor != "" {
+					v, err := w.anchor(r.Anchor)
+					if err != nil {
+						return "", err
+					}
+					out.WriteString(v)
+					continue
+				}
 				repeated := false
 				noteBookmark := 0
 				noteName := ""
@@ -276,13 +301,15 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 						fmt.Fprintf(&out, `<w:bookmarkStart w:id="%d" w:name="%s"/>`, noteBookmark, noteName)
 					}
 				}
-				if r.Link != "" {
-					if strings.HasPrefix(r.Link, "#") {
-						out.WriteString(`<w:hyperlink w:anchor="` + escape(strings.TrimPrefix(r.Link, "#")) + `">`)
-					} else {
-						id := w.addRel("hyperlink", r.Link, true)
-						out.WriteString(`<w:hyperlink r:id="` + id + `">`)
+				if r.Destination != "" {
+					name, err := w.destinationName(r.Destination)
+					if err != nil {
+						return "", err
 					}
+					out.WriteString(`<w:hyperlink w:anchor="` + escape(name) + `" md:destination="` + escape(r.Destination) + `" md:href="` + escape(destinationHref(r)) + `">`)
+				} else if r.Link != "" {
+					id := w.addRel("hyperlink", r.Link, true)
+					out.WriteString(`<w:hyperlink r:id="` + id + `">`)
 				}
 				out.WriteString(`<w:r`)
 				out.WriteString(docxTextImplicit(r))
@@ -349,7 +376,7 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 				}
 				flush()
 				out.WriteString(`</w:r>`)
-				if r.Link != "" {
+				if r.Link != "" || r.Destination != "" {
 					out.WriteString(`</w:hyperlink>`)
 				}
 			}

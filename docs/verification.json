@@ -4790,5 +4790,69 @@
     },
     "next": "Implement typed flow anchors/internal links, named PDF destinations/GoTo and PDF recovery; see INTERNAL_DESTINATIONS.md",
     "evidence": "output/internal-destinations; scripts/audit_mqtt_destinations.py; scripts/verify_word_fragments.py"
+  },
+  "typed_destinations_milestone": {
+    "status": "intermediate; complete rich-document goal remains incomplete",
+    "implemented": [
+      "shared SF/JSON graph",
+      "DOCX bookmarks/internal links",
+      "native PDF named views and GoTo"
+    ],
+    "pending": "PDF-to-SF physical view provenance and separately identified inferred flow binding",
+    "real_source": {
+      "bookmarks": 3106,
+      "visible_internal_link_ids": 379,
+      "pages": 189,
+      "bytes": 5315006,
+      "goto_annotations": 1145,
+      "uri_annotations": 81,
+      "uri_targets": 56,
+      "unresolved": {
+        "_Introduction": 3
+      },
+      "paint": "all page-content bytes and annotation rectangles exact against eacd33c URI-stage baseline",
+      "source_oracles": "unchanged; independent original XML supplies bookmark identities"
+    },
+    "synthetic": {
+      "pages": 2,
+      "named_views": 17,
+      "paint": "exact against same visible document without points",
+      "checks": [
+        "pypdf actual pages/XYZ positions",
+        "MuPDF resolve_link physical positions",
+        "Unicode names",
+        "generic fragment URI and token collision",
+        "existing direct note destination",
+        "missing target stays unbound",
+        "SF/DOCX canonical graph",
+        "empty/nested cell and grouped boundary points",
+        "section/empty-section graph",
+        "LibreOffice initial point + break retains blank first page"
+      ]
+    },
+    "office": {
+      "import": "ODT content/styles retain 17 public names and ten link text/target pairs",
+      "visual": "both exported pages inspected; both native pages inspected",
+      "export_caveat": "LibreOffice PDF exporter omits most links, reproduced with a minimal independent python-docx probe; PDF export is not the DOCX link oracle"
+    },
+    "checks": {
+      "test": "library 14.107s; CLI 0.674s, all packages pass",
+      "race": "library 171.846s; CLI 1.981s, all packages pass",
+      "vet": "pass",
+      "module_verify": "all modules verified",
+      "cgo_disabled": "host built and executed four operations; Linux/amd64 cross-built only",
+      "prosemirror": "26,548 nodes/marks/attributes across source/example SFs",
+      "fuzz": "SF 6,753 executions; DOCX 305; ten seconds each, two workers, pass",
+      "font_asset_uri": "independent original fonts/JPEG/metadata/Unicode and URI checks pass",
+      "diff_check": "pass"
+    },
+    "commands": [
+      "GOWORK=off go run ./examples/destinations",
+      "output/qa-venv/bin/python scripts/verify_destinations.py --office-odt output/destinations/lo/destinations.odt",
+      "output/qa-venv/bin/python scripts/verify_mqtt_render.py --out output/destinations"
+    ],
+    "evidence": "output/destinations (ignored, regenerable); scripts/verify_destinations.py; docs/INTERNAL_DESTINATIONS.md",
+    "runtime_dependencies": "unchanged; no external executable, CGO or service",
+    "next": "Recover PDF direct/named destination views, ownership and inferred flow bindings; then bounded remaining acceptance/corpus/codec audit"
   }
 }

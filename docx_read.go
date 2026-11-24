@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -127,6 +128,8 @@ type docxRelation struct {
 	External     bool
 }
 type docxReader struct {
+	bookmarkPoints        map[*xmlNode]docxBookmarkPoint
+	destinationAliases    map[string]string
 	ctx                   context.Context
 	files                 map[string]*zip.File
 	doc                   *Document
@@ -172,6 +175,9 @@ func (r *docxReader) xml(name string) (*xmlNode, error) {
 	}
 	n, err := parseXML(r.ctx, b)
 	if err != nil {
+		return nil, fmt.Errorf("DOCX %s: %w", name, err)
+	}
+	if err := r.scanDestinations(n); err != nil {
 		return nil, fmt.Errorf("DOCX %s: %w", name, err)
 	}
 	return n, nil
@@ -374,6 +380,11 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 			}
 		}
 	}
+	if raw := n.attributeNS(docxNotesNS, "unresolvedDestinations"); raw != "" {
+		if err := json.Unmarshal([]byte(raw), &r.doc.UnresolvedDestinations); err != nil {
+			return nil, fmt.Errorf("invalid unresolved destination metadata")
+		}
+	}
 	r.doc.Blocks, err = r.blocks(n.child("body"), mainRels, 0)
 	if err != nil {
 		return nil, err
@@ -387,6 +398,9 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 	}
 
 	if err := r.foldDocumentLists(); err != nil {
+		return nil, err
+	}
+	if err := r.finishDestinations(); err != nil {
 		return nil, err
 	}
 	return r.doc, r.doc.Validate()
@@ -406,6 +420,18 @@ func (r *docxReader) blocks(n *xmlNode, rels map[string]docxRelation, depth int)
 			return nil, err
 		}
 		switch c.Name.Local {
+		case "bookmarkStart", "bookmarkEnd":
+			if name := r.bookmark(c); name != "" {
+				group := r.bookmarkPoints[c].group
+				if group != "" && len(out) > 0 && out[len(out)-1].docxAnchorGroup == group {
+					out[len(out)-1].Anchors = append(out[len(out)-1].Anchors, name)
+				} else {
+					if group != "" && group != name {
+						return nil, fmt.Errorf("standalone anchor group lacks its first point")
+					}
+					out = append(out, Block{Kind: AnchorPoint, Anchors: []string{name}, docxAnchorGroup: group})
+				}
+			}
 		case "p":
 			structural, err := docxStructuralParagraph(n, c)
 			if err != nil {
@@ -497,7 +523,7 @@ func (r *docxReader) blocks(n *xmlNode, rels map[string]docxRelation, depth int)
 			r.doc.warn("unsupported_block", "Unsupported Word block: "+c.Name.Local)
 		}
 	}
-	return out, nil
+	return packBlockAnchors(out), nil
 }
 func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Block, error) {
 	b := Block{Kind: Paragraph}
@@ -624,7 +650,24 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 					r.doc.warn("hyperlink_word_anchor", "Hyperlink relationship plus anchor uses Word fragment composition; strict OOXML readers may ignore the anchor")
 				}
 			} else if a := c.attr("anchor"); a != "" {
-				style.Link = "#" + a
+				target := a
+				if alias, ok := r.destinationAliases[a]; ok {
+					target = alias
+				}
+				if original := c.attributeNS(docxNotesNS, "destination"); original != "" {
+					if docxDestinationName(original) != a {
+						return fmt.Errorf("internal hyperlink metadata contradicts anchor")
+					}
+					if alias, ok := r.destinationAliases[a]; ok && alias != original {
+						return fmt.Errorf("internal hyperlink metadata contradicts bookmark")
+					}
+					target = original
+				}
+				style.Destination = target
+				style.Link = "#" + target
+				if href := c.attributeNS(docxNotesNS, "href"); href != "" {
+					style.Link = href
+				}
 			}
 		case "t":
 			skipNoteSeparator = false
@@ -779,7 +822,9 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				r.noteBookmarkEnds[c.attr("id")] = true
 				return nil
 			}
-			r.doc.warn("bookmarks", "Bookmark text is retained; bookmark destinations are not represented")
+			if name := r.bookmark(c); name != "" {
+				b.Runs = append(b.Runs, Run{Anchor: name})
+			}
 			return nil
 		case "footnoteReference", "endnoteReference":
 			id, err := strconv.Atoi(c.attr("id"))

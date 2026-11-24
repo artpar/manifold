@@ -199,7 +199,7 @@ func docxStructuralParagraph(parent, n *xmlNode) (bool, error) {
 	}
 	var content []*xmlNode
 	for _, c := range parent.Children {
-		if c.Name.Local != "tcPr" {
+		if c.Name.Local != "tcPr" && c.Name.Local != "bookmarkStart" && c.Name.Local != "bookmarkEnd" {
 			content = append(content, c)
 		}
 	}

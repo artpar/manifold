@@ -31,12 +31,15 @@
         "evenAndOddHeaders": {
           "default": false,
           "validate": "boolean"
+        },
+        "unresolvedDestinations": {
+          "default": []
         }
       }
     },
     "paragraph": {
       "group": "block",
-      "content": "(text | note_reference)*",
+      "content": "(text | note_reference | anchor)*",
       "attrs": {
         "source": {
           "default": null
@@ -48,12 +51,15 @@
         "dir": {
           "default": "",
           "validate": "string"
+        },
+        "anchors": {
+          "default": []
         }
       }
     },
     "heading": {
       "group": "block",
-      "content": "(text | note_reference)*",
+      "content": "(text | note_reference | anchor)*",
       "attrs": {
         "level": {
           "default": 1,
@@ -69,6 +75,9 @@
         "dir": {
           "default": "",
           "validate": "string"
+        },
+        "anchors": {
+          "default": []
         }
       }
     },
@@ -81,6 +90,9 @@
       "attrs": {
         "source": {
           "default": null
+        },
+        "anchors": {
+          "default": []
         }
       }
     },
@@ -88,13 +100,18 @@
       "group": "block",
       "content": "list_item+",
       "attrs": {
-        "numbering": {"default": null},
+        "numbering": {
+          "default": null
+        },
         "order": {
           "default": 1,
           "validate": "number"
         },
         "source": {
           "default": null
+        },
+        "anchors": {
+          "default": []
         }
       }
     },
@@ -110,9 +127,14 @@
       "group": "block",
       "content": "table_row*",
       "attrs": {
-        "columnWidths": {"default": null},
+        "columnWidths": {
+          "default": null
+        },
         "source": {
           "default": null
+        },
+        "anchors": {
+          "default": []
         }
       }
     },
@@ -161,6 +183,9 @@
         },
         "source": {
           "default": null
+        },
+        "anchors": {
+          "default": []
         }
       }
     },
@@ -169,6 +194,9 @@
       "attrs": {
         "source": {
           "default": null
+        },
+        "anchors": {
+          "default": []
         }
       }
     },
@@ -207,6 +235,30 @@
         },
         "source": {
           "default": null
+        },
+        "anchors": {
+          "default": []
+        }
+      }
+    },
+    "anchor": {
+      "inline": true,
+      "group": "inline",
+      "atom": true,
+      "marks": "source",
+      "attrs": {
+        "name": {}
+      }
+    },
+    "anchor_point": {
+      "group": "block",
+      "atom": true,
+      "attrs": {
+        "anchors": {
+          "default": []
+        },
+        "source": {
+          "default": null
         }
       }
     }
@@ -220,6 +272,9 @@
       "attrs": {
         "href": {
           "validate": "string"
+        },
+        "destination": {
+          "default": null
         }
       },
       "inclusive": false

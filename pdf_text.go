@@ -87,7 +87,7 @@ func (r *pdfRenderer) textAdvance(text string, size float64) float64 {
 	return width
 }
 func samePDFStyle(a, b Run) bool {
-	return a.ComplexScript == b.ComplexScript && a.Language == b.Language && a.EastAsiaLanguage == b.EastAsiaLanguage && a.ComplexLanguage == b.ComplexLanguage && a.Direction == b.Direction && a.Bold == b.Bold && a.Italic == b.Italic && a.Underline == b.Underline && a.Strike == b.Strike && a.Link == b.Link && a.Note == nil && b.Note == nil && a.FontFamily == b.FontFamily && a.FontSize == b.FontSize && canonicalTextColor(a.Color) == canonicalTextColor(b.Color)
+	return a.ComplexScript == b.ComplexScript && a.Language == b.Language && a.EastAsiaLanguage == b.EastAsiaLanguage && a.ComplexLanguage == b.ComplexLanguage && a.Direction == b.Direction && a.Bold == b.Bold && a.Italic == b.Italic && a.Underline == b.Underline && a.Strike == b.Strike && a.Link == b.Link && a.Destination == b.Destination && a.Note == nil && b.Note == nil && a.FontFamily == b.FontFamily && a.FontSize == b.FontSize && canonicalTextColor(a.Color) == canonicalTextColor(b.Color)
 }
 func appendPDFSpan(line pdfLine, span pdfSpan) pdfLine {
 	zeroControl := span.width == 0 && span.text != "\u00ad" && !pdfHardBreak(span.text) && !pdfTrimSpace(span.text)
@@ -273,7 +273,7 @@ func (r *pdfRenderer) linesDirection(runs []Run, width, size float64, direction 
 		return nil, err
 	}
 	if len(atoms) == 0 {
-		return []pdfLine{{}}, nil
+		return bindPDFLineAnchors(runs, []pdfLine{{}}), nil
 	}
 	protectedGroup := make([]bool, len(atoms))
 	for i := len(atoms) - 1; i >= 0; i-- {
@@ -444,7 +444,7 @@ func (r *pdfRenderer) linesDirection(runs []Run, width, size float64, direction 
 			return nil, fmt.Errorf("PDF line layout made no progress")
 		}
 	}
-	return lines, nil
+	return bindPDFLineAnchors(runs, lines), nil
 }
 
 func pdfActualText(text string) string {
@@ -514,6 +514,10 @@ func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 	cursor := x
 	var actualGroup *pdfPaintActualGroup
 	for _, span := range line {
+		if span.run.Anchor != "" {
+			r.bindDestinations([]string{span.run.Anchor}, y)
+			continue
+		}
 		x = cursor
 		if span.placed {
 			x = origin + span.visualX
@@ -550,7 +554,10 @@ func (r *pdfRenderer) drawLine(line pdfLine, x, y, size float64) {
 		if span.run.Note != nil {
 			r.pdf.Link(x, y+baseline-span.ascent, span.width, math.Max(textSize(span.run, size), span.ascent+span.descent), r.noteLinks[referenceKey(span.run.Note)])
 		}
-		if span.run.Link != "" && span.width > 0 {
+		if span.run.Destination != "" && span.width > 0 {
+			r.pdf.LinkString(x, y+baseline-span.ascent, span.width, math.Max(textSize(span.run, size)*1.3, span.ascent+span.descent), r.destinationURIs[span.run.Destination])
+		}
+		if span.run.Destination == "" && span.run.Link != "" && span.width > 0 {
 			r.pdf.LinkString(x, y+baseline-span.ascent, span.width, math.Max(textSize(span.run, size)*1.3, span.ascent+span.descent), pdfASCIIURI(span.run.Link))
 		}
 
@@ -603,22 +610,32 @@ func (r *pdfRenderer) drawLineDecorations(line pdfLine, x, y, baseline, size flo
 }
 
 func pdfLineSize(line pdfLine, fallback float64) float64 {
-	size := fallback
-	if len(line) > 0 {
-		size = 0
-	}
+	size := 0.0
+	painted := false
 	for _, span := range line {
+		if span.run.Anchor != "" {
+			continue
+		}
+		painted = true
 		size = math.Max(size, math.Max(textSize(span.run, fallback), span.ascent))
+	}
+	if !painted {
+		return fallback
 	}
 	return size
 }
 func pdfLineHeight(line pdfLine, fallback, factor float64) float64 {
-	below := fallback * (factor - 1)
-	if len(line) > 0 {
-		below = 0
-	}
+	below := 0.0
+	painted := false
 	for _, span := range line {
+		if span.run.Anchor != "" {
+			continue
+		}
+		painted = true
 		below = math.Max(below, math.Max(textSize(span.run, fallback)*(factor-1), span.descent))
+	}
+	if !painted {
+		below = fallback * (factor - 1)
 	}
 	return pdfLineSize(line, fallback) + below
 }

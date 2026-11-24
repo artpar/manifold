@@ -63,6 +63,9 @@ func (r *pdfRenderer) list(b Block, width, x float64) error {
 		if err := r.ensureWithNotes(minimum, lineNoteKeys(firstLines[0])); err != nil {
 			return err
 		}
+		if index == 0 {
+			r.bindDestinations(b.Anchors, r.y)
+		}
 		markerX, bodyX := x, x+indent
 		if first.Direction == "rtl" {
 			markerX = x + width - pdfAdvance(marker)

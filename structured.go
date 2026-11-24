@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 )
 
@@ -22,15 +23,16 @@ type StructuredDocument struct {
 	Content []StructuredNode     `json:"content,omitempty"`
 }
 type StructuredAttributes struct {
-	Schema            string           `json:"schema"`
-	Metadata          Metadata         `json:"metadata,omitempty"`
-	Layout            Layout           `json:"layout,omitempty"`
-	Headers           []StructuredNode `json:"headers,omitempty"`
-	Footers           []StructuredNode `json:"footers,omitempty"`
-	Notes             []StructuredNote `json:"notes,omitempty"`
-	Diagnostics       []Diagnostic     `json:"diagnostics,omitempty"`
-	Pages             []PDFPage        `json:"pages,omitempty"`
-	EvenAndOddHeaders bool             `json:"evenAndOddHeaders,omitempty"`
+	Schema                 string           `json:"schema"`
+	Metadata               Metadata         `json:"metadata,omitempty"`
+	Layout                 Layout           `json:"layout,omitempty"`
+	Headers                []StructuredNode `json:"headers,omitempty"`
+	Footers                []StructuredNode `json:"footers,omitempty"`
+	Notes                  []StructuredNote `json:"notes,omitempty"`
+	Diagnostics            []Diagnostic     `json:"diagnostics,omitempty"`
+	Pages                  []PDFPage        `json:"pages,omitempty"`
+	EvenAndOddHeaders      bool             `json:"evenAndOddHeaders,omitempty"`
+	UnresolvedDestinations []string         `json:"unresolvedDestinations,omitempty"`
 }
 type StructuredNote struct {
 	ID      string           `json:"id"`
@@ -64,7 +66,9 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 	s := &StructuredDocument{Type: "doc", Attrs: StructuredAttributes{
 		Schema: StructuredSchema, Metadata: d.Metadata, Layout: cloneLayout(d.Layout), EvenAndOddHeaders: d.EvenAndOddHeaders,
 		Diagnostics: append([]Diagnostic(nil), d.Diagnostics...), Pages: append([]PDFPage(nil), d.Pages...),
+		UnresolvedDestinations: append([]string(nil), d.UnresolvedDestinations...),
 	}}
+	sort.Strings(s.Attrs.UnresolvedDestinations)
 	var err error
 	if s.Content, err = encodeSFBlocks(d.Blocks); err != nil {
 		return nil, err
@@ -118,10 +122,16 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 				}{level, b.PageBreakBefore, b.Direction})
 			}
 			for _, r := range b.Runs {
-				if r.Text == "" && r.Note == nil {
+				if r.Text == "" && r.Note == nil && r.Anchor == "" {
 					continue
 				}
 				t := StructuredNode{Type: "text", Text: r.Text}
+				if r.Anchor != "" {
+					t.Type = "anchor"
+					t.Attrs = sfAttrs(struct {
+						Name string `json:"name"`
+					}{r.Anchor})
+				}
 				if r.Note != nil {
 					t.Type = "note_reference"
 					t.Attrs = sfAttrs(r.Note)
@@ -147,10 +157,11 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 					}{r.FontFamily, r.FontSize, canonicalTextColor(r.Color), r.Language, r.EastAsiaLanguage, r.ComplexLanguage, r.Direction, r.ComplexScript})})
 
 				}
-				if r.Link != "" {
+				if r.Link != "" || r.Destination != "" {
 					t.Marks = append(t.Marks, StructuredMark{Type: "link", Attrs: sfAttrs(struct {
-						Href string `json:"href"`
-					}{r.Link})})
+						Href        string `json:"href"`
+						Destination string `json:"destination,omitempty"`
+					}{destinationHref(r), r.Destination})})
 				}
 				if r.Source != nil {
 					t.Marks = append(t.Marks, StructuredMark{Type: "source", Attrs: sfAttrs(r.Source)})
@@ -214,6 +225,17 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 		case PageBreak:
 		}
 		n.Attrs = encodeSourceAttrs(n.Attrs, b.Source)
+		if len(b.Anchors) > 0 {
+			var attrs map[string]json.RawMessage
+			if len(n.Attrs) > 0 {
+				json.Unmarshal(n.Attrs, &attrs)
+			}
+			if attrs == nil {
+				attrs = map[string]json.RawMessage{}
+			}
+			attrs["anchors"] = sfAttrs(b.Anchors)
+			n.Attrs = sfAttrs(attrs)
+		}
 		ns = append(ns, n)
 	}
 	return ns, nil
@@ -229,7 +251,7 @@ func FromStructured(s *StructuredDocument) (*Document, error) {
 	if s.Attrs.Schema != StructuredSchema {
 		return nil, fmt.Errorf("%w: structured schema %q", ErrUnsupported, s.Attrs.Schema)
 	}
-	d := &Document{EvenAndOddHeaders: s.Attrs.EvenAndOddHeaders, Metadata: s.Attrs.Metadata, Layout: cloneLayout(s.Attrs.Layout), Diagnostics: append([]Diagnostic(nil), s.Attrs.Diagnostics...), Pages: append([]PDFPage(nil), s.Attrs.Pages...)}
+	d := &Document{EvenAndOddHeaders: s.Attrs.EvenAndOddHeaders, Metadata: s.Attrs.Metadata, Layout: cloneLayout(s.Attrs.Layout), Diagnostics: append([]Diagnostic(nil), s.Attrs.Diagnostics...), Pages: append([]PDFPage(nil), s.Attrs.Pages...), UnresolvedDestinations: append([]string(nil), s.Attrs.UnresolvedDestinations...)}
 	var err error
 	if d.Blocks, err = decodeSFBlocks(s.Content, 0); err != nil {
 		return nil, err
@@ -300,11 +322,25 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 		if err != nil {
 			return nil, err
 		}
+		var anchors []string
+		if len(attrs) > 0 {
+			var common map[string]json.RawMessage
+			if err := json.Unmarshal(attrs, &common); err != nil {
+				return nil, err
+			}
+			if a, ok := common["anchors"]; ok {
+				if err := json.Unmarshal(a, &anchors); err != nil {
+					return nil, err
+				}
+				delete(common, "anchors")
+				attrs = sfAttrs(common)
+			}
+		}
 		n.Attrs = attrs
 		if n.Text != "" || len(n.Marks) > 0 {
 			return nil, fmt.Errorf("block %s cannot have text or marks", n.Type)
 		}
-		b := Block{Kind: Kind(n.Type), Source: source}
+		b := Block{Kind: Kind(n.Type), Source: source, Anchors: anchors}
 		switch n.Type {
 		case "section":
 			b.Section, err = decodeSFSection(n, depth)
@@ -355,6 +391,20 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 						return nil, err
 					}
 					r.Text = t.Text
+				case "anchor":
+					if t.Text != "" || len(t.Content) > 0 {
+						return nil, fmt.Errorf("anchor is an inline atom")
+					}
+					var a struct {
+						Name string `json:"name"`
+					}
+					if err := strictSFAttrs(t.Attrs, &a); err != nil {
+						return nil, err
+					}
+					if err := destinationID(a.Name); err != nil {
+						return nil, err
+					}
+					r.Anchor = a.Name
 				case "note_reference":
 					if t.Text != "" || len(t.Content) > 0 {
 						return nil, fmt.Errorf("note reference is an inline atom")
@@ -426,7 +476,8 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 						r.Strike = true
 					case "link":
 						a := struct {
-							Href string `json:"href"`
+							Href        string `json:"href"`
+							Destination string `json:"destination,omitempty"`
 						}{}
 						if err := strictSFAttrs(m.Attrs, &a); err != nil {
 							return nil, err
@@ -435,6 +486,7 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 							return nil, fmt.Errorf("link requires href")
 						}
 						r.Link = a.Href
+						r.Destination = a.Destination
 					default:
 						return nil, sfUnsupported(m.Type)
 					}
@@ -538,6 +590,13 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 					r.Cells = append(r.Cells, Cell{Blocks: blocks, ColSpan: a.ColSpan, RowSpan: rowSpan, Source: cellSource})
 				}
 				b.Rows = append(b.Rows, r)
+			}
+		case "anchor_point":
+			if len(n.Content) > 0 {
+				return nil, fmt.Errorf("anchor point cannot have content")
+			}
+			if err := emptySFAttrs(n.Attrs); err != nil {
+				return nil, err
 			}
 		case "image":
 			if len(n.Content) > 0 {

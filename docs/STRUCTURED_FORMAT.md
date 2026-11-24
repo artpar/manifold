@@ -643,3 +643,16 @@ templates use %1..%9 and preserve literals. Enclosing list counters refresh matc
 ancestors during serialization, unless independent; fallback contexts cover resumed
 lists. Source SF/DOCX round trips retain canonical semantics and implicit nil defaults.
 See NUMBERING.md for supported formats, budgets and independent evidence.
+
+## Named points and internal links
+
+All blocks accept `attrs.anchors` (default []). `anchor_point` is a zero-height
+block boundary. Inline `anchor` is an atom with `attrs.name`, optionally a source
+mark, without text/format/link marks. `link` optionally includes `destination`,
+separate from its interoperable `href`; the root optionally declares
+`unresolvedDestinations`. Missing hrefs derive a fragment; present hrefs must refer
+to that ID. Plain href fragments retain generic URI semantics. IDs are unique,
+nonempty valid UTF-8 up to 1,024 bytes, and references require a definition or an
+explicit unresolved declaration. SF/JSON/DOCX preserve the graph. Native PDF binds
+standard named views after admission; PDF import recovery remains unfinished.
+See INTERNAL_DESTINATIONS.md for range, point placement and repeat policies.

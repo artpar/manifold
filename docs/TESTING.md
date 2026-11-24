@@ -2204,3 +2204,27 @@ Earlier normalized DOCX `audit_mqtt_source.py --compare` invocations use the old
 normative 434-target projection; current Word-compatible canonical links require
 the separate word-links oracle. Do not rewrite the original oracle to hide that
 contract change. The new source audit rechecks all of its original target/text hashes.
+
+## Typed SF/DOCX/native PDF destinations
+
+```sh
+GOWORK=off go test -run 'TestDestination|TestRealWordBookmarkIdentity' -count=1 .
+GOWORK=off go run ./examples/destinations
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-destinations-profile --headless --convert-to odt --outdir output/destinations/lo output/destinations/destinations.docx
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-destinations-profile --headless --convert-to pdf --outdir output/destinations/lo output/destinations/destinations.docx
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/destinations/source.sf output/destinations/from-docx.sf output/destinations/mqtt.sf
+output/qa-venv/bin/python scripts/verify_destinations.py --office-odt output/destinations/lo/destinations.odt
+output/qa-venv/bin/python scripts/verify_mqtt_render.py --out output/destinations
+```
+
+Generate output/destinations/mqtt.sf/PDF with the font mappings in FONT_SUBSETTING.md
+and the numbering/URI milestones, keeping eacd33c's ignored
+output/internal-destinations/mqtt.pdf as the unchanged paint/rectangle baseline.
+The verifier uses original ZIP/XML for all 3,106 names/379 visible target IDs. It
+checks 17 synthetic named views against pypdf and actual MuPDF resolve_link (whose
+get_links named coordinates are raw, unlike resolved screen coordinates). Both
+native and both LibreOffice-rendered pages were inspected. LibreOffice ODT import
+retains 17 names/ten link text/target pairs; its PDF export omits most links, also
+for a minimal python-docx probe. Do not treat that PDF as a link oracle. PDF import
+still emits its prior unrepresented-action diagnostic and does not recover these
+targets. This milestone does not qualify PDF-to-SF internal navigation.

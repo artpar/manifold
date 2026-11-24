@@ -1,5 +1,12 @@
 # Active goal acceptance audit
 
+Latest navigation milestone: typed points/links and missing declarations now run
+through SF/DOCX/native PDF, with all 3,106 original Word names and unchanged native
+paint. Independent point/view checks, source graph tests and LibreOffice ODT import
+verify the current slice. PDF-to-SF physical destination recovery and inferred flow
+binding remain required next work. The complete goal remains incomplete; see
+INTERNAL_DESTINATIONS.md and STATUS.md before using historical next-step notes.
+
 Audited 2026-11-24 after the SF foundation merged-table and explicit-list and typed-note, positioned-PDF and forward-tagged-PDF and Unicode-typography/implied-paragraph/untagged-inference/painted-grid/rich-cell/body-table-continuation/recursive-table/explicit-page-break/paragraph-property/image-height/repeating-header/text-style/PDF-style-recovery/theme-color/font-slot/glyph-transport/language-LTR-shaping/default-shaping/paint-context milestones. **Not complete.** Passing initial
 checks does not satisfy the expanded user goal. No external blocker currently
 prevents continuing implementation.

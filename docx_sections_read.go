@@ -1,6 +1,7 @@
 package manydoc
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"strings"
@@ -189,7 +190,28 @@ func (r *docxReader) readDocumentSections(properties []*xmlNode, rels map[string
 			*destination = &RunningStory{Blocks: blocks}
 			storyCache[rel.Target] = *destination
 		}
-		sections = append(sections, Block{Kind: SectionBlock, Section: s})
+		var anchors []string
+		if raw := p.attributeNS(docxNotesNS, "sectionAnchors"); raw != "" {
+			if model != "1" {
+				return fmt.Errorf("section anchor metadata requires exported section model")
+			}
+			if err := json.Unmarshal([]byte(raw), &anchors); err != nil || len(anchors) == 0 {
+				return fmt.Errorf("invalid section anchor metadata")
+			}
+			if len(s.Blocks) == 0 || len(s.Blocks[0].Anchors) < len(anchors) {
+				return fmt.Errorf("section anchor metadata lacks standard bookmarks")
+			}
+			for j, id := range anchors {
+				if s.Blocks[0].Anchors[j] != id {
+					return fmt.Errorf("section anchor metadata contradicts standard bookmarks")
+				}
+			}
+			s.Blocks[0].Anchors = s.Blocks[0].Anchors[len(anchors):]
+			if s.Blocks[0].Kind == AnchorPoint && len(s.Blocks[0].Anchors) == 0 {
+				s.Blocks = s.Blocks[1:]
+			}
+		}
+		sections = append(sections, Block{Kind: SectionBlock, Section: s, Anchors: anchors})
 		if s.Layout != nil {
 			previous = cloneLayout(*s.Layout)
 		}

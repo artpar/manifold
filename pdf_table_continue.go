@@ -193,6 +193,7 @@ func (r *pdfRenderer) planTablePage(plan *pdfTableLayout, g pdfTableGroup, curso
 }
 
 func (r *pdfRenderer) paintTablePage(plan *pdfTableLayout, page pdfTablePage, x, top float64) error {
+	r.bindDestinations(plan.anchors, top)
 	y := top
 	if page.header != nil {
 		if err := r.paintTableGroup(plan, page.header.group, x, y); err != nil {

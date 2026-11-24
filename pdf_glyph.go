@@ -467,7 +467,7 @@ func (f *pdfGlyphFace) embed(ctx context.Context, p *model.Context, tag string) 
 	return p.IndRefForNewObject(types.Dict{"Type": types.Name("Font"), "Subtype": types.Name("Type0"), "BaseFont": types.Name(name), "Encoding": types.Name("Identity-H"), "DescendantFonts": types.Array{*descendant}, "ToUnicode": *unicodeMap})
 }
 func (r *pdfRenderer) finishGlyphFonts(input []byte) (output []byte, err error) {
-	if len(r.glyphFaces) == 0 {
+	if len(r.glyphFaces) == 0 && len(r.destinationPoints)+len(r.destinationTokens) == 0 {
 		return input, nil
 	}
 	defer func() {
@@ -540,6 +540,9 @@ func (r *pdfRenderer) finishGlyphFonts(input []byte) (output []byte, err error) 
 		}
 		resources["Font"] = merged
 		dict["Resources"] = resources
+	}
+	if err := r.finishDestinations(p); err != nil {
+		return nil, err
 	}
 	var b bytes.Buffer
 	p.Write.Writer = bufio.NewWriter(&b)

@@ -39,6 +39,12 @@ func TestMalformedInputsNeverPanic(t *testing.T) {
 	}
 }
 func FuzzReadDOCX(f *testing.F) {
+	var destinations bytes.Buffer
+	if err := Write(context.Background(), &destinations, destinationDocument(), DOCX, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(destinations.Bytes())
+
 	f.Add(fixture(f, "docx_basic.docx"))
 	f.Add(fixture(f, "docx_wrong_root.docx"))
 	f.Add(docxWithBody(f, mergedTableOOXML))

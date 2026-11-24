@@ -72,7 +72,21 @@ func (r *docxReader) table(n *xmlNode, rels map[string]docxRelation, depth int) 
 				target.RowSpan++
 				// Required empty continuation paragraphs carry no visible content. Any
 				// real content is retained at the origin, with an explicit placement loss.
-				if !emptyMergeContinuation(bs) {
+				if emptyMergeContinuation(bs) {
+					var anchors []string
+					for _, block := range bs {
+						anchors = append(anchors, block.Anchors...)
+						for _, run := range block.Runs {
+							if run.Anchor != "" {
+								anchors = append(anchors, run.Anchor)
+							}
+						}
+					}
+					if len(anchors) > 0 {
+						target.Blocks = append(target.Blocks, Block{Kind: AnchorPoint, Anchors: anchors})
+						r.doc.warn("merge_continuation_anchor", "Vertical merge continuation navigation points retained at the origin; original placement is normalized")
+					}
+				} else {
 					target.Blocks = append(target.Blocks, bs...)
 					r.doc.warn("merge_continuation_content", "Vertical merge continuation content retained at its origin; original placement is normalized")
 				}
@@ -116,7 +130,7 @@ func (r *docxReader) table(n *xmlNode, rels map[string]docxRelation, depth int) 
 
 func emptyMergeContinuation(bs []Block) bool {
 	for _, b := range bs {
-		if b.Kind != Paragraph || b.List != "" || b.PageBreakBefore {
+		if (b.Kind != Paragraph && b.Kind != AnchorPoint) || b.List != "" || b.PageBreakBefore {
 			return false
 		}
 		for _, run := range b.Runs {
@@ -227,9 +241,13 @@ func (w *docxWriter) table(b Block) (string, error) {
 					return "", err
 				}
 				out.WriteString(v)
-				if len(c.Blocks) == 0 {
+				last := len(c.Blocks) - 1
+				for last >= 0 && c.Blocks[last].Kind == AnchorPoint {
+					last--
+				}
+				if last < 0 {
 					out.WriteString(`<w:p md:emptyCell="1"/>`)
-				} else if c.Blocks[len(c.Blocks)-1].Kind == Table {
+				} else if c.Blocks[last].Kind == Table {
 					out.WriteString(`<w:p md:tableTail="1"/>`)
 				}
 			} else {

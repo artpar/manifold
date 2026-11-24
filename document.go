@@ -38,6 +38,8 @@ type Document struct {
 	Diagnostics       []Diagnostic `json:"diagnostics,omitempty"`
 	Pages             []PDFPage    `json:"pages,omitempty"`
 	EvenAndOddHeaders bool         `json:"even_and_odd_headers,omitempty"`
+	// UnresolvedDestinations explicitly retains source links whose target is absent.
+	UnresolvedDestinations []string `json:"unresolved_destinations,omitempty"`
 }
 type Metadata struct {
 	Title     string `json:"title,omitempty"`
@@ -69,12 +71,15 @@ const (
 	Picture      Kind = "image"
 	PageBreak    Kind = "page_break"
 	SectionBlock Kind = "section"
+	AnchorPoint  Kind = "anchor_point"
 )
 
 type Block struct {
 	// PageBreakBefore starts a paragraph/heading on a new page unless already
 	// at the page's first flow position. PageBreak blocks always advance a page.
 	PageBreakBefore bool `json:"page_break_before,omitempty"`
+	// Anchors binds names to the start of this block; AnchorPoint has zero height.
+	Anchors []string `json:"anchors,omitempty"`
 	// Direction is empty (unspecified), ltr or rtl; it describes paragraph flow.
 	Direction string `json:"direction,omitempty"`
 	Kind      Kind   `json:"kind"`
@@ -93,6 +98,7 @@ type Block struct {
 	Source                  *SourceInfo    `json:"source,omitempty"`
 	Section                 *Section       `json:"section,omitempty"`
 	docxSection             *xmlNode
+	docxAnchorGroup         string
 	docxSectionTail         bool
 	docxList                *docxListRef
 	docxNumberID            int
@@ -124,14 +130,18 @@ type Run struct {
 	FontSize   float64 `json:"font_size,omitempty"`
 	Color      string  `json:"color,omitempty"` // #RRGGBB or auto
 
-	Text      string         `json:"text"`
-	Bold      bool           `json:"bold,omitempty"`
-	Italic    bool           `json:"italic,omitempty"`
-	Underline bool           `json:"underline,omitempty"`
-	Strike    bool           `json:"strike,omitempty"`
-	Link      string         `json:"link,omitempty"`
-	Note      *NoteReference `json:"note,omitempty"`
-	Source    *SourceInfo    `json:"source,omitempty"`
+	Text      string `json:"text"`
+	Bold      bool   `json:"bold,omitempty"`
+	Italic    bool   `json:"italic,omitempty"`
+	Underline bool   `json:"underline,omitempty"`
+	Strike    bool   `json:"strike,omitempty"`
+	Link      string `json:"link,omitempty"`
+	// Destination is an internal name, separate from generic URI Link references.
+	Destination string `json:"destination,omitempty"`
+	// Anchor declares a zero-width named navigation point between text runs.
+	Anchor string         `json:"anchor,omitempty"`
+	Note   *NoteReference `json:"note,omitempty"`
+	Source *SourceInfo    `json:"source,omitempty"`
 }
 type Row struct {
 	// RepeatHeader repeats a contiguous prefix of rows on table continuation pages.
@@ -300,6 +310,8 @@ func textBlocks(b *strings.Builder, blocks []Block) {
 			}
 			seenSection = true
 			textBlocks(b, v.Section.Blocks)
+		case AnchorPoint:
+			continue
 		case PageBreak:
 			b.WriteString("\f")
 		case Table:
@@ -486,6 +498,10 @@ func (d *Document) Validate() error {
 				if b.Image.Width < 0 || b.Image.Height < 0 || math.IsNaN(b.Image.Width) || math.IsNaN(b.Image.Height) || math.IsInf(b.Image.Width, 0) || math.IsInf(b.Image.Height, 0) {
 					return errors.New("invalid image dimensions")
 				}
+			case AnchorPoint:
+				if len(b.Anchors) == 0 || len(b.Runs) > 0 || len(b.Rows) > 0 || b.Image != nil || b.List != "" || len(b.Items) > 0 || b.Section != nil || b.Level != 0 || b.PageBreakBefore || b.Direction != "" || len(b.ColumnWidths) != 0 || b.Start != nil || b.Numbering != nil {
+					return errors.New("anchor point requires only named anchors")
+				}
 			case PageBreak:
 				if len(b.Runs) > 0 || len(b.Rows) > 0 || b.Image != nil {
 					return errors.New("page break cannot contain content")
@@ -505,6 +521,9 @@ func (d *Document) Validate() error {
 		if err := walk(n.Blocks, 0); err != nil {
 			return err
 		}
+	}
+	if _, err := catalogDestinations(d, true); err != nil {
+		return err
 	}
 	return validateNotes(d)
 }

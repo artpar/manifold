@@ -109,6 +109,9 @@ type pdfSpan struct {
 type pdfLine []pdfSpan
 type pdfRenderer struct {
 	ctx                      context.Context
+	destinationPoints        map[string]pdfDestinationPoint
+	destinationTokens        map[string]string
+	destinationURIs          map[string]string
 	pdf                      *gofpdf.Fpdf
 	width, height, margin, y float64
 	images                   int
@@ -159,6 +162,9 @@ func writePDFWithFonts(ctx context.Context, out io.Writer, d *Document, fonts []
 	p.SetAuthor(d.Metadata.Author, true)
 	p.SetSubject(d.Metadata.Subject, true)
 	r := &pdfRenderer{ctx: ctx, pdf: p, width: w, height: h, margin: m, page: &g, y: math.Abs(g.margins.Top), validatedImages: make(outputImageCache)}
+	if err := r.prepareDestinations(d); err != nil {
+		return err
+	}
 	r.fontMap = map[string]string{}
 	for from, to := range fontMap {
 		if from == "" || to == "" {
@@ -262,7 +268,10 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 			return err
 		}
 		switch b.Kind {
+		case AnchorPoint:
+			r.bindDestinations(b.Anchors, r.y)
 		case PageBreak:
+			r.bindDestinations(b.Anchors, r.y)
 			if err := r.nextPage(true); err != nil {
 				return err
 			}
@@ -289,10 +298,13 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 					return err
 				}
 			}
-			for _, line := range lines {
+			for lineIndex, line := range lines {
 				leading = pdfLineHeight(line, size, 1.4)
 				if err := r.ensureWithNotes(leading, lineNoteKeys(line)); err != nil {
 					return err
+				}
+				if lineIndex == 0 {
+					r.bindDestinations(b.Anchors, r.y)
 				}
 				r.drawLine(line, x, r.y, size)
 				r.y += leading
@@ -315,6 +327,7 @@ func (r *pdfRenderer) blocks(bs []Block, width, x float64) error {
 			if err := r.ensure(im.height + 8); err != nil {
 				return err
 			}
+			r.bindDestinations(b.Anchors, r.y)
 			if err := r.drawImage(im, x, r.y); err != nil {
 				return err
 			}

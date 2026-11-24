@@ -21,7 +21,41 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: external Word fragments; internal target audit
+## Latest milestone: typed navigation points through SF/DOCX/native PDF
+
+The shared API/profile now preserves inline/block/boundary anchors, typed internal
+links and explicitly unresolved names. Native output binds standard named GoTo
+views after actual flow admission, without changing text/shaping/pagination.
+DOCX bookmark names/pairs, metadata and missing-target graphs are checked. Read
+INTERNAL_DESTINATIONS.md for API, positions, repetition/range policies and limits.
+
+Independent original-XML checks retain all 3,106 names/379 visible target IDs.
+The new 189-page PDF has 1,145 GoTo/81 URI annotations and exactly unchanged page
+commands/annotation rectangles against eacd33c. Only the source's three missing
+_Introduction links remain unbound. The two-page all-story example verifies 17
+actual destinations and ten LibreOffice-imported link pairs; Unicode/collision/
+ligature/empty/nested-cell cases and 26,548 actual ProseMirror nodes pass. Native
+and LibreOffice visual samples were inspected. LibreOffice's PDF exporter omits
+most links even for a minimal independent probe; its ODT import, not that PDF
+export, verifies the generated DOCX navigation. Original fonts/assets/text and
+URI source fixtures/oracles remain intact. No production dependency was added.
+
+Full tests pass (library 14.107s / CLI 0.674s). Race checks pass (171.846s / 1.981s), as do vet,
+module verification, host/Linux CGO-disabled builds and diff checks; new SF
+and DOCX fuzz seeds passed 6,753 / 305 mutations (ten-second campaigns). The host
+CGO-disabled CLI exercised all four operations; current PDF import explicitly
+reports the pending navigation loss. Section/empty-section graph round trips pass;
+LibreOffice also confirms an initial point retains an unconditional blank first page.
+
+PDF-to-SF destination recovery remains **unfinished**, so this is an intermediate
+milestone and the complete goal remains active/incomplete. Next commands:
+`GOWORK=off go run ./examples/destinations`;
+`output/qa-venv/bin/python scripts/verify_destinations.py --office-odt output/destinations/lo/destinations.odt`;
+`rg -n 'readLink|logicalLink|pageRefs|geometricLinks' pdf_links.go pdf_read.go pdf_structure_blocks.go`.
+Implement physical destination/view provenance and explicit/inferred flow binding
+through direct/named targets, then continue the bounded acceptance/corpus/codec audit.
+
+## Previous milestone: external Word fragments; internal target audit
 
 DOCX relationship + anchor hyperlinks retain their actual Word URI, with a Word/
 strict-OOXML compatibility diagnostic. Four original elements now yield the three
