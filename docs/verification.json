@@ -7365,5 +7365,45 @@
       "node scripts/prepare_colleaf_browser.cjs",
       "python3 -m http.server 8768 --bind 127.0.0.1 --directory output/colleaf-browser"
     ]
+  },
+  "colleaf_note_order_edit_probe": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "command": "node scripts/verify_colleaf_note_order.cjs",
+    "checker_sha256": "dcb53997ee3bb712efbe6afa2a10f6734ce369f7a80d9ab671a6b121d510d4cf",
+    "source": "Unchanged public notes VDOCS, pinned actual core/engine-render1.0.4. Original first-reference-order oracle remains note-2 then note-3; no application/vendor changes.",
+    "observations": {
+      "original": [
+        "manydoc-note-3",
+        "manydoc-note-2"
+      ],
+      "no_repeat_control": [
+        "manydoc-note-2",
+        "manydoc-note-3"
+      ],
+      "raw_range_swap_control": [
+        "manydoc-note-2",
+        "manydoc-note-3"
+      ],
+      "after_native_TextX_insertion": [
+        "manydoc-note-3",
+        "manydoc-note-2"
+      ],
+      "after_edit_reference_indices": [
+        128,
+        148
+      ]
+    },
+    "decision": "Do not adopt raw array reordering: ordinary native editing canonicalizes ranges and restores wrong body order. The pinned citation type has only noteId, no separate placement identity. No safe data-level repair established yet; other goal work continues.",
+    "checks": {
+      "syntax": "node --check passes",
+      "acceptance": "original first-reference-order assertion still FAILS, as required to keep the gap visible; no-repeat control passes, reordering control demonstrates transient success then regression after edit",
+      "production": "No production change in this probe; current Go constant-template work is separate and remains under verification.",
+      "diff_check": "passed"
+    },
+    "next_commands": [
+      "node scripts/verify_colleaf_note_order.cjs",
+      "cat docs/COLLEAF_BROWSER.md docs/STATUS.md"
+    ]
   }
 }

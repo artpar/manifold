@@ -54,6 +54,16 @@ control.body.customRanges=control.body.customRanges.filter(range=>{
 });
 assert.equal(removed,1,'the original fixture must retain its repeated citation');
 const controlResult=observe(control);assert.deepEqual(controlResult.observed,expected);
-console.log(JSON.stringify({expectedFirstReferenceOrder:expected,observedBodyOrder:original.observed,positions:original.positions,noRepeatControlOrder:controlResult.observed},null,2));
+// Reordering raw ranges is not a stable fix: a normal TextX edit canonicalizes
+// them again. Keep this experiment separate from the unchanged acceptance input.
+const reordered=structuredClone(d);
+const repeats=reordered.body.customRanges.map((r,i)=>[r,i]).filter(([r])=>r.properties?.noteId===expected[0]).map(([,i])=>i);
+assert.equal(repeats.length,2);
+[reordered.body.customRanges[repeats[0]],reordered.body.customRanges[repeats[1]]]=[reordered.body.customRanges[repeats[1]],reordered.body.customRanges[repeats[0]]];
+const beforeEdit=observe(reordered);
+const edited=structuredClone(reordered);
+edited.body=core.TextX.apply(edited.body,new core.TextX().insert(1,{dataStream:'X'}).serialize());
+const afterEdit=observe(edited);
+console.log(JSON.stringify({expectedFirstReferenceOrder:expected,observedBodyOrder:original.observed,positions:original.positions,noRepeatControlOrder:controlResult.observed,rawRangeReorderControl:beforeEdit.observed,afterNativeTextXEdit:afterEdit.observed,editedReferenceIndices:afterEdit.positions.map(p=>p.referenceIndex)},null,2));
 assert.deepEqual(original.observed,expected,'native footnote bodies must follow first-reference order even with repeated citations');
 console.log('Native footnote first-reference placement order passes');

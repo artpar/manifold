@@ -81,3 +81,20 @@ established yet. The broader browser edit/save/reopen, navigation, image/font/
 wrapping and mobile/preset checks remain unqualified. The full goal stays active;
 this is a precise newly reproduced gap, not a declaration that all work is blocked
 or a reason to narrow the objective.
+
+
+## Raw range reordering is not a stable repair
+
+The pinned API exposes noteId on a citation range, with no independent repeated-
+citation placement identity. A new separate control swaps the first/repeated
+range records without moving their actual text positions. This initially makes
+the headless body order correct, proving the renderer depends on input ordering.
+A normal TextX insertion of X at the start sorts ranges to their current positions;
+body order immediately reverses again, with stored reference indices 128/148.
+
+The acceptance checker now logs this before/after-edit control as well as the
+original and no-repeat results. It still fails the unchanged original first-
+reference-order assertion. Reordering raw arrays would therefore only hide the
+problem until editing and is not adopted in the library. Other native API/schema
+representations or the remaining goal work still require investigation; no overall
+blocked state follows from this scoped external-engine limitation.
