@@ -126,3 +126,11 @@ annotations, missing/null/extra entries, malformed shape/ranges/owners/cycles an
 resource bounds. Missing reciprocal metadata is disclosed without dropping forward
 content. This closes the specific ignored-ParentTree gap, not general source or
 resource safety, accessibility conformance or full goal acceptance.
+
+
+Latest resource evidence closes a concrete attribute-graph amplification gap:
+small shared arrays and cross-owner classes now stop at a document-wide expanded
+work budget, and traversal observes cancellation. A valid shared graph preserves
+local Roman-over-Decimal behavior and exact body/label/source/SF evidence. Original
+source bytes and oracles remain unchanged. See PDF_RESOURCES.md; broader resource
+and final acceptance remain unproven.

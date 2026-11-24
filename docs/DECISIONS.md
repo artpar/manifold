@@ -2285,3 +2285,15 @@ metadata is a diagnosed partial-source condition; it does not erase otherwise
 recoverable forward content. Inverse-only entries do not authorize invented content
 or ordering. Validate number-tree shape, ordering, Limits when present, cycles and
 bounded owner slots. This is not a full conformance/accessibility certification.
+
+
+## 2026-11-24 Bound expanded PDF attribute work across owners
+
+Count expanded attribute visits rather than unique indirect objects or per-owner
+work. Shared acyclic arrays can multiply processing below the depth limit; shared
+classes can also exceed a document budget across multiple owners. Use an explicit
+200,000-work-entry bound and cancellation checks during traversal. Keep class
+attributes before local overrides and retain revision diagnostics. Regression
+fixtures demonstrate previously accepted over-budget work and ignored cancellation;
+a smaller valid graph proves the override/visible/source contract is preserved.
+This parser work limit is not application quota or exhaustive PDF safety.

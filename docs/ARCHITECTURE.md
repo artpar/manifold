@@ -1856,3 +1856,13 @@ there is no SF schema expansion. Missing indexes/keys/slots and inverse-only
 ownership remain explicit uncertainty; they never change forward ordering.
 Malformed/cyclic ranges, unknown/nonindirect owners, shared container keys, wrong
 slot shape and contradictory owners reject. See PDF_PARENT_TREE.md.
+
+
+## Bounded PDF attribute graph expansion
+
+The forward structure parser now shares a document-wide expanded-attribute work
+counter across owners. Value visits, class selection/entries and dictionary
+members consume the 200,000-entry budget, with cancellation checked during
+traversal. The existing depth-16 guard alone could not bound acyclic shared arrays.
+Class/local override order is unchanged; overflow returns an error without partial
+content. See PDF_RESOURCES.md for regression/source evidence and distinct bounds.

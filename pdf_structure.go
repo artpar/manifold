@@ -55,6 +55,7 @@ type pdfStructureRecovery struct {
 	marked         map[pdfContentKey][]int
 	active, seen   map[string]bool
 	referenceTotal int
+	attributeTotal int
 	nodes          int
 	grids          map[int][]pdfGridRegion
 	notes          map[*pdfStructureNode]*pdfRecoveredNote
@@ -361,6 +362,9 @@ func (s *pdfStructureRecovery) attributes(n *pdfStructureNode, d types.Dict) err
 	// validated but historical revision selection is explicitly diagnosed.
 	var attrs func(types.Object, int) error
 	attrs = func(value types.Object, depth int) error {
+		if err := s.attributeWork(); err != nil {
+			return err
+		}
 		if value == nil {
 			return nil
 		}
@@ -403,6 +407,9 @@ func (s *pdfStructureRecovery) attributes(n *pdfStructureNode, d types.Dict) err
 			return fmt.Errorf("attribute owner missing")
 		}
 		for k, v := range a {
+			if err := s.attributeWork(); err != nil {
+				return err
+			}
 			if k == "O" {
 				continue
 			}
@@ -415,6 +422,9 @@ func (s *pdfStructureRecovery) attributes(n *pdfStructureNode, d types.Dict) err
 		return nil
 	}
 	if c := d["C"]; c != nil {
+		if err := s.attributeWork(); err != nil {
+			return err
+		}
 		v, e := s.reader.pdf.Dereference(c)
 		if e != nil {
 			return e
@@ -424,6 +434,9 @@ func (s *pdfStructureRecovery) attributes(n *pdfStructureNode, d types.Dict) err
 			classes = types.Array{v}
 		}
 		for i := 0; i < len(classes); i++ {
+			if err := s.attributeWork(); err != nil {
+				return err
+			}
 			name, ok := classes[i].(types.Name)
 			if !ok {
 				return fmt.Errorf("invalid attribute class name")
@@ -448,7 +461,23 @@ func (s *pdfStructureRecovery) attributes(n *pdfStructureNode, d types.Dict) err
 			}
 		}
 	}
-	return attrs(d["A"], 0)
+	if d["A"] != nil {
+		return attrs(d["A"], 0)
+	}
+	return s.reader.ctx.Err()
+}
+
+// Count expanded visits, not unique objects: repeated acyclic attribute arrays
+// can amplify a small PDF into exponential work despite a nesting limit.
+func (s *pdfStructureRecovery) attributeWork() error {
+	if err := s.reader.ctx.Err(); err != nil {
+		return err
+	}
+	s.attributeTotal++
+	if s.attributeTotal > 200000 {
+		return fmt.Errorf("structure attributes exceed 200000 work entries")
+	}
+	return nil
 }
 func (s *pdfStructureRecovery) content(n *pdfStructureNode) ([]Block, error) {
 	var ids []int

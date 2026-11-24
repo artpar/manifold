@@ -1195,3 +1195,10 @@ and evidence. This does not infer hidden ancestor/legal intent or arbitrary
 alphabets. Ambiguous, annotated or non-text labels retain literal rich content
 with disclosed loss of editable list semantics. Marker appearance may normalize
 on reflow with a diagnostic. NUMBERING.md records exact scopes and checks.
+
+
+Tagged attribute interpretation now bounds expanded value/class/member visits
+across all owners to 200,000 work entries, in addition to depth16, and observes
+cancellation during traversal. Compact shared-array amplification rejects without
+a partial document. Supported class/local override semantics are unchanged. See
+PDF_RESOURCES.md; this is scoped resource protection, not exhaustive PDF safety.

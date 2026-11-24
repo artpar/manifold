@@ -40,7 +40,38 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: reciprocal PDF ParentTree audit
+## Latest progress: bounded PDF attribute graph traversal
+
+A small acyclic attribute-array graph could amplify work through shared indirect
+references despite the existing depth-16 guard. The new document-wide 200,000-work-
+entry budget counts expanded value/class/member visits across all owners and
+checks cancellation while traversing. Overflow rejects without a partial document.
+Class/local override order, supported attribute semantics and revision diagnostics
+are unchanged. No public API/SF schema, output layout or dependency changes.
+
+The new regressions reproduced successful over-budget imports and ignored
+cancellation before the fix. They now pass; a valid shared graph still preserves
+local Roman numbering over class Decimal, its literal/source label, start/body
+and SF structure. Both amplification fixtures stay below 5,000 source bytes;
+fanout eight/depth six expands to 262,144 leaf visits. See PDF_RESOURCES.md.
+
+```sh
+GOWORK=off go test -run 'TestPDFAttribute|TestPDFPublished' -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzPDFAttributeGraph$' -fuzztime=10s -parallel=2 .
+```
+
+Final evidence is being recorded. The goal remains active/incomplete; this closes
+the concrete unbounded attribute-walk gap, not general PDF resource safety or the
+remaining native/semantic/reflow/API/visual acceptance audits.
+
+Full tests pass (library 27.044s/CLI 0.534s), full race passes (317.245s/3.178s),
+vet/modules and CGO-disabled focused tests (1.969s), host CLI build/help and Linux
+amd64/arm64 cross-builds pass. Bounded graph fuzz passes 4,062 executions/10.537s/
+two workers (short safety sample). The original InDesign SF is byte-identical to
+its preceding-milestone result; independent source/DOCX/PDF checks pass. Details
+and hashes are in verification.json and PDF_RESOURCES.md. Goal active/incomplete.
+
+## Earlier progress: reciprocal PDF ParentTree audit
 
 PDF import now cross-checks present inverse ParentTree entries against forward
 page/Form MCIDs and whole-object annotation ownership. Number-tree keys/ranges,

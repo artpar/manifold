@@ -2424,3 +2424,12 @@ painted generated notes, then create separate contradictory-owner variants whose
 decoded page streams remain unchanged. CLI rejection and absence of committed
 output are checked separately. This evidence concerns ownership consistency,
 not full PDF resource safety, standards certification or visual equivalence.
+
+
+## Expanded PDF attribute work
+
+PDF_RESOURCES.md records small acyclic shared-array and cross-owner class
+amplification regressions, deterministic mid-traversal cancellation, unchanged
+valid local/class override semantics and the bounded FuzzPDFAttributeGraph target.
+The regression fixtures and expectations were authored before the fix; no original
+source/golden was changed to obtain passing results.

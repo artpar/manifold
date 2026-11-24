@@ -7263,5 +7263,37 @@
       "GOWORK=off go test -run 'TestPDFParentTree|TestPDFTagged|TestGeneratedPDF' -count=1 .",
       "output/qa-venv/bin/python scripts/verify_pdf_parent_tree.py testdata/real/copyright-office-circular-1-2021.pdf"
     ]
+  },
+  "pdf_attribute_work_milestone": {
+    "date": "2026-11-24",
+    "goal": "active/incomplete",
+    "problem": "Attribute-array nesting was bounded but repeated acyclic arrays/classes could amplify visits without a total-work budget or traversal cancellation checks.",
+    "before_fix": "New TestPDFAttributeExpansionBudget cases returned successful documents for compact shared-array and cross-owner graphs; deterministic TestPDFAttributeTraversalCancellation returned nil instead of context.Canceled. The cancellation fixture pointer setup was corrected before reproducing the actual ignored-cancellation failure.",
+    "behavior": "A document-wide200000 expanded-work-entry budget counts attribute value/class/member visits across owners and checks context during traversal. Overflow rejects without partial document; depth16/class-before-local/revision behavior remains. No API/SF/dependency/output-layout change.",
+    "regressions": "Under5000-byte fanout8/depth6 graph expands262144 leaves and rejects. Two owners share a depth5 graph and exceed the combined budget. A smaller valid graph retains local LowerRoman over repeated class Decimal, start4/displayed iv./body/source label/SF. Deterministic cancellation now wraps context.Canceled.",
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_published_pdf.py output/pdf-attributes/published",
+      "verifier_sha256": "c96670a07711cf232c96368731233640f8c17dff97872bb47ae106e3a16bd88b",
+      "results": "Original source hash/metadata;10 lists/57 items and exact K membership;16 URI targets and typed internal GoTo/name identity;20531 normalized nonspace characters;DOCX content/metadata;9 reflowed PDF pages/space counts/bounds all pass.",
+      "source_SF_sha256": "2d630c8ff72ec594b95b67542d66bf2df13886380672f6a213e5713b8095a7b2",
+      "comparison": "cmp against preceding ParentTree-milestone original-source SF passes byte-for-byte. No original fixture or expected oracle changed.",
+      "visual_scope": "No output painting/layout change; prior visual evidence is not expanded into a new fidelity claim."
+    },
+    "checks": {
+      "go_test_all": "passed library27.044s/CLI0.534s",
+      "race": "passed library317.245s/CLI3.178s",
+      "vet": "passed",
+      "modules": "all modules verified",
+      "CGO_disabled_focused": "passed1.969s",
+      "builds": "CGO-disabled host CLI build/help executed;Linux amd64/arm64 cross-builds pass, not execution",
+      "fuzz": "FuzzPDFAttributeGraph passed4062 executions/10.537s/two workers/3 seeds;bounded depth/fanout/owner graph variations, short safety sample",
+      "diff_check": "passed"
+    },
+    "remaining": "Broader native rendering/settings/browser, note-policy/untagged/custom-list/source/reflow and final semantic/API/visual audits remain open. Scoped work-budget protection is not exhaustive PDF resource safety.",
+    "next_commands": [
+      "GOWORK=off go test -run 'TestPDFAttribute|TestPDFPublished' -count=1 .",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzPDFAttributeGraph$' -fuzztime=10s -parallel=2 .",
+      "cat docs/STATUS.md docs/ACCEPTANCE.md docs/COLLEAF_FORMAT.md"
+    ]
   }
 }
