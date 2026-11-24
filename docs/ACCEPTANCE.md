@@ -164,15 +164,15 @@ block-bearing labels remain literal on recovery, including numeric/bullet text.
 DOCX now retains rich literal labels in checked borderless layout cells, with
 sequential label/body ranges in notes to avoid nested-table omission. Mixed automatic
 counters use real start overrides; item page starts sit before layout cells.
-VDOCS generation remains required unfinished work and rejects before output;
-it is not excused by that rejection. Existing
+VDOCS now generates checked native label/body cells and recovers actual content. Existing
 source/text/pixel oracles remain unchanged while structural assertions strengthen.
 LITERAL_LIST_MARKERS.md records the schema, evidence and next implementation.
 
 
-Native literal-marker graph support now has an internal checked table-ownership
-prototype with exact SF/source and pinned SDK/facade-save evidence. The strict
-browser image-pixel oracle now passes after native drawing resource registration;
-public VDOCS marker export remains unfinished pending nested-list and pagination
-qualification. No body/asset cache or general native fidelity claim is introduced. See
-NATIVE_LITERAL_MARKERS.md for schema, observations and reproduction.
+Public VDOCS literal-marker generation now preserves actual editable label/body
+cells, source owners and real automatic counters. Native list indentation retains
+measured counter advance; custom foreign indents still diagnose. SDK edits/saves,
+actual desktop/mobile saves, image pixels and96 unique label/body tokens across
+six native pages pass scoped checks. See NATIVE_LITERAL_MARKERS.md for exact
+commands, original counter regression evidence and wider qualification limits.
+The full acceptance goal remains active; no general native/Word fidelity is claimed.

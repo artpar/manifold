@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -72,15 +71,18 @@ func TestLiteralMarkerSFJSONGzipAndIdentityGraphs(t *testing.T) {
 	}
 }
 
-func TestLiteralMarkerGenerationRejectsBeforeOutput(t *testing.T) {
-	// This is an explicit unfinished renderer capability, not permission to drop
-	// new marker content or narrow the all-four-path completion criteria.
-	for _, format := range []Format{VDOCS} {
-		var out bytes.Buffer
-		err := Write(context.Background(), &out, literalMarkerDocument(), format, WriteOptions{AllowLossy: true})
-		if !errors.Is(err, ErrUnsupported) || out.Len() != 0 {
-			t.Fatal(format, "marker silently discarded or partial output", err)
-		}
+func TestLiteralMarkerNativePublicGeneration(t *testing.T) {
+	want := resolveNumberingDocument(literalMarkerDocument())
+	var out bytes.Buffer
+	if err := WriteVDOCS(context.Background(), &out, want); err != nil {
+		t.Fatal(err)
+	}
+	got, err := ReadVDOCS(context.Background(), &out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(canonicalSF(t, want), canonicalSF(t, got)) {
+		t.Fatal("public native writer changed actual label content/relationships")
 	}
 }
 

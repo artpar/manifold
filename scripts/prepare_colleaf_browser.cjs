@@ -39,6 +39,12 @@ qa.renderedNotes=()=>{
  const skeleton=render.with(DocSkeletonManagerService).getSkeleton();
  return skeleton.getSkeletonData().pages.map((p:any,index:number)=>({page:index+1,notes:(p.notes||[]).map((n:any)=>({id:n.noteId,type:qa.snapshot().document.notes[n.noteId]?.type,referenceIndex:n.referenceIndex,top:n.top}))}));
 };
+// Raw native geometry for scoped QA probes; it is never part of application data.
+qa.skeletonData=()=>{
+ const doc=qa.runtime.univerAPI.getActiveDocument();
+ const render=qa.runtime.univer.__getInjector().get(IRenderManagerService).getRenderUnitById(doc.getId());
+ return render.with(DocSkeletonManagerService).getSkeleton().getSkeletonData();
+};
 qa.result=await qa.mount(await (await fetch('/document.vdocs')).json());
 qa.ready=true;
 document.querySelector('#status')!.textContent='Ready';

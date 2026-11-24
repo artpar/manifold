@@ -40,7 +40,39 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: native drawing registration fixes missing image paint
+## Latest progress: public native rich labels and measured counters
+
+VDOCS literal-marker export is now enabled through the checked native label/body
+graph. The temporary writer guard is removed. Public API/CLI tests recover exact
+label/source/formatting/relationship graphs; the authored CLI example's recovered
+SF equals the canonicalized SF source byte-for-byte and validates23 ProseMirror
+nodes/marks/attrs. Raw authored JSON omits empty layout/metadata and uses whitespace;
+the writer normalizes these defaults, so raw input bytes are not equal.
+
+Actual native insertion exposed the nested counter's missing indentation. Ordinary
+native list levels now use21px indent steps with zero hanging so the engine retains
+its measured counter advance. A fixed21px frame initially overlapped long counters;
+the original numbering example exposed it and now visibly shows full Appendix AA.,
+compound, Roman and cell labels followed by separate body text. Empty right-aligned
+automatic-label cells keep measured layout without those properties. Custom foreign
+indents still diagnose; source/body content never becomes an SF cache.
+
+The scoped browser queue now passes: nested1. INNER_LIST; full Item7)/Item9) counters;
+unchanged red source/pixels (nested441/footnote420) plus400 dimmed header pixels;
+96 unique label/body tokens across six native pages. All six pages were visually
+inspected, along with nested/mixed/original numbering and mobile nested views.
+Actual desktop1000×1400 and mobile375×812 touch presets produce the same graphs;
+six actual app saves and pinned SDK facade saves reimport exactly. No runtime errors.
+Read NATIVE_LITERAL_MARKERS.md for reproducible probes and precise evidence scope.
+This is targeted synthetic qualification, not universal native/Word fidelity.
+
+Final Go suite passes (library26.966s/CLI0.880s), CGO-disabled focus0.425s,
+vet/modules and host/Linux amd64/arm64 CGO-disabled builds pass. Full race passes on final production/test code (library319.534s/CLI3.154s), and
+focused actual-save race passes (1.783s). Owned browser/server were closed after QA.
+Superseded full-race snapshots were deliberately stopped after production changes
+(the label-only exception, then measured hanging fix); they are not passing claims.
+
+## Earlier: native drawing registration fixes missing image paint
 
 Committed prototype b390dbf preserved graph/save evidence and the original failing
 browser oracle. Actual native image insertion then exposed the missing built-in
@@ -125,7 +157,7 @@ actual ODT link graph and reports the discrepancy. An isolated w:history probe d
 not fix it. This does not qualify Word-PDF hyperlink export or general Word fidelity;
 read LITERAL_LIST_MARKERS.md for the evidence and reproducible commands.
 
-VDOCS literal-marker mapping remains required unfinished work and still rejects
+At this earlier checkpoint VDOCS literal-marker mapping still rejected
 before output. Native repeated-footnote ordering and broader resource/source/API/
 visual/original acceptance audits remain open. The complete goal stays active.
 
@@ -176,7 +208,7 @@ cross-builds establish compilation, not Linux execution. The short paint-context
 fuzz sample passes (eight executions/12.335s); it is not broad fuzz evidence.
 Commits 5b806cc and the following evidence update record this PDF milestone.
 
-VDOCS literal-marker generation remains required unfinished work and rejects
+At this earlier checkpoint VDOCS literal-marker generation still rejected
 before output. The native repeated-footnote ordering failure and wider source/
 resource/reflow/API/visual acceptance audits remain open; the goal is incomplete.
 Final checks for this milestone are recorded in verification.json. Prior
@@ -480,10 +512,8 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-1. Qualify the nested ordinary list counter/clipping in NATIVE_LITERAL_MARKERS.md; compare
-   actual native insertion with the Go snapshot, then qualify/enable marker export.
-   The checked graph prototype and DOCX/PDF mappings now exist. The current output rejection is temporary
-   required work, not a completed support-contract exception. Reproduce the native
+1. Audit the wider source/resource/reflow/native corpus contract now that public
+   literal-marker mappings exist in all output formats. Reproduce the native
    repeated-footnote failure in COLLEAF_BROWSER.md without weakening its oracle.
    Broaden source/structure and resource audits beyond the newly qualified
    reciprocal ParentTree checks, using malformed and independently authored sources.

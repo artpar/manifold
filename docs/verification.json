@@ -7634,5 +7634,46 @@
       "node scripts/prepare_colleaf_browser.cjs output/native-literal/nested.vdocs",
       "node scripts/verify_colleaf_literal_markers.cjs"
     ]
+  },
+  "native_literal_public_measured_layout": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "Public VDOCS rich literal-marker generation enabled; temporary writer guard removed. Actual editable label/body native content, source graph and sparse ownership remain authoritative. Ordinary lists indent21px per logical level with zero hanging,retaining actual measured counter advances. Empty right-aligned automatic-label cells keep measured layout without ordinary list properties. Custom foreign indents still diagnose.",
+    "counter_discovery": "Actual native inserted numbered paragraph exposed missing indent. Fixed21px hanging first fixed short1. but clipped mixed Item7)/Item9) suffixes and overlapped original AppendixAA./compound/Roman/cell counter bodies. Original oracles retained. Label-only exception and measured zero-hanging fix now show full counters/body separation. AppendixAA. observed content88.874px/advance94.5px.",
+    "SDK": {
+      "command": "node scripts/verify_colleaf_literal_markers.cjs",
+      "sha256": "36395aaffb8423146eecb821a6f589eca7cc0bc5b2e743b6c44c65ff42e07062",
+      "result": "Pinned validator/glyph/table/header/note/counter/TextX edit/actual facade saves pass,including continued case. Go actual-saved graph checks pass."
+    },
+    "browser": {
+      "prepare_sha256": "e4deadb742136deb3982f668786c82590d01e08d66c90fe3e80a2229d2aa4f6c",
+      "probe_sha256": "274f43b79dd0216be0b5d69630bd771ac357215bd3de5b2f30984dde906c5cbc",
+      "viewports": "Desktop1000x1400x1;actual mobile preset375x812x1,mobile,touch. Intermediate mobile preset also ran at1000x1400;only viewport-specific evidence is claimed.",
+      "result": "Nested1.INNER_LIST and complete Item7)/Item9) glyphs/positive layout/measured advance checks pass. Narrow300x400pt fixture retains96 unique label/body tokens exactly once across6 pages,with both columns on each page,in desktop and mobile. Six actual app saves reimport exactly through public ReadVDOCS. No runtime errors.",
+      "images": "Unchanged exact source and red-pixel oracle passes:nested441/footnote420;separate inactive-header pink400.",
+      "cleanup": "Owned isolated browser tab closed and QA server deliberately terminated after observed result.",
+      "visual": "Nested/mixed/original numbering/full-page running-note views inspected;all six continued pages inspected in two overview screenshots;mobile nested view inspected. Synthetic scoped evidence,not universal native/Word fidelity."
+    },
+    "CLI": "CGO-disabled host CLI converts authored examples/literal-markers/document.sf to VDOCS and extracts SF byte-identical to CLI-canonicalized source;raw authored JSON differs in whitespace/omitted empty metadata/layout defaults. Actual ProseMirror verifies23 nodes/marks/attrs. First attempt lacked output directory;mkdir then actual commands pass.",
+    "checks": {
+      "go_test_all": "passed final library26.966s/CLI0.880s",
+      "race": "passed final measured-layout run library319.534s/CLI3.154s;includes final production/test edits",
+      "focused_race": "passed final1.783s actual SDK/browser-save and list/public-marker checks",
+      "CGO_disabled_focus": "passed final0.425s",
+      "vet": "passed final",
+      "modules": "all modules verified",
+      "builds": "CGO-disabled host and Linux amd64/arm64 cross-builds pass;not Linux execution.",
+      "diff_check": "passed",
+      "malformed": "Existing malformed/stale ownership/source/asset tests remain;custom foreign-indent test requires explicit presentation diagnostic and exact remaining content/counters. Full suite includes existing fuzz seeds;no new fuzz campaign claimed."
+    },
+    "superseded_runs": "Two owned full-race snapshots were deliberately terminated after later production fixes (label-only exception,then measured hanging). They are not passing final-code claims;final run started after all production/test edits.",
+    "production_dependencies": "unchanged;independently authored standard-Go native mapping and existing optional pinned SDK/browser QA.",
+    "remaining": "Full goal active: native repeated-footnote order defect,Word-PDF link annotation discrepancy and broader original source/resource/reflow/corpus/API/visual acceptance audits remain. Oversized/unbreakable counter and broader native font/layout cases still require qualification. No universal fidelity or completion/blocker exemption.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/ACCEPTANCE.md docs/NATIVE_LITERAL_MARKERS.md",
+      "node scripts/verify_colleaf_note_order.cjs",
+      "rg -n 'resource|source|ParentTree|infer' docs/STATUS.md docs/ACCEPTANCE.md",
+      "GOWORK=off go test ./..."
+    ]
   }
 }

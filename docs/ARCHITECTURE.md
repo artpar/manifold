@@ -1899,9 +1899,9 @@ PDF irregular-label fallback now retains actual L/LI/Lbl structure, assets and
 relationships instead of flattening paragraphs. Unknown kind/counter intent is
 explicit. PDF generation uses a borderless parallel flow plan through the existing table
 continuation machinery, with real Lbl/LBody content owners and no logical layout
-table. Block-bearing labels remain literal on recovery. VDOCS generation is
-still guarded until its native mapping is implemented. LITERAL_LIST_MARKERS.md records required
-unfinished work; no completion follows from the extraction/persistence milestone.
+table. Block-bearing labels remain literal on recovery. VDOCS now uses checked
+editable label/body cells with measured automatic counters. LITERAL_LIST_MARKERS.md
+and NATIVE_LITERAL_MARKERS.md record scoped evidence and the broader open queue.
 
 
 Generated PDF ordinary Span groups now carry standard structural ActualText tied
@@ -1929,9 +1929,9 @@ tables and checked manydocLiteralItem role/counter metadata. Contiguous owners
 reconstruct lists; stale ownership retains actual cells and diagnostics. Source-only
 marker references join list/item origins, and all native model walks include marker
 trees. Empty automatic-label paragraphs use checked right alignment inside their
-cells. Actual SDK/facade graphs pass, but the browser red-image oracle fails even
-for a standalone control, so public export remains guarded. See
-NATIVE_LITERAL_MARKERS.md for the exact failure and required next investigation.
+cells. SDK/facade graphs, browser image/counter paint and six-page continuation
+now pass scoped checks and public export is enabled. See NATIVE_LITERAL_MARKERS.md
+for evidence and the broader remaining qualification queue.
 
 
 Native drawing registration follow-up: the initial zero-red canvas failure is
@@ -1940,5 +1940,18 @@ The pinned controller consumes that resource to initialize its registry and coll
 notes separately. Source descriptors/SF/assets remain authoritative and mirror
 contradictions reject. Actual native insertion, save/reload and unchanged red-pixel
 oracles establish this fix; inactive header paint is separately pink in the editor.
-See NATIVE_LITERAL_MARKERS.md. Public literal-marker export remains guarded for
-nested ordinary counter/pagination qualification; no native fidelity claim.
+See NATIVE_LITERAL_MARKERS.md. Subsequent measured-counter/pagination qualification
+enables public marker export; no general native fidelity claim.
+
+
+## 2026-11-25 Enable native rich labels after measured-layout qualification
+
+Public VDOCS generation now uses the checked editable label/body graph. Ordinary
+native lists use21px logical indentation steps and zero hanging so the engine
+retains measured counter advances. Fixed21px hanging made long counters overlap
+body text; the existing original numbering example exposed it. Right-aligned empty
+automatic-label cells keep measured layout without ordinary list properties. Exact
+generated layout is consumed on import; custom indents still diagnose. SDK saves,
+actual desktop/mobile app saves, complete nested/mixed counters, image pixels and
+six-page96-token continuation pass scoped checks. No universal layout guarantee
+or completion claim follows; NATIVE_LITERAL_MARKERS.md gives the remaining queue.

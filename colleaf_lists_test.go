@@ -85,6 +85,41 @@ func TestColleafRichListOwnershipNumberingAndSF(t *testing.T) {
 		}
 	}
 }
+
+func TestColleafCustomListIndentStillReportsPresentationLoss(t *testing.T) {
+	ctx := context.Background()
+	want := resolveNumberingDocument(colleafListExample())
+	wire, err := encodeColleafNotes(ctx, want)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, raw := range wire.Lists {
+		var list colleafNativeList
+		if err := json.Unmarshal(raw, &list); err != nil {
+			t.Fatal(err)
+		}
+		// This custom indent cannot be represented by logical SF nesting alone.
+		for i := range list.Levels {
+			list.Levels[i].Properties = json.RawMessage(`{"hanging":{"v":21},"indentStart":{"v":99}}`)
+		}
+		wire.Lists[id] = sfAttrs(list)
+	}
+	got, err := decodeColleafNotes(ctx, wire, colleafTextContext{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, d := range got.Diagnostics {
+		found = found || d.Code == "colleaf_list_presentation"
+	}
+	if !found {
+		t.Fatal("custom list indentation loss was silent")
+	}
+	got.Diagnostics = nil
+	if !reflect.DeepEqual(got, want) {
+		t.Fatal("custom indent normalization changed list content or counters")
+	}
+}
 func TestColleafNativeListsWithoutOwnershipKeepActualBullets(t *testing.T) {
 	ctx := context.Background()
 	wire, err := encodeColleafNotes(ctx, colleafListExample())

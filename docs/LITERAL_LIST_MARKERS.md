@@ -156,17 +156,16 @@ output/qa-venv/bin/python scripts/verify_docx_literal_markers.py --require-pdf-l
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/literal-docx/{rich,mixed-0,mixed-7,nested,running,continued,page-start,explicit-break,rtl,endnote}.sf
 ```
 
-## Required unfinished mapping
+## Native mapping
 
-VDOCS still rejects literal markers with ErrUnsupported before writing output,
-even with AllowLossy. The native mapping remains required work, not a completion
-exemption. An internal checked native table/flow prototype now preserves its rich
-model/source graph through SDK edits and facade saves. Actual browser red-image
-painting still fails, including a standalone control, so publication remains
-unfinished. See NATIVE_LITERAL_MARKERS.md for the precise oracle and next commands.
-Word's ordinary bullet glyph path truncated multi-character labels in
-the earlier experiment and is not a generic encoding. Keep actual editable content
-and assets authoritative in the checked native mapping as in DOCX/PDF.
+VDOCS now generates actual rich label/body cells with checked sparse ownership and
+real automatic counters. Public API/CLI roundtrips preserve the original label and
+source graphs. Pinned SDK/app saves, nested and mixed counter paint, images, and
+six-page label/body continuation now have scoped evidence. See
+NATIVE_LITERAL_MARKERS.md for schema, exact commands and wider qualification limits.
+Word's ordinary bullet glyph path truncated multi-character labels in the earlier
+experiment and is not a generic rich-label encoding; actual editable blocks remain
+authoritative in DOCX/PDF/native mappings.
 
 ## Evidence and commands
 
@@ -176,7 +175,7 @@ now additionally require explicit list/marker/item ownership instead of the old
 flattened stage. The original iv. First / Second paragraph text oracle is unchanged.
 
 New tests verify exact JSON/SF/gzip graphs, note/destination admission, source-only
-markers, malformed marker placement/payload, atomic unfinished-output rejection,
+markers, malformed marker placement/payload, public native semantic roundtrips,
 and variable None/UpperAlpha source labels. Independent pypdf compares actual
 original L/LI/Lbl references, source bounds, marker/body correspondence, URI, raster
 pixels and image dimensions/placement. Actual ProseMirror validates all new nodes.
@@ -211,8 +210,7 @@ See COLLEAF_BROWSER.md. The complete goal stays active; native generation and re
 semantic/source/resource/visual acceptance work are not closed by this milestone.
 
 
-Native browser follow-up: source-map-only image paint is fixed by the required
-DOC_DRAWING_PLUGIN registration resource. Original standalone/nested/footnote red
-pixel checks now pass; inactive header paint is separately checked in its dimmed
-editor appearance. Ordinary nested counters and label pagination remain unqualified,
-so public marker export stays guarded. See NATIVE_LITERAL_MARKERS.md.
+Native browser follow-up: drawing registration and ordinary counter clipping are
+resolved. Public marker generation is enabled after unchanged source/pixel/counter
+checks and desktop/mobile/long-label save/recovery evidence. The complete goal
+remains active; NATIVE_LITERAL_MARKERS.md records scope and remaining audits.

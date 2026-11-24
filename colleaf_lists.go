@@ -73,6 +73,25 @@ type colleafListParagraph struct {
 
 var colleafNumberFormats = []string{"decimal", "decimalZero", "upperLetter", "lowerLetter", "upperRoman", "lowerRoman"}
 
+// Indent logical levels using the native preset's 21px step. A zero hanging
+// width retains the engine's measured marker advance instead of forcing long
+// custom counters into the preset's fixed 21px frame. Without the indent, a
+// hanging marker sits outside a clipped cell. Custom indents still diagnose.
+func colleafListLayout(level int) json.RawMessage {
+	return sfAttrs(map[string]any{"hanging": map[string]int{"v": 0}, "indentStart": map[string]int{"v": 21 * (level + 1)}})
+}
+
+func standardColleafListLayout(raw json.RawMessage, level int) bool {
+	if len(raw) == 0 {
+		return true // Existing native documents may omit preset layout properties.
+	}
+	var actual, expected any
+	if json.Unmarshal(raw, &actual) != nil || json.Unmarshal(colleafListLayout(level), &expected) != nil {
+		return false
+	}
+	return reflect.DeepEqual(actual, expected)
+}
+
 func colleafNumberGlyph(format string) (int, error) {
 	for i, f := range colleafNumberFormats {
 		if f == format {
@@ -126,7 +145,12 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 		if err != nil {
 			return err
 		}
-		entry := colleafListLevel{Format: "%" + strconv.Itoa(l+1) + ".", Glyph: &glyph, Start: start, Align: 1}
+		entry := colleafListLevel{Format: "%" + strconv.Itoa(l+1) + ".", Glyph: &glyph, Start: start, Align: 1, Properties: colleafListLayout(l)}
+		if len(block.Items[0].Blocks) > 0 && block.Items[0].Blocks[0].colleafAutoLabel {
+			// This is an empty, right-aligned label-only cell. Its marker uses
+			// its measured width; a preset hanging width clips long prefixes.
+			entry.Properties = nil
+		}
 		if l == level {
 			entry.Start = listStart(block) - 1
 			if block.List == "bullet" {
@@ -374,7 +398,7 @@ func colleafListParagraphs(ctx context.Context, body colleafBody, lists map[stri
 
 			info.Numbering = n
 		}
-		info.Loss = info.Loss || len(level.Style) > 0 || len(level.Properties) > 0 || len(bullet.Style) > 0 || level.Align != 1
+		info.Loss = info.Loss || len(level.Style) > 0 || !standardColleafListLayout(level.Properties, bullet.Level) || len(bullet.Style) > 0 || level.Align != 1
 		result[p.StartIndex] = info
 		state.values[bullet.Level] = value
 		state.seen[bullet.Level] = true

@@ -326,9 +326,6 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 	if err := d.Validate(); err != nil {
 		return err
 	}
-	if format == VDOCS && d.hasLiteralListMarkers() {
-		return fmt.Errorf("%w: literal list marker generation is not yet implemented for %s", ErrUnsupported, format)
-	}
 	if format != JSON && format != SF && format != SFGzip && format != VDOCS && format != Text && len(d.Diagnostics) > 0 && !opts.AllowLossy {
 		return fmt.Errorf("%w: %s", ErrLossy, d.Diagnostics[0].Message)
 	}

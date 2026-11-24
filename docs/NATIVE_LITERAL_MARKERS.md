@@ -1,12 +1,12 @@
-# Native literal-marker prototype and drawing registration
+# Native literal markers, measured counters and browser qualification
 
-The complete goal remains active. Public VDOCS generation still rejects literal
-markers before output. The internal implementation now preserves their actual
-native content, relationships and source facts, but **does not yet qualify the
-native rendered result**. This is required unfinished work, not an exception to
-the rich-label goal. DOCX/PDF mappings remain available and unchanged.
+The complete goal remains active. Public VDOCS generation now writes rich literal
+markers through checked native label/body content. Exact SF/source graphs, pinned
+SDK saves/edits, browser image/counter paint and six-page label/body continuation
+have scoped evidence. This does not establish general native/Word fidelity or close
+the broader acceptance queue. DOCX/PDF mappings remain available.
 
-## Implemented internal mapping
+## Implemented mapping
 
 `colleaf_literal_markers.go` writes actual native two-cell tables, with equal
 relative columns and mirrored cell order for RTL. `manydocLiteralItem` contains
@@ -72,9 +72,28 @@ of actual native sources, not a hidden SF/text cache, and contradictions still
 reject. The existing resize test now updates both source and mirror to model a
 valid native edit; its original actual-frame-wins oracle remains unchanged.
 
-A nested ordinary numbered label remains absent/clipped in the browser despite
-being present in the SDK glyph graph. Wider list-in-cell layout and long-label
-pagination remain unqualified, so public marker generation stays guarded.
+The missing nested ordinary counter is now resolved. Actual native list insertion
+showed the indent missing from the Go list definition. Ordinary logical levels now
+use a21px indentation step with zero hanging, preserving the native engine's actual
+measured counter advance. A fixed21px hanging frame initially made long automatic
+labels overlap their body: the original numbering example exposed Appendix AA.,
+compound, Roman and table-cell labels wider than that frame. Zero hanging retains
+their measured advances (e.g. Appendix AA.88.874px content/94.5px advance), and the
+actual browser shows full counters followed by separate body text. Custom foreign
+indents still diagnose presentation loss; only the generated convention is consumed.
+
+Empty right-aligned automatic-label cells retain their measured-width layout without
+these ordinary paragraph properties. A regression test/view caught the fixed-frame
+variant truncating Item 7)/Item 9); the exact original full-prefix oracle is retained.
+
+New browser probes require complete counter strings and advance >= measured glyph
+width. The nested marker shows1. INNER_LIST. A narrow300×400pt fixture wraps96 unique
+label/body tokens across six native pages, with both columns continuing and every
+token present exactly once. All six pages were visually inspected in two overview
+screenshots. Desktop1000×1400 and mobile preset375×812 touch runs preserve the same
+counter/token graphs; all six actual app saves reimport through ReadVDOCS with exact
+SF semantics. The mobile nested view was also inspected. SDK facade saves cover the
+long fixture separately. These are targeted synthetic tests, not universal fidelity.
 
 ## Reproduction
 
@@ -83,8 +102,9 @@ MANYDOC_NATIVE_LITERAL_QA=output/colleaf-qa/literal-markers.json MANYDOC_NATIVE_
 node scripts/verify_colleaf_literal_markers.cjs
 MANYDOC_NATIVE_LITERAL_SAVED_DIR=output/native-literal MANYDOC_NATIVE_LITERAL_SAVED=output/colleaf-qa/literal-markers-edited.json GOWORK=off go test -run 'TestColleafLiteralMarkerActualSaved' -count=1 .
 node scripts/prepare_colleaf_browser.cjs output/native-literal/rich.vdocs
-cp output/native-literal/{nested,stories,mixed,image-control}.vdocs output/colleaf-browser/
+cp output/native-literal/{nested,stories,mixed,image-control,continued}.vdocs output/colleaf-browser/
 cp scripts/colleaf_literal_browser_probe.js output/colleaf-browser/literal-browser-probe.js
+cp scripts/colleaf_list_browser_probe.js output/colleaf-browser/list-browser-probe.js
 python3 -m http.server 8768 --bind 127.0.0.1 --directory output/colleaf-browser
 ```
 
@@ -98,17 +118,38 @@ await probe('image-control', true); // redPixels:441
 await probe('stories', true); // footnote redPixels:420 plus dimmed header pixels
 ```
 
-Next compare the ordinary nested-list counter's actual skeleton glyph position
-and clipping geometry against a native inserted numbered paragraph in a table.
-Preserve its original counter/text oracle. The pinned engine default bullet
-skeleton supplies indentStart/hanging21, while a concrete list definition uses
-its own paragraphProperties; the Go list definition currently omits them. Its
-layoutParagraph then defaults hanging to glyph width without a matching indent.
-This is a candidate clipping cause, not a qualified fix. Check actual native
-inserted list definitions and explicit/inferred indentation behavior before
-changing the mapping or consuming those properties in the reader.
-Qualify long label pagination,
-mobile/preset saves and the original broader acceptance matrix before enabling
-public marker export. The separate repeated-footnote order failure remains in
-COLLEAF_BROWSER.md; the Word-PDF link-annotation discrepancy remains in
-LITERAL_LIST_MARKERS.md. Neither is resolved by drawing registration.
+For the native list/counter/pagination probe:
+
+```js
+const lists = Function('return (' + await (await fetch('/list-browser-probe.js', {cache:'no-store'})).text() + ')')();
+await lists('nested');
+await lists('mixed');
+await lists('continued'); // six pages,96 tokens
+await lists('continued',true); // actual mobile preset; use375×812 touch viewport
+```
+
+Save each actual qa.snapshot() envelope into ignored output/native-literal using
+nested/mixed/continued-browser.vdocs and -mobile-browser.vdocs names. Reimport:
+
+```sh
+MANYDOC_NATIVE_LIST_BROWSER_DIR=output/native-literal MANYDOC_NATIVE_LITERAL_SAVED_DIR=output/native-literal MANYDOC_NATIVE_LITERAL_SAVED=output/colleaf-qa/literal-markers-edited.json GOWORK=off go test -race -run 'TestColleafLiteralMarker(BrowserSaved|ActualSaved)' -count=1 .
+```
+
+The original broader acceptance/source/resource/reflow/corpus audits remain open.
+Next reproduce the separate repeated-footnote native order failure without changing
+its oracle, and continue the library's broader source/resource audit. The Word-PDF
+link discrepancy remains in LITERAL_LIST_MARKERS.md. Neither is resolved by native
+list generation. Oversized/unbreakable custom counter and broader font/layout cases
+still need corpus qualification; successful synthetic counters are not a universal
+layout guarantee. See STATUS.md and ACCEPTANCE.md for the full queue.
+
+To qualify the existing original automatic-numbering example separately:
+
+```sh
+GOWORK=off go run ./examples/numbering
+GOWORK=off go run ./cmd/manydoc convert -o output/colleaf-browser/numbering.vdocs output/numbering/source.sf
+```
+
+Then evaluate `await lists('numbering')` in the actual harness. Its fixed original
+counter oracle includes Appendix AA., compound, legal, Roman and table/note labels;
+the measured-advance assertion fails if a fixed frame overlaps those glyphs.

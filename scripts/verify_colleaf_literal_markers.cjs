@@ -31,7 +31,7 @@ async function main(){
  fs.writeFileSync(path.join(qa,'literal-markers-saved.json'),JSON.stringify(save(snapshot),null,2));
  fs.writeFileSync(path.join(qa,'literal-markers-edited.json'),JSON.stringify(saved,null,2));
  skeleton.dispose();view.dispose();model.dispose();
- for(const name of ['mixed','nested','stories','rtl','sources']){
+ for(const name of ['mixed','nested','stories','rtl','sources','continued']){
   const input=JSON.parse(fs.readFileSync(path.join(root,'output/native-literal',name+'.json')));validate(input);
   const m=new core.DocumentDataModel(input),v=new engine.DocumentViewModel(m),sk=new engine.DocumentSkeleton(v,new core.LocaleService());
   try{
@@ -39,6 +39,7 @@ async function main(){
    const visible=all.map(g=>g.content||'').join('');
    if(name==='mixed')assert.deepEqual(all.filter(g=>g.glyphType===engine.GlyphType.LIST).map(g=>g.content),['Item 7)','Item 9)']);
    if(name==='nested'||name==='stories')for(const t of ['RICH_LABEL','INNER_TABLE','INNER_LIST','RICH_BODY'])assert.ok(visible.includes(t),[name,t,visible]);
+   if(name==='continued')for(let i=0;i<48;i++)for(const kind of ['LABEL','BODY'])assert.equal(visible.split(kind+'_LINE_'+String(i).padStart(2,'0')).length-1,1,[name,kind,i]);
    if(name==='stories'){
     assert.ok(data.skeHeaders.size);const header=[];for(const cache of data.skeHeaders.values())for(const p of cache.values())glyphs(p,header);
     for(const t of ['RICH_LABEL','INNER_TABLE','INNER_LIST','RICH_BODY'])assert.ok(header.map(g=>g.content||'').join('').includes(t),t);
@@ -48,6 +49,6 @@ async function main(){
    console.log(name,'actual native glyphs and facade table ownership pass');
   }finally{sk.dispose();v.dispose();m.dispose();}
  }
- console.log('Pinned reader/native label+body glyphs/table geometry/note citation/TextX edit/actual facade save pass; browser and wider label graphs remain unqualified');
+ console.log('Pinned reader/native label+body glyphs/table geometry/note citation/TextX edit/actual facade save pass; scoped SDK evidence only; broader native fidelity remains unqualified');
 }
 main().catch(err=>{console.error(err);process.exitCode=1});

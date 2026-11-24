@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -81,7 +82,7 @@ func checkNativeLiteral(t *testing.T, name string, d *Document) colleafNoteSnaps
 			t.Fatal(err)
 		}
 		var out bytes.Buffer
-		if err := writeColleaf(context.Background(), &out, d); err != nil {
+		if err := WriteVDOCS(context.Background(), &out, d); err != nil {
 			t.Fatal(err)
 		}
 		if err := os.WriteFile(filepath.Join(dir, name+".vdocs"), out.Bytes(), 0600); err != nil {
@@ -122,6 +123,14 @@ func TestColleafLiteralMarkerRichCases(t *testing.T) {
 	checkNativeLiteral(t, "stories", d)
 	rtl := Block{Kind: ListBlock, List: "bullet", Items: []ListItem{{Marker: &ListMarker{Blocks: []Block{mergeParagraph("RIGHT_LABEL")}}, Blocks: []Block{{Kind: Paragraph, Direction: "rtl", Runs: []Run{{Text: "RTL_BODY"}}}}}}}
 	checkNativeLiteral(t, "rtl", &Document{Blocks: []Block{rtl}})
+	continued := &Document{Layout: Layout{Width: 300, Height: 400, Margin: 30}}
+	item := ListItem{Marker: &ListMarker{}}
+	for i := 0; i < 48; i++ {
+		item.Marker.Blocks = append(item.Marker.Blocks, mergeParagraph(fmt.Sprintf("LABEL_LINE_%02d wraps across this narrow label column", i)))
+		item.Blocks = append(item.Blocks, mergeParagraph(fmt.Sprintf("BODY_LINE_%02d wraps across this narrow body column", i)))
+	}
+	continued.Blocks = []Block{{Kind: ListBlock, List: "bullet", Items: []ListItem{item}}}
+	checkNativeLiteral(t, "continued", continued)
 }
 
 func TestColleafLiteralMarkerActualSavedEdit(t *testing.T) {
@@ -154,7 +163,7 @@ func TestColleafLiteralMarkerActualSavedCases(t *testing.T) {
 	if dir == "" {
 		t.Skip("optional pinned facade-save cases")
 	}
-	for _, name := range []string{"mixed", "nested", "stories", "rtl", "sources"} {
+	for _, name := range []string{"mixed", "nested", "stories", "rtl", "sources", "continued"} {
 		decode := func(path string) *Document {
 			raw, err := os.ReadFile(path)
 			if err != nil {
@@ -174,6 +183,32 @@ func TestColleafLiteralMarkerActualSavedCases(t *testing.T) {
 		saved := decode(filepath.Join(dir, name+"-saved.json"))
 		if !bytes.Equal(canonicalSF(t, original), canonicalSF(t, saved)) {
 			t.Fatalf("%s native facade changed semantic graph", name)
+		}
+	}
+}
+
+func TestColleafLiteralMarkerBrowserSaved(t *testing.T) {
+	dir := os.Getenv("MANYDOC_NATIVE_LIST_BROWSER_DIR")
+	if dir == "" {
+		t.Skip("optional actual desktop/mobile browser saves")
+	}
+	for _, name := range []string{"nested", "mixed", "continued"} {
+		read := func(suffix string) *Document {
+			raw, err := os.ReadFile(filepath.Join(dir, name+suffix+".vdocs"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			d, err := ReadVDOCS(context.Background(), bytes.NewReader(raw))
+			if err != nil {
+				t.Fatal(name, suffix, err)
+			}
+			return d
+		}
+		original := canonicalSF(t, read(""))
+		for _, suffix := range []string{"-browser", "-mobile-browser"} {
+			if !bytes.Equal(original, canonicalSF(t, read(suffix))) {
+				t.Fatal(name, suffix, "browser save changed semantic graph")
+			}
 		}
 	}
 }

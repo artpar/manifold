@@ -2393,3 +2393,16 @@ contradictions reject. Actual native insertion, save/reload and unchanged red-pi
 oracles establish this fix; inactive header paint is separately pink in the editor.
 See NATIVE_LITERAL_MARKERS.md. Public literal-marker export remains guarded for
 nested ordinary counter/pagination qualification; no native fidelity claim.
+
+
+## 2026-11-25 Enable native rich labels after measured-layout qualification
+
+Public VDOCS generation now uses the checked editable label/body graph. Ordinary
+native lists use21px logical indentation steps and zero hanging so the engine
+retains measured counter advances. Fixed21px hanging made long counters overlap
+body text; the existing original numbering example exposed it. Right-aligned empty
+automatic-label cells keep measured layout without ordinary list properties. Exact
+generated layout is consumed on import; custom indents still diagnose. SDK saves,
+actual desktop/mobile app saves, complete nested/mixed counters, image pixels and
+six-page96-token continuation pass scoped checks. No universal layout guarantee
+or completion claim follows; NATIVE_LITERAL_MARKERS.md gives the remaining queue.

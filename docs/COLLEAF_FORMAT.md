@@ -1495,9 +1495,10 @@ Go tests do not run this optional native-reader check, which currently FAILS.
 No application/vendor/production change or full browser/fidelity claim is made.
 
 
-Native literal-marker graph support now has an internal checked table-ownership
-prototype with exact SF/source and pinned SDK/facade-save evidence. The strict
-browser image-pixel oracle now passes after native drawing resource registration;
-public VDOCS marker export remains unfinished pending nested-list and pagination
-qualification. No body/asset cache or general native fidelity claim is introduced. See
-NATIVE_LITERAL_MARKERS.md for schema, observations and reproduction.
+Public VDOCS literal-marker generation now preserves actual editable label/body
+cells, source owners and real automatic counters. Native list indentation retains
+measured counter advance; custom foreign indents still diagnose. SDK edits/saves,
+actual desktop/mobile saves, image pixels and96 unique label/body tokens across
+six native pages pass scoped checks. See NATIVE_LITERAL_MARKERS.md for exact
+commands, original counter regression evidence and wider qualification limits.
+The full acceptance goal remains active; no general native/Word fidelity is claimed.
