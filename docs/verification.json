@@ -7967,5 +7967,62 @@
       "rg -n 'untagged|infer|remaining' pdf_infer.go pdf_structure_notes*.go docs/PDF_NOTES.md",
       "GOWORK=off go test ./..."
     ]
+  },
+  "pdf_untagged_reciprocal_notes": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "Infer a graph from unique link-owned raised matching marks with reciprocal explicit XYZ views, a leading-label paragraph and bounded same/later-page kind policy. Repeated matching citations reuse one note. Preserve original glyph geometry, body-label style/source and physical navigation; disclose relationship, kind and paragraph-extent inference. Omit now-empty trailing note-only page boundaries from editable reflow while retaining physical Pages.",
+    "bounds": "Shared4,000,000-comparison limit includes alignment, mark/region ownership and target-region search. Compute ownership/conflicts/citation lists before graph mutation; ambiguous/exhausted sources stay literal. Existing earlier parser allocation limitations remain separate.",
+    "before": "Exact f74d1b5 Git-archive CLI leaves both unchanged original exports literal/no notes when PDFSkipStructure selects geometric reading. Current recovers one correct inferred note per original independently owned source body/reference.",
+    "default_tests": "TestPDFUntaggedReciprocalNote, AmbiguityKeepsContent(six negatives), RepeatedNoteAndRoundTrips(SF/gzip/JSON/DOCX), EndnoteOnlyPage(two physical and reflow pages), NoteBudgetPreservesFlow(three exhaustion stages). Exact SF, graph, label, source quads/baselines/fonts/annotations and inline order checks; no writer used to author input PDFs.",
+    "original_sources": {
+      "footnotes": {
+        "original_sha256": "d70b3438a87896c889b07325eac4bee338076a95a979ee2b49365da11e080747",
+        "original_pages": 1,
+        "original_docx_note": "snoska",
+        "word_reader_checked": true,
+        "profiles": [
+          "unchanged-original-skip-structure",
+          "untagged-catalog-derivative"
+        ],
+        "checks": "exact physical glyph/font/geometry/navigation; inferred graph/label/kind; independent source text/annotations; DOCX XML and reread; PDF pypdf/MuPDF and render"
+      },
+      "endnotes": {
+        "original_sha256": "337daa2ba7445ee822f42cca6ca79fdbe255e339ab68fddec148e22ac394063e",
+        "original_pages": 2,
+        "original_docx_note": "XXX",
+        "word_reader_checked": true,
+        "profiles": [
+          "unchanged-original-skip-structure",
+          "untagged-catalog-derivative"
+        ],
+        "checks": "exact physical glyph/font/geometry/navigation; inferred graph/label/kind; independent source text/annotations; DOCX XML and reread; PDF pypdf/MuPDF and render"
+      }
+    },
+    "independent": "pypdf strict and MuPDF check original/untagged-derivative source text and two reciprocal annotations; MuPDF source label/citation glyph origins. Exact original/control glyph inventory and navigation excluding only editable flow fields. Original DOCX ZIP/XML owns body text and reference count. Generated DOCX XML/reread preserves graph/inference. Both readers check native PDF note text; MuPDF checks actual note target pages and one/two-page output without blank page.",
+    "visual": "Original, geometric reflow and untagged reflow first/last pages inspected; readable text/notes with no observed clipping. Native Endnotes heading/font/placement differ from original. Explicit QA mappings/four real DejaVu faces; no Word-equivalent print claim.",
+    "original_regression": "Original publication/MQTT complete SF matches prior direct-encryption milestone byte-for-byte.",
+    "checks": {
+      "full_tests": "passed root85.087s; CLI cached",
+      "full_race": "Default full go test -race ./... timed out after600s (root601.321s), during existing FuzzCustomPDFFont seed; CLI8.090s passes. No assertion/race failure reported before timeout. Identical full suite with -timeout20m is running; not counted passed yet.",
+      "cgo_disabled_tests": "passed focused TestPDFUntagged1.471s",
+      "vet": "passed final",
+      "modules": "all modules verified; no dependency changes",
+      "builds": "CGO-disabled host CLI and Linux amd64/arm64 cross-builds pass; no Linux execution claim",
+      "diff_check": "passed",
+      "focused_current_race": "passed final TestPDFUntagged5.375s"
+    },
+    "superseded_runs": "Earlier focused attempts encountered test-authoring compilation/font setup errors; corrected using the existing helper signature and explicit Courier=Go Mono map. A superseded pre-cleanup full race run was terminated once final-source qualification started; not counted as passed.",
+    "remaining": "Broader multi-paragraph/page/nested/directional geometric body ownership and tagged fallback kind policies; source/resource initial-parser/reflow/native and final API/visual acceptance. Original tagged Footnote without explicit NoteType retains existing diagnosed endnote default; geometric mode infers footnote kind. No overall blocker or completion waiver.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/ACCEPTANCE.md docs/PDF_UNTAGGED_NOTES.md",
+      "python3 scripts/generate_pdf_note_continuation_probe.py --check output/pdf-note-continuation/geometric.json # currently fails; see complete generation/render/extract commands in PDF_UNTAGGED_NOTES.md",
+      "GOWORK=off go test -run TestPDFUntagged -count=1 .",
+      "output/qa-venv/bin/python scripts/verify_pdf_untagged_notes.py",
+      "GOWORK=off go test ./..."
+    ],
+    "word_reader": "LibreOffice independently renders all four generated DOCX files; both pypdf/MuPDF require their actual note body and one/two-page counts. Last-page contact sheet inspected; no observed missing notes or clipping. Optional --word-render checks remain reproducible.",
+    "prosemirror": "Actual pinned ProseMirror validates118 nodes and all marks/attributes across four new SF profiles.",
+    "next_source_failure": "Independent LibreOffice export of the explicitly synthetic POI-footnote extension owns two paragraphs, including a24pt-separated italic continuation. Current geometric graph links only first snoska paragraph, retaining the visible italic continuation in main flow. generate_pdf_note_continuation_probe.py --check fails the unchanged authored two-paragraph graph oracle; next implementation, not external blocker or unsupported-feature exception."
   }
 }

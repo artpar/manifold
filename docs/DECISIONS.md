@@ -2485,3 +2485,15 @@ patch, API/dependency-version change or runtime executable/service. The original
 four MuPDF failures now pass unconditionally. PDF_DIRECT_ENCRYPTION.md records
 independent rich source/visual/full-SF evidence, exact prior ciphertexts, repair-shape
 reader discrepancies, initial-parser boundary and remaining original-goal work.
+
+## 2026-11-25 Infer notes from reciprocal physical views with explicit uncertainty
+
+Compact raised marks alone are insufficient. Unique physical link ownership,
+matching labels and reciprocal explicit XYZ views qualify one recovered body
+paragraph. Later matching citations can reuse its identity. Keep glyph geometry
+and physical navigation intact; distinguish inferred relationships, body extent
+and reflow kind from explicit source facts. Ambiguous/exhausted assignments stay
+literal. Bound comparison work and resolve conflicts before graph mutation.
+PDF_UNTAGGED_NOTES.md qualifies actual original exports and separately identified
+untagged derivatives against independent DOCX source ownership and PDF readers;
+rich geometric continuation ownership remains required acceptance work.

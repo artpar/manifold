@@ -194,6 +194,11 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 		doc.warn("pdf_structure_skipped", "Logical PDF structure was explicitly skipped; positioned paint content is retained")
 	}
 	r.diagnosePartialLinks()
+	if !opts.PDFSkipInference {
+		if err := r.inferLinkedPDFNotes(); err != nil {
+			return nil, err
+		}
+	}
 	r.bindPDFNavigation()
 	if strings.TrimSpace(strings.ReplaceAll(doc.Text(), "\f", "")) == "" {
 		doc.warn("no_text", "No extractable text was found; scanned/image-only documents require OCR")
@@ -205,6 +210,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 }
 
 type pdfReader struct {
+	noteInferenceWork        int
 	streamBudget             *pdfStreamBudget
 	rasterPixels             int64
 	contentBytes             int

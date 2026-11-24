@@ -114,6 +114,7 @@ func (r *pdfReader) inferStructure() error {
 			out = append(out, originals...)
 			continue
 		}
+		r.alignPDFLinkedLabels(boxes, page.Number)
 		em := pdfBodySize(boxes)
 		for i, image := range boxes {
 			if image.block.Kind != Picture {
@@ -272,6 +273,7 @@ func pdfLayoutLines(boxes []pdfLayoutBox) []pdfLayoutBox {
 			if b.block.Kind == Paragraph && last.block.Kind == Paragraph && b.column == last.column && math.Abs(b.base-last.base) <= max(1, min(b.size, last.size)*.25) && b.x0 >= last.x0-.1 {
 				last.block.Runs = joinPDFLayoutRuns(last.block.Runs, b.block.Runs)
 				last.block.Source = inferredPDFSource([]Block{{Runs: last.block.Runs}}, "geometric_baseline_line", .7)
+				last.size = max(last.size, b.size)
 				last.x1 = max(last.x1, b.x1)
 				last.y0 = min(last.y0, b.y0)
 				last.y1 = max(last.y1, b.y1)

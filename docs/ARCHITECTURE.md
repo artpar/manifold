@@ -2034,3 +2034,13 @@ patch, API/dependency-version change or runtime executable/service. The original
 four MuPDF failures now pass unconditionally. PDF_DIRECT_ENCRYPTION.md records
 independent rich source/visual/full-SF evidence, exact prior ciphertexts, repair-shape
 reader discrepancies, initial-parser boundary and remaining original-goal work.
+
+## Reciprocal geometric note graphs
+
+After geometric flow and explicit tag recovery, PDF note inference can join
+uniquely link-owned raised labels through reciprocal XYZ views. Source geometry
+and physical navigation remain separate from inferred note references/kind/body
+extent. A shared finite comparison budget and pre-mutation ownership plan keep
+ambiguous/exhausted content visible. PDF_UNTAGGED_NOTES.md records the exact
+single-paragraph scope, original-source/independent checks and remaining rich-body
+work. No new dependency, runtime process, app policy or public schema was added.

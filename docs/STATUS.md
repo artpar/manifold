@@ -40,7 +40,25 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: direct encryption dictionaries now decrypt
+## Latest progress: untagged reciprocal note inference
+
+PDF_UNTAGGED_NOTES.md records geometric note graphs from matching raised labels
+and reciprocal physical GoTo views, with explicit relationship/kind/body-extent
+uncertainty. Shared bounded inference preserves original glyph geometry and
+navigation, repeated citations reuse one note, and ambiguous sources stay literal.
+Actual POI Word/LibreOffice original PDFs plus separately identified untagged
+catalog derivatives qualify source-owned note bodies, exact physical inventory,
+DOCX semantics, independent PDF readers and visual output. This is a verified
+single-paragraph geometric case. A trailing note-only source page now moves
+without leaving an extra blank reflow page; physical Pages remain recorded. This
+is not completion of arbitrary rich note recovery.
+Normal tests85.087s, final focused race5.375s, vet/module verification and CGO-
+disabled host/Linux builds pass. The default full race command timed out at601.321s
+in an existing custom-font seed; identical full-suite -timeout20m requalification
+is running and is not yet counted passed. Exact scopes are in verification.json.
+The goal remains active/incomplete; broader body ownership and final audits remain.
+
+## Prior progress: direct encryption dictionaries now decrypt
 
 The four preserved MuPDF RC4/AES failures now pass the unchanged full-SF oracle
 through a pure-Go in-memory trailer adaptation. Original ciphertext/object/file-ID
@@ -661,14 +679,21 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-The direct Encrypt compatibility defect is now fixed and independently qualified
-in PDF_DIRECT_ENCRYPTION.md. Return to the original acceptance matrix. Prioritize
-actual untagged note sources against their original DOCX graphs, preserving
-physical source/asset/relationship oracles and explicit inference uncertainty.
-Initial parser allocations remain a separate concern; no decoder hook was added.
+Direct Encrypt and the reciprocal single-paragraph untagged note cases are
+qualified in PDF_DIRECT_ENCRYPTION.md and PDF_UNTAGGED_NOTES.md. Broaden actual
+untagged multi-paragraph/page note ownership against original DOCX graphs,
+preserving physical source/asset/relationship oracles and inference uncertainty.
+A precise next failure is now pinned by generate_pdf_note_continuation_probe.py:
+an independently exported synthetic extension owns two footnote paragraphs, but
+geometric recovery links only the first and leaves the italic continuation visible
+in main flow. PDF_UNTAGGED_NOTES.md records the strict failing graph oracle and
+reproduction; do not weaken it. Initial parser allocations remain separate.
 
 ```sh
-cat docs/ACCEPTANCE.md docs/PDF_NOTES.md docs/REAL_DOCX_CORPUS.md
+cat docs/ACCEPTANCE.md docs/PDF_UNTAGGED_NOTES.md docs/REAL_DOCX_CORPUS.md
+GOWORK=off go test -run TestPDFUntagged -count=1 .
+python3 scripts/generate_pdf_note_continuation_probe.py
+# Render/extract and run its strict --check as in PDF_UNTAGGED_NOTES.md.
 rg -n 'untagged|infer|remaining' pdf_infer.go pdf_structure_notes*.go docs/PDF_NOTES.md
 rg --files output | rg '(footnotes|endnotes).*\.pdf$'
 GOWORK=off go test -run 'TestPDF.*Note|TestGeneratedPDF|TestCLIVDOCSSemantics' -count=1 ./...

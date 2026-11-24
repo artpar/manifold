@@ -1304,3 +1304,19 @@ separately retained reader disagreements. PDF_DIRECT_ENCRYPTION.md records the
 precise contract, independent evidence and initial-parser boundary. This resolves
 the direct-dictionary defect above; it does not establish universal PDF security,
 repair or structured-recovery compatibility.
+
+## Untagged reciprocal note recovery
+
+Geometric PDF recovery now recognizes a matching pair of uniquely link-owned
+raised labels with reciprocal explicit XYZ views. One leading-label paragraph
+becomes a note; later matching citations reuse it. Kind, relationship and body
+extent are explicitly inferred/diagnosed; glyph geometry and original navigation
+persist. Mismatched/ambiguous/partial/unpaired cases stay literal. PDFSkipInference
+disables this rule. Shared finite work bounds preserve unassigned flow on
+exhaustion. Multi-block/page/nested/bidirectional geometric note bodies remain
+unqualified acceptance work; explicit rich tagged recovery is separate. Read
+PDF_UNTAGGED_NOTES.md for original-source, independent-reader and visual evidence.
+
+Trailing physical pages containing only moved inferred note bodies no longer leave
+empty flow pages ahead of generated notes. Pages/source evidence remain; the
+reflow boundary adjustment is explicitly diagnosed.

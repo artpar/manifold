@@ -507,3 +507,13 @@ Independent source-SF-driven recursive-table and repeated-header checks also pas
 7 and5 pages, respectively, with table/row/cell-span/image/citation ownership and
 original literal marker counts. Only the two-page notes example has the fresh
 pre-tagging pixel baseline and visual inspection in this milestone.
+
+## Geometric reciprocal notes
+
+PDF_UNTAGGED_NOTES.md documents a separate bounded geometric rule using matching
+raised labels and reciprocal physical XYZ views. It preserves source positions
+and navigation, diagnoses inferred relationship/kind/one-paragraph extent and
+keeps ambiguous content literal. Original Word exports and separate untagged
+derivatives qualify editable notes and reflow; broader geometric rich bodies
+remain work. This rule does not turn physical GoTo annotations into explicit Ref
+structure edges.
