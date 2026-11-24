@@ -1608,3 +1608,19 @@ implementation code or embed SF as a second authoritative text payload. Actual
 rich mapping/edit/save qualification remains required; current internal token and
 metadata validation does not fulfill it. Optional SDK tools stay outside runtime,
 production modules, application authorization/quota/save responsibilities.
+
+
+## 2026-11-24 Qualify native semantic workers through SF and native mutations
+
+Map actual native stream/style/link fields before exposing a native format.
+Select the last overlapping text record as a whole, then apply declared inherited
+style layers; do not union overlapping marks. Keep UTF-16 inclusive links separate
+from exclusive style intervals and retain fs in points. Native authored language
+has an explicit lang field in the pinned declarations. Script-specific alternate
+language intent still needs a checked mapping.
+
+Cross the canonical SF in tests, including its normalized internal href plus
+matching destination, and re-import actual TextX edit/save output. Native edits
+must win without consulting another text payload. Unknown presentation has explicit
+diagnostics, hidden content and unmapped containers reject in these private workers.
+No public rich-adapter support exception or runtime editor dependency is introduced.

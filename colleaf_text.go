@@ -1,0 +1,344 @@
+package manydoc
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"sort"
+	"strings"
+	"unicode/utf16"
+)
+
+type colleafTextContext struct {
+	DefaultText      json.RawMessage
+	DefaultParagraph json.RawMessage
+	Styles           map[string]colleafNamedStyle
+}
+
+func colleafRawInt(style colleafStyleMap, key string) (int, bool, error) {
+	raw, ok := style[key]
+	if !ok {
+		return 0, false, nil
+	}
+	var n *int
+	if err := json.Unmarshal(raw, &n); err != nil || n == nil {
+		return 0, true, fmt.Errorf("native %s must be an integer", key)
+	}
+	return *n, true, nil
+}
+func colleafUTF16Len(text string) int {
+	n := 0
+	for _, r := range text {
+		n += utf16.RuneLen(r)
+	}
+	return n
+}
+
+// These private text workers are shared by future main/story/note mappings.
+// Unsupported rich containers reject before returning partial document content.
+func encodeColleafTextBody(ctx context.Context, blocks []Block) (colleafBody, error) {
+	body := colleafBody{TextRuns: []colleafTextRun{}}
+	var stream strings.Builder
+	offset := 0
+	serial := 0
+	appendText := func(text string) { stream.WriteString(text); offset += colleafUTF16Len(text) }
+	for _, block := range blocks {
+		if err := ctx.Err(); err != nil {
+			return body, err
+		}
+		if (block.Kind != Paragraph && block.Kind != Heading) || block.Source != nil || len(block.Anchors) > 0 {
+			return body, fmt.Errorf("%w: native text worker requires paragraph/heading content without unmapped provenance/anchors", ErrUnsupported)
+		}
+		p := colleafParagraphRecord{ID: fmt.Sprintf("p%d", serial)}
+		serial++
+		properties := map[string]any{}
+		if block.Kind == Heading {
+			if block.Level < 1 || block.Level > 6 {
+				return body, fmt.Errorf("invalid heading rank")
+			}
+			properties["outlineLevel"] = block.Level - 1
+			if block.Level <= 5 {
+				properties["namedStyleType"] = block.Level + 3
+			}
+		}
+		if block.Direction == "ltr" {
+			properties["direction"] = 1
+		} else if block.Direction == "rtl" {
+			properties["direction"] = 2
+		} else if block.Direction != "" {
+			return body, fmt.Errorf("invalid paragraph direction")
+		}
+		if block.PageBreakBefore {
+			properties["pageBreakBefore"] = 1
+		}
+		if len(properties) > 0 {
+			p.Style = sfAttrs(properties)
+		}
+		for _, run := range block.Runs {
+			if run.Note != nil || run.Anchor != "" || strings.ContainsAny(run.Text, "\r\f\v\b\x1a\x1b\x1c\x1d\x0e\x0f\x1e\x1f") {
+				return body, fmt.Errorf("%w: native text atom/break needs its full structural mapping", ErrUnsupported)
+			}
+			if err := validateString(run.Text); err != nil {
+				return body, err
+			}
+			if run.Text == "" {
+				continue
+			}
+			style, err := colleafRunStyle(run)
+			if err != nil {
+				return body, err
+			}
+			start := offset
+			appendText(strings.ReplaceAll(run.Text, "\n", "\v"))
+			body.TextRuns = append(body.TextRuns, colleafTextRun{St: start, Ed: offset, TS: style})
+			if run.Link != "" || run.Destination != "" {
+				if run.Link != "" && run.Destination != "" && run.Link != "#"+run.Destination {
+					return body, fmt.Errorf("conflicting native link targets")
+				}
+				properties := map[string]any{"textStyleMode": "text"}
+				if run.Destination != "" {
+					properties["bookmarkId"] = run.Destination
+				} else {
+					properties["url"] = run.Link
+				}
+				body.CustomRanges = append(body.CustomRanges, colleafRangeRecord{StartIndex: start, EndIndex: offset - 1, ID: fmt.Sprintf("link%d", len(body.CustomRanges)), Type: 0, Properties: sfAttrs(properties)})
+			}
+		}
+		p.StartIndex = offset
+		appendText("\r")
+		body.Paragraphs = append(body.Paragraphs, p)
+	}
+	if len(blocks) == 0 {
+		body.Paragraphs = append(body.Paragraphs, colleafParagraphRecord{StartIndex: 0, ID: "p0"})
+		appendText("\r")
+	}
+	body.SectionBreaks = []colleafSectionRecord{{StartIndex: offset, ID: "s0"}}
+	appendText("\n")
+	body.DataStream = stream.String()
+	if _, err := indexColleafBody(ctx, body); err != nil {
+		return body, err
+	}
+	return body, nil
+}
+
+func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colleafTextContext) (*Document, error) {
+	index, err := indexColleafBody(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	if len(index.tables) > 0 || len(index.blocks) > 0 || len(index.sections) != 1 {
+		return nil, fmt.Errorf("%w: native containers/sections require the rich body mapping", ErrUnsupported)
+	}
+	doc := &Document{}
+	resolver := colleafStyleResolver{named: settings.Styles}
+	baseText, err := colleafStyleObject(settings.DefaultText)
+	if err != nil {
+		return nil, err
+	}
+	baseParagraph, err := colleafStyleObject(settings.DefaultParagraph)
+	if err != nil {
+		return nil, err
+	}
+	paragraphMetadata := map[int]colleafParagraphRecord{}
+	for _, p := range body.Paragraphs {
+		paragraphMetadata[p.StartIndex] = p
+	}
+	spans, err := colleafStyleSpans(ctx, index.text, body.TextRuns)
+	if err != nil {
+		return nil, err
+	}
+	annotations := append([]colleafRangeRecord(nil), body.CustomRanges...)
+	sort.Slice(annotations, func(i, j int) bool { return annotations[i].StartIndex < annotations[j].StartIndex })
+	var annotationBounds []int
+	for i, annotation := range annotations {
+		if annotation.Type != 0 {
+			return nil, fmt.Errorf("%w: native annotation type %d requires its semantic mapping", ErrUnsupported, annotation.Type)
+		}
+		if i > 0 && annotations[i-1].EndIndex >= annotation.StartIndex {
+			return nil, fmt.Errorf("conflicting native hyperlink extents")
+		}
+		annotationBounds = append(annotationBounds, annotation.StartIndex, annotation.EndIndex+1)
+	}
+	for _, node := range index.sections[0].children {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		if node.kind != "paragraph" || len(node.children) > 0 {
+			return nil, fmt.Errorf("%w: nontext native paragraph", ErrUnsupported)
+		}
+		p := paragraphMetadata[node.end-1]
+		named, err := resolver.resolve(p.StyleID, 0)
+		if err != nil {
+			return nil, err
+		}
+		namedParagraph, err := colleafStyleObject(named.ParagraphStyle)
+		if err != nil {
+			return nil, err
+		}
+		directParagraph, err := colleafStyleObject(p.Style)
+		if err != nil {
+			return nil, err
+		}
+		properties := mergeColleafStyle(mergeColleafStyle(baseParagraph, namedParagraph), directParagraph)
+		block := Block{Kind: Paragraph}
+		level, hasLevel, err := colleafRawInt(properties, "outlineLevel")
+		if err != nil {
+			return nil, err
+		}
+		namedType, hasNamed, err := colleafRawInt(properties, "namedStyleType")
+		if err != nil {
+			return nil, err
+		}
+		if hasLevel && level >= 0 && level <= 5 {
+			block.Kind = Heading
+			block.Level = level + 1
+		} else if !hasLevel && hasNamed && namedType >= 4 && namedType <= 8 {
+			block.Kind = Heading
+			block.Level = namedType - 3
+		} else if hasLevel && level != 9 {
+			return nil, fmt.Errorf("%w: native outline level %d", ErrUnsupported, level)
+		}
+		direction, _, err := colleafRawInt(properties, "direction")
+		if err != nil {
+			return nil, err
+		}
+		switch direction {
+		case 0:
+		case 1:
+			block.Direction = "ltr"
+		case 2:
+			block.Direction = "rtl"
+		default:
+			return nil, fmt.Errorf("invalid native paragraph direction")
+		}
+		if raw, ok := properties["pageBreakBefore"]; ok {
+			block.PageBreakBefore, err = colleafBool(raw)
+			if err != nil {
+				return nil, err
+			}
+		}
+		pText, err := colleafStyleObject(properties["textStyle"])
+		if err != nil {
+			return nil, err
+		}
+		namedText, err := colleafStyleObject(named.TextStyle)
+		if err != nil {
+			return nil, err
+		}
+		defaults := mergeColleafStyle(mergeColleafStyle(baseText, namedText), pText)
+		boundaries := []int{node.start, node.end - 1}
+		firstSpan := sort.Search(len(spans), func(i int) bool { return spans[i].end > node.start })
+		for _, span := range spans[firstSpan:] {
+			if span.start >= node.end-1 {
+				break
+			}
+			if span.start > node.start && span.start < node.end-1 {
+				boundaries = append(boundaries, span.start)
+			}
+			if span.end > node.start && span.end < node.end-1 {
+				boundaries = append(boundaries, span.end)
+			}
+		}
+		firstAnnotation := sort.SearchInts(annotationBounds, node.start+1)
+		for _, boundary := range annotationBounds[firstAnnotation:] {
+			if boundary >= node.end-1 {
+				break
+			}
+			boundaries = append(boundaries, boundary)
+		}
+		sort.Ints(boundaries)
+		previous := -1
+		for i := 0; i < len(boundaries)-1; i++ {
+			start, end := boundaries[i], boundaries[i+1]
+			if start == end || start == previous {
+				continue
+			}
+			previous = start
+			text, err := index.text.exclusive(start, end)
+			if err != nil {
+				return nil, err
+			}
+			if strings.ContainsAny(text, "\f\b\x1e\x1f") {
+				return nil, fmt.Errorf("%w: native text control requires semantic mapping", ErrUnsupported)
+			}
+			record := -1
+			position := sort.Search(len(spans), func(i int) bool { return spans[i].end > start })
+			if position < len(spans) {
+				record = spans[position].record
+			}
+			style := defaults
+			if record >= 0 {
+				raw := body.TextRuns[record]
+				character, err := resolver.resolve(raw.StyleID, 0)
+				if err != nil {
+					return nil, err
+				}
+				inherited, err := colleafStyleObject(character.TextStyle)
+				if err != nil {
+					return nil, err
+				}
+				direct, err := colleafStyleObject(raw.TS)
+				if err != nil {
+					return nil, err
+				}
+				style = mergeColleafStyle(mergeColleafStyle(defaults, inherited), direct)
+			}
+			run, err := colleafStyleRun(style, doc)
+			if err != nil {
+				return nil, err
+			}
+			run.Text = strings.ReplaceAll(text, "\v", "\n")
+			var link *colleafRangeRecord
+			position = sort.Search(len(annotations), func(i int) bool { return annotations[i].EndIndex >= start })
+			if position < len(annotations) && annotations[position].StartIndex <= start {
+				link = &annotations[position]
+			}
+			if link != nil {
+				var target struct {
+					URL      string `json:"url"`
+					Bookmark string `json:"bookmarkId"`
+					Heading  string `json:"headingId"`
+					Mode     string `json:"textStyleMode"`
+				}
+				if err := json.Unmarshal(link.Properties, &target); err != nil {
+					return nil, err
+				}
+				count := 0
+				for _, value := range []string{target.URL, target.Bookmark, target.Heading} {
+					if value != "" {
+						count++
+					}
+				}
+				if count != 1 {
+					return nil, fmt.Errorf("native hyperlink requires one target")
+				}
+				run.Link = target.URL
+				run.Destination = target.Bookmark
+				if target.Heading != "" {
+					run.Destination = target.Heading
+				}
+				if target.Mode != "text" {
+					doc.warn("colleaf_link_presentation", "Native automatic hyperlink presentation may differ; target and authored text style are retained")
+				}
+			}
+			block.Runs = append(block.Runs, run)
+		}
+		if len(p.Bullet) > 0 && string(p.Bullet) != "null" {
+			return nil, fmt.Errorf("%w: native paragraph numbering needs list ownership mapping", ErrUnsupported)
+		}
+		keys := make([]string, 0, len(properties))
+		for key := range properties {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			switch key {
+			case "outlineLevel", "namedStyleType", "direction", "pageBreakBefore", "textStyle":
+			default:
+				doc.warn("colleaf_paragraph_style", "Native paragraph property "+key+" is not represented; text and supported paragraph semantics are retained")
+			}
+		}
+		doc.Blocks = append(doc.Blocks, block)
+	}
+	return doc, nil
+}

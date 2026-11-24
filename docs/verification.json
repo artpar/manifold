@@ -5513,5 +5513,39 @@
     "runtime": "Pure Go; public API/CLI and four existing conversion paths unchanged. Optional Node/SDK/app-validator QA only; no CGO/required services/executables/uploads/app changes/permission or quota gates introduced.",
     "remaining": "Implement both semantic native\u2194SF mappings, strict envelope/JSON/escaped-Unicode handling, defaults/style winning intervals, lists/table merges/assets/resources/sections/stories/notes and actual native edit/save checks. Do not wrap SF as an opaque second text authority. Broader untagged recovery and final consistency/resource/API/acceptance audit remain.",
     "next_commands": "cat docs/COLLEAF_FORMAT.md; sed -n '790,1405p' output/codec/univer-document-types.txt; MANYDOC_COLLEAF_QA_TREE=output/colleaf-qa/go-tree.json GOWORK=off go test -run TestColleaf -count=1 .; node scripts/verify_colleaf_stream.cjs"
+  },
+  "colleaf_text_semantics_2026_11_24": {
+    "scope": "Private native paragraph/heading/style/link/language/soft-break workers through canonical SF. No public native format/API/CLI; rich adapter incomplete.",
+    "tests": [
+      "300 seeded interval sets compared to naive last-whole-record oracle",
+      "UTF-16 astral ranges, empty paragraphs, heading6, direction, page-break-before and supported typography",
+      "native->SF->native record equality including normalized internal href/destination",
+      "named/default/direct inheritance, undefined/cyclic styles, malformed BooleanNumber/decoration/outline metadata",
+      "unmapped rich containers, annotations, multi-section bodies and hidden text reject; unknown presentation diagnosed",
+      "actual pinned SDK TextX edit/save then Go re-import; edited native text/style authoritative"
+    ],
+    "independent_reader": {
+      "packages": "@univerjs/core and @univerjs/engine-render1.0.4; ignored QA environment from prior foundation",
+      "script": "scripts/verify_colleaf_text.cjs",
+      "script_sha256": "f4d6753432ffe1ae63cb4cecbbce88b8d09a756826265103d30424d175c0bc00",
+      "result": "Generated text/style/link records read, TextX replaced astral heading with Edited\ud83d\ude00/italic, saved native snapshot, Go re-imported edit; pass",
+      "limitations": "No browser/native rendered layout or renderer-effective inheritance qualification. An initial QA assertion overlooked the adjacent internal-link range at16; corrected assertion matches the authored fixture; no input/oracle changed."
+    },
+    "checks": {
+      "full_tests": "go test ./... pass, final invocation cached",
+      "full_race": "go test -race ./... pass after final production/test changes; library167.782s, CLI cached",
+      "vet": "pass after final production changes",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "focused native tests0.380s pass; host CLI built and --help executed; Linux amd64/arm64 cross-builds pass",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure Go; no new production dependency/executable/service/CGO/upload/application changes or authorization/quota gates.",
+    "remaining": "Strict native envelope/JSON/escaped-surrogate handling; rich lists/merged tables/images/resources/notes/sections/stories/provenance and intent mappings; actual rich native edit/render qualification; broader untagged PDF recovery and final consistency/resource/API/acceptance audit.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_TEXT_QA=output/colleaf-qa/text.json GOWORK=off go test -run TestColleafTextSemanticRoundTripAndNativeEdits -count=1 .",
+      "node scripts/verify_colleaf_text.cjs",
+      "MANYDOC_COLLEAF_TEXT_EDIT=output/colleaf-qa/text-edited.json GOWORK=off go test -run TestColleaf -count=1 ."
+    ]
   }
 }

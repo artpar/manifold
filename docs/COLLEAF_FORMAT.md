@@ -182,3 +182,41 @@ and no external blocker exists. No implementation code was copied/translated fro
 Univer; the adapter is authored from format declarations and executable API probes.
 Next implement both semantic mappings through SF, with rich fixtures and actual
 reader/edit/save qualification, keeping the application/backend untouched.
+
+
+## Private text/style semantic mapping and native edit/save qualification
+
+The next private layer (colleaf_styles.go/colleaf_text.go) covers paragraphs,
+heading1–6 (outlineLevel5 for heading6), direction/page-break-before, authored
+language, font family/point size, bold/italic/underline/strike/color, hyperlinks
+and VT soft line breaks. The pinned ITextStyle declares lang and altLang; lang
+maps to the general SF binding, while alternate/script-specific intent remains
+unmapped. Empty paragraphs and astral UTF-16 bounds survive the SF hop. A native
+last-whole-record interval sweep is checked against a deterministic naive oracle
+on300 interval sets; named basedOn resolution rejects undefined/cyclic styles.
+Named/default/direct inheritance has Go semantic tests; full renderer-effective
+inheritance is not visually qualified yet.
+
+Optional SDK QA independently reads generated native records, uses published
+TextX operations to replace the astral heading with Edited😀/italic, resets and
+saves a DocumentDataModel, and Go re-imports that snapshot. The new text/style
+wins; subsequent link metadata survives. This is a real reader/mutation/save
+check, not browser editor or rendered-layout qualification. No full-SF text cache
+is present. The test also checks native→SF→native records, including normalized
+internal SF href plus matching destination. The missing internal target in this
+isolated text fixture is explicitly declared for the SF validation hop.
+
+```sh
+MANYDOC_COLLEAF_TEXT_QA=output/colleaf-qa/text.json GOWORK=off go test -run TestColleafTextSemanticRoundTripAndNativeEdits -count=1 .
+node scripts/verify_colleaf_text.cjs
+MANYDOC_COLLEAF_TEXT_EDIT=output/colleaf-qa/text-edited.json GOWORK=off go test -run TestColleaf -count=1 .
+```
+
+Unknown presentation properties report explicit diagnostics. Hidden text rejects
+until visibility semantics are mapped; unsupported containers/annotations or
+multiple sections reject before partial content can escape. These are internal
+workers, not a new public format contract. Lists/merges/images/resources/notes,
+stories/section settings, provenance, checked sparse intent metadata, strict
+JSON/envelope/surrogate decoding and broader native edit/render checks remain
+required. Next extend body/container ownership and validate native list/table/note
+sources using actual SDK APIs before exposing any .vdocs API/CLI.

@@ -39,7 +39,21 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: actual Colleaf/Univer stream foundation
+## Latest progress: native text/style semantics (internal, incomplete)
+
+Private text workers now map paragraphs/headings (including level6), direction,
+page-break-before, point-size typography, language, links and soft line breaks
+through the actual SF. Overlapping/unsorted native text styles select the last
+whole record; named/default/direct style layers resolve with cycle checks. Native
+visible edits remain authoritative. Optional pinned SDK QA reads generated records,
+uses TextX to replace astral heading text, saves, then Go re-imports the edit.
+This is text-level interoperability, not rich adapter or layout completion.
+
+Unknown presentation emits diagnostics; hidden text and unmapped containers reject
+rather than returning a partial document. Rich containers, sections/stories,
+provenance/nonvisual annotations, strict envelope decoding and full native edit/
+layout qualification remain open. No public format/API/CLI was added. Next extend
+these workers to rich body ownership and real lists/tables/notes/assets.
 
 The native adapter's private first layer now validates UTF-16 scalar/range bounds,
 paragraph/section/nested-table tokens and style/annotation/custom-block/soft-break

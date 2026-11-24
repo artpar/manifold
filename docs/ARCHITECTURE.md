@@ -1143,3 +1143,21 @@ records and nested table bounds. They exposed stale table-token prose and the
 need for CR/LF inside cells. Geometry is pixels; text fs is points. Full semantic
 mapping, inherited styles/sections/stories, merged tables/lists/assets/notes and
 native edit/save checks remain open. See COLLEAF_FORMAT.md.
+
+
+## Private Colleaf text/style mapping
+
+colleaf_styles.go computes a UTF-16 interval partition with an event sweep and
+last-whole-record priority, resolves named basedOn styles with cycle/depth checks,
+and projects supported typography with explicit loss diagnostics. Font fs remains
+points. Native lang maps to the authored general language, while altLang/script-
+specific bindings still require a checked mapping. Hidden text cannot become visible.
+
+colleaf_text.go shares validated indexes for paragraph/heading semantics, link
+ranges and native VT↔SF newline. It does not return partial rich containers or
+multiple sections. Native text and styles are authoritative; no private whole-SF
+payload exists. The SF href plus matching destination normalization is accepted.
+These workers remain private pending rich ownership/asset/section/story mappings.
+Tests cross the canonical SF and compare native records, verify style interval
+winners/inheritance, and re-import actual pinned SDK TextX edit/save output.
+Optional scripts/verify_colleaf_text.cjs is reader/mutation QA, not renderer QA.
