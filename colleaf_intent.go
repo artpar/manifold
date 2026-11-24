@@ -19,7 +19,7 @@ type colleafIntentCarrier struct {
 
 func colleafOwnIntent(name string) bool {
 	switch name {
-	case colleafNoteIdentityResource, colleafListResource, colleafImageResource:
+	case colleafNoteIdentityResource, colleafListResource, colleafImageResource, colleafDocumentResource:
 		return true
 	}
 	return false
@@ -131,6 +131,16 @@ func checkColleafDrawingMirror(snapshot colleafNoteSnapshot, resource colleafRes
 	}
 	for _, note := range snapshot.Notes {
 		if err := add(note.Drawings); err != nil {
+			return err
+		}
+	}
+	for _, story := range snapshot.Headers {
+		if err := add(story.Drawings); err != nil {
+			return err
+		}
+	}
+	for _, story := range snapshot.Footers {
+		if err := add(story.Drawings); err != nil {
 			return err
 		}
 	}

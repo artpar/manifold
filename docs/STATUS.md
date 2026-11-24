@@ -39,23 +39,39 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: actual facade-save persistence correction
+## Latest progress: native sections, page settings and running stories
 
-The public FDocument.save API used by Colleaf drops unregistered manydoc.*
-resources. Earlier model getSnapshot checks did not prove facade persistence.
-The adapter now stores only its checked intent records in a native CUSTOM range
-on the protected terminal LF. No visible text/assets/SF body are copied there.
-Actual createDocument→save→fresh reopen→save preserves notes/list ownership/image
-size intent; TextX edits move the carrier correctly. Go re-imports the same graph.
+Private document composition now connects page geometry, section boundaries and
+first/even/default header/footer variants to the existing text/table/list/image/
+note workers. Zero/fractional margins and distances, optional/inherited layout,
+explicit empty stories, authored page breaks and metadata survive SF round trips.
+Native geometry edits win over checked original precision/default intent. Unknown
+layout properties produce diagnostics; contradictory references/orphans reject.
+Native rendered soft page breaks are disclosed and removed from logical flow.
 
-Registered drawing resources are accepted as redundant mirrors only when every
-entry matches a persisted source; contradictions/orphans reject. SDK permission
-resources are outside document interpretation and never gate conversion. Legacy
-private direct-resource input still reads. Public native API/CLI remains absent.
-Browser drawing mutations/painting and full preset behavior still need evidence;
-a headless image facade resize needs a render-manager service and is not qualified.
-Next implement page/section/header/footer context and image fitting, complete
-remaining intent policies, then qualify the full browser/editor and final audit.
+The pinned executable reader confirms seven pages, odd-page blank insertion,
+geometry transitions, story selection/inheritance and header merged table/bullet/
+image boxes. Header assets must live in document catalogs: local-only sources
+were ignored by the renderer. Actual FDocument.save/fresh reopen retains the same
+Go model. This proves structure/geometry/save behavior, not browser paint or font
+metrics. The native adapter remains private/incomplete, with no public API/CLI.
+
+Next qualify contextual image fitting, complete rich note/marker/list/appearance
+intent and strict native envelope/JSON/surrogate handling, then actual full-preset/
+browser editing/rendering and the final acceptance audit. Broader untagged PDF
+note recovery and final source/resource/API checks also remain. No external
+blocker exists; production remains pure Go with applications/backends untouched.
+
+Final section milestone checks pass: tests 17.829s/0.786s, race 174.270s/1.773s,
+vet/modules, CGO-disabled focused tests/host CLI execution, Linux amd64/arm64
+cross-builds, short document fuzz 2,854 executions and diff check. All eight pinned
+reader/save scripts, Pillow and edited/saved Go re-import pass. See verification.json
+for exact scope; Linux cross-builds are not execution evidence.
+
+The preceding facade correction remains: only checked nonvisible intent is stored
+in a native CUSTOM range on the terminal LF because actual FDocument.save drops
+unregistered manydoc resources. Registered drawing mirrors must match persisted
+sources. SDK permission resources never introduce document admission gates.
 
 
 Private image workers now map embedded PNG/JPEG bytes, alternative text, drawing
@@ -71,7 +87,8 @@ Mixed inline image/text becomes ordered SF blocks with diagnostics. Malformed or
 contradictory sources, orphans, remote/hosted sources and unmapped hidden/transformed
 appearance reject instead of silently changing/dropping content. No public native
 API/CLI exists. Browser bitmap painting/editor resource persistence, contextual
-page/cell/note fitting, running stories and remaining profile mappings are open.
+page/cell/note fitting and remaining profile mappings are open. Running stories
+now have the section-composition qualification above.
 The full adapter and overall goal remain active/incomplete.
 
 

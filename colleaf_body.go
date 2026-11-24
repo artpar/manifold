@@ -33,6 +33,8 @@ type colleafParagraphRecord struct {
 	Bullet     json.RawMessage `json:"bullet,omitempty"`
 }
 type colleafSectionRecord struct {
+	Extra map[string]json.RawMessage `json:"-"`
+	colleafSectionProperties
 	StartIndex int    `json:"startIndex"`
 	ID         string `json:"sectionId,omitempty"`
 }
@@ -186,4 +188,30 @@ func indexColleafBody(ctx context.Context, body colleafBody) (*colleafBodyIndex,
 		positions[offset] = true
 	}
 	return index, nil
+}
+
+func (s *colleafSectionRecord) UnmarshalJSON(data []byte) error {
+	type alias colleafSectionRecord
+	var value alias
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	known := map[string]bool{}
+	for _, key := range []string{"startIndex", "sectionId", "sectionType", "sectionTypeNext", "pageSize", "pageOrient", "documentFlavor", "marginTop", "marginRight", "marginBottom", "marginLeft", "marginHeader", "marginFooter", "defaultHeaderId", "defaultFooterId", "firstPageHeaderId", "firstPageFooterId", "evenPageHeaderId", "evenPageFooterId", "useFirstPageHeaderFooter", "evenAndOddHeaders"} {
+		known[key] = true
+	}
+	for key, raw := range fields {
+		if !known[key] {
+			if value.Extra == nil {
+				value.Extra = map[string]json.RawMessage{}
+			}
+			value.Extra[key] = raw
+		}
+	}
+	*s = colleafSectionRecord(value)
+	return nil
 }

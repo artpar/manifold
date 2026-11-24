@@ -34,14 +34,21 @@ type colleafNoteIdentities struct {
 	Bindings []colleafNoteBinding `json:"bindings"`
 }
 type colleafNoteSnapshot struct {
-	Body         colleafBody                  `json:"body"`
-	Tables       map[string]json.RawMessage   `json:"tableSource,omitempty"`
-	Notes        map[string]colleafNativeNote `json:"notes,omitempty"`
-	Resources    []colleafResource            `json:"resources,omitempty"`
-	Lists        map[string]json.RawMessage   `json:"lists,omitempty"`
-	ID           string                       `json:"id,omitempty"`
-	Drawings     map[string]json.RawMessage   `json:"drawings,omitempty"`
-	DrawingOrder []string                     `json:"drawingsOrder,omitempty"`
+	Body                     colleafBody                    `json:"body"`
+	Tables                   map[string]json.RawMessage     `json:"tableSource,omitempty"`
+	Notes                    map[string]colleafNativeNote   `json:"notes,omitempty"`
+	Resources                []colleafResource              `json:"resources,omitempty"`
+	Lists                    map[string]json.RawMessage     `json:"lists,omitempty"`
+	ID                       string                         `json:"id,omitempty"`
+	Drawings                 map[string]json.RawMessage     `json:"drawings,omitempty"`
+	DrawingOrder             []string                       `json:"drawingsOrder,omitempty"`
+	Title                    string                         `json:"title,omitempty"`
+	DocumentStyle            json.RawMessage                `json:"documentStyle,omitempty"`
+	Headers                  map[string]colleafRunningStory `json:"headers,omitempty"`
+	Footers                  map[string]colleafRunningStory `json:"footers,omitempty"`
+	Styles                   map[string]colleafNamedStyle   `json:"styles,omitempty"`
+	HeaderFooterDrawingOrder []string                       `json:"headerFooterDrawingsOrder,omitempty"`
+	NoteSettings             json.RawMessage                `json:"noteSettings,omitempty"`
 }
 
 // Native note IDs share one namespace; SF identities are scoped by kind. This

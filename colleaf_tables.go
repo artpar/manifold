@@ -112,7 +112,14 @@ func (w *colleafBodyWriter) flow(blocks []Block, depth int) error {
 		if err := w.ctx.Err(); err != nil {
 			return err
 		}
-		if b.Kind == Picture {
+		if b.Kind == PageBreak {
+			if b.Source != nil || len(b.Anchors) > 0 {
+				return fmt.Errorf("%w: native page-break source/anchors require mapping", ErrUnsupported)
+			}
+			w.text("\f")
+			w.body.Paragraphs = append(w.body.Paragraphs, colleafParagraphRecord{StartIndex: w.offset, ID: w.id("p")})
+			w.text("\r")
+		} else if b.Kind == Picture {
 			if err := w.picture(b); err != nil {
 				return err
 			}
@@ -307,7 +314,7 @@ type colleafBodyReader struct {
 }
 
 func (r *colleafBodyReader) paragraph(start, end int, p colleafParagraphRecord) ([]Block, error) {
-	return r.imageParagraph(start, end, p)
+	return r.breakParagraph(start, end, p)
 }
 func (r *colleafBodyReader) textParagraph(start, end int, p colleafParagraphRecord) ([]Block, error) {
 	p.Bullet = nil
@@ -658,7 +665,7 @@ func (r *colleafBodyReader) presentationLosses(raw json.RawMessage, allowed []st
 		r.doc.warn(code, "Native property "+key+" is not represented in SF; table content and supported geometry are retained")
 	}
 }
-func decodeColleafBody(ctx context.Context, body colleafBody, settings colleafTextContext, tables map[string]json.RawMessage) (*Document, error) {
+func newColleafBodyReader(ctx context.Context, body colleafBody, settings colleafTextContext, tables map[string]json.RawMessage) (*colleafBodyReader, error) {
 	index, err := indexColleafBody(ctx, body)
 	if err != nil {
 		return nil, err
@@ -734,7 +741,15 @@ func decodeColleafBody(ctx context.Context, body colleafBody, settings colleafTe
 	for _, p := range body.Paragraphs {
 		r.paragraphs[p.StartIndex] = p
 	}
-	blocks, err := r.sections(index.sections, 0)
+	return &r, nil
+}
+
+func decodeColleafBody(ctx context.Context, body colleafBody, settings colleafTextContext, tables map[string]json.RawMessage) (*Document, error) {
+	r, err := newColleafBodyReader(ctx, body, settings, tables)
+	if err != nil {
+		return nil, err
+	}
+	blocks, err := r.sections(r.index.sections, 0)
 	if err != nil {
 		return nil, err
 	}

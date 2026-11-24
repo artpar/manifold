@@ -1284,3 +1284,31 @@ and tests TextX edits. It deliberately reproduces the old resource-drop failure.
 Go verifies full mapped model semantics after saved/reopened fixtures. Browser
 painting, preset-specific UI behavior and drawing facade mutations requiring the
 render-manager service remain separate, unfinished qualification.
+
+
+## Native document/page/section and running-story composition
+
+colleaf_sections.go composes the private native workers through the shared Go/SF
+model. It uses one main UTF-16 body writer/index across root sections and separate
+body indexes per running story. Section closing LF records carry current section
+properties; native sectionTypeNext can override the following start. Points project
+to pixels (4/3), and partial native geometry inherits the previous effective layout.
+Checked document-properties intent retains original optional/fractional layout,
+implicit starts, empty-story/section distinction and author/subject metadata only.
+Actual geometry changes invalidate old layout intent; visible title stays native.
+
+Running-story IDs distinguish nil inheritance from explicit empty bodies. Header/
+footer tables/lists/drawings are promoted to document catalogs with globally scoped
+identities because the executable renderer does not resolve those local catalogs.
+The reader subsets global catalogs per actual body relationships, retaining orphan
+checks across the union and within local catalogs. Main, running and note streams
+share semantics without confusing their scalar offsets or source ownership.
+
+Explicit form feeds become PageBreak blocks; renderedPageBreaks designate disclosed
+soft pagination boundaries omitted from logical flow. Native first/even/default
+references, page distances and zero margins are explicit. Output disables native
+automatic hyphenation rather than accepting facade-added defaults silently. Foreign
+nontraditional/unpaginated and note-setting policies remain unfinished and reject;
+unknown style properties retain content with explicit representation diagnostics.
+The pinned seven-page skeleton and real facade save/reopen qualify source lookup,
+geometry and story selection, separately from unfinished browser/font/paint checks.

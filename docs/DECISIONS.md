@@ -1722,3 +1722,24 @@ for older private resource transport. Verify registered drawing mirrors before
 ignoring duplicate cache data. Do not inspect SDK permission payloads or add
 performer-level gates. Browser/preset/render-service-dependent operations remain
 unfinished rather than being inferred from successful headless saves.
+
+
+## 2026-11-24 Compose native sections against executable story lookup
+
+Retain the established SF as the canonical representation. Native page/section
+properties and header/footer streams are an adapter projection, with sparse guarded
+intent for precision/default omission and metadata that the native schema lacks.
+Do not flatten foreign section properties into an implicit plain body. Preserve
+nil inheritance versus explicit empty story overrides; native edits take priority.
+
+Executable renderer checks found local header image sources were not rendered,
+even though published reference-source types allow them. Promote running-story
+assets to globally scoped document catalogs, including tables/list types and image
+registry order. Keep one authority per asset. Validate references/orphans rather
+than passing an arbitrary subset that silently hides unrelated visible sources.
+
+Use actual sectionType/next override semantics and authored/soft page-break
+separation. Disable native automatic hyphenation in generated projections to avoid
+facade-injected behavior changes. Record measured seven-page selection/geometry
+and actual FDocument.save/fresh-reopen equality, without claiming browser/font
+fidelity. Contextual fitting, advanced intent and public native API remain work.

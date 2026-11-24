@@ -517,3 +517,54 @@ remaining rich label/list/appearance intent and strict envelope/JSON/surrogates,
 then qualify actual full-preset/browser editing/rendering. The adapter remains
 private/incomplete. Production dependencies/API/CLI and application/backend code
 are unchanged; Node remains optional QA, with no services/uploads/permission gates.
+
+
+## Private document composition: sections, geometry and running content
+
+colleaf_sections.go now composes the private snapshot through the shared SF. Main
+body sections use one scalar index, with closing LF section records, sectionType
+continuous/next/even/odd and sectionTypeNext precedence on import. Page dimensions,
+per-side margins and header/footer distances project points to pixels. Explicit
+zero/fractional values, optional layouts and nil inheritance survive guarded intent;
+actual native geometry edits invalidate stale original intent and emit diagnostics.
+Traditional native defaults measured 794×1124px with 72px margins; an unpaginated
+canvas is not silently turned into a finite page. Unmapped note settings still
+reject pending required mapping, rather than being claimed as completed support.
+
+First/even/default headers and footers have distinct IDs and bodies. Nil stories
+inherit; explicit empty bodies override inheritance. Original author/subject and
+empty title intent persist without a second visible text authority. Native unknown
+section/document layout properties produce explicit diagnostics. Contradictory
+references, malformed flags/geometry, missing bodies and orphan sources reject.
+Authored form feeds map to PageBreak; renderedPageBreaks are soft/inferred layout
+boundaries, removed from logical text with colleaf_soft_page_break diagnostics.
+
+The executable renderer ignored an image present only in a header-local catalog.
+Header/footer tables, list sources/groups and images now use scoped identities in
+the document catalogs, with headerFooterDrawingsOrder. Source selection checks
+all relationships and local/global orphan coverage. Notes keep their earlier local
+catalog behavior. Automatic hyphenation is explicitly disabled on output because
+the facade otherwise inserts enabled defaults; nonzero input remains diagnosed.
+
+scripts/verify_colleaf_sections.cjs checks the unmodified hash-pinned application
+validator, Univer 1.0.4 skeleton and actual FDocument.save/fresh reopen. Its fixed
+example independently checks seven pages (including odd-page blank insertion),
+page sizes/margins, each page's header/footer ID, empty overrides, inherited even
+headers, a merged header table, bullet marker and 32×16px drawing box. Go re-import
+compares full model semantics and SF/native sources, including fractional sizes,
+metadata and nil/empty variants. Separate tests cover foreign/no-intent sections,
+native edits, supplementary characters/page breaks and notes in later sections.
+This is structural/geometry/save evidence; browser paint/fonts are unqualified.
+
+```sh
+MANYDOC_COLLEAF_SECTION_QA=output/colleaf-qa/sections.json GOWORK=off go test -run TestColleaf -count=1 .
+node scripts/verify_colleaf_sections.cjs
+MANYDOC_COLLEAF_SECTION_SAVED=output/colleaf-qa/sections-saved.json GOWORK=off go test -run TestColleaf -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafDocument$' -fuzztime=10s -parallel=2 .
+```
+
+Next: contextual page/cell/note/running-story image fitting; rich note/marker/list/
+appearance intent; strict native envelope/JSON/surrogates; then full-preset/browser
+editing and rendering. The adapter remains private/incomplete; native API/CLI and
+the full goal are not complete. No runtime dependencies or application/backend
+changes were introduced. Existing source/oracle files are unchanged.

@@ -5747,5 +5747,42 @@
       "MANYDOC_COLLEAF_FACADE_SAVED=output/colleaf-qa/facade-saved.json MANYDOC_COLLEAF_FACADE_EDITED=output/colleaf-qa/facade-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
       "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafIntent$\" -fuzztime=10s -parallel=2 ."
     ]
+  },
+  "colleaf_sections_and_running_stories_2026_11_24": {
+    "scope": "Private native document/page/section/running-story composition through shared SF; full adapter/goal remain incomplete; no public native API/CLI.",
+    "implementation": [
+      "One UTF-16 main body across sections; separate running/note body indexes and relationship-selected catalogs",
+      "Pixel/point page dimensions, explicit zero/fractional margins/distances, inherited optional geometry, native-edits-win checked intent",
+      "First/even/default header/footer selection, inherited nil versus explicit empty stories, authored versus disclosed soft page breaks",
+      "Globally scoped running-story table/list/drawing catalogs and headerFooterDrawingsOrder required by real native renderer",
+      "Author/subject and empty title intent persist in existing checked terminal-LF carrier; native automatic hyphenation disabled explicitly",
+      "Reject invalid/missing story references, local/global visible source orphans and unfinished contradictory settings; diagnose unmapped layout properties"
+    ],
+    "independent_reader": {
+      "packages": "Pinned Univer1.0.4, hash-pinned unmodified Colleaf app validator; ignored optional Node QA only",
+      "script": "scripts/verify_colleaf_sections.cjs",
+      "script_sha256": "b92f57874a1a627c5357a8621f9aa3da82d76343b1f23c5429a863815601eb65",
+      "result": "Seven-page skeleton validates odd-page blank insertion, page sizes/margins, exact first/even/default/inherited/empty header/footer IDs, merged header table, bullet glyph and32x16px image. Actual FDocument.save/fresh reopen/save plus Go import preserves full model semantics.",
+      "regressions": "Fresh Go artifacts and all8 stream/text/table/note/list/image/facade/section Node scripts plus independent Pillow passed. Final combined Go edited/saved re-import0.461s passes.",
+      "limits": "Geometry/structure/save evidence only; browser paint/font metrics/full-preset UI and contextual image fitting remain unqualified."
+    },
+    "checks": {
+      "full_tests": "Final go test ./... pass library17.829s/CLI0.786s/internal2.727s",
+      "vet": "Final pass",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "Final native focus0.956s pass, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass (cross-builds not execution)",
+      "malformed_input_fuzz": "Final FuzzColleafDocument2854 executions/11.451s, two workers; pass. Earlier campaign20360 executions passed; short campaigns not exhaustive.",
+      "full_race": "Final go test -race ./... pass after final source/test changes; library174.270s/CLI1.773s/internal14.209s",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure Go; no production dependency, executable/service/CGO/upload, application/backend modification or permission/quota gate. Original corpus sources/oracles unchanged.",
+    "remaining": "Contextual image fitting, advanced note/marker/list/appearance/provenance policies, strict native JSON/envelope/surrogates and public adapter; actual full-preset/browser rendering and UI mutations; broader untagged PDF note recovery and final source/resource/API/acceptance audit.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_SECTION_QA=output/colleaf-qa/sections.json GOWORK=off go test -run TestColleaf -count=1 .",
+      "node scripts/verify_colleaf_sections.cjs",
+      "MANYDOC_COLLEAF_SECTION_SAVED=output/colleaf-qa/sections-saved.json GOWORK=off go test -run TestColleaf -count=1 .",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzColleafDocument$' -fuzztime=10s -parallel=2 ."
+    ]
   }
 }
