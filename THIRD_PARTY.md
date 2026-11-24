@@ -178,3 +178,9 @@ implementation is copied/translated into Go. Downloads/installations/UI extracti
 remain ignored. The independently authored resource mapping and synthetic fixture
 are manydoc code/data. Source-handler evidence does not establish browser/UI or
 full native navigation compatibility.
+
+The optional navigation probe uses the same attributed pinned packages/source.
+It executes the unmodified internal-link handler/helper region with the actual
+DocSelectionManagerService and a stub render manager/window. It verifies selection
+refresh requests and save/edit transport, without claiming rendered caret/scroll
+or browser interaction. No additional package or production dependency was added.

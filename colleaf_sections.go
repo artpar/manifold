@@ -51,6 +51,7 @@ type colleafLayoutBinding struct {
 	Empty         bool                  `json:"empty,omitempty"`
 }
 type colleafDocumentIntent struct {
+	Unresolved   []string               `json:"unresolved,omitempty"`
 	Author       string                 `json:"author,omitempty"`
 	Subject      string                 `json:"subject,omitempty"`
 	EmptyTitle   bool                   `json:"emptyTitle,omitempty"`
@@ -190,7 +191,7 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 	if err != nil {
 		return out, err
 	}
-	intent := colleafDocumentIntent{Author: d.Metadata.Author, Subject: d.Metadata.Subject, EmptyTitle: d.Metadata.Title == "", Sectioned: hasSectionBlocks(d.Blocks), EmptyStories: map[string]bool{}}
+	intent := colleafDocumentIntent{Unresolved: append([]string(nil), d.UnresolvedDestinations...), Author: d.Metadata.Author, Subject: d.Metadata.Subject, EmptyTitle: d.Metadata.Title == "", Sectioned: hasSectionBlocks(d.Blocks), EmptyStories: map[string]bool{}}
 	out.Title = d.Metadata.Title
 	if out.Title == "" {
 		out.Title = "Untitled"
@@ -441,6 +442,9 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 	}
 	out.Resources = colleafReplaceResource(out.Resources, colleafImageResource, geometry)
 	out.Resources = colleafReplaceResource(out.Resources, colleafDocumentResource, intent)
+	if err = scopeColleafBookmarkIDs(ctx, &out, d); err != nil {
+		return out, err
+	}
 	if err = sealColleafIntent(&out); err != nil {
 		return out, err
 	}
@@ -528,7 +532,11 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 	if err = colleafResourceMap(opened.Resources, colleafImageResource, &geometry); err != nil {
 		return nil, err
 	}
-	settings := colleafTextContext{ImageCache: outputImageCache{}, Styles: opened.Styles, NoteLabels: numberPlan.Overrides, Citations: citations}
+	aliases, err := colleafBookmarkAliases(opened.Body)
+	if err != nil {
+		return nil, err
+	}
+	settings := colleafTextContext{NavigationAliases: aliases, ImageCache: outputImageCache{}, Styles: opened.Styles, NoteLabels: numberPlan.Overrides, Citations: citations}
 	styleFields, err := colleafStyleObject(opened.DocumentStyle)
 	if err != nil {
 		return nil, err
@@ -714,6 +722,10 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 			return nil, err
 		}
 		child := settings
+		child.NavigationScope = "footer:" + *id
+		if header {
+			child.NavigationScope = "header:" + *id
+		}
 		child.NoteIDs = nil
 		child.Lists = lists
 		child.ListBindings = ownership.Stories[*id]
@@ -862,6 +874,9 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 	doc.Diagnostics = append(doc.Diagnostics, reader.doc.Diagnostics...)
 	doc.Diagnostics = append(doc.Diagnostics, diagnostics...)
 	if err = citations.collapse(ctx, doc); err != nil {
+		return nil, err
+	}
+	if err = finishColleafNavigation(ctx, opened, doc, intent.Unresolved); err != nil {
 		return nil, err
 	}
 	if err = doc.Validate(); err != nil {

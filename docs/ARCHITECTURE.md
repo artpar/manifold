@@ -1514,3 +1514,29 @@ external-link handler, with real loaded models and a window.open stub, qualifies
 target selection logic. It does not load UI widgets or qualify browser gestures,
 popup behavior, paint or internal navigation. Actual bookmark/heading point mapping
 and remaining intent/API/browser/resource work still gate adapter completion.
+
+
+## Native bookmark points and typed destination graph
+
+colleaf_navigation.go maps real BOOKMARK3 records to the existing SF paragraph/
+heading anchors and inline anchor atoms. Zero-width native points validate their
+UTF-16 start boundary independently of inclusive formatting extents, including
+before astral scalars. Rich paragraph fragments carry point records separately
+from hyperlink intervals, preserving overlaps and end-of-paragraph points. Sparse
+version1 role/paragraph-ID hints preserve authored block ownership only at its
+current valid start; moved points retain actual positions with diagnostics.
+
+Export transport IDs avoid logical and unresolved names as well as native range
+identities. Import resolves main bookmark aliases, maps headingId through scoped
+SF identities and normalizes equivalent fragment URLs to typed destinations.
+Document intent retains explicit unresolved IDs; final graph validation recovers
+new missing targets and rejects points that rich interpretation did not represent.
+Range-to-point editing extent, unknown metadata and main-only native target lookup
+limits are diagnosed. Diagnostic ordering is stable.
+
+Actual registered-plugin save/reopen and TextX mutation, strict byte-codec/SF
+round trips and1,024 point-bearing paragraphs qualify this component. Hash-pinned
+unmodified handler source issues twelve requests through the actual selection
+manager, with a stub render manager. This proves target/event logic, not rendered
+caret/scroll/browser interaction. Standalone/container anchors and structural
+cursor projection remain unfinished, alongside broader intent/API/UI audits.

@@ -132,7 +132,7 @@ func applyColleafHyperlinkResource(ctx context.Context, input colleafNoteSnapsho
 						return input, nil, err
 					}
 				}
-				if internal != "" {
+				if internal != "" && !colleafInternalHref(*entry.Payload, internal) {
 					return input, nil, fmt.Errorf("%w: native hyperlink resource has conflicting external/internal targets", ErrUnsupported)
 				}
 			}

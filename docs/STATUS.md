@@ -39,7 +39,55 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: registered hyperlink persistence and scoped identities
+## Latest progress: bookmark points and typed internal navigation
+
+Private native output/import now maps paragraph/heading block anchors and inline
+anchor atoms to real BOOKMARK3 point records without inserting visible characters.
+UTF-16 point boundaries include astral starts and paragraph ends. Small version1
+placement hints bind block ownership to the current paragraph ID/position; native
+edits win and stale block placement becomes an inline point with diagnostics.
+Stable transport IDs avoid all logical/missing names, preventing accidental SDK
+rangeId aliases. No text, styles or body trees are cached in point metadata.
+
+Main bookmark range-ID aliases resolve to canonical SF identities. Native headingId
+bindings become scoped SF point identities and typed links; redundant native
+fragment URLs normalize to the existing typed-destination semantics. Explicit
+missing targets persist; new missing references are diagnosed. Foreign bookmark
+editing ranges collapse to current start points with disclosed loss of range
+extent. A final graph check rejects unrepresented structural cursors. Main-story
+lookup limits for targets in other stories are disclosed; data is retained in SF.
+These limits remain required qualification work, not completion exceptions.
+
+Pinned real save/reopen and TextX insertion verify nine main points, twelve
+internal-link selection-refresh requests from main/cell/list/header/footer/note
+stories, foreign headingId lookup, missing-target false behavior and intact emoji/
+13pt/bold/color glyph fields. The unmodified hash-pinned click handler uses the
+real selection manager; the render manager is stubbed, so actual caret display,
+scrolling, browser events and UI controls remain unqualified. Strict .vdocs/Go/SF
+checks verify saved and edited graphs, source immutability, and current point
+movement over stale ownership. A 1,024-paragraph case retains every named point.
+
+Final tests pass: library15.527s/CLI0.369s/internal2.264s, all-package race
+(cache-confirmed after the fresh run), actual saved/edited/heading focused race
+2.310s, vet/modules, CGO-disabled focused tests/host CLI execution and Linux amd64/
+arm64 cross-builds. Point fuzz84,704 executions passed before the isolated metadata
+passthrough adjustment; the four-execution whole-snapshot fuzz sample is weak
+evidence. Pinned readers and diff checks pass; verification.json records scope
+and recovery details. Linux builds are not Linux execution evidence. The full goal
+stays active/incomplete. Next finish standalone/container anchor and structural-
+cursor projection, remaining marker appearance/nonvisual/provenance intent,
+public native API/CLI and actual full-preset/browser qualification. Per-page/
+decorated notes and broader PDF/source/resource/final acceptance audits remain
+required. No external blocker exists. Runtime stays pure Go; apps/backends are
+untouched and no permission/quota gates were introduced.
+
+```sh
+MANYDOC_COLLEAF_NAVIGATION_QA=output/colleaf-qa/navigation.json GOWORK=off go test -run TestColleafNavigation -count=1 .
+node scripts/verify_colleaf_navigation.cjs
+MANYDOC_COLLEAF_NAVIGATION_SAVED=output/colleaf-qa/navigation-saved.json MANYDOC_COLLEAF_NAVIGATION_EDITED=output/colleaf-qa/navigation-edited.json MANYDOC_COLLEAF_NAVIGATION_HEADING=output/colleaf-qa/navigation-heading.json GOWORK=off go test -run 'TestColleafNavigation|TestColleafForeignHeading' -count=1 .
+```
+
+## Earlier progress: registered hyperlink persistence and scoped identities
 
 The actual pinned hyperlink plugin now participates in native save/reopen QA.
 It emits DOC_HYPER_LINK_PLUGIN URL resources and applies them by global rangeId

@@ -951,3 +951,53 @@ MANYDOC_COLLEAF_HYPERLINK_QA=output/colleaf-qa/hyperlinks.json GOWORK=off go tes
 node scripts/verify_colleaf_hyperlinks.cjs
 MANYDOC_COLLEAF_HYPERLINK_SAVED=output/colleaf-qa/hyperlinks-saved.json MANYDOC_COLLEAF_HYPERLINK_RESOURCE_EDITED=output/colleaf-qa/hyperlinks-resource-edited.json MANYDOC_COLLEAF_HYPERLINK_EDITED_SAVED=output/colleaf-qa/hyperlinks-edited-saved.json GOWORK=off go test -run TestColleafHyperlink -count=1 .
 ```
+
+
+## Current bookmark-point and typed internal navigation component
+
+Real BOOKMARK3 custom ranges now represent SF paragraph/heading block anchors and
+inline anchor atoms. startIndex=endIndex denotes a point at a UTF-16 scalar
+boundary, including an astral start or paragraph end; it carries no document text.
+Small manydocNavigation version1 role/paragraphId properties retain block-vs-run
+ownership only while the actual paragraph and current point agree. Native TextX
+moves win. Stale block placement becomes an inline point with diagnostics. IDs
+used for transport avoid logical/missing target names and all other range IDs;
+actual SDK lookup accepts both rangeId and properties.bookmarkId, so accidental
+aliases would otherwise make a missing target appear resolved.
+
+Main bookmark aliases canonicalize to the SF identity. Native headingId becomes a
+scoped SF navigation name with diagnostics; current links target that point.
+Equivalent fragment URL/bookmark or URL/heading pairs are one typed target, while
+contradictory targets reject. Redundant href spelling normalizes through the
+existing SF typed-destination contract. Explicit unresolved IDs persist in checked
+document intent; currently missing native references become explicit SF unresolved
+identities. Foreign bookmark spans retain the current start and disclose loss of
+range editing extent. Unknown bookmark metadata/invalid hints and surviving graph
+coverage are checked. Structural points not yet representable reject rather than
+being silently dropped.
+
+scripts/verify_colleaf_navigation.cjs uses the already hash-pinned model/UI source
+from the preceding section, actual registered plugins and selection manager, with
+a stub render manager and window.open. It checks nine main points, twelve internal
+selection-refresh requests from main/cell/list/header/footer/note contexts, actual
+headingId lookup, false outcome for missing targets, emoji integrity and authored
+13pt/bold/#123456 fields. Two real saves/reopens and actual TextX insertion retain
+current offsets. Go/strict .vdocs/SF reimport checks all saved/edited structures,
+styles and relationships and does not mutate source snapshots. A1,024-paragraph
+point graph is an additional structural regression, not a visual fidelity claim.
+
+The handler requests a collapsed main-body selection with preserveCaret; the real
+selection manager emits its refresh request. No render/controller is mounted in
+this probe. Actual caret display, scrolling, widgets and browser events remain
+unqualified. The pinned handler resolves targets only in the main body; links to
+nonmain point definitions retain data with an explicit limitation diagnostic.
+Standalone AnchorPoint blocks, anchors on containers/images/sections and native
+structural cursor projection remain required work. This component does not claim
+full native adapter/API/CLI or overall goal completion.
+
+```sh
+MANYDOC_COLLEAF_NAVIGATION_QA=output/colleaf-qa/navigation.json GOWORK=off go test -run TestColleafNavigation -count=1 .
+node scripts/verify_colleaf_navigation.cjs
+MANYDOC_COLLEAF_NAVIGATION_SAVED=output/colleaf-qa/navigation-saved.json MANYDOC_COLLEAF_NAVIGATION_EDITED=output/colleaf-qa/navigation-edited.json MANYDOC_COLLEAF_NAVIGATION_HEADING=output/colleaf-qa/navigation-heading.json GOWORK=off go test -run 'TestColleafNavigation|TestColleafForeignHeading' -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafNavigationPoint$' -fuzztime=10s -parallel=2 .
+```

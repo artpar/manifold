@@ -212,6 +212,12 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 	if err != nil {
 		return nil, err
 	}
+	if settings.NavigationAliases == nil {
+		settings.NavigationAliases, err = colleafBookmarkAliases(input.Body)
+		if err != nil {
+			return nil, err
+		}
+	}
 	if settings.Citations == nil {
 		input, settings.Citations, err = openColleafCitations(ctx, input)
 		if err != nil {
@@ -357,6 +363,7 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 		originals[key] = true
 
 		bodySettings := settings
+		bodySettings.NavigationScope = "note:" + id
 		bodySettings.Citations = nil
 		bodySettings.NoteIDs = map[string]noteKey{id: ids[id]}
 		bodySettings.Lists = n.Lists
@@ -466,6 +473,11 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 	}
 	if !settings.DeferNoteNumbering {
 		if err = settings.Citations.collapse(ctx, doc); err != nil {
+			return nil, err
+		}
+	}
+	if !settings.DeferNoteNumbering {
+		if err = finishColleafNavigation(ctx, input, doc, nil); err != nil {
 			return nil, err
 		}
 	}

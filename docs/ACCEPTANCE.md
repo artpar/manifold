@@ -63,7 +63,10 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
    Registered hyperlink URL-resource precedence and scoped main/running identities
    now have actual plugin save/edit/Go/SF evidence. Source-only external handler
    execution with window.open stubbed does not qualify browser interaction or
-   native bookmark/heading navigation; those remain required.
+   full native navigation. Current bookmark/heading point data, typed targets and
+   real selection-manager refresh requests now have save/edit/Go/SF evidence.
+   Standalone/container/structural cursor projection, nonmain lookup limits and
+   actual rendered caret/scroll/browser behavior remain required.
 4. **Corpus/visual and final audit:** eight pinned, legally attributed original
    Word/Mac Word/LibreOffice inputs now qualify notes/running/review/field policies
    through source-only oracles, full semantic round trips, independent readers

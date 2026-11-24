@@ -6209,5 +6209,62 @@
       "rg -n 'findInternalLinkTarget|BOOKMARK|headingId' output/codec/docs-hyper-link-ui-1.0.4/package/lib/cjs/index.js",
       "rg -n 'Anchor|Destination|annotation.Type' colleaf_text.go colleaf_tables.go colleaf_body.go destinations.go"
     ]
+  },
+  "colleaf_point_navigation_2026_11_24": {
+    "scope": "Private native paragraph/heading and inline bookmark points, current typed internal targets and unresolved graph through existing SF. Full adapter/public API/CLI/goal remain incomplete.",
+    "implementation": [
+      "Real BOOKMARK3 zero-width annotations at scalar UTF16 boundaries, distinct from inclusive text-formatting range validation; no extra text characters.",
+      "Sparse version1 role/paragraph-ID hints retain current valid block ownership. Native cursor movement wins; stale block placement becomes an inline point with diagnostics.",
+      "Rich paragraph fragments transport bookmarks separately from hyperlink extents, including overlapping and end-of-paragraph points; unknown metadata survives stale-role normalization long enough to diagnose its loss.",
+      "Global transport-ID reservation prevents accidental aliases of logical/currently unresolved names and other range identities. Main native aliases canonicalize; foreign heading identities map through scoped SF names.",
+      "Equivalent fragment URL/internal target pairs normalize consistently. Known unresolved IDs persist in checked intent; newly missing references become explicit unresolved names, with stable diagnostic ordering.",
+      "All source points must occur in the decoded graph. Malformed/surrogate-split/ambiguous/unrepresented structural points reject explicitly; no new production dependency or app permission/quota policy."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_navigation.cjs",
+      "script_sha256": "7c54b57bd0f5ebbfa8727d5b569ed227a263b460961902be8e63e5cd3c6b371c",
+      "packages": "Pinned actual Univer1.0.4 core/renderer/docs/drawing/docs-drawing/hyperlink plugins and actual DocSelectionManagerService; unchanged hash-pinned Colleaf validator and unmodified UI handler/helper source from prior milestone.",
+      "ui_source_sha256": "a5055ae57c52a0f593e2e10e10b3ae39612f9df3bcf84ae4c9f8fc77ba7ac6fb",
+      "normal_main_offsets": {
+        "paragraph": 0,
+        "before": 0,
+        "middle": 3,
+        "end": 7,
+        "heading": 8,
+        "empty": 16,
+        "list": 17,
+        "cell": 28,
+        "cell-run": 28
+      },
+      "edited_main_offsets": "Actual TextX inserts Q at0; all nine main bookmark offsets move by1. Go import preserves current inline positions and diagnoses stale block ownership.",
+      "results": [
+        "Nine main bookmarks and12 internal selection-refresh requests, including header/footer/note source contexts; each successful request is collapsed at its exact main offset with preserveCaret and isEditing=false. Missing target returnsfalse and emits no new selection request/window.open.",
+        "Actual foreign headingId lookup and source heading/typed SF relationship recovery pass; source namespace normalization is explicitly diagnosed.",
+        "Emoji remains a whole glyph with authored13pt/bold/#123456 style and no forced underline. Two actual registered-plugin saves/reopens and TextX mutation pass.",
+        "Saved/edited/foreign-heading strict .vdocs/Go/SF reimport preserves declared structural semantics, styles, identities, reference relationships and source immutability. Existing table unit-span/redundant href normalizations are respected.",
+        "1024 point-bearing paragraphs retain all structure/content/identities; reserved-alias, unresolved, nonmain limitation, malformed hint/case, span-loss and stale-metadata regressions pass.",
+        "Previous external hyperlink resource/handler reader regression also passes."
+      ],
+      "limits": "Render manager is stubbed; actual manager refresh emission is not renderer/controller caret state, scrolling, browser/widget/event qualification. Main-only target lookup limitation is diagnosed for nonmain point data. No customer upload, external link opening or professional/Word-equivalent fidelity claim."
+    },
+    "checks": {
+      "full_tests": "Post metadata-passthrough all-package tests pass library15.527s/CLI0.369s/internal2.264s; earlier all-package tests with actual saved/edited/heading files16.099s/0.710s/2.252s also pass.",
+      "race": "Final post-passthrough go test -race ./... passes (cached confirmation after the fresh run ended; its original output was lost during context recovery). Earlier full race167.990s/CLI2.178s/internal13.509s and actual saved/edited/heading post-fix focused race2.310s passed.",
+      "vet": "pass after final metadata-passthrough test changes",
+      "modules": "all modules verified; production go.mod/go.sum unchanged",
+      "cgo_disabled": "Post metadata-passthrough focused tests0.662s, host CLI build/--help and Linux amd64/arm64 cross-builds pass. Linux builds are not Linux execution evidence.",
+      "point_fuzz": "84704 executions/10.731s,2workers pass before isolated metadata passthrough adjustment; short point/property/offset safety campaign, not exhaustive",
+      "snapshot_fuzz": "4 executions/11.452s,2workers pass; large whole-snapshot seed/minimization yielded very low throughput, not substantive coverage evidence",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go/std-library production changes only; no new runtime tool/service/CGO/license server/upload, app/backend edits, Daptin performer/permission/quota gates. Optional pinned Node QA and ignored generated artifacts only. Source corpus/oracles and SF schema unchanged.",
+    "remaining": "Standalone AnchorPoint/container/image/section anchors and structural cursor projection; main-only editor target lookup limitation, marker appearance/nonvisual/provenance intent; public native API/CLI and real full-preset/browser caret/scroll interaction; per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_NAVIGATION_QA=output/colleaf-qa/navigation.json GOWORK=off go test -run TestColleafNavigation -count=1 .",
+      "node scripts/verify_colleaf_navigation.cjs",
+      "MANYDOC_COLLEAF_NAVIGATION_SAVED=output/colleaf-qa/navigation-saved.json MANYDOC_COLLEAF_NAVIGATION_EDITED=output/colleaf-qa/navigation-edited.json MANYDOC_COLLEAF_NAVIGATION_HEADING=output/colleaf-qa/navigation-heading.json GOWORK=off go test -run TestColleafNavigation -count=1 .",
+      "rg -n 'AnchorPoint|len\\(.*Anchors|structural cursor' colleaf_tables.go colleaf_lists.go colleaf_images.go colleaf_sections.go colleaf_navigation.go"
+    ]
   }
 }

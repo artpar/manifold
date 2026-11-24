@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 	"unicode/utf16"
 )
 
 type colleafTextContext struct {
+	NavigationAliases  map[string]string
+	NavigationScope    string
 	DeferNoteNumbering bool
 	Citations          *colleafCitationState
 	NoteLabels         map[string]string
@@ -59,7 +62,7 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 		if err := ctx.Err(); err != nil {
 			return body, err
 		}
-		if (block.Kind != Paragraph && block.Kind != Heading) || block.Source != nil || len(block.Anchors) > 0 {
+		if (block.Kind != Paragraph && block.Kind != Heading) || block.Source != nil {
 			return body, fmt.Errorf("%w: native text worker requires paragraph/heading content without unmapped provenance/anchors", ErrUnsupported)
 		}
 		p := colleafParagraphRecord{ID: fmt.Sprintf("p%d", serial)}
@@ -87,8 +90,26 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 		if len(properties) > 0 {
 			p.Style = sfAttrs(properties)
 		}
+		for _, id := range block.Anchors {
+			if err := destinationID(id); err != nil {
+				return body, err
+			}
+			body.CustomRanges = append(body.CustomRanges, writeColleafBookmark(id, offset, p.ID, "block"))
+		}
 		for _, run := range block.Runs {
-			if run.Anchor != "" || strings.ContainsAny(run.Text, "\r\f\v\b\x1a\x1b\x1c\x1d\x0e\x0f\x1e\x1f") {
+			if run.Anchor != "" {
+				if err := destinationID(run.Anchor); err != nil {
+					return body, err
+				}
+				copy := run
+				copy.Anchor = ""
+				if !reflect.DeepEqual(copy, Run{}) {
+					return body, fmt.Errorf("%w: annotated native anchor atom", ErrUnsupported)
+				}
+				body.CustomRanges = append(body.CustomRanges, writeColleafBookmark(run.Anchor, offset, p.ID, "run"))
+				continue
+			}
+			if strings.ContainsAny(run.Text, "\r\f\v\b\x1a\x1b\x1c\x1d\x0e\x0f\x1e\x1f") {
 				return body, fmt.Errorf("%w: native text atom/break needs its full structural mapping", ErrUnsupported)
 			}
 			if err := validateString(run.Text); err != nil {
@@ -166,12 +187,13 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 			appendText(strings.ReplaceAll(run.Text, "\n", "\v"))
 			body.TextRuns = append(body.TextRuns, colleafTextRun{St: start, Ed: offset, TS: style})
 			if run.Link != "" || run.Destination != "" {
-				if run.Link != "" && run.Destination != "" && run.Link != "#"+run.Destination {
+				if run.Link != "" && run.Destination != "" && !colleafInternalHref(run.Link, run.Destination) {
 					return body, fmt.Errorf("conflicting native link targets")
 				}
 				properties := map[string]any{"textStyleMode": "text"}
 				if run.Destination != "" {
 					properties["bookmarkId"] = run.Destination
+					properties["url"] = destinationHref(Run{Destination: run.Destination})
 				} else {
 					properties["url"] = run.Link
 				}
@@ -232,7 +254,7 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 	}
 	var annotations []colleafRangeRecord
 	for _, a := range body.CustomRanges {
-		if a.Type != 8 && a.Type != 9 {
+		if a.Type != 8 && a.Type != 9 && a.Type != 3 {
 			annotations = append(annotations, a)
 		}
 	}
@@ -246,6 +268,19 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 			return nil, fmt.Errorf("conflicting native hyperlink extents")
 		}
 		annotationBounds = append(annotationBounds, annotation.StartIndex, annotation.EndIndex+1)
+	}
+	bookmarks := []colleafRangeRecord{}
+	for _, a := range body.CustomRanges {
+		if a.Type == 3 {
+			bookmarks = append(bookmarks, a)
+		}
+	}
+	sort.SliceStable(bookmarks, func(i, j int) bool { return bookmarks[i].StartIndex < bookmarks[j].StartIndex })
+	if settings.NavigationAliases == nil {
+		settings.NavigationAliases, err = colleafBookmarkAliases(body)
+		if err != nil {
+			return nil, err
+		}
 	}
 	for _, node := range index.sections[0].children {
 		if err := ctx.Err(); err != nil {
@@ -314,7 +349,49 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 			return nil, err
 		}
 		defaults := mergeColleafStyle(mergeColleafStyle(baseText, namedText), pText)
+		headingID, err := colleafNativeHeadingID(p.Style)
+		if err != nil {
+			return nil, err
+		}
+		if headingID != "" {
+			block.Anchors = append(block.Anchors, colleafHeadingID(settings.NavigationScope, headingID))
+		}
+
+		points := map[int][]Run{}
+		firstPoint := sort.Search(len(bookmarks), func(i int) bool { return bookmarks[i].StartIndex >= node.start })
+		for _, a := range bookmarks[firstPoint:] {
+			if a.StartIndex > node.end-1 {
+				break
+			}
+			fields, err := colleafStyleObject(a.Properties)
+			if err != nil {
+				return nil, err
+			}
+			for name := range fields {
+				if name != "bookmarkId" && name != "manydocNavigation" {
+					doc.warn("colleaf_bookmark_metadata", "Native bookmark metadata outside identity and placement is not represented in SF")
+				}
+			}
+			bp, err := readColleafBookmark(a)
+			if err != nil {
+				return nil, err
+			}
+			if a.EndIndex != a.StartIndex {
+				doc.warn("colleaf_bookmark_span", "Native bookmark range editing extent becomes an SF point at its current start")
+			}
+			if bp.Hint != nil && bp.Hint.Role == "block" && a.StartIndex == node.start && bp.Hint.ParagraphID == p.ID {
+				block.Anchors = append(block.Anchors, bp.BookmarkID)
+			} else {
+				points[a.StartIndex] = append(points[a.StartIndex], Run{Anchor: bp.BookmarkID})
+				if bp.Hint != nil && bp.Hint.Role == "block" {
+					doc.warn("colleaf_stale_bookmark_placement", "Edited native bookmark position is retained as a current inline point rather than old block placement")
+				}
+			}
+		}
 		boundaries := []int{node.start, node.end - 1}
+		for offset := range points {
+			boundaries = append(boundaries, offset)
+		}
 		firstSpan := sort.Search(len(spans), func(i int) bool { return spans[i].end > node.start })
 		for _, span := range spans[firstSpan:] {
 			if span.start >= node.end-1 {
@@ -349,6 +426,8 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 				continue
 			}
 			previous = start
+			block.Runs = append(block.Runs, points[start]...)
+			delete(points, start)
 			text, err := index.text.exclusive(start, end)
 			if err != nil {
 				return nil, err
@@ -413,28 +492,43 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 				if run.Note != nil {
 					return nil, fmt.Errorf("%w: hyperlink on native note citation requires navigation mapping", ErrUnsupported)
 				}
-				var target struct {
-					URL      string `json:"url"`
-					Bookmark string `json:"bookmarkId"`
-					Heading  string `json:"headingId"`
-					Mode     string `json:"textStyleMode"`
+				var target colleafLinkProperties
+				if err := validateTypedJSON(ctx, link.Properties, reflect.TypeFor[colleafLinkProperties]()); err != nil {
+					return nil, err
 				}
+
 				if err := json.Unmarshal(link.Properties, &target); err != nil {
 					return nil, err
 				}
+				if target.Bookmark != "" && target.Heading != "" {
+					return nil, fmt.Errorf("conflicting native internal target kinds")
+				}
+				nativeID := target.Bookmark
+				if target.Heading != "" {
+					nativeID = target.Heading
+				}
+				alias := nativeID != "" && colleafInternalHref(target.URL, nativeID)
 				count := 0
 				for _, value := range []string{target.URL, target.Bookmark, target.Heading} {
 					if value != "" {
 						count++
 					}
 				}
-				if count != 1 {
+				if count != 1 && !(count == 2 && alias) {
 					return nil, fmt.Errorf("native hyperlink requires one target")
 				}
 				run.Link = target.URL
 				run.Destination = target.Bookmark
 				if target.Heading != "" {
-					run.Destination = target.Heading
+					run.Destination = colleafHeadingID("", target.Heading)
+				}
+				if target.Bookmark != "" {
+					if canonical, ok := settings.NavigationAliases[target.Bookmark]; ok {
+						run.Destination = canonical
+					}
+				}
+				if alias {
+					run.Link = ""
 				}
 				if target.Mode != "text" {
 					doc.warn("colleaf_link_presentation", "Native automatic hyperlink presentation may differ; target and authored text style are retained")
@@ -442,6 +536,7 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 			}
 			block.Runs = append(block.Runs, run)
 		}
+		block.Runs = append(block.Runs, points[node.end-1]...)
 		if len(p.Bullet) > 0 && string(p.Bullet) != "null" {
 			return nil, fmt.Errorf("%w: native paragraph numbering needs list ownership mapping", ErrUnsupported)
 		}
@@ -452,7 +547,7 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 		sort.Strings(keys)
 		for _, key := range keys {
 			switch key {
-			case "outlineLevel", "namedStyleType", "direction", "pageBreakBefore", "textStyle":
+			case "outlineLevel", "namedStyleType", "direction", "pageBreakBefore", "textStyle", "headingId":
 			default:
 				doc.warn("colleaf_paragraph_style", "Native paragraph property "+key+" is not represented; text and supported paragraph semantics are retained")
 			}

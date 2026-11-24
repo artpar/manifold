@@ -64,11 +64,14 @@ func (w *colleafBodyWriter) paragraph(block Block) error {
 	if err != nil {
 		return err
 	}
+	paragraphIDs := map[string]string{}
 	shift := w.offset
 	w.text(strings.TrimSuffix(fragment.DataStream, "\n"))
 	for _, p := range fragment.Paragraphs {
 		p.StartIndex += shift
+		oldID := p.ID
 		p.ID = w.id("p")
+		paragraphIDs[oldID] = p.ID
 		w.body.Paragraphs = append(w.body.Paragraphs, p)
 	}
 	for _, r := range fragment.TextRuns {
@@ -79,7 +82,12 @@ func (w *colleafBodyWriter) paragraph(block Block) error {
 	for _, r := range fragment.CustomRanges {
 		r.StartIndex += shift
 		r.EndIndex += shift
-		r.ID = w.id("link")
+		if r.Type != 3 {
+			r.ID = w.id("link")
+		}
+		if err := rebindColleafBookmark(&r, paragraphIDs); err != nil {
+			return err
+		}
 		nameColleafCitationRange(&r)
 		w.body.CustomRanges = append(w.body.CustomRanges, r)
 	}
@@ -260,6 +268,15 @@ func (r *colleafBodyReader) paragraphFragment(start, end int, p colleafParagraph
 		return colleafBody{}, err
 	}
 	out := colleafBody{DataStream: text + "\r\n"}
+	originalEnd := p.StartIndex
+	if start != r.paragraphStarts[originalEnd] && len(p.Style) > 0 {
+		props, err := colleafStyleObject(p.Style)
+		if err != nil {
+			return out, err
+		}
+		delete(props, "headingId")
+		p.Style = sfAttrs(props)
+	}
 	p.StartIndex = end - start
 	out.Paragraphs = []colleafParagraphRecord{p}
 	first := sort.Search(len(r.spans), func(i int) bool { return r.spans[i].end > start })
@@ -283,6 +300,37 @@ func (r *colleafBodyReader) paragraphFragment(start, end int, p colleafParagraph
 		a.StartIndex = max(start, a.StartIndex) - start
 		a.EndIndex = min(end-1, a.EndIndex) - start
 		out.CustomRanges = append(out.CustomRanges, a)
+	}
+	first = sort.Search(len(r.bookmarks), func(i int) bool { return r.bookmarks[i].StartIndex >= start })
+	for _, a := range r.bookmarks[first:] {
+		if a.StartIndex > end {
+			break
+		}
+		if r.bookmarkUsed[a.ID] {
+			continue
+		}
+		bp, err := readColleafBookmark(a)
+		if err != nil {
+			return out, err
+		}
+		if bp.Hint != nil && bp.Hint.Role == "block" && (a.StartIndex != r.paragraphStarts[originalEnd] || bp.Hint.ParagraphID != p.ID) {
+			hint := *bp.Hint
+			hint.Role = "run"
+			fields, err := colleafStyleObject(a.Properties)
+			if err != nil {
+				return out, err
+			}
+			fields["manydocNavigation"] = sfAttrs(hint)
+			a.Properties = sfAttrs(fields)
+			r.doc.warn("colleaf_stale_bookmark_placement", "Edited native bookmark position is retained as a current inline point rather than old block placement")
+		}
+		if a.EndIndex != a.StartIndex {
+			r.doc.warn("colleaf_bookmark_span", "Native bookmark range editing extent becomes an SF point at its current start")
+		}
+		a.StartIndex -= start
+		a.EndIndex = a.StartIndex
+		out.CustomRanges = append(out.CustomRanges, a)
+		r.bookmarkUsed[a.ID] = true
 	}
 	first = sort.SearchInts(r.atomPositions, start)
 	for _, position := range r.atomPositions[first:] {
@@ -310,21 +358,24 @@ func (r *colleafBodyReader) paragraphFragment(start, end int, p colleafParagraph
 }
 
 type colleafBodyReader struct {
-	ctx            context.Context
-	body           colleafBody
-	index          *colleafBodyIndex
-	settings       colleafTextContext
-	tables         map[string]json.RawMessage
-	doc            *Document
-	paragraphs     map[int]colleafParagraphRecord
-	used           map[string]bool
-	spans          []colleafStyleSpan
-	ranges         []colleafRangeRecord
-	atomPositions  []int
-	listParagraphs map[int]colleafListParagraph
-	listBindings   map[string]colleafListBinding
-	images         map[string]*Image
-	imageBindings  map[string]colleafImageBinding
+	ctx             context.Context
+	body            colleafBody
+	index           *colleafBodyIndex
+	settings        colleafTextContext
+	tables          map[string]json.RawMessage
+	doc             *Document
+	paragraphs      map[int]colleafParagraphRecord
+	used            map[string]bool
+	spans           []colleafStyleSpan
+	ranges          []colleafRangeRecord
+	bookmarks       []colleafRangeRecord
+	bookmarkUsed    map[string]bool
+	paragraphStarts map[int]int
+	atomPositions   []int
+	listParagraphs  map[int]colleafListParagraph
+	listBindings    map[string]colleafListBinding
+	images          map[string]*Image
+	imageBindings   map[string]colleafImageBinding
 }
 
 func (r *colleafBodyReader) paragraph(start, end int, p colleafParagraphRecord) ([]Block, error) {
@@ -685,7 +736,7 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 		return nil, err
 	}
 	for _, a := range body.CustomRanges {
-		if a.Type != 0 && a.Type != 8 && a.Type != 9 {
+		if a.Type != 0 && a.Type != 3 && a.Type != 8 && a.Type != 9 {
 			return nil, fmt.Errorf("%w: native annotation type %d requires mapping", ErrUnsupported, a.Type)
 		}
 	}
@@ -734,11 +785,18 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 	if err != nil {
 		return nil, err
 	}
+	r.bookmarkUsed = map[string]bool{}
+	r.paragraphStarts = colleafParagraphStarts(index)
 	for _, a := range body.CustomRanges {
+		if a.Type == 3 {
+			r.bookmarks = append(r.bookmarks, a)
+			continue
+		}
 		if a.Type != 8 && a.Type != 9 {
 			r.ranges = append(r.ranges, a)
 		}
 	}
+	sort.SliceStable(r.bookmarks, func(i, j int) bool { return r.bookmarks[i].StartIndex < r.bookmarks[j].StartIndex })
 	sort.Slice(r.ranges, func(i, j int) bool { return r.ranges[i].StartIndex < r.ranges[j].StartIndex })
 	for i := 1; i < len(r.ranges); i++ {
 		if r.ranges[i-1].EndIndex >= r.ranges[i].StartIndex {

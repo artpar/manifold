@@ -174,7 +174,14 @@ func indexColleafBody(ctx context.Context, body colleafBody) (*colleafBodyIndex,
 		if annotation.ID == "" || ids[annotation.ID] {
 			return nil, fmt.Errorf("native custom range identity must be nonempty and unique")
 		}
-		if _, err := text.inclusive(annotation.StartIndex, annotation.EndIndex); err != nil {
+		if annotation.Type == 3 && annotation.StartIndex == annotation.EndIndex {
+			if annotation.StartIndex >= text.length() {
+				return nil, fmt.Errorf("native bookmark is outside the stream")
+			}
+			if _, err := text.byteBoundary(annotation.StartIndex); err != nil {
+				return nil, err
+			}
+		} else if _, err := text.inclusive(annotation.StartIndex, annotation.EndIndex); err != nil {
 			return nil, err
 		}
 		ids[annotation.ID] = true

@@ -1926,3 +1926,28 @@ Published UI source confirms bookmark/heading lookup mechanisms for the next
 mapping step, but source inspection alone is not implementation/interaction proof.
 No third-party implementation is incorporated into production Go or required at
 runtime; optional QA source/package identities and notices stay attributed.
+
+
+## 2026-11-24 Map native navigation as current points, not hidden text
+
+Use real BOOKMARK3 annotations at scalar UTF-16 boundaries. Do not insert invisible
+or visible characters to carry anchors. A point can precede an astral scalar even
+though an inclusive formatting range cannot end on its first surrogate. Keep
+point validation distinct from formatting extent validation. Preserve paragraph/
+heading block placement through small version1 role/paragraph-ID hints and honor
+current native edits; stale ownership becomes an inline point with a diagnostic.
+No marker text, styles or document bodies are cached.
+
+Native lookup accepts rangeId and bookmarkId in one namespace. Avoid every logical/
+missing identity when allocating transport IDs, so an explicitly missing link
+cannot accidentally resolve. Canonicalize actual main-body range aliases; namespace
+foreign heading identities and retain typed SF destinations. Normalize redundant
+fragment URLs consistently across SF/native round trips. Preserve known missing
+IDs, diagnose new ones and reject points left at unrepresented structural cursors.
+Native bookmark range editing extent becomes a disclosed start-point loss.
+
+Pin save/reopen, actual TextX cursor movement and real selection-manager refresh
+requests from the unmodified UI handler. Stub render/window services in this probe
+and state its limits. These are not browser caret/scroll/event or full adapter
+completion evidence. Structural/standalone/container anchors and nonmain target
+lookup/remaining intent/API/browser qualification stay on the required queue.
