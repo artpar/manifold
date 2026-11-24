@@ -160,11 +160,11 @@ NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/li
 
 VDOCS still rejects literal markers with ErrUnsupported before writing output,
 even with AllowLossy. The native mapping remains required work, not a completion
-exemption. The current native reader dispatches list ownership through bullet
-paragraphs and explicitly rejects a table as the first item block. Native tables
-already have structural anchoring paragraphs; the next mapping must connect real
-label/body table or flow owners before ordinary bullet reconstruction, rather
-than scalarize rich labels into glyphSymbol. Word's ordinary bullet glyph path truncated multi-character labels in
+exemption. An internal checked native table/flow prototype now preserves its rich
+model/source graph through SDK edits and facade saves. Actual browser red-image
+painting still fails, including a standalone control, so publication remains
+unfinished. See NATIVE_LITERAL_MARKERS.md for the precise oracle and next commands.
+Word's ordinary bullet glyph path truncated multi-character labels in
 the earlier experiment and is not a generic encoding. Keep actual editable content
 and assets authoritative in the checked native mapping as in DOCX/PDF.
 

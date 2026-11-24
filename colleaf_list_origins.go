@@ -9,6 +9,15 @@ import (
 
 const colleafListOriginProfile = "manydoc.list-origin"
 const colleafItemOriginProfile = "manydoc.item-origin"
+const colleafMarkerOriginProfile = "manydoc.marker-origin"
+
+func colleafMarkerFingerprint(m *ListMarker) (string, error) {
+	nodes, err := encodeSFBlocks(m.Blocks)
+	if err != nil {
+		return "", err
+	}
+	return colleafSourceFreeHash(nodes)
+}
 
 func colleafListFingerprint(b Block) (string, error) {
 	nodes, err := encodeSFBlocks([]Block{b})
@@ -46,7 +55,7 @@ func visitColleafListOrigins(snapshot *colleafNoteSnapshot, update bool, visit f
 				return err
 			}
 			changed := false
-			for key, profile := range map[string]string{"manydocListOrigin": colleafListOriginProfile, "manydocItemOrigin": colleafItemOriginProfile} {
+			for key, profile := range map[string]string{"manydocListOrigin": colleafListOriginProfile, "manydocItemOrigin": colleafItemOriginProfile, "manydocMarkerOrigin": colleafMarkerOriginProfile} {
 				o, err := readColleafOriginProfile(props[key], profile)
 				if err != nil {
 					return err
@@ -125,7 +134,7 @@ func collectColleafListOrigins(out *colleafNoteSnapshot, e **colleafDocumentEvid
 	return nil
 }
 func validateColleafListOrigin(o colleafOrigin, pages []PDFPage) error {
-	if o.Profile != colleafListOriginProfile && o.Profile != colleafItemOriginProfile {
+	if o.Profile != colleafListOriginProfile && o.Profile != colleafItemOriginProfile && o.Profile != colleafMarkerOriginProfile {
 		return fmt.Errorf("invalid native list/item source profile")
 	}
 	return validateColleafOriginProfile(o, pages, o.Profile)
@@ -194,6 +203,16 @@ func restoreColleafListOrigins(d *Document, e *colleafDocumentEvidence, input co
 							return err
 						}
 					}
+					if p.colleafMarkerOrigin != nil && item.Marker != nil {
+						hash, err := colleafMarkerFingerprint(item.Marker)
+						if err != nil {
+							return err
+						}
+						item.Marker.Source, err = restore(p.colleafMarkerOrigin, hash)
+						if err != nil {
+							return err
+						}
+					}
 					if p.colleafItemOrigin != nil {
 						hash, err := colleafItemFingerprint(*b, j)
 						if err != nil {
@@ -208,7 +227,13 @@ func restoreColleafListOrigins(d *Document, e *colleafDocumentEvidence, input co
 			}
 			b.colleafListOrigin = nil
 			b.colleafItemOrigin = nil
+			b.colleafMarkerOrigin = nil
 			for j := range b.Items {
+				if b.Items[j].Marker != nil {
+					if err := walk(b.Items[j].Marker.Blocks); err != nil {
+						return err
+					}
+				}
 				if err := walk(b.Items[j].Blocks); err != nil {
 					return err
 				}

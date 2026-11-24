@@ -258,6 +258,11 @@ func (s *colleafCitationState) collapse(ctx context.Context, doc *Document) erro
 				}
 			}
 			for i := range b.Items {
+				if b.Items[i].Marker != nil {
+					if err := walk(b.Items[i].Marker.Blocks); err != nil {
+						return err
+					}
+				}
 				if err := walk(b.Items[i].Blocks); err != nil {
 					return err
 				}

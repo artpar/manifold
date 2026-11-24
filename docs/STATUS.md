@@ -40,7 +40,34 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: rich literal labels persist and render in DOCX
+## Latest progress: native literal-label graph prototype, paint still fails
+
+An internal native mapping now writes real label/body tables with checked sparse
+ownership/counter intent. It restores complete SF graphs, including source owners,
+formatting, links, notes, images, nested structures and RTL, through actual native
+TextX edits and facade saves. Marker trees now participate in native source/identity/
+image-fitting walks. Mixed automatic label paragraphs align right to prevent the
+browser clipping their prefixes; the generated fix was visually observed.
+
+The actual pinned Colleaf browser exposes a further required gap: the source red
+image decodes correctly and has a drawing record, but produces zero red canvas
+pixels, including a standalone image control. No runtime error is reported. This
+is not established as solely a label-table nesting problem. The strict pixel probe
+remains FAILING. Generic scene-transform input probes did not fix it. Public VDOCS
+marker export stays guarded; this internal milestone is not a completed native
+conversion capability or a completion exemption. Read NATIVE_LITERAL_MARKERS.md
+for exact schema, evidence, source/pixel oracles and reproduction commands.
+
+Full Go tests pass (library26.577s/CLI0.794s), full race passes
+(library319.540s/CLI3.213s); final focused race passes (3.002s), including added
+malformed/stale cases and standalone control. Vet/modules, CGO-disabled focus
+(0.381s), host and Linux amd64/arm64 builds pass. Full race preceded test-only
+malformed/control additions; no production changes followed its snapshot. SDK
+and facade-save checks pass; browser image painting does not. QA server/tab were
+closed after observation. The full goal remains active, with native drawing
+registration/insertion comparison as the next safe implementation step.
+
+## Earlier progress: rich literal labels persist and render in DOCX
 
 DOCX now exports literal marker content as actual editable OOXML blocks with
 checked list/item ownership. Body/running items use borderless parallel label/body
@@ -428,8 +455,9 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-1. Complete literal-marker native mapping using LITERAL_LIST_MARKERS.md; the
-   DOCX/PDF mappings now exist. The current output rejection is temporary
+1. Resolve the native drawing paint failure in NATIVE_LITERAL_MARKERS.md, comparing
+   actual native insertion with the Go snapshot, then qualify/enable marker export.
+   The checked graph prototype and DOCX/PDF mappings now exist. The current output rejection is temporary
    required work, not a completed support-contract exception. Reproduce the native
    repeated-footnote failure in COLLEAF_BROWSER.md without weakening its oracle.
    Broaden source/structure and resource audits beyond the newly qualified

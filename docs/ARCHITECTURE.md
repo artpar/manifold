@@ -1922,3 +1922,13 @@ layout paragraphs carry/restorably encode item page starts; no content can hide
 inside them. Note resolution and running fitting include markers. The actual ODT
 link graph passes while the separate Word-PDF annotation oracle remains a recorded
 failure; LITERAL_LIST_MARKERS.md gives exact behavior and qualification commands.
+
+
+An internal native literal-label prototype encodes actual equal-column label/body
+tables and checked manydocLiteralItem role/counter metadata. Contiguous owners
+reconstruct lists; stale ownership retains actual cells and diagnostics. Source-only
+marker references join list/item origins, and all native model walks include marker
+trees. Empty automatic-label paragraphs use checked right alignment inside their
+cells. Actual SDK/facade graphs pass, but the browser red-image oracle fails even
+for a standalone control, so public export remains guarded. See
+NATIVE_LITERAL_MARKERS.md for the exact failure and required next investigation.

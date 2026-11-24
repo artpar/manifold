@@ -7561,5 +7561,45 @@
       "output/qa-venv/bin/python scripts/verify_docx_literal_markers.py --require-pdf-links",
       "node scripts/verify_colleaf_note_order.cjs"
     ]
+  },
+  "native_literal_marker_prototype": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "Internal native literal-marker tables retain actual editable content with sparse checked ownership/counter metadata. Public VDOCS marker writer remains guarded until rendered qualification. Marker trees now participate in source/identity/citation/image-fitting walks.",
+    "graph_checks": "Exact SF roundtrips cover rich formatting/links/notes, mixed automatic counters, nested images/tables/lists, stories, RTL and source owners. Actual native TextX edit and facade saves reimport current content. Unknown metadata rejects; stale ownership retains visible native tables and diagnostics.",
+    "independent": {
+      "command": "node scripts/verify_colleaf_literal_markers.cjs",
+      "sha256": "be98b445609ff29ad4f3b6c5d5a1914210994343815153fc3993609ecf00ea92",
+      "validator_source_sha256": "c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0",
+      "packages": "Published Univer core/engine-render/docs/drawing/docs-drawing 1.0.4; unmodified pinned Colleaf mount.",
+      "result": "Native glyphs, geometry, complete Item 7)/Item 9) counters, notes/header caches, TextX edits and actual FDocument.save/reopen pass. Geometry/persistence do not establish canvas paint."
+    },
+    "browser": {
+      "probe": "scripts/colleaf_literal_browser_probe.js",
+      "sha256": "e803732d951bc8d0f0869099fe53098b5b9904dd48b0d8ed7ad86b9bdb1e714b",
+      "passed": "Lifecycle stage3/no runtime errors; rich/empty labels, note body, full automatic prefixes after right alignment and nested text visible.",
+      "failed": "Strict original red-pixel oracle FAILS: nested, running/note and standalone control retain drawing records and independently decoded RGBA255,0,0,255 source, but canvas redPixels=0. Nested ordinary numbered label also appeared clipped.",
+      "investigation": "Renderer skips missing generic scene transform; adding transforms at zero and visible coordinates still produces zero pixels. Candidate only,not proven sole cause. Next compare actual native image insertion/registration against generated snapshot. No vendor/app edits or image-oracle changes.",
+      "cleanup": "Owned local server terminated and isolated Chrome tab closed after observed result."
+    },
+    "checks": {
+      "go_test_all": "passed final library26.577s/CLI0.794s",
+      "race": "passed library319.540s/CLI3.213s; snapshot precedes test-only malformed/stale/control additions, no production changes followed",
+      "focused_race": "passed final3.002s including current marker/source malformed and stale cases",
+      "vet": "passed final",
+      "modules": "all modules verified",
+      "CGO_disabled_focus": "passed final0.381s",
+      "builds": "CGO-disabled host CLI and Linux amd64/arm64 cross-builds pass;cross-builds are not Linux execution.",
+      "fuzz": "Existing malformed/fuzz seeds run by whole suite;no new fuzz campaign claimed.",
+      "diff_check": "passed"
+    },
+    "production_dependencies": "unchanged;independently authored Go adapter and existing optional SDK/browser QA only.",
+    "remaining": "Native image paint/list-in-cell/pagination qualification and public literal-marker writer enablement remain unfinished. Repeated-footnote native order bug, Word-PDF link discrepancy and broader source/resource/reflow/API/visual/original acceptance audits remain open. No overall blocker or completion exemption established.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/NATIVE_LITERAL_MARKERS.md",
+      "node scripts/prepare_colleaf_browser.cjs output/native-literal/rich.vdocs",
+      "rg -n 'insertImage|renderImages|singleTransform|getImageSourceCache' output/colleaf-browser/node_modules/@univerjs/{docs-drawing-ui,drawing-ui,drawing}/lib/es/index.js",
+      "node scripts/verify_colleaf_literal_markers.cjs"
+    ]
   }
 }

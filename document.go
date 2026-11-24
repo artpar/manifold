@@ -105,9 +105,12 @@ type Block struct {
 	Start                   *int           `json:"start,omitempty"`
 	Source                  *SourceInfo    `json:"source,omitempty"`
 	Section                 *Section       `json:"section,omitempty"`
+	colleafAutoLabel        bool
+	colleafLiteral          *colleafLiteralItem
 	colleafFlowOrigin       *colleafOrigin
 	colleafListOrigin       *colleafOrigin
 	colleafItemOrigin       *colleafOrigin
+	colleafMarkerOrigin     *colleafOrigin
 	colleafImageOrigin      *colleafOrigin
 	colleafTableOrigin      *colleafOrigin
 	colleafOrigin           *colleafOrigin

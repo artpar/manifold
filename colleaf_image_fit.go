@@ -28,7 +28,13 @@ func colleafImageBoxes(ctx context.Context, blocks []Block, box colleafImageSize
 				}
 				boxes = append(boxes, available)
 			case ListBlock:
-				for _, item := range b.Items {
+				for i, item := range b.Items {
+					if hasColleafLiteralItems(b) {
+						if err := visit([]Block{colleafLiteralTable(b, item, i)}, available, depth+1); err != nil {
+							return err
+						}
+						continue
+					}
 					if err := visit(item.Blocks, available, depth+1); err != nil {
 						return err
 					}

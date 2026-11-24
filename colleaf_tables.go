@@ -27,9 +27,10 @@ type colleafNativeRow struct {
 	GridAfter  int               `json:"gridAfter,omitempty"`
 }
 type colleafNativeTable struct {
-	Origin  json.RawMessage   `json:"manydocOrigin,omitempty"`
-	ID      string            `json:"tableId"`
-	Rows    []json.RawMessage `json:"tableRows"`
+	Literal *colleafLiteralItem `json:"manydocLiteralItem,omitempty"`
+	Origin  json.RawMessage     `json:"manydocOrigin,omitempty"`
+	ID      string              `json:"tableId"`
+	Rows    []json.RawMessage   `json:"tableRows"`
 	Columns []struct {
 		Size colleafTableWidth `json:"size"`
 	} `json:"tableColumns"`
@@ -84,6 +85,31 @@ func (w *colleafBodyWriter) paragraph(block Block) error {
 				return err
 			}
 			props["manydocOrigin"] = sfAttrs(origin)
+			fragment.Paragraphs[i].Style = sfAttrs(props)
+		}
+	}
+	for _, binding := range []struct {
+		key    string
+		origin *colleafOrigin
+	}{{"manydocListOrigin", sourceBlock.colleafListOrigin}, {"manydocItemOrigin", sourceBlock.colleafItemOrigin}, {"manydocMarkerOrigin", sourceBlock.colleafMarkerOrigin}} {
+		if binding.origin != nil {
+			for i := range fragment.Paragraphs {
+				props, err := colleafStyleObject(fragment.Paragraphs[i].Style)
+				if err != nil {
+					return err
+				}
+				props[binding.key] = sfAttrs(binding.origin)
+				fragment.Paragraphs[i].Style = sfAttrs(props)
+			}
+		}
+	}
+	if sourceBlock.colleafAutoLabel {
+		for i := range fragment.Paragraphs {
+			props, err := colleafStyleObject(fragment.Paragraphs[i].Style)
+			if err != nil {
+				return err
+			}
+			props["horizontalAlign"] = sfAttrs(3)
 			fragment.Paragraphs[i].Style = sfAttrs(props)
 		}
 	}
@@ -454,38 +480,39 @@ func (r *colleafBodyReader) paragraphFragment(start, end int, p colleafParagraph
 }
 
 type colleafBodyReader struct {
-	cursorWarningSet   map[string]bool
-	cursorKinds        map[int]string
-	cursorBookmarks    map[int][]colleafRangeRecord
-	pointSlots         map[colleafPointSlot]bool
-	standalone         []colleafStandalonePoint
-	standaloneIDs      map[string]bool
-	pointsAt           map[int][]colleafStandalonePoint
-	pointCarriers      map[string]bool
-	sectionIDs         map[int]string
-	sectionPoints      map[int][]string
-	listPointPositions map[string]int
-	listPointOwners    map[string]string
-	promotedListPoints map[string]bool
-	containerPoints    map[int][]string
-	ctx                context.Context
-	body               colleafBody
-	index              *colleafBodyIndex
-	settings           colleafTextContext
-	tables             map[string]json.RawMessage
-	doc                *Document
-	paragraphs         map[int]colleafParagraphRecord
-	used               map[string]bool
-	spans              []colleafStyleSpan
-	ranges             []colleafRangeRecord
-	bookmarks          []colleafRangeRecord
-	bookmarkUsed       map[string]bool
-	paragraphStarts    map[int]int
-	atomPositions      []int
-	listParagraphs     map[int]colleafListParagraph
-	listBindings       map[string]colleafListBinding
-	images             map[string]*Image
-	imageBindings      map[string]colleafImageBinding
+	literalAutomaticCell bool
+	cursorWarningSet     map[string]bool
+	cursorKinds          map[int]string
+	cursorBookmarks      map[int][]colleafRangeRecord
+	pointSlots           map[colleafPointSlot]bool
+	standalone           []colleafStandalonePoint
+	standaloneIDs        map[string]bool
+	pointsAt             map[int][]colleafStandalonePoint
+	pointCarriers        map[string]bool
+	sectionIDs           map[int]string
+	sectionPoints        map[int][]string
+	listPointPositions   map[string]int
+	listPointOwners      map[string]string
+	promotedListPoints   map[string]bool
+	containerPoints      map[int][]string
+	ctx                  context.Context
+	body                 colleafBody
+	index                *colleafBodyIndex
+	settings             colleafTextContext
+	tables               map[string]json.RawMessage
+	doc                  *Document
+	paragraphs           map[int]colleafParagraphRecord
+	used                 map[string]bool
+	spans                []colleafStyleSpan
+	ranges               []colleafRangeRecord
+	bookmarks            []colleafRangeRecord
+	bookmarkUsed         map[string]bool
+	paragraphStarts      map[int]int
+	atomPositions        []int
+	listParagraphs       map[int]colleafListParagraph
+	listBindings         map[string]colleafListBinding
+	images               map[string]*Image
+	imageBindings        map[string]colleafImageBinding
 }
 
 func (r *colleafBodyReader) paragraph(start, end int, p colleafParagraphRecord) ([]Block, error) {
@@ -493,6 +520,18 @@ func (r *colleafBodyReader) paragraph(start, end int, p colleafParagraphRecord) 
 }
 func (r *colleafBodyReader) textParagraph(start, end int, p colleafParagraphRecord) ([]Block, error) {
 	p.Bullet = nil
+	autoLayout := false
+	if r.literalAutomaticCell && start == end {
+		props, err := colleafStyleObject(p.Style)
+		if err != nil {
+			return nil, err
+		}
+		if string(props["horizontalAlign"]) == "3" {
+			delete(props, "horizontalAlign")
+			p.Style = sfAttrs(props)
+			autoLayout = true
+		}
+	}
 	fragment, err := r.paragraphFragment(start, end, p)
 	if err != nil {
 		return nil, err
@@ -502,6 +541,9 @@ func (r *colleafBodyReader) textParagraph(start, end int, p colleafParagraphReco
 		return nil, err
 	}
 	r.doc.Diagnostics = append(r.doc.Diagnostics, doc.Diagnostics...)
+	if autoLayout && len(doc.Blocks) == 1 {
+		doc.Blocks[0].colleafAutoLabel = true
+	}
 	return doc.Blocks, nil
 }
 func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([]Block, error) {
@@ -601,6 +643,10 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 	if err != nil {
 		return nil, err
 	}
+	blocks, err = r.literalLists(blocks, depth)
+	if err != nil {
+		return nil, err
+	}
 	// A point at a terminal LF has no text carrier. Retain a changed scope at
 	// this actual current boundary rather than dropping it.
 	scope := r.sectionIDs[sections[0].end-1]
@@ -647,6 +693,19 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 		return block, err
 	}
 	var err error
+	if table.Literal != nil {
+		var props map[string]json.RawMessage
+		if err := json.Unmarshal(raw, &props); err != nil {
+			return block, err
+		}
+		if err := strictSFAttrs(props["manydocLiteralItem"], table.Literal); err != nil {
+			return block, err
+		}
+		if err := table.Literal.validate(); err != nil {
+			return block, err
+		}
+		block.colleafLiteral = table.Literal
+	}
 	block.colleafTableOrigin, err = readColleafOriginProfile(table.Origin, colleafTableOriginProfile)
 	if err != nil {
 		return block, err
@@ -801,7 +860,10 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 					occupied[rr][cc] = origin
 				}
 			}
+			previousAutoCell := r.literalAutomaticCell
+			r.literalAutomaticCell = table.Literal != nil && table.Literal.Automatic && ri == 0 && ((ci == 0 && !table.Literal.Right) || (ci == 1 && table.Literal.Right))
 			content, err := r.sections(cellNode.children, depth)
+			r.literalAutomaticCell = previousAutoCell
 			if err != nil {
 				return block, err
 			}
@@ -894,7 +956,7 @@ func (r *colleafBodyReader) table(node colleafStreamNode, depth int) (Block, err
 		"dist":     map[string]int{"distT": 0, "distB": 0, "distL": 0, "distR": 0},
 		"size":     colleafTableWidth{typeValue, colleafNumberUnit{total, unit}}, "layout": layout,
 	}
-	allowed := []string{"tableId", "tableRows", "tableColumns", "manydocOrigin"}
+	allowed := []string{"tableId", "tableRows", "tableColumns", "manydocOrigin", "manydocLiteralItem"}
 	for key, expected := range neutral {
 		var actual, canonical any
 		_ = json.Unmarshal(props[key], &actual)

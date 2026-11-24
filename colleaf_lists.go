@@ -83,6 +83,11 @@ func colleafNumberGlyph(format string) (int, error) {
 }
 
 func (w *colleafBodyWriter) list(block Block, depth int) error {
+	for _, item := range block.Items {
+		if item.Marker != nil {
+			return w.literalList(block, depth)
+		}
+	}
 	if depth > 64 || len(block.Items) == 0 || (block.List != "number" && block.List != "bullet") {
 		return fmt.Errorf("invalid native list")
 	}

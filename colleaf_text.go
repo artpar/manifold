@@ -338,6 +338,10 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 		if err != nil {
 			return nil, err
 		}
+		block.colleafMarkerOrigin, err = readColleafOriginProfile(directParagraph["manydocMarkerOrigin"], colleafMarkerOriginProfile)
+		if err != nil {
+			return nil, err
+		}
 		level, hasLevel, err := colleafRawInt(properties, "outlineLevel")
 		if err != nil {
 			return nil, err
@@ -597,7 +601,7 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 			switch key {
 			case "manydocFlowOrigin":
 				doc.warn("colleaf_flow_origin_context", "Native flow source metadata outside a current standalone flow owner is not asserted")
-			case "manydocListOrigin", "manydocItemOrigin":
+			case "manydocListOrigin", "manydocItemOrigin", "manydocMarkerOrigin":
 				if (key == "manydocListOrigin" && block.colleafListOrigin == nil) || (key == "manydocItemOrigin" && block.colleafItemOrigin == nil) {
 					doc.warn("colleaf_list_origin_inheritance", "Inherited native source properties are not treated as direct list/item ownership")
 				}

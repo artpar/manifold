@@ -2370,3 +2370,16 @@ the same reader omitted a nested label table. Preserve the rich source fixture,
 not an empty-table oracle. Keep actual ODT hyperlink retention distinct from the
 missing Word-PDF annotations, with the strict extra oracle still executable.
 LITERAL_LIST_MARKERS.md records the independent source/geometry/assets/visual scope.
+
+
+## 2026-11-25 Keep native label graph support separate from paint qualification
+
+Prototype rich labels as actual native cell content with sparse ownership/counter
+intent, not glyph strings or cached SF. Bind source owners to actual body paragraphs
+and include marker trees in native identity/source/fitting walks. Preserve real
+automatic counters, aligning their empty label paragraphs right to avoid observed
+prefix clipping. Require actual browser pixel evidence in addition to SDK glyphs,
+geometry and facade saves. Keep public export guarded after the red-image oracle
+fails, including a standalone control; do not blame only new table nesting or
+claim a sole root cause from the missing-transform hypothesis. Compare actual
+native image insertion next without patching applications/vendor packages.

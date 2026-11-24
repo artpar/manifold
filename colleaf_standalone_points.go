@@ -131,6 +131,9 @@ func (r *colleafBodyReader) finishStandalone(blocks []Block) {
 				walk(b.Section.Blocks, f)
 			}
 			for j := range b.Items {
+				if b.Items[j].Marker != nil {
+					walk(b.Items[j].Marker.Blocks, f)
+				}
 				walk(b.Items[j].Blocks, f)
 			}
 			for j := range b.Rows {
@@ -215,6 +218,9 @@ func colleafStandaloneBlockIDs(blocks []Block) map[string]bool {
 				walk(b.Section.Blocks)
 			}
 			for _, item := range b.Items {
+				if item.Marker != nil {
+					walk(item.Marker.Blocks)
+				}
 				walk(item.Blocks)
 			}
 			for _, row := range b.Rows {

@@ -184,6 +184,11 @@ func restoreColleafRunOrigins(d *Document, e *colleafDocumentEvidence) error {
 				}
 			}
 			for j := range b.Items {
+				if b.Items[j].Marker != nil {
+					if err := walk(b.Items[j].Marker.Blocks); err != nil {
+						return err
+					}
+				}
 				if err := walk(b.Items[j].Blocks); err != nil {
 					return err
 				}
