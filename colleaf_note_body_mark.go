@@ -25,6 +25,7 @@ type colleafBodyMarkScope struct {
 	colleafBodyMark
 	Start, End int
 	RangeID    string
+	Restored   bool
 }
 
 func prepareColleafBodyMark(n Note, catalog *noteCatalog) ([]Block, *colleafBodyMark, int, error) {
@@ -178,6 +179,7 @@ func restoreColleafBodyMark(ctx context.Context, n colleafNativeNote, scope *col
 		if scope.UseDefault {
 			note.BodyLabel = nil
 		}
+		scope.Restored = true
 		return nil // real referenceTextStyle was decoded normally, without text caches
 	}
 	if len(n.Body.Paragraphs) == 0 || n.Body.Paragraphs[0].ID != scope.ParagraphID || scope.End >= n.Body.Paragraphs[0].StartIndex || len(note.Blocks) == 0 || (note.Blocks[0].Kind != Paragraph && note.Blocks[0].Kind != Heading) {
@@ -206,6 +208,7 @@ func restoreColleafBodyMark(ctx context.Context, n colleafNativeNote, scope *col
 		return nil
 	}
 	// Commit the structural collapse only after the whole ownership guard passes.
+	scope.Restored = true
 	note.Blocks[0].Runs = remaining
 	if scope.Separate && len(remaining) == 0 {
 		note.Blocks = note.Blocks[1:]

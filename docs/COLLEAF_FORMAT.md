@@ -727,3 +727,55 @@ Next implement native literal/rich per-citation markers with checked ownership,
 then remaining intent/strict envelope and public adapter/browser qualification.
 Body provenance/nonvisual style policies remain on the wider mapping queue. No
 production dependency, app/backend change or runtime external tool was added.
+
+
+## Per-citation literal/rich/default/markerless output
+
+colleaf_citation.go now handles NoteReference.Label, LabelContent and Inferred in
+native output. Every citation in an affected note group keeps a real U+FFFC note
+atom with customMark empty. Real superscript text runs follow that atom, then a
+U+2060 delimiter. A neutral manydoc.note-citation version1 CUSTOM annotation binds
+profile/token/native note ID/mode/inferred flags to the current source interval.
+It contains no label text/style/body copy. Root checked identity data retains the
+original shared/automatic label intent; independent/default body marks use real
+body-prefix runs through the existing worker. Notes remain shared definitions.
+
+The actual native BaselineOffset.SUPERSCRIPT is 3, checked against pinned glyphs.
+Rich atom-wide style is canonicalized into its fragments using the existing SF
+rule. Authoritative native text/style edits derive new per-reference values.
+Default omission restores only while actual labels still match the current shared
+catalog; otherwise explicit values and diagnostics preserve displayed marks.
+
+Actual TextX replaces II with III by splitting its ownership annotation into anchor
+and delimiter fragments. Stable tokens and identical properties join that known
+case without inventing text. Original fragment IDs/scalar bounds validate first.
+Only guarded superscript label intervals normalize their baseline during semantic
+recovery. Neutral baseline 0 maps to ordinary text; unsupported nonzero baselines
+outside ownership still emit diagnostics. Missing/changed ownership retains real
+text and anchors. Invalid versions, appearance, bounds, contradictions or ownership
+crossing another atom reject instead of hiding content.
+
+Style-span binary searches preserve last-record-wins precedence without scanning
+every source record per citation. Paragraph folding consumes runs once. The fixed
+2,048-reference case checks all order/default/ownership semantics; ordinary cases
+cover nested cells/lists/sections and foot/endnotes sharing a public ID.
+
+scripts/verify_colleaf_citations.cjs checks the unmodified hash-pinned app validator,
+actual seven markerless anchors, visible literal/rich/default/empty labels, red 12pt
+bold/green 8pt italic/superscript fields, and two placed note bodies. Real facade
+save/fresh reopen plus TextX/style edits pass exact Go/SF semantics. It preserves
+the actual split-range edit, not a synthetic direct-text substitute. This is
+headless structure/glyph/style/save evidence; full browser paint/font/wrapping,
+atomic-label selection/click/navigation and interaction remain unqualified.
+
+```sh
+MANYDOC_COLLEAF_CITATION_QA=output/colleaf-qa/citations.json GOWORK=off go test -run TestColleaf -count=1 .
+node scripts/verify_colleaf_citations.cjs
+MANYDOC_COLLEAF_CITATION_SAVED=output/colleaf-qa/citations-saved.json MANYDOC_COLLEAF_CITATION_EDITED=output/colleaf-qa/citations-edited.json GOWORK=off go test -run TestColleaf -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafCitations$' -fuzztime=1000x -parallel=2 .
+```
+
+Next complete remaining list/appearance/navigation/provenance/nonvisual intent,
+strict native envelope and public API/CLI, then actual full-preset/browser QA.
+Per-page/decorated-note policies and final broader goal audits remain explicit.
+No production dependency, external runtime tool or application/backend edit added.

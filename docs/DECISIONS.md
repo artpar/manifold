@@ -1809,3 +1809,25 @@ Qualify literal/rich/styled, table-first, empty and markerless-style cases throu
 real facade save/reopen and actual text/style edits. These prove this body-mark
 projection, not per-citation rich output, browser paint/interaction, total-story
 layout or native adapter completion. Keep those on the required next-work queue.
+
+
+## 2026-11-24 Keep native per-citation labels editable and notes shared
+
+Native generated labels are shared per definition. Represent different/rich/empty
+citations as real editable text beside real markerless note atoms, with neutral
+ownership annotations and an explicit end delimiter. Preserve a single note body.
+Use existing SF per-reference/shared/body-label fields, with sparse checked intent
+for the shared value not expressible in the markerless native field. Do not cache
+whole labels/styles/bodies or force old values over editor changes.
+
+The actual pinned superscript enum is 3; a symmetric Go-only round trip would not
+have detected a wrong enum. Actual glyph checks are required. TextX replacement
+also split one annotation into two fragments; preserve that unchanged edit as a
+regression and combine only identical stable-token fragments. Validate original
+records before normalization so malformed inputs cannot be hidden by joining.
+
+Import derives current text/style from native intervals, preserving source style
+precedence, and discloses stale/unsupported ownership. Long paragraphs use bounded
+style searches and linear folding; a 2,048-reference case checks ordering/defaults.
+Headless glyph/relationship/save/edit checks do not prove browser paint, atomic
+wrapping, selection/click/navigation behavior or full native adapter completion.

@@ -181,6 +181,14 @@ func colleafStyleRun(style colleafStyleMap, doc *Document) (Run, error) {
 			if err := json.Unmarshal(raw, &out.Language); err != nil {
 				return out, err
 			}
+		case "va":
+			value, _, err := colleafRawInt(style, "va")
+			if err != nil {
+				return out, err
+			}
+			if value != 0 {
+				doc.warn("colleaf_text_presentation", "Native baseline offset is not represented by ordinary SF text; visible text is retained")
+			}
 		case "hidden":
 			var hidden bool
 			if err := json.Unmarshal(raw, &hidden); err != nil {

@@ -39,7 +39,40 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: editable independent and rich native body marks
+## Latest progress: editable native per-citation literal and rich marks
+
+Private native output now preserves per-reference literal/rich/empty/default labels
+and inferred-relationship flags, including repeated citations in sections, cells
+and lists. Real markerless note atoms retain the note relationship/placement;
+editable superscript label runs and an owned zero-width delimiter carry display.
+Separate real body marks preserve the note's shared default without duplicating
+note definitions or whole bodies. Existing SF label fields remain canonical.
+
+The pinned renderer checks seven markerless anchors, actual visible labels,
+superscript 3 and authored color/size/bold/italic fields, plus two placed bodies.
+Actual facade save/reopen and TextX/style edits retain exact Go/SF semantics.
+TextX can split a label annotation around replaced text: a stable token combines
+only matching fragments between the protected anchor and delimiter. Missing/stale
+ownership leaves visible text/anchors in the story and reports losses; malformed
+or nonneutral ownership rejects. A 2,048-reference paragraph retains every reference
+and default, using effective style spans and linear paragraph consumption.
+
+Final milestone checks pass: tests 16.855s/0.777s, race 167.692s/2.133s,
+vet/modules, CGO-disabled focused tests/host CLI execution and Linux amd64/arm64
+cross-builds. Citation fuzz 1,000 and document fuzz 50,749 executions pass; all twelve
+pinned reader/save scripts, independent Python regressions, final combined Go
+edited/saved re-import and diff check pass. Cross-builds are not Linux execution
+evidence. verification.json records exact scope, timings and remaining limits.
+
+Next complete remaining native list/appearance/navigation and nonvisual/provenance
+intent, strict envelope/JSON/surrogates, public API/CLI and actual full-preset/
+browser paint/wrapping/selection/navigation/interaction qualification. Automatic
+per-page/decorated-note cases and the broader PDF/source/resource/final acceptance
+audit remain on the required queue. No browser click/atomic wrapping or full native
+adapter completion is claimed from headless glyph/save checks. Runtime stays
+pure Go, with applications/backends untouched and no external blocker.
+
+## Earlier progress: editable independent and rich native body marks
 
 Private native output now writes literal, rich and uniformly styled independent
 note-body marks as actual editable runs, including links, table-first and otherwise
@@ -65,7 +98,7 @@ pass; diff check and all eleven pinned reader/save scripts plus independent Pyth
 regressions pass. Cross-builds are not Linux execution evidence. verification.json
 records exact scope, timings and the remaining UI/font/layout qualification.
 
-Next implement per-citation literal/rich output, then remaining list/appearance/
+Per-citation output is now qualified above. Next complete remaining list/appearance/
 provenance intent, strict native envelope/JSON/surrogates and public native API/CLI.
 Actual browser/preset paint/wrapping/interaction and total story qualification also
 remain required. Prior foreign-numbering/import and DOCX/PDF checks stay valid;

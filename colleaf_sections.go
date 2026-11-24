@@ -182,7 +182,7 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 	if err != nil {
 		return colleafNoteSnapshot{}, err
 	}
-	out, err := encodeColleafNotesWithCatalog(ctx, &plain, catalog)
+	out, err := encodeColleafNotesWithCatalog(ctx, &plain, catalog, colleafCitationProjection(resolved, catalog))
 	if err != nil {
 		return out, err
 	}
@@ -287,7 +287,7 @@ func encodeColleafDocument(ctx context.Context, d *Document) (colleafNoteSnapsho
 	for _, b := range identities.Bindings {
 		ids[noteKey{b.Kind, b.ID}] = b.NativeID
 	}
-	w := colleafBodyWriter{ctx: ctx, noteIDs: ids, documentID: out.ID, imageCache: cache, tables: map[string]json.RawMessage{}, lists: map[string]json.RawMessage{}, drawings: map[string]json.RawMessage{}, body: colleafBody{TextRuns: []colleafTextRun{}}}
+	w := colleafBodyWriter{citationProjection: colleafCitationProjection(resolved, catalog), ctx: ctx, noteIDs: ids, documentID: out.ID, imageCache: cache, tables: map[string]json.RawMessage{}, lists: map[string]json.RawMessage{}, drawings: map[string]json.RawMessage{}, body: colleafBody{TextRuns: []colleafTextRun{}}}
 	sectionBlocks := resolved.Blocks
 	if !intent.Sectioned {
 		sectionBlocks = []Block{{Kind: SectionBlock, Section: &Section{Blocks: resolved.Blocks}}}
@@ -454,10 +454,15 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 	if root.Flavor != nil && *root.Flavor != 0 && *root.Flavor != 1 {
 		return nil, fmt.Errorf("%w: native nontraditional document flavor", ErrUnsupported)
 	}
+	opened, citations, err := openColleafCitations(ctx, opened)
+	if err != nil {
+		return nil, err
+	}
 	numberPlan, err := planColleafNoteNumbers(ctx, opened)
 	if err != nil {
 		return nil, err
 	}
+	citations.adaptPlan(&numberPlan)
 	var intent colleafDocumentIntent
 	if err = colleafResourceMap(opened.Resources, colleafDocumentResource, &intent); err != nil {
 		return nil, err
@@ -502,7 +507,7 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 	if err = colleafResourceMap(opened.Resources, colleafImageResource, &geometry); err != nil {
 		return nil, err
 	}
-	settings := colleafTextContext{ImageCache: outputImageCache{}, Styles: opened.Styles, NoteLabels: numberPlan.Overrides}
+	settings := colleafTextContext{ImageCache: outputImageCache{}, Styles: opened.Styles, NoteLabels: numberPlan.Overrides, Citations: citations}
 	styleFields, err := colleafStyleObject(opened.DocumentStyle)
 	if err != nil {
 		return nil, err
@@ -828,11 +833,15 @@ func decodeColleafDocument(ctx context.Context, input colleafNoteSnapshot) (*Doc
 		}
 	}
 	applyColleafNoteNumbers(doc, numberPlan, noteIDs)
+	citations.restoreDefinitions(doc, noteIDs)
 	if err = finishColleafNoteNumbering(doc, autoLabels); err != nil {
 		return nil, err
 	}
 	doc.Diagnostics = append(doc.Diagnostics, reader.doc.Diagnostics...)
 	doc.Diagnostics = append(doc.Diagnostics, diagnostics...)
+	if err = citations.collapse(ctx, doc); err != nil {
+		return nil, err
+	}
 	if err = doc.Validate(); err != nil {
 		return nil, err
 	}

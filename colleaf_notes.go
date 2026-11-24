@@ -26,11 +26,12 @@ type colleafNativeNote struct {
 	Lists             map[string]json.RawMessage `json:"lists,omitempty"`
 }
 type colleafNoteBinding struct {
-	BodyMarkRange string  `json:"bodyMarkRange,omitempty"`
-	AutoLabel     *string `json:"autoLabel,omitempty"`
-	NativeID      string  `json:"nativeId"`
-	Kind          string  `json:"kind"`
-	ID            string  `json:"id"`
+	LiteralCitations *string `json:"literalCitations,omitempty"`
+	BodyMarkRange    string  `json:"bodyMarkRange,omitempty"`
+	AutoLabel        *string `json:"autoLabel,omitempty"`
+	NativeID         string  `json:"nativeId"`
+	Kind             string  `json:"kind"`
+	ID               string  `json:"id"`
 }
 type colleafNoteIdentities struct {
 	Bindings []colleafNoteBinding `json:"bindings"`
@@ -58,7 +59,7 @@ type colleafNoteSnapshot struct {
 func encodeColleafNotes(ctx context.Context, d *Document) (colleafNoteSnapshot, error) {
 	return encodeColleafNotesWithCatalog(ctx, d, nil)
 }
-func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *noteCatalog) (colleafNoteSnapshot, error) {
+func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *noteCatalog, projection ...map[noteKey]string) (colleafNoteSnapshot, error) {
 	out := colleafNoteSnapshot{ID: "manydoc"}
 	if err := d.Validate(); err != nil {
 		return out, err
@@ -72,6 +73,10 @@ func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *no
 		}
 	}
 
+	citationProjection := colleafCitationProjection(d, catalog)
+	if len(projection) > 0 {
+		citationProjection = projection[0]
+	}
 	ids := map[noteKey]string{}
 	bindings := colleafNoteIdentities{}
 	ownership := colleafListOwnership{Stories: map[string][]colleafListBinding{}}
@@ -93,7 +98,19 @@ func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *no
 			label := catalog.labels[noteIdentity(n)]
 			binding.AutoLabel = &label
 		}
-		blocks, bodyMark, markLength, err := prepareColleafBodyMark(n, catalog)
+		bodyInput := n
+		if _, projected := citationProjection[noteIdentity(n)]; projected {
+			label := n.Label
+			binding.LiteralCitations = &label
+			if n.BodyLabel == nil && n.BodyLabelContent == nil && n.BodyLabelStyle == nil {
+				actual := catalog.labels[noteIdentity(n)]
+				bodyInput.BodyLabel = &actual
+			}
+		}
+		blocks, bodyMark, markLength, err := prepareColleafBodyMark(bodyInput, catalog)
+		if bodyMark != nil && binding.LiteralCitations != nil && n.BodyLabel == nil && n.BodyLabelContent == nil {
+			bodyMark.UseDefault = true
+		}
 		if err != nil {
 			return out, err
 		}
@@ -135,9 +152,13 @@ func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *no
 				return out, err
 			}
 		}
+		if binding.LiteralCitations != nil {
+			empty := ""
+			note.Mark = &empty
+		}
 		out.Notes[id] = note
 	}
-	encoded, err := encodeColleafAssetBody(ctx, d.Blocks, ids, out.ID, "", imageCache)
+	encoded, err := encodeColleafAssetBody(ctx, d.Blocks, ids, out.ID, "", imageCache, citationProjection)
 	if err != nil {
 		return out, err
 	}
@@ -185,12 +206,19 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 	if err != nil {
 		return nil, err
 	}
+	if settings.Citations == nil {
+		input, settings.Citations, err = openColleafCitations(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+	}
 	var numberPlan colleafNoteNumberPlan
 	if !settings.DeferNoteNumbering {
 		numberPlan, err = planColleafNoteNumbers(ctx, input)
 		if err != nil {
 			return nil, err
 		}
+		settings.Citations.adaptPlan(&numberPlan)
 		settings.NoteLabels = numberPlan.Overrides
 	}
 	doc := &Document{}
@@ -323,6 +351,7 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 		originals[key] = true
 
 		bodySettings := settings
+		bodySettings.Citations = nil
 		bodySettings.NoteIDs = map[string]noteKey{id: ids[id]}
 		bodySettings.Lists = n.Lists
 		bodySettings.ListBindings = ownership.Stories[id]
@@ -397,6 +426,10 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 		if err = restoreColleafBodyMark(ctx, n, bodyMarkScope, &note, doc); err != nil {
 			return nil, err
 		}
+		if bodyMarkScope != nil && bodyMarkScope.UseDefault && bodyMarkScope.Restored {
+			settings.Citations.BodyDefaults[key] = true
+		}
+
 		doc.Notes = append(doc.Notes, note)
 	}
 	settings.NoteIDs = ids
@@ -420,7 +453,13 @@ func decodeColleafNotes(ctx context.Context, input colleafNoteSnapshot, settings
 	doc.Diagnostics = append(doc.Diagnostics, body.Diagnostics...)
 	if !settings.DeferNoteNumbering {
 		applyColleafNoteNumbers(doc, numberPlan, ids)
+		settings.Citations.restoreDefinitions(doc, ids)
 		if err = finishColleafNoteNumbering(doc, autoLabels); err != nil {
+			return nil, err
+		}
+	}
+	if !settings.DeferNoteNumbering {
+		if err = settings.Citations.collapse(ctx, doc); err != nil {
 			return nil, err
 		}
 	}

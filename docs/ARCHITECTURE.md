@@ -1399,3 +1399,32 @@ stale ownership leaves actual visible text in the body and discloses the loss.
 Empty styled marks use the real referenceTextStyle and a terminal-LF annotation.
 Per-citation rich output and broader nonvisual intent remain separate unfinished
 workers; this body-mark layer does not expose a partial public native format.
+
+
+## Native per-citation label projection
+
+colleaf_citation.go projects a note group with per-citation overrides/rich labels
+into markerless real note atoms, editable superscript label runs and U+2060 end
+delimiters. A neutral CUSTOM annotation stores only profile/version/token/note ID/
+mode/inferred flags. It does not cache label text, styles or a second note body.
+The original shared label/automatic intent remains in the checked identity record;
+real independent/default body marks use the existing body-mark worker. This avoids
+duplicating note definitions when several labels point to one note.
+
+Native TextX can split a CUSTOM range around replacement text. Identical copied
+tokens/properties combine fragments; original identities/scalar bounds validate
+before combining. The protected atom and end delimiter define current label text.
+Effective native style spans preserve last-record-wins precedence. Only guarded
+superscript 3 label spans are semantically normalized to ordinary run styles before
+folding them into a NoteReference. Neutral baseline 0 is ordinary SF text; unowned
+nonzero baseline offsets still diagnose representation loss. Binary searches avoid
+rescanning all style records per citation, and paragraph folding consumes each
+run without repeatedly copying its whole remainder.
+
+Final semantic assembly derives labels/styles from actual source runs, restores
+implicit shared/default/body labels only when current values agree, and retains
+explicit overrides after edits. Missing/stale ownership preserves visible label
+text and markerless anchors with diagnostics. Baseline/shape/relationship changes
+do not justify hiding text. Nested cells/lists share the root source-index context;
+note bodies do not accidentally reuse root citation IDs. All of this remains a
+private adapter pending broader intent, strict envelope and actual browser/API QA.

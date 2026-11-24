@@ -120,11 +120,14 @@ func (w *colleafBodyWriter) picture(block Block) error {
 	w.text("\r")
 	return nil
 }
-func encodeColleafAssetBody(ctx context.Context, blocks []Block, noteIDs map[noteKey]string, documentID, storyID string, cache outputImageCache) (colleafEncodedBody, error) {
+func encodeColleafAssetBody(ctx context.Context, blocks []Block, noteIDs map[noteKey]string, documentID, storyID string, cache outputImageCache, projection ...map[noteKey]string) (colleafEncodedBody, error) {
 	if cache == nil {
 		cache = outputImageCache{}
 	}
 	w := colleafBodyWriter{ctx: ctx, noteIDs: noteIDs, documentID: documentID, storyID: storyID, imageCache: cache, tables: map[string]json.RawMessage{}, lists: map[string]json.RawMessage{}, drawings: map[string]json.RawMessage{}, body: colleafBody{TextRuns: []colleafTextRun{}}}
+	if len(projection) > 0 {
+		w.citationProjection = projection[0]
+	}
 	if err := w.blocks(blocks, 0); err != nil {
 		return colleafEncodedBody{}, err
 	}

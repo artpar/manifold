@@ -36,6 +36,7 @@ type colleafNativeTable struct {
 }
 
 type colleafBodyWriter struct {
+	citationProjection  map[noteKey]string
 	ctx                 context.Context
 	stream              strings.Builder
 	body                colleafBody
@@ -59,7 +60,7 @@ func (w *colleafBodyWriter) id(prefix string) string {
 	return fmt.Sprintf("%s%d", prefix, w.serial)
 }
 func (w *colleafBodyWriter) paragraph(block Block) error {
-	fragment, err := encodeColleafTextBodyWithNotes(w.ctx, []Block{block}, w.noteIDs)
+	fragment, err := encodeColleafTextBodyWithNotes(w.ctx, []Block{block}, w.noteIDs, w.citationProjection)
 	if err != nil {
 		return err
 	}
@@ -79,6 +80,7 @@ func (w *colleafBodyWriter) paragraph(block Block) error {
 		r.StartIndex += shift
 		r.EndIndex += shift
 		r.ID = w.id("link")
+		nameColleafCitationRange(&r)
 		w.body.CustomRanges = append(w.body.CustomRanges, r)
 	}
 	for _, atom := range fragment.CustomBlocks {

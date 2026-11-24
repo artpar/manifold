@@ -11,6 +11,7 @@ import (
 
 type colleafTextContext struct {
 	DeferNoteNumbering bool
+	Citations          *colleafCitationState
 	NoteLabels         map[string]string
 	DefaultText        json.RawMessage
 	DefaultParagraph   json.RawMessage
@@ -48,7 +49,7 @@ func colleafUTF16Len(text string) int {
 func encodeColleafTextBody(ctx context.Context, blocks []Block) (colleafBody, error) {
 	return encodeColleafTextBodyWithNotes(ctx, blocks, nil)
 }
-func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs map[noteKey]string) (colleafBody, error) {
+func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs map[noteKey]string, projection ...map[noteKey]string) (colleafBody, error) {
 	body := colleafBody{TextRuns: []colleafTextRun{}}
 	var stream strings.Builder
 	offset := 0
@@ -92,6 +93,49 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 			}
 			if err := validateString(run.Text); err != nil {
 				return body, err
+			}
+			if run.Note != nil && len(projection) > 0 {
+				if shared, projected := projection[0][referenceKey(run.Note)]; projected {
+					id, ok := noteIDs[referenceKey(run.Note)]
+					if !ok {
+						return body, fmt.Errorf("native literal citation lacks definition")
+					}
+					run = canonicalCitationRun(run)
+					mode := "default"
+					var label []Run
+					if run.Note.LabelContent != nil {
+						mode = "rich"
+						label = run.Note.LabelContent
+					} else {
+						text := shared
+						if run.Note.Label != nil {
+							mode = "literal"
+							text = *run.Note.Label
+						}
+						r := run
+						r.Note = nil
+						r.Text = text
+						label = []Run{r}
+					}
+					fragment, err := writeColleafCitation(ctx, run, id, mode, label)
+					if err != nil {
+						return body, err
+					}
+					for _, r := range fragment.TextRuns {
+						r.St += offset
+						r.Ed += offset
+						body.TextRuns = append(body.TextRuns, r)
+					}
+					for _, a := range fragment.CustomRanges {
+						a.StartIndex += offset
+						a.EndIndex += offset
+						a.ID = fmt.Sprintf("citation%d", len(body.CustomRanges))
+						nameColleafCitationRange(&a)
+						body.CustomRanges = append(body.CustomRanges, a)
+					}
+					appendText(fragment.DataStream)
+					continue
+				}
 			}
 			if run.Note != nil {
 				id, ok := noteIDs[referenceKey(run.Note)]
@@ -347,6 +391,12 @@ func decodeColleafTextBody(ctx context.Context, body colleafBody, settings colle
 				key := settings.NoteIDs[atom.NoteID]
 				run.Text = ""
 				run.Note = &NoteReference{ID: key.id, Kind: key.kind}
+				if settings.Citations != nil {
+					if scope, ok := settings.Citations.Scopes[atom.ID]; ok {
+						settings.Citations.Pending[run.Note] = colleafCitationPending{Scope: scope}
+					}
+				}
+
 				if label, ok := settings.NoteLabels[atom.ID]; ok {
 					copy := label
 					run.Note.Label = &copy
