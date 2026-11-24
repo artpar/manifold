@@ -36,12 +36,20 @@ ProseMirror also requires explicit extensions for page layout and PDF provenance
 those extensions must be documented and tested, rather than called universal
 editor compatibility.
 
-No Colleaf checkout was found in the local workspace search. The Daptin checkout
-has `.vdocs` extension references in tests, but no editor schema was found in the
-searched source. This does not establish what Colleaf uses. Inspect its real
-schema before adding a `.vdocs` adapter; do not infer its representation from its
-file extension. A package.json search for Colleaf/vdocs across all local GitHub
-checkouts also returned no matches. Daptin was read only and was not changed.
+The initial workspace-only search found no Colleaf checkout. A later read-only
+GitHub audit found and inspected actual `artpar/colleaf` at
+`5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6`. Its native .vdocs is a version-3 wrapper
+around Univer 1.0.4 IDocumentData, not this ProseMirror profile. Matching published
+Apache-2.0 type declarations were inspected with verified distribution integrity.
+COLLEAF_FORMAT.md records exact source links, fields, range semantics and constraints.
+
+ProseMirror remains the canonical logical format because explicit child ownership
+and marks support structural manipulation/provenance without an offset/control-token
+protocol. Univer snapshots remain the required application adapter boundary: rich
+lists/tables/drawings/stories/notes/plugin resources must be mapped and checked.
+Raw SF is not .vdocs, and no native adapter or app persistence compatibility is
+currently claimed. This corrects the earlier unavailable-schema claim; it does
+not require executing either editor at runtime. No Daptin/Colleaf files changed.
 
 ## Wire profile and current API
 

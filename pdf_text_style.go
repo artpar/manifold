@@ -186,13 +186,15 @@ func colorRGB(space string, v [4]float64) [3]float64 {
 
 // Retain only values shared by all contributors to an unmappable replacement.
 func commonTextStyle(a, b Run) (Run, bool) {
-	mixed := a.Bold != b.Bold || a.Italic != b.Italic || a.Underline != b.Underline || a.Strike != b.Strike || a.Link != b.Link || a.FontFamily != b.FontFamily || math.Abs(a.FontSize-b.FontSize) > 1e-7 || a.Color != b.Color
+	linkMixed := a.Destination != b.Destination || (a.Destination == "" && a.Link != b.Link)
+	mixed := a.Bold != b.Bold || a.Italic != b.Italic || a.Underline != b.Underline || a.Strike != b.Strike || linkMixed || a.FontFamily != b.FontFamily || math.Abs(a.FontSize-b.FontSize) > 1e-7 || a.Color != b.Color
 	a.Bold = a.Bold && b.Bold
 	a.Italic = a.Italic && b.Italic
 	a.Underline = a.Underline && b.Underline
 	a.Strike = a.Strike && b.Strike
-	if a.Link != b.Link {
+	if linkMixed {
 		a.Link = ""
+		a.Destination = ""
 	}
 	if a.FontFamily != b.FontFamily {
 		a.FontFamily = ""

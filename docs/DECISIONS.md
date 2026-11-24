@@ -1373,3 +1373,20 @@ keeping all public graph checks. Stream body encoding to avoid another complete
 output buffer. Independent normalized JSON hashes and all 205,918 ProseMirror nodes
 prove retention. Full-tree allocation/editor costs remain explicit and must be
 considered in the remaining acceptance audit. See SF_CODEC.md.
+
+## 2026-11-24 Correct the Colleaf availability assumption and current audit
+
+The initial local-only search did not inspect the remotely available application.
+Read-only pinned GitHub inspection now establishes the actual .vdocs version-3
+Univer 1.0.4 snapshot contract, with matching published schema examined. Keep the
+logical ProseMirror SF and qualify a checked native snapshot adapter as the
+application boundary; do not claim raw SF compatibility. Document rich source/range
+and plugin-resource mappings, and keep application quotas/access/save guards out
+of the library. See COLLEAF_FORMAT.md; no app/backend source was modified.
+
+Current audit probes show explicit Note/Ref relationships and Header pagination
+properties still flatten rather than recover into corresponding semantics. Keep
+those concrete required gaps open. ActualText's loss of typed GoTo ownership is
+fixed now, with URI/internal/mixed intersections tested. Replace stale cumulative
+acceptance claims with current requirement evidence; do not use old TODOs or a
+passing suite as a substitute for the actual completion criteria.

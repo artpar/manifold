@@ -164,6 +164,7 @@ func (s *pdfStructureRecovery) structureReplacement(blocks []Block, text string,
 			}
 			if count == 0 {
 				out.Bold, out.Italic, out.Underline, out.Strike, out.Link = r.Bold, r.Italic, r.Underline, r.Strike, r.Link
+				out.Destination = r.Destination
 				out.FontFamily, out.FontSize, out.Color = r.FontFamily, r.FontSize, r.Color
 				first = r.Source
 			} else {

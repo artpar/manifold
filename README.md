@@ -300,3 +300,7 @@ extraction selects it with `manydoc extract -format sf.gz -o document.sf.gz inpu
 Go callers use `manydoc.Read` / `manydoc.Write` with `manydoc.SFGzip`.
 Schema/graph/checksum validation and all assets/source fields remain intact. Full
 large-document trees still take memory; see [codec evidence and limits](docs/SF_CODEC.md).
+
+Colleaf's actual native `.vdocs` format uses a pinned Univer snapshot rather than
+SF. [Inspected contract and remaining adapter work](docs/COLLEAF_FORMAT.md) records
+the exact boundary; native app/save compatibility is not yet implemented.

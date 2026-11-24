@@ -898,3 +898,17 @@ with CRC/truncation/trailing-data checks and no automatic inference from generic
 validation. The complete tree is still materialized; source-heavy PDFs can require
 substantial memory even with small compressed files. See SF_CODEC.md for exact
 real-source proof, measured costs and unchanged profile/API behavior.
+
+## Current semantic audit and native application boundary
+
+Structural ActualText now preserves matching typed internal destinations; mixed
+URI/internal/different-target replacements clear exact editable ownership with a
+diagnostic while retaining physical link evidence. Explicit PDF Note/Reference
+relationships and Pagination/Header artifact properties still require semantic
+recovery; content remains visible, which alone is insufficient for that goal.
+ACCEPTANCE.md and scripts/generate_pdf_semantic_audit.py record current evidence.
+
+Colleaf's actual .vdocs snapshot is pinned Univer 1.0.4 inside a version-3 app
+envelope. This library's SF is not that format. Native adapter/real-reader
+qualification remains open; no .vdocs read/write, app upload or native-save
+compatibility is claimed. See COLLEAF_FORMAT.md for inspected source facts.

@@ -2262,3 +2262,21 @@ through gzip, including source/assets/relationships. Invalid stream finalization
 unknown SF content, cancellation, short writes and CLI atomic failures are checked.
 A ten-second gzip fuzz campaign (two workers) passed 128,050 executions. These are
 codec robustness/retention checks, not new layout-fidelity or completion evidence.
+
+## Current acceptance audit and ActualText internal navigation
+
+```sh
+GOWORK=off go test -run 'TestPDFActualTextRetainsInternalNavigation|TestPDFActualTextLinkIntersection' -count=1 .
+output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
+bin/manydoc extract -format sf -o output/audit/explicit-note.sf output/audit/explicit-note.pdf
+bin/manydoc extract -format sf -o output/audit/pagination-artifact.sf output/audit/pagination-artifact.pdf
+```
+
+New positive tests cover parent ActualText outside a Link element with single or
+multiple contributors, strict SF and DOCX, equivalent href spelling and mixed
+URI/internal ownership. Semantic-audit probes independently encode Note/Reference/
+Ref and a typed Header artifact; current text survives but typed note/story
+recovery is missing. They are gap evidence, not passing semantic acceptance tests.
+Actual Colleaf source/declaration inspection is pinned in COLLEAF_FORMAT.md and
+verification.json. No remote project code or customer documents are copied into
+this repository; optional retrieved source remains ignored under output/codec.

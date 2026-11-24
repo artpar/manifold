@@ -970,3 +970,19 @@ result. Public tree APIs still validate their inputs. structured_encode.go strea
 body nodes; root attributes and individual node/asset values remain materialized.
 Context/error checks cover encoding and gzip finalization. See SF_CODEC.md for
 full original-value/provenance proof, independent ProseMirror checks and memory costs.
+
+## Current audit and Colleaf boundary (2026-11-24)
+
+ACCEPTANCE.md is now the current requirement audit rather than a cumulative list
+of obsolete pending milestones. The actual Colleaf contract was inspected read-only
+at pinned GitHub source and matching Univer 1.0.4 published declarations. Its .vdocs
+snapshot requires an explicit native adapter through SF; it is not ProseMirror.
+See COLLEAF_FORMAT.md. Application access/quotas/storage/conflicts stay outside
+manydoc, and neither Colleaf nor Daptin was modified.
+
+The audit's ActualText regression fix copies typed internal destinations alongside
+hrefs and intersects URI/internal ownership as separate target kinds. Matching
+internal IDs can share semantically equivalent href spellings; mixed targets clear
+editable ownership with the existing ambiguity diagnostic. Physical annotation
+records remain intact. Explicit PDF Note/Reference and pagination artifact semantic
+recovery still remain next work, with reproducible independent source probes.

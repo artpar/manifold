@@ -5024,5 +5024,63 @@
     "production_dependencies": "unchanged; Go standard compress/gzip only",
     "retained_costs": "complete parse/model/bridge tree remains materialized; root attributes and inline asset/node values still marshaled; high-fidelity glyph tree has substantial memory/editor cost",
     "next": "bounded current-state acceptance/source/corpus/visual/resource audit; no completion claim based on transport optimization"
+  },
+  "current_acceptance_actualtext_colleaf_audit": {
+    "status": "verified code correction and source audit; original full goal remains incomplete",
+    "baseline": "f804210",
+    "code_fix": {
+      "problem": "Structural ActualText copied href without typed Destination; common-style intersection ignored URI/internal identity",
+      "behavior": "matching internal target preserved; equivalent href spelling allowed for the same ID; mixed/different ownership cleared with ambiguity; physical annotations retained",
+      "tests": [
+        "single/multiple contributing parent ActualText outside child Link",
+        "SF and DOCX target identity",
+        "URI/internal/different target intersections",
+        "CGO-disabled focused execution"
+      ]
+    },
+    "colleaf": {
+      "repository": "artpar/colleaf",
+      "commit": "5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6",
+      "access": "read-only GitHub; prior local-only unavailable-schema claim corrected",
+      "format": "vibedada-document version 3, engine univer 1.0.4, IDocumentData snapshot, .vdocs",
+      "mime": "application/vnd.vibedada.docs+json;version=3",
+      "inspected": [
+        "src/shared/files/docsFormat.ts",
+        "src/shared/files/nativeDocument.ts",
+        "src/integrations/univer/document.ts",
+        "src/integrations/univer/DocumentEditor.vue",
+        "src/daptin/documents.ts",
+        "docs/native-document-contract.md",
+        "docs/office-document-expansion-plan.md",
+        "src/features/docs/format.test.ts",
+        "package.json/package-lock.json"
+      ],
+      "published_schema": {
+        "package": "@univerjs/core@1.0.4",
+        "license": "Apache-2.0",
+        "integrity_verified": "sha512-ofbW7Pt/+YW1IOnhjWao4CHz36AMlaWG24fQZOk0Lc+UT3vyefWvHL1U3wiup/daVibut6nVYwJkNtoxgoxB5w==",
+        "declaration": "lib/types/types/interfaces/i-document-data.d.ts",
+        "declaration_sha256": "1bc2354b7aa5114ccf6b5df90a22aca743ba9f034d4aef5f3e5aac11f2299be5"
+      },
+      "conclusion": "actual source inspection done; native snapshot adapter and actual reader qualification remain missing",
+      "application_boundary": "No Daptin/Colleaf modifications, service/customer uploads or app writes; application access, quotas and persistence stay outside library"
+    },
+    "gap_probes": {
+      "generator": "scripts/generate_pdf_semantic_audit.py",
+      "explicit_note": "independent Note/Reference/Ref fixture retains BODY/1/NOTE BODY but creates zero typed notes; pypdf verifies source relationship",
+      "pagination_artifact": "independent Header subtype/BBox/Attached source retains HEADER text in body, creates zero running stories and loses explicit properties",
+      "interpretation": "concrete recoverable-semantic gaps; diagnostics/plain-text retention do not fulfill complete goal"
+    },
+    "docs": "ACCEPTANCE/ROADMAP/STATUS rewritten as current queue; historical evidence remains in Git history/verification.json; COLLEAF_FORMAT records pinned source comparison and mappings",
+    "checks": {
+      "full_test": "library 14.736s; CLI 0.686s; all packages pass",
+      "full_race": "library 175.468s; CLI 2.199s; all packages pass",
+      "vet": "pass",
+      "modules": "all modules verified",
+      "cgo_disabled": "host build/focused ActualText execution; Linux amd64/arm64 cross-build only",
+      "diff_check": "pass"
+    },
+    "evidence": "output/audit and output/codec (ignored); no remote implementation source copied into production",
+    "next": "explicit PDF note/reference and pagination semantics; checked rich Colleaf snapshot adapter; representative original DOCX/corpus/visual and final requirement audit"
   }
 }

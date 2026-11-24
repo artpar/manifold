@@ -1,258 +1,30 @@
-# Next capability work
+# Current implementation queue
 
-Current SF codec slice: compact JSON and explicit .sf.gz retain all original values,
-assets and provenance, with complete independent real-source ProseMirror checks.
-Transport size drops from 477.6 MB to 8.88 MB; large full-tree allocation/editor
-costs remain explicit. Next is a bounded current-state acceptance/source/corpus/
-visual/resource audit, not an automatic completion claim. See SF_CODEC.md.
+The complete original objective remains active/incomplete. ACCEPTANCE.md is the
+current requirement-by-requirement audit; historical milestone narratives remain
+in Git history and verification.json. Do not use an old pending statement as proof
+that a feature is still missing or that a requirement can be dropped.
 
-Current PDF navigation slice: explicit named/direct views, nullable settings,
-byte identities and annotation geometry now recover through SF with separately
-inferred flow anchors; three-source independent checks pass. This closes the
-navigation-reader implementation gap recorded below. The full goal is still open:
-next bounded source/rich semantics/corpus/visual audit and the 477 MB SF/provenance/
-codec usability issue. See PDF_NAVIGATION.md and STATUS.md before historical notes.
+1. Finish and commit the ActualText typed-navigation preservation fix and its
+   regression evidence. Mixed targets must not become a false single link.
+2. Recover explicit tagged-PDF Note/Reference relationships and pagination-
+   artifact properties. Preserve rich bodies, IDs, physical evidence and uncertainty;
+   do not treat anonymous links or text retention alone as semantic recovery.
+   `scripts/generate_pdf_semantic_audit.py` reproduces current gaps.
+3. Implement/qualify a standalone Colleaf native Univer 1.0.4 snapshot adapter
+   through SF. Read COLLEAF_FORMAT.md first: actual .vdocs data is an indexed
+   IDocumentData snapshot with rich source maps and a versioned app envelope.
+   No Daptin/Colleaf writes, permission/quota gates or app transport changes belong
+   in this library. Preserve/reject meanings explicitly and test real reader APIs.
+4. Broaden original DOCX source/producer and rich-note/running/review/field corpus
+   coverage with rights, pinned bytes and independent structural/asset oracles.
+   Render meaningful source/output samples; correct failures rather than edit goldens.
+5. Re-audit remaining structure consistency and resource/interop costs, run the
+   complete tests/race/vet/module/malformed/CGO-disabled and independent/visual
+   checks, then prove every original acceptance item before completing the goal.
 
-Latest navigation milestone: typed points/links and missing declarations now run
-through SF/DOCX/native PDF, with all 3,106 original Word names and unchanged native
-paint. Independent point/view checks, source graph tests and LibreOffice ODT import
-verify the current slice. PDF-to-SF physical destination recovery and inferred flow
-binding remain required next work. The complete goal remains incomplete; see
-INTERNAL_DESTINATIONS.md and STATUS.md before using historical next-step notes.
-
-Items 1–5 are unfinished work required by the active rich-document goal, rather
-than exemptions from it. SF foundation is in STRUCTURED_FORMAT.md and the full
-acceptance audit is in ACCEPTANCE.md. Items 6–7 concern separate application
-integration and do not authorize changes to Daptin.
-
-1. Qualify DOCX output visually in Microsoft Word/LibreOffice, using a published
-   corpus of real exported documents and intended deployment fonts. Compare text,
-   structure, and appearance separately.
-2. Extend the implemented family/size/color fields with full theme/script/embedded
-   font recovery, shaping/bidi/glyph output and paragraph properties; font-slot/
-   theme-language resolution now preserves current spans, while broader selection
-   qualification/modern ranges remain required; calculated run theme tint/shade
-   and settings color mappings now exist; four-edge margins/running distances now
-   exist; section bodies and default/first/even bindings now exist; next controls/empty-section ownership, signed overlap and producer parity/inheritance qualification, richer note numbering/separator/layout behavior, bookmarks, comment/revision history and
-   broader numbering formats. Each feature needs import, model, export and tests;
-   avoid a second authoritative representation of the same content.
-3. Extend the new Unicode-space/NFC/grapheme wrapping foundation with Go text shaping/bidi and configurable licensed fonts for broader PDF
-   generation. Preserve explicit missing-glyph errors while this is incomplete.
-4. Expand forward tagged-PDF recovery and the implemented untagged whitespace/heading/list/numeric/painted-grid table inference (including merges/empty/multiline cells) with more complex/double-border/occluded/rotated layouts; validate inverse ParentTree and internal links. Expand CMaps,
-   vertical text and remaining image codecs/masks/colors. Editable family/physical
-   size/device-color recovery now has source evidence and independent span checks;
-   broader source-font/color-management coverage remains required. A successful extraction must not imply
-   reconstruction of editable Word structure.
-5. Extend recursive body/nested/footnote continuation with broader pagination
-   qualification; repeated header prefixes now exist across those contexts; full-container image fitting, native explicit breaks
-   and conditional paragraph starts now exist. Production DOCX encoding recovers
-   the previously omitted note side texts in LibreOffice and retains SF controls;
-   cell/note pagination still differs. Qualify broader Word/producer behavior and
-   real exports without treating that content mitigation as professional fidelity.
-6. Build the Colleaf .vdocs adapter once its actual schema and supported features
-   are supplied or inspected. Do not invent a second native editor schema.
-7. Integrate thin Daptin performers around this public library. Keep Daptin's
-   existing action admission, resource/storage operations and identity context.
-
-Use `docs/STATUS.md` as the current handoff and `docs/TESTING.md` for the commands.
-Record compatibility changes and reference-corpus results before claiming a
-broader professional-document contract.
-
-
-Glyph-ID output now exists for supported LTR graphemes, using full TrueType
-programs, shared CID resources, ActualText/ToUnicode and checked GPOS offsets.
-Language/direction/forced-CS semantics and language-tagged LTR segment/line shaping
-now exist. The next slice needs paragraph bidi/joining and full itemization,
-context across differing fonts/sizes/languages and within-grapheme styles. Ordinary default text now uses
-the same LTR shaping pipeline. Reuse the transport; keep current unsupported-script guards until
-independent glyph/order/layout evidence qualifies their replacement. Full-font
-cost, generalization beyond the implemented compatible-face/size/language LTR line re-shaping,
-style/font segmentation and internal text/link/note bidi order need deliberate
-handling. Source-font recovery,
-broader formats/qualification and other acceptance rows remain required.
-
-
-Paint-only boundaries now preserve shared LTR context, including clipped ligature
-colors, exact logical carriers and URI geometry. Keep the eight-row independent
-paint-context oracle while implementing paragraph bidi/itemization. Broader
-font/size/language and within-grapheme style context remain open; do not reintroduce
-paint-based shaping segments or the observed MuPDF missing-f defect.
-
-
-The qualified internal/bidilevels resolver now supplies paragraph levels and
-line L1/L2 maps. Next carry original scalar ranges through normalization and
-textAtoms, split shaping contexts by resolved level/script/font, shape final
-lines in their resolved direction, and place units using L2 while retaining logical
-extraction. Qualify L3/L4/paint/link/note behavior before removing existing RTL/
-joining guards. Unicode 15 algorithm conformance is not renderer qualification.
-
-
-Paragraph levels/source ranges now reach final directional shaping and L2
-placement, with supplied-font Hebrew/Arabic glyph/layout and logical-carrier
-qualification. Next provide context across different faces/sizes/languages and
-within-grapheme styles, then full script itemization/joining and broader
-Word/producer/font qualification. Retain the native 29-group bidi oracle and two
-invented-space fuzz seeds. Other layout/recovery/real-export acceptance rows remain.
-
-
-HarfBuzz item context now crosses face/size/language and transparent-control
-boundaries, with fourteen native contextual vectors and seven actual two-font
-rows. Next extend full itemization/cross-item positioning and within-grapheme
-styles, then broaden script/font/producer coverage. Do not regress decimal note
-labels' independent LTR glyph direction at RTL anchors.
-
-
-Rich PDF header/footer stories now support merged/nested tables, images, lists,
-links and reserved body/note bounds. The shared DOCX budget now repairs the
-previously reproduced oversized-image omission, preserving the fixture and actual observations. Four-edge margins/distances now exist; next add section-specific stories through
-SF/model/import/export.
-Qualify the sparse native note-only page and producer cell-break differences,
-alongside the remaining script/font/PDF-recovery/real-export acceptance work.
-
-
-The tight DOCX running-image omission is now repaired with a shared raster/body
-budget; four additional producer pages qualify serial/nested/merged/JPEG/body
-placements. Keep the original fixtures, exact pixels and stable physical second
-round trips. Four-edge page margins and running distances now exist in the shared SF/model;
-next add section-specific settings/stories. DOCX text estimation,
-broader font/producer containment and producer URI-export qualification still need
-work; a python-docx control currently exports zero of one expected URI too. Do not
-remove these or the remaining script/font/recovery/real-export acceptance rows.
-
-
-Asymmetric/zero frames and independent running anchors now span SF/DOCX/PDF with
-current-property selection and explicit advanced-setting losses. Next establish
-section boundaries and default/first/even story selection within the same canonical
-SF, then implement import/export and native paper/story transitions. Preserve the
-new coordinate/pixel/destination oracles and legacy nil behavior. Signed overlap,
-advanced page/binding settings, sparse note/table packing, broader producer/font
-and real-export qualification remain required; no completion claim follows from
-single-frame page support.
-
-
-After the section checkpoint, run `GOWORK=off go run ./examples/sections` and
-`output/qa-venv/bin/python scripts/verify_sections.py --office`. Next resolve changed
-continuous page geometry and qualify producer parity/inheritance against primary
-specification evidence and independent controls. Keep source and observed producer
-oracles separate. Signed overlap and all remaining font/script/PDF recovery/real-
-export requirements remain active; this checkpoint does not narrow the full goal.
-
-
-Continuous story changes and section-local counter resets now exist. Next establish
-physical-page versus body-frame ownership for changed continuous geometry, starting
-with the eight controls from `scripts/verify_continuous.py --make-controls`; do not
-silently discard their margins/sizes because one producer does. Keep already-shaped
-line/table continuation widths valid and account for notes and page controls.
-Run `GOWORK=off go run ./examples/continuous` and the independent verifier before
-repeating final tests. The full acceptance audit remains active.
-
-
-Changed continuous geometry now generates output: same-paper sections retain their
-own horizontal frames, and different paper starts a new canvas after notes drain.
-Next exercise controls/empty-section ownership and common vertical packing, then
-signed story overlap and richer page/binding cases. Keep the unchanged controls
-and producer observations, including orientation-hint qualifications. Run
-`GOWORK=off go run ./examples/continuous-geometry` and its independent verifier.
-
-
-Signed running overlap is implemented with fixed body edges and foreground body/
-notes, with independent picture caps and contained-page checks. Continuous
-fixed/minimum mixtures now partition into feasible native groups;
-do not solve this by dropping a story, changing its source preference or placing
-measured notes into another interval. Controls/empty owners and the original
-font/script/recovery/real-export requirements remain open. Reproduce the current
-capability with `GOWORK=off go run ./examples/signed-overlap` and its independent
-verifier. The continuous-admission example/verifier adds fresh-page boundaries,
-old-note drainage and actual body-floor evidence. The control/empty ownership
-checkpoint below supplies targeted qualification; conservative packing and broader
-requirements remain open.
-
-
-Targeted page-control/empty ownership now has fourteen four-path cases and
-independent text, standard OOXML, annotations, physical geometry and visual
-qualification. Sectioned note numbering is explicit and exact through SF/DOCX.
-Next audit the representative export corpus and acquire a reusable licensed rich
-DOCX with structural oracles, then address concrete font/script/theme/note/recovery
-failures. Continue qualifying richer control/binding combinations and conservative
-packing; the targeted milestone does not close the full rich-document goal.
-
-
-An original licensed rich Word export and independent cell/link/content/asset
-oracles now exist (MQTT 5.0). Next combine its explicit PDF membership with painted
-span evidence, handling empty vertical continuation cells and inference provenance.
-Then qualify an actual supplementary CJK font and address concrete numbering,
-width/shading and layout gaps. Preserve original sources instead of normalizing
-away failures; broader corpus and every original acceptance item remain required.
-
-
-## Tagged span recovery next step
-
-Implement row-dependent painted partitions for original MQTT page 89 Table 12539,
-preserving all distinct axes and explicit continuation identities. The other 41
-omitted-span grids now recover with independently checked painted boundaries. Then
-qualify the supplementary CJK source example and continue the full acceptance work. See
-TAGGED_TABLE_SPANS.md.
-
-
-## 2026-11-24 Next after short-connector recovery
-
-Page 89 is resolved by collecting short painted connector pieces, not by merging its
-distinct axes. Next qualify an appropriately licensed reusable static font for source
-U+2A6D4, then render the actual full Word source with explicit font mappings to expose
-further layout/numbering/width/shading requirements. Keep original fixtures and oracles.
-See TAGGED_TABLE_SPANS.md.
-
-
-## 2026-11-24 Next: Unicode PDF URI targets, then widths and numbering
-
-Glyph embedding and the original supplementary character are now qualified with
-caller-supplied static fonts; no font is vendored. Fix the three concrete Unicode
-fragment targets found by scripts/verify_mqtt_render.py without changing its expected
-source set. Then preserve source column widths and numbering formats, driven by the
-native 207-page Word-source render. Continue other required recovery/layout/corpus and
-provenance/codec performance work. See FONT_SUBSETTING.md.
-
-
-## 2026-11-24 Next after Unicode URI serialization
-
-The three actual Unicode fragment targets are now correctly encoded without modifying
-the source oracle. Next preserve source logical-column widths through SF/DOCX/native PDF
-sizing, then source numbering templates/formats. The 207-page real render supplies
-concrete table-wrapping and heading evidence. Continue the original broader
-requirements; see URI_TARGETS.md.
-
-
-## 2026-11-24 Preferred grid widths landed; next numbering
-
-The initial grid preferences now survive all 59 original Word tables and SF/DOCX
-round trips. PDF layout/continuations use shared intervals; uniquely proven painted
-grids retain inferred widths independently of logical membership. Native full-source
-output is 189 pages; the formerly narrow table is readable on page 120. See
-TABLE_WIDTHS.md for source facts, diagnostics and independent-reader limits.
-
-Next inspect `docxNumberLevel`, source `w:numFmt`/`w:lvlText` and renderer labels.
-Preserve common decimal/letter/Roman and multilevel templates through the SF, test
-restart/overrides and real-source headings independently, then address internal
-destinations and remaining source/recovery/corpus/performance work. Word auto-fit
-and conflicting width overrides remain explicit layout losses, not a claim of
-complete Word layout. Do not remove any required acceptance row to call this done.
-
-
-## 2026-11-24 Numbering landed; next internal destinations
-
-Common formats/templates and explicit counter contexts now have original-publisher
-and all-story independent-reader evidence. See NUMBERING.md. Next trace DOCX
-bookmarks/hyperlink anchors and PDF name trees/GoTo/Dest actions into the shared
-SF and typed link model. Preserve Unicode URI behavior and note-link identity;
-continue source/recovery/corpus and large-provenance work before completion.
-
-
-## 2026-11-24 Source destination audit and Word URI fix
-
-The split external URI component is corrected, with unchanged paint and separate
-source/publisher evidence. Next implement typed flow anchors and internal links,
-then native GoTo/name-tree output and exact/inferred PDF recovery. Read the concrete
-INTERNAL_DESTINATIONS.md plan first; it records zero-width layout/bidi concerns,
-between-block markers, missing source targets and existing finalization hooks.
-After this work, audit required PDF semantics and the verbose provenance/codec cost
-against the actual goal; do not expand into excluded Word-equivalent fidelity.
+Current font/shaping behavior is governed by its declared contract and explicit
+missing-glyph/unsupported-shaping errors. Full Word/UniOffice/UniPDF parity and
+Word-equivalent pagination are outside the original completion criteria. This is
+not permission to omit required paragraphs, formatting, links, lists, merged
+structures, images, metadata, page/running/note semantics or meaningful PDF recovery.
