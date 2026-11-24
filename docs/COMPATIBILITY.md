@@ -952,3 +952,13 @@ restores SF automatic intent. Body glyphs/widths are validated. Homogeneous RTL
 citation marks shape correctly; internal mixed-direction atomic marks fail
 explicitly. Rich multi-node labels and nested/non-Ref graph recovery remain open.
 Read PDF_NOTES.md for exact evidence and output/editing limits.
+
+Tagged PDF note relationships can now be inferred from matching immediate
+Reference/Note siblings or a logically owned physical GoTo view into one matching
+Note-label region. NoteReference.Inferred, rule evidence and heuristic confidence
+are explicit; original roles/navigation remain source facts and no Ref is forged.
+Explicit links win; empty/different/complex, partial/far/overlapping or conflicting
+evidence retains flow/navigation. The published original guide qualifies two real
+nonadjacent cases. Label backlinks remain physical provenance with a specific
+editable-label-link loss diagnostic; richer label graphs remain open. See
+PDF_NOTES.md for source, rule bounds and exact independent qualification.

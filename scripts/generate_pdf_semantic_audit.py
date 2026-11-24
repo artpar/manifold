@@ -68,3 +68,12 @@ markerless[17]=markerless[17].replace('/K 7 >>','/K [] >>')
 markerless[9]=markerless[9].replace('/K 2 >>','/K [] >>')
 (out/'markerless-explicit-note.pdf').write_bytes(pdf(markerless))
 print('Wrote differing-mark and markerless explicit relationship probes')
+
+# Published inline Reference/Note sibling pattern, deliberately without Ref.
+adjacent=objects.copy()
+adjacent[5]=adjacent[5].replace('/K [7 0 R 9 0 R]','/K 7 0 R')
+adjacent[6]=adjacent[6].replace('/K [0 8 0 R 6 18 0 R 8]','/K [0 8 0 R 9 0 R 6 18 0 R 8]')
+adjacent[7]=adjacent[7].replace('/Ref [9 0 R] ','')
+adjacent[8]=adjacent[8].replace('/Ref [8 0 R 18 0 R] ','').replace('/P 6 0 R','/P 7 0 R').replace('/S /FENote /A << /O /FENote /NoteType /Footnote >>','/S /Note')
+(out/'adjacent-note.pdf').write_bytes(pdf(adjacent))
+print('Wrote published adjacent Reference/Note pattern without explicit Ref links')

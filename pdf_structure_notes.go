@@ -66,6 +66,10 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 			}
 		}
 	}
+	inferredRefs, err := s.inferNoteRelationships(roots, nodes, targets, inNote, underActual)
+	if err != nil {
+		return err
+	}
 	// Prefer a more specific explicit referring element to its enclosing wrapper.
 	// A wrapper spanning multiple independently linked marks cannot be one atom.
 	hasInner := map[*pdfStructureNode]bool{}
@@ -162,7 +166,15 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 			citation, _ := pdfNoteMark(blocks)
 			run := s.structureReplacement(blocks, citation, source)
 			run.Text, run.Link, run.Destination = "", "", ""
-			run.Note = &NoteReference{ID: id, Kind: kind}
+			run.Note = &NoteReference{ID: id, Kind: kind, Inferred: inferredRefs[ref] != ""}
+			if inferredRefs[ref] != "" {
+				source.Evidence = "pdf_note_adjacent_reference"
+				source.Confidence = .85
+				if inferredRefs[ref] == "link_view" {
+					source.Evidence = "pdf_note_link_view"
+					source.Confidence = .95
+				}
+			}
 			if citation != label || label == "" {
 				value := citation
 				run.Note.Label = &value
@@ -248,6 +260,9 @@ func (s *pdfStructureRecovery) recoverNote(n *pdfStructureNode, note *pdfRecover
 					labelBlocks = bs
 					labelRun := s.structureReplacement(bs, label, sourceFromBlocks(bs, kid))
 					note.definition.LabelSource = labelRun.Source
+					if labelRun.Link != "" || labelRun.Destination != "" {
+						s.warn("pdf_note_label_link", "The leading note label has link navigation retained in physical PDFNavigation; editable label backlink behavior is not yet represented")
+					}
 					s.warn("pdf_note_label_presentation", "The explicit leading note label becomes the literal semantic mark; independent label typography is normalized on reflow, with original geometry/font/paint retained in label_source")
 					continue
 				}
@@ -274,4 +289,179 @@ func pdfNoteHasContentReference(n *pdfStructureNode) bool {
 		}
 	}
 	return false
+}
+
+// Recover the published inline Reference/Note pattern without pretending that
+// adjacency or equal labels constitute an explicit PDF Ref edge.
+func (s *pdfStructureRecovery) inferNoteRelationships(roots, nodes []*pdfStructureNode, targets map[*pdfStructureNode]map[*pdfStructureNode]bool, inNote, underActual map[*pdfStructureNode]bool) (map[*pdfStructureNode]string, error) {
+	inferred := map[*pdfStructureNode]string{}
+	incoming := map[*pdfStructureNode]bool{}
+	byID := map[string]*pdfStructureNode{}
+	for _, n := range nodes {
+		if n.id != "" {
+			byID[n.id] = n
+		}
+	}
+	for _, n := range nodes {
+		for _, id := range n.refs {
+			if target := byID[id]; target != nil {
+				incoming[target] = true
+			}
+		}
+	}
+	var hasRefs func(*pdfStructureNode) bool
+	hasRefs = func(n *pdfStructureNode) bool {
+		if len(n.refs) > 0 {
+			return true
+		}
+		for _, kid := range n.kids {
+			if hasRefs(kid) {
+				return true
+			}
+		}
+		return false
+	}
+	cache := func(n *pdfStructureNode) ([]Block, error) {
+		if blocks, ok := s.cachedRefs[n]; ok {
+			return blocks, nil
+		}
+		blocks, err := s.node(n)
+		if err != nil {
+			return nil, err
+		}
+		s.cachedRefs[n] = blocks
+		return blocks, nil
+	}
+	var visit func([]*pdfStructureNode) error
+	visit = func(siblings []*pdfStructureNode) error {
+		for i, ref := range siblings {
+			if err := s.reader.ctx.Err(); err != nil {
+				return err
+			}
+			if i+1 < len(siblings) && ref.kind == "StructElem" && ref.role == "Reference" {
+				note := siblings[i+1]
+				if note.kind == "StructElem" && pdfNoteRole(note) && !inNote[ref] && !underActual[ref] && !inNote[note] && !underActual[note] && note.actual == nil && len(note.kids) > 0 && note.kids[0].kind == "StructElem" && note.kids[0].role == "Lbl" && !incoming[note] && len(targets[ref]) == 0 && !hasRefs(ref) && !hasRefs(note) {
+					// Cache only eligible candidate text. Rejected candidates are returned
+					// unchanged during flow materialization, so no paint units disappear.
+					s.noteRefs[ref] = nil
+					a, err := cache(ref)
+					if err != nil {
+						return err
+					}
+					b, err := cache(note.kids[0])
+					if err != nil {
+						return err
+					}
+					left, okA := pdfNoteMark(a)
+					right, okB := pdfNoteMark(b)
+					if okA && okB && left != "" && left == right {
+						targets[ref] = map[*pdfStructureNode]bool{note: true}
+						inferred[ref] = "adjacent"
+						s.warn("pdf_note_relationship_inferred", "A Reference immediately preceding a Note with the same nonempty leading label is linked by inferred logical adjacency; no explicit Ref edge is claimed")
+					} else {
+						delete(s.noteRefs, ref)
+						s.warn("pdf_note_relationship_uncertain", "Adjacent Reference/Note labels are empty, different or complex; their visible content is retained without inventing a relationship")
+					}
+				}
+			}
+			if err := visit(ref.kids); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	if err := visit(roots); err != nil {
+		return nil, err
+	}
+	if err := s.inferLinkedNotes(nodes, targets, inferred, incoming, inNote, underActual, hasRefs, cache); err != nil {
+		return nil, err
+	}
+	return inferred, nil
+}
+
+// A physical GoTo view is explicit evidence; associating that point with a
+// uniquely labelled Note container is still separately identified inference.
+func (s *pdfStructureRecovery) inferLinkedNotes(nodes []*pdfStructureNode, targets map[*pdfStructureNode]map[*pdfStructureNode]bool, inferred map[*pdfStructureNode]string, incoming, inNote, underActual map[*pdfStructureNode]bool, hasRefs func(*pdfStructureNode) bool, cache func(*pdfStructureNode) ([]Block, error)) error {
+	nav := s.reader.doc.PDFNavigation
+	if nav == nil {
+		return nil
+	}
+	type candidate struct {
+		node   *pdfStructureNode
+		label  string
+		source *SourceInfo
+	}
+	var notes []candidate
+	for _, note := range nodes {
+		if !pdfNoteRole(note) || inNote[note] || underActual[note] || note.actual != nil || incoming[note] || hasRefs(note) || len(note.kids) == 0 || note.kids[0].role != "Lbl" {
+			continue
+		}
+		blocks, err := cache(note.kids[0])
+		if err != nil {
+			return err
+		}
+		label, ok := pdfNoteMark(blocks)
+		source := sourceFromBlocks(blocks, note.kids[0])
+		if ok && label != "" && source.Page > 0 && source.Quad != nil {
+			notes = append(notes, candidate{note, label, source})
+		}
+	}
+	if len(notes) == 0 {
+		return nil
+	}
+	views := map[string]PDFDestination{}
+	for _, view := range nav.Destinations {
+		views[view.ID] = view
+	}
+	comparisons := 0
+	for _, ref := range nodes {
+		if err := s.reader.ctx.Err(); err != nil {
+			return err
+		}
+		if ref.role != "Link" || inNote[ref] || underActual[ref] || len(targets[ref]) > 0 || hasRefs(ref) {
+			continue
+		}
+		link, conflict := s.logicalLink(ref.kids)
+		view, ok := views[link.destination]
+		if conflict || link.destination == "" || !ok || view.Unresolved || view.Point == nil {
+			continue
+		}
+		var matches []candidate
+		for _, note := range notes {
+			comparisons++
+			if comparisons > 200000 {
+				s.warn("pdf_note_inference_budget", "Further physical note-link matching is retained as source navigation after the bounded inference work limit")
+				return nil
+			}
+			if note.source.Page != view.Page {
+				continue
+			}
+			x0, y0, x1, y1 := quadBounds(*note.source.Quad)
+			// Two physical points permit viewer targets just above the font-metric
+			// label rectangle, as in the published guide. No page/nearest-note guess.
+			if view.Point.X >= x0-2 && view.Point.X <= x1+2 && view.Point.Y >= y0-2 && view.Point.Y <= y1+2 {
+				matches = append(matches, note)
+			}
+		}
+		if len(matches) != 1 {
+			if len(matches) > 1 {
+				s.warn("pdf_note_relationship_uncertain", "A physical Link view overlaps multiple Note label regions; exact navigation remains without invented ownership")
+			}
+			continue
+		}
+		blocks, err := cache(ref)
+		if err != nil {
+			return err
+		}
+		label, valid := pdfNoteMark(blocks)
+		if !valid || label != matches[0].label {
+			s.warn("pdf_note_relationship_uncertain", "Physical Link view and Note label do not establish a unique matching literal citation; content/navigation remain in flow")
+			continue
+		}
+		targets[ref] = map[*pdfStructureNode]bool{matches[0].node: true}
+		inferred[ref] = "link_view"
+		s.noteRefs[ref] = nil
+		s.warn("pdf_note_relationship_inferred", "A logically owned GoTo Link targets one matching Note label region within two physical points; note ownership is inferred, while original annotation/view geometry remains explicit")
+	}
+	return nil
 }

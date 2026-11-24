@@ -1034,3 +1034,17 @@ and style/namespace/content validation. DOCX mixed automatic/variant export requ
 AllowLossy for literal portable numbering, while checked metadata retains automatic
 SF intent. Ordinary note representation stays unchanged. PDF_NOTES.md is the full
 current behavior/qualification contract.
+
+## Inferred note relationships
+
+PDF note preparation now also recognizes matching immediate Reference/Note
+siblings and logically owned physical GoTo views into a unique matching Note-label
+region. NoteReference.Inferred persists epistemic ownership independently of
+Note.KindInferred and explicit role/annotation/geometry evidence. The source record
+carries rule-specific evidence/confidence; no synthetic Ref edge is manufactured.
+Cache candidate/label blocks once so rejected candidates remain intact in ordinary
+flow. Explicit edges outrank inference, ambiguous/unknown cases retain flow, and
+physical matching has a cancellable work bound. The original published guide's
+two real notes qualify the nonadjacent physical-link rule; PDF_NOTES.md records
+source hashes, independent MCID/object/view checks and the editable-label-backlink
+gap exposed by that source.

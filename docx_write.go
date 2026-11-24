@@ -319,7 +319,7 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 					noteName = fmt.Sprintf("mdnote1_%s_%d", key.kind, id)
 					repeated = w.seenNoteRefs[key]
 					if repeated {
-						fmt.Fprintf(&out, `<w:fldSimple w:instr=" NOTEREF %s \h \f ">`, noteName)
+						fmt.Fprintf(&out, `<w:fldSimple w:instr=" NOTEREF %s \h \f "%s>`, noteName, docxNoteInference(r.Note))
 					} else {
 						w.seenNoteRefs[key] = true
 						w.bookmarks++
@@ -377,7 +377,7 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 						fmt.Fprintf(&out, `<w:t>%s</w:t></w:r></w:fldSimple>`, escape(w.noteLabels[referenceKey(r.Note)]))
 					} else {
 						if label := w.noteCustomLabels[referenceKey(r.Note)]; label != "" {
-							fmt.Fprintf(&out, `<w:%sReference w:id="%d" w:customMarkFollows="1"/>`, r.Note.Kind, id)
+							fmt.Fprintf(&out, `<w:%sReference w:id="%d" w:customMarkFollows="1"%s/>`, r.Note.Kind, id, docxNoteInference(r.Note))
 							// One Unicode scalar per text node also avoids LibreOffice duplicating
 							// a multi-character custom mark on import. These are one logical mark.
 							for _, scalar := range label {
@@ -385,7 +385,7 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 							}
 							fmt.Fprintf(&out, `</w:r><w:bookmarkEnd w:id="%d"/>`, noteBookmark)
 						} else {
-							fmt.Fprintf(&out, `<w:%sReference w:id="%d"/></w:r><w:bookmarkEnd w:id="%d"/>`, r.Note.Kind, id, noteBookmark)
+							fmt.Fprintf(&out, `<w:%sReference w:id="%d"%s/></w:r><w:bookmarkEnd w:id="%d"/>`, r.Note.Kind, id, docxNoteInference(r.Note), noteBookmark)
 						}
 					}
 					continue

@@ -39,39 +39,36 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: independent citation/body display
+## Latest progress: identified note relationship inference
 
-NoteReference.Label and Note.BodyLabel now distinguish inherited, literal and
-explicitly empty display independently from kind/ID and automatic counter order.
-Explicit PDF forward/reverse references with different marks retain typed sites
-and one rich body; leading Lbl values/LabelSource remain independent. Proven empty
-reference containers recover markerless atoms. Missing paint/MCR associations stay
-uncertain and do not establish empty marks. PDF_NOTES.md is the current contract.
+NoteReference.Inferred now separates inferred relationship ownership from explicit
+PDF roles/Ref edges and from Note.KindInferred placement. It persists through
+SF/JSON/gzip and checked Word references/repeats/aliases. Matching immediate
+Reference/Note siblings and unique matching physical GoTo/Note-label regions now
+recover rich notes with distinct rule evidence/confidence. Explicit edges win;
+missing/ambiguous/partial/conflicting data stays in flow. Read PDF_NOTES.md.
 
-DOCX variants use standard real-note anchors, literal body labels and visible
-hyperlinks to body bookmarks, with checked shape/target/style/namespace metadata.
-Mixed automatic/variant Word export requires AllowLossy for literal portable
-numbering; SF automatic intent round-trips in checked metadata. Ordinary note
-output keeps its existing representation. Native body labels now validate fonts,
-glyphs/shaping and widths. Homogeneous RTL citations work; mixed-direction atomic
-labels produce an explicit shaping error. Per-site run formatting is retained.
+The original 71-page publisher tagging guide supplied a necessary counterexample:
+its two Note definitions sit at Document's end and citations are Links without
+Ref. Physical-link inference now recovers NOTE_1/NOTE_2 on source pages 8/22.
+Independent original object/MCID font decoding/view/label-region checks pass, and
+all 87,381 old paint-order text records remain exact. Actual ProseMirror checks
+89,397 nodes/marks/attributes across that original and adjacent probe/Word round
+trip. Original source and generated native/Word note pages were inspected.
 
-Independent original paint/empty-container, python-docx/lxml, pypdf/PyMuPDF and
-actual ProseMirror checks cover distinct/empty fields, rich bodies/raster pixels,
-all editable DOCX round-trip values and visible citation-to-body coordinates.
-All four native/LibreOffice example pages were inspected. New fuzz seeds include
-variants. Final full tests (15.737s/0.363s), full production race (181.448s/2.114s),
-final focused/new-seed race (2.727s), vet/modules, host CGO-disabled execution
-(0.408s), Linux amd64/arm64 cross-builds, DOCX/SF fuzz (331/57,871 executions) and
-diff checks pass. Exact check scope is in verification.json. Evidence is ignored
-under output/note-variants. Primary source/oracle bytes and dependencies are intact.
+The guide remains ignored QA input, not a vendored/redistribution-licensed fixture;
+source/mirror/hash and reproduction are in PDF_NOTES.md. Its note-label backlinks
+remain explicit physical navigation, while editable label backlink behavior is a
+specific diagnosed gap. No module/runtime/app/access/quota boundary changed.
 
-The full goal remains active/incomplete. Required work includes rich multi-node/
-internal mixed-direction label layout, nested/enclosing-ActualText graphs,
-identified adjacency/geometric note inference without Ref, native Colleaf adapter,
-broader original DOCX producer/corpus/visual qualification and final acceptance.
-The previous explicit PDF note graph/provenance milestone is 60bf496; literal
-labels are 44fe42f and physical artifact structure is 10459dd.
+Final full tests (16.368s/0.368s), full production race (184.196s/2.201s), final
+added-case race (1.772s), vet/modules, host CGO-disabled execution (0.384s), Linux
+amd64/arm64 cross-builds, PDF/SF fuzz (273/886 executions) and diff checks pass.
+Exact scope is in verification.json; ignored evidence uses output/note-inference. The full goal remains active/incomplete: rich/mixed-direction
+label layout and editable backlinks, nested/enclosing-ActualText graphs, broader
+untagged recovery, native Colleaf adapter, original DOCX producer/corpus/visual
+qualification and final acceptance remain. Previous independent display work is
+09315a1; explicit PDF graph/provenance is 60bf496; literal labels are 44fe42f.
 
 ## Existing verified evidence to preserve
 
@@ -107,8 +104,8 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
 
 ## Next concrete implementation order
 
-1. Complete rich label layout and remaining note graphs/identified inference;
-   use the concrete cases in PDF_NOTES.md, preserving source evidence and content.
+1. Complete rich labels/backlinks and remaining nested/ActualText/untagged graphs;
+   use the original-guide evidence in PDF_NOTES.md, preserving source facts/content.
 2. Implement/qualify the actual Colleaf native snapshot adapter through the shared
    SF. Include UTF-16 boundaries, rich source maps, notes/stories and resources;
    do not stop at plain-text wrapping. Leave applications/backends untouched.
@@ -120,7 +117,7 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
    after every original criterion is proven. There is no external blocker now.
 
 ```sh
-GOWORK=off go test -race -run 'TestPDFExplicitNotes|TestPDFNote|TestDOCXListTable' -count=1 .
+GOWORK=off go test -race -run 'TestPDFAdjacent|TestPDFPhysicalLinkNoteInference|TestDOCXNoteRelationshipInference|TestPDFNoteLinkAmbiguity' -count=1 .
 output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
 bin/manydoc extract -format sf -o output/audit/explicit-note.sf output/audit/explicit-note.pdf
 bin/manydoc extract -format sf -o output/audit/pagination-artifact.sf output/audit/pagination-artifact.pdf

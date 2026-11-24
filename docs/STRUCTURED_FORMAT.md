@@ -712,3 +712,9 @@ change display only; kind/ID remains the relationship key and counter order is
 unchanged. Per-reference run marks still carry citation formatting. See
 PDF_NOTES.md for source recovery, Word's checked variant representation/automatic
 editing loss, glyph and bidi behavior, and independent checks.
+
+Optional boolean `note_reference.attrs.inferred` defaults false. True records an
+inferred relationship to the note; it does not make the source role/geometry or
+annotation inferred. Note `kind_inferred` is a separate placement/type decision.
+Rule-specific source evidence/confidence and original Ref edges stay separate.
+JSON/SF/gzip and generated DOCX metadata preserve this distinction for each site.

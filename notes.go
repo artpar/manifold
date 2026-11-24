@@ -14,6 +14,8 @@ const (
 // NoteReference identifies a note independently of its displayed automatic number.
 // IDs are scoped by Kind and may be application identifiers rather than integers.
 type NoteReference struct {
+	// Inferred records a recovered relationship that was not an explicit source link.
+	Inferred bool `json:"inferred,omitempty"`
 	// Label overrides this citation only. Nil inherits the note label; empty is markerless.
 	Label *string `json:"label,omitempty"`
 	ID    string  `json:"id"`

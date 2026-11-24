@@ -1450,3 +1450,20 @@ labels become literal when variants coexist with automatic numbering; explicitly
 gate that editing loss with AllowLossy and retain checked automatic intent for SF.
 No generated Word editing/fidelity or full note-graph claim is implied. See
 PDF_NOTES.md and the independent source/reader/visual verifier.
+
+## 2026-11-24 Keep note relationship inference independently visible
+
+Add NoteReference.Inferred rather than treating inferred ownership as a fabricated
+explicit Ref or overwriting explicit Reference/Note roles. Preserve it in generated
+Word references, cached repeats and literal citation aliases. Use matching logical
+adjacency and separately identified unique physical GoTo/label-region evidence;
+never infer from equal text or page-bottom placement alone. Reject ambiguous/far/
+partial/conflicting evidence without consuming candidate glyphs.
+
+The actual 71-page tagging guide contradicts an adjacency-only completion claim:
+its two Note containers live at Document's end and its citations are Links. The
+physical rule recovers both with exact independently decoded original body/label
+text and navigation. Preserve all 87,381 old paint-order text records. Keep the
+original ignored unless redistribution rights are established; record its hash
+and mirror provenance. Its label backlinks expose a remaining editable-rich-label
+gap, now specifically diagnosed rather than hidden by a generic reflow claim.

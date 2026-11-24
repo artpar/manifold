@@ -2340,3 +2340,18 @@ editing-loss admission, malformed/retargeted/visible-content metadata, missing b
 glyphs, RTL/unsupported internal bidi, and missing-paint uncertainty. DOCX/SF fuzz
 seeds now include display variants; final campaign counts/checks are recorded in
 verification.json. Generated artifacts remain ignored under output/note-variants.
+
+## Inferred note relationships with a real original export
+
+PDF_NOTES.md records the pinned 71-page publisher-guide download/mirror, exact
+input hash, no-redistribution status, CLI and scripts/verify_note_inference.py
+commands. The verifier independently decodes original font CMaps/MCID text,
+Note IDs and physical GoTo views/label bounds for NOTE_1/NOTE_2. Both typed sites
+carry Inferred separately from KindInferred. All 87,381 old paint-order records
+remain exact. ProseMirror validates 89,397 nodes/marks/attributes including the
+adjacent probe/DOCX round trip. Source note pages 8/22 and generated native/Word
+note pages were inspected. Tests include mismatch/intervening content/unresolved
+Ref/ActualText/partial/far/overlapping views, explicit priority and per-site Word
+provenance. PDF/SF fuzz seeds cover both inference rules; final counts/checks are
+in verification.json. The body-label backlink loss is explicitly diagnosed and
+remains unfinished; raw QA artifacts stay ignored under output/note-inference.

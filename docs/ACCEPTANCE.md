@@ -1,6 +1,6 @@
 # Active goal acceptance audit
 
-Audited after 60bf496 and the independent citation/body display milestone, 2026-11-24.
+Audited after 09315a1 and identified note inference/original-guide qualification, 2026-11-24.
 **The full goal remains incomplete.** This is the current requirement audit;
 older milestone narratives are preserved in Git history and verification.json.
 The objective remains all four rich-document paths around one shared SF, pure Go,
@@ -17,7 +17,7 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
 | DOCX→SF | docx_read.go and scoped package/list/table/note/section/font code; unchanged original Word source/oracles; real_docx_test.go | Common required rich content preserved with explicit losses. Broader representative DOCX qualification remains needed; no universal OOXML claim |
 | SF→DOCX | docx_write.go and related modules; exact supported source SF round trips; python-docx/standard XML/LibreOffice checks and visual examples in verification.json | Implemented rich path; broaden original-export visual/corpus coverage beyond current synthetic combinations and single original Word publication |
 | SF→PDF wrapping/pagination/tables/fonts/Unicode | pdf_write/text/shaping/bidi/glyph/table/note modules; independent font/GID/geometry/pixel/continuation checks; 189-page real-source render | Implemented declared support contract. Unsupported shaping/missing glyphs explicitly error; no automatic font substitution. Do not turn this into an unstated requirement for every script or Word pagination |
-| PDF→SF text/images/pages/positions/structure | pdf_read/geometry/images/marked/structure/infer/rulings modules; original 90 tables/3,009 origins/eleven continuation refs; PDF_NAVIGATION.md | Rich extraction exists. Explicit artifact properties/membership now recover in physical page/source records (PDF_ARTIFACTS.md). Explicit forward/reverse/repeated Note/Ref relationships now recover typed rich notes (PDF_NOTES.md); rich multi-node/internal mixed-direction labels, nested graphs and non-Ref inference remain required |
+| PDF→SF text/images/pages/positions/structure | pdf_read/geometry/images/marked/structure/infer/rulings modules; original 90 tables/3,009 origins/eleven continuation refs; PDF_NAVIGATION.md | Rich extraction exists. Explicit artifact properties/membership now recover in physical page/source records (PDF_ARTIFACTS.md). Explicit forward/reverse/repeated Note/Ref relationships now recover typed rich notes (PDF_NOTES.md); rich multi-node/internal mixed-direction labels, editable label backlinks/nested graphs and broader untagged inference remain required |
 | Distinguish explicit/inferred/uncertain PDF meanings | SourceInfo; explicit logical roles separate from geometric/table/span/width/destination inference; original source identity/geometry oracles | Implemented for current recovery. Artifact page roles/properties now remain explicit, separate from authoring templates. Notes now separate explicit roles/edges from KindInferred reflow defaults. Broader note variants and inverse ParentTree consistency remain unqualified |
 | Paragraphs/headings/formatting/links/lists | Shared model/profile, DOCX style/theme/slot/direction and numbering code; NUMBERING.md, URI_TARGETS.md, PDF_NAVIGATION.md; tests/independent source/render checks | Implemented for declared subset. Audit found ActualText dropped typed internal targets; current fix and regression tests close that concrete failure, with mixed ownership still diagnosed |
 | Tables including merged cells and widths | table_grid, DOCX merges/grids, native recursive continuation/repetition, tagged/painted PDF recovery; TABLE_WIDTHS.md and TAGGED_TABLE_SPANS.md | Declared semantics implemented and independently qualified, including actual Word/PDF cells. Complex ambiguous grids must retain content and disclose uncertainty |
@@ -45,7 +45,8 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
    label, ID bytes, style, list/table/image hierarchy/pixels and note-body navigation.
    KindInferred explicitly separates the endnote editorial default from source
    NoteType. PDF_NOTES.md records qualification and implemented different/empty citation and body labels,
-   and still-required rich label layout/nested/ActualText graphs/non-Ref inference. Artifact page roles and
+   identified logical/physical inference and original guide cases, and still-required
+   rich label/backlink layout, nested/ActualText graphs and broader untagged recovery. Artifact page roles and
    membership remain independently qualified without inventing running templates.
 3. **Actual Colleaf boundary:** implement/qualify a standalone native Univer 1.0.4
    snapshot adapter through the shared SF, including rich structures and UTF-16

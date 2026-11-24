@@ -5264,5 +5264,47 @@
     "oracles": "original publisher fixture/oracle bytes intact; prior differing-label conservative fallback expectation now requires the newly supported explicit per-site typed behavior using the same source paint; malformed/uncertainty expectations retained",
     "remaining": "rich multi-node/internal mixed-direction labels, nested/enclosing-ActualText graphs and identified non-Ref adjacency/geometric inference; native Colleaf snapshot adapter; broader original DOCX producer/corpus/visual qualification; final full-goal audit",
     "goal": "active/incomplete"
+  },
+  "identified_note_relationship_inference": {
+    "date": "2026-11-24",
+    "model": "NoteReference.Inferred / note_reference.attrs.inferred independent from Note.KindInferred; explicit roles/Ref edges and physical views remain source facts; per-site flag round-trips JSON/SF/gzip/DOCX references/repeats/aliases",
+    "rules": {
+      "logical_adjacency": "immediate Reference/Note siblings, same nonempty literal leading label, no explicit conflict/nested/ActualText scope; source evidence pdf_note_adjacent_reference, heuristic confidence0.85",
+      "physical_note_view": "logically owned GoTo Link with resolved point in exactly one Note label rectangle within two physical points plus identical nonempty text; source evidence pdf_note_link_view, heuristic confidence0.95; original annotation/view stays explicit",
+      "limits": "explicit Ref wins; no binding from equal text/proximity alone, empty/missing/partial/far/overlapping/conflicting evidence; cancellation and 200000 comparison work bound; cached candidate paint materializes once"
+    },
+    "real_original": {
+      "title": "PDF Association Tagged PDF Best Practice Guide Syntax1.0.1",
+      "pages": 71,
+      "bytes": 1233877,
+      "sha256": "8185a30793869379ea4c2d82f214a930368b3fa7520faba61df38c52a502335e",
+      "source": "publisher download HTTP403; public newformat.se distribution mirror URL in PDF_NOTES.md",
+      "rights": "ignored read-only QA input; no vendored PDF or redistribution-license claim",
+      "counterexample": "Note definitions2363/2367 sit at Document end; citation sites are Links, no Ref/Reference roles; adjacency-only would still return zero notes",
+      "result": "NOTE_1/NOTE_2 and both typed sites recover with independent relationship/kind inference; physical pages8/22 preserved",
+      "independent": "pypdf original font-encoding/ToUnicode MCID label/body decoding, ID bytes, GoTo parameters, note-label region; no self-generated expected text",
+      "body_text_sha256": [
+        "e3e7d8c85dd1d914621b27929983d0ed834e5ecb56ca661ce6f9ab86fc742984",
+        "465d0461717dd35ec5faf2fa63f8c92e60cbfb4cb1b311519c889d99a7bd7ab2"
+      ],
+      "all_painted_text": "87381 paint-order records exact before/after semantic moves, including citation and body marks",
+      "paint_sha256": "c09a4c63f5cba37c53150c3f894e0bf8910690e43f8ae04a335cbcbb2d0e068c",
+      "new_gap": "label backlinks retain explicit physical navigation; editable rich-label backlinks not represented; exact pdf_note_label_link diagnostic added"
+    },
+    "independent_other": "hand-authored adjacent object/paint/source distinction and DOCX inferred-site equality pass; ProseMirror89397 nodes/marks/attributes across original guide plus adjacent and DOCX files; original pages8/22 and generated native/Word note pages inspected; no layout-equivalence claim",
+    "checks": {
+      "full_tests_final": "16.368s library;0.368s CLI; all packages pass",
+      "full_race_production": "184.196s library;2.201s CLI; all packages pass",
+      "focused_last_added_cases": "1.772s pass including overlapping regions and explicit priority",
+      "vet": "pass",
+      "modules": "all modules verified",
+      "cgo_disabled": "host build/focused execution0.384s pass; Linux amd64/arm64 cross-builds only",
+      "fuzz": "ten seconds each/two workers: PDF273, SF886 executions including seed coverage; pass. Source-heavy warmup limits these short campaigns.",
+      "diff_check": "pass"
+    },
+    "evidence": "docs/PDF_NOTES.md; scripts/verify_note_inference.py; pdf_note_inference_test.go; ignored output/note-inference",
+    "production_boundary": "modules unchanged; pureGo, no CGO/executables/services/uploads or Daptin/Colleaf modifications",
+    "remaining": "rich/mixed-direction labels and editable backlinks, nested/enclosing-ActualText graphs, broader untagged recovery, native Colleaf snapshot adapter, broader original DOCX producer/corpus/visual qualification and final acceptance",
+    "goal": "active/incomplete"
   }
 }

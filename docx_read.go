@@ -898,8 +898,11 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			}
 			style.Text = ""
 			style.Note = &NoteReference{ID: strconv.Itoa(id), Kind: strings.TrimSuffix(c.Name.Local, "Reference")}
+			if err := readDocxNoteInference(c, style.Note); err != nil {
+				return err
+			}
 			if activeNoteReference != nil {
-				if *activeNoteReference != *style.Note || seenNoteReference {
+				if referenceKey(activeNoteReference) != referenceKey(style.Note) || seenNoteReference {
 					return fmt.Errorf("note bookmark identity contradicts enclosed reference")
 				}
 				seenNoteReference = true

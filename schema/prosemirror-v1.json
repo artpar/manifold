@@ -207,6 +207,7 @@
       "atom": true,
       "attrs": {
         "label": {"default": null},
+        "inferred": {"default": false, "validate": "boolean"},
         "id": {
           "validate": "string"
         },

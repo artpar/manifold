@@ -175,3 +175,82 @@ flatten merely because their text differs. The old differing-label fallback test
 now requires the new typed behavior while retaining the original source bytes;
 malformed target and uncertainty expectations remain intact. Existing primary
 source files/oracles have not been changed.
+
+## Relationship inference and original-publisher qualification
+
+`NoteReference.Inferred` / `note_reference.attrs.inferred` now distinguishes a
+recovered relationship from an explicit source Ref. It is independent of
+Note.KindInferred, which concerns editorial foot/endnote placement. Both flags
+persist through JSON/SF/gzip and checked DOCX reference/citation metadata, including
+repeated references. The original Reference/Link/Note roles remain explicit source
+facts; no guessed Ref edge is inserted into SourceInfo.References.
+
+Two bounded rules now recover additional relationships:
+
+- An immediate sibling Reference then Note, with identical nonempty literal
+  citation/leading Lbl text, no enclosing ActualText/nested-note scope and no
+  conflicting explicit relationships. Evidence is pdf_note_adjacent_reference,
+  heuristic confidence .85. This follows the inline pattern described in the
+  [published tagging guide](https://pdfa.org/wp-content/uploads/2023/07/Tagged-PDF-Best-Practice-Guide.pdf).
+- A logically owned GoTo Link with a resolved two-coordinate physical view into
+  exactly one Note leading-label region (two physical points of tolerance) and
+  identical nonempty literal text. Evidence is pdf_note_link_view, heuristic
+  confidence .95. Original physical annotation/view values remain explicit;
+  associating that view with a semantic Note is still identified as inference.
+
+Confidence values are heuristic rankings, not probabilities. Explicit Ref links
+win. Empty/different/complex marks, intervening content, missing paint, partial or
+far views, overlapping note-label regions, unresolved explicit edges and enclosing
+ActualText retain content/navigation with diagnostics instead of guessing. Link
+matching is bounded at 200,000 comparisons and observes cancellation. No proximity
+alone, page-bottom placement or repeated equal text establishes a note relationship.
+Label blocks are cached during candidate inspection and materialized once, including
+rejected candidates; inference must not consume or duplicate visible glyphs.
+
+### Real original guide, not only a matching synthetic probe
+
+The 71-page PDF Association Tagged PDF Best Practice Guide 1.0.1 itself contains
+two Note definitions, NOTE_1/NOTE_2, on physical pages 8 and 22. Its exported logical
+Note containers sit at the end of Document and its citation sites are Links, with
+no explicit Ref entries or Reference roles. Adjacency alone therefore recovers
+neither. The physical-link rule now recovers both as typed notes with separate
+relationship/kind inference flags. Independent pypdf decoding of original font
+encodings/ToUnicode and MCID paint matches both label/body strings; original ID,
+GoTo parameters and source label bounds match too. The new verifier reports only
+text hashes, not republished prose.
+
+Original file: 1,233,877 bytes, SHA256
+8185a30793869379ea4c2d82f214a930368b3fa7520faba61df38c52a502335e.
+The publisher download returned HTTP 403 to the QA client; the public
+[distribution mirror](https://www.newformat.se/documents/pdfa-org/pdfa-org-technical-papers/pdfa-org-technical-paper-eng-pdfua-tagged-pdf-best-practices-guide-syntax-v1-0-1-2023-01-14.pdf)
+provided the pinned original export. It remains ignored QA input, not a vendored
+fixture or a redistribution-license claim. No customer file was uploaded.
+
+All 87,381 source paint-order text records, including semantic citation/body marks,
+match the pre-inference extraction exactly: normalized SHA256
+c09a4c63f5cba37c53150c3f894e0bf8910690e43f8ae04a335cbcbb2d0e068c.
+Actual ProseMirror checks 89,397 nodes/marks/attributes across that original, the
+adjacent probe and its DOCX round trip. Original source pages 8/22 and generated
+native/LibreOffice note pages were inspected; no source-layout equivalence is
+claimed. The kind default remains editorial Endnote despite observed footnote
+placement, with KindInferred=true and original page/region provenance.
+
+The original's leading note labels contain backlinks. Their explicit physical
+navigation stays in PDFNavigation. Editable body-label backlink behavior still
+needs rich label support; pdf_note_label_link now discloses that exact loss.
+Do not claim that retaining physical navigation proves editable label-link parity.
+
+```sh
+python3 scripts/generate_pdf_semantic_audit.py
+bin/manydoc extract -format sf -o output/note-inference/adjacent.sf output/audit/adjacent-note.pdf
+bin/manydoc convert -allow-lossy -o output/note-inference/adjacent.docx output/note-inference/adjacent.sf
+bin/manydoc extract -format sf -o output/note-inference/adjacent-docx.sf output/note-inference/adjacent.docx
+bin/manydoc extract -format sf.gz -o output/note-inference/guide-linked.sf.gz output/note-inference/tagged-guide.pdf
+output/qa-venv/bin/python scripts/verify_note_inference.py --guide output/note-inference/tagged-guide.pdf --guide-sf output/note-inference/guide-linked.sf.gz
+GOWORK=off go test -race -run 'TestPDFAdjacent|TestPDFPhysicalLinkNoteInference|TestDOCXNoteRelationshipInference|TestPDFNoteLinkAmbiguity' -count=1 .
+```
+
+No required runtime component, module dependency, app integration or quota/access
+boundary changed. General untagged note recognition, richer/nested/ActualText label
+graphs, editable label backlinks, Colleaf snapshot integration and remaining
+original DOCX corpus/visual qualification are still open.

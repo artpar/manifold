@@ -464,6 +464,9 @@ func (r *docxReader) noteField(n *xmlNode) (*NoteReference, error) {
 		return nil, fmt.Errorf("%w: note cross-reference instruction", ErrUnsupported)
 	}
 	ref, err := parseNoteBookmark(fields[1])
+	if err == nil {
+		err = readDocxNoteInference(n, ref)
+	}
 	if err != nil {
 		return nil, err
 	}

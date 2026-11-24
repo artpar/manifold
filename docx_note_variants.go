@@ -56,7 +56,7 @@ func (w *docxWriter) variantNoteReference(run Run, block Block) (string, error) 
 		override = "1"
 	}
 	name := noteBodyName(wire)
-	fmt.Fprintf(&out, `<w:hyperlink w:anchor="%s" md:noteCitation="%s" md:noteOverride="%s">%s</w:hyperlink>`, name, name, override, encoded[start+len(`</w:pPr>`):end])
+	fmt.Fprintf(&out, `<w:hyperlink w:anchor="%s" md:noteCitation="%s" md:noteOverride="%s"%s>%s</w:hyperlink>`, name, name, override, docxNoteInference(run.Note), encoded[start+len(`</w:pPr>`):end])
 	return out.String(), nil
 }
 func (w *docxWriter) noteDisplayMetadata(n Note) string {
@@ -128,6 +128,9 @@ func (r *docxReader) variantCitation(n *xmlNode) (*NoteReference, error) {
 	name := n.attributeNS(docxNotesNS, "noteCitation")
 	ref, err := parseNoteBodyName(name)
 	if err != nil {
+		return nil, err
+	}
+	if err := readDocxNoteInference(n, ref); err != nil {
 		return nil, err
 	}
 	if n.attr("anchor") != name || n.attr("id") != "" || len(n.Children) != 1 || n.Children[0].Name.Local != "r" {
@@ -249,6 +252,23 @@ func checkVariantNamespaces(n *xmlNode) error {
 		if err := checkVariantNamespaces(child); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func docxNoteInference(ref *NoteReference) string {
+	if ref.Inferred {
+		return ` md:inferred="1"`
+	}
+	return ""
+}
+func readDocxNoteInference(n *xmlNode, ref *NoteReference) error {
+	switch n.attributeNS(docxNotesNS, "inferred") {
+	case "":
+	case "1":
+		ref.Inferred = true
+	default:
+		return fmt.Errorf("invalid note relationship inference metadata")
 	}
 	return nil
 }
