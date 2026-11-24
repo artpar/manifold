@@ -7523,5 +7523,43 @@
       "MANYDOC_LITERAL_OUTPUT_QA=output/literal-output GOWORK=off go test -run 'TestPDFLiteralMarker|TestPDFWrappedReplacement|TestPDFActualWhitespace' -count=1 .",
       "output/qa-venv/bin/python scripts/verify_literal_marker_output.py"
     ]
+  },
+  "literal_marker_docx_milestone": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "DOCX now writes literal labels as actual editable OOXML content through checked list/item ranges. Body/running items use borderless label/body cells linked to real standard numbering definitions. Foot/endnotes use sequential label bookmark ranges. No label text/SF body cache is embedded.",
+    "counter_intent": "Literal items consume logical indices. Later automatic runs use real OOXML start overrides; import checks resumed start vs item position, all counter definitions/levels, all used numbering IDs across explicit ranges. Automatic items remain automatic.",
+    "controls_and_assets": "Checked 1pt paragraphs before layout tables preserve conditional/explicit item starts; hidden content rejects. Literal layout shape/borders/side/numbering/body/marker controls validate. Note resolution, reserved destination prefixes, running measurement and body floors include markers. Real labels retain marks/links/images/tables/nested lists/notes and accept actual XML text edits.",
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_docx_literal_markers.py",
+      "sha256": "fba2cff22c8e6ee247d98df2ff97a944413aef96d3e0d9143bc896bd77ac13af",
+      "cases": 10,
+      "Word_pages": 17,
+      "checks": "Actual OOXML counter definitions/resumed display, cell/range ownership, alpha/beta/empty labels, note reference/definition, exact DOCX and actual Word ODT URI/internal target graph, nested red image pixels/placements, real tables/lists, running repeats, four-page continuation, RTL and both requested page starts pass.",
+      "ProseMirror": "324 actual recovered nodes/marks/attributes across ten API SFs pass; CLI SF equals API byte-for-byte.",
+      "visual": "All17 Word-rendered pages inspected after Poppler rendering, using five labelled contact sheets and nested case full page. Rich labels/figures/tables/notes remain visible, requested starts separate pages, columns continue, RTL label is on right. Scoped synthetic evidence,not general Word fidelity.",
+      "initial_reader_failures": "Word ignored cell-local pageBreakBefore and omitted the nested label table in a footnote layout cell. Original page/text/table oracles retained. Moved starts before cells and used sequential rich marker/body note flow; actual rendered source now passes both.",
+      "Word_PDF_link_discrepancy": "Actual Word ODT save retains both exact authored URI/internal targets and destination bookmark; PDF export omits their two annotations while note links remain. Additional --require-pdf-links oracle intentionally FAILS and remains executable. Isolated w:history probe did not change it. The main checker reports this discrepancy and requires the actual ODT graph; no passing Word-PDF hyperlink claim.",
+      "native_PDF": "CLI DOCX→SF→native Go PDF retains actual marker URI/internal annotations and Greek text; distinct from the Word-PDF export discrepancy."
+    },
+    "checks": {
+      "go_test_all": "passed final library27.262s/CLI0.809s",
+      "race": "passed library320.160s/CLI2.782s before duplicate-container/namespace hardening; new final full run pending; focused final hardening passed1.879s",
+      "vet": "passed",
+      "modules": "all modules verified",
+      "CGO_disabled_focus": "passed final0.396s",
+      "builds": "CGO-disabled host CLI and Linux amd64/arm64 cross-builds pass;host example conversion/extraction execute. Cross-builds are not Linux execution.",
+      "malformed": "New unknown marker roles/number IDs/levels/side/borders/extra visible cells/page-start content and note-label bindings reject. Actual label edit overrides source text. Full suite includes existing malformed/fuzz seeds; no new fuzz campaign claimed.",
+      "diff_check": "passed"
+    },
+    "test_development": "Initial new roundtrip fixture made page defaults/media type implicit; explicit A4/PNG values now test exact resolved semantics. Existing source/expected oracles unchanged. A new malformed-note mutator initially missed the actual note level; corrected to match its observed ID/level, preserving invalid-ID/level expectations. Superseded race tree was deliberately terminated after the authoritative failed mutation test,not after an observation timeout.",
+    "production_dependencies": "unchanged;independently authored standard-Go OOXML changes,existing optional QA readers only.",
+    "remaining": "VDOCS literal markers remain required unfinished native mapping with atomic rejection. Native repeated-footnote placement, Word-PDF annotation reader discrepancy and broader source/resource/reflow/API/visual/original acceptance audits remain open. No overall blocker or completion exemption established.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/LITERAL_LIST_MARKERS.md",
+      "rg -n 'ListBlock|Items|bullet|Marker' colleaf_lists.go colleaf_list_origins.go colleaf_tables.go",
+      "output/qa-venv/bin/python scripts/verify_docx_literal_markers.py --require-pdf-links",
+      "node scripts/verify_colleaf_note_order.cjs"
+    ]
   }
 }

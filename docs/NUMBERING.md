@@ -183,4 +183,6 @@ now retain their list/item/label content in the existing SF profile via ListMark
 This includes annotated and pictorial labels formerly flattened into paragraphs.
 PDF generation now preserves rich labels through borderless parallel measured
 flows and actual Lbl/LBody ownership; explicit block-bearing labels remain literal
-on recovery. DOCX/native literal-marker mappings remain required unfinished work. See LITERAL_LIST_MARKERS.md.
+on recovery. DOCX now retains literal blocks through checked editable layout cells/ranges and
+resumes automatic items with standard start overrides. The native mapping remains
+required unfinished work. See LITERAL_LIST_MARKERS.md.

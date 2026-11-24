@@ -97,15 +97,72 @@ Independent QA matches CHILD's structure replacement against its actual two MCID
 fragments CHIL and D, rather than accepting a detached logical text value. Tests
 also cover mixed-style/link wrapping and rejection of non-whitespace mismatches.
 
-## Required unfinished mappings
+## DOCX generation and recovery
 
-DOCX and VDOCS writers still reject literal markers with ErrUnsupported before
-writing output, even with AllowLossy. Those mappings remain required work, not a
-completion exemption. Next implement DOCX generation/recovery against an
-independently rendered marker/body representation, then the checked native mapping.
-Keep the source/SF/asset oracles. Word's ordinary bullet glyph path truncated
-multi-character labels in the preceding experiment and is not a generic encoding.
-Do not replace assets/links with a text cache or claim output support from parsing.
+DOCX now writes rich literal label/body cells as ordinary borderless two-column
+OOXML tables inside the existing checked list/item bookmark ranges. Small ignorable
+attributes record literal ownership, the standard numbering ID/level and marker
+side. Text, marks, links, drawings and notes live only in actual Word content.
+The reader checks the one-row/two-cell shape, nil borders, numbering, marker side,
+body start and permitted label content before removing the layout container.
+Unexpected visible features reject; edits to actual label text remain authoritative.
+The ordinary table writer/reader owns nested tables, assets and relationships.
+
+Literal items still consume an item index. A following automatic run uses a real
+OOXML startOverride so mixed lists display e.g. Item 7), [done], Item 9). Recovery
+compares every counter definition/level, resumed start against item position, and
+all used numbering IDs across explicit ranges. Automatic items remain automatic;
+no literal text cache substitutes for a Word counter.
+
+Word ignored pageBreakBefore within the layout cell in the first experiment.
+A checked empty 1pt paragraph now carries an item page start before the table;
+conditional, explicit-before-list and combined intent restore separately. Content
+in that control rejects. Actual Word renders prove both requested two-page starts.
+
+LibreOffice omitted a real table nested inside the extra footnote layout cell.
+Foot/endnote literal items therefore use sequential ordinary label/body flow,
+with mdmarker1_ID_LEVEL_BOOKMARK checked label ranges rather than an extra table.
+This reflow policy retains the actual rich label table, image, nested list and body;
+it is not an unsupported-label exception. Reserved bookmark names remain separate
+from editable anchors. Note identity resolution includes marker references. Running
+story fitting/minimum-body measurement also includes parallel label flows.
+
+Ten targeted authored cases retain exact normalized SF graphs, including assets,
+relationships, note IDs, empty markers, counter intent, RTL and page settings.
+Optional independent OOXML/LibreOffice/pypdf checks cover 17 rendered pages;
+all were inspected after Poppler rendering. Actual ProseMirror validates 324 nodes.
+These are scoped structural/content/asset/visual tests, not Word-equivalent fidelity.
+
+One independent-reader limitation remains explicit: LibreOffice retains both URI
+and internal label links in its actual ODT save, but its PDF export omits those two
+annotations while retaining note links. Adding w:history in an isolated probe did
+not change that result. The strict --require-pdf-links oracle remains reproducible
+and fails; the main checker separately requires the actual ODT link graph. The
+native Go PDF generated from the same DOCX retains both annotations. No claim is
+made that the Word-rendered PDF passes the missing-annotation oracle. LibreOffice
+[documents automatic hyperlink export](https://help.libreoffice.org/latest/en-GB/text/shared/01/ref_pdf_export_links.html),
+so the observed discrepancy stays in the reader-qualification queue; direct
+DOCX-to-PDF fidelity is outside the original goal. Original label/text/asset oracles
+and core all-four-path requirements are unchanged.
+
+```sh
+MANYDOC_LITERAL_DOCX_QA=output/literal-docx GOWORK=off go test -run TestDOCXLiteralMarker -count=1 .
+mkdir -p output/literal-docx/word output/literal-docx/odt
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-literal-docx-qa --headless --convert-to pdf --outdir output/literal-docx/word output/literal-docx/{rich,mixed-0,mixed-7,nested,running,continued,page-start,explicit-break,rtl,endnote}.docx
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-literal-docx-qa --headless --convert-to odt --outdir output/literal-docx/odt output/literal-docx/rich.docx
+output/qa-venv/bin/python scripts/verify_docx_literal_markers.py
+# Retained additional Word-PDF annotation oracle currently fails:
+output/qa-venv/bin/python scripts/verify_docx_literal_markers.py --require-pdf-links
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/literal-docx/*.sf
+```
+
+## Required unfinished mapping
+
+VDOCS still rejects literal markers with ErrUnsupported before writing output,
+even with AllowLossy. The native mapping remains required work, not a completion
+exemption. Word's ordinary bullet glyph path truncated multi-character labels in
+the earlier experiment and is not a generic encoding. Keep actual editable content
+and assets authoritative in the checked native mapping as in DOCX/PDF.
 
 ## Evidence and commands
 
@@ -146,5 +203,5 @@ pdftoppm -scale-to 1100 -png output/literal-output/continued.pdf output/literal-
 ```
 
 The native repeated-footnote ordering defect remains separate and unresolved.
-See COLLEAF_BROWSER.md. The complete goal stays active; DOCX/native generation and remaining
+See COLLEAF_BROWSER.md. The complete goal stays active; native generation and remaining
 semantic/source/resource/visual acceptance work are not closed by this milestone.

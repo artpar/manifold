@@ -458,6 +458,9 @@ func (r *docxReader) blocks(n *xmlNode, rels map[string]docxRelation, depth int)
 				}
 			}
 		case "p":
+			if c.attributeNS(docxNotesNS, "literalPageStart") != "" {
+				return nil, fmt.Errorf("literal page-start requires checked item ownership")
+			}
 			structural, err := docxStructuralParagraph(n, c)
 			if err != nil {
 				return nil, err
@@ -512,12 +515,18 @@ func (r *docxReader) blocks(n *xmlNode, rels map[string]docxRelation, depth int)
 			}
 			out = append(out, bs...)
 		case "tbl":
+			if c.attributeNS(docxNotesNS, "literalMarker") != "" {
+				return nil, fmt.Errorf("literal marker table requires checked list/item ownership")
+			}
 			b, err := r.table(c, rels, depth)
 			if err != nil {
 				return nil, err
 			}
 			out = append(out, b)
 		case "sdt":
+			if c.Name.Space == "" && strings.HasPrefix(c.child("sdtPr").child("tag").attr("val"), docxMarkerTag) {
+				return nil, fmt.Errorf("literal marker bookmark requires checked item ownership")
+			}
 			if c.Name.Space == "" && strings.HasPrefix(c.child("sdtPr").child("tag").attr("val"), docxListTag) {
 				b, err := r.taggedList(c, rels, depth)
 				if err != nil {

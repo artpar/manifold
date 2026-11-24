@@ -180,6 +180,10 @@ func docxTableColumns(b Block, width float64) (*tableGeometry, []int, error) {
 }
 
 func (w *docxWriter) table(b Block) (string, error) {
+	return w.tableLayout(b, "", false)
+}
+
+func (w *docxWriter) tableLayout(b Block, extra string, borderless bool) (string, error) {
 	g, widths, err := docxTableColumns(b, w.contentWidth)
 	if err != nil {
 		return "", err
@@ -193,11 +197,17 @@ func (w *docxWriter) table(b Block) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Fprintf(&out, `<w:tbl md:columnWidths="%s" md:columnWidthContainer="%s"><w:tblPr><w:tblW w:w="%d" w:type="dxa"/>`, escape(string(metadata)), strconv.FormatFloat(w.contentWidth-float64(b.docxIndent)/20, 'g', -1, 64), total)
+	fmt.Fprintf(&out, `<w:tbl%s md:columnWidths="%s" md:columnWidthContainer="%s"><w:tblPr><w:tblW w:w="%d" w:type="dxa"/>`, extra, escape(string(metadata)), strconv.FormatFloat(w.contentWidth-float64(b.docxIndent)/20, 'g', -1, 64), total)
 	if b.docxIndent > 0 {
 		fmt.Fprintf(&out, `<w:tblInd w:w="%d" w:type="dxa"/>`, b.docxIndent)
 	}
-	out.WriteString(`<w:tblBorders><w:top w:val="single" w:sz="4"/><w:left w:val="single" w:sz="4"/><w:bottom w:val="single" w:sz="4"/><w:right w:val="single" w:sz="4"/><w:insideH w:val="single" w:sz="4"/><w:insideV w:val="single" w:sz="4"/></w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="80" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>`)
+	if borderless {
+		out.WriteString(`<w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders>`)
+	} else {
+		out.WriteString(`<w:tblBorders><w:top w:val="single" w:sz="4"/><w:left w:val="single" w:sz="4"/><w:bottom w:val="single" w:sz="4"/><w:right w:val="single" w:sz="4"/><w:insideH w:val="single" w:sz="4"/><w:insideV w:val="single" w:sz="4"/></w:tblBorders>`)
+	}
+	out.WriteString(`<w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="80" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>`)
+
 	for _, width := range widths {
 		fmt.Fprintf(&out, `<w:gridCol w:w="%d"/>`, width)
 	}

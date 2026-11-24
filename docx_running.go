@@ -137,6 +137,16 @@ func (w *docxWriter) runningFlow(bs []Block, width, height float64, depth int, i
 				return nil, 0, fmt.Errorf("%w: DOCX numbering supports nine levels", ErrUnsupported)
 			}
 			for _, item := range b.Items {
+				if item.Marker != nil {
+					table, _ := docxLiteralTable(item, available)
+					child, n, err := w.runningFlow([]Block{table}, available, height, depth, 0)
+					if err != nil {
+						return nil, 0, err
+					}
+					flow = append(flow, child...)
+					images += n
+					continue
+				}
 				child, n, err := w.runningFlow(item.Blocks, width, height, depth+1, float64(depth+1)*18)
 				if err != nil {
 					return nil, 0, err
@@ -196,7 +206,12 @@ func docxBodyFloor(bs []Block, padding float64) float64 {
 			floor = math.Max(floor, size*1.4+padding)
 		case ListBlock:
 			for _, item := range b.Items {
-				floor = math.Max(floor, docxBodyFloor(item.Blocks, padding))
+				itemPadding := padding
+				if item.Marker != nil {
+					itemPadding += docxImageCellHeightAllowance
+					floor = math.Max(floor, docxBodyFloor(item.Marker.Blocks, itemPadding))
+				}
+				floor = math.Max(floor, docxBodyFloor(item.Blocks, itemPadding))
 			}
 		case Table:
 			for _, row := range b.Rows {

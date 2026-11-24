@@ -40,7 +40,44 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: rich literal labels render through PDF parallel flow
+## Latest progress: rich literal labels persist and render in DOCX
+
+DOCX now exports literal marker content as actual editable OOXML blocks with
+checked list/item ownership. Body/running items use borderless parallel label/body
+cells; foot/endnotes use checked sequential label ranges to retain rich tables
+that LibreOffice omitted when nested in an extra layout cell. Conditional/explicit
+item page starts move before layout cells because the reader ignored cell-local
+pageBreakBefore. Mixed lists resume automatic counters using real standard start
+overrides, validated against item positions and the shared counter definition.
+No body/label SF cache is embedded. Actual XML edits remain authoritative.
+
+Exact normalized SF round trips cover formatting, URI/internal links, note IDs,
+images, tables/nested lists, RTL, empty labels, counters, page starts and stories.
+Ten targeted cases retain structure/assets through independent OOXML/Word reader
+checks; 17 rendered Word pages were inspected after Poppler rendering. Actual
+ProseMirror validates 324 recovered nodes. This is scoped synthetic evidence.
+
+Full tests pass (library27.262s/CLI0.809s); the pre-hardening full race passed
+(library320.160s/CLI2.782s). Final duplicate-container/namespace hardening passes
+focused race checks, with a new full race run currently live. Vet/modules, final
+CGO-disabled focus (0.396s), host CLI and
+Linux amd64/arm64 builds pass. Linux compilation is not execution. CLI SF extraction
+matches API output byte-for-byte; DOCX→SF→native PDF keeps actual marker URI/internal
+annotations. No new fuzz campaign is claimed; full suite includes existing seeds
+and new malformed ownership/page-control/numbering/visible-edit tests.
+
+The actual Word ODT save retains both exact authored link targets, but its PDF
+export omits their two annotations. The additional --require-pdf-links checker
+remains FAILING and recorded separately; the main independent checker requires the
+actual ODT link graph and reports the discrepancy. An isolated w:history probe did
+not fix it. This does not qualify Word-PDF hyperlink export or general Word fidelity;
+read LITERAL_LIST_MARKERS.md for the evidence and reproducible commands.
+
+VDOCS literal-marker mapping remains required unfinished work and still rejects
+before output. Native repeated-footnote ordering and broader resource/source/API/
+visual/original acceptance audits remain open. The complete goal stays active.
+
+## Earlier progress: rich literal labels render through PDF parallel flow
 
 The completion audit found a remaining core structural gap: irregular, annotated
 or pictorial labels could flatten an otherwise explicit PDF L/LI tree. List items
@@ -87,10 +124,10 @@ cross-builds establish compilation, not Linux execution. The short paint-context
 fuzz sample passes (eight executions/12.335s); it is not broad fuzz evidence.
 Commits 5b806cc and the following evidence update record this PDF milestone.
 
-DOCX/VDOCS literal-marker generation remains required unfinished work and rejects
+VDOCS literal-marker generation remains required unfinished work and rejects
 before output. The native repeated-footnote ordering failure and wider source/
 resource/reflow/API/visual acceptance audits remain open; the goal is incomplete.
-Final checks for this milestone are being recorded in verification.json. Prior
+Final checks for this milestone are recorded in verification.json. Prior
 import milestone checks and evidence remain in its historical ledger entry.
 
 ## Earlier progress: fixed ordered-list labels retain PDF structure
@@ -391,8 +428,8 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-1. Complete literal-marker DOCX generation/recovery and native
-   mapping using LITERAL_LIST_MARKERS.md. The current output rejection is temporary
+1. Complete literal-marker native mapping using LITERAL_LIST_MARKERS.md; the
+   DOCX/PDF mappings now exist. The current output rejection is temporary
    required work, not a completed support-contract exception. Reproduce the native
    repeated-footnote failure in COLLEAF_BROWSER.md without weakening its oracle.
    Broaden source/structure and resource audits beyond the newly qualified

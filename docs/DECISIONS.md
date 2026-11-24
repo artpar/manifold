@@ -2356,3 +2356,17 @@ owner trial duplicated the unchanged paint-context seed and was discarded. Exact
 alignment preserves original styles/links; missing-whitespace-only alignment
 cannot alter painted characters and diagnoses its adjacent-style assignment.
 See LITERAL_LIST_MARKERS.md for the unchanged narrow RTL word oracle and sources.
+
+
+## 2026-11-25 Render literal DOCX labels as real editable content
+
+Reuse ordinary cells/tables and existing checked list/item ranges; sparse metadata
+links layout roles to actual standard numbering definitions without a cached label
+or SF payload. Resume automatic counters after literal items with real OOXML start
+overrides, validating all counter definitions and each resumed position on import.
+Move item page starts before layout cells because the independent Word reader
+ignored the cell property. Use sequential label/body ranges in note stories after
+the same reader omitted a nested label table. Preserve the rich source fixture,
+not an empty-table oracle. Keep actual ODT hyperlink retention distinct from the
+missing Word-PDF annotations, with the strict extra oracle still executable.
+LITERAL_LIST_MARKERS.md records the independent source/geometry/assets/visual scope.

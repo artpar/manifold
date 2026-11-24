@@ -1899,8 +1899,8 @@ PDF irregular-label fallback now retains actual L/LI/Lbl structure, assets and
 relationships instead of flattening paragraphs. Unknown kind/counter intent is
 explicit. PDF generation uses a borderless parallel flow plan through the existing table
 continuation machinery, with real Lbl/LBody content owners and no logical layout
-table. Block-bearing labels remain literal on recovery. DOCX/native generation is
-still guarded until proper format mappings are implemented. LITERAL_LIST_MARKERS.md records required
+table. Block-bearing labels remain literal on recovery. VDOCS generation is
+still guarded until its native mapping is implemented. LITERAL_LIST_MARKERS.md records required
 unfinished work; no completion follows from the extraction/persistence milestone.
 
 
@@ -1911,3 +1911,14 @@ geometry gaps without discarding styles/links. A strict missing-whitespace match
 restores only unpainted Unicode whitespace, preserves every painted character,
 and diagnoses inherited whitespace style. The narrow RTL marker regression proves
 CHILD survives its CHIL / D wrap; LITERAL_LIST_MARKERS.md records source/spec/QA.
+
+
+DOCX literal markers use ordinary borderless layout tables within existing list/
+item ranges, linked to real standard counter definitions through checked sparse
+attributes. Resumed automatic runs use actual start overrides and checked semantic
+identity across numbering IDs. Foot/endnotes use sequential label bookmark ranges
+instead of adding a nested layout cell that LibreOffice omitted. Empty preceding
+layout paragraphs carry/restorably encode item page starts; no content can hide
+inside them. Note resolution and running fitting include markers. The actual ODT
+link graph passes while the separate Word-PDF annotation oracle remains a recorded
+failure; LITERAL_LIST_MARKERS.md gives exact behavior and qualification commands.

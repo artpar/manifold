@@ -70,7 +70,10 @@ func (w *docxWriter) writeNoteParts(notes []Note) error {
 			}
 			previousHeight := w.contentHeight
 			w.contentHeight -= math.Min(docxImageNoteHeightAllowance, w.contentHeight/2)
+			previousNoteStory := w.noteStory
+			w.noteStory = true
 			body, err := w.blocksAt(blocks, 1)
+			w.noteStory = previousNoteStory
 			w.contentHeight = previousHeight
 			if err != nil {
 				w.rels = mainRels
@@ -345,6 +348,11 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 				run.Note = &copy
 			}
 			for ii := range b.Items {
+				if b.Items[ii].Marker != nil {
+					if err := resolve(b.Items[ii].Marker.Blocks); err != nil {
+						return err
+					}
+				}
 				if err := resolve(b.Items[ii].Blocks); err != nil {
 					return err
 				}

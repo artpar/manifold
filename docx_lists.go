@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -82,6 +83,7 @@ func (w *docxWriter) list(b Block, depth int) (string, error) {
 	number := fmt.Sprintf(`<w:num w:numId="%d"><w:abstractNumId w:val="%d"/><w:lvlOverride w:ilvl="%d"><w:startOverride w:val="%d"/></w:lvlOverride></w:num>`, id, id-1, outputLevel, listStart(b))
 	w.numberings = append(w.numberings, docxNumbering{abstract.String(), number})
 	var out strings.Builder
+	automaticID, resumeCounter := id, false
 	w.bookmarks++
 	listBookmark := w.bookmarks
 	fmt.Fprintf(&out, `<w:bookmarkStart w:id="%d" w:name="mdlist1_%s_%d_%d"/>`, listBookmark, b.List, listStart(b), listBookmark)
@@ -89,12 +91,33 @@ func (w *docxWriter) list(b Block, depth int) (string, error) {
 		w.bookmarks++
 		itemBookmark := w.bookmarks
 		fmt.Fprintf(&out, `<w:bookmarkStart w:id="%d" w:name="mditem1_%d"/>`, itemBookmark, itemBookmark)
+		if item.Marker != nil {
+			resumeCounter = true
+			if itemIndex == 0 && b.docxBeforeList {
+				item.Blocks = append([]Block(nil), item.Blocks...)
+				item.Blocks[0].docxBeforeList = true
+				item.Blocks[0].docxExplicitBreakBefore = true
+			}
+			value, err := w.literalListItem(item, id, outputLevel)
+			if err != nil {
+				return "", err
+			}
+			out.WriteString(value)
+			fmt.Fprintf(&out, `<w:bookmarkEnd w:id="%d"/>`, itemBookmark)
+			continue
+		}
 		blocks := append([]Block(nil), item.Blocks...)
 		if itemIndex == 0 && b.docxBeforeList {
 			blocks[0].docxBeforeList = true
 			blocks[0].docxExplicitBreakBefore = true
 		}
-		blocks[0].docxNumberID = id
+		if resumeCounter {
+			automaticID = len(w.numberings) + 1
+			resume := fmt.Sprintf(`<w:num w:numId="%d"><w:abstractNumId w:val="%d"/><w:lvlOverride w:ilvl="%d"><w:startOverride w:val="%d"/></w:lvlOverride></w:num>`, automaticID, id-1, outputLevel, listStart(b)+itemIndex)
+			w.numberings = append(w.numberings, docxNumbering{number: resume})
+			resumeCounter = false
+		}
+		blocks[0].docxNumberID = automaticID
 		blocks[0].docxNumberLevel = outputLevel
 		for i := 1; i < len(blocks); i++ {
 			if blocks[i].Kind != ListBlock {
@@ -150,13 +173,55 @@ func (r *docxReader) taggedList(n *xmlNode, rels map[string]docxRelation, depth 
 	defer func() { r.inTaggedList-- }()
 	firstID := ""
 	firstLevel := -1
+	automaticID := ""
+	resumeCounter := false
+	usedIDs := map[string]bool{}
 	for _, item := range content.Children {
 		if item.Name.Local != "sdt" || item.child("sdtPr").child("tag").attr("val") != docxItemTag || item.child("sdtContent") == nil {
 			return Block{}, fmt.Errorf("list range requires item boundaries")
 		}
-		bs, err := r.blocks(item.child("sdtContent"), rels, depth+1)
+		var marker *ListMarker
+		var bs []Block
+		var err error
+		children := item.child("sdtContent").Children
+		pageStart := ""
+		if len(children) > 0 && children[0].attributeNS(docxNotesNS, "literalPageStart") != "" {
+			pageStart, err = literalPageStart(children[0])
+			if err != nil {
+				return Block{}, err
+			}
+			children = children[1:]
+		}
+		if len(children) == 1 && children[0].attributeNS(docxNotesNS, "literalMarker") != "" {
+			var decoded ListItem
+			var ref *docxListRef
+			decoded, ref, err = r.literalListItem(children[0], rels, depth+1)
+			marker, bs = decoded.Marker, decoded.Blocks
+			if err == nil {
+				bs[0].docxList = ref
+				bs[0].List = ref.Definition.Kind
+			}
+		} else if len(children) > 0 && children[0].Name.Space == "" && strings.HasPrefix(children[0].child("sdtPr").child("tag").attr("val"), docxMarkerTag) {
+			var decoded ListItem
+			var ref *docxListRef
+			decoded, ref, err = r.sequentialLiteralItem(children, rels, depth+1)
+			marker, bs = decoded.Marker, decoded.Blocks
+			if err == nil {
+				bs[0].docxList = ref
+				bs[0].List = ref.Definition.Kind
+			}
+		} else {
+			bs, err = r.blocks(&xmlNode{Children: children}, rels, depth+1)
+		}
 		if err != nil {
 			return Block{}, err
+		}
+		if pageStart != "" {
+			if marker == nil {
+				return Block{}, fmt.Errorf("literal page-start requires literal item")
+			}
+			bs[0].PageBreakBefore = pageStart == "conditional" || pageStart == "both"
+			bs[0].docxBeforeList = pageStart == "explicit" || pageStart == "both"
 		}
 		if len(bs) > 0 && bs[0].Kind == ListBlock && bs[0].docxList != nil && len(bs[0].Items) == 1 {
 			ref := bs[0].docxList
@@ -176,28 +241,47 @@ func (r *docxReader) taggedList(n *xmlNode, rels map[string]docxRelation, depth 
 			bs[0].docxBeforeList = false
 		}
 		ref := bs[0].docxList
-		if ref.Definition.Start != start {
-			return Block{}, fmt.Errorf("list tag start disagrees with DOCX numbering")
-		}
+		usedIDs[ref.ID] = true
 		if firstID == "" {
-			firstID = ref.ID
-			firstLevel = ref.Level
+			if ref.Definition.Start != start {
+				return Block{}, fmt.Errorf("list tag start disagrees with DOCX numbering")
+			}
+			firstID, firstLevel = ref.ID, ref.Level
+			automaticID = ref.ID
 			b.Numbering = r.publicListNumbering(ref, nil)
-		} else if ref.ID != firstID || ref.Level != firstLevel {
-			return Block{}, fmt.Errorf("list item ranges disagree on numbering identity/level")
+		} else if ref.Level != firstLevel {
+			return Block{}, fmt.Errorf("list item ranges disagree on numbering level")
 		}
+		if marker != nil {
+			if ref.ID != firstID || ref.Definition.Start != start {
+				return Block{}, fmt.Errorf("literal item disagrees with list numbering")
+			}
+			resumeCounter = true
+		} else if resumeCounter {
+			if ref.Definition.Start != start+len(b.Items) || !r.sameListCounter(firstID, ref.ID, firstLevel) {
+				return Block{}, fmt.Errorf("resumed list counter disagrees with item position")
+			}
+			automaticID, resumeCounter = ref.ID, false
+		} else if ref.ID != automaticID {
+			return Block{}, fmt.Errorf("list item ranges disagree on numbering identity")
+		}
+
 		bs[0].List = ""
 		bs[0].docxList = nil
-		b.Items = append(b.Items, ListItem{Blocks: bs})
+		b.Items = append(b.Items, ListItem{Marker: marker, Blocks: bs})
 	}
 	if firstID != "" {
 		if r.rangeNumIDs == nil {
 			r.rangeNumIDs = map[string]bool{}
 		}
-		if r.rangeNumIDs[firstID] {
-			return Block{}, fmt.Errorf("numbering identity reused by separate explicit list ranges")
+		for id := range usedIDs {
+			if r.rangeNumIDs[id] {
+				return Block{}, fmt.Errorf("numbering identity reused by separate explicit list ranges")
+			}
 		}
-		r.rangeNumIDs[firstID] = true
+		for id := range usedIDs {
+			r.rangeNumIDs[id] = true
+		}
 	}
 	return b, nil
 }
@@ -637,7 +721,7 @@ func expandListBookmarks(children []*xmlNode, depth int) ([]*xmlNode, error) {
 	for index := 0; index < len(children); index++ {
 		n := children[index]
 		name := n.attr("name")
-		if n.Name.Local != "bookmarkStart" || (!strings.HasPrefix(name, "mdlist1_") && !strings.HasPrefix(name, "mditem1_")) {
+		if n.Name.Local != "bookmarkStart" || (!strings.HasPrefix(name, "mdlist1_") && !strings.HasPrefix(name, "mditem1_") && !strings.HasPrefix(name, "mdmarker1_")) {
 			result = append(result, n)
 			continue
 		}
@@ -653,6 +737,12 @@ func expandListBookmarks(children []*xmlNode, depth int) ([]*xmlNode, error) {
 				return nil, fmt.Errorf("invalid list bookmark name")
 			}
 			tag = docxListTag + parts[0] + ":" + parts[1]
+		} else if strings.HasPrefix(name, "mdmarker1_") {
+			parts := strings.Split(strings.TrimPrefix(name, "mdmarker1_"), "_")
+			if len(parts) != 3 || parts[2] != id {
+				return nil, fmt.Errorf("invalid literal marker bookmark name")
+			}
+			tag = docxMarkerTag + parts[0] + ":" + parts[1]
 		} else if strings.TrimPrefix(name, "mditem1_") != id {
 			return nil, fmt.Errorf("invalid item bookmark name")
 		}
@@ -721,4 +811,27 @@ func (r *docxReader) publicListNumbering(ref *docxListRef, counter *docxListCoun
 	}
 	r.listSequences[n] = ref.ID
 	return n
+}
+
+// Literal items consume a logical index without a numbered Word paragraph.
+// A resumed automatic run uses a real start override. Compare every definition
+// level before accepting its new identity inside the checked list range.
+func (r *docxReader) sameListCounter(base, candidate string, level int) bool {
+	a, b := r.num[base], r.num[candidate]
+	if len(a) != len(b) {
+		return false
+	}
+	for k, v := range a {
+		other, ok := b[k]
+		if !ok {
+			return false
+		}
+		if k == level {
+			other.Start = v.Start
+		}
+		if !reflect.DeepEqual(v, other) {
+			return false
+		}
+	}
+	return true
 }

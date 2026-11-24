@@ -23,6 +23,7 @@ const xmlHeader = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`
 const wordNamespaces = ` xmlns:w="` + wordNS + `" xmlns:r="` + relNS + `" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"`
 
 type docxWriter struct {
+	noteStory          bool
 	allowLossy         bool
 	destinationNames   map[string]string
 	ctx                context.Context

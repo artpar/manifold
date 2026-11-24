@@ -823,7 +823,10 @@ and the additive list_marker SF node. Unknown kind/counter intent is diagnosed.
 PDF now renders literal labels through borderless parallel measured flows with
 actual Lbl/LBody paint ownership, rich nested blocks, notes and pagination. Explicit
 block-bearing labels remain literal on recovery, including numeric/bullet text.
-DOCX/VDOCS generation remains required unfinished work and rejects before output;
+DOCX now retains rich literal labels in checked borderless layout cells, with
+sequential label/body ranges in notes to avoid nested-table omission. Mixed automatic
+counters use real start overrides; item page starts sit before layout cells.
+VDOCS generation remains required unfinished work and rejects before output;
 it is not excused by that rejection. Existing
 source/text/pixel oracles remain unchanged while structural assertions strengthen.
 LITERAL_LIST_MARKERS.md records the schema, evidence and next implementation.
