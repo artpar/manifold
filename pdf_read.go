@@ -193,6 +193,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 }
 
 type pdfReader struct {
+	xobjectTotal             int
 	artifactTotal            int
 	logicalBidiLine          bool
 	ctx                      context.Context
@@ -728,7 +729,20 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 	}
 	return nil
 }
+
+// Count actual invocations, not unique objects or nesting. A shallow acyclic
+// shared Form graph can expand exponentially, including through appearances.
+// This parser work bound is independent of application admission or quotas.
+const maxPDFXObjectVisits = 200000
+
 func (r *pdfReader) form(o types.Object, parent types.Dict, depth int, state pdfTextState) error {
+	if err := r.ctx.Err(); err != nil {
+		return err
+	}
+	if r.xobjectTotal >= maxPDFXObjectVisits {
+		return fmt.Errorf("PDF XObject expansion exceeds %d visits", maxPDFXObjectVisits)
+	}
+	r.xobjectTotal++
 	sd, _, err := r.pdf.DereferenceStreamDict(o)
 	if err != nil {
 		return err

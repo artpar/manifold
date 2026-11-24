@@ -43,7 +43,9 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
   broader untagged note/source/reflow cases remain in PDF_NOTES.md.
 - Present inverse ParentTree validation now checks page/Form/annotation ownership.
   Original-source reciprocal graphs and wrong-owner mutations qualify this gap;
-  broader source/resource safety remains required. See PDF_PARENT_TREE.md.
+  expanded XObject visits now reject document-wide amplification while preserving
+  valid repeated placements (PDF_RESOURCES.md); broader source/resource audit
+  remains required. See PDF_PARENT_TREE.md.
 - The public offline native adapter, rich graph transport, language/source metadata
   and registered-plugin saves already exist. Remaining native settings/rendering,
   marker appearance and full-preset/browser behavior stay unqualified. Read
@@ -176,3 +178,13 @@ actual desktop/mobile saves, image pixels and96 unique label/body tokens across
 six native pages pass scoped checks. See NATIVE_LITERAL_MARKERS.md for exact
 commands, original counter regression evidence and wider qualification limits.
 The full acceptance goal remains active; no general native/Word fidelity is claimed.
+
+
+Expanded PDF XObject execution now has a document-wide200,000-visit work bound.
+Compact acyclic/shared-across-page/appearance sources reject atomically; valid
+transformed repeated paint retains exact geometry/source/SF. Independent pypdf
+counts the source graphs and original publication oracles still pass. This closes
+one concrete resource gap, not the full source/resource or completion audit.
+The original pinned-native repeated-footnote placement oracle still fails; no
+completion waiver or overall blocked state follows. See PDF_RESOURCES.md and
+COLLEAF_BROWSER.md.

@@ -1955,3 +1955,14 @@ generated layout is consumed on import; custom indents still diagnose. SDK saves
 actual desktop/mobile app saves, complete nested/mixed counters, image pixels and
 six-page96-token continuation pass scoped checks. No universal layout guarantee
 or completion claim follows; NATIVE_LITERAL_MARKERS.md gives the remaining queue.
+
+## Expanded PDF XObject work
+
+The PDF reader counts actual Form/image invocations across pages and annotation
+appearances, rejecting beyond200,000 visits before decoding the next source.
+Unique-object/depth checks alone do not bound shallow acyclic shared Form graphs.
+Valid repeated instances are still interpreted at their individual transforms;
+rendered content is not memoized in a way that discards placements or source order.
+This parser work guard is separate from app quotas/admission and other PDF bounds.
+PDF_RESOURCES.md records source-only DAG, placement/SF, independent reader/CLI and
+original-publication checks; no general PDF safety or layout claim follows.

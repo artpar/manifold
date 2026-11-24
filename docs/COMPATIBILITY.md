@@ -1244,3 +1244,11 @@ actual desktop/mobile saves, image pixels and96 unique label/body tokens across
 six native pages pass scoped checks. See NATIVE_LITERAL_MARKERS.md for exact
 commands, original counter regression evidence and wider qualification limits.
 The full acceptance goal remains active; no general native/Word fidelity is claimed.
+
+PDF XObject execution now has a document-wide200,000-invocation parser work bound,
+including repeated Forms/images and annotation appearances. A shallow acyclic graph
+can exceed it even with only a few source objects. Exceeding the bound rejects the
+whole read; the CLI commits no partial extraction. Valid repeated transformed paint
+is still retained per occurrence. PDF_RESOURCES.md gives independent graph/count,
+placement/source/SF and unchanged publication evidence. This does not bound all
+other font/stream/image resources or certify arbitrary malformed PDF safety.

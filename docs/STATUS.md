@@ -40,7 +40,38 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: public native rich labels and measured counters
+## Latest progress: bound expanded PDF XObject execution
+
+A compact acyclic Form graph exposed another concrete source/resource gap:
+3203bytes/seven objects expanded to299,593 actual invocations and previously
+returned success below the depth guard. The reader now rejects beyond200,000
+Form/image invocations across the whole document, including annotation appearances,
+before decoding the next source. It returns no partial Document; CLI commits no
+partial destination. This is parser work protection, not Daptin/app quotas.
+
+Independent pypdf confirms299,593 visits in one graph and224,694 across six pages
+or six appearances. Small valid shared Forms retain eight actual transformed
+placements, original stream/page identities, precise baselines/advances and SF.
+The original InDesign publication checker still passes10lists/57items/exact K
+membership/16URIs/20,531 normalized characters and nine reflowed PDF pages. A
+pre-change Git-archive CLI also produces byte-identical full source SF.
+See PDF_RESOURCES.md for reproduction and resource-scope limits.
+
+The unchanged optional native note-order checker still FAILS: note2,note3 expected,
+actual reversed; no-repeat control passes, range reordering breaks after TextX edit.
+Published1.0.4 code overwrites placement references keyed by shared noteId. No safe
+stable schema repair was established, and no duplicated definitions/static cache or
+vendor/application patch was adopted. COLLEAF_BROWSER.md records exact evidence.
+Other source/resource and original completion audits continue; no overall blocker
+or goal completion is established. Final normal suite passes (library29.270s;
+CLI cached, earlier fresh0.819s), focused race20.936s and CGO-disabled focus2.308s
+pass. Vet/modules/host and Linux amd64/arm64 CGO-disabled builds pass. Short fuzz
+run passes588 executions/10.719s/two workers; not exhaustive safety evidence.
+Full race passes (library339.329s/CLI3.184s) on final production code, before the
+optional test-only fixture-export hook; final focused race covers that hook. All
+evidence is in verification.json.
+
+## Earlier: public native rich labels and measured counters
 
 VDOCS literal-marker export is now enabled through the checked native label/body
 graph. The temporary writer guard is removed. Public API/CLI tests recover exact
@@ -512,9 +543,10 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-1. Audit the wider source/resource/reflow/native corpus contract now that public
-   literal-marker mappings exist in all output formats. Reproduce the native
-   repeated-footnote failure in COLLEAF_BROWSER.md without weakening its oracle.
+1. Continue the wider source/resource/reflow/native corpus audit, including CID
+   width-range work and decoded-stream handling after the new XObject bound. The
+   native repeated-footnote failure is revalidated in COLLEAF_BROWSER.md; retain
+   its original oracle and seek new evidence rather than repeating the same check.
    Broaden source/structure and resource audits beyond the newly qualified
    reciprocal ParentTree checks, using malformed and independently authored sources.
    Retain current physical and explicit/inferred source oracles; never recover from an embedded SF cache.

@@ -7675,5 +7675,54 @@
       "rg -n 'resource|source|ParentTree|infer' docs/STATUS.md docs/ACCEPTANCE.md",
       "GOWORK=off go test ./..."
     ]
+  },
+  "pdf_xobject_execution_budget": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "PDF reader now counts actual Form/image XObject calls,including annotation appearances,across the whole read. Invocation200001 rejects before decoding,without partial Document or CLI destination. Existing depth/image/structure guards remain separate. Parser work bound200000 is independent of app identity/admission/quotas.",
+    "before": "New acyclic fanout-eight/depth-six source3203bytes/seven unique Forms invokes299593 times. Actual pre-fix regression returned doc=true,err=nil in0.50s. Earlier binary-depth17 fixture hit the existing doubled content/Form depth guard; changed the targeted fixture to shallow fanout to exercise expanded work. The work-bound expectation was retained.",
+    "fixtures": {
+      "acyclic-shared-form": "3203bytes/7Forms/299593visits/depth7",
+      "shared-across-pages": "3691bytes/6Forms/224694visits/depth6 across6pages",
+      "shared-appearances": "3502bytes/6Forms/224694visits/depth6 across6appearance owners",
+      "valid": "Eight LEAF paint occurrences from one source stream retain exact0..70pt baselines/24pt advances,physical page/source identity and exact SF alongside KEEP."
+    },
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_pdf_xobject_budget.py output/pdf-xobject-qa",
+      "sha256": "312861e757aa286fdbcd7ee8ca585d6862d244b0584f1009cade628c4ada1c0c",
+      "result": "pypdf strict source parsing,actual Do/resource edge counts,acyclic depth and exact expanded counts pass. Current CLI rejects all3sources with explicit limit and no committed partial output."
+    },
+    "original_corpus": {
+      "command": "output/qa-venv/bin/python scripts/verify_published_pdf.py output/pdf-xobject-published",
+      "result": "Original InDesign source bytes/metadata/10lists/57items/exact K body membership/16URI targets/20531 normalized chars,output DOCX and9 reflowed PDF pages/space counts/text bounds pass. No new visual-fidelity claim.",
+      "baseline": "CLI built in ignored directory from exact Git archive1d6879a77d5e6c13b668be525b452fbebe09192e produces byte-identical full publication SF to guarded reader,including current physical/source/navigation/diagnostic fields.",
+      "SF_sha256": "2d630c8ff72ec594b95b67542d66bf2df13886380672f6a213e5713b8095a7b2",
+      "historical_comparison": "An older unrelated output differed in diagnostics/navigation/pages;not used as oracle or rewritten. Exact pre-change archive comparison passes."
+    },
+    "native_note_revalidation": {
+      "command": "node scripts/verify_colleaf_note_order.cjs",
+      "sha256": "dcb53997ee3bb712efbe6afa2a10f6734ce369f7a80d9ab671a6b121d510d4cf",
+      "result": "Original first-reference-order assertion still FAILS:expected note2,note3;observed reverse. No-repeat control passes;raw-range reorder initially passes then actual TextX edit reverses again. Source/oracle unchanged.",
+      "source": "Pinned published1.0.4 resolveNoteReferences stores by text offset;footnote constructor overwrites _references by shared noteId,then sorts stored referenceIndex. IFootnoteCustomRange exposes noteId only. No proven stable data repair;does not prove all schema workarounds impossible. No duplicated bodies/static cache/vendor/app patch adopted."
+    },
+    "checks": {
+      "go_test_all": "passed final library29.270s/CLIcached;earlier fresh29.428s/CLI0.819s",
+      "race": "passed library339.329s/CLI3.184s;final production code,preceding optional test-only fixture-export hook;current focused race covers that hook",
+      "focused_race": "passed final20.936s includes current optional fixture export path and4fuzz seeds",
+      "CGO_disabled_focus": "passed2.308s",
+      "vet": "passed",
+      "modules": "all modules verified",
+      "builds": "CGO-disabled host and Linux amd64/arm64 cross-builds pass;not Linux execution.",
+      "fuzz": "FuzzPDFXObjectGraph passed588executions/10.719s/two workers/four baseline seeds;varies bounded depth/fanout/page count;short sample,not exhaustive safety.",
+      "diff_check": "passed"
+    },
+    "production_dependencies": "unchanged;independently authored Go counter and existing optional pypdf/real publication QA only.",
+    "remaining": "Full original goal remains active. This closes one expanded execution gap,not all decoded stream/font/image resource safety or broader source/reflow/API/visual acceptance. Pinned native repeated-footnote placement and recorded Word-PDF annotation discrepancy remain;no overall blocker or completion waiver.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/ACCEPTANCE.md docs/PDF_RESOURCES.md",
+      "rg -n 'CID width|for code|DereferenceNumber' pdf_font_metrics.go",
+      "GOWORK=off go test ./...",
+      "node scripts/verify_colleaf_note_order.cjs"
+    ]
   }
 }

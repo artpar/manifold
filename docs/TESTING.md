@@ -2475,3 +2475,13 @@ actual desktop/mobile saves, image pixels and96 unique label/body tokens across
 six native pages pass scoped checks. See NATIVE_LITERAL_MARKERS.md for exact
 commands, original counter regression evidence and wider qualification limits.
 The full acceptance goal remains active; no general native/Word fidelity is claimed.
+
+PDF XObject resource audit: `TestPDFXObjectExpansionBudget` uses compact independent
+acyclic sources that exceed expanded work within one page, across six pages and
+through six annotation appearances. `TestPDFXObjectRepeatedPaintPreservesPlacements`
+retains eight transformed occurrences of one source stream with exact baselines,
+advances, source identities and SF. `FuzzPDFXObjectGraph` checks bounded depth/fanout/
+page combinations. `scripts/verify_pdf_xobject_budget.py` independently parses Do
+operators with pypdf and verifies graph counts plus public CLI atomic rejection.
+Commands/evidence scope are in PDF_RESOURCES.md; native repeated-note order remains
+a separate deliberately failing optional check in COLLEAF_BROWSER.md.

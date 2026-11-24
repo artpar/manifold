@@ -2406,3 +2406,15 @@ generated layout is consumed on import; custom indents still diagnose. SDK saves
 actual desktop/mobile app saves, complete nested/mixed counters, image pixels and
 six-page96-token continuation pass scoped checks. No universal layout guarantee
 or completion claim follows; NATIVE_LITERAL_MARKERS.md gives the remaining queue.
+
+## 2026-11-25 Bound expanded PDF XObject execution
+
+Count each actual Form/image invocation across the entire read, including
+appearances, rather than only object identities or nesting. Reject beyond200,000
+visits without partial extraction. Preserve each valid repeated placement and
+source identity; a rendering cache cannot replace distinct transformed content.
+A3203-byte acyclic source previously succeeded after299,593 invocations; independent
+pypdf counts and the unchanged original publication oracle qualify the fix. This is
+an internal parser resource bound, not performer permissions or a completion waiver.
+Keep the separate pinned-native repeated-footnote failure and its original oracle;
+no duplicated-body/static-cache/vendor-patch workaround was adopted.

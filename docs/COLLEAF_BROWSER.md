@@ -98,3 +98,28 @@ reference-order assertion. Reordering raw arrays would therefore only hide the
 problem until editing and is not adopted in the library. Other native API/schema
 representations or the remaining goal work still require investigation; no overall
 blocked state follows from this scoped external-engine limitation.
+
+## Current repeated-reference revalidation
+
+After public native literal-marker enablement, the unchanged note-order checker
+still fails on the same pinned1.0.4 input: expected note2,note3; actual note3,note2.
+The no-repeat control passes, raw range reordering temporarily passes, and actual
+TextX editing reverses the order again. No fixture/reference oracle was changed.
+
+Published `resolveNoteReferences` retains one reference per text offset. The native
+footnote layout constructor then populates `_references` keyed by noteId with
+unconditional `set`, so later references overwrite the first placement identity.
+Its ordering code sorts by that stored referenceIndex. The published
+IFootnoteCustomRange contains only the shared noteId, with no separate placement
+identity. This explains the reproduced behavior; it does not prove every possible
+native schema workaround impossible. No safe stable data mapping has been found.
+No library workaround using duplicated bodies/static caches/vendor patches was
+adopted. The exact retained failing command remains:
+
+```sh
+node scripts/verify_colleaf_note_order.cjs
+```
+
+The source/resource audit continues independently; this external reader defect
+is not an overall blocked status or a completion exemption. The four required
+Go conversion paths keep their own note-order/source/relationship oracles.
