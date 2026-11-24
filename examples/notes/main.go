@@ -23,6 +23,7 @@ func main() {
 	pageHeight := flag.Float64("page-height", 0, "override page height in points to exercise pagination")
 	customLabels := flag.Bool("custom-labels", false, "use literal foot/endnote marks without advancing automatic numbering")
 	variantLabels := flag.Bool("variant-labels", false, "use independent citation/body marks; acknowledge static Word numbering")
+	styledLabels := flag.Bool("styled-labels", false, "preserve independent body mark typography and backlinks; acknowledge static Word numbering")
 	flag.Parse()
 	ctx := context.Background()
 	sf, err := manydoc.ReadStructured(ctx, bytes.NewReader(source))
@@ -58,6 +59,12 @@ func main() {
 			}
 		}
 	}
+	if *styledLabels {
+		d.Blocks[0].Anchors = append(d.Blocks[0].Anchors, "citation-return")
+		for i := range d.Notes {
+			d.Notes[i].BodyLabelStyle = &manydoc.Run{FontFamily: "Go", FontSize: 9.5, Bold: true, Italic: true, Color: "#203040", Underline: true, Destination: "citation-return", Link: "#citation-return", Language: "en"}
+		}
+	}
 	if *longNote {
 		for i := range d.Notes {
 			if d.Notes[i].Kind == manydoc.Footnote {
@@ -75,7 +82,7 @@ func main() {
 	for _, format := range []manydoc.Format{manydoc.SF, manydoc.DOCX, manydoc.PDF} {
 		name := filepath.Join(*out, "notes."+string(format))
 		var buf bytes.Buffer
-		if err := manydoc.Write(ctx, &buf, d, format, manydoc.WriteOptions{AllowLossy: *variantLabels}); err != nil {
+		if err := manydoc.Write(ctx, &buf, d, format, manydoc.WriteOptions{AllowLossy: *variantLabels || *styledLabels}); err != nil {
 			log.Fatal(err)
 		}
 		if err := os.WriteFile(name, buf.Bytes(), 0644); err != nil {

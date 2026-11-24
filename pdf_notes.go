@@ -38,7 +38,7 @@ func (r *pdfRenderer) measureFootnote(key noteKey) (pdfNoteChunk, error) {
 	}
 	r.pdf.SetFont("Go", "", 8)
 	r.pdf.SetTextColor(0, 0, 0)
-	_, labelWidth, err := r.footnoteLabel(key, r.bodyWidth())
+	label, labelWidth, err := r.footnoteLabel(key, r.bodyWidth())
 	if err != nil {
 		return pdfNoteChunk{}, err
 	}
@@ -49,6 +49,14 @@ func (r *pdfRenderer) measureFootnote(key noteKey) (pdfNoteChunk, error) {
 	lines, err := r.cellFlow(definition.Blocks, r.bodyWidth()-indent, 0, r.bodyHeight()-footnoteSeparatorHeight-10)
 	if err != nil {
 		return pdfNoteChunk{}, fmt.Errorf("footnote %q: %w", key.id, err)
+	}
+	// A tall independently styled marker owns a measured line before the body.
+	// This also keeps it atomic when a rich/table body continues onto another page.
+	if pdfLineHeight(label, 8, 1.4) > 14 {
+		lines = append([]pdfFragment{{Line: label, TextSize: 8, Height: pdfLineHeight(label, 8, 1.4), Indent: -indent}}, lines...)
+	}
+	if len(definition.Blocks) > 0 && definition.Blocks[0].Direction == "rtl" && pdfLineHeight(label, 8, 1.4) > 14 {
+		lines[0].Indent = r.bodyWidth() - labelWidth
 	}
 	chunk := pdfNoteChunk{left: r.bodyLeft(), width: r.bodyWidth(), key: key, lines: lines, first: true, indent: indent, rtl: len(definition.Blocks) > 0 && definition.Blocks[0].Direction == "rtl"}
 	if imageBoundStart(lines[0]) {
@@ -280,7 +288,9 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 			labelX = chunk.left + chunk.width - labelWidth
 			bodyX = chunk.left
 		}
-		r.drawLine(label, labelX, y, 8)
+		if pdfLineHeight(label, 8, 1.4) <= 14 {
+			r.drawLine(label, labelX, y, 8)
+		}
 		noticeTop := y
 		for _, fragment := range chunk.lines {
 			if err := r.drawFragment(fragment, bodyX, y); err != nil {
@@ -416,9 +426,10 @@ func (r *pdfRenderer) finishNotes() error {
 		r.pdf.SetLink(r.noteLinks[key], r.y, -1)
 		start, _ := strconv.Atoi(noteBodyLabel(r.notes, key))
 		list := Block{Kind: ListBlock, List: "number", Start: listStartPointer(start), Items: []ListItem{{Blocks: blocks}}}
-		if note.Label != "" || note.BodyLabel != nil {
+		if note.Label != "" || note.BodyLabel != nil || note.BodyLabelStyle != nil {
 			label := noteBodyLabel(r.notes, key)
 			list.pdfListMarker = &label
+			list.pdfListMarkerStyle = note.BodyLabelStyle
 		}
 		if err := r.list(list, r.bodyWidth(), r.bodyLeft()); err != nil {
 			return err
@@ -430,7 +441,7 @@ func (r *pdfRenderer) finishNotes() error {
 // Body marks use the normal font/glyph/shaping path too. A distinct body label
 // must never bypass validation merely because the citation used other glyphs.
 func (r *pdfRenderer) footnoteLabel(key noteKey, width float64) (pdfLine, float64, error) {
-	lines, err := r.lines([]Run{{Text: noteBodyLabel(r.notes, key)}}, width, 8)
+	lines, err := r.lines([]Run{noteBodyLabelRun(r.notes, key)}, width, 8)
 	if err != nil {
 		return nil, 0, err
 	}

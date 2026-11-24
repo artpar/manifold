@@ -400,7 +400,7 @@ func (r *pdfReader) bindPDFNavigation() {
 			found := false
 			for j := range b.Runs {
 				s := b.Runs[j].Source
-				if s != nil && s.Page > 0 && s.Quad != nil && b.Runs[j].Text != "" {
+				if s != nil && s.Page > 0 && s.Quad != nil && (b.Runs[j].Text != "" || b.Runs[j].Note != nil) {
 					candidates[s.Page] = append(candidates[s.Page], pdfFlowCandidate{b, j, s})
 					found = true
 				}

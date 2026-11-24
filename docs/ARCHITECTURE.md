@@ -1048,3 +1048,17 @@ physical matching has a cancellable work bound. The original published guide's
 two real notes qualify the nonadjacent physical-link rule; PDF_NOTES.md records
 source hashes, independent MCID/object/view checks and the editable-label-backlink
 gap exposed by that source.
+
+
+## Independent body-label template
+
+Note.BodyLabelStyle is a text-free validated Run template; label resolution stays
+in notes.go. structured.go uses existing ProseMirror marks for body_label_marks,
+not a new inline schema. documentDestinationRuns includes template links. PDF
+recovery splits LabelSource from the recovered common template before binding
+navigation; citation atoms participate in candidate flow anchors. Native footnote
+and endnote marker paths use normal fonts/shaping/measurement, with atomic tall
+footnote labels and measured endnote minimum height. docx_note_style.go reuses
+ordinary visible run/hyperlink encoding and parsing, with checked label/separator
+roles, no second text authority, and a conservative derived gutter. See
+PDF_NOTES.md for empty labels, exact checks and independent-reader limitations.

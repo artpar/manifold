@@ -235,22 +235,75 @@ native/LibreOffice note pages were inspected; no source-layout equivalence is
 claimed. The kind default remains editorial Endnote despite observed footnote
 placement, with KindInferred=true and original page/region provenance.
 
-The original's leading note labels contain backlinks. Their explicit physical
-navigation stays in PDFNavigation. Editable body-label backlink behavior still
-needs rich label support; pdf_note_label_link now discloses that exact loss.
-Do not claim that retaining physical navigation proves editable label-link parity.
+The original leading labels now retain editable typography and backlinks through
+BodyLabelStyle / body_label_marks as well as independent physical PDFNavigation.
+See the latest section below; this replaces the former pdf_note_label_link loss.
+Physical geometry and inferred semantic anchor ownership remain separate facts.
 
 ```sh
 python3 scripts/generate_pdf_semantic_audit.py
 bin/manydoc extract -format sf -o output/note-inference/adjacent.sf output/audit/adjacent-note.pdf
 bin/manydoc convert -allow-lossy -o output/note-inference/adjacent.docx output/note-inference/adjacent.sf
 bin/manydoc extract -format sf -o output/note-inference/adjacent-docx.sf output/note-inference/adjacent.docx
-bin/manydoc extract -format sf.gz -o output/note-inference/guide-linked.sf.gz output/note-inference/tagged-guide.pdf
-output/qa-venv/bin/python scripts/verify_note_inference.py --guide output/note-inference/tagged-guide.pdf --guide-sf output/note-inference/guide-linked.sf.gz
+bin/manydoc extract -format sf.gz -o output/note-inference/guide-styled.sf.gz output/note-inference/tagged-guide.pdf
+output/qa-venv/bin/python scripts/verify_note_inference.py --guide output/note-inference/tagged-guide.pdf --guide-sf output/note-inference/guide-styled.sf.gz --baseline-guide-sf output/note-inference/guide-linked.sf.gz
 GOWORK=off go test -race -run 'TestPDFAdjacent|TestPDFPhysicalLinkNoteInference|TestDOCXNoteRelationshipInference|TestPDFNoteLinkAmbiguity' -count=1 .
 ```
 
 No required runtime component, module dependency, app integration or quota/access
 boundary changed. General untagged note recognition, richer/nested/ActualText label
-graphs, editable label backlinks, Colleaf snapshot integration and remaining
+graphs, heterogeneous label layout/precision policy, Colleaf snapshot integration and remaining
 original DOCX corpus/visual qualification are still open.
+
+
+## Editable body-label style and navigation
+
+Note.BodyLabelStyle is an optional Run template without Text, Note, Anchor or
+Source. Its font/size/color/language/direction/emphasis and Link/Destination apply
+to the body mark resolved from BodyLabel/default numbering. LabelSource retains
+physical provenance independently. SF stores optional body_label_marks using
+normal ProseMirror textStyle/emphasis/link marks; an empty array retains an
+explicit empty template. No second copy of visible label text is authoritative.
+Invalid mark/source/atom/destination combinations reject through normal validators.
+
+Recovery uses the leading Lbl's independently recovered common style/navigation;
+heterogeneous styling still follows common-style intersection diagnostics. Native
+PDF uses normal measured text and font/shaping admission. A body mark taller than
+the compact footnote line gets an atomic measured line before its rich body;
+continuations do not reintroduce that tall marker. Styled endnote gutter and
+height are measured before body admission. This is reflow, not source layout.
+
+Word uses ordinary visible text/hyperlinks and rPr, with checked noteBodyStyle
+and noteBodySeparator roles. The latter contains exactly a tab and two layout
+spaces, so consumers that discard the custom tab still show a label/body gap.
+The gutter budgets one em per display column plus 6pt; this is conservative
+consumer layout, not Word font measurement. Exact label/structure/namespace/style
+checks prevent metadata from swallowing other text, drawings or hidden runs.
+Markerless labels still retain their template. Variant/automatic editing loss
+continues to require AllowLossy; existing private metadata retains counter intent.
+
+Independent original guide checks now compare label Tf/BaseFont/black paint and
+backlink annotation GoTo parameters with editable marks and semantic target
+bindings, in addition to existing original body/ID/forward-view oracles. Source
+bytes/oracles are unchanged. A current nonempty text/reference/leading-label
+projection preserves 87,442 records exactly against guide-linked.sf.gz; the
+historical 87,381-record report used a different projection. Actual ProseMirror
+checks 89,431 nodes/marks/attributes across the original guide, styled example
+and Word round trip. Native and LibreOffice output pages were inspected.
+
+LibreOffice renders 9.5pt bold italic colored labels but substitutes unavailable
+Go with Liberation Serif and omits the custom label hyperlinks from its PDF.
+Standard DOCX targets/relationships and native PDF named backlinks are separately
+verified. This does not establish that every Word consumer preserves navigation.
+The original guide's 6.959646pt sizes still reject DOCX export under the current
+half-point contract; acknowledged precision handling remains required work.
+Heterogeneous/mixed-direction labels and nested/ActualText graphs remain open.
+
+```sh
+GOWORK=off go run ./examples/notes -variant-labels -styled-labels -out output/note-styles
+bin/manydoc extract -format sf -o output/note-styles/notes-docx.sf output/note-styles/notes.docx
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-note-styles-lo --headless --convert-to pdf --outdir output/note-styles/lo output/note-styles/notes.docx
+output/qa-venv/bin/python scripts/verify_note_styles.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/note-styles/notes.sf output/note-styles/notes-docx.sf output/note-inference/guide-styled.sf.gz
+GOWORK=off go test -race -run 'TestNoteBodyLabelStyle|TestStyledNoteBody|TestMarkerlessStyled|TestTallNote' -count=1 .
+```

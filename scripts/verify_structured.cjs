@@ -40,7 +40,13 @@ for (const filename of process.argv.slice(2)) {
   verifyTree([input]);
   verifyTree(input.attrs.headers);
   verifyTree(input.attrs.footers);
-  for (const note of input.attrs.notes || []) verifyTree(note.content);
+  for (const note of input.attrs.notes || []) {
+    verifyTree(note.content);
+    if (note.body_label_marks !== undefined) {
+      assert.ok(Array.isArray(note.body_label_marks));
+      verifyTree([{type: 'text', text: 'label', marks: note.body_label_marks}]);
+    }
+  }
   console.log(`ProseMirror checked ${filename}`);
 }
 assert.ok(count, 'provide at least one .sf file');

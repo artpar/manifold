@@ -15,6 +15,7 @@ type docxNoteDisplay struct {
 	BodyLabel *string `json:"body_label"`
 	Value     string  `json:"value"`
 	Variant   bool    `json:"variant"`
+	Styled    bool    `json:"styled,omitempty"`
 }
 
 func noteBodyName(key noteKey) string { return "mdnotebody1_" + key.kind + "_" + key.id }
@@ -64,7 +65,7 @@ func (w *docxWriter) noteDisplayMetadata(n Note) string {
 		return ""
 	}
 	key := noteIdentity(n)
-	value := docxNoteDisplay{Label: n.Label, BodyLabel: n.BodyLabel, Value: w.noteLabels[key], Variant: w.noteVariants[key]}
+	value := docxNoteDisplay{Label: n.Label, BodyLabel: n.BodyLabel, Value: w.noteLabels[key], Variant: w.noteVariants[key], Styled: n.BodyLabelStyle != nil}
 	raw, _ := json.Marshal(value)
 	return ` md:display="` + escape(string(raw)) + `"`
 }
@@ -82,7 +83,7 @@ func readNoteDisplay(n *xmlNode) (*docxNoteDisplay, error) {
 	if dec.Decode(new(any)) != io.EOF {
 		return nil, fmt.Errorf("invalid note display metadata")
 	}
-	if value.BodyLabel != nil && !value.Variant {
+	if (value.BodyLabel != nil || value.Styled) && !value.Variant {
 		return nil, fmt.Errorf("body override requires variant wire format")
 	}
 	if value.Value == "" {
@@ -237,6 +238,9 @@ func checkVariantNamespaces(n *xmlNode) error {
 		return fmt.Errorf("invalid namespace in generated note fragment")
 	}
 	for _, a := range n.Attr {
+		if n.Name.Local == "hyperlink" && a.Name.Local == "id" && (a.Name.Space == relNS || a.Name.Space == "http://purl.oclc.org/ooxml/officeDocument/relationships") {
+			continue
+		}
 		if a.Name.Local == "id" || a.Name.Local == "name" || a.Name.Local == "anchor" || a.Name.Local == "customMarkFollows" {
 			if a.Name.Space != n.Name.Space {
 				return fmt.Errorf("lookalike note binding attribute")

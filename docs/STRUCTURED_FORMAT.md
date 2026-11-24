@@ -697,8 +697,8 @@ and supported DOCX round trips preserve it, including multi-character Unicode.
 
 PDF note recovery adds optional note `source`, `label_source` and `kind_inferred`.
 `label_source` retains the leading source label's own geometry, font/paint and role
-when its text becomes the semantic note label; reflow typography normalization is
-explicitly diagnosed. The latter
+when its text becomes the semantic note label; body_label_marks retains recovered
+common typography/navigation independently. The latter
 separates an editorial foot/endnote choice from explicit source NoteType; source
 roles/regions remain explicit. Source marks/objects accept `structure_id` (original
 binary PDF ID as base64) and `references` (array of `{element, targets}` explicit
@@ -718,3 +718,13 @@ inferred relationship to the note; it does not make the source role/geometry or
 annotation inferred. Note `kind_inferred` is a separate placement/type decision.
 Rule-specific source evidence/confidence and original Ref edges stay separate.
 JSON/SF/gzip and generated DOCX metadata preserve this distinction for each site.
+
+
+Optional `attrs.notes[].body_label_marks` holds normal ProseMirror marks applied
+to the resolved body mark. Omitted means no independent style; `[]` means an
+explicit empty template. Text remains authoritative in body_label/default label;
+identity and counters do not change. This maps to Note.BodyLabelStyle, a Run
+without text, atoms or source. Source marks/anchors are invalid here; use
+label_source for provenance. Link destinations use the same shared catalog as
+body text. Independent reader verification now checks these marks too. See
+PDF_NOTES.md for Word layout/precision and reader qualification limits.

@@ -108,6 +108,7 @@ type Block struct {
 	docxNumberID            int
 	docxNumberLevel         int
 	pdfListMarker           *string
+	pdfListMarkerStyle      *Run
 	docxIndent              int
 	docxExplicitBreakBefore bool
 	docxBeforeList          bool
@@ -170,6 +171,8 @@ type Image struct {
 	Height    float64 `json:"height,omitempty"`
 }
 type Note struct {
+	// BodyLabelStyle supplies formatting/navigation for the resolved body mark, without text or atoms.
+	BodyLabelStyle *Run `json:"body_label_style,omitempty"`
 	// BodyLabel overrides the body mark, independently of citation marks.
 	BodyLabel *string `json:"body_label,omitempty"`
 	// KindInferred distinguishes an editorial placement choice from an explicit source kind.
@@ -550,6 +553,16 @@ func (d *Document) Validate() error {
 		}
 	}
 	for _, n := range d.Notes {
+		if n.BodyLabelStyle != nil {
+			style := *n.BodyLabelStyle
+			if style.Text != "" || style.Note != nil || style.Anchor != "" || style.Source != nil {
+				return fmt.Errorf("body label style cannot contain text, atoms or source; use LabelSource for provenance")
+			}
+			style.Text = "label"
+			if err := walk([]Block{{Kind: Paragraph, Runs: []Run{style}}}, 0); err != nil {
+				return err
+			}
+		}
 		if err := n.LabelSource.validate(d.Pages); err != nil {
 			return err
 		}

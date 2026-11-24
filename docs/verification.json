@@ -5306,5 +5306,35 @@
     "production_boundary": "modules unchanged; pureGo, no CGO/executables/services/uploads or Daptin/Colleaf modifications",
     "remaining": "rich/mixed-direction labels and editable backlinks, nested/enclosing-ActualText graphs, broader untagged recovery, native Colleaf snapshot adapter, broader original DOCX producer/corpus/visual qualification and final acceptance",
     "goal": "active/incomplete"
+  },
+  "editable_note_body_styles_and_backlinks": {
+    "date": "2026-11-24",
+    "exists": "Note.BodyLabelStyle text-free template; SF optional body_label_marks uses normal ProseMirror marks; SF/JSON/gzip and checked DOCX round trips preserve nil/empty and formatting/navigation. Native glyph/font/shaping/width/height admission includes resolved labels.",
+    "layout": "Tall footnotes own an atomic measured line; styled endnote minimum height/gutter reserved; Word derived one-em-column gutter and exact tab+two-layout-space separator avoid cramped independent reader output.",
+    "tests": "formatting/emphasis/language/font/size/color, URI/internal links, invalid atoms/source/destinations, empty style/markerless marks, contradictory/hidden/nontext/private-role content, tall marker/body/sibling geometry; no oracle changes",
+    "original_guide": {
+      "sha256": "8185a30793869379ea4c2d82f214a930368b3fa7520faba61df38c52a502335e",
+      "independent": "pypdf original MCID Tf/BaseFont/black paint, backlink annotations98/115 GoTo, editable link/anchor binding, unchanged ID/body/forward view oracles",
+      "styles": "Both SourceSansPro-Regular 6.959646pt labels retain editable backlinks and separate LabelSource provenance",
+      "text_projection": "87442 nonempty text/reference/leading-label (page,order,text) records exact versus prior guide-linked.sf.gz; explicitly a different projection from historical87381 report",
+      "rights": "ignored read-only QA input; source not vendored, no redistribution-license claim"
+    },
+    "independent_generated": "actual ProseMirror89431 nodes/marks/attrs across guide and styled example/Word SF; python-docx/lxml standard rPr/bookmark/hyperlink checks, pypdf named native view and MuPDF font/color/geometry/gutter checks. Native and Word foot/endnote pages inspected.",
+    "reader_limits": "LibreOffice substitutes unavailable Go with Liberation Serif and omits custom note-label hyperlinks from PDF export. Standard Word package links and native PDF backlinks verified independently; no consumer fidelity claim.",
+    "checks": {
+      "full_tests_final": "15.423s library;0.682s CLI; all packages pass, including final tall geometry cases",
+      "full_race_core": "188.600s library;2.130s CLI; all packages pass. This preceded final Word gutter/separator/parser refinement.",
+      "final_focused_race": "2.535s pass after final production changes and added tall label/body/sibling geometry assertions",
+      "vet": "pass after final production changes",
+      "modules": "all modules verified; production dependencies unchanged",
+      "cgo_disabled": "host CLI build/final focused execution0.557s pass including new tall geometry cases; Linux amd64/arm64 cross-builds pass (build evidence only)",
+      "structured_fuzz": "10s/two workers,815 executions including updated explicit/adjacent recovered-style seeds, pass11.485s; short campaign not exhaustive",
+      "diff_check": "pass"
+    },
+    "evidence": "docs/PDF_NOTES.md; note_label_style_test.go; scripts/verify_note_styles.py, verify_note_inference.py and verify_structured.cjs; examples/notes -styled-labels; ignored output/note-styles and output/note-inference",
+    "remaining": "acknowledged checked fractional DOCX text-size policy; heterogeneous/mixed-direction labels; nested/enclosing-ActualText and broader untagged graphs; actual native Colleaf adapter; broader original DOCX producer/rich-feature corpus/visual checks; final acceptance audit",
+    "next_commands": "rg -n 'docxTextStyle|writeDOCX|writeSectionedDOCX|textImplicit' docx*.go; GOWORK=off go run ./examples/notes -variant-labels -styled-labels -out output/note-styles; output/qa-venv/bin/python scripts/verify_note_styles.py",
+    "production_boundary": "pure Go; no new modules/required executables/CGO/services/uploads; no Daptin/Colleaf changes or access/quota gates",
+    "goal": "active/incomplete"
   }
 }

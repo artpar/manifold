@@ -20,7 +20,12 @@ func (r *pdfRenderer) listMarker(b Block, index int, width, size float64) (pdfLi
 	if text == "" {
 		return nil, 0, nil
 	}
-	lines, err := r.lines([]Run{{Text: text}}, width, size)
+	run := Run{Text: text}
+	if b.pdfListMarkerStyle != nil {
+		run = *b.pdfListMarkerStyle
+		run.Text = text
+	}
+	lines, err := r.lines([]Run{run}, width, size)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -63,6 +68,8 @@ func (r *pdfRenderer) list(b Block, width, x float64) error {
 		if first.Kind == Heading {
 			minimum = math.Min(minimum*2, r.bodyHeight())
 		}
+		markerHeight := pdfLineHeight(marker, size, 1.4)
+		minimum = math.Max(minimum, markerHeight)
 		if err := r.ensureWithNotes(minimum, lineNoteKeys(firstLines[0])); err != nil {
 			return err
 		}
@@ -74,9 +81,17 @@ func (r *pdfRenderer) list(b Block, width, x float64) error {
 			markerX = x + width - pdfAdvance(marker)
 			bodyX = x
 		}
-		r.drawLine(marker, markerX, r.y+pdfLineSize(firstLines[0], size)-size, size)
+		markerTop, markerPage := r.y, r.pdf.PageNo()
+		markerY := markerTop + pdfLineSize(firstLines[0], size) - size
+		if b.pdfListMarkerStyle != nil {
+			markerY = markerTop
+		}
+		r.drawLine(marker, markerX, markerY, size)
 		if err := r.blocks(item.Blocks, width-indent, bodyX); err != nil {
 			return err
+		}
+		if r.pdf.PageNo() == markerPage {
+			r.y = math.Max(r.y, markerTop+markerHeight)
 		}
 	}
 	return r.pdf.Error()

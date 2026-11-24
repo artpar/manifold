@@ -65,6 +65,11 @@ func documentDestinationRuns(d *Document, visit func(Run) error) error {
 		}
 	}
 	for _, n := range d.Notes {
+		if n.BodyLabelStyle != nil {
+			if err := visit(*n.BodyLabelStyle); err != nil {
+				return err
+			}
+		}
 		if err := walkDestinationRuns(n.Blocks, visit); err != nil {
 			return err
 		}

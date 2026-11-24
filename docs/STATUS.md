@@ -39,36 +39,41 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: identified note relationship inference
+## Latest progress: editable note-body typography and backlinks
 
-NoteReference.Inferred now separates inferred relationship ownership from explicit
-PDF roles/Ref edges and from Note.KindInferred placement. It persists through
-SF/JSON/gzip and checked Word references/repeats/aliases. Matching immediate
-Reference/Note siblings and unique matching physical GoTo/Note-label regions now
-recover rich notes with distinct rule evidence/confidence. Explicit edges win;
-missing/ambiguous/partial/conflicting data stays in flow. Read PDF_NOTES.md.
+Note.BodyLabelStyle is a text-free Run template. SF notes expose optional
+body_label_marks using established ProseMirror marks, separately from label text,
+identity, counter intent and label_source. Nil and explicitly empty style remain
+distinct. SF/JSON/gzip and checked DOCX round trips preserve formatting and links;
+native PDF measures the resolved mark with ordinary glyph/font/shaping checks.
+Tall footnote marks own an atomic measured line; styled endnote markers reserve
+height. Word uses visible standard text/hyperlinks/rPr and a checked layout
+separator, with a conservative gutter. No hidden content or duplicate label text
+becomes authority. Read PDF_NOTES.md for exact support and reproduction.
 
-The original 71-page publisher tagging guide supplied a necessary counterexample:
-its two Note definitions sit at Document's end and citations are Links without
-Ref. Physical-link inference now recovers NOTE_1/NOTE_2 on source pages 8/22.
-Independent original object/MCID font decoding/view/label-region checks pass, and
-all 87,381 old paint-order text records remain exact. Actual ProseMirror checks
-89,397 nodes/marks/attributes across that original and adjacent probe/Word round
-trip. Original source and generated native/Word note pages were inspected.
+The unchanged original 71-page guide now retains both label backlinks and exact
+6.959646pt SourceSansPro style in SF. Independent original MCID operators/fonts,
+GoTo annotations, semantic anchor bindings and body hashes pass. A current
+nonempty text/reference/leading-label projection matches all 87,442 records in
+the previous extraction (a different projection from the earlier 87,381-record
+report). Actual ProseMirror validates 89,431 nodes/marks/attributes across this
+original plus styled SF and Word round trip. Four generated native/Word note
+pages were visually inspected; independent font/style/geometry checks pass.
 
-The guide remains ignored QA input, not a vendored/redistribution-licensed fixture;
-source/mirror/hash and reproduction are in PDF_NOTES.md. Its note-label backlinks
-remain explicit physical navigation, while editable label backlink behavior is a
-specific diagnosed gap. No module/runtime/app/access/quota boundary changed.
+Qualification limits remain concrete: LibreOffice substitutes unavailable Go
+with Liberation Serif and omits custom note-label hyperlinks from its PDF export.
+Standard DOCX bookmark/hyperlink relationships and native PDF backlinks are
+independently verified. Original fractional PDF sizes still reject DOCX output
+rather than silently rounding; a checked, acknowledged precision policy is next
+work. Rich heterogeneous/mixed-direction labels, nested/enclosing-ActualText and
+broader untagged graphs, actual Colleaf adapter, original DOCX producer/corpus
+qualification and final acceptance remain required. The full goal is incomplete.
+No module/runtime/app/access/quota boundary changed.
 
-Final full tests (16.368s/0.368s), full production race (184.196s/2.201s), final
-added-case race (1.772s), vet/modules, host CGO-disabled execution (0.384s), Linux
-amd64/arm64 cross-builds, PDF/SF fuzz (273/886 executions) and diff checks pass.
-Exact scope is in verification.json; ignored evidence uses output/note-inference. The full goal remains active/incomplete: rich/mixed-direction
-label layout and editable backlinks, nested/enclosing-ActualText graphs, broader
-untagged recovery, native Colleaf adapter, original DOCX producer/corpus/visual
-qualification and final acceptance remain. Previous independent display work is
-09315a1; explicit PDF graph/provenance is 60bf496; literal labels are 44fe42f.
+Current check results and final scope are recorded in verification.json. Ignored
+source and QA output live in output/note-inference and output/note-styles.
+Previous identified relationship inference is 894ee74; display variants 09315a1;
+explicit graph/provenance 60bf496; literal labels 44fe42f.
 
 ## Existing verified evidence to preserve
 
@@ -104,7 +109,8 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
 
 ## Next concrete implementation order
 
-1. Complete rich labels/backlinks and remaining nested/ActualText/untagged graphs;
+1. Complete fractional DOCX text-size policy, heterogeneous/mixed-direction labels
+   and remaining nested/ActualText/untagged graphs;
    use the original-guide evidence in PDF_NOTES.md, preserving source facts/content.
 2. Implement/qualify the actual Colleaf native snapshot adapter through the shared
    SF. Include UTF-16 boundaries, rich source maps, notes/stories and resources;
@@ -117,6 +123,11 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
    after every original criterion is proven. There is no external blocker now.
 
 ```sh
+# Next implementation: acknowledged half-point output precision with checked
+# original intent; cover ordinary/variant/section/note paths without mutation.
+rg -n 'docxTextStyle|writeDOCX|writeSectionedDOCX|textImplicit' docx*.go
+GOWORK=off go run ./examples/notes -variant-labels -styled-labels -out output/note-styles
+output/qa-venv/bin/python scripts/verify_note_styles.py
 GOWORK=off go test -race -run 'TestPDFAdjacent|TestPDFPhysicalLinkNoteInference|TestDOCXNoteRelationshipInference|TestPDFNoteLinkAmbiguity' -count=1 .
 output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
 bin/manydoc extract -format sf -o output/audit/explicit-note.sf output/audit/explicit-note.pdf

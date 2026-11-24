@@ -192,7 +192,7 @@ func noteBodyLabel(c *noteCatalog, key noteKey) string {
 func variantNoteKeys(d *Document) map[noteKey]bool {
 	keys := map[noteKey]bool{}
 	for _, n := range d.Notes {
-		if n.BodyLabel != nil {
+		if n.BodyLabel != nil || n.BodyLabelStyle != nil {
 			keys[noteIdentity(n)] = true
 		}
 	}
@@ -203,4 +203,13 @@ func variantNoteKeys(d *Document) map[noteKey]bool {
 		return nil
 	})
 	return keys
+}
+
+func noteBodyLabelRun(c *noteCatalog, key noteKey) Run {
+	var run Run
+	if style := c.definitions[key].BodyLabelStyle; style != nil {
+		run = *style
+	}
+	run.Text = noteBodyLabel(c, key)
+	return run
 }

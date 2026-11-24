@@ -53,10 +53,25 @@ func (w *docxWriter) writeNoteParts(notes []Note) error {
 				continue
 			}
 			count++
+			indent := 360
+			if n.BodyLabelStyle != nil {
+				size := n.BodyLabelStyle.FontSize
+				if size == 0 {
+					size = 11
+				}
+				// Word owns glyph layout; budget one em per display column plus
+				// a six-point gap instead of assuming the ordinary 18pt gutter.
+				gutter := docxNoteLabelGutter(noteBodyLabel(w.noteCatalog, noteIdentity(n)), size)
+				if gutter >= w.contentWidth {
+					return fmt.Errorf("%w: styled note label leaves no DOCX body width", ErrUnsupported)
+				}
+				indent = int(math.Ceil(gutter * 20))
+			}
+			indentXML := strconv.Itoa(indent)
 			blocks := append([]Block(nil), n.Blocks...)
 			for i := range blocks {
 				if blocks[i].Kind != ListBlock {
-					blocks[i].docxIndent = 360
+					blocks[i].docxIndent = indent
 				}
 			}
 			previousHeight := w.contentHeight
@@ -75,6 +90,13 @@ func (w *docxWriter) writeNoteParts(notes []Note) error {
 					label += " "
 				}
 				marker = `<w:r><w:` + kind + `Ref/></w:r><w:r md:noteBodyLabel="1"><w:rPr><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr><w:t xml:space="preserve">` + escape(label) + `</w:t><w:tab/></w:r>`
+				if n.BodyLabelStyle != nil {
+					styled, err := w.styledNoteBodyMark(n)
+					if err != nil {
+						return err
+					}
+					marker = `<w:r><w:` + kind + `Ref/></w:r>` + styled
+				}
 				w.bookmarks++
 				marker = fmt.Sprintf(`<w:bookmarkStart w:id="%d" w:name="%s"/><w:bookmarkEnd w:id="%d"/>`, w.bookmarks, noteBodyName(noteKey{kind, strconv.Itoa(w.noteIDs[noteIdentity(n)])}), w.bookmarks) + marker
 			}
@@ -86,12 +108,12 @@ func (w *docxWriter) writeNoteParts(notes []Note) error {
 					return fmt.Errorf("missing note paragraph properties")
 				}
 				// The first line's number hangs before the note's text edge.
-				body = strings.Replace(body, `<w:ind w:left="360"/>`, `<w:tabs><w:tab w:val="left" w:pos="360"/></w:tabs><w:ind w:left="360" w:hanging="360"/>`, 1)
+				body = strings.Replace(body, `<w:ind w:left="`+indentXML+`"/>`, `<w:tabs><w:tab w:val="left" w:pos="`+indentXML+`"/></w:tabs><w:ind w:left="`+indentXML+`" w:hanging="`+indentXML+`"/>`, 1)
 				at = strings.Index(body, `</w:pPr>`)
 				at += len(`</w:pPr>`)
 				body = body[:at] + marker + body[at:]
 			} else {
-				body = `<w:p><w:pPr><w:tabs><w:tab w:val="left" w:pos="360"/></w:tabs><w:ind w:left="360" w:hanging="360"/></w:pPr>` + marker + `</w:p>` + body
+				body = `<w:p><w:pPr><w:tabs><w:tab w:val="left" w:pos="` + indentXML + `"/></w:tabs><w:ind w:left="` + indentXML + `" w:hanging="` + indentXML + `"/></w:pPr>` + marker + `</w:p>` + body
 				leading = ` md:leadingMarker="1"`
 			}
 			leading += w.noteDisplayMetadata(n)
@@ -200,6 +222,9 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 			}
 			r.expectedBodyLabel = nil
 			r.bodyLabelSeen = false
+			r.expectedBodyStyle = display != nil && display.Styled
+			r.parsedBodyStyle = nil
+			r.bodySeparatorSeen = false
 			if display != nil && display.Variant {
 				value := display.Value
 				if display.BodyLabel != nil {
@@ -213,7 +238,7 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 			r.inNote++
 			bs, err := r.blocks(n, partRels, 0)
 			r.inNote--
-			if display != nil && display.Variant && !r.bodyLabelSeen {
+			if display != nil && display.Variant && (!r.bodyLabelSeen || (display.Styled && !r.bodySeparatorSeen)) {
 				return fmt.Errorf("variant note body label missing")
 			}
 			r.expectedBodyLabel = nil
@@ -259,7 +284,7 @@ func (r *docxReader) readNoteParts(rels map[string]docxRelation) error {
 			if inferred != "" && inferred != "1" {
 				return fmt.Errorf("invalid inferred note kind metadata")
 			}
-			r.doc.Notes = append(r.doc.Notes, Note{ID: publicID, Kind: kind, Blocks: bs, Label: label, KindInferred: inferred == "1", BodyLabel: bodyLabel})
+			r.doc.Notes = append(r.doc.Notes, Note{ID: publicID, Kind: kind, Blocks: bs, Label: label, KindInferred: inferred == "1", BodyLabel: bodyLabel, BodyLabelStyle: r.parsedBodyStyle})
 			total++
 		}
 	}

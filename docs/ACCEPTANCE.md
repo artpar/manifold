@@ -1,6 +1,6 @@
 # Active goal acceptance audit
 
-Audited after 09315a1 and identified note inference/original-guide qualification, 2026-11-24.
+Audited after editable common note-label styles/backlinks and original-guide qualification, 2026-11-24.
 **The full goal remains incomplete.** This is the current requirement audit;
 older milestone narratives are preserved in Git history and verification.json.
 The objective remains all four rich-document paths around one shared SF, pure Go,
@@ -46,7 +46,7 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
    KindInferred explicitly separates the endnote editorial default from source
    NoteType. PDF_NOTES.md records qualification and implemented different/empty citation and body labels,
    identified logical/physical inference and original guide cases, and still-required
-   rich label/backlink layout, nested/ActualText graphs and broader untagged recovery. Artifact page roles and
+   heterogeneous/mixed-direction label layout, fractional DOCX size policy, nested/ActualText graphs and broader untagged recovery. Artifact page roles and
    membership remain independently qualified without inventing running templates.
 3. **Actual Colleaf boundary:** implement/qualify a standalone native Univer 1.0.4
    snapshot adapter through the shared SF, including rich structures and UTF-16

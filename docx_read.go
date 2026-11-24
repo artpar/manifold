@@ -156,6 +156,9 @@ type docxReader struct {
 	variantCitations      map[noteKey]bool
 	variantDefaultMarks   map[noteKey][]string
 	expectedBodyLabel     *string
+	expectedBodyStyle     bool
+	parsedBodyStyle       *Run
+	bodySeparatorSeen     bool
 	bodyLabelSeen         bool
 	rangeNumIDs           map[string]bool
 	listSequences         map[*ListNumbering]string
@@ -534,16 +537,17 @@ func (r *docxReader) blocks(n *xmlNode, rels map[string]docxRelation, depth int)
 func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Block, error) {
 	b := Block{Kind: Paragraph}
 	ppr := n.child("pPr")
+	noteIndent := r.implicitNoteIndent(n)
 	if ppr != nil {
 		for _, p := range ppr.Children {
 			switch p.Name.Local {
 			case "pStyle", "numPr", "outlineLvl", "sectPr", "keepNext", "pageBreakBefore", "bidi":
 			case "tabs":
-				if !(r.implicitNoteLayout && len(p.Children) == 1 && p.Children[0].Name.Local == "tab" && p.Children[0].attr("val") == "left" && p.Children[0].attr("pos") == "360") {
+				if !(r.implicitNoteLayout && len(p.Children) == 1 && p.Children[0].Name.Local == "tab" && p.Children[0].attr("val") == "left" && p.Children[0].attr("pos") == noteIndent) {
 					r.doc.warn("paragraph_formatting", "Paragraph property not represented: tabs")
 				}
 			case "ind":
-				if r.inTaggedList == 0 && !(r.implicitNoteLayout && p.attr("left") == "360") {
+				if r.inTaggedList == 0 && !(r.implicitNoteLayout && p.attr("left") == noteIndent) {
 					r.doc.warn("paragraph_formatting", "Paragraph property not represented: ind")
 				}
 			default:
@@ -613,6 +617,19 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 		case "ins", "moveTo":
 			r.doc.warn("revision_history", "Final visible revision content is retained; revision history is not represented")
 		case "r":
+			if c.attributeNS(docxNotesNS, "noteBodyStyle") != "" {
+				if err := r.readStyledBodyMark(c, rels); err != nil {
+					return err
+				}
+				return nil
+			}
+			if c.attributeNS(docxNotesNS, "noteBodySeparator") != "" {
+				if err := r.readBodyLabelSeparator(c); err != nil {
+					return err
+				}
+				skipNoteSeparator = false
+				return nil
+			}
 			if c.attributeNS(docxNotesNS, "noteBodyLabel") != "" {
 				if err := r.variantBodyMark(c); err != nil {
 					return err
@@ -665,6 +682,12 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				style.Bold = value == "1"
 			}
 		case "hyperlink":
+			if c.attributeNS(docxNotesNS, "noteBodyStyle") != "" {
+				if err := r.readStyledBodyMark(c, rels); err != nil {
+					return err
+				}
+				return nil
+			}
 			if c.attributeNS(docxNotesNS, "noteCitation") != "" {
 				ref, err := r.variantCitation(c)
 				if err != nil {

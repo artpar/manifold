@@ -959,6 +959,19 @@ Note-label region. NoteReference.Inferred, rule evidence and heuristic confidenc
 are explicit; original roles/navigation remain source facts and no Ref is forged.
 Explicit links win; empty/different/complex, partial/far/overlapping or conflicting
 evidence retains flow/navigation. The published original guide qualifies two real
-nonadjacent cases. Label backlinks remain physical provenance with a specific
-editable-label-link loss diagnostic; richer label graphs remain open. See
+nonadjacent cases. Editable common label typography/backlinks now survive through
+BodyLabelStyle/body_label_marks; physical provenance and inferred bindings remain
+separate. Heterogeneous label graphs and fractional DOCX size policy remain open. See
 PDF_NOTES.md for source, rule bounds and exact independent qualification.
+
+
+Body label templates now preserve common font/size/color/language/direction,
+emphasis and navigation without duplicating label text. SF/JSON/gzip and checked
+Word round trips preserve explicit empty versus omitted style. Native PDF uses
+ordinary glyph/shaping/width and height admission. Tall footnote labels own a
+measured line; Word uses visible standard rPr/hyperlinks and a derived gutter.
+Independent original guide operators/backlinks and generated package/native
+navigation/styles were checked. LibreOffice renders styled labels but substitutes
+unavailable Go fonts and omits their hyperlinks from its PDF export; no broader
+consumer navigation claim. Fractional source font sizes outside half-points still
+reject DOCX, rather than rounding silently. See PDF_NOTES.md for next work.

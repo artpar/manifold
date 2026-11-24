@@ -260,10 +260,10 @@ func (s *pdfStructureRecovery) recoverNote(n *pdfStructureNode, note *pdfRecover
 					labelBlocks = bs
 					labelRun := s.structureReplacement(bs, label, sourceFromBlocks(bs, kid))
 					note.definition.LabelSource = labelRun.Source
-					if labelRun.Link != "" || labelRun.Destination != "" {
-						s.warn("pdf_note_label_link", "The leading note label has link navigation retained in physical PDFNavigation; editable label backlink behavior is not yet represented")
-					}
-					s.warn("pdf_note_label_presentation", "The explicit leading note label becomes the literal semantic mark; independent label typography is normalized on reflow, with original geometry/font/paint retained in label_source")
+					labelRun.Text = ""
+					labelRun.Source = nil
+					note.definition.BodyLabelStyle = &labelRun
+					s.warn("pdf_note_label_presentation", "The explicit leading note label becomes the literal semantic mark; body label formatting/navigation is retained separately from its text, with original geometry/font/paint in label_source")
 					continue
 				}
 				s.warn("pdf_note_body_label", "A distinct or complex explicit note-body label remains visible in the rich body; it is not discarded as an automatic mark")

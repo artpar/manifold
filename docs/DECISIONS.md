@@ -1467,3 +1467,17 @@ text and navigation. Preserve all 87,381 old paint-order text records. Keep the
 original ignored unless redistribution rights are established; record its hash
 and mirror provenance. Its label backlinks expose a remaining editable-rich-label
 gap, now specifically diagnosed rather than hidden by a generic reflow claim.
+
+
+## 2026-11-24 Preserve body-label formatting and navigation without duplicate text
+
+Use an optional text-free Run template and established ProseMirror marks. A note
+has one body-label text authority; source LabelSource remains physical evidence.
+Ordinary glyph/font/shaping/layout and destination validators apply to resolved
+marks. Checked Word roles wrap actual visible rPr/hyperlinks; reject contradictory
+text/nontext/hidden properties rather than letting metadata discard content.
+Original publisher MCID operators and backlink objects independently qualify the
+new semantics. LibreOffice font substitution and omitted custom-label PDF links
+remain reader limitations, not native/package success claims. Keep fractional
+DOCX size policy and heterogeneous/mixed-direction labels in the required queue;
+no silent rounding or oracle/source changes were used. See PDF_NOTES.md.
