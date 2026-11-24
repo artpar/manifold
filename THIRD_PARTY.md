@@ -145,3 +145,14 @@ The source-only oracle/QA evidence for those exports is documented in
 `docs/REAL_DOCX_CORPUS.md`; their embedded editor metadata identifies Word12/14,
 Mac Word12 and LibreOffice6.0.7.3. Original XML is the expectation authority;
 generated output and rendered comparison sheets remain ignored.
+
+Pinned `@univerjs/core`, `@univerjs/docs` and `@univerjs/engine-render` 1.0.4
+(Apache-2.0) are optional independently installed native-format QA readers under
+ignored output/colleaf-qa. They are not production Go modules, vendored source or
+runtime requirements. The private Colleaf stream implementation is independently
+authored against published format declarations and executable reader APIs; no
+Univer implementation code is incorporated or translated. The unmodified app
+validator is loaded from its pinned ignored source only during QA. The native
+reference JSON fixture is manydoc-authored test data. See COLLEAF_FORMAT.md for
+exact versions, source hashes, unit/token discrepancies, commands and remaining
+semantic-adapter work.

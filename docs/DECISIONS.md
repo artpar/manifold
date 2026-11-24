@@ -1591,3 +1591,20 @@ run sources before flattening. Independent PDF object/graph/asset and native/Wor
 reader/visual checks qualify these rules, including nested mixed foot/endnotes.
 No source/oracle or runtime dependency was changed. PDF_NOTES.md records the eight
 inspected pages,130 actual PM nodes and broader recovery/native-adapter/final work.
+
+
+## 2026-11-24 Ground native interoperability in the executable pinned reader
+
+Start the native bridge with UTF-16 scalar safety and actual container/control
+ownership, not a flat text wrapper. Keep private prerequisites private until rich
+SF mappings are usable. Published table-end prose was stale; the executable 1.0.4
+enum/parser establishes0x0E/0x0F, with0x1E/0x1F reserved for annotation controls.
+Cells require CR/LF and tree ends differ from exclusive table metadata. Native
+geometry and fs also have different units; preserve these distinctions explicitly.
+
+Use independently hand-authored native records and actual Colleaf validator/core/
+view/tree APIs to qualify offsets/styles/links/note references/tables. Do not copy
+implementation code or embed SF as a second authoritative text payload. Actual
+rich mapping/edit/save qualification remains required; current internal token and
+metadata validation does not fulfill it. Optional SDK tools stay outside runtime,
+production modules, application authorization/quota/save responsibilities.

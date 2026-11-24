@@ -1125,3 +1125,21 @@ Both writers now initializeNotes through one catalog; the sectioned path previou
 omitted variant/custom/style setup. parseXML rejects duplicate expanded attribute
 names before interpretation. DOCX_PRECISION.md records the original-guide and
 independent-reader qualification, precise bounds and remaining PDF precision policy.
+
+
+## Colleaf native adapter foundation (internal, incomplete)
+
+colleaf_stream.go maps UTF-16 positions to validated UTF-8 scalar boundaries and
+parses actual Univer 1.0.4 paragraph/section/table controls. It preserves original
+scalar sequences rather than normalizing before indexing. colleaf_body.go shares
+that index to validate style/range/control metadata ownership. The internal AST
+uses exclusive ends; native annotation/tree ends have distinct inclusive rules.
+Context cancellation and existing nesting bounds apply. These helpers do not
+replace the canonical SF or expose a partial native format/API.
+
+Actual pinned Colleaf validator and DocumentDataModel/DocumentViewModel/table
+parser probes qualify token values, control ownership, astral style/link/note
+records and nested table bounds. They exposed stale table-token prose and the
+need for CR/LF inside cells. Geometry is pixels; text fs is points. Full semantic
+mapping, inherited styles/sections/stories, merged tables/lists/assets/notes and
+native edit/save checks remain open. See COLLEAF_FORMAT.md.

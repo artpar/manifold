@@ -5484,5 +5484,34 @@
     "runtime": "pure Go, unchanged dependencies; no required executables/CGO/services/uploads/app modifications/permission or quota gates; independent QA readers optional",
     "remaining": "actual Colleaf native snapshot adapter; broader untagged note recovery and inverse source consistency/resource/public API/final acceptance audit; preserve original editor corpus and measured review/field/producer limits",
     "next_commands": "cat docs/COLLEAF_FORMAT.md; rg -n 'IDocumentData|dataStream|customRanges|tableSource' output/codec; GOWORK=off go test -race -run 'TestPDFNested|TestPDFRedundantNote|TestPDFNoteWrapper' -count=1 ."
+  },
+  "colleaf_native_stream_foundation_2026_11_24": {
+    "goal": "active/incomplete; semantic native adapter/public format NOT complete or exposed",
+    "implementation": "Private UTF-16\u2192UTF-8 scalar boundary index reused for actual paragraph/section/nested-table grammar and style/range/table/custom-block/soft-break metadata checks. Astral and combining input remains unnormalized; invalid halves/bounds/grammar/ownership reject; cancellation and existing nesting bounds apply. No app snapshot/image quota gates.",
+    "actual_reader_findings": "Pinned1.0.4 runtime enum/parser table row/end tokens0x0E/0x0F contradict stale declaration prose0x1E/0x1F (annotation controls). Each cell needsCR/LF. Table metadata exclusive end differs from inclusive runtime tree end. Paragraph/section metadata point atCR/LF. Geometrypx vs fspt confirmed72pt\u219296px APIs. Actual reader accepts unsorted/overlapping/empty text intervals: last matching whole record wins, not union; validator preserves these valid inputs.",
+    "independent": "Unmodified pinned Colleaf validateDocument accepts hand-authored native-stream.json. Actual @univerjs/core DocumentDataModel and @univerjs/engine-render DocumentViewModel/parseDataStreamToTree match Go tree kinds/UTF-16 bounds for nested tables and confirm styled astral text, inclusive hyperlink, note anchor/body, table source lookups/cell counts and unchanged stream. Actual overlapping-style probes qualified separately. This is offset/container evidence, NOT rich SF mapping/renderer/edit-save completion.",
+    "pins": {
+      "core_docs_engine_render": "1.0.4, optional ignored npm QA installation; pinned core tarball integrity/declaration hash already in COLLEAF_FORMAT.md",
+      "colleaf_source_commit": "5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6",
+      "validator_sha256": "c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0",
+      "native_reference_sha256": "773e57d81ac69c32bdaacb165fb565e4405d488e4dcface73e2d8f35f5e9ae2f",
+      "ignored_qa_lock_sha256": "5defa3bf7b1d1d50aa855a3af32c591e35d45677949f620a72a99c282418b535"
+    },
+    "checks": {
+      "full_tests": "final all packages15.891s library/0.355s CLI pass after metadata-overlap correction and final tests",
+      "full_race": "final all packages166.309s library/2.124s CLI pass after all production/test changes",
+      "focused_race": "1.410s pass",
+      "vet": "pass after final changes",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "host CLI build and focused execution0.376s pass; Linux amd64/arm64 cross-builds pass (not execution evidence)",
+      "fuzz": "New native-stream campaign10s/two workers requested,19398 executions11.432s pass;34 new interesting cases. Parser unchanged by later metadata-overlap acceptance correction. Short campaign not exhaustive.",
+      "independent": "verify_colleaf_stream.cjs pass; expected Node experimental TypeScript-stripping warning",
+      "diff_check": "pass"
+    },
+    "evidence": "COLLEAF_FORMAT.md executable reader/foundation section; colleaf_stream.go, colleaf_body.go, colleaf_stream_test.go, testdata/colleaf/native-stream.json; verify_colleaf_stream.cjs; ignored output/colleaf-qa/checks",
+    "investigation_limits": "An optional @univerjs/docs-exchange1.0.4 lookup returned404; not a dependency/blocker. An initial QA invocation preceded its Go tree artifact; rerun after Go completion passed. SDK/source are QA references only; no implementation code copied/translated or native renderer completion claim.",
+    "runtime": "Pure Go; public API/CLI and four existing conversion paths unchanged. Optional Node/SDK/app-validator QA only; no CGO/required services/executables/uploads/app changes/permission or quota gates introduced.",
+    "remaining": "Implement both semantic native\u2194SF mappings, strict envelope/JSON/escaped-Unicode handling, defaults/style winning intervals, lists/table merges/assets/resources/sections/stories/notes and actual native edit/save checks. Do not wrap SF as an opaque second text authority. Broader untagged recovery and final consistency/resource/API/acceptance audit remain.",
+    "next_commands": "cat docs/COLLEAF_FORMAT.md; sed -n '790,1405p' output/codec/univer-document-types.txt; MANYDOC_COLLEAF_QA_TREE=output/colleaf-qa/go-tree.json GOWORK=off go test -run TestColleaf -count=1 .; node scripts/verify_colleaf_stream.cjs"
   }
 }

@@ -92,3 +92,93 @@ the existing four SF conversion paths. Do not change Colleaf/Daptin for this
 standalone work. Application authorization, quotas and persistence remain outside
 manydoc. This gap stays visible in the acceptance audit; source inspection alone
 is not interoperability completion.
+
+## Executable reader and internal stream foundation (2026-11-24)
+
+The semantic `.vdocs`↔SF adapter and public CLI format are **still incomplete**.
+The first implementation layer is private: colleaf_stream.go and colleaf_body.go
+validate UTF-16 scalar boundaries, native paragraph/section/table grammar and the
+positions of styles, annotations, custom blocks and soft page-break records. This
+is a prerequisite, not a plain-text adapter or a claim of rich native conversion.
+Styles/properties remain raw until the bridge resolves defaults and diagnostics;
+root/header/footer/note/source/drawing/resource relationships still need mapping.
+
+The actual pinned runtime corrected a material declaration-comment error:
+
+| Native control | Executable DataStreamTreeTokenType 1.0.4 |
+| --- | --- |
+| Table start/row start/cell start/cell end |0x1A /0x1B /0x1C /0x1D |
+| Table row end/table end |0x0E /0x0F |
+| Custom annotation start/end |0x1F /0x1E |
+| Paragraph/section/custom block |CR /LF /BACKSPACE |
+
+The prose comments in i-document-data.d.ts incorrectly list0x1E/0x1F for table
+row/end; those bytes are annotation controls in the actual runtime. Using the
+comments as the implementation would corrupt table ownership. Each table cell
+contains its own paragraph/section CR/LF terminator. Omitting that LF produced
+negative/empty cell bounds in the independent parser; it is not a valid profile.
+A table's endIndex is exclusive after TABLE_END. Runtime tree-node endIndex is
+inclusive, so the QA normalizer adds one before comparing with Go's internal tree.
+Paragraph metadata startIndex points at CR, section metadata at LF; these names
+must not be interpreted as the first text character's offset.
+
+The executable reader also accepts unsorted/overlapping text-run intervals and
+empty insertion-style records. The last matching whole record wins, without a
+union of earlier marks. The foundation checks scalar/range bounds without falsely
+rejecting those valid inputs; semantic mapping still needs to project the actual
+winning intervals and diagnose unsupported insertion-style editing intent.
+
+Text-run st/ed remains inclusive/exclusive; custom-range startIndex/endIndex is
+inclusive/inclusive. In A😀B the emoji occupies UTF-16 units1 and2, even though it
+is one scalar/four UTF-8 bytes. The mapper rejects partial surrogate slices,
+invalid UTF-8, reversed/out-of-bounds extents, conflicting style intervals and
+metadata pointing at the wrong control. Original combining strings are not NFC-
+normalized before interpreting positions. The index is shared by token/metadata
+validation; it is not rebuilt for every range. Context cancellation and the
+library's existing64-level nesting boundary apply; app document/image quotas do
+not become library permission or admission gates.
+
+Layout geometry uses96-DPI pixels (72pt=96px), while native text style fs is already
+points. The executable engine conversion APIs and declaration both confirm that
+difference. It must not be implemented as one global scaling of every number.
+
+The hand-authored testdata/colleaf/native-stream.json is a protocol reference
+fixture, not output from manydoc. It contains astral styled/link text, a real note
+anchor/body and nested tables with actual source records. The Go tree is compared
+node-for-node/extent-for-extent with @univerjs/engine-render 1.0.4's
+parseDataStreamToTree. Actual DocumentDataModel/DocumentViewModel readers verify
+style, inclusive link range, note body/anchor, table lookup/source cell counts and
+unchanged stream text. Colleaf's unmodified pinned validator accepts the envelope.
+Its source SHA256 is
+c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0.
+The reference fixture SHA256 is recorded in verification.json.
+
+This proves scalar/token/metadata prerequisites, not merged-cell rendering, asset
+loading, source-map fidelity, list/section/story ownership or native edit/save
+semantics. Those remain necessary before the adapter can be called complete.
+Do not expose a partial CLI conversion or store the whole SF as an opaque private
+payload and call that interoperability. Native visible text/styles/relationships/
+assets must be real, independently editable fields. Any extension for provenance
+or otherwise unrepresented semantics must avoid duplicated visible-text authority
+and must be checked against actual native records/edits.
+
+Optional QA reproduction (no runtime JavaScript or editor service):
+
+```sh
+npm install --prefix output/colleaf-qa --ignore-scripts --no-audit --no-fund @univerjs/core@1.0.4 @univerjs/docs@1.0.4 rxjs@7.8.2
+# Retain the unmodified pinned docsFormat.ts as output/codec/colleaf-format-0.txt:
+curl -fL -o output/codec/colleaf-format-0.txt https://raw.githubusercontent.com/artpar/colleaf/5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6/src/shared/files/docsFormat.ts
+MANYDOC_COLLEAF_QA_TREE=output/colleaf-qa/go-tree.json GOWORK=off go test -run 'TestColleaf' -count=1 .
+node scripts/verify_colleaf_stream.cjs
+GOWORK=off go test -race -run 'TestColleaf' -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafStream$' -fuzztime=10s -parallel=2 .
+```
+
+The QA script checks exact package versions and source hash before executing the
+actual validator. Node's TypeScript stripping emits its experimental warning on
+this host. An investigative @univerjs/docs-exchange 1.0.4 install returned404; that
+package is not required for the independent core/renderer readers or Go bridge,
+and no external blocker exists. No implementation code was copied/translated from
+Univer; the adapter is authored from format declarations and executable API probes.
+Next implement both semantic mappings through SF, with rich fixtures and actual
+reader/edit/save qualification, keeping the application/backend untouched.

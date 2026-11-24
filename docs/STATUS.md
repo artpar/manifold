@@ -39,36 +39,34 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: nested definitions and redundant note ownership
+## Latest progress: actual Colleaf/Univer stream foundation
 
-Independently cited PDF note definitions now recover even when their source
-containers are nested. Editable definitions stay separate, in original logical
-preorder, without duplicating the child body inside its parent. SourceInfo now
-retains optional parent_element from validated K/P containment, separate from
-actual Ref edges. pdf_note_nested_definition diagnoses the editable flattening;
-source parents/IDs/positions remain facts. Parent containment is not a citation.
+The native adapter's private first layer now validates UTF-16 scalar/range bounds,
+paragraph/section/nested-table tokens and style/annotation/custom-block/soft-break
+metadata positions. No public .vdocs conversion is exposed yet. Complete semantic
+mapping through SF, assets/resources, lists/merges/sections/stories and native edit/
+save qualification remain required; this foundation is not adapter completion.
 
-Single-inline-child same-target Ref wrappers now contribute explicit owner edges
-to the one most-specific citation, rather than creating duplicate references or a
-false ambiguity. Conflicting, extra-content and opaque-ActualText wrappers retain
-source evidence/uncertainty. A separate paragraph-join bug dropped wrapper-level
-Ref edges; joining now aggregates original block sources as well as run sources.
-Recursive citations inside note bodies still remain literal/source edges with
-relationship diagnostics under the existing nonrecursive editing contract.
+Actual Univer 1.0.4 readers exposed stale published prose comments: table row/end
+controls are0x0E/0x0F, while0x1E/0x1F belong to annotations. Cells require their own
+CR/LF section terminator. Go token trees/UTF-16 extents now match the executable
+parseDataStreamToTree exactly for a hand-authored rich native reference. Actual
+DocumentDataModel/DocumentViewModel checks styled astral text, inclusive link range,
+note anchor/body, nested table sources and unchanged stream text; the pinned
+unmodified Colleaf validator accepts its envelope. Geometry is pixels; fs is pt.
+See COLLEAF_FORMAT.md for exact source/hash/reader evidence and reproduction.
 
-Independent original PDF objects/parents/IDs/Ref targets, two mixed foot/endnote
-sites and source-body ownership/order, exact SF/Word meaning, list/table/red-blue
-raster pixels and native note target pages pass. Actual ProseMirror validates130
-nodes/marks/attrs; eight native/LibreOffice pages were inspected. Producer font/
-spacing/footnote/endnote layout differences remain explicit. See PDF_NOTES.md and
-verify_nested_notes.py for bounds and reproduction. No original fixture/oracle was
-changed, no module/runtime/application/authorization/quota/upload boundary changed.
+The codec rejects split surrogate boundaries, invalid UTF-8, malformed token
+nesting, contradictory metadata positions/ranges and unbound table/custom-block
+controls. Context cancellation and existing nesting bounds apply; app quotas and
+permission gates are absent. All Go production dependencies and public API/CLI
+remain unchanged. Runtime is pure Go; Node/Univer are ignored QA installations.
+Full/focused/race/vet/modules/CGO-disabled/fuzz evidence is in verification.json.
 
-Full/final-focused tests, race, vet, modules, fuzz and CGO-disabled results are in
-verification.json. Ignored QA is output/nested-notes. Previous8061131 qualified
-original Word/Mac Word/LibreOffice exports and fixed positional-tab separation.
-The full goal remains active/incomplete; actual Colleaf integration, broader
-untagged recovery and final consistency/resource/API/acceptance audit remain open.
+Previous fd2fdd7 qualifies independently cited nested PDF notes, original parents/
+order and wrapper Ref provenance;8061131 qualifies original Office sources and
+positional-tab separation. The full goal remains active/incomplete. Next is both
+rich native mappings, not another declaration-only or plain-text milestone.
 
 ## Existing verified evidence to preserve
 

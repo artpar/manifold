@@ -2400,3 +2400,14 @@ notes/body ownership/order, source raster pixels, native target pages and eight
 native/Word pages are independently checked; actual PM validates130 nodes/marks/
 attributes. Optional readers remain QA only. Untagged recovery/native integration
 and the final acceptance audit remain open.
+
+
+## Internal Colleaf UTF-16/token prerequisites
+
+colleaf_stream_test.go and testdata/colleaf/native-stream.json qualify scalar-safe
+UTF-16 ranges, control/metadata bounds, astral/combining text, nested-table grammar,
+annotation endpoints, soft-break positions, malformed cases and cancellation.
+MANYDOC_COLLEAF_QA_TREE emits an optional private tree for the independent actual
+Univer parser comparison. COLLEAF_FORMAT.md contains the full pinned install/source
+and reader commands. These are foundation checks; no public native conversion or
+complete SF/native mapping is claimed yet.
