@@ -196,8 +196,8 @@ func TestColleafListTokenProjectionAndNativeEdits(t *testing.T) {
 		t.Fatal("stale intent overrode native edit")
 	}
 	d.Blocks[0].Numbering.Template = "%%1."
-	if _, err = encodeColleafNotes(context.Background(), d); err == nil {
-		t.Fatal("known literal-percent mismatch emitted corrupt native marker")
+	if _, err = encodeColleafNotes(context.Background(), d); err != nil {
+		t.Fatal("literal percent projection rejected", err)
 	}
 }
 func FuzzColleafLists(f *testing.F) {

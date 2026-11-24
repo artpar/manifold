@@ -1449,3 +1449,23 @@ added empty settings object is a retained save/reimport regression. Exact envelo
 validator and rich facade/Go/SF tests qualify structural transport only; remaining
 intent mappings, public API/CLI, browser/preset interaction and final corpus audits
 still gate native adapter completion.
+
+
+## Native list template grammar projection
+
+colleaf_list_template.go keeps SF's single-digit %1..%9 grammar independent from
+native glyphFormat's whole-index grammar. Fixed-symbol native source entries at
+index9+ carry literal percent and digit suffix fragments; real paragraph levels
+stay0..8 and number counters remain native/automatic. This also works when all
+nine real levels participate. Helpers deduplicate identical literal fragments.
+There is no extra SF schema, per-item marker cache or application dependency.
+
+Import checks current format/helpers before restoring sparse original template
+intent; otherwise it derives the current representable SF template. It compares
+symbolic parts to avoid turning a literal percent-digit fragment into an active
+counter. Numeric glyph types with glyphSymbol now import their actual constant
+marker. Unrepresentable/overlong/malformed helper templates reject explicitly.
+SF512-byte template limits bound helper projections and expanded parsing, without
+copying app quotas. Pinned renderer and facade tests qualify main/nested/cell/note/
+header marker content and counter/helper edits. Browser/preset qualification and
+nondecimal-zero/legal-decimalZero policies remain unfinished.

@@ -1682,7 +1682,9 @@ Executable probes also found literal percent and nondecimal-zero differences,
 and absent-level template dereferences that throw in the pinned renderer. Project
 ignored deeper placeholders safely and restore sparse original intent only when
 it still matches native fields. Reject the other private unmapped cases explicitly;
-these are unfinished work, not public adapter completion/support exceptions. Keep
+these are unfinished work, not public adapter completion/support exceptions. The
+later dynamic literal-marker decision below supersedes the percent rejection;
+nondecimal zero and broader numbering policies still need mapping. Keep
 browser/resource persistence and visual fidelity qualification open.
 
 
@@ -1853,3 +1855,24 @@ empty/positive zoom settings, disclose lost UI view/locale state and reject unkn
 settings. Preserve unchanged independent-reader output as the regression rather
 than removing fields to make a symmetric Go test pass. Envelope/facade evidence
 does not establish browser interaction or complete native compatibility.
+
+
+## 2026-11-24 Keep native literal list markers dynamic
+
+Native glyphFormat has no percent escape and interprets %10 as level ten; SF/OOXML
+interprets %10 as a level-one counter followed by0. Compile literal fragments to
+non-active native fixed-symbol entries beyond the nine real levels. Keep real
+counter placeholders and paragraph levels intact. Actual pinned glyph and facade
+save/reopen evidence confirms this mechanism, including all-nine-level templates.
+Do not replace the list with frozen per-item marker strings.
+
+Reuse sparse checked original-template intent for ignored deeper placeholders and
+unrepresentable normalized spellings. Match current format/helper values before
+restoring it, so native edits win. Recover unbound representable helper templates
+symbolically; reject a literal percent-digit sequence that would falsely become a
+counter in SF. A numeric native glyph with a fixed symbol must import that actual
+symbol, not silently infer the numeric format's changing label. Bound templates
+and helper expansion by the existing SF representation. Counter edits resolve
+through canonical SF's existing enclosing-counter rules; stored ancestor values
+are fallbacks, not proof that an edited enclosing counter was lost. Full browser
+and zero/legal numbering qualification remain required.

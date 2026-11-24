@@ -752,7 +752,7 @@ func newColleafBodyReader(ctx context.Context, body colleafBody, settings collea
 		}
 		r.listBindings[binding.Type] = binding
 	}
-	r.listParagraphs, err = colleafListParagraphs(ctx, body, settings.Lists)
+	r.listParagraphs, err = colleafListParagraphs(ctx, body, settings.Lists, r.listBindings)
 	if err != nil {
 		return nil, err
 	}

@@ -54,7 +54,9 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
    snapshot adapter through the shared SF, including rich structures and UTF-16
    ranges. Private exact-envelope/strict-JSON/Unicode and actual facade saved-envelope
    reimport now exist (COLLEAF_FORMAT.md); public native API/CLI, remaining mappings
-   and browser/preset qualification are still unfinished. Do not merely wrap plain text or rename SF. No Daptin or Colleaf edits
+   and browser/preset qualification are still unfinished. Dynamic literal-percent/
+   digit-suffix native list templates now have real glyph/save/edit evidence;
+   nondecimal-zero/legal-decimalZero and remaining marker policies are still open. Do not merely wrap plain text or rename SF. No Daptin or Colleaf edits
    are authorized by this standalone project goal; their access/quotas/save guards
    remain application responsibilities.
 4. **Corpus/visual and final audit:** eight pinned, legally attributed original

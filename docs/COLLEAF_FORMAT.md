@@ -372,13 +372,14 @@ initially omitted older nested markers because that history resets; actual glyph
 provide the independent marker evidence. Go also checks SF/native record equality,
 stale native restarts, foreign inference, templates and malformed source handling.
 
-Two additional native differences remain precise unfinished work. A literal percent
+The original list milestone identified two additional differences. A literal percent
 in glyphFormat does not follow Go/OOXML template semantics (%%1. displayed11.
 instead of%1.). An undefined deeper placeholder such as%9 at level0 throws while
 SF ignores it. Export projects ignored placeholders out, stores sparse original-
 template intent only for that projection, and restores it only while projection
 matches actual glyphFormat. Native format edits remain authoritative. Literal
-percent cases reject pending their checked representation. Native zero in
+percent/digit-suffix output is now implemented and qualified in the current list
+projection section below. Native zero in
 DECIMAL_ZERO displayed00; letter/Roman zero displayed an empty symbol, while SF
 currently displays0. Both import/export reject those known nondecimal-zero
 mismatches until a format-specific zero policy is represented. Decimal zero works.
@@ -817,4 +818,43 @@ node scripts/verify_colleaf_envelope.cjs
 MANYDOC_COLLEAF_ENVELOPE_SAVED=output/colleaf-qa/sections-saved.vdocs GOWORK=off go test -run 'TestColleafEnvelope|TestStrictJSON' -count=1 .
 GOWORK=off go test -run '^$' -fuzz '^FuzzStrictJSON$' -fuzztime=10s -parallel=2 .
 GOWORK=off go test -run '^$' -fuzz '^FuzzColleafEnvelope$' -fuzztime=10s -parallel=2 .
+```
+
+
+## Current literal-percent/digit-suffix list projection
+
+The former literal-percent output rejection is replaced by a checked dynamic
+projection in colleaf_list_template.go. SF uses single-digit %1..%9 placeholders;
+native glyphFormat consumes whole decimal indices and has no literal-percent
+escape. Fixed-symbol source entries at index9 onward represent literal fragments,
+while real paragraph nestingLevel stays0..8 and counter placeholders stay dynamic.
+This is also valid with all nine real levels occupied. Entries are deduplicated
+per template and bounded by the existing SF512-byte template contract. Native
+format parsing has a bounded expansion allowance; these are representation/stack
+protections, not Colleaf's snapshot/image budgets.
+
+Current native format/helpers must agree before original-template intent restores
+ignored deeper placeholders or a normalized spelling. Otherwise import derives
+current symbolic parts and checks that their SF spelling retains the same literal/
+dynamic meaning. Unbound representable helper projections work too. Malformed,
+overlong or intrinsically ambiguous templates reject. Native numeric glyphs with
+fixed glyphSymbol now import the real constant marker rather than silently
+substituting a dynamic number. Nondecimal-zero and native legal-decimalZero
+semantics are still on the required mapping queue.
+
+scripts/verify_colleaf_literal_lists.cjs checks actual pinned glyphs for twelve
+main/cell labels, two note labels and two header labels (using the correct global
+running-story list catalog), including percent, digit suffix, static percent text,
+compound levels and all-nine-level templates. Actual facade save/reopen twice and
+Go/SF import preserve exact supported semantics. A real helper edit from% to‰ and
+a parent start edit from2 to5 change parent/child glyphs; SF recovers the edited
+template and resolves actual enclosing counters. Header marker content is checked
+as an isolated story with its actual global catalog; broader browser paint/preset
+controls/interactive list editing are not established by these probes.
+
+```sh
+MANYDOC_COLLEAF_LITERAL_LIST_QA=output/colleaf-qa/literal-lists.json GOWORK=off go test -run TestColleafLiteral -count=1 .
+node scripts/verify_colleaf_literal_lists.cjs
+MANYDOC_COLLEAF_LITERAL_LIST_SAVED=output/colleaf-qa/literal-lists-saved.json MANYDOC_COLLEAF_LITERAL_LIST_EDITED=output/colleaf-qa/literal-lists-edited.json GOWORK=off go test -run TestColleafLiteral -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafListTemplate$' -fuzztime=10s -parallel=2 .
 ```

@@ -39,7 +39,50 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: strict native .vdocs envelope boundary
+## Latest progress: dynamic native literal-percent and digit-suffix markers
+
+Native list output now compiles SF/OOXML single-digit placeholders into the pinned
+native grammar, which reads whole decimal indices and has no percent escape.
+Non-active fixed-symbol entries at index9 onward carry literal fragments; real
+paragraph levels remain0..8 and real counters/formats stay automatic. This supports
+literal %, percent-only/constant templates, digit suffixes such as SF %10, all
+nine real levels, compound/continued lists, cells, notes and headers. Helpers are
+native source entries, not extra SF outline levels or frozen per-item labels.
+
+Existing sparse OriginalTemplate intent restores ignored deeper placeholders only
+when the current format/helper projection agrees. Current helper/format/counter
+edits win. Unbound representable helper templates derive from current native data;
+ambiguous literal percent-digit cases reject rather than becoming false counters.
+Known numeric glyphs with fixed glyphSymbol now import their actual constant
+marker instead of silently treating it as a changing numeric format. Template and
+helper bounds follow the SF512-byte representation; actual levels remain bounded.
+
+Pinned actual glyph checks verify twelve main/cell labels, two note labels and two
+header labels using the correct global running-story list catalog. Two actual
+facade saves/reopens preserve exact Go/SF/native semantics. Native percent-to-per-
+mille helper edits and parent2-to5 counter edits update the real child labels;
+Go/SF import resolves current enclosing counters over stored ancestor fallbacks.
+These checks do not qualify browser paint, preset controls or full native parity.
+
+Final checks pass: tests16.097s/0.717s, race168.349s/2.129s, vet/modules,
+CGO-disabled focused tests/host CLI execution and Linux amd64/arm64 cross-builds.
+Template fuzz106,875 and list-graph fuzz37,843 executions pass; these are short
+campaigns, not exhaustive proof. Pinned old/new list readers, app validator,
+facade save/reopen and final edited/saved Go/SF import0.361s pass; diff check is
+clean. Cross-builds are not Linux execution. verification.json records evidence.
+The goal remains active/incomplete. Next investigate/implement native nondecimal-zero and legal
+numbering differences (notably decimalZero), remaining marker appearance and
+navigation/nonvisual/provenance intent, then public API/CLI and actual browser/
+preset interaction. Per-page/decorated notes, broader PDF/source/resource audits
+and final acceptance remain required. No external blocker exists.
+
+```sh
+MANYDOC_COLLEAF_LITERAL_LIST_QA=output/colleaf-qa/literal-lists.json GOWORK=off go test -run TestColleafLiteral -count=1 .
+node scripts/verify_colleaf_literal_lists.cjs
+MANYDOC_COLLEAF_LITERAL_LIST_SAVED=output/colleaf-qa/literal-lists-saved.json MANYDOC_COLLEAF_LITERAL_LIST_EDITED=output/colleaf-qa/literal-lists-edited.json GOWORK=off go test -run TestColleafLiteral -count=1 .
+```
+
+## Earlier progress: strict native .vdocs envelope boundary
 
 Private readColleaf/writeColleaf workers now read/write the exact pinned v3
 vibedada-document/Univer1.0.4 envelope around the rich native projection, through

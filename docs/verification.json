@@ -5998,5 +5998,66 @@
       "rg -n 'literal percent|colleafCheckZeroNumbering|OriginalTemplate' colleaf_lists.go",
       "GOWORK=off go test -run TestColleafList -count=1 ."
     ]
+  },
+  "colleaf_literal_list_templates_2026_11_24": {
+    "scope": "Private native dynamic literal-percent/digit-suffix template projection and current native helper/counter edit recovery through shared SF; full adapter/public API/CLI and goal incomplete.",
+    "implementation": [
+      "SF/OOXML single-digit placeholders compile to native whole-index placeholders. Non-active fixed-symbol entries at index9+ carry literal percent and digit suffixes; real paragraph levels stay0..8 and native counters remain automatic.",
+      "Supports constant/percent-only templates, ignored deeper placeholders, all nine actual levels, compound/continued lists and main/cell/note/header catalogs. Literal helper fragments deduplicate per template.",
+      "Existing sparse original-template intent restores only when current native format/helper projection agrees. Otherwise current symbolic native data derives the representable SF template; ambiguous percent-digit literals reject before becoming false counters.",
+      "Numeric native glyphs with fixed glyphSymbol now import actual constant marker text, avoiding silent substitution by dynamic labels. Existing caller/source ownership/counter behavior remains checked.",
+      "Existing SF512-byte representation bounds template/helper expansions. No app snapshot/image quota or permission policy introduced; no per-item frozen label/whole-document cache or new SF schema."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_literal_lists.cjs",
+      "script_sha256": "df2fd309a149e85422cd138bf524ac580a4046e0b837ddc6830c14f42311f4bd",
+      "packages": "Actual pinned Univer1.0.4 core/engine-render/docs/drawing/docs-drawing and FDocument.save; unchanged hash-pinned Colleaf source validator. Optional ignored Node QA only.",
+      "expected_markers": [
+        "%2%",
+        "2/iv%0",
+        "2/v%0",
+        "%3%",
+        "10",
+        "20",
+        "50% literal",
+        "50% literal",
+        "%1.2.3.4.5.6.7.8.9%",
+        "%1.2.3.4.5.6.7.8.10%",
+        "12",
+        "22",
+        "note% 0%",
+        "note% 1%",
+        "header% 1",
+        "header% 2"
+      ],
+      "results": [
+        "All twelve main/cell marker glyphs plus two note and two header marker glyphs match. Header checked as isolated story with actual global running-story list catalog; node default missing-catalog bullet is not used as an oracle.",
+        "Unmodified application validator and two actual facade save/reopen cycles preserve exact Go/SF/native source/ownership semantics.",
+        "Actual helper percent-to-per-mille edit and parent2-to5 start edit update real parent/child glyphs. Go/SF import retains edited template and resolves parent counters over stored ancestor fallbacks.",
+        "Previous original list marker/TextX reader script also passes unchanged."
+      ],
+      "limits": "Headless glyph/content/counter/save evidence only; browser paint/preset controls/interactive list editing and full native fidelity remain unqualified."
+    },
+    "checks": {
+      "full_tests": "go test ./... pass library16.097s/CLI0.717s/internal2.376s",
+      "race": "Full final-source go test -race ./... pass library168.349s/CLI2.129s/internal13.570s",
+      "vet": "pass",
+      "modules": "all modules verified; production dependencies unchanged",
+      "cgo_disabled": "Focused native/JSON tests0.570s; host CLI build/--help execution and Linux amd64/arm64 cross-builds pass. Cross-builds are not Linux execution evidence.",
+      "list_template_fuzz": "106875 executions/10.861s,2workers pass; short campaign, not exhaustive",
+      "list_graph_fuzz": "37843 executions/11.447s,2workers pass; short malformed/source safety campaign, not exhaustive",
+      "diff_check": "pass before commit",
+      "saved_edited_go_import": "Final actual saved/edited reimport through SF passes0.361s"
+    },
+    "runtime": "Pure-Go/std-library addition and existing shared workers only. No new production dependency, CGO/external runtime executable/service/upload/app/backend/authorization/quota gate. Existing SF schema and source corpus/oracles unchanged.",
+    "remaining": "Nondecimal zero/legal-decimalZero and marker appearance mapping; navigation/nonvisual/provenance intent, automatic per-page/decorated notes, public API/CLI and actual browser/preset qualification; broader PDF/source/resource/final acceptance audit.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_LITERAL_LIST_QA=output/colleaf-qa/literal-lists.json GOWORK=off go test -run TestColleafLiteral -count=1 .",
+      "node scripts/verify_colleaf_literal_lists.cjs",
+      "MANYDOC_COLLEAF_LITERAL_LIST_SAVED=output/colleaf-qa/literal-lists-saved.json MANYDOC_COLLEAF_LITERAL_LIST_EDITED=output/colleaf-qa/literal-lists-edited.json GOWORK=off go test -run TestColleafLiteral -count=1 .",
+      "rg -n 'colleafCheckZeroNumbering|Legal|decimalZero' colleaf_lists.go numbering.go",
+      "GOWORK=off go test -run TestColleafNondecimalZero -count=1 ."
+    ]
   }
 }

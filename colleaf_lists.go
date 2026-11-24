@@ -75,27 +75,6 @@ func colleafNumberGlyph(format string) (int, error) {
 	return 0, fmt.Errorf("%w: native numbering format%s", ErrUnsupported, format)
 }
 
-// Go/OOXML ignores placeholders deeper than the active level. The pinned native
-// formatter dereferences those levels instead; omit them in real native format.
-func colleafListTemplate(template string, level int) (string, error) {
-	out := ""
-	for i := 0; i < len(template); i++ {
-		if template[i] != '%' {
-			out += template[i : i+1]
-			continue
-		}
-		if i+1 >= len(template) || template[i+1] < '1' || template[i+1] > '9' {
-			return "", fmt.Errorf("%w: literal percent in native list format needs its checked representation", ErrUnsupported)
-		}
-		n := int(template[i+1] - '1')
-		if n <= level {
-			out += template[i : i+2]
-		}
-		i++
-	}
-	return out, nil
-}
-
 func colleafCheckZeroNumbering(n *ListNumbering, value int, ancestors []int) error {
 	if n == nil || n.Legal {
 		return nil
@@ -175,14 +154,15 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 				entry.Symbol = "•"
 				entry.Format = "%" + strconv.Itoa(l+1)
 			} else if block.Numbering != nil {
-				entry.Format, err = colleafListTemplate(block.Numbering.Template, level)
-				if err != nil {
-					return err
-				}
+				entry.Format = block.Numbering.Template
 				entry.Legal = block.Numbering.Legal
 			}
 		}
 		source.Levels = append(source.Levels, entry)
+	}
+	if block.List == "number" && block.Numbering != nil {
+		format := projectColleafListTemplate(block.Numbering.Template, level, &source)
+		source.Levels[level].Format = format
 	}
 	w.lists[typeID] = sfAttrs(source)
 	binding := colleafListBinding{Type: typeID, Group: group, Implicit: block.Numbering == nil, Independent: independent}
@@ -217,7 +197,7 @@ func (w *colleafBodyWriter) list(block Block, depth int) error {
 	return nil
 }
 
-func colleafListParagraphs(ctx context.Context, body colleafBody, lists map[string]json.RawMessage) (map[int]colleafListParagraph, error) {
+func colleafListParagraphs(ctx context.Context, body colleafBody, lists map[string]json.RawMessage, bindings map[string]colleafListBinding) (map[int]colleafListParagraph, error) {
 	result := map[int]colleafListParagraph{}
 	sources := map[string]colleafNativeList{}
 	for key, raw := range lists {
@@ -225,7 +205,7 @@ func colleafListParagraphs(ctx context.Context, body colleafBody, lists map[stri
 		if err := json.Unmarshal(raw, &source); err != nil {
 			return nil, err
 		}
-		if key == "" || source.Type != key || len(source.Levels) == 0 || len(source.Levels) > 9 {
+		if key == "" || source.Type != key || len(source.Levels) == 0 || len(source.Levels) > colleafMaxListEntries {
 			return nil, fmt.Errorf("invalid native list source")
 		}
 		sources[key] = source
@@ -254,7 +234,7 @@ func colleafListParagraphs(ctx context.Context, body colleafBody, lists map[stri
 			return nil, err
 		}
 		source, ok := sources[bullet.Type]
-		if !ok || bullet.ID == "" || bullet.Level < 0 || bullet.Level >= len(source.Levels) {
+		if !ok || bullet.ID == "" || bullet.Level < 0 || bullet.Level > 8 || bullet.Level >= len(source.Levels) {
 			return nil, fmt.Errorf("native bullet lacks valid source/group/level")
 		}
 		level := source.Levels[bullet.Level]
@@ -288,15 +268,12 @@ func colleafListParagraphs(ctx context.Context, body colleafBody, lists map[stri
 			return nil, fmt.Errorf("%w: native glyph type%d", ErrUnsupported, *level.Glyph)
 		}
 		if info.Kind == "number" {
-			normalized, err := colleafListTemplate(level.Format, bullet.Level)
+			template, err := readColleafListTemplate(source, bullet.Level, bindings[bullet.Type])
 			if err != nil {
 				return nil, err
 			}
-			if normalized != level.Format {
-				return nil, fmt.Errorf("%w: native numbering refers to an absent level", ErrUnsupported)
-			}
 
-			n := &ListNumbering{Level: bullet.Level, Template: level.Format, Legal: level.Legal}
+			n := &ListNumbering{Level: bullet.Level, Template: template, Legal: level.Legal}
 			for l := 0; l <= bullet.Level; l++ {
 				spec := source.Levels[l]
 				if spec.Glyph == nil || *spec.Glyph < 2 || *spec.Glyph > 7 {
@@ -347,11 +324,7 @@ func nativeListBlock(info colleafListParagraph, binding *colleafListBinding) Blo
 			n.Independent = binding.Independent
 		}
 		implicit := binding != nil && binding.Implicit && n.Template == "%"+strconv.Itoa(n.Level+1)+"." && n.Formats[n.Level] == "decimal" && !n.Legal
-		if binding != nil && binding.OriginalTemplate != nil {
-			if projected, err := colleafListTemplate(*binding.OriginalTemplate, n.Level); err == nil && projected == n.Template {
-				n.Template = *binding.OriginalTemplate
-			}
-		}
+
 		if !implicit {
 			block.Numbering = &n
 		}
