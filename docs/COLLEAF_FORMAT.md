@@ -331,3 +331,60 @@ body work. These are unfinished work, not new public support exceptions. The
 public format/API/CLI, production dependencies and application boundaries remain
 unchanged. Next complete rich label/intent and list/asset/section/story mappings,
 strict native envelope/JSON/surrogate decoding and native browser qualification.
+
+
+## Private list sources, counter semantics and checked item ownership
+
+colleaf_lists.go now composes real native list sources and paragraph bullets for
+main/note/table-cell stories. Native startNumber is zero-based (0→1,4→5,-1→0),
+while SF stores actual starts. Parent groups share counters for nested compound
+formats; independent lists get separate groups and fallback ancestors. Canonical
+parent contexts resolve exactly as ToStructured on copied containers. Adjacent
+explicit SF lists retain their boundaries. Note definitions can now contain lists.
+
+Native bullet records do not own continuation paragraphs/tables. The resource
+manydoc.list-ownership.v1 contains per-story list type/group and first/last paragraph
+IDs, item bounds and implicit/independent flags. It contains no visible item text,
+styles or complete SF payload. A binding applies only while actual paragraph IDs,
+bullet type/group/level, item coverage and counter progression agree. Native text
+edits remain real fields; native restart/group edits invalidate old grouping. Stale
+or absent bindings produce disclosed bullet/nesting inference; unmarked text/tables
+remain visible in native order. Ambiguous continuation ownership is not invented.
+Maps/interval interpretation are shared across cells rather than rescanning every
+source/binding per paragraph. The narrower old body helper rejects list content
+if the caller would fail to transport its sources/ownership resource.
+
+Optional scripts/verify_colleaf_lists.cjs checks the pinned app validator and actual
+renderer LIST glyphs for Appendix AA./BB., AA.iv)/AA.v), independent8.1, restarted
+2./3., bullet• and decimal0., plus0./1. in a note story. A native isLegal edit
+changes compound Roman labels to27.4)/27.5), independently checked too. It then changes Parent one
+to Edited one via TextX and saves; paragraph IDs, resources, marker glyphs and owned
+continuation/table structure survive Go re-import. Counter-cache-only inspection
+initially omitted older nested markers because that history resets; actual glyphs
+provide the independent marker evidence. Go also checks SF/native record equality,
+stale native restarts, foreign inference, templates and malformed source handling.
+
+Two additional native differences remain precise unfinished work. A literal percent
+in glyphFormat does not follow Go/OOXML template semantics (%%1. displayed11.
+instead of%1.). An undefined deeper placeholder such as%9 at level0 throws while
+SF ignores it. Export projects ignored placeholders out, stores sparse original-
+template intent only for that projection, and restores it only while projection
+matches actual glyphFormat. Native format edits remain authoritative. Literal
+percent cases reject pending their checked representation. Native zero in
+DECIMAL_ZERO displayed00; letter/Roman zero displayed an empty symbol, while SF
+currently displays0. Both import/export reject those known nondecimal-zero
+mismatches until a format-specific zero policy is represented. Decimal zero works.
+These are private unfinished mappings, not new public support exceptions.
+
+```sh
+MANYDOC_COLLEAF_LIST_QA=output/colleaf-qa/lists.json GOWORK=off go test -run TestColleafRichListOwnershipNumberingAndSF -count=1 .
+node scripts/verify_colleaf_lists.cjs
+MANYDOC_COLLEAF_LIST_EDIT=output/colleaf-qa/lists-edited.json GOWORK=off go test -run TestColleaf -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafLists$' -fuzztime=10s -parallel=2 .
+```
+
+No full browser/font/visual layout or unknown-resource persistence through the
+actual full editor save is qualified yet. Remaining native work includes those
+list policies/marker presentation/picture bullets, rich note label/style intent,
+drawings/assets/resources, section/story/page metadata and strict envelope/JSON/
+surrogate handling. No public native format/API/CLI or runtime dependency was added.

@@ -5621,5 +5621,44 @@
       "MANYDOC_COLLEAF_NOTE_EDIT=output/colleaf-qa/notes-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
       "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafNotes$\" -fuzztime=10s -parallel=2 ."
     ]
+  },
+  "colleaf_list_ownership_2026_11_24": {
+    "scope": "Private real native list sources/bullets/counters and checked list/item ownership through SF, main/note/cell bodies. No public native adapter API/CLI; full goal incomplete.",
+    "semantics": [
+      "Native zero-based starts map to actual SF starts; nested/shared and independent counter families",
+      "Compound letter/Roman/decimal, separate adjacent lists/restarts, ordinary bullets and decimal-zero starts",
+      "Continuation paragraph/merged-table ownership via checked actual paragraph IDs; no item text/whole SF cache",
+      "Canonical numbering contexts resolve on copied containers as ToStructured; raw caller arrays remain untouched",
+      "Unbound/stale ownership yields disclosed bullet nesting inference, visible unmarked blocks retained, native restarts win",
+      "Ignored deeper placeholders project safely with guarded sparse original-template intent; native glyph-format edits win",
+      "Literal-percent and nondecimal zero mismatches explicitly reject in private workers pending full policy mapping"
+    ],
+    "independent_reader": {
+      "packages": "Pinned @univerjs/core and @univerjs/engine-render1.0.4 optional ignored QA only",
+      "script": "scripts/verify_colleaf_lists.cjs",
+      "script_sha256": "71a7a7218be5e1f9c44a61efb20950bed24af1cf848998bd77636453a8a37303",
+      "result": "Unmodified hash-checked Colleaf app validator accepts generated/saved envelopes. Actual renderer LIST glyphs match Appendix AA./BB., AA.iv)/AA.v), independent8.1, restarted2./3., bullet and decimal0., note0./1. TextX Parent->Edited save preserves paragraph IDs/resources/markers and Go continuation/table ownership re-import0.369s passes.; source legal flag edits render27.4)/27.5) as expected",
+      "investigation": "Counter history alone omits old nested levels, so actual glyphs establish marker evidence. Native %%1. gave11. rather than SF %1.; %9 at level0 throws. Native decimalZero0 gave00 and letter/Roman0 empty, unlike SF0. Guards/projected inactive placeholders prevent known corrupt/crashing output.",
+      "limits": "Headless glyph/text/record/mutation qualification; browser/font/visual layout and unknown-resource persistence through full actual editor save remain unqualified."
+    },
+    "checks": {
+      "full_tests": "final go test ./... pass, library17.649s/CLI cached",
+      "full_race": "final go test -race ./... pass after final production/test changes; library168.661s/CLI cached",
+      "vet": "pass after final changes",
+      "modules": "all modules verified; unchanged go.mod/go.sum",
+      "cgo_disabled": "native focus0.405s pass, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass",
+      "malformed_input_fuzz": "Final FuzzColleafLists7628 executions/11.439s, two workers, pass. Earlier rich-only seed campaign completed just3 executions; added independent small native seed to improve exploration. Short campaign not exhaustive.",
+      "diff_check": "pass before commit",
+      "native_regressions": "Fresh Go artifacts and verify_colleaf_stream/text/tables/notes/lists.cjs all pass after composition refactor; expected Node TypeScript-stripping warning"
+    },
+    "runtime": "Pure Go; no new production dependencies/executables/services/CGO/uploads/application changes or authorization/quota gates. Native SDK is optional QA, not runtime; no implementation code copied/translated.",
+    "remaining": "Native literal-percent/nondecimal-zero/marker typography/picture-bullet policies, rich note labels and provenance/intent, drawings/assets/resources, sections/stories/page metadata, strict envelope/JSON/surrogates; actual full native browser/edit/resource/render qualification; broader untagged PDF recovery and final consistency/resource/API/acceptance audit.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_LIST_QA=output/colleaf-qa/lists.json GOWORK=off go test -run TestColleafRichListOwnershipNumberingAndSF -count=1 .",
+      "node scripts/verify_colleaf_lists.cjs",
+      "MANYDOC_COLLEAF_LIST_EDIT=output/colleaf-qa/lists-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
+      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafLists$\" -fuzztime=10s -parallel=2 ."
+    ]
   }
 }

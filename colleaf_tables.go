@@ -42,6 +42,10 @@ type colleafBodyWriter struct {
 	tables         map[string]json.RawMessage
 	offset, serial int
 	noteIDs        map[noteKey]string
+	lists          map[string]json.RawMessage
+	listBindings   []colleafListBinding
+	listDepth      int
+	listGroup      string
 }
 
 func (w *colleafBodyWriter) text(s string) { w.stream.WriteString(s); w.offset += colleafUTF16Len(s) }
@@ -88,11 +92,26 @@ func (w *colleafBodyWriter) blocks(blocks []Block, depth int) error {
 			return err
 		}
 	}
+	if err := w.flow(blocks, depth); err != nil {
+		return err
+	}
+	w.body.SectionBreaks = append(w.body.SectionBreaks, colleafSectionRecord{StartIndex: w.offset, ID: w.id("s")})
+	w.text("\n")
+	return nil
+}
+func (w *colleafBodyWriter) flow(blocks []Block, depth int) error {
+	if depth > 64 {
+		return fmt.Errorf("native body nesting exceeds64")
+	}
 	for _, b := range blocks {
 		if err := w.ctx.Err(); err != nil {
 			return err
 		}
-		if b.Kind == Table {
+		if b.Kind == ListBlock {
+			if err := w.list(b, depth+1); err != nil {
+				return err
+			}
+		} else if b.Kind == Table {
 			if err := w.table(b, depth+1); err != nil {
 				return err
 			}
@@ -102,10 +121,9 @@ func (w *colleafBodyWriter) blocks(blocks []Block, depth int) error {
 			}
 		}
 	}
-	w.body.SectionBreaks = append(w.body.SectionBreaks, colleafSectionRecord{StartIndex: w.offset, ID: w.id("s")})
-	w.text("\n")
 	return nil
 }
+
 func (w *colleafBodyWriter) table(block Block, depth int) error {
 	if len(block.Runs) > 0 || block.Image != nil || len(block.Items) > 0 || block.Section != nil || block.List != "" || block.Level != 0 || block.Start != nil || block.Numbering != nil {
 		return fmt.Errorf("invalid native table block")
@@ -195,15 +213,26 @@ func encodeColleafBody(ctx context.Context, blocks []Block) (colleafBody, map[st
 	return encodeColleafBodyWithNotes(ctx, blocks, nil)
 }
 func encodeColleafBodyWithNotes(ctx context.Context, blocks []Block, noteIDs map[noteKey]string) (colleafBody, map[string]json.RawMessage, error) {
-	w := colleafBodyWriter{ctx: ctx, noteIDs: noteIDs, tables: map[string]json.RawMessage{}, body: colleafBody{TextRuns: []colleafTextRun{}}}
-	if err := w.blocks(blocks, 0); err != nil {
+	body, tables, lists, bindings, err := encodeColleafListBody(ctx, blocks, noteIDs)
+	if err != nil {
 		return colleafBody{}, nil, err
+	}
+	if len(lists) > 0 || len(bindings) > 0 {
+		return colleafBody{}, nil, fmt.Errorf("%w: native list body requires list source/ownership transport", ErrUnsupported)
+	}
+	return body, tables, nil
+}
+
+func encodeColleafListBody(ctx context.Context, blocks []Block, noteIDs map[noteKey]string) (colleafBody, map[string]json.RawMessage, map[string]json.RawMessage, []colleafListBinding, error) {
+	w := colleafBodyWriter{ctx: ctx, noteIDs: noteIDs, tables: map[string]json.RawMessage{}, lists: map[string]json.RawMessage{}, body: colleafBody{TextRuns: []colleafTextRun{}}}
+	if err := w.blocks(blocks, 0); err != nil {
+		return colleafBody{}, nil, nil, nil, err
 	}
 	w.body.DataStream = w.stream.String()
 	if _, err := indexColleafBody(ctx, w.body); err != nil {
-		return colleafBody{}, nil, err
+		return colleafBody{}, nil, nil, nil, err
 	}
-	return w.body, w.tables, nil
+	return w.body, w.tables, w.lists, w.listBindings, nil
 }
 
 // Decode a paragraph fragment using original effective intervals and hyperlink
@@ -252,20 +281,23 @@ func (r *colleafBodyReader) paragraphFragment(start, end int, p colleafParagraph
 }
 
 type colleafBodyReader struct {
-	ctx           context.Context
-	body          colleafBody
-	index         *colleafBodyIndex
-	settings      colleafTextContext
-	tables        map[string]json.RawMessage
-	doc           *Document
-	paragraphs    map[int]colleafParagraphRecord
-	used          map[string]bool
-	spans         []colleafStyleSpan
-	ranges        []colleafRangeRecord
-	atomPositions []int
+	ctx            context.Context
+	body           colleafBody
+	index          *colleafBodyIndex
+	settings       colleafTextContext
+	tables         map[string]json.RawMessage
+	doc            *Document
+	paragraphs     map[int]colleafParagraphRecord
+	used           map[string]bool
+	spans          []colleafStyleSpan
+	ranges         []colleafRangeRecord
+	atomPositions  []int
+	listParagraphs map[int]colleafListParagraph
+	listBindings   map[string]colleafListBinding
 }
 
 func (r *colleafBodyReader) paragraph(start, end int, p colleafParagraphRecord) ([]Block, error) {
+	p.Bullet = nil
 	fragment, err := r.paragraphFragment(start, end, p)
 	if err != nil {
 		return nil, err
@@ -284,7 +316,12 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 	if len(sections) != 1 {
 		return nil, fmt.Errorf("%w: native sections require settings mapping", ErrUnsupported)
 	}
-	var blocks []Block
+	var flow []colleafFlowBlock
+	push := func(bs []Block, p colleafParagraphRecord) {
+		for _, b := range bs {
+			flow = append(flow, colleafFlowBlock{Block: b, ID: p.ID, Bullet: p.Bullet, Position: p.StartIndex})
+		}
+	}
 	for _, node := range sections[0].children {
 		if err := r.ctx.Err(); err != nil {
 			return nil, err
@@ -298,7 +335,7 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 			if err != nil {
 				return nil, err
 			}
-			blocks = append(blocks, part...)
+			push(part, p)
 			continue
 		}
 		cursor := node.start
@@ -309,7 +346,7 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 				if err != nil {
 					return nil, err
 				}
-				blocks = append(blocks, part...)
+				push(part, p)
 				mixed = true
 			}
 			if child.kind != "table" {
@@ -319,7 +356,7 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 			if err != nil {
 				return nil, err
 			}
-			blocks = append(blocks, table)
+			push([]Block{table}, p)
 			cursor = child.end
 		}
 		// Preserve authored suffix text/paragraph properties. An otherwise empty
@@ -329,14 +366,14 @@ func (r *colleafBodyReader) sections(sections []colleafStreamNode, depth int) ([
 			if err != nil {
 				return nil, err
 			}
-			blocks = append(blocks, part...)
+			push(part, p)
 			mixed = true
 		}
 		if mixed {
 			r.doc.warn("colleaf_table_paragraph", "Native table and text sharing one paragraph become ordered SF blocks; visible content and supported paragraph styles are retained")
 		}
 	}
-	return blocks, nil
+	return r.groupLists(flow, depth)
 }
 func colleafUnitPoints(unit colleafNumberUnit) (float64, error) {
 	if math.IsNaN(unit.Value) || math.IsInf(unit.Value, 0) || unit.Value < 0 {
@@ -628,6 +665,17 @@ func decodeColleafBody(ctx context.Context, body colleafBody, settings colleafTe
 		if r.ranges[i-1].EndIndex >= r.ranges[i].StartIndex {
 			return nil, fmt.Errorf("conflicting native hyperlink extents")
 		}
+	}
+	r.listBindings = map[string]colleafListBinding{}
+	for _, binding := range settings.ListBindings {
+		if _, ok := r.listBindings[binding.Type]; ok || binding.Type == "" {
+			return nil, fmt.Errorf("duplicate/invalid native list ownership binding")
+		}
+		r.listBindings[binding.Type] = binding
+	}
+	r.listParagraphs, err = colleafListParagraphs(ctx, body, settings.Lists)
+	if err != nil {
+		return nil, err
 	}
 	for _, p := range body.Paragraphs {
 		r.paragraphs[p.StartIndex] = p

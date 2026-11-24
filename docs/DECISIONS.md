@@ -1662,3 +1662,25 @@ merged-table semantics now cross SF and actual reader/edit/save checks. Advanced
 citation/body-label variants, note settings/assets/lists/provenance and generated
 note placement remain unfinished private mappings. Headless metadata checks do
 not qualify note layout or substitute for the final acceptance audit.
+
+
+## 2026-11-24 Keep native list presentation authoritative and ownership checked
+
+Use native bullet/list sources for real markers/counters. Native starts are zero-
+based:0 displays1, -1 displays0. Share nested counter groups unless independent;
+resolve canonical SF parent contexts without mutating callers. Qualify glyph text
+through actual renderer LIST glyphs: the counter history cache resets deeper
+levels and cannot prove all previously rendered markers.
+
+Native flat bullets do not identify SF continuation paragraphs/tables or explicit
+adjacent-list boundaries. Preserve only that missing ownership/implicit intent in
+a checked per-story resource bound to actual paragraph IDs/type/group/counters.
+No item text or whole SF is cached. Native edits invalidate stale ownership and
+fall back to explicitly disclosed bullet inference, preserving visible block order.
+
+Executable probes also found literal percent and nondecimal-zero differences,
+and absent-level template dereferences that throw in the pinned renderer. Project
+ignored deeper placeholders safely and restore sparse original intent only when
+it still matches native fields. Reject the other private unmapped cases explicitly;
+these are unfinished work, not public adapter completion/support exceptions. Keep
+browser/resource persistence and visual fidelity qualification open.

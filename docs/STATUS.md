@@ -39,7 +39,25 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: native foot/endnote graph mapping (internal, incomplete)
+## Latest progress: native rich list ownership/numbering (internal, incomplete)
+
+Private list workers now map native bullets/list sources and checked item ownership
+through SF, including nested lists, continuation paragraphs/tables, separate adjacent
+lists, restarts, compound/legal/independent numbering and decimal zero starts.
+Lists also work inside note bodies. Native paragraph IDs bind item/container bounds;
+no item text is cached. Actual bullet/source edits remain authoritative. Unbound or
+stale ownership falls back to disclosed native-bullet inference without dropping
+unmarked text/tables. Native counter starts are zero-based, unlike SF starts.
+
+Pinned app validator/renderer marker glyphs/TextX save/Go re-import qualify AA/BB,
+compound Roman markers, independent8.1, restarts, bullets and decimal0 in main and
+note stories. Counter-cache history alone was insufficient; actual LIST glyphs
+retain earlier nested markers. Full browser/resource persistence and visual layout
+remain unqualified. Literal percent templates and nondecimal zero policies differ
+between SF and this native renderer: private workers reject these known mismatches
+pending proper representation. Undefined deeper placeholders project safely with
+checked intent. The full adapter and overall goal remain active/incomplete.
+
 
 Private note workers now map real native foot/endnote definitions, styled UTF-16
 reference atoms, repeated citations, custom shared marks, markerless body marks

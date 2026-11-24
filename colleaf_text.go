@@ -14,6 +14,8 @@ type colleafTextContext struct {
 	DefaultParagraph json.RawMessage
 	Styles           map[string]colleafNamedStyle
 	NoteIDs          map[string]noteKey
+	Lists            map[string]json.RawMessage
+	ListBindings     []colleafListBinding
 }
 
 func colleafRawInt(style colleafStyleMap, key string) (int, bool, error) {

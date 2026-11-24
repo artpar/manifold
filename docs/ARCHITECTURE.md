@@ -1206,3 +1206,30 @@ The internal worker rejects unmapped independent/rich labels, navigation/provena
 and assets/lists rather than dropping relationships. Complete note settings, marker
 defaults/intent and browser/native placement qualification are still needed. The
 public API/CLI and runtime dependency graph are unchanged.
+
+
+## Private Colleaf list composition and ownership
+
+colleaf_lists.go emits actual paragraph bullet records, named list sources and
+nine-level native glyph/counter definitions. SF starts map to native startNumber-1;
+shared group IDs bind non-independent nested counters, while separate groups keep
+independent counters. Native templates/levels/styles remain the real presentation
+fields. The same owned body writer handles main, note and table-cell list content.
+Canonical numbering contexts resolve on copied containers before encoding, matching
+ToStructured; caller fallback ancestors are not mutated.
+
+manydoc.list-ownership.v1 stores per-story list type/group IDs, first/last paragraph
+IDs, item bounds and implicit/independent intent. It stores no item text or SF body.
+Bounds must match actual paragraphs and item bullets, nesting and counters before
+reconstructing containers. Stale bindings cannot override native restarts/group edits.
+Foreign lists infer only marked paragraphs/nesting with explicit ownership uncertainty;
+unmarked content remains visible. Native list source/counter interpretation occurs
+once per body; ownership maps are shared across cell sections.
+
+Inactive deeper placeholders are omitted from native glyphFormat (the executable
+formatter otherwise dereferences absent levels). Sparse original-template intent is
+restored only while its projection equals the actual native format. Literal percent
+syntax and nondecimal zero formats differ: private workers reject rather than emit
+wrong/crashing markers. Full policy/intent mapping remains open. SDK QA inspects
+actual GlyphType.LIST content, not only the mutable counter history cache. Browser
+layout and full editor resource persistence remain separate required evidence.
