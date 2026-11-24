@@ -37,6 +37,8 @@ type colleafNoteIdentities struct {
 	Bindings []colleafNoteBinding `json:"bindings"`
 }
 type colleafNoteSnapshot struct {
+	Settings                 json.RawMessage                `json:"settings,omitempty"`
+	Locale                   string                         `json:"locale,omitempty"`
 	Body                     colleafBody                    `json:"body"`
 	Tables                   map[string]json.RawMessage     `json:"tableSource,omitempty"`
 	Notes                    map[string]colleafNativeNote   `json:"notes,omitempty"`

@@ -5955,5 +5955,48 @@
       "MANYDOC_COLLEAF_CITATION_SAVED=output/colleaf-qa/citations-saved.json MANYDOC_COLLEAF_CITATION_EDITED=output/colleaf-qa/citations-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
       "GOWORK=off go test -run '^$' -fuzz '^FuzzColleafCitations$' -fuzztime=1000x -parallel=2 ."
     ]
+  },
+  "colleaf_native_envelope_2026_11_24": {
+    "scope": "Private exact v3 .vdocs codec through existing rich native projection and shared SF. Public native API/CLI and complete goal remain unfinished.",
+    "implementation": [
+      "Exact vibedada-document/version3/univer/1.0.4 identity, required snapshot id/textRuns/documentStyle, typed unknown-field rejection; bare snapshots/renamed SF reject.",
+      "Original-byte JSON scanner rejects decoded duplicate keys, malformed UTF-8, unpaired surrogate escapes, typed record case aliases/null scalar offsets and depth over128. Valid pairs and intentional U+FFFD retain exact text.",
+      "Interpreted JSON resource strings, including sparse intent carrier records, are checked before map decoding. Permission resources remain outside library admission policy.",
+      "Large string values scan without copying/allocations (1MiB string regression); decoded object key sets and typed schema maps allocate. Whole-envelope buffering and broader resource auditing remain unfinished.",
+      "Actual facade save adds settings:{}; documented empty/positive zoom settings accepted, view zoom and nondefault locale losses diagnosed; unknown settings reject. No application byte/image quota or permission gate introduced."
+    ],
+    "independent_reader": {
+      "packages": "Pinned actual Univer1.0.4 core/docs/drawing/docs-drawing facade and hash-pinned unmodified Colleaf validator; optional ignored Node QA only",
+      "script": "scripts/verify_colleaf_envelope.cjs",
+      "script_sha256": "390054672b9a513b1f0074c4aadf9659b408c819c5bb1da8f4aaf031da814198",
+      "app_source_sha256": "c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0",
+      "results": [
+        "Generated exact envelope accepted by actual application validator.",
+        "Two real createDocument/FDocument.save/reopen cycles preserve rich source stream/sectionBreaks/headers/footers/drawings; native added settings:{} retained unchanged.",
+        "Fresh saved-envelope Go reimport and shared SF bridge preserve exact section/page geometry, conditional/empty stories, tables/lists/image assets and metadata; final focused checks pass.",
+        "Blank documents, valid raw/escaped astral Unicode, literal replacement characters, malformed/ambiguous input, null offsets, settings diagnostics and invalid-source output rejection tests pass."
+      ],
+      "limits": "Structural acceptance/save transport only. No new browser font/paint/wrapping/selection/navigation/interaction or whole-native compatibility claim."
+    },
+    "checks": {
+      "full_tests": "Final source go test ./... pass library15.722s/CLI0.722s/internal2.265s",
+      "race": "Full final-source go test -race ./... pass library167.447s/CLI2.236s/internal13.559s",
+      "vet": "pass after final source changes",
+      "modules": "all modules verified; unchanged production dependencies",
+      "cgo_disabled": "Focused native/strict JSON tests0.587s, host CLI build/--help execution, Linux amd64/arm64 cross-builds pass; Linux execution not performed",
+      "strict_json_fuzz": "76406 executions/10.544s,2workers pass; short differential/safety campaign, not exhaustive",
+      "native_envelope_fuzz": "872 executions/11.457s,2workers pass; short safety/bridge campaign, not exhaustive",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure Go/std library additions only. No new production dependency, external runtime executable/CGO/service/upload/app/backend/authorization/quota gate. Original corpus/oracle files unchanged.",
+    "remaining": "Native list/appearance/navigation/nonvisual/provenance intent and per-page/decorated note policies; public API/CLI and actual full-preset/browser qualification; broader PDF/source/resource/final acceptance audit. No external blocker.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_ENVELOPE_QA=output/colleaf-qa/sections.vdocs GOWORK=off go test -run 'TestColleafEnvelope|TestStrictJSON' -count=1 .",
+      "node scripts/verify_colleaf_envelope.cjs",
+      "MANYDOC_COLLEAF_ENVELOPE_SAVED=output/colleaf-qa/sections-saved.vdocs GOWORK=off go test -run 'TestColleafEnvelope|TestStrictJSON' -count=1 .",
+      "rg -n 'literal percent|colleafCheckZeroNumbering|OriginalTemplate' colleaf_lists.go",
+      "GOWORK=off go test -run TestColleafList -count=1 ."
+    ]
   }
 }

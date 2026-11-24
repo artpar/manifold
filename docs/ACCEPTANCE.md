@@ -52,7 +52,9 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
    membership remain independently qualified without inventing running templates.
 3. **Actual Colleaf boundary:** implement/qualify a standalone native Univer 1.0.4
    snapshot adapter through the shared SF, including rich structures and UTF-16
-   ranges. Do not merely wrap plain text or rename SF. No Daptin or Colleaf edits
+   ranges. Private exact-envelope/strict-JSON/Unicode and actual facade saved-envelope
+   reimport now exist (COLLEAF_FORMAT.md); public native API/CLI, remaining mappings
+   and browser/preset qualification are still unfinished. Do not merely wrap plain text or rename SF. No Daptin or Colleaf edits
    are authorized by this standalone project goal; their access/quotas/save guards
    remain application responsibilities.
 4. **Corpus/visual and final audit:** eight pinned, legally attributed original

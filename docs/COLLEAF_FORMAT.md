@@ -779,3 +779,42 @@ Next complete remaining list/appearance/navigation/provenance/nonvisual intent,
 strict native envelope and public API/CLI, then actual full-preset/browser QA.
 Per-page/decorated-note policies and final broader goal audits remain explicit.
 No production dependency, external runtime tool or application/backend edit added.
+
+
+## Current private .vdocs envelope codec and strict JSON qualification
+
+colleaf_codec.go now connects the rich workers to the exact pinned envelope.
+readColleaf/writeColleaf remain private; public Read/Write/CLI native dispatch is
+still unfinished. The supported envelope is exactly vibedada-document version3,
+engine univer, engineVersion1.0.4. Bare snapshots, renamed SF, wrong identity/version,
+unknown typed fields, missing id/textRuns/documentStyle, ambiguous decoded keys,
+malformed UTF-8 and unpaired surrogate escapes reject before interpretation.
+Known typed record case aliases and null scalar offsets also reject. Valid escaped
+surrogate pairs and intentional U+FFFD remain actual scalar text. Resource JSON
+inside strings, including manydoc carrier records, gets a separate strict pass.
+Raw native property objects retain their existing semantic diagnostics/rejection.
+The parser depth bound protects its stack; it is not the app's file/image budget.
+Input is buffered and container/key-set allocation remains on the resource audit.
+
+The actual FDocument.save output contains settings:{} even when omitted on input.
+Known settings support empty/finite positive zoomRatio only; zoom and nondefault
+locale disclose editor-view state absent from logical SF. Unknown settings reject.
+The writer initializes enUS locale; it does not introduce application persistence,
+collaboration, identity, authorization or quota behavior.
+
+scripts/verify_colleaf_envelope.cjs verifies the pinned unmodified validator hash,
+the generated .vdocs envelope and two actual facade save/reopens. Go reimports that
+unchanged saved envelope with exact rich section/story/table/list/image/metadata
+semantics and checks its shared SF bridge. This qualifies structural acceptance
+and save transport only. Existing section glyph/page probes remain separate;
+actual browser paint/wrapping/selection/navigation, remaining list/appearance/
+nonvisual/provenance intent and per-page/decorated-note policies are unfinished.
+No full native adapter or overall goal completion is claimed.
+
+```sh
+MANYDOC_COLLEAF_ENVELOPE_QA=output/colleaf-qa/sections.vdocs GOWORK=off go test -run 'TestColleafEnvelope|TestStrictJSON' -count=1 .
+node scripts/verify_colleaf_envelope.cjs
+MANYDOC_COLLEAF_ENVELOPE_SAVED=output/colleaf-qa/sections-saved.vdocs GOWORK=off go test -run 'TestColleafEnvelope|TestStrictJSON' -count=1 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzStrictJSON$' -fuzztime=10s -parallel=2 .
+GOWORK=off go test -run '^$' -fuzz '^FuzzColleafEnvelope$' -fuzztime=10s -parallel=2 .
+```

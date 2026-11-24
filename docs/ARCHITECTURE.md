@@ -1428,3 +1428,24 @@ text and markerless anchors with diagnostics. Baseline/shape/relationship change
 do not justify hiding text. Nested cells/lists share the root source-index context;
 note bodies do not accidentally reuse root citation IDs. All of this remains a
 private adapter pending broader intent, strict envelope and actual browser/API QA.
+
+
+## Private Colleaf native file boundary
+
+colleaf_codec.go wraps the rich section/story/note workers in the actual pinned
+v3 .vdocs envelope; it does not add a public Format or rename SF. Strict lexical
+validation runs before typed decoding: duplicate decoded keys, invalid UTF-8,
+unpaired surrogate escapes, case aliases in known typed records, null scalar
+values and excessive parser depth reject. Raw native property objects still use
+their existing semantic checks/diagnostics. Interpreted JSON resource strings are
+also validated before their maps can be collapsed. Large strings scan in place;
+key sets/schema maps allocate. Input is buffered and broader allocation auditing
+remains unfinished. No Colleaf snapshot/image budgets are runtime library quotas.
+
+Known native settings accept empty objects or finite positive zoomRatio; view zoom
+and nondefault editor locale get explicit loss diagnostics because logical SF has
+no editor-view state. Unknown settings/typed fields reject. The actual facade's
+added empty settings object is a retained save/reimport regression. Exact envelope
+validator and rich facade/Go/SF tests qualify structural transport only; remaining
+intent mappings, public API/CLI, browser/preset interaction and final corpus audits
+still gate native adapter completion.

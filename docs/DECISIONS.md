@@ -1831,3 +1831,25 @@ precedence, and discloses stale/unsupported ownership. Long paragraphs use bound
 style searches and linear folding; a 2,048-reference case checks ordering/defaults.
 Headless glyph/relationship/save/edit checks do not prove browser paint, atomic
 wrapping, selection/click/navigation behavior or full native adapter completion.
+
+
+## 2026-11-24 Validate native JSON before decoding changes its meaning
+
+The actual native file boundary uses Colleaf's exact v3 envelope and pinned engine
+identity. Keep it private until remaining mappings and interaction are qualified.
+Do not rely on encoding/json alone: it accepts duplicate keys, malformed Unicode,
+case aliases for struct tags and null scalar values. Scan original bytes first,
+checking decoded object-key identity and Unicode scalar validity; preserve valid
+surrogate pairs and literal replacement characters. Reject ambiguity before native
+UTF-16 ranges or relationship maps are interpreted. Check interpreted JSON-in-string
+resource payloads independently, including sparse carrier records. Do not parse
+application permission resources as library admission policy.
+
+Scan large string values in place; bound parser depth for stack protection, without
+copying Colleaf's application byte/image budgets into the library. The whole input
+is currently buffered, so broader resource auditing remains required. Actual
+facade save adds settings even when omitted by the producer. Accept the documented
+empty/positive zoom settings, disclose lost UI view/locale state and reject unknown
+settings. Preserve unchanged independent-reader output as the regression rather
+than removing fields to make a symmetric Go test pass. Envelope/facade evidence
+does not establish browser interaction or complete native compatibility.

@@ -39,7 +39,49 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: editable native per-citation literal and rich marks
+## Latest progress: strict native .vdocs envelope boundary
+
+Private readColleaf/writeColleaf workers now read/write the exact pinned v3
+vibedada-document/Univer1.0.4 envelope around the rich native projection, through
+shared SF semantics. Bare snapshots/renamed SF, wrong identities/versions, unknown
+typed fields and missing required snapshot fields reject. A scanner validates
+syntax, decoded duplicate keys, UTF-8 and paired Unicode surrogate escapes before
+encoding/json can replace text or collapse maps. Known typed record aliases and
+null scalar offsets reject. Large string values scan in place without string
+copies; object-key sets and schema metadata allocate. Nested interpreted resource
+JSON is checked independently, including carrier records. A depth bound protects
+the parser; no application byte/image quota or permission gate was introduced.
+
+Actual pinned facade save exposed an added settings object that raw-snapshot
+qualification missed. The codec accepts documented empty/positive zoom settings;
+zoom and nondefault editor locale emit explicit logical-SF loss diagnostics.
+Unrepresented settings reject. The unmodified hash-pinned Colleaf validator accepts
+the generated envelope. Two actual facade saves/reopens and exact Go/SF reimport
+preserve section/page settings, first/even/default/empty stories, tables, lists,
+image bytes/relationships and metadata. Existing blank/Unicode cases pass too.
+This is structural/save evidence, not browser paint or interaction qualification.
+
+Final checks pass: tests 15.722s/0.722s, race 167.447s/2.236s, vet/modules,
+CGO-disabled focused native/JSON tests and host CLI execution, Linux amd64/arm64
+cross-builds, strict JSON fuzz 76,406 executions and native envelope fuzz 872
+executions. Fuzz campaigns are short, not exhaustive; cross-builds are not Linux
+execution. Actual app-validator/facade/saved-envelope reimport and diff checks
+pass. verification.json records scope/evidence. The full goal remains active/incomplete. Next finish native list/appearance/navigation and
+nonvisual/provenance intent, automatic per-page/decorated-note policies, public
+API/CLI and actual full-preset/browser paint/wrapping/selection/navigation checks.
+The broader PDF/source/resource/final acceptance audit remains required; native
+input currently buffers the envelope and large-container allocation behavior
+still needs that audit. No external blocker exists.
+
+Reproduce this milestone with:
+
+```sh
+MANYDOC_COLLEAF_ENVELOPE_QA=output/colleaf-qa/sections.vdocs GOWORK=off go test -run 'TestColleafEnvelope|TestStrictJSON' -count=1 .
+node scripts/verify_colleaf_envelope.cjs
+MANYDOC_COLLEAF_ENVELOPE_SAVED=output/colleaf-qa/sections-saved.vdocs GOWORK=off go test -run 'TestColleafEnvelope|TestStrictJSON' -count=1 .
+```
+
+## Earlier progress: editable native per-citation literal and rich marks
 
 Private native output now preserves per-reference literal/rich/empty/default labels
 and inferred-relationship flags, including repeated citations in sections, cells
