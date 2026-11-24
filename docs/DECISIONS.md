@@ -2297,3 +2297,14 @@ attributes before local overrides and retain revision diagnostics. Regression
 fixtures demonstrate previously accepted over-budget work and ignored cancellation;
 a smaller valid graph proves the override/visible/source contract is preserved.
 This parser work limit is not application quota or exhaustive PDF safety.
+
+
+## 2026-11-24 Keep the actual browser ordering failure visible
+
+Build the pinned actual Colleaf mount/validator as optional isolated browser QA;
+readiness and preserved note sets are insufficient placement evidence. Keep the
+unchanged public example and first-reference-order oracle when the actual renderer
+reverses repeated footnotes. Separate the no-repeat control from the acceptance
+input and do not patch applications or substitute static cached bodies. Preserve
+the failing native checker and exact source/package pins until a real solution
+is qualified. This does not turn the overall goal into a blocked state.

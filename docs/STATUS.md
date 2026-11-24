@@ -40,7 +40,35 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: bounded PDF attribute graph traversal
+## Latest progress: actual native browser probe exposes note-order failure
+
+The full pinned Colleaf/Univer desktop mount now builds in an isolated optional
+QA harness. The unmodified actual mount/validator are hash-checked and all vendor
+presets are pinned at 1.0.4. Browser readiness reaches lifecycle 3 with a canvas and
+no reported errors. No application or production dependency is changed.
+
+This is not a passing full-browser qualification: the unchanged public notes
+example displays footnote 2 above footnote 1. Main indices first cite note-2 at 36,
+note-3 at 127 and repeat note-2 at 147. The renderer retains the last index per
+note, so its actual placement order is reversed. The browser page and an actual
+headless body-order checker both reproduce it. A separate no-repeat control has
+the correct order. The original example and expected first-reference order remain.
+
+```sh
+node scripts/prepare_colleaf_browser.cjs
+python3 -m http.server 8768 --bind 127.0.0.1 --directory output/colleaf-browser
+# Current native acceptance failure, not a passing smoke test:
+node scripts/verify_colleaf_note_order.cjs
+```
+
+COLLEAF_BROWSER.md records source pins, controls and remaining work. Native browser
+edit/save/reopen/mobile and wider paint/layout remain unqualified. No safe data-level
+ordering fix is established yet; do not patch the applications, weaken the oracle,
+or replace live citations with cached bodies. Other goal work can still progress.
+The full Go checks below remain passing, but do not execute this native checker.
+Goal active/incomplete; no full completion or blocked-state claim is made.
+
+## Earlier progress: bounded PDF attribute graph traversal
 
 A small acyclic attribute-array graph could amplify work through shared indirect
 references despite the existing depth-16 guard. The new document-wide 200,000-work-
@@ -267,7 +295,9 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-1. Broaden source/structure and resource audits beyond the newly qualified
+1. Reproduce and resolve the native repeated-footnote body-order failure in
+   COLLEAF_BROWSER.md while preserving the source graph and original oracle.
+   Broaden source/structure and resource audits beyond the newly qualified
    reciprocal ParentTree checks, using malformed and independently authored sources.
    Retain current physical and explicit/inferred source oracles; never recover from an embedded SF cache.
 2. Qualify remaining native rendering/intent/settings and browser/preset behavior
@@ -282,7 +312,7 @@ QA only. Historical codec timings are retained in the verification ledger.
    after every original criterion is proven. No external blocker is established.
 
 ```sh
-cat docs/ACCEPTANCE.md docs/PDF_NOTES.md docs/COLLEAF_FORMAT.md
+cat docs/ACCEPTANCE.md docs/COLLEAF_BROWSER.md docs/COLLEAF_FORMAT.md
 rg -n 'ParentTree|StructParent|MCID|OBJR' pdf_structure*.go pdf_marked.go
 GOWORK=off go test -run 'TestGeneratedPDF|TestPDFTagged|TestCLIVDOCSSemantics' -count=1 ./...
 output/qa-venv/bin/python scripts/verify_pdf_parent_tree.py testdata/real/copyright-office-circular-1-2021.pdf

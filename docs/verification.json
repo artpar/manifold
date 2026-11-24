@@ -7295,5 +7295,75 @@
       "GOWORK=off go test -run '^$' -fuzz '^FuzzPDFAttributeGraph$' -fuzztime=10s -parallel=2 .",
       "cat docs/STATUS.md docs/ACCEPTANCE.md docs/COLLEAF_FORMAT.md"
     ]
+  },
+  "colleaf_browser_note_order_audit": {
+    "date": "2026-11-24",
+    "goal": "active/incomplete",
+    "scope": "First actual full-desktop-preset native browser probe; readiness succeeds but repeated-footnote body order fails. No application/vendor/production code or source oracle changed.",
+    "sources": {
+      "Colleaf_commit": "5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6",
+      "mount_sha256": "11d3fe8caadd351a3871b82ceecba3285cd77e02f777f7f7b1fecc57252b499a",
+      "validator_sha256": "c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0",
+      "Univer_presets": "1.0.4 core/drawing/hyperlink and find/replace; core/docs/engine-render also1.0.4",
+      "other_QA_pins": "icons1.43.1,React/ReactDOM19.0.0,RxJS7.8.2,esbuild0.27.0; ignored optional QA only"
+    },
+    "reproduction": {
+      "prepare": "node scripts/prepare_colleaf_browser.cjs",
+      "prepare_sha256": "49e3ffa0af12b0db6bf52d99b290d70da744765c75372e3151c4002dcb5a6285",
+      "checker": "node scripts/verify_colleaf_note_order.cjs",
+      "checker_sha256": "36082fac7acec399d24931dfff78912613dda147ce2db7d16000ab1e2a0b1650",
+      "fixture_sha256": "43adc02a773866141fe29d625c31c42f23478297f888eedba1a45a47ba6aa0a5"
+    },
+    "browser": {
+      "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36",
+      "viewport_CSS": "1280x900,DPR2",
+      "readiness": "stage3,one canvas,qa.errors=[]",
+      "original_first_reference_indices": [
+        36,
+        127
+      ],
+      "later_repeat_index": 147,
+      "expected_footnote_order": [
+        "manydoc-note-2",
+        "manydoc-note-3"
+      ],
+      "actual_footnote_order": [
+        "manydoc-note-3",
+        "manydoc-note-2"
+      ],
+      "actual_render_records_referenceIndex": [
+        127,
+        147
+      ],
+      "control_order": [
+        "manydoc-note-2",
+        "manydoc-note-3"
+      ],
+      "control_render_records_referenceIndex": [
+        36,
+        127
+      ]
+    },
+    "visual": {
+      "original_png_sha256": "f87d2673351881ade11c59aa3aba3b1aea9d264be3c23239f2cb0db54146c084",
+      "control_png_sha256": "9f1ee1473951148ed79f7b836c3a979ddafa0618780594fbe33dec27b97b6238",
+      "inspection": "Fresh-load original shows complete main text and all notes/list/footer but label2 body above label1. Separate no-repeat control shows label1 above label2. Remount paint timing is not qualified. PNGs remain ignored."
+    },
+    "cause": "Installed pinned DocumentFootnoteLayout indexes references by noteId with last occurrence, then orders bodies by stored referenceIndex. Source/typed identity persists; placed-body sets did not prove first-reference order. No vendor implementation copied into Go.",
+    "checks": {
+      "harness_build": "passed using checked unmodified mount/validator and exact development package pins",
+      "JS_syntax": "both new scripts pass node --check",
+      "native_acceptance": "FAILS original first-reference-order assertion; no-repeat control passes. This is an open real-renderer acceptance gap; optional checker is not run in ordinary Go tests.",
+      "production_checks": "No production change after cfa11fe. That commit passed full tests27.044s/0.534s,race317.245s/3.178s,vet/modules,CGO-disabled builds/focused tests and independent original-source verification.",
+      "diff_check": "passed",
+      "cleanup": "Created isolated browser page closed; dedicated local HTTP server terminated. No lingering QA server required."
+    },
+    "remaining": "Resolve native repeated-note placement without weakening original oracle, duplicating definitions/static body caches or patching applications. Browser edit/save/reopen/navigation/images/fonts/wrapping/mobile and broader goal audits remain unqualified. Overall goal active; not an all-work blocked claim.",
+    "next_commands": [
+      "cat docs/COLLEAF_BROWSER.md",
+      "node scripts/verify_colleaf_note_order.cjs",
+      "node scripts/prepare_colleaf_browser.cjs",
+      "python3 -m http.server 8768 --bind 127.0.0.1 --directory output/colleaf-browser"
+    ]
   }
 }

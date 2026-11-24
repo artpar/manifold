@@ -1866,3 +1866,13 @@ members consume the 200,000-entry budget, with cancellation checked during
 traversal. The existing depth-16 guard alone could not bound acyclic shared arrays.
 Class/local override order is unchanged; overflow returns an error without partial
 content. See PDF_RESOURCES.md for regression/source evidence and distinct bounds.
+
+
+Actual desktop preset browser qualification now has a reproducible repeated-note
+placement failure. The unchanged public notes example places label 2 above label 1;
+the pinned renderer uses the later repeated citation index for the first note.
+The source identity/content graph still persists, but that does not prove correct
+body order. COLLEAF_BROWSER.md and scripts/verify_colleaf_note_order.cjs preserve
+the original first-reference-order oracle and passing no-repeat control. Ordinary
+Go tests do not run this optional native-reader check, which currently FAILS.
+No application/vendor/production change or full browser/fidelity claim is made.

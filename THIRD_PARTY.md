@@ -290,3 +290,14 @@ clause 14.7.5.4 and its public corrections:
 https://pdf-issues.pdfa.org/32000-2-2020/clause14.html#14754-finding-structure-elements-from-content-items
 Optional pypdf checks reuse the previously attributed original Copyright Office
 PDF and generated notes; no production dependency or proprietary code is added.
+
+
+Optional browser QA downloads/bundles the already attributed actual Colleaf mount
+and validator at 5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6 with checked original
+hashes; see [browser QA](docs/COLLEAF_BROWSER.md). They remain ignored QA source, not Go implementation.
+Univer core/drawing/hyperlink presets and find/replace 1.0.4 and RxJS 7.8.2 are
+Apache-2.0; Univer icons 1.43.1, React/ReactDOM 19.0.0 and esbuild 0.27.0 are MIT per installed package
+metadata. These optional pinned development dependencies are installed only in
+ignored output/colleaf-browser. No production module, executable, service, CGO or
+proprietary UniDoc implementation is introduced. The note-order checker inspects
+actual vendor placement without copying that implementation into manydoc.

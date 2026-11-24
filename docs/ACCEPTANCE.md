@@ -134,3 +134,13 @@ work budget, and traversal observes cancellation. A valid shared graph preserves
 local Roman-over-Decimal behavior and exact body/label/source/SF evidence. Original
 source bytes and oracles remain unchanged. See PDF_RESOURCES.md; broader resource
 and final acceptance remain unproven.
+
+
+Actual desktop preset browser qualification now has a reproducible repeated-note
+placement failure. The unchanged public notes example places label 2 above label 1;
+the pinned renderer uses the later repeated citation index for the first note.
+The source identity/content graph still persists, but that does not prove correct
+body order. COLLEAF_BROWSER.md and scripts/verify_colleaf_note_order.cjs preserve
+the original first-reference-order oracle and passing no-repeat control. Ordinary
+Go tests do not run this optional native-reader check, which currently FAILS.
+No application/vendor/production change or full browser/fidelity claim is made.
