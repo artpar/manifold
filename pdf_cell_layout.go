@@ -32,7 +32,8 @@ type pdfImageLayout struct {
 	width, height float64
 }
 type pdfTableLayout struct {
-	width, height, unit    float64
+	width, height          float64
+	columns                []float64
 	offsets                []float64
 	cells                  []pdfMeasuredCell
 	groups                 []pdfTableGroup
@@ -302,7 +303,15 @@ func (r *pdfRenderer) measureTableHeaderBudget(b Block, width, height, headerBud
 	}
 	headers, _ := tableHeaderRows(b.Rows)
 	plan.headerRows = headers
-	plan.unit = width / float64(g.Columns)
+	widths, err := fittedColumnWidths(b.ColumnWidths, g.Columns, width)
+	if err != nil {
+		return nil, err
+	}
+	plan.columns = make([]float64, g.Columns+1)
+	for i, w := range widths {
+		plan.columns[i+1] = plan.columns[i] + w
+	}
+	plan.width = plan.columns[g.Columns]
 	heights := make([]float64, len(b.Rows))
 	for i := range heights {
 		heights[i] = 22
@@ -334,7 +343,7 @@ func (r *pdfRenderer) measureTableHeaderBudget(b Block, width, height, headerBud
 				cellHeight -= 26
 			} // one compact body line plus padding
 		}
-		flow, err := r.cellFlowStyle(b.Rows[p.Row].Cells[p.Cell].Blocks, plan.unit*float64(p.ColSpan)-12, 0, cellHeight, style)
+		flow, err := r.cellFlowStyle(b.Rows[p.Row].Cells[p.Cell].Blocks, (plan.columns[p.Column+p.ColSpan]-plan.columns[p.Column])-12, 0, cellHeight, style)
 		if err != nil {
 			return nil, err
 		}
@@ -437,11 +446,11 @@ func (r *pdfRenderer) paintTableGroup(plan *pdfTableLayout, g pdfTableGroup, x, 
 			return err
 		}
 		p := c.position
-		cx := x + float64(p.Column)*plan.unit
+		cx := x + plan.columns[p.Column]
 		cy := top + plan.offsets[p.Row] - plan.offsets[g.start]
 		ch := plan.offsets[p.Row+p.RowSpan] - plan.offsets[p.Row]
 		r.pdf.SetDrawColor(120, 120, 120)
-		r.pdf.Rect(cx, cy, float64(p.ColSpan)*plan.unit, ch, "D")
+		r.pdf.Rect(cx, cy, (plan.columns[p.Column+p.ColSpan] - plan.columns[p.Column]), ch, "D")
 		y := cy + 6
 		for _, f := range c.flow {
 			if err := r.drawFragment(f, cx+6, y); err != nil {

@@ -200,3 +200,19 @@ the source oracle. Next preserve source logical-column widths through SF/DOCX/na
 sizing, then source numbering templates/formats. The 207-page real render supplies
 concrete table-wrapping and heading evidence. Continue the original broader
 requirements; see URI_TARGETS.md.
+
+
+## 2026-11-24 Preferred grid widths landed; next numbering
+
+The initial grid preferences now survive all 59 original Word tables and SF/DOCX
+round trips. PDF layout/continuations use shared intervals; uniquely proven painted
+grids retain inferred widths independently of logical membership. Native full-source
+output is 189 pages; the formerly narrow table is readable on page 120. See
+TABLE_WIDTHS.md for source facts, diagnostics and independent-reader limits.
+
+Next inspect `docxNumberLevel`, source `w:numFmt`/`w:lvlText` and renderer labels.
+Preserve common decimal/letter/Roman and multilevel templates through the SF, test
+restart/overrides and real-source headings independently, then address internal
+destinations and remaining source/recovery/corpus/performance work. Word auto-fit
+and conflicting width overrides remain explicit layout losses, not a claim of
+complete Word layout. Do not remove any required acceptance row to call this done.

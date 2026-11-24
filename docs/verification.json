@@ -2017,7 +2017,7 @@
         "docx_unicode.docx"
       ],
       "before": "one Cambria span",
-      "after": "Cambria text interleaved with declared \uff2d\uff33 \u660e\u671d Chinese and supplementary spans",
+      "after": "Cambria text interleaved with declared ＭＳ 明朝 Chinese and supplementary spans",
       "node_increase": 4,
       "fixture_or_content_oracle_changed": false,
       "comparison": "output/script-font-corpus-differences.json"
@@ -4121,7 +4121,7 @@
         69,
         89
       ],
-      "detailed_crop": "page 89 shifted-column grid; byte 4 description visibly spans bytes 5\u20137",
+      "detailed_crop": "page 89 shifted-column grid; byte 4 description visibly spans bytes 5–7",
       "claim": "reader geometry qualification; no generated-output or Word-equivalence claim"
     },
     "limitations": [
@@ -4380,14 +4380,14 @@
       "uri_targets": 434,
       "expected_source_uri_targets": 434,
       "missing_uri_targets": [
-        "#_CONNACK_\u2013_Connect",
-        "#_CONNECT_\u2013_Connection",
-        "#_Figure_4.3_\u2013"
+        "#_CONNACK_–_Connect",
+        "#_CONNECT_–_Connection",
+        "#_Figure_4.3_–"
       ],
       "unexpected_uri_targets": [
-        "#_CONNACK_\u00e2\u2022\ufb01_Connect",
-        "#_CONNECT_\u00e2\u2022\ufb01_Connection",
-        "#_Figure_4.3_\u00e2\u2022\ufb01"
+        "#_CONNACK_â•ﬁ_Connect",
+        "#_CONNECT_â•ﬁ_Connection",
+        "#_Figure_4.3_â•ﬁ"
       ],
       "image_programs": 1,
       "original_jpeg_sha_preserved": true,
@@ -4471,7 +4471,7 @@
     },
     "commands": [
       "GOWORK=off CGO_ENABLED=0 go run ./examples/font-subset",
-      "GOWORK=off CGO_ENABLED=0 go run ./examples/font-subset -font output/font-research/BabelStoneHan.ttf -family 'BabelStone Han' -text \ud869\uded4 -out output/font-subset/han-example",
+      "GOWORK=off CGO_ENABLED=0 go run ./examples/font-subset -font output/font-research/BabelStoneHan.ttf -family 'BabelStone Han' -text 𪛔 -out output/font-subset/han-example",
       "output/qa-venv/bin/python scripts/verify_font_subsets.py --han-font output/font-research/BabelStoneHan.ttf",
       "output/qa-venv/bin/python scripts/verify_glyphs.py",
       "output/qa-venv/bin/python scripts/verify_default_shaping.py",
@@ -4533,9 +4533,9 @@
         "#_Figure_4.3_%E2%80%93"
       ],
       "old_corrupt_targets": [
-        "#_CONNACK_\u00e2\u2022\ufb01_Connect",
-        "#_CONNECT_\u00e2\u2022\ufb01_Connection",
-        "#_Figure_4.3_\u00e2\u2022\ufb01"
+        "#_CONNACK_â•ﬁ_Connect",
+        "#_CONNECT_â•ﬁ_Connection",
+        "#_Figure_4.3_â•ﬁ"
       ],
       "source_fixtures_and_oracles": "unchanged",
       "comparison": "Independent urllib RFC 3987 mapping preserves source Unicode and rejects old mojibake"
@@ -4638,5 +4638,56 @@
     ],
     "kt": "docs/URI_TARGETS.md",
     "logs": "ignored output/uri/"
+  },
+  "table_column_widths": {
+    "date": "2026-11-24",
+    "status": "verified milestone; full objective incomplete",
+    "go_test": "passed: library 17.298s; CLI 0.490s",
+    "go_test_race": "passed on final source: library 162.138s; CLI 2.101s",
+    "go_vet": "passed",
+    "module_verify": "all modules verified",
+    "diff_check": "passed",
+    "cgo_disabled": {
+      "darwin_arm64": "CLI built and executed; example ran all four paths",
+      "linux_amd64": "cross-build passed"
+    },
+    "original_docx_grids": 59,
+    "original_grid_comparison": "independent original ZIP/XML twips / 20 exact for every SF table",
+    "original_table_51": {
+      "logical_columns": 17,
+      "description_cell_points": 180.35,
+      "isolated_native_pages": 1
+    },
+    "synthetic": {
+      "native_pages": 4,
+      "libreoffice_docx_pages": 3,
+      "source_and_docx_outer_twips": [
+        900,
+        3600,
+        1500
+      ],
+      "nested_docx_twips": [
+        1482,
+        3458
+      ],
+      "recovered_page_local_tables": 5,
+      "prosemirror_nodes_marks_attributes": 1093,
+      "fractional_preference_roundtrips": 120
+    },
+    "full_real_render": {
+      "pages": 189,
+      "bytes": 4958166,
+      "source_uri_targets": 434,
+      "original_jpeg_and_font_programs": "independent checks passed",
+      "visual_pages": [
+        1,
+        24,
+        120
+      ]
+    },
+    "visual_inspection": "all four synthetic native pages, all three LibreOffice DOCX pages, isolated source table, and full-source 1/24/120 inspected",
+    "initial_failure": "random fractional preferences exposed false metadata rejection when using the rounded table total; fixed by recording/checking actual fitting container, original failing log retained locally",
+    "limits": "Word auto-fit/width overrides are diagnosed. Broader numbering, source/recovery/corpus, internal destinations and codec/performance remain. No Word-equivalent layout claim.",
+    "evidence": "output/table-widths; docs/TABLE_WIDTHS.md; scripts/verify_table_widths.py"
   }
 }

@@ -20,6 +20,7 @@ func (s *pdfStructureRecovery) recoverTableSpans(table Block, nodes []*pdfStruct
 	}
 	var chosen Block
 	matches := 0
+	spansChanged := false
 	x0, y0, x1, y1 := quadBounds(*source.Quad)
 	for _, g := range regions {
 		if s.reader.ctx.Err() != nil {
@@ -29,10 +30,18 @@ func (s *pdfStructureRecovery) recoverTableSpans(table Block, nodes []*pdfStruct
 			continue
 		}
 		candidate, changed, ok := s.matchTaggedGrid(table, nodes, g)
-		if !ok || !changed {
+		if !ok {
 			continue
 		}
+		if !changed {
+			candidate = table
+		}
+		candidate.ColumnWidths = gridColumnWidths(g)
+		src := *candidate.Source
+		src.TableWidths = gridWidthSource(g)
+		candidate.Source = &src
 		chosen = candidate
+		spansChanged = changed
 		matches++
 		if matches > 1 {
 			return table, false
@@ -41,7 +50,10 @@ func (s *pdfStructureRecovery) recoverTableSpans(table Block, nodes []*pdfStruct
 	if matches != 1 {
 		return table, false
 	}
-	s.warn("pdf_structure_spans_inferred", "Missing tagged-table spans are recovered from a uniquely matching painted grid; logical membership stays explicit and empty continuation identities are retained")
+	s.warn("pdf_table_widths_inferred", "Column widths are measured from a uniquely matching painted grid, independently of explicit logical membership")
+	if spansChanged {
+		s.warn("pdf_structure_spans_inferred", "Missing tagged-table spans are recovered from a uniquely matching painted grid; logical membership stays explicit and empty continuation identities are retained")
+	}
 	return chosen, true
 }
 
@@ -278,6 +290,9 @@ func (s *pdfStructureRecovery) matchTaggedGrid(table Block, nodes []*pdfStructur
 	}
 	if _, err := tableGrid(result.Rows); err != nil {
 		return Block{}, false, false
+	}
+	if !changed {
+		return table, false, true
 	}
 	return result, changed, true
 }

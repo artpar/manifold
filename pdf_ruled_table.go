@@ -391,7 +391,7 @@ func (r *pdfReader) inferRuledTables(boxes []pdfLayoutBox, page int, em float64)
 			}
 			continue
 		}
-		table := Block{Kind: Table, Rows: make([]Row, len(g.ys)-1)}
+		table := Block{Kind: Table, Rows: make([]Row, len(g.ys)-1), ColumnWidths: gridColumnWidths(g)}
 		for i, c := range g.cells {
 			ordered := r.layoutOrder(content[i], em, "", 0)
 			lines := pdfLayoutLines(ordered)
@@ -415,6 +415,7 @@ func (r *pdfReader) inferRuledTables(boxes []pdfLayoutBox, page int, em float64)
 			continue
 		}
 		table.Source = rulingBoundsSource(page, g.rect, []Block{table}, "Table")
+		table.Source.TableWidths = gridWidthSource(g)
 		var remaining []pdfLayoutBox
 		for i, b := range boxes {
 			if !consumed[i] {
@@ -426,4 +427,15 @@ func (r *pdfReader) inferRuledTables(boxes []pdfLayoutBox, page int, em float64)
 		r.doc.warn("pdf_table_rulings_inferred", "Cell boundaries, rectangular merges and empty cells are inferred from painted grid adjacency; border appearance and authorial table/header semantics are not established")
 	}
 	return boxes
+}
+
+func gridColumnWidths(g pdfGridRegion) []float64 {
+	widths := make([]float64, len(g.xs)-1)
+	for i := range widths {
+		widths[i] = g.xs[i+1] - g.xs[i]
+	}
+	return widths
+}
+func gridWidthSource(g pdfGridRegion) *TableWidthSource {
+	return &TableWidthSource{Evidence: "painted_grid_adjacency", Confidence: .7, Bounds: Quad{{g.rect.x0, g.rect.y0}, {g.rect.x1, g.rect.y0}, {g.rect.x1, g.rect.y1}, {g.rect.x0, g.rect.y1}}}
 }

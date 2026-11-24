@@ -910,3 +910,12 @@ IRI; PDF recovery keeps the stored equivalent URI. Existing escapes/delimiters a
 distinct resource normalization forms are preserved. No URI resolution, destination
 inference or public schema/API change is added. See URI_TARGETS.md for source-oracle and
 reader evidence.
+
+
+## Preferred physical table grids
+
+table_widths.go validates and fits point preferences shared by DOCX containers and
+PDF measurement/paint/continuation. SF table columnWidths extends the established
+profile; docx_table_widths.go imports original grid preferences and checks metadata
+against actual serialized twips. PDF source.table_widths separates measured grid
+evidence from explicit membership. See TABLE_WIDTHS.md.

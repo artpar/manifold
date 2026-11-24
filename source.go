@@ -54,35 +54,44 @@ type TableSpanSource struct {
 	Continuations []SourceElementReference `json:"continuations,omitempty"`
 }
 
+// TableWidthSource records measured painted-grid widths independently from
+// explicit PDF logical table membership. Confidence is not a probability.
+type TableWidthSource struct {
+	Evidence   string  `json:"evidence"`
+	Confidence float64 `json:"confidence"`
+	Bounds     Quad    `json:"bounds"`
+}
+
 // SourceInfo records provenance, not an alternative copy of content. Quads use
 // advance/font metrics, not glyph ink outlines. Precision discloses estimates.
 // Confidence is a heuristic ranking, not a calibrated probability.
 type SourceInfo struct {
-	Format             Format           `json:"format"`
-	Page               int              `json:"page,omitempty"`
-	Object             string           `json:"object,omitempty"`
-	Stream             string           `json:"stream,omitempty"`
-	Role               string           `json:"role,omitempty"`
-	Element            string           `json:"element,omitempty"`
-	Order              int              `json:"order,omitempty"`
-	Quad               *Quad            `json:"quad,omitempty"`
-	Baseline           *[2]Point        `json:"baseline,omitempty"`
-	Matrix             *Matrix          `json:"matrix,omitempty"`
-	Regions            []SourceRegion   `json:"regions,omitempty"`
-	Font               string           `json:"font,omitempty"`
-	FontFamilyEvidence string           `json:"font_family_evidence,omitempty"`
-	ColorSpace         string           `json:"color_space,omitempty"`
-	ColorComponents    []float64        `json:"color_components,omitempty"`
-	FontSize           float64          `json:"font_size,omitempty"`
-	MCID               *int             `json:"mcid,omitempty"`
-	Tag                string           `json:"tag,omitempty"`
-	Structure          string           `json:"structure"` // explicit, inferred or unstructured
-	Evidence           string           `json:"evidence"`
-	Confidence         float64          `json:"confidence"`
-	Precision          string           `json:"precision,omitempty"`
-	Label              string           `json:"label,omitempty"`
-	RenderMode         int              `json:"render_mode,omitempty"`
-	TableSpans         *TableSpanSource `json:"table_spans,omitempty"`
+	Format             Format            `json:"format"`
+	Page               int               `json:"page,omitempty"`
+	Object             string            `json:"object,omitempty"`
+	Stream             string            `json:"stream,omitempty"`
+	Role               string            `json:"role,omitempty"`
+	Element            string            `json:"element,omitempty"`
+	Order              int               `json:"order,omitempty"`
+	Quad               *Quad             `json:"quad,omitempty"`
+	Baseline           *[2]Point         `json:"baseline,omitempty"`
+	Matrix             *Matrix           `json:"matrix,omitempty"`
+	Regions            []SourceRegion    `json:"regions,omitempty"`
+	Font               string            `json:"font,omitempty"`
+	FontFamilyEvidence string            `json:"font_family_evidence,omitempty"`
+	ColorSpace         string            `json:"color_space,omitempty"`
+	ColorComponents    []float64         `json:"color_components,omitempty"`
+	FontSize           float64           `json:"font_size,omitempty"`
+	MCID               *int              `json:"mcid,omitempty"`
+	Tag                string            `json:"tag,omitempty"`
+	Structure          string            `json:"structure"` // explicit, inferred or unstructured
+	Evidence           string            `json:"evidence"`
+	Confidence         float64           `json:"confidence"`
+	Precision          string            `json:"precision,omitempty"`
+	Label              string            `json:"label,omitempty"`
+	RenderMode         int               `json:"render_mode,omitempty"`
+	TableWidths        *TableWidthSource `json:"table_widths,omitempty"`
+	TableSpans         *TableSpanSource  `json:"table_spans,omitempty"`
 }
 
 // PDFPage records physical page boundaries even when a logical tagged paragraph
@@ -180,6 +189,18 @@ func (s *SourceInfo) validate(pages []PDFPage) error {
 		}
 		if err := check(region.Quad); err != nil {
 			return err
+		}
+	}
+	if width := s.TableWidths; width != nil {
+		if s.Page < 1 || s.Role != "Table" || width.Evidence != "painted_grid_adjacency" || !finite(width.Confidence) || width.Confidence < 0 || width.Confidence > 1 {
+			return fmt.Errorf("invalid table width provenance")
+		}
+		if err := check(width.Bounds); err != nil {
+			return err
+		}
+		x0, y0, x1, y1 := quadBounds(width.Bounds)
+		if x1 <= x0 || y1 <= y0 {
+			return fmt.Errorf("invalid table width bounds")
 		}
 	}
 	if span := s.TableSpans; span != nil {

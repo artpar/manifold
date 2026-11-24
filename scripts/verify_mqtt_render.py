@@ -56,7 +56,7 @@ report=dict(pages=len(pdf),bytes=(out/'mqtt.pdf').stat().st_size,title=r.metadat
             supplementary_character_count=1,figure_dash_count=4,
             unique_glyph_font_programs=list(programs.values()),
             selected_pages_for_visual_inspection=[i+1 for i in sorted(selected)],
-            limitation='Explicit caller font normalization and acknowledged source diagnostics. This does not prove complete source text/structure/layout recovery or Word-equivalent reflow; widths/numbering/shading and further corpus work remain.')
+            limitation='Explicit caller font normalization and acknowledged source diagnostics. This does not prove complete source text/structure/layout recovery or Word-equivalent reflow; Word auto-fit/conflicting width preferences, numbering/shading and further corpus work remain.')
 (out/'mqtt-independent.json').write_text(json.dumps(report,indent=2)+'\n')
 print(json.dumps(report,indent=2))
 assert links==expected_links,(len(links),len(expected_links),expected_links-links)

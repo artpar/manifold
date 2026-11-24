@@ -21,7 +21,36 @@ links, table nesting, notes, running content and diagnostics survive the bridge.
 No Colleaf schema was found in the searched checkout locations; `.vdocs`
 compatibility has not been established. No Daptin files were changed.
 
-## Latest milestone: standards-based Unicode URI serialization
+## Latest milestone: preferred physical table grid widths
+
+SF table `columnWidths` and public `Block.ColumnWidths` now preserve logical grid
+preferences in points through SF/JSON/DOCX. PDF measurement/drawing/continuation
+share cumulative physical boundaries, including merges, nested tables, notes and
+running containers. Explicit preferences fit by proportional shrinkage; absent
+widths keep equal available columns. DOCX standard grids plus checked ignorable
+metadata retain the preference before fitting/twip rounding. Source auto-fit and
+conflicting table/cell preferences have explicit diagnostics. Painted PDF grids
+supply separately identified inferred width provenance; explicit logical membership
+and original cell identity/span/hash oracles remain intact.
+
+Independent XML inspection matches all 59 original Word grids. The affected 17-axis
+table now has a 180.35pt merged description cell and a readable one-page isolated
+render. The full native real render is 189 pages (previously 207); font/link/asset
+checks pass. This is not a Word-equivalence claim. Four native synthetic pages and
+three LibreOffice DOCX pages were inspected. See TABLE_WIDTHS.md for API/schema,
+source/reader evidence, diagnostics and limits; TESTING.md has commands.
+
+Checks pass: full tests (library 17.298s / CLI 0.490s), final race checks
+(162.138s / 2.101s), vet, module verification, host CGO-disabled build/execution,
+Linux/amd64 CGO-disabled cross-build and diff whitespace check. Independent Python
+and actual ProseMirror checks pass; evidence is in output/table-widths and
+verification.json. The full objective is still open:
+source numbering formats/templates, internal destinations, broader source/recovery/
+corpus qualification and large-provenance/codec costs remain concrete next work.
+Next: `rg -n 'numFmt|lvlText|numbering_label' docx_lists.go docx_read.go`;
+inspect original numbering definitions and establish independent label expectations.
+
+## Previous milestone: standards-based Unicode URI serialization
 
 PDF link targets now use UTF-8 percent-encoded ASCII URI references, as required
 by ISO 32000-1 Table 206 and RFC 3987. Unicode source IRIs stay unchanged in SF

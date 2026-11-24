@@ -76,14 +76,17 @@ type Block struct {
 	// at the page's first flow position. PageBreak blocks always advance a page.
 	PageBreakBefore bool `json:"page_break_before,omitempty"`
 	// Direction is empty (unspecified), ltr or rtl; it describes paragraph flow.
-	Direction string     `json:"direction,omitempty"`
-	Kind      Kind       `json:"kind"`
-	Runs      []Run      `json:"runs,omitempty"`
-	Level     int        `json:"level,omitempty"`
-	List      string     `json:"list,omitempty"` // bullet or number
-	Rows      []Row      `json:"rows,omitempty"`
-	Image     *Image     `json:"image,omitempty"`
-	Items     []ListItem `json:"items,omitempty"`
+	Direction string `json:"direction,omitempty"`
+	Kind      Kind   `json:"kind"`
+	Runs      []Run  `json:"runs,omitempty"`
+	Level     int    `json:"level,omitempty"`
+	List      string `json:"list,omitempty"` // bullet or number
+	Rows      []Row  `json:"rows,omitempty"`
+	// ColumnWidths are preferred logical grid-column widths in points. Empty uses
+	// equal available widths. Renderers shrink proportionally to fit a container.
+	ColumnWidths []float64  `json:"column_widths,omitempty"`
+	Image        *Image     `json:"image,omitempty"`
+	Items        []ListItem `json:"items,omitempty"`
 	// Start is the first ordered-list value; nil means one. Zero is valid.
 	Start                   *int        `json:"start,omitempty"`
 	Source                  *SourceInfo `json:"source,omitempty"`
@@ -381,6 +384,9 @@ func (d *Document) Validate() error {
 					return err
 				}
 			}
+			if b.Kind != Table && len(b.ColumnWidths) > 0 {
+				return errors.New("column widths require a table")
+			}
 			switch b.Kind {
 			case SectionBlock:
 				if b.Section == nil || len(b.Runs) > 0 || len(b.Rows) > 0 || b.Image != nil || len(b.Items) > 0 || b.List != "" || b.Level != 0 {
@@ -439,7 +445,11 @@ func (d *Document) Validate() error {
 				if len(b.Runs) > 0 || b.Image != nil {
 					return errors.New("table cannot contain direct runs or an image")
 				}
-				if _, err := tableGrid(b.Rows); err != nil {
+				g, err := tableGrid(b.Rows)
+				if err != nil {
+					return err
+				}
+				if err := validateColumnWidths(b.ColumnWidths, g.Columns); err != nil {
 					return err
 				}
 				for _, r := range b.Rows {

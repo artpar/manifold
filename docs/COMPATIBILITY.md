@@ -847,3 +847,11 @@ implicit resolution. Eight all-story sample targets and all 434 original Word-so
 targets pass independent serialization/relationship checks. Relative fragments remain
 references, and internal bookmark/destination recovery remains unfinished. See
 URI_TARGETS.md.
+
+
+## Preferred table grid widths
+
+SF/JSON/DOCX retain optional point preferences per logical column. PDF fits and
+continues the same physical grid; ruled recovery exposes measured inferred widths.
+Word auto-fit and conflicting cell/table preferences remain diagnosed layout losses.
+No source Word-equivalent pagination is claimed. See TABLE_WIDTHS.md.

@@ -624,3 +624,12 @@ The existing link mark href string retains its Unicode IRI in SF and DOCX. PDF
 URI-action strings use equivalent RFC 3987 ASCII/percent representations, and PDF import
 retains that stored URI. Direct SF bridges do not rewrite targets. This is a
 serialization rule, with no new mark/node/version; see URI_TARGETS.md.
+
+
+## Physical table preferences
+
+Optional table attrs.columnWidths is an array of positive finite point widths,
+one per shared logical column; default null/empty means equal available columns.
+It preserves subpixel source dimensions and avoids inconsistent per-cell widths.
+PDF source.table_widths records measured grid evidence/confidence/bounds independently
+from explicit membership. See TABLE_WIDTHS.md for editor adaptation and validation.

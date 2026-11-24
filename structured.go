@@ -172,6 +172,11 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 				n.Content = append(n.Content, StructuredNode{Type: "list_item", Attrs: encodeSourceAttrs(nil, item.Source), Content: content})
 			}
 		case Table:
+			if len(b.ColumnWidths) > 0 {
+				n.Attrs = sfAttrs(struct {
+					ColumnWidths []float64 `json:"columnWidths"`
+				}{b.ColumnWidths})
+			}
 			for _, row := range b.Rows {
 				rn := StructuredNode{Type: "table_row"}
 				if row.RepeatHeader {
@@ -468,9 +473,13 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 			}
 
 		case "table":
-			if err := emptySFAttrs(n.Attrs); err != nil {
+			a := struct {
+				ColumnWidths []float64 `json:"columnWidths"`
+			}{}
+			if err := strictSFAttrs(n.Attrs, &a); err != nil {
 				return nil, err
 			}
+			b.ColumnWidths = append([]float64(nil), a.ColumnWidths...)
 			for _, row := range n.Content {
 				if row.Type != "table_row" || row.Text != "" || len(row.Marks) > 0 {
 					return nil, fmt.Errorf("table requires table_row children")

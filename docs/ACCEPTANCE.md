@@ -224,3 +224,14 @@ SF paths with visible repeated running labels and preserved note destinations. A
 page commands/annotation rectangles are exact before/after. The goal remains incomplete:
 source widths/numbering, internal destinations, broader source/recovery/corpus and codec
 overhead remain required. See URI_TARGETS.md.
+
+
+## 2026-11-24 Physical grid sizing milestone
+
+Source widths now persist across SF/DOCX; PDF layout/continuation and measured-grid
+recovery use them. Independent original XML proves all 59 grids, with the affected
+17-axis table readable and 180.35pt description width. All four paths have width
+evidence; four native and three independent DOCX-render pages were inspected.
+Full-source output is 189 pages, not a Word-equivalence result. Source numbering,
+internal destinations, broader corpus/recovery and codec/performance remain open.
+See TABLE_WIDTHS.md.

@@ -2089,3 +2089,33 @@ old corruption still fails, new output matches all 434 targets. All 207 page com
 and annotation rectangles remain exact. Go tests/race/vet, 1,000 URI fuzz executions and
 CGO-disabled builds pass; exact evidence and remaining limitations are in
 URI_TARGETS.md/verification.json.
+
+## Preferred table widths (2026-11-24)
+
+```sh
+GOWORK=off go run ./examples/table-widths
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+bin/manydoc convert -o output/table-widths/mqtt.sf testdata/real/mqtt-v5.0-os.docx
+output/qa-venv/bin/python scripts/verify_table_widths.py --prepare-source
+bin/manydoc convert -allow-lossy -pdf-font Sans=output/font-subset/dejavu/DejaVuSans.ttf -pdf-font Sans/B=output/font-subset/dejavu/DejaVuSans-Bold.ttf -pdf-font-map Arial=Sans -o output/table-widths/mqtt-table.pdf output/table-widths/mqtt-table.sf
+output/qa-venv/bin/python scripts/verify_table_widths.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/table-widths/source.sf output/table-widths/from-docx.sf output/table-widths/from-pdf.sf output/table-widths/mqtt-table.sf
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-width-profile --headless --convert-to pdf --outdir output/table-widths/lo output/table-widths/widths.docx
+GOWORK=off go test ./...
+GOWORK=off go test -race ./...
+GOWORK=off go vet ./...
+GOWORK=off go mod verify
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOWORK=off go build -o bin/manydoc-linux-amd64 ./cmd/manydoc
+git diff --check
+```
+
+See FONT_SUBSETTING.md for optional original font preparation and the complete
+source render flags; use output/table-widths for its SF/PDF, then
+`output/qa-venv/bin/python scripts/verify_mqtt_render.py --out output/table-widths`.
+This audit keeps its original source/asset/URI/font checks; pagination is an
+observation. Native page 120 contains the affected original table. Visual QA
+inspected all four synthetic native and three LibreOffice DOCX pages, isolated
+original table page, and full-source page 120. The initial randomized rounding
+check caught false metadata rejection; writer metadata now carries the available
+container width so the reader recomputes exact quantization instead of using a
+rounded total. The failing log is retained locally; it is not a green result.

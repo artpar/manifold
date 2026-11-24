@@ -1306,3 +1306,13 @@ on PDF import. Compare output to an independent RFC mapping of unchanged source 
 and prove the old mojibake still fails. All 207 page streams and annotation rectangles
 remain exact. Internal destination resolution is not inferred from a fragment string;
 see URI_TARGETS.md.
+
+
+## 2026-11-24 Preserve column preferences on the logical grid
+
+Use a table-level point array instead of duplicating physical widths into each
+cell or snapping the source to integer CSS pixels. Keep every narrow source axis;
+merged cells sum their intervals. Preserve preferences before container shrinkage
+through checked ignorable DOCX metadata, with standard grids independently usable.
+Report Word auto-fit/override losses. PDF measured widths carry independent inferred
+provenance; they do not change logical membership evidence. See TABLE_WIDTHS.md.

@@ -1,6 +1,7 @@
 package manydoc
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"strconv"
@@ -103,7 +104,11 @@ func (r *docxReader) table(n *xmlNode, rels map[string]docxRelation, depth int) 
 			}
 		}
 	}
-	if _, err := tableGrid(b.Rows); err != nil {
+	g, err := tableGrid(b.Rows)
+	if err != nil {
+		return Block{}, err
+	}
+	if err := r.tableWidths(n, &b, g.Columns); err != nil {
 		return Block{}, err
 	}
 	return b, nil
@@ -128,17 +133,35 @@ func docxTableColumns(b Block, width float64) (*tableGeometry, []int, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	total := int(math.Round(width*20) - float64(b.docxIndent))
-	if total < max(1, g.Columns) {
-		return nil, nil, fmt.Errorf("%w: DOCX table too narrow for %d columns", ErrUnsupported, g.Columns)
+	available := width - float64(b.docxIndent)/20
+	points, err := fittedColumnWidths(b.ColumnWidths, g.Columns, available)
+	if err != nil {
+		return nil, nil, err
 	}
 	widths := make([]int, g.Columns)
-	for col := range widths {
-		widths[col] = total / g.Columns
-		if col < total%g.Columns {
-			widths[col]++
+	if len(b.ColumnWidths) == 0 {
+		total := int(math.Round(available * 20))
+		for i := range widths {
+			widths[i] = total / g.Columns
+			if i < total%g.Columns {
+				widths[i]++
+			}
+		}
+	} else {
+		position, previous := 0.0, 0
+		for i, pt := range points {
+			position += pt * 20
+			next := int(math.Round(position))
+			widths[i] = next - previous
+			previous = next
 		}
 	}
+	for _, w := range widths {
+		if w < 1 {
+			return nil, nil, fmt.Errorf("%w: DOCX table column narrower than one twip", ErrUnsupported)
+		}
+	}
+
 	return g, widths, nil
 }
 
@@ -152,7 +175,11 @@ func (w *docxWriter) table(b Block) (string, error) {
 		total += width
 	}
 	var out strings.Builder
-	fmt.Fprintf(&out, `<w:tbl><w:tblPr><w:tblW w:w="%d" w:type="dxa"/>`, total)
+	metadata, err := json.Marshal(b.ColumnWidths)
+	if err != nil {
+		return "", err
+	}
+	fmt.Fprintf(&out, `<w:tbl md:columnWidths="%s" md:columnWidthContainer="%s"><w:tblPr><w:tblW w:w="%d" w:type="dxa"/>`, escape(string(metadata)), strconv.FormatFloat(w.contentWidth-float64(b.docxIndent)/20, 'g', -1, 64), total)
 	if b.docxIndent > 0 {
 		fmt.Fprintf(&out, `<w:tblInd w:w="%d" w:type="dxa"/>`, b.docxIndent)
 	}

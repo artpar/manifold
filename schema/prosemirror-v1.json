@@ -109,6 +109,7 @@
       "group": "block",
       "content": "table_row*",
       "attrs": {
+        "columnWidths": {"default": null},
         "source": {
           "default": null
         }

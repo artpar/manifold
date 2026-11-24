@@ -208,7 +208,7 @@ func (r *pdfRenderer) paintTablePage(plan *pdfTableLayout, page pdfTablePage, x,
 				return err
 			}
 			p := c.position
-			cx, cw := x+float64(p.Column)*plan.unit, float64(p.ColSpan)*plan.unit
+			cx, cw := x+plan.columns[p.Column], (plan.columns[p.Column+p.ColSpan] - plan.columns[p.Column])
 			r.pdf.SetDrawColor(120, 120, 120)
 			r.pdf.Line(cx, y, cx, y+band.height)
 			r.pdf.Line(cx+cw, y, cx+cw, y+band.height)
@@ -236,8 +236,8 @@ func (r *pdfRenderer) paintTablePage(plan *pdfTableLayout, page pdfTablePage, x,
 	}{{page.bands[0], bodyTop}, {page.bands[len(page.bands)-1], y}} {
 		for _, c := range edge.band.cells {
 			p := c.position
-			cx := x + float64(p.Column)*plan.unit
-			r.pdf.Line(cx, edge.y, cx+float64(p.ColSpan)*plan.unit, edge.y)
+			cx := x + plan.columns[p.Column]
+			r.pdf.Line(cx, edge.y, cx+(plan.columns[p.Column+p.ColSpan]-plan.columns[p.Column]), edge.y)
 		}
 	}
 	return r.pdf.Error()
