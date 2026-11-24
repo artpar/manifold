@@ -34,12 +34,60 @@ GitHub inspection now pins artpar/colleaf at
 5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6 and matching published Univer 1.0.4 types.
 Its .vdocs is a version-3 wrapper around IDocumentData with indexed streams,
 source tables/drawings/stories/notes and plugin resources. SF cannot be renamed
-into that native format. A checked standalone adapter through SF remains open.
+into that native format. A checked standalone adapter through SF is now public; broader native rendering
+and browser qualification remain open.
 Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: native run language intent and original DOCX graphs
+## Latest progress: public native API/CLI and a concrete PDF acceptance failure
+
+Colleaf version-3/Univer 1.0.4 envelopes are now available through VDOCS,
+ReadVDOCS, WriteVDOCS, VDOCSMIME and .vdocs CLI input/output. Native transport
+retains diagnostics and PDF source history, so it needs no lossy acknowledgement;
+AllowLossy cannot bypass unsupported mappings. Public API tests compare full SF
+from original DOCX/PDF plus table/image/list/Unicode fixtures, check input
+immutability, I/O/cancellation/nil/wrong-envelope boundaries, and generic dispatch.
+CLI tests compare complete native/SF/gzip graphs, typed DOCX notes and atomic
+failure behavior. examples/colleaf exercises native/SF/DOCX/PDF without runtime
+external tools, uploads, application quotas or authorization logic.
+
+The public example passes the pinned actual Colleaf validator and two registered
+plugin save/reopen cycles; public Go reimport matches its complete SF graph.
+Actual ProseMirror checks 34 nodes/marks/attributes. Independent pypdf/OOXML checks
+find two PDF pages, each of three note-body markers exactly once, and two footnote/
+one endnote DOCX definitions. This is offline transport/component evidence, not
+native browser rendering or PDF semantic round-trip qualification.
+
+A new end-to-end assertion exposed a required PDF gap: generated PDFs have no
+StructTreeRoot. Their visible notes remain text on import, with zero typed notes
+instead of the example's three. The expected three definitions/two footnotes/one
+endnote remain unchanged in the acceptance subtest below. It is explicitly opt-in
+in ordinary unit/race runs, and currently FAILS when enabled. Standard green tests
+therefore do not prove this completion requirement. Neither the native adapter nor
+its public API fixes this existing PDF semantic-recovery gap.
+
+```sh
+GOWORK=off go run ./examples/colleaf -out output/colleaf-example
+node scripts/verify_colleaf_envelope.cjs output/colleaf-example/document.vdocs output/colleaf-example/saved.vdocs
+MANYDOC_PUBLIC_VDOCS_SAVED=output/colleaf-example/saved.vdocs GOWORK=off go test -run TestVDOCSPublicActualSavedExample -count=1 .
+MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf' -count=1 ./cmd/manydoc
+rg -n 'RawWriteStr|drawFragment|noteLinks|StructTreeRoot' pdf_write.go pdf_glyph.go pdf_notes.go pdf_structure_notes.go
+```
+
+Standard tests pass (library 26.910s/CLI 0.797s), race passes (314.803s/2.241s),
+vet/modules, CGO-disabled public tests (5.630s), host build/help/native CLI and Linux
+amd64/arm64 cross-builds pass. Envelope fuzz passes 1861 executions/11.464s (short
+safety sample). The required PDF note-graph acceptance gate is skipped in those
+standard runs and explicitly FAILS when enabled. verification.json records both
+the passing scoped checks and that contradictory completion evidence.
+Goal active/incomplete. Next priority: preserve generated PDF note relationships
+through actual marked content/structure or conservatively diagnosed recovery;
+never inject a cached SF body as apparent recovered structure. Remaining native
+marker/run/settings intent, full-preset/browser and nonmain lookup limits, note
+policies/decorations, broader PDF/inverse/source/resource and final audits remain.
+
+## Earlier progress: native run language intent and original DOCX graphs
 
 Private native conversion now maps SF EastAsiaLanguage to the current native
 altLang field. A typed manydoc.run-languages/version 1 text-style marker identifies

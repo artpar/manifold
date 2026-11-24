@@ -16,19 +16,21 @@ async function main() {
  const source = fs.readFileSync(path.join(root, 'output/codec/colleaf-format-0.txt'), 'utf8');
  assert.equal(crypto.createHash('sha256').update(source).digest('hex'), 'c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0');
  const app = await import('data:text/javascript;base64,' + Buffer.from(stripTypeScriptTypes(source)).toString('base64'));
- const wire = JSON.parse(fs.readFileSync(path.join(qa, 'sections.vdocs')));
+ const wire = JSON.parse(fs.readFileSync(process.argv[2] || path.join(qa, 'sections.vdocs')));
  app.validateDocument(wire);
  assert.equal(wire.type, 'vibedada-document'); assert.equal(wire.version, 3); assert.equal(wire.engine, 'univer'); assert.equal(wire.engineVersion, '1.0.4');
  assert.equal(wire.document.locale, 'enUS');
  const saved = {...wire, document: save(save(wire.document))}; app.validateDocument(saved);
  assert.equal(saved.document.body.dataStream, wire.document.body.dataStream);
  assert.deepEqual(saved.document.body.sectionBreaks, wire.document.body.sectionBreaks);
- assert.deepEqual(saved.document.headers, wire.document.headers);
- assert.deepEqual(saved.document.footers, wire.document.footers);
- assert.deepEqual(saved.document.drawings, wire.document.drawings);
- fs.writeFileSync(path.join(qa, 'sections-saved.vdocs'), JSON.stringify(saved));
+ // SDK initializes absent story/drawing maps to empty objects. No entries
+ // may appear or disappear; only that schema-equivalent empty default differs.
+ assert.deepEqual(saved.document.headers ?? {}, wire.document.headers ?? {});
+ assert.deepEqual(saved.document.footers ?? {}, wire.document.footers ?? {});
+ assert.deepEqual(saved.document.drawings ?? {}, wire.document.drawings ?? {});
+ fs.writeFileSync(process.argv[3] || path.join(qa, 'sections-saved.vdocs'), JSON.stringify(saved));
  // A source validator pass establishes structural acceptance only; the other
  // section/glyph probes and future browser qualification retain their own scope.
- console.log('Exact .vdocs envelope accepted by pinned Colleaf validator; rich section/header/table/list/image facade save/reopen transport preserved');
+ console.log('Exact .vdocs envelope accepted by pinned Colleaf validator; main/section/running/drawing facade save/reopen transport checked; Go compares full SF graph separately');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

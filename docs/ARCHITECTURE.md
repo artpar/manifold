@@ -1789,3 +1789,19 @@ and deletion survive; current SF language semantics participate in existing sour
 fingerprints. The pinned engine has no distinct complex-language layout property:
 retaining that setting is persistence evidence, not native shaping equivalence.
 Run direction/forced complex-script rendering remain separate required mappings.
+
+
+## Public native format boundary
+
+VDOCS dispatches through the existing checked envelope workers. ReadVDOCS and
+WriteVDOCS expose that same boundary; VDOCSMIME declares the exact application
+MIME without implementing app admission. Write treats native transport like SF:
+existing diagnostic/source history is retained, while unsupported mappings reject
+regardless of AllowLossy. The CLI reuses existing atomic replacement behavior.
+The offline profile is now public independently of still-unqualified browser
+interaction; this does not widen the supported native rendering contract.
+
+The new end-to-end note acceptance probe exposes the PDF writer's lack of logical
+tags. Its untagged visible note text is not typed recovery. The unchanged three-
+note expectation is an opt-in failing acceptance check, separate from ordinary
+unit/race passes; a structured PDF writer/recovery fix remains required.

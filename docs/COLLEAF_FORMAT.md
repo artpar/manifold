@@ -1455,3 +1455,32 @@ language edits retain historical run/paragraph facts with explicit diagnostics.
 This closes the earlier five-document language-guard failures, not native
 complex-script shaping, run-direction rendering, browser paint/pagination, every
 producer or the remaining native settings/API/full-preset acceptance queue.
+
+
+## Public offline native profile
+
+The version-3/Univer1.0.4 profile is now exposed as VDOCS, ReadVDOCS, WriteVDOCS
+and VDOCSMIME, plus .vdocs CLI conversion/extraction. This supersedes earlier
+private-only staging. Accepted content goes through the same strict envelope,
+UTF-16, resource, relationships, assets, semantics and source checks described
+above. Bare editor snapshots and renamed SF still reject. Native transport retains
+diagnostic history/source facts without lossy acknowledgement; AllowLossy does not
+bypass unsupported output. The library does not impose Colleaf's application size
+limits or implement Daptin/application authorization, quotas, storage or saves.
+
+Public external-package tests qualify exact SF graphs from original note/story
+DOCX and published PDF plus image/list/table/Unicode fixtures, generic dispatch,
+immutability and error boundaries. CLI tests qualify native/SF/gzip transport,
+DOCX typed notes and atomic failure. examples/colleaf runs entirely in Go. Its
+actual app validator and two facade saves/reopens pass; public reimport compares
+full SF, and actual ProseMirror checks34 nodes/marks/attributes. The optional
+verify_colleaf_envelope.cjs now accepts input/output path arguments; absent and
+empty story/drawing maps are schema-equivalent SDK defaults, without permitting
+any populated entries to disappear. This is not browser interaction/paint proof.
+
+A separate required CLI acceptance check expects three typed notes after native
+→PDF→SF; it currently fails with zero. Independent pypdf confirms no StructTreeRoot
+in generated PDF while all three note-body markers remain visible once each.
+Native/SF persistence succeeds; generated-PDF typed recovery does not. The oracle
+is retained behind MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 and is an explicit open goal
+requirement, not an unsupported-feature exemption or a successful round trip.

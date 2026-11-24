@@ -302,5 +302,19 @@ Schema/graph/checksum validation and all assets/source fields remain intact. Ful
 large-document trees still take memory; see [codec evidence and limits](docs/SF_CODEC.md).
 
 Colleaf's actual native `.vdocs` format uses a pinned Univer snapshot rather than
-SF. [Inspected contract and remaining adapter work](docs/COLLEAF_FORMAT.md) records
-the exact boundary; native app/save compatibility is not yet implemented.
+SF. The checked offline adapter is available as `manydoc.VDOCS`,
+`ReadVDOCS` / `WriteVDOCS`, and MIME constant `VDOCSMIME`:
+
+```sh
+bin/manydoc convert -o document.vdocs examples/notes/document.sf
+bin/manydoc extract -format sf -o reopened.sf document.vdocs
+GOWORK=off go run ./examples/colleaf -out output/colleaf-example
+```
+
+The version-3 envelope targets Univer 1.0.4. Supported native/SF round trips retain
+assets, notes, source facts and diagnostics without `-allow-lossy`; unsupported
+mappings still reject. [Native contract and limits](docs/COLLEAF_FORMAT.md) records
+actual validator/plugin-save evidence, rendering gaps and application size limits.
+Browser interaction and full native rendering remain unqualified. Generated PDFs
+are currently untagged: their visible notes do not yet reimport as typed SF notes.
+This is an open completion requirement, not a successful structured round trip.

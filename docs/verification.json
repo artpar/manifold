@@ -7001,5 +7001,72 @@
       "node scripts/verify_colleaf_languages.cjs",
       "rg -n 'ErrUnsupported|requires mapping|ComplexScript|run.Direction' colleaf_*.go"
     ]
+  },
+  "colleaf_public_api_2026_11_24": {
+    "status": "public offline transport milestone; full goal active/incomplete; required PDF note acceptance fails",
+    "public_api": [
+      "VDOCS",
+      "VDOCSMIME",
+      "ReadVDOCS",
+      "WriteVDOCS",
+      "Read/Write and FormatFromName native dispatch"
+    ],
+    "CLI": ".vdocs convert input/output and extract input; same atomic replacement. Native diagnostic/source history is retained without AllowLossy; unsupported mappings cannot be bypassed with AllowLossy.",
+    "public_test_scope": "External-package full SF graph equality from original note/story DOCX, published Copyright Office PDF and table/image/list/Unicode corpus inputs; generic and dedicated functions, input immutability, envelope identity, nil/cancellation/I/O/wrong-envelope and unsupported output boundaries. CLI exact native/SF/gzip graph, typed DOCX notes and atomic failure.",
+    "example": {
+      "command": "GOWORK=off go run ./examples/colleaf -out output/colleaf-example",
+      "result": "passed; pure-Go native/SF/DOCX/PDF; native/SF graph equality verified",
+      "MIME": "application/vnd.vibedada.docs+json;version=3",
+      "app_envelope": "vibedada-document/version3/univer/engineVersion1.0.4"
+    },
+    "independent_QA": {
+      "script": "scripts/verify_colleaf_envelope.cjs",
+      "script_sha256": "66c9e84f903f83914eb362885cbc983dc2bf741a6351ad482cbc4cd5af410102",
+      "input": "output/colleaf-example/document.vdocs",
+      "validator": "Same hash-pinned actual Colleaf validator; passed",
+      "SDK": "Registered Univer1.0.4 Docs/Drawing/DocsDrawing facade saves/reopens twice in fresh instances; passed. Absent and empty story/drawing maps are equivalent defaults, populated entries still compare.",
+      "public_reimport": "MANYDOC_PUBLIC_VDOCS_SAVED=output/colleaf-example/saved.vdocs GOWORK=off go test -run TestVDOCSPublicActualSavedExample -count=1 .; passed0.378s/full SF graph",
+      "ProseMirror": "34-node example SF graph checked in document.sf and equivalent CLI SF; Python JSON/gzip confirms exact CLI graph",
+      "pypdf_and_OOXML": {
+        "PDF_pages": 2,
+        "visible_note_body_marker_counts": {
+          "FIRST_NOTE_BODY": 1,
+          "SECOND_NOTE_BODY": 1,
+          "END_NOTE_BODY": 1
+        },
+        "PDF_has_StructTreeRoot": false,
+        "DOCX_typed_note_definitions": {
+          "footnote": 2,
+          "endnote": 1
+        }
+      },
+      "scope": "Offline transport/schema/graph/save evidence. No browser interaction/paint/pagination qualification and no PDF structured-note recovery pass."
+    },
+    "required_acceptance_failure": {
+      "command": "MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf' -count=1 ./cmd/manydoc",
+      "actual_exit": 1,
+      "expected_note_definitions": 3,
+      "expected_footnotes": 2,
+      "expected_endnotes": 1,
+      "actual_note_definitions": 0,
+      "diagnosis": "Generated PDF is untagged; existing text/placement checks do not prove typed-note semantic recovery. Same problem exists for direct SF→PDF, independent of native transport.",
+      "oracle": "Expected values retained in the opt-in acceptance subtest; ordinary unit/race runs explicitly skip it. Not an unsupported-feature exemption or completed requirement.",
+      "next": "Implement actual painted logical structure/relationships or conservative diagnosed recovery; no cached SF-body substitution."
+    },
+    "checks": {
+      "go_test_all": "passed26.910s library/0.797s CLI; internal cached; known required PDF acceptance explicitly skipped",
+      "race": "passed314.803s library/2.241s CLI; internal cached; known required PDF acceptance explicitly skipped",
+      "vet": "passed",
+      "modules": "all modules verified",
+      "CGO_disabled_public_tests": "passed5.630s",
+      "builds": "CGO-disabled host build/--help and CLI native→SF/gzip execution pass; Linux amd64/arm64 cross-builds pass (not execution)",
+      "fuzz": "FuzzColleafEnvelope passed1861 executions/11.464s/two workers; short safety sample, not exhaustive",
+      "diff_check": "passed"
+    },
+    "remaining": "Generated-PDF typed-note recovery required gate fails. Native rendering/intent/browser and other PDF/inverse/source/resource/final acceptance remain open. No application/backend change or new production dependency.",
+    "next_commands": [
+      "MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf' -count=1 ./cmd/manydoc",
+      "rg -n 'finishGlyphFonts|RawWriteStr|drawFragment|noteLinks|StructTreeRoot' pdf_write.go pdf_glyph.go pdf_notes.go pdf_structure_notes.go"
+    ]
   }
 }

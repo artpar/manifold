@@ -9,6 +9,9 @@ import (
 	"math"
 )
 
+// VDOCSMIME is the MIME type required for Colleaf version-3 native documents.
+const VDOCSMIME = "application/vnd.vibedada.docs+json;version=3"
+
 const colleafEnvelopeType = "vibedada-document"
 const colleafEngineVersion = "1.0.4"
 
@@ -20,8 +23,23 @@ type colleafEnvelope struct {
 	Document      colleafNoteSnapshot `json:"document"`
 }
 
-// Private until remaining native semantics and interaction are qualified. This
-// reads the actual .vdocs envelope, never a renamed SF or bare Univer snapshot.
+// ReadVDOCS reads a Colleaf version-3 envelope for Univer 1.0.4. It validates
+// native structure, relationships and interpreted metadata before returning a
+// logical document. Unknown or unrepresentable constructs reject or produce
+// explicit diagnostics. Bare editor snapshots and renamed SF are not accepted.
+func ReadVDOCS(ctx context.Context, r io.Reader) (*Document, error) {
+	return readColleaf(ctx, r)
+}
+
+// WriteVDOCS writes a Colleaf version-3 envelope for Univer 1.0.4. It preserves
+// supported logical content, assets, diagnostic history and source facts. It
+// rejects unsupported mappings; it does not validate application admission limits
+// or guarantee native browser rendering. See docs/COLLEAF_FORMAT.md for scope.
+func WriteVDOCS(ctx context.Context, w io.Writer, d *Document) error {
+	return Write(ctx, w, d, VDOCS, WriteOptions{})
+}
+
+// The internal worker reads the envelope rather than a bare editor snapshot.
 func readColleaf(ctx context.Context, r io.Reader) (*Document, error) {
 	if r == nil {
 		return nil, fmt.Errorf("nil native document reader")

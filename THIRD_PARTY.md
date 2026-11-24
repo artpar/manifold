@@ -260,3 +260,9 @@ DOCX fixtures, pinned Univer1.0.4 types/renderer/plugins/facade, hash-pinned Col
 validator and ProseMirror reader. No new production dependency or third-party
 implementation is introduced. The original fixtures and source-only oracles are
 unchanged; native shaping/paint equivalence is not claimed.
+
+
+The public native profile/example reuses existing attributed source fixtures,
+pinned Colleaf validator/Univer facade plugins and ProseMirror. Independent
+example checks use the existing optional pypdf and standard-library OOXML reader.
+No new production dependency or third-party implementation is incorporated.

@@ -441,3 +441,23 @@ GOWORK=off go test -race -run 'TestPDFNested|TestPDFRedundantNote|TestPDFNoteWra
 Verification.json records full/final-focused tests, race, vet, modules, fuzz and
 CGO-disabled results. Ignored evidence is output/nested-notes. There is no runtime
 module/executable/service/CGO/upload/application/access/quota boundary change.
+
+
+## Generated-PDF typed-note acceptance remains incomplete
+
+The public native example provides a concrete end-to-end failure independent of
+transport: examples/notes/document.sf has three typed definitions (two footnotes,
+one endnote), all preserved through native/SF and DOCX. The generated two-page
+PDF retains each body marker once, but has no StructTreeRoot, and PDF→SF recovers
+zero typed definitions. Existing placement/text checks did not prove this inverse
+semantic path. Independent pypdf confirms the absent tree and retained text; the
+new expected count/kinds are unchanged in the CLI acceptance subtest:
+
+```sh
+MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf' -count=1 ./cmd/manydoc
+```
+
+It currently fails, explicitly. Ordinary unit/race runs skip this known acceptance
+gate and do not count it as a pass. Implement actual tagged painted relationships
+or a conservative geometric/link recovery with uncertainty; do not use cached SF
+as apparent source recovery. This is required work, not a completion exemption.

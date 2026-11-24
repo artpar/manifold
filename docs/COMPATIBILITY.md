@@ -1158,3 +1158,12 @@ altLang is authoritative for the East Asian slot; unmarked foreign slot inferenc
 is diagnosed. ComplexLanguage survives as typed authored style metadata; its use
 for native shaping is unproven. Forced complex-script and run-direction output
 still reject. See COLLEAF_FORMAT.md for exact scope and remaining native work.
+
+
+The checked native envelope profile is public through VDOCS/ReadVDOCS/WriteVDOCS
+and CLI .vdocs input/output. It preserves supported SF content/assets/history;
+unsupported native mappings still reject even with AllowLossy. No app size/quota/
+authorization gate is added. See COLLEAF_FORMAT.md for pinned version and scope.
+Browser interaction/rendering remain unqualified. Generated PDFs are untagged:
+visible note text does not yet recover into typed note definitions. The retained
+three-note acceptance oracle currently fails and remains a completion requirement.

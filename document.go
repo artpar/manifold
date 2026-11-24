@@ -25,7 +25,9 @@ const (
 	SF Format = "sf"
 	// SFGzip is the same ProseMirror JSON in an RFC 1952 gzip stream (.sf.gz).
 	SFGzip Format = "sf.gz"
-	Text   Format = "txt"
+	// VDOCS is the Colleaf version-3 envelope for Univer 1.0.4 snapshots.
+	VDOCS Format = "vdocs"
+	Text  Format = "txt"
 )
 
 // Document is manydoc's interchange model. Diagnostics describe input features
@@ -233,7 +235,7 @@ func FormatFromName(name string) (Format, error) {
 	}
 	f := Format(strings.ToLower(strings.TrimPrefix(filepath.Ext(name), ".")))
 	switch f {
-	case DOCX, PDF, JSON, SF, Text:
+	case DOCX, PDF, JSON, SF, Text, VDOCS:
 		return f, nil
 	}
 	return "", fmt.Errorf("%w: format %q", ErrUnsupported, f)
@@ -243,6 +245,8 @@ func Read(ctx context.Context, r io.Reader, format Format, opts ReadOptions) (*D
 		return nil, err
 	}
 	switch format {
+	case VDOCS:
+		return ReadVDOCS(ctx, r)
 	case DOCX:
 		return ReadDOCX(ctx, r)
 	case PDF:
@@ -301,7 +305,7 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 	if err := d.Validate(); err != nil {
 		return err
 	}
-	if format != JSON && format != SF && format != SFGzip && format != Text && len(d.Diagnostics) > 0 && !opts.AllowLossy {
+	if format != JSON && format != SF && format != SFGzip && format != VDOCS && format != Text && len(d.Diagnostics) > 0 && !opts.AllowLossy {
 		return fmt.Errorf("%w: %s", ErrLossy, d.Diagnostics[0].Message)
 	}
 	if (format == DOCX || format == PDF) && d.hasPDFSource() && !opts.AllowLossy {
@@ -318,6 +322,8 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 		d = resolveNumberingDocument(d)
 	}
 	switch format {
+	case VDOCS:
+		return writeColleaf(ctx, w, d)
 	case DOCX:
 		return writeDOCX(ctx, w, d, opts.AllowLossy)
 	case PDF:

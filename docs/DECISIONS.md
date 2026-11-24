@@ -2224,3 +2224,19 @@ altLang. Validate tags/profile/version/slot/keys. Do not infer forced complex-sc
 or run-direction rendering from these fields; the existing explicit guards remain.
 Qualify original DOCX graphs, all shared text contexts, style inheritance/clearing,
 actual saves/edits and source uncertainty separately from native shaping/paint.
+
+
+## 2026-11-24 Expose the checked offline native adapter
+
+Expose the existing qualified envelope profile via VDOCS/ReadVDOCS/WriteVDOCS and
+CLI .vdocs dispatch now, retaining explicit rejection for unsupported mappings.
+Earlier private-only staging deferred this useful boundary until full interaction
+qualification. Offline schema/graph/save evidence is now sufficient for its stated
+transport contract; browser rendering and remaining mappings stay unqualified.
+Keep source/diagnostic history without an AllowLossy gate, matching SF transport.
+Do not implement application size/quota/auth checks in the library.
+
+Retain the newly failing generated-PDF note oracle (three typed definitions) as
+an explicit opt-in acceptance check. Ordinary green tests do not close it. The
+existing writer is untagged, so a real marked-content/structure or conservative
+recovery implementation is required; an SF cache must not masquerade as recovery.
