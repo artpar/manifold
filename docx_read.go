@@ -800,8 +800,15 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			}
 			b.Runs = append(b.Runs, parts...)
 			return nil
-		case "tab":
-			if skipNoteSeparator {
+		case "tab", "ptab":
+			if c.Name.Local == "ptab" {
+				if len(c.Children) != 0 || strings.TrimSpace(c.Text) != "" {
+					return fmt.Errorf("positional tab must not contain content")
+				}
+				skipNoteSeparator = false
+				r.doc.warn("position_tab", "Positional tab separation is retained as a tab; alignment, positioning base and leader presentation are not represented")
+			}
+			if skipNoteSeparator && c.Name.Local == "tab" {
 				skipNoteSeparator = false
 				return nil
 			}

@@ -58,6 +58,13 @@ Required empty-cell/table-tail paragraphs carry checked structural markers;
 heading bold metadata preserves original mark presence despite default style
 appearance. Metadata never authorizes dropping actual runs/content.
 
+The final-visible DOCX text walker preserves positional-tab controls as normal
+tabs and diagnoses alignment/positioning-base/leader loss with position_tab. It
+rejects nonempty ptab nodes rather than silently dropping child text. This fixes a
+real first/default-story export; it does not add Word tab-position layout semantics.
+Original POI editor exports and source-only oracles qualify note/story/review/field
+paths separately from synthetic cases; see REAL_DOCX_CORPUS.md.
+
 ## Notes
 
 `notes.go` validates the identity/reference graph and assigns per-kind display

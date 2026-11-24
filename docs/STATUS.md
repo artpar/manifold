@@ -39,29 +39,37 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: exact enclosing ActualText note correspondence
+## Latest progress: original editor note/story/review/field corpus
 
-Structural ActualText now preserves individual run styles/source regions when its
-complete character string exactly equals one inline paragraph after removing
-only inferred geometric separators. A conditional isolated preliminary traversal
-identifies these boundaries before note extraction, allowing explicit references
-inside nested exact replacement spans. It copies consumption/diagnostic state;
-original paint/source objects are not consumed or rewritten by the probe.
+Eight unmodified, pinned Apache POI source DOCX exports now complement MQTT's
+large Word publication. Embedded metadata identifies Word12/14, Mac Word12 and
+LibreOffice6.0.7.3. Source-only ZIP/XML oracles qualify50 body paragraphs,81 direct
+formatting intervals, two exact note reference sites/definitions,16 story bindings,
+page settings, seven explicit URI relationships,13 cached field instructions,
+32 insertion/4 deletion containers and comments. Full normalized SF semantics
+survive SF/gzip/JSON/Word; review/comment/field losses remain explicitly diagnosed.
+See REAL_DOCX_CORPUS.md for sources/rights, limits and concrete reproduction.
 
-No substring or equal-label guess maps genuinely different replacement text.
-Opaque ranges, definition-containing ranges, nontext and multiple-paragraph ranges
-keep the existing replacement/source-evidence/diagnostic behavior. A defensive
-check prevents a prepared note atom being silently swallowed by a later replacement.
-The exact synthetic case retains both explicit sites, rich citation fragments,
-notes/list/table/raster, navigation and Word/SF meaning; independent object/operator,
-package/paint/link and two-page visual checks pass. Actual ProseMirror checks61
-nodes/marks/attrs. See PDF_NOTES.md and scripts/verify_note_actual.py.
+Independent visual QA exposed silently discarded Word positional tabs. The importer
+now preserves their separation as normal tabs and reports position_tab for the
+alignment/base/leader presentation loss; malformed nonempty controls reject. The
+original/source oracle reproduces the pre-fix failure. Exact Word tab placement is
+not claimed. Source files/oracles were not weakened to accept concatenated words.
 
-Previous milestone5cde91b preserves rich/internal mixed-direction citations with
-atomic native layout and checked Word isolation; see RICH_CITATIONS.md. Full and
-final focused checks for the current milestone are recorded in verification.json.
-QA remains ignored under output/note-actual; no dependency/runtime/application/
-authorization/quota/upload boundary changed. The full goal remains incomplete.
+All four CLI paths run over the new inputs. Independent package/readers, actual
+ProseMirror762 nodes/marks/attrs, physical PDF page geometry, note/native URI targets
+and33 original/native/Word rendered pages qualify the milestone. Source delins
+renders editing markup; manydoc's final-text view excludes deleted history. Word's
+implicit Roman endnote mark, spacing/fonts/tab layout differ explicitly. LibreOffice
+exports zero delins URI annotations from both original/generated Word; standard
+package/native targets pass. Go-only fonts reject missing ṭ before output; QA
+supplies real DejaVu four-style faces. Production dependencies/boundaries unchanged.
+
+Full/focused tests, race checks, vet, modules, fuzz and CGO-disabled verification
+are recorded in verification.json. QA remains ignored under output/real-docx-audit;
+third-party notices and source hashes are committed. Previous616fb6a qualifies exact
+nested/enclosing ActualText and5cde91b rich atomic bidi citations. Full goal remains
+active/incomplete; native Colleaf, broader note graphs and final audit remain open.
 
 ## Existing verified evidence to preserve
 
@@ -102,9 +110,9 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
 2. Implement/qualify the actual Colleaf native snapshot adapter through the shared
    SF. Include UTF-16 boundaries, rich source maps, notes/stories and resources;
    do not stop at plain-text wrapping. Leave applications/backends untouched.
-3. Broaden pinned, legally reusable original DOCX producer/rich-feature inputs;
-   establish independent structure/asset/reference oracles and meaningful visual
-   output checks. Fix actual failures without changing the original expectations.
+3. Preserve the now broadened original DOCX corpus and independent expectations;
+   carry its measured source/producer/review/field limits into the final audit.
+   Fix further real failures without changing original oracles.
 4. Audit remaining source-structure consistency/resource and public API evidence,
    repeat the full acceptance matrix and final checks, and complete the goal only
    after every original criterion is proven. There is no external blocker now.

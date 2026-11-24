@@ -39,6 +39,13 @@ func TestMalformedInputsNeverPanic(t *testing.T) {
 	}
 }
 func FuzzReadDOCX(f *testing.F) {
+	for _, name := range []string{"DiffFirstPageHeadFoot", "HeaderFooterUnicode", "headerFooter", "footnotes", "endnotes", "delins", "FieldCodes", "comment"} {
+		source, err := os.ReadFile("testdata/real/poi-" + name + ".docx")
+		if err != nil {
+			f.Fatal(err)
+		}
+		f.Add(source)
+	}
 	var richCitation bytes.Buffer
 	if err := Write(context.Background(), &richCitation, richCitationDocument(true), DOCX, WriteOptions{AllowLossy: true}); err != nil {
 		f.Fatal(err)

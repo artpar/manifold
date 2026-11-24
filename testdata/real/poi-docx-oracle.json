@@ -1,0 +1,1182 @@
+{
+  "poi-DiffFirstPageHeadFoot.docx": {
+    "sha256": "e94332c7b86b1bbce960f93fec90078486ab8abc3913a024a24be391a0b42151",
+    "bytes": 14204,
+    "application": "Microsoft Office Word",
+    "app_version": "12.0000",
+    "body": [
+      "This is a sample word document. It has two pages. It has a simple header and footer, which is different to all the other pages.",
+      "HEADING TEXT",
+      "More on page one",
+      "End of page 1",
+      "This is page two. It also has a three column heading, and a three column footer."
+    ],
+    "body_styles": [],
+    "notes": [],
+    "sections": [
+      {
+        "stories": {
+          "header_default": [
+            "First header column!\tMid header\tRight header!"
+          ],
+          "header_first": [
+            "I am the header on the first page, and I’m nice and simple"
+          ],
+          "footer_default": [
+            "Footer Left\tFooter Middle\tFooter Right"
+          ],
+          "footer_first": [
+            "The footer of the first page"
+          ]
+        },
+        "page": {
+          "w": 612.0,
+          "h": 792.0
+        },
+        "margins": {
+          "top": 72.0,
+          "right": 72.0,
+          "bottom": 72.0,
+          "left": 72.0,
+          "header": 35.4,
+          "footer": 35.4,
+          "gutter": 0.0
+        },
+        "first_page": true
+      }
+    ],
+    "hyperlinks": {},
+    "metadata": {
+      "author": "Nick Burch",
+      "title": "",
+      "subject": ""
+    },
+    "review": {
+      "ins": 0,
+      "del": 0,
+      "fldChar": 0,
+      "fldSimple": 0,
+      "commentReference": 0
+    },
+    "deleted_text": "",
+    "field_instructions": [],
+    "comments": []
+  },
+  "poi-FieldCodes.docx": {
+    "sha256": "9247f85ab90b15f11d0cf14d0070fdcb5cdf47c65d6bc77cc32cb7ee682aad24",
+    "bytes": 17034,
+    "application": "Microsoft Office Word",
+    "app_version": "14.0000",
+    "body": [
+      "ANTONI",
+      "16 June 2010"
+    ],
+    "body_styles": [],
+    "notes": [],
+    "sections": [
+      {
+        "stories": {},
+        "page": {
+          "w": 595.3,
+          "h": 841.9
+        },
+        "margins": {
+          "top": 70.85,
+          "right": 70.85,
+          "bottom": 70.85,
+          "left": 70.85,
+          "header": 35.4,
+          "footer": 35.4,
+          "gutter": 0.0
+        },
+        "first_page": false
+      }
+    ],
+    "hyperlinks": {},
+    "metadata": {
+      "author": "Antoni",
+      "title": "",
+      "subject": ""
+    },
+    "review": {
+      "ins": 0,
+      "del": 0,
+      "fldChar": 6,
+      "fldSimple": 0,
+      "commentReference": 0
+    },
+    "deleted_text": "",
+    "field_instructions": [
+      " AUTHOR  \\* Upper  \\* MERGEFORMAT ",
+      " CREATEDATE  \\@ \"d MMMM yyyy\"  \\* MERGEFORMAT "
+    ],
+    "comments": []
+  },
+  "poi-HeaderFooterUnicode.docx": {
+    "sha256": "ec439ac0643294e1e2961b381983304e044444f3a8f0dc465a98adf9ebee0e67",
+    "bytes": 15079,
+    "application": "Microsoft Office Word",
+    "app_version": "12.0000",
+    "body": [
+      "This is a fairly simple word document, over two pages, with headers and footers.",
+      "The trick with this one is that it contains some Unicode based strings in it.",
+      "Firstly, some currency symbols:",
+      "\tGBP - £",
+      "\tEUR - €",
+      "Now, we’ll have some French text, in bold and big:",
+      "\tMolière",
+      "And some normal French text:",
+      "\tL'Avare ou l'École du mensonge",
+      "That’s it for page one",
+      "This is page two. Les Précieuses ridicules. The end."
+    ],
+    "body_styles": [
+      {
+        "paragraph": 10,
+        "start": 18,
+        "end": 45,
+        "marks": {
+          "italic": true
+        }
+      }
+    ],
+    "notes": [],
+    "sections": [
+      {
+        "stories": {
+          "header_even": [],
+          "header_default": [
+            "This is a simple header, with a € euro symbol in it."
+          ],
+          "header_first": [],
+          "footer_even": [],
+          "footer_default": [
+            "The footer, with Molière, has Unicode in it."
+          ],
+          "footer_first": []
+        },
+        "page": {
+          "w": 612.0,
+          "h": 792.0
+        },
+        "margins": {
+          "top": 72.0,
+          "right": 72.0,
+          "bottom": 72.0,
+          "left": 72.0,
+          "header": 35.4,
+          "footer": 35.4,
+          "gutter": 0.0
+        },
+        "first_page": false
+      }
+    ],
+    "hyperlinks": {},
+    "metadata": {
+      "author": "Nick Burch",
+      "title": "",
+      "subject": ""
+    },
+    "review": {
+      "ins": 0,
+      "del": 0,
+      "fldChar": 0,
+      "fldSimple": 0,
+      "commentReference": 0
+    },
+    "deleted_text": "",
+    "field_instructions": [],
+    "comments": []
+  },
+  "poi-comment.docx": {
+    "sha256": "23bbfe33e1acf7073253bd87552cbee5be0a07cbd08a479a4bf139f09b1dd6dc",
+    "bytes": 4926,
+    "application": "LibreOffice/6.0.7.3$Linux_X86_64 LibreOffice_project/00m0$Build-3",
+    "app_version": null,
+    "body": [],
+    "body_styles": [],
+    "notes": [],
+    "sections": [
+      {
+        "stories": {},
+        "page": {
+          "w": 595.3,
+          "h": 841.9
+        },
+        "margins": {
+          "left": 56.7,
+          "right": 56.7,
+          "header": 0.0,
+          "top": 56.7,
+          "footer": 0.0,
+          "bottom": 56.7,
+          "gutter": 0.0
+        },
+        "first_page": false
+      }
+    ],
+    "hyperlinks": {},
+    "metadata": {
+      "author": "",
+      "title": "",
+      "subject": ""
+    },
+    "review": {
+      "ins": 0,
+      "del": 0,
+      "fldChar": 0,
+      "fldSimple": 0,
+      "commentReference": 1
+    },
+    "deleted_text": "",
+    "field_instructions": [],
+    "comments": [
+      "This is the first line",
+      "This is the second line"
+    ]
+  },
+  "poi-delins.docx": {
+    "sha256": "7ecad102602586be7f1371f117fc567ea47f3ed0ca703b353e003002f1ff8d3f",
+    "bytes": 17720,
+    "application": "Microsoft Office Word",
+    "app_version": "12.0000",
+    "body": [
+      "Tika can be:",
+      "A Nepalese name for Tilaka",
+      "A nickname for Petrika the Albanian variation of Peter",
+      "A title in certain Indian monarchies for a Crown Prince",
+      "A place in Abkhazia ",
+      "A place on Saturn's satellite Rhea, named after the last place",
+      "A name in various Indian languages (ṭīkā) for certain commentaries such as:",
+      "the subcommentaries of the Theravada tradition.",
+      "March 2009: Apache Tika Release",
+      "Apache Tika 0.3 has been released. Please see the download page for more details.",
+      "February 2009: Lucene at ApacheCon Europe 2009 in Amsterdam",
+      "Lucene will be extremely well represented at ApacheCon EU 2009 in Amsterdam, Netherlands this March 23-27, 2009:",
+      "Lucene Boot Camp - A two day training session, March 23 & 24th",
+      "Solr Boot Camp - A one day training session, March 24th",
+      "Introducing Apache Mahout - Grant Ingersoll. March 25th @ 10:30",
+      "Lucene/Solr Case Studies - Erik Hatcher. March 25th @ 11:30",
+      "Advanced Indexing Techniques with Apache Lucene - Michael Busch. March 25th @ 14:00",
+      "Apache Solr - A Case Study - Uri Boness. March 26th @ 17:30",
+      "Best of breed - httpd, forrest, solr and droids - Thorsten Scherler. March 27th @ 17:30",
+      "Apache Droids - an intelligent standalone robot framework - Thorsten Scherler. March 26th @ 15:00",
+      "A software module for extracting text from binary files. Apache Tika is a subproject of the Lucene"
+    ],
+    "body_styles": [
+      {
+        "paragraph": 0,
+        "start": 0,
+        "end": 4,
+        "marks": {
+          "bold": true,
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 0,
+        "start": 4,
+        "end": 5,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 0,
+        "start": 5,
+        "end": 8,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 0,
+        "start": 8,
+        "end": 9,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 0,
+        "start": 9,
+        "end": 11,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 0,
+        "start": 11,
+        "end": 12,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 1,
+        "start": 0,
+        "end": 2,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 1,
+        "start": 2,
+        "end": 10,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 1,
+        "start": 10,
+        "end": 11,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 1,
+        "start": 11,
+        "end": 15,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 1,
+        "start": 15,
+        "end": 16,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 1,
+        "start": 16,
+        "end": 19,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 1,
+        "start": 19,
+        "end": 20,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 1,
+        "start": 20,
+        "end": 26,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 2,
+        "start": 0,
+        "end": 15,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 2,
+        "start": 15,
+        "end": 22,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 2,
+        "start": 22,
+        "end": 49,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 2,
+        "start": 49,
+        "end": 54,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 3,
+        "start": 0,
+        "end": 43,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 3,
+        "start": 43,
+        "end": 55,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 4,
+        "start": 0,
+        "end": 2,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 4,
+        "start": 2,
+        "end": 7,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 4,
+        "start": 7,
+        "end": 8,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 4,
+        "start": 8,
+        "end": 10,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 4,
+        "start": 10,
+        "end": 11,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 4,
+        "start": 11,
+        "end": 19,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 4,
+        "start": 19,
+        "end": 20,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 5,
+        "start": 0,
+        "end": 30,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 5,
+        "start": 30,
+        "end": 34,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 5,
+        "start": 34,
+        "end": 62,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 6,
+        "start": 0,
+        "end": 36,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 6,
+        "start": 36,
+        "end": 44,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 6,
+        "start": 44,
+        "end": 79,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 7,
+        "start": 0,
+        "end": 3,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 7,
+        "start": 3,
+        "end": 4,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 7,
+        "start": 4,
+        "end": 19,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 7,
+        "start": 19,
+        "end": 27,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 7,
+        "start": 27,
+        "end": 36,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 7,
+        "start": 36,
+        "end": 47,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 8,
+        "start": 0,
+        "end": 31,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 9,
+        "start": 0,
+        "end": 81,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 10,
+        "start": 0,
+        "end": 59,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 11,
+        "start": 0,
+        "end": 45,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 11,
+        "start": 45,
+        "end": 62,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 11,
+        "start": 62,
+        "end": 112,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 12,
+        "start": 0,
+        "end": 16,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 12,
+        "start": 16,
+        "end": 62,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 13,
+        "start": 0,
+        "end": 14,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 13,
+        "start": 14,
+        "end": 55,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 14,
+        "start": 0,
+        "end": 25,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 14,
+        "start": 25,
+        "end": 45,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 14,
+        "start": 45,
+        "end": 50,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 14,
+        "start": 50,
+        "end": 63,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 15,
+        "start": 0,
+        "end": 24,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 15,
+        "start": 24,
+        "end": 41,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 15,
+        "start": 41,
+        "end": 46,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 15,
+        "start": 46,
+        "end": 59,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 16,
+        "start": 0,
+        "end": 47,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 16,
+        "start": 47,
+        "end": 65,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 16,
+        "start": 65,
+        "end": 70,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 16,
+        "start": 70,
+        "end": 83,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 17,
+        "start": 0,
+        "end": 26,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 17,
+        "start": 26,
+        "end": 41,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 17,
+        "start": 41,
+        "end": 46,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 17,
+        "start": 46,
+        "end": 59,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 18,
+        "start": 0,
+        "end": 23,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 18,
+        "start": 23,
+        "end": 30,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 18,
+        "start": 30,
+        "end": 47,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 18,
+        "start": 47,
+        "end": 69,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 18,
+        "start": 69,
+        "end": 74,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 18,
+        "start": 74,
+        "end": 87,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 19,
+        "start": 0,
+        "end": 57,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 19,
+        "start": 57,
+        "end": 79,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 19,
+        "start": 79,
+        "end": 84,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 19,
+        "start": 84,
+        "end": 97,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 20,
+        "start": 0,
+        "end": 57,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 20,
+        "start": 57,
+        "end": 64,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 20,
+        "start": 64,
+        "end": 68,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      },
+      {
+        "paragraph": 20,
+        "start": 68,
+        "end": 92,
+        "marks": {
+          "size": 12.0
+        }
+      },
+      {
+        "paragraph": 20,
+        "start": 92,
+        "end": 98,
+        "marks": {
+          "underline": true,
+          "size": 12.0,
+          "color": "#0000FF"
+        }
+      }
+    ],
+    "notes": [],
+    "sections": [
+      {
+        "stories": {},
+        "page": {
+          "w": 595.3,
+          "h": 841.9
+        },
+        "margins": {
+          "top": 56.7,
+          "right": 42.5,
+          "bottom": 56.7,
+          "left": 85.05,
+          "header": 35.4,
+          "footer": 35.4,
+          "gutter": 0.0
+        },
+        "first_page": false
+      }
+    ],
+    "hyperlinks": {
+      "http://en.wikipedia.org/wiki/Tilaka": "Tilaka",
+      "http://en.wikipedia.org/wiki/Peter": "Peter",
+      "http://en.wikipedia.org/wiki/Crown_Prince": "Crown Prince",
+      "http://en.wikipedia.org/wiki/Abkhazia": "Abkhazia",
+      "http://en.wikipedia.org/wiki/Rhea": "Rhea",
+      "http://en.wikipedia.org/wiki/Subcommentaries,_Theravada": "subcommentaries",
+      "http://en.wikipedia.org/wiki/Theravada": "Theravada"
+    },
+    "metadata": {
+      "author": "pavel",
+      "title": "",
+      "subject": ""
+    },
+    "review": {
+      "ins": 32,
+      "del": 4,
+      "fldChar": 42,
+      "fldSimple": 0,
+      "commentReference": 0
+    },
+    "deleted_text": "A pendant worn in place of the red spot (tilaka or 'tika') on the foreheads of Hindu women. Originally, the red spot was a sign which a priest would paint on the brow of a visitor to the temple. Later the tika became a standard part of the costume of a Hindu woman. The tika can be stuck on or drawn, or, in the form of a pendant, suspended between the eyes. Also known as Maang Tika.Tika Waylan, a major character in the DragonLance series of fantasy novels",
+    "field_instructions": [
+      " HYPERLINK \"http://www.eu.apachecon.com/c/aceu2009/\" ",
+      " HYPERLINK \"http://eu.apachecon.com/c/aceu2009/sessions/197\" ",
+      " HYPERLINK \"http://eu.apachecon.com/c/aceu2009/sessions/201\" ",
+      " HYPERLINK \"http://eu.apachecon.com/c/aceu2009/sessions/136\" ",
+      " HYPERLINK \"http://eu.apachecon.com/c/aceu2009/sessions/137\" ",
+      " HYPERLINK \"http://eu.apachecon.com/c/aceu2009/sessions/138\" ",
+      " HYPERLINK \"http://eu.apachecon.com/c/aceu2009/sessions/251\" ",
+      " HYPERLINK \"http://eu.apachecon.com/c/aceu2009/sessions/250\" ",
+      " HYPERLINK \"http://eu.apachecon.com/c/aceu2009/sessions/165\" ",
+      " HYPERLINK \"http://lucene.apache.org/tika\" \\o \"http://lucene.apache.org/tika\" ",
+      " HYPERLINK \"http://lucene.apache.org\" \\o \"http://lucene.apache.org\" "
+    ],
+    "comments": []
+  },
+  "poi-endnotes.docx": {
+    "sha256": "6e2e1b2dabb0ae6b9b26ddd613dca446ba0710ecc8b4008722abc4ed592934e3",
+    "bytes": 13553,
+    "application": "Microsoft Office Word",
+    "app_version": "12.0000",
+    "body": [
+      "    * A Nepalese name for Tilaka",
+      "    * A nickname for Petrika the Albanian variation of Peter",
+      "    * A title in certain Indian monarchies for a Crown Prince",
+      "    * A place in Abkhazia",
+      "    * A place on Saturn's satellite Rhea, named after the last place",
+      "    * A name in various Indian languages (ṭīkā) for certain commentaries such as:",
+      "        * the subcommentaries of the Theravada tradition.",
+      "    * A pendant worn in place of the red spot (tilaka ￼endnote:2￼or 'tika') on the foreheads of Hindu women. Originally, the red spot was a sign which a priest would paint on the brow of a visitor to the temple. Later the tika became a standard part of the costume of a Hindu woman. The tika can be stuck on or drawn, or, in the form of a pendant, suspended between the eyes. Also known as Maang Tika.",
+      "    * Tika Waylan, a major character in the DragonLance series of fantasy novels",
+      "    * A software module for extracting text from binary files. Apache Tika is a subproject of the Lucene"
+    ],
+    "body_styles": [],
+    "notes": [
+      {
+        "id": "2",
+        "kind": "endnote",
+        "paragraphs": [
+          " XXX"
+        ],
+        "styles": []
+      }
+    ],
+    "sections": [
+      {
+        "stories": {},
+        "page": {
+          "w": 595.3,
+          "h": 841.9
+        },
+        "margins": {
+          "top": 56.7,
+          "right": 42.5,
+          "bottom": 56.7,
+          "left": 85.05,
+          "header": 35.4,
+          "footer": 35.4,
+          "gutter": 0.0
+        },
+        "first_page": false
+      }
+    ],
+    "hyperlinks": {},
+    "metadata": {
+      "author": "pavel",
+      "title": "",
+      "subject": ""
+    },
+    "review": {
+      "ins": 0,
+      "del": 0,
+      "fldChar": 0,
+      "fldSimple": 0,
+      "commentReference": 0
+    },
+    "deleted_text": "",
+    "field_instructions": [],
+    "comments": []
+  },
+  "poi-footnotes.docx": {
+    "sha256": "9070094b27ff5201477f4de4b2c027730c66cb889106a1609c5adeed207a59c1",
+    "bytes": 12823,
+    "application": "Microsoft Office Word",
+    "app_version": "12.0000",
+    "body": [
+      "Eto ochen prostoy￼footnote:1￼ text so snoskoy"
+    ],
+    "body_styles": [],
+    "notes": [
+      {
+        "id": "1",
+        "kind": "footnote",
+        "paragraphs": [
+          " snoska"
+        ],
+        "styles": []
+      }
+    ],
+    "sections": [
+      {
+        "stories": {},
+        "page": {
+          "w": 595.3,
+          "h": 841.9
+        },
+        "margins": {
+          "top": 56.7,
+          "right": 42.5,
+          "bottom": 56.7,
+          "left": 85.05,
+          "header": 35.4,
+          "footer": 35.4,
+          "gutter": 0.0
+        },
+        "first_page": false
+      }
+    ],
+    "hyperlinks": {},
+    "metadata": {
+      "author": "Anton Trekin",
+      "title": "",
+      "subject": ""
+    },
+    "review": {
+      "ins": 0,
+      "del": 0,
+      "fldChar": 0,
+      "fldSimple": 0,
+      "commentReference": 0
+    },
+    "deleted_text": "",
+    "field_instructions": [],
+    "comments": []
+  },
+  "poi-headerFooter.docx": {
+    "sha256": "0ad90c6ee8ec8b9fab1ae8219387eca8d934b739580918d76a1b6c911bc41913",
+    "bytes": 28423,
+    "application": "Microsoft Macintosh Word",
+    "app_version": "12.0000",
+    "body": [],
+    "body_styles": [],
+    "notes": [],
+    "sections": [
+      {
+        "stories": {
+          "header_even": [],
+          "header_default": [
+            "This is a simple header…"
+          ],
+          "header_first": [],
+          "footer_even": [],
+          "footer_default": [
+            "… and this is a simple footer."
+          ],
+          "footer_first": []
+        },
+        "page": {
+          "w": 595.0,
+          "h": 842.0
+        },
+        "margins": {
+          "top": 72.0,
+          "right": 90.0,
+          "bottom": 72.0,
+          "left": 90.0,
+          "header": 35.4,
+          "footer": 35.4,
+          "gutter": 0.0
+        },
+        "first_page": false
+      }
+    ],
+    "hyperlinks": {},
+    "metadata": {
+      "author": "Paolo Mottadelli",
+      "title": "",
+      "subject": ""
+    },
+    "review": {
+      "ins": 0,
+      "del": 0,
+      "fldChar": 0,
+      "fldSimple": 0,
+      "commentReference": 0
+    },
+    "deleted_text": "",
+    "field_instructions": [],
+    "comments": []
+  }
+}

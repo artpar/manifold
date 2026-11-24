@@ -765,3 +765,10 @@ pdf_structure_actualtext_aligned. Literal characters and individual regions rema
 single authorities. Opaque replacement spans retain their replacement string and
 original Ref evidence/uncertainty; no schema extension or guessed text-to-citation
 offsets are introduced. See PDF_NOTES.md for full-equality boundaries and checks.
+
+
+Word positional-tab normalization uses the existing ordinary tab text, not a new
+SF node. position_tab diagnostics disclose lost alignment/base/leader presentation;
+SF/JSON/gzip retain the diagnostic and the actual separator. Original header/footer
+export qualification is in REAL_DOCX_CORPUS.md. No exact Word tab-layout semantics
+are implied by preserving this normalized content.

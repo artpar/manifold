@@ -5439,5 +5439,29 @@
     "runtime": "pure Go; no CGO/required executables/services/uploads/app changes/permission or quota gates; QA readers optional",
     "remaining": "nested-definition/redundant-wrapper and broader untagged note graphs; actual Colleaf adapter; broader original DOCX note/story/revision/field corpus and producer qualification; final source/resource/API/acceptance audit",
     "next_commands": "rg -n 'inNote|hasInner|grouped|recoverNote' pdf_structure_notes.go; GOWORK=off go test -run 'TestPDFNoteAligned|TestPDFNoteActualText' -count=1 ."
+  },
+  "original_poi_docx_corpus_2026_11_24": {
+    "goal": "active/incomplete",
+    "sources": "Eight unmodified Apache POI test-data/document exports pinned44d254e441b983d1338e1b4d2248023b807ce55f: embedded Word12/14, Mac Word12 and LibreOffice6.0.7.3. Original bytes/SHA256/metadata/source URLs and upstream license/NOTICE retained; no upstream implementation reused.",
+    "source_oracle": "Original ZIP/XML only:50 nonempty ordered body paragraphs/exact reference sites,81 direct formatting intervals, two typed note definitions,16 story bindings including empties, page settings/first-page activation, seven explicit URI relationships,13 cached field instructions,32 insertion/4 deletion containers/comments; no generated output feeds expectations.",
+    "semantic": "Exact normalized SF/gzip/JSON/Word semantics pass; original note IDs/reference positions, marks, notes/stories/page geometry and metadata verified. Review/comment/field loss diagnostics remain explicit; empty deletion-only list-item structures retained in current final-text projection.",
+    "source_discovered_fix": "Original first/default-story positional w:ptab was silently lost, concatenating labels. Tightened source-only separator oracle reproduces the failure. Import preserves ordinary tabs and diagnoses position_tab alignment/base/leader loss; malformed nonempty ptab rejects. Word/native separation passes; no exact margin-relative positioning claim.",
+    "independent": "python-docx/lxml original/generated packages; exact SF/Word; all four CLI paths; pypdf/native PDF page geometry vs Go-recovered SF; source literal segments/note bodies, correct native note target pages, seven native URI/standard Word package targets; actual ProseMirror762 nodes/marks/attributes; native24pt bold Unicode heading and positional separator physical gap;33 original/native/generated-Word pages inspected using eight comparison sheets.",
+    "observed_limits": "Original delins LibreOffice render shows review markup; converted final-text view excludes deleted history.11 complex HYPERLINK fields retain cached text/style with generic field diagnostics, not editable field links. LibreOffice emits zero URI annotations from both original/generated delins; standard package/native links pass separately. Implicit Roman source endnote differs from diagnosed decimal/default/native Endnotes layout. Fonts/spacing/wrapping/tab placement differ, not Word-equivalent fidelity.",
+    "unicode": "Go-only explicit font mappings reject real U+1E6D before output bytes; successful QA supplies real four-style DejaVuSans2.37 faces from existing pinned release, no silent substitution or fake style faces.",
+    "checks": {
+      "tests": "final all packages pass; library16.206s/CLI0.361s after all source-oracle/metadata/font/fuzz-seed additions",
+      "full_race": "all packages pass library166.688s/CLI2.137s after production positional-tab fix/guards; predates final URI/metadata/missing-glyph assertions and added original fuzz seeds",
+      "final_focused_race": "2.015s pass including original metadata/style/reference/story/URI/roundtrip/missing-glyph and positional-tab guards",
+      "vet": "pass after final test additions",
+      "modules": "all modules verified; no dependency changes",
+      "cgo_disabled": "host CLI built; focused execution0.425s pass; Linux amd64/arm64 cross-builds pass (not execution evidence)",
+      "fuzz": "DOCX10s/two workers requested:180 executions11.679s pass including all eight newly added original source seeds; short source-heavy campaign not exhaustive",
+      "diff_check": "pass"
+    },
+    "evidence": "REAL_DOCX_CORPUS.md; real_poi_docx_test.go, docx_positional_tab_test.go; scripts/audit_poi_sources.py, generate_poi_qa.py, verify_poi_corpus.py; original oracle/manifest/notices; ignored output/real-docx-audit",
+    "runtime": "pure Go, no CGO/required executables/services/uploads/app modifications/permission/quota gates; optional independent QA readers/fonts only",
+    "remaining": "broader nested/untagged note graphs; actual Colleaf native adapter; final source consistency/resource/public-API/acceptance audit with measured producer/review/field/font limits",
+    "next_commands": "GOWORK=off go test -race -run 'TestRealPOI|TestDOCXPositionalTab' -count=1 .; rg -n 'inNote|hasInner|grouped|recoverNote' pdf_structure_notes.go; see COLLEAF_FORMAT.md mapping queue"
   }
 }

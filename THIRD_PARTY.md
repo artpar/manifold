@@ -128,3 +128,20 @@ not redistributed in this repository or linked into the binary. Caller-supplied
 font programs remain subject to their own reuse/embedding terms. FONT_SUBSETTING.md
 records hashes, checks and scope; no publisher/customer PDF font was extracted
 or repurposed as a manydoc output font.
+
+Eight unmodified original DOCX exports from Apache POI's test-data/document at
+44d254e441b983d1338e1b4d2248023b807ce55f are retained as testdata/real/poi-*.docx.
+They cover Word 2007/2010, Mac Word and LibreOffice 6 exports; they were not generated
+by manydoc. The pinned upstream Apache-2.0 LICENSE and NOTICE are preserved as
+third_party/licenses/apache-poi-fixtures-LICENSE.txt and
+third_party/licenses/apache-poi-fixtures-NOTICE.txt, including upstream component
+notices. Original embedded author/producer metadata remains inside the unchanged
+files. They are reference fixtures, not MIT-licensed manydoc implementation code.
+Manifest hashes/URLs and independently derived XML expectations are in
+ testdata/real/manifest.json and poi-docx-oracle.json. No Apache POI implementation
+or runtime dependency was copied; optional Python/LibreOffice readers are QA only.
+See docs/REAL_DOCX_CORPUS.md for exact provenance, evidence and limits.
+The source-only oracle/QA evidence for those exports is documented in
+`docs/REAL_DOCX_CORPUS.md`; their embedded editor metadata identifies Word12/14,
+Mac Word12 and LibreOffice6.0.7.3. Original XML is the expectation authority;
+generated output and rendered comparison sheets remain ignored.

@@ -63,8 +63,8 @@ checks two pages and compares expected content with Poppler. The second compares
 all 28 non-malformed named PDF fixtures with Poppler after whitespace
 normalization, including password cases. Inspect every generated PDF page PNG.
 
-DOCX structure checks do not establish visual Word rendering. No Microsoft Word
-or LibreOffice rendering acceptance has been completed. The generated PDF
+DOCX structure checks do not establish visual Word rendering. Microsoft Word rendering has not been qualified; scoped LibreOffice/native checks
+are recorded in the feature sections below and REAL_DOCX_CORPUS.md. The generated PDF
 example has been visually inspected, including Unicode, table layout and both
 pages; that only qualifies this example.
 
@@ -2355,3 +2355,25 @@ Ref/ActualText/partial/far/overlapping views, explicit priority and per-site Wor
 provenance. PDF/SF fuzz seeds cover both inference rules; final counts/checks are
 in verification.json. The body-label backlink loss is explicitly diagnosed and
 remains unfinished; raw QA artifacts stay ignored under output/note-inference.
+
+
+## Original note/story/review/field exports
+
+Eight pinned original Word/Mac Word/LibreOffice files, the independent ZIP/XML
+oracle and pure-Go test are in testdata/real/poi-* and real_poi_docx_test.go. They
+qualify exact text/reference sites, direct marks, relationships, notes, stories,
+page settings, loss diagnostics and normalized SF/gzip/JSON/Word round trips.
+The source-discovered positional-tab regression also has malformed-content and
+semantic round-trip guards. All eight originals seed DOCX fuzzing.
+
+```sh
+GOWORK=off go test -race -run 'TestRealPOI|TestDOCXPositionalTab' -count=1 .
+output/qa-venv/bin/python scripts/audit_poi_sources.py
+output/qa-venv/bin/python scripts/generate_poi_qa.py
+output/qa-venv/bin/python scripts/verify_poi_corpus.py
+```
+
+Use REAL_DOCX_CORPUS.md for original/generated independent rendering commands,
+font prerequisites and exact33-page/762-node evidence. The source-only oracle never
+reads generated output. Preserve original hashes/expected source content; do not
+regenerate expectations to accept a failure. Optional readers remain QA only.

@@ -1553,3 +1553,22 @@ correspondence rather than silently swallowing a prepared atom. Independent raw
 PDF objects/operators, rich asset/style/graph checks and native/Word visual QA qualify
 the exact case; broader nested/untagged graphs and original producer qualification
 remain open. No canonical schema or runtime dependency changed.
+
+
+## 2026-11-24 Qualify original Office exports and preserve positional separators
+
+Add pinned, unmodified Apache POI fixture exports with upstream license/notices,
+actual editor metadata and independent original ZIP/XML expectations. Compare
+relationships, paragraph/reference positions, marks, stories/geometry and assets
+rather than accepting parse success. Preserve the established final-text/cached-
+field/comment-diagnostic policies; review-markup printing is a different view.
+
+Visual inspection found actual w:ptab controls silently concatenated header/footer
+labels. Tighten the source oracle, reproduce the failure, then preserve tab
+separation and diagnose alignment/base/leader loss. The logical SF does not claim
+Word tab-position layout; metadata must not hide the loss. Reject malformed
+nonempty controls. Original source files remain unchanged. Independently distinguish
+package/native links from LibreOffice's observed zero-annotation exports, and use
+real caller-supplied Unicode/style fonts rather than silent glyph substitutions.
+REAL_DOCX_CORPUS.md records all33 inspected pages,762 actual PM nodes, commands and
+remaining broader graph/native-adapter/final-audit work. Runtime modules unchanged.

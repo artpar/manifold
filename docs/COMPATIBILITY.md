@@ -1025,3 +1025,18 @@ opaque replacements with graph evidence/uncertainty. Equal label substrings alon
 never establish character mapping. Independent source/object/operator/Word/native
 checks qualify the exact case in PDF_NOTES.md. Broader nested/untagged note graphs
 remain required; this does not claim arbitrary replacement-string correspondence.
+
+
+Original Word12/14, Mac Word12 and LibreOffice6 exports now qualify the existing
+note/story/review/cached-field policies through unchanged source ZIP/XML oracles,
+exact SF/Word semantics and independent native/Word visual checks. This is scoped
+producer evidence, not universal Office compatibility. Positional w:ptab controls
+now retain separation as normal tabs, with position_tab disclosing alignment/base/
+leader presentation loss; malformed nonempty controls reject. Exact centered/right
+Word tab placement is not represented. Source delins review markup and implicit
+Roman endnote display differ from the diagnosed final-text/decimal reflow policy;
+complex HYPERLINK fields retain cached text/styles with field diagnostics, while
+seven explicit URI relationships keep targets. The observed LibreOffice exporter
+omits delins URI annotations for both original/generated Word; standard package
+and native PDF links qualify separately. See REAL_DOCX_CORPUS.md for original
+hashes, reader/visual evidence, font requirements and remaining work.
