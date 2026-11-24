@@ -694,3 +694,13 @@ marks do not advance that automatic counter; repeated references reuse the mark.
 Whitespace-only or multiline/tab/control labels are rejected. Label text is not a
 note identifier; the existing kind/ID graph remains authoritative. SF/gzip/JSON
 and supported DOCX round trips preserve it, including multi-character Unicode.
+
+PDF note recovery adds optional note `source`, `label_source` and `kind_inferred`.
+`label_source` retains the leading source label's own geometry, font/paint and role
+when its text becomes the semantic note label; reflow typography normalization is
+explicitly diagnosed. The latter
+separates an editorial foot/endnote choice from explicit source NoteType; source
+roles/regions remain explicit. Source marks/objects accept `structure_id` (original
+binary PDF ID as base64) and `references` (array of `{element, targets}` explicit
+Ref owners/object targets, including unresolved edges and aggregate contributors).
+These are provenance, not a second copy of editable note bodies. Read PDF_NOTES.md.

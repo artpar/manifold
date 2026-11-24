@@ -172,7 +172,43 @@ func docxBreakRole(n *xmlNode) (role string, conditional bool, err error) {
 
 // Required OOXML paragraphs are physical structure, not extra authored SF
 // paragraphs. Only recognize our checked empty markers in their exact context.
+const docxListTableBoundary = `<w:p md:listTableBoundary="1"><w:pPr><w:numPr><w:numId w:val="0"/></w:numPr></w:pPr></w:p>`
+
 func docxStructuralParagraph(parent, n *xmlNode) (bool, error) {
+	if value := n.attributeNS(docxNotesNS, "listTableBoundary"); value != "" {
+		pr := n.child("pPr")
+		num := pr.child("numPr")
+		id := num.child("numId")
+		if pr == nil || num == nil || id == nil || value != "1" || len(n.Attr) != 1 || n.content() != "" || len(n.Children) != 1 || len(pr.Children) != 1 || len(num.Children) != 1 || len(id.Attr) != 1 || id.attr("val") != "0" || len(id.Children) != 0 {
+			return false, fmt.Errorf("list/table boundary metadata contradicts content")
+		}
+		index := -1
+		for i, c := range parent.Children {
+			if c == n {
+				index = i
+				break
+			}
+		}
+		if index < 1 || parent.Children[index-1].Name.Local != "bookmarkEnd" {
+			return false, fmt.Errorf("list/table boundary lacks preceding list end")
+		}
+		endID := parent.Children[index-1].attr("id")
+		matched := false
+		for _, c := range parent.Children[:index-1] {
+			if c.Name.Local == "bookmarkStart" && c.attr("id") == endID && strings.HasPrefix(c.attr("name"), "mdlist1_") {
+				matched = true
+			}
+		}
+		next := index + 1
+		for next < len(parent.Children) && (parent.Children[next].Name.Local == "bookmarkStart" || parent.Children[next].Name.Local == "bookmarkEnd") {
+			next++
+		}
+		if !matched || next >= len(parent.Children) || parent.Children[next].Name.Local != "tbl" {
+			return false, fmt.Errorf("list/table boundary contradicts sibling structure")
+		}
+		return true, nil
+	}
+
 	empty, tail := false, false
 	for _, a := range n.Attr {
 		if a.Name.Space != docxNotesNS {

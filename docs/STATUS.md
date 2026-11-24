@@ -39,44 +39,39 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: literal note labels
+## Latest progress: explicit PDF note relationships
 
-Note.Label / SF note label now preserves explicit custom marks independently of
-note identity. SF/gzip/JSON/DOCX round trips and native foot/endnote output retain
-multi-character labels without advancing automatic counters. Independent package,
-XML, pypdf, PyMuPDF and LibreOffice checks qualify exact labels/body counts,
-automatic numbering and reference navigation; all four rendered pages were inspected.
-One text node per Unicode scalar fixes a real LibreOffice duplication failure.
-Full tests pass (18.458s/0.840s), full race before the final portable-markup
-changes passes (172.886s/2.375s), and final focused new-case race passes (1.734s).
-Vet, modules, host CGO-disabled build/execution, Linux amd64/arm64 cross-builds
-and diff checks pass; exact scope/timings are in verification.json.
-The typed PDF Note/Reference/Ref relationship recovery remains the next step; this
-prerequisite does not close that gap or complete the goal. See TESTING.md.
+The original Note/Reference/Ref audit probe now recovers a typed note and reference
+site. Forward/reverse explicit edges and repeated marks recover one rich definition,
+with paragraphs, formatting, lists, tables, raster/alt content and note-body view
+bindings. Note.Source/LabelSource, raw binary StructureID and source Ref
+owner/targets persist
+through SF/JSON/gzip. Explicit FENote NoteType stays distinct from the documented
+endnote reflow default with KindInferred=true. Read PDF_NOTES.md.
 
-## Previous milestone: explicit PDF artifact structure
+The custom-label prerequisite is committed as 44fe42f. Independent pypdf object,
+python-docx, actual ProseMirror, PyMuPDF and LibreOffice checks qualify exact note
+sites/labels/bodies, strong marks, nested structures, links and red/blue image pixels.
+Native and Word rich-note renders were inspected. A real LibreOffice list/table
+failure required an empty checked paragraph cancelling numbering; forcing tiny
+exact line heights clipped/hidden table content and was rejected during QA.
 
-PDFPage.Artifacts and SourceInfo.Artifacts now retain explicit physical groups,
-Type/Subtype, default-space BBox/display geometry, Attached edges and linked rich
-content membership. Nested marked content/MCIDs, images/Forms and ActualText keep
-these relationships; no visible text is duplicated. Physical Header/Footer roles
-are not silently treated as reusable authorial templates. Read PDF_ARTIFACTS.md.
+The full goal stays incomplete. Remaining required note work includes differing
+citation/body marks, complex/markerless or differently labelled citations, nested/
+enclosing-ActualText graphs, and separately identified adjacency/geometric inference
+without Ref. Current fallback keeps visible content, source edges and diagnostics;
+it does not prove a complete editable note contract. Native Colleaf interoperability,
+original DOCX producer/corpus/visual coverage and final acceptance remain open.
 
-Independent original-object checks match all 1,530 MQTT groups (127 Header/137
-Footer, 1,266 generic) and 25 InDesign groups. All 15,324/160 source memberships
-survive, and the old whole-source JSON projection is exact before the additive
-artifact fields. Actual ProseMirror checks all 214,795 nodes/marks/attributes across
-both originals and the targeted Header probe. Original source/oracles remain intact.
-
-Checks pass: full tests (18.860s/0.824s), race (173.268s/1.864s), new-seed
-race (1.912s), vet/modules, host CGO-disabled build/focused execution and original
-PDF extraction, Linux amd64/arm64 cross-builds and diff check. PDF/SF ten-second
-fuzz campaigns pass (4,738/273 executions, two workers). Durable evidence is in
-verification.json; output/artifacts and output/audit hold ignored raw logs.
-
-The Note/Reference/Ref probe still produces zero typed notes. That is the next
-concrete required recovery gap; physical artifact facts are now available, while
-authorial template inference must remain distinct. The full goal stays incomplete.
+Final full tests pass (15.644s/0.715s), full race passes (178.359s/2.110s), and
+final focused race passes (2.328s). Vet/modules, host CGO-disabled build/focused
+execution (0.420s), Linux amd64/arm64 cross-builds, malformed-input cases, PDF/SF
+fuzz (261/273 executions including seeds) and diff checks pass. Complete original
+MQTT SF values remain exact (semantic SHA256 69f09f6d…447b3). Exact outcomes/scope
+are in verification.json; ignored logs use output/audit/notes-* and output/note-labels. Original artifact evidence is retained:
+1,530 MQTT groups/15,324 memberships and 25 InDesign groups/160 memberships still
+match independently, separate from authorial running-template inference. See
+PDF_ARTIFACTS.md for the committed physical-artifact contract (10459dd).
 
 ## Existing verified evidence to preserve
 
@@ -112,27 +107,25 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
 
 ## Next concrete implementation order
 
-1. Finish/commit the custom note-label prerequisite with current checks.
-2. Recover explicit PDF note-reference semantics, keeping
-   physical evidence separate from inferred placement/kind. Retain rich bodies,
-   actual labels and uncertainty rather than flattening them silently. Explicit
-   pagination-artifact properties/membership are now qualified in PDF_ARTIFACTS.md.
-3. Implement/qualify the actual Colleaf native snapshot adapter through the shared
+1. Complete remaining note graph/label variants and clearly identified inference;
+   use the concrete cases in PDF_NOTES.md, preserving source evidence and content.
+2. Implement/qualify the actual Colleaf native snapshot adapter through the shared
    SF. Include UTF-16 boundaries, rich source maps, notes/stories and resources;
    do not stop at plain-text wrapping. Leave applications/backends untouched.
-4. Broaden pinned, legally reusable original DOCX producer/rich-feature inputs;
+3. Broaden pinned, legally reusable original DOCX producer/rich-feature inputs;
    establish independent structure/asset/reference oracles and meaningful visual
    output checks. Fix actual failures without changing the original expectations.
-5. Audit remaining source-structure consistency/resource and public API evidence,
+4. Audit remaining source-structure consistency/resource and public API evidence,
    repeat the full acceptance matrix and final checks, and complete the goal only
    after every original criterion is proven. There is no external blocker now.
 
 ```sh
-GOWORK=off go test -run 'TestPDFActualTextRetainsInternalNavigation|TestPDFActualTextLinkIntersection' -count=1 .
+GOWORK=off go test -race -run 'TestPDFExplicitNotes|TestPDFNote|TestDOCXListTable' -count=1 .
 output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
 bin/manydoc extract -format sf -o output/audit/explicit-note.sf output/audit/explicit-note.pdf
 bin/manydoc extract -format sf -o output/audit/pagination-artifact.sf output/audit/pagination-artifact.pdf
-rg -n 'Ref|Note|Artifact|Subtype|BBox' pdf_structure.go pdf_structure_blocks.go pdf_marked.go
+output/qa-venv/bin/python scripts/verify_pdf_notes.py
+# Full probe/generation/reader commands: docs/PDF_NOTES.md
 ```
 
 ## Code map and recovery commands

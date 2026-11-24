@@ -43,6 +43,8 @@ type pdfStructureNode struct {
 	kids                                []*pdfStructureNode
 	attrs                               map[string]types.Object
 	alt, actual                         *string
+	refs                                []string
+	originalID                          []byte
 }
 type pdfStructureRecovery struct {
 	reader         *pdfReader
@@ -50,8 +52,12 @@ type pdfStructureRecovery struct {
 	units          []pdfContentUnit
 	marked         map[pdfContentKey][]int
 	active, seen   map[string]bool
+	referenceTotal int
 	nodes          int
 	grids          map[int][]pdfGridRegion
+	notes          map[*pdfStructureNode]*pdfRecoveredNote
+	noteRefs       map[*pdfStructureNode]*pdfRecoveredNote
+	cachedRefs     map[*pdfStructureNode][]Block
 }
 
 func (r *pdfReader) recoverStructure(root types.Object) error {
@@ -112,6 +118,9 @@ func (r *pdfReader) recoverStructure(root types.Object) error {
 	}
 	kids, err := s.parse(d["K"], 0, fmt.Sprint(root), 0)
 	if err != nil {
+		return err
+	}
+	if err := s.prepareNotes(kids); err != nil {
 		return err
 	}
 	blocks, err := s.children(kids)
@@ -285,6 +294,34 @@ func (s *pdfStructureRecovery) parse(value types.Object, page int, parent string
 				*entry.target = &text
 			}
 		}
+
+		if value := d["ID"]; value != nil {
+			value, err = s.reader.pdf.Dereference(value)
+			if err != nil {
+				return nil, err
+			}
+			n.originalID, err = pdfString(value)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if value := d["Ref"]; value != nil {
+			refs, e := s.reader.pdf.DereferenceArray(value)
+			if e != nil || refs == nil {
+				return nil, fmt.Errorf("structure Ref must be an array")
+			}
+			for _, value := range refs {
+				s.referenceTotal++
+				if s.referenceTotal > 200000 {
+					return nil, fmt.Errorf("structure Ref graph exceeds 200000 targets")
+				}
+				ref, ok := value.(types.IndirectRef)
+				if !ok {
+					return nil, fmt.Errorf("structure Ref target must be indirect")
+				}
+				n.refs = append(n.refs, fmt.Sprint(ref))
+			}
+		}
 		if err = s.attributes(n, d); err != nil {
 			return nil, err
 		}
@@ -295,7 +332,7 @@ func (s *pdfStructureRecovery) parse(value types.Object, page int, parent string
 		if value := n.attrs["ListNumbering"]; value != nil {
 			inheritPDFListNumbering(n.kids, value)
 		}
-		for _, key := range []string{"Lang", "E", "T", "NS", "Ref", "Phoneme"} {
+		for _, key := range []string{"Lang", "E", "T", "NS", "Phoneme"} {
 			if d[key] != nil {
 				s.warn("pdf_structure_properties", "Additional logical language/title/namespace/accessibility properties are not represented")
 			}
@@ -355,7 +392,7 @@ func (s *pdfStructureRecovery) attributes(n *pdfStructureNode, d types.Dict) err
 			if k == "O" {
 				continue
 			}
-			if (*owner == "Table" && (k == "RowSpan" || k == "ColSpan")) || (*owner == "List" && k == "ListNumbering") {
+			if (*owner == "Table" && (k == "RowSpan" || k == "ColSpan")) || (*owner == "List" && k == "ListNumbering") || (*owner == "FENote" && k == "NoteType") {
 				n.attrs[k] = v
 			} else {
 				s.warn("pdf_structure_attributes", "Additional structure layout/style/table/list attributes are not represented")
@@ -477,13 +514,17 @@ func (s *pdfStructureRecovery) materialize(ids []int, explicit bool, role string
 	return blocks
 }
 func sourceFromBlocks(blocks []Block, n *pdfStructureNode) *SourceInfo {
-	source := &SourceInfo{Format: PDF, Element: n.id, Tag: n.tag, Role: n.role, Structure: "explicit", Evidence: "pdf_structure_tree", Confidence: 1, Precision: "union_of_content_bounds"}
+	source := &SourceInfo{Format: PDF, StructureID: append([]byte(nil), n.originalID...), Element: n.id, Tag: n.tag, Role: n.role, Structure: "explicit", Evidence: "pdf_structure_tree", Confidence: 1, Precision: "union_of_content_bounds"}
+	if len(n.refs) > 0 {
+		source.References = []SourceStructureReference{{Element: n.id, Targets: append([]string(nil), n.refs...)}}
+	}
 	boxes := map[int]Quad{}
 	var add func(*SourceInfo)
 	add = func(src *SourceInfo) {
 		if src == nil {
 			return
 		}
+		source.References = structureReferences(source.References, src.References)
 		source.Artifacts = artifactIDs(source, src.Artifacts...)
 		if src.Order > 0 && (source.Order == 0 || src.Order < source.Order) {
 			source.Order = src.Order

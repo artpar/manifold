@@ -170,6 +170,10 @@ type Image struct {
 	Height    float64 `json:"height,omitempty"`
 }
 type Note struct {
+	// KindInferred distinguishes an editorial placement choice from an explicit source kind.
+	KindInferred bool        `json:"kind_inferred,omitempty"`
+	LabelSource  *SourceInfo `json:"label_source,omitempty"`
+	Source       *SourceInfo `json:"source,omitempty"`
 	// Label is a literal display mark. Empty uses automatic per-kind numbering.
 	// Custom labels do not advance the automatic counter.
 	Label  string  `json:"label,omitempty"`
@@ -537,6 +541,12 @@ func (d *Document) Validate() error {
 		}
 	}
 	for _, n := range d.Notes {
+		if err := n.LabelSource.validate(d.Pages); err != nil {
+			return err
+		}
+		if err := n.Source.validate(d.Pages); err != nil {
+			return err
+		}
 		if err := walk(n.Blocks, 0); err != nil {
 			return err
 		}

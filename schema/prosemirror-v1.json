@@ -282,6 +282,8 @@
     },
     "source": {
       "attrs": {
+        "structure_id": {"default": null},
+        "references": {"default": []},
         "artifacts": {"default": []},
         "format": {
           "default": "pdf",

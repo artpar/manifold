@@ -3,6 +3,7 @@ package manydoc
 import (
 	"fmt"
 	"math"
+	"slices"
 )
 
 // Point is in physical points in displayed page coordinates: top-left origin,
@@ -62,37 +63,66 @@ type TableWidthSource struct {
 	Bounds     Quad    `json:"bounds"`
 }
 
+// SourceStructureReference identifies the explicit owner and targets of a PDF
+// structure Ref entry. Aggregate source bounds retain contributing edges too.
+type SourceStructureReference struct {
+	Element string   `json:"element,omitempty"`
+	Targets []string `json:"targets"`
+}
+
+func structureReferences(a, b []SourceStructureReference) []SourceStructureReference {
+	out := append([]SourceStructureReference(nil), a...)
+	for _, ref := range b {
+		found := false
+		for _, old := range out {
+			if old.Element == ref.Element && slices.Equal(old.Targets, ref.Targets) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			copy := ref
+			copy.Targets = append([]string(nil), ref.Targets...)
+			out = append(out, copy)
+		}
+	}
+	return out
+}
+
 // SourceInfo records provenance, not an alternative copy of content. Quads use
 // advance/font metrics, not glyph ink outlines. Precision discloses estimates.
 // Confidence is a heuristic ranking, not a calibrated probability.
 type SourceInfo struct {
-	Artifacts          []string          `json:"artifacts,omitempty"`
-	Format             Format            `json:"format"`
-	Page               int               `json:"page,omitempty"`
-	Object             string            `json:"object,omitempty"`
-	Stream             string            `json:"stream,omitempty"`
-	Role               string            `json:"role,omitempty"`
-	Element            string            `json:"element,omitempty"`
-	Order              int               `json:"order,omitempty"`
-	Quad               *Quad             `json:"quad,omitempty"`
-	Baseline           *[2]Point         `json:"baseline,omitempty"`
-	Matrix             *Matrix           `json:"matrix,omitempty"`
-	Regions            []SourceRegion    `json:"regions,omitempty"`
-	Font               string            `json:"font,omitempty"`
-	FontFamilyEvidence string            `json:"font_family_evidence,omitempty"`
-	ColorSpace         string            `json:"color_space,omitempty"`
-	ColorComponents    []float64         `json:"color_components,omitempty"`
-	FontSize           float64           `json:"font_size,omitempty"`
-	MCID               *int              `json:"mcid,omitempty"`
-	Tag                string            `json:"tag,omitempty"`
-	Structure          string            `json:"structure"` // explicit, inferred or unstructured
-	Evidence           string            `json:"evidence"`
-	Confidence         float64           `json:"confidence"`
-	Precision          string            `json:"precision,omitempty"`
-	Label              string            `json:"label,omitempty"`
-	RenderMode         int               `json:"render_mode,omitempty"`
-	TableWidths        *TableWidthSource `json:"table_widths,omitempty"`
-	TableSpans         *TableSpanSource  `json:"table_spans,omitempty"`
+	// References retains explicit PDF structure Ref edges, including unresolved targets.
+	StructureID        []byte                     `json:"structure_id,omitempty"` // original PDF ID bytes, not a Unicode text string
+	References         []SourceStructureReference `json:"references,omitempty"`
+	Artifacts          []string                   `json:"artifacts,omitempty"`
+	Format             Format                     `json:"format"`
+	Page               int                        `json:"page,omitempty"`
+	Object             string                     `json:"object,omitempty"`
+	Stream             string                     `json:"stream,omitempty"`
+	Role               string                     `json:"role,omitempty"`
+	Element            string                     `json:"element,omitempty"`
+	Order              int                        `json:"order,omitempty"`
+	Quad               *Quad                      `json:"quad,omitempty"`
+	Baseline           *[2]Point                  `json:"baseline,omitempty"`
+	Matrix             *Matrix                    `json:"matrix,omitempty"`
+	Regions            []SourceRegion             `json:"regions,omitempty"`
+	Font               string                     `json:"font,omitempty"`
+	FontFamilyEvidence string                     `json:"font_family_evidence,omitempty"`
+	ColorSpace         string                     `json:"color_space,omitempty"`
+	ColorComponents    []float64                  `json:"color_components,omitempty"`
+	FontSize           float64                    `json:"font_size,omitempty"`
+	MCID               *int                       `json:"mcid,omitempty"`
+	Tag                string                     `json:"tag,omitempty"`
+	Structure          string                     `json:"structure"` // explicit, inferred or unstructured
+	Evidence           string                     `json:"evidence"`
+	Confidence         float64                    `json:"confidence"`
+	Precision          string                     `json:"precision,omitempty"`
+	Label              string                     `json:"label,omitempty"`
+	RenderMode         int                        `json:"render_mode,omitempty"`
+	TableWidths        *TableWidthSource          `json:"table_widths,omitempty"`
+	TableSpans         *TableSpanSource           `json:"table_spans,omitempty"`
 }
 
 // PDFPage records physical page boundaries even when a logical tagged paragraph
@@ -169,6 +199,24 @@ func (s *SourceInfo) validate(pages []PDFPage) error {
 	if s.Structure != "explicit" && s.Structure != "inferred" && s.Structure != "unstructured" {
 		return fmt.Errorf("invalid source structure provenance")
 	}
+
+	for _, ref := range s.References {
+		if err := validateString(ref.Element); err != nil {
+			return err
+		}
+		if len(ref.Targets) == 0 {
+			return fmt.Errorf("empty source structure reference")
+		}
+		for _, target := range ref.Targets {
+			if target == "" {
+				return fmt.Errorf("empty source structure target")
+			}
+			if err := validateString(target); err != nil {
+				return err
+			}
+		}
+	}
+
 	if s.Evidence == "" {
 		return fmt.Errorf("source evidence is required")
 	}
@@ -364,7 +412,7 @@ func (d *Document) hasPDFSource() bool {
 		return true
 	}
 	for _, n := range d.Notes {
-		if walk(n.Blocks) {
+		if n.Source != nil || n.LabelSource != nil || walk(n.Blocks) {
 			return true
 		}
 	}

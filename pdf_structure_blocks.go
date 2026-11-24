@@ -18,6 +18,13 @@ func (s *pdfStructureRecovery) node(n *pdfStructureNode) ([]Block, error) {
 	if n.kind != "StructElem" {
 		return s.content(n)
 	}
+
+	if cached, ok := s.cachedRefs[n]; ok {
+		return cached, nil
+	}
+	if note := s.notes[n]; note != nil {
+		return s.recoverNote(n, note)
+	}
 	switch n.role {
 	case "Table":
 		return s.table(n)
@@ -121,7 +128,7 @@ func (s *pdfStructureRecovery) node(n *pdfStructureNode) ([]Block, error) {
 			}
 		}
 	} else if isInlineRole(n.role) {
-		if n.role != "Span" && n.role != "Link" {
+		if _, preparing := s.noteRefs[n]; n.role != "Span" && n.role != "Link" && !preparing {
 			s.warn("pdf_structure_inline", "Specialized inline role is retained in source provenance without dedicated editing semantics")
 		}
 	} else {
@@ -129,6 +136,11 @@ func (s *pdfStructureRecovery) node(n *pdfStructureNode) ([]Block, error) {
 		case "Document", "Part", "Sect", "Div", "Art", "LBody":
 		default:
 			s.warn("pdf_structure_role", "Unrepresented logical container/role is flattened while its content is retained")
+		}
+	}
+	if len(n.refs) > 0 || pdfNoteRole(n) {
+		for i := range blocks {
+			blocks[i].Source = sourceFromBlocks([]Block{blocks[i]}, n)
 		}
 	}
 	for i := range blocks {

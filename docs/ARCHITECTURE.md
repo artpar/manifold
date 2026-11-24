@@ -1007,3 +1007,16 @@ DOCX uses standard customMarkFollows with same-run text nodes and a standard
 footnoteRef/endnoteRef in the note body. One Unicode scalar per text node avoids
 LibreOffice duplicating multi-character marks. Checked md:label metadata agrees
 with the actual main-story mark, preserving identity independently of appearance.
+
+## Explicit PDF note graph recovery
+
+pdf_structure_notes.go resolves forward and reverse structure Ref edges against
+the completed tree before flow materialization. Unambiguous consistent text marks
+become reference atoms, rich definitions move once into Document.Notes, and only
+matching leading explicit Lbl content becomes the semantic label. Definitions keep
+Note.Source and independent leading-label geometry/font/paint in Note.LabelSource;
+all source records can retain binary StructureID and owner/target Ref
+edges, including unresolved relationships and contributing aggregate bounds.
+Explicit FENote NoteType is separate from KindInferred editorial reflow defaults.
+Navigation candidate traversal includes relocated note bodies. Read PDF_NOTES.md
+for current evidence, precise fallbacks and remaining required note work.

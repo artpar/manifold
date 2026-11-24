@@ -241,6 +241,16 @@ func TestStructuredListBoundaryRoundTrip(t *testing.T) {
 }
 
 func FuzzReadStructured(f *testing.F) {
+	note, err := ReadPDF(context.Background(), bytes.NewReader(recoveryPDF(explicitNoteObjects("Note")...)), ReadOptions{})
+	if err != nil {
+		f.Fatal(err)
+	}
+	var noteSF bytes.Buffer
+	if err = Write(context.Background(), &noteSF, note, SF, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(noteSF.Bytes())
+
 	artifact, artifactErr := ReadPDF(context.Background(), bytes.NewReader(recoveryPage(`/Artifact << /Type /Pagination /Subtype /Header /BBox [10 350 220 390] /Attached [/Top] >> BDC BT /F 10 Tf 20 370 Td (HEADER) Tj ET EMC`, "")), ReadOptions{PDFSkipInference: true})
 	if artifactErr != nil {
 		f.Fatal(artifactErr)

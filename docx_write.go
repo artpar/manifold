@@ -213,6 +213,12 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 	hasPhysical := false
 	for i := 0; i < len(bs); i++ {
 		b := bs[i]
+		// A block-level list bookmark ending immediately before a table makes
+		// LibreOffice synthesize another numbered paragraph. End numbering explicitly
+		// in a checked, empty layout boundary before the table.
+		if i > 0 && bs[i-1].Kind == ListBlock && b.Kind == Table {
+			out.WriteString(docxListTableBoundary)
+		}
 		for _, id := range b.Anchors {
 			v, err := w.anchor(id)
 			if err != nil {

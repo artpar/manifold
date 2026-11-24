@@ -419,6 +419,9 @@ func (r *pdfReader) bindPDFNavigation() {
 		}
 	}
 	walk(r.doc.Blocks)
+	for i := range r.doc.Notes {
+		walk(r.doc.Notes[i].Blocks)
+	}
 	inserts := map[*Block]map[int][]Run{}
 	pageAnchors := map[int][]string{}
 	for i := range r.doc.PDFNavigation.Destinations {

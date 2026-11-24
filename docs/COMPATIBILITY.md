@@ -930,3 +930,13 @@ literal text nodes after the reference in its run; missing/empty/nontext custom
 marks are rejected explicitly rather than guessed. Automatic nondecimal numbering
 policies still have their existing normalization diagnostics. Native PDF measures
 both custom body/reference marks and reports missing glyphs/shaping/width failures.
+
+Explicit PDF Note/FENote Ref recovery now supports forward/reverse edges,
+consistent literal/repeated citations and rich definitions with positions/styles,
+lists/tables/images and relocated navigation. Matching leading Lbl is represented
+as the note label once. NoteType is explicit when present; unspecified kind selects
+a documented endnote editorial default with KindInferred and diagnostics. Binary
+source IDs and Ref object edges persist in SF/JSON/gzip; native/Word retain their
+existing acknowledged source-provenance/reflow policy. Broader differing marks,
+complex/nested/ActualText graphs and non-Ref inference remain required work, with
+visible content/source edges retained in current fallbacks. See PDF_NOTES.md.

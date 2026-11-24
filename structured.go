@@ -37,10 +37,13 @@ type StructuredAttributes struct {
 	UnresolvedDestinations []string         `json:"unresolvedDestinations,omitempty"`
 }
 type StructuredNote struct {
-	Label   string           `json:"label,omitempty"`
-	ID      string           `json:"id"`
-	Kind    string           `json:"kind"`
-	Content []StructuredNode `json:"content"`
+	LabelSource  *SourceInfo      `json:"label_source,omitempty"`
+	KindInferred bool             `json:"kind_inferred,omitempty"`
+	Source       *SourceInfo      `json:"source,omitempty"`
+	Label        string           `json:"label,omitempty"`
+	ID           string           `json:"id"`
+	Kind         string           `json:"kind"`
+	Content      []StructuredNode `json:"content"`
 }
 
 // Attrs contains the attributes defined for this node type, encoded as an object.
@@ -87,7 +90,7 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 		if err != nil {
 			return nil, err
 		}
-		s.Attrs.Notes = append(s.Attrs.Notes, StructuredNote{ID: n.ID, Kind: n.Kind, Content: bs, Label: n.Label})
+		s.Attrs.Notes = append(s.Attrs.Notes, StructuredNote{ID: n.ID, Kind: n.Kind, Content: bs, Label: n.Label, Source: n.Source, KindInferred: n.KindInferred, LabelSource: n.LabelSource})
 	}
 	if _, err := FromStructured(s); err != nil {
 		return nil, err
@@ -276,7 +279,7 @@ func FromStructured(s *StructuredDocument) (*Document, error) {
 		if err != nil {
 			return nil, err
 		}
-		d.Notes = append(d.Notes, Note{ID: n.ID, Kind: n.Kind, Blocks: bs, Label: n.Label})
+		d.Notes = append(d.Notes, Note{ID: n.ID, Kind: n.Kind, Blocks: bs, Label: n.Label, Source: n.Source, KindInferred: n.KindInferred, LabelSource: n.LabelSource})
 	}
 	for _, diag := range d.Diagnostics {
 		if err := validateString(diag.Code); err != nil {

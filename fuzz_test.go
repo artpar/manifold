@@ -92,6 +92,7 @@ func FuzzReadDOCX(f *testing.F) {
 	})
 }
 func FuzzReadPDF(f *testing.F) {
+	f.Add(recoveryPDF(explicitNoteObjects("FENote /A << /O /FENote /NoteType /Footnote >>")...))
 	f.Add(recoveryPage(`/Artifact << /Type /Pagination /Subtype /Header /BBox [10 350 220 390] /Attached [/Top] >> BDC /Span << /ActualText (replacement) >> BDC BT /F 10 Tf 20 370 Td (HEADER) Tj ET EMC EMC`, ""))
 	f.Add(navigationFixture(fullNavigationTree(), `/foo [6 0 R /FitH 100]`, `(foo)`))
 	f.Add(recoveryPDF(taggedShortPatchObjects(true)...))

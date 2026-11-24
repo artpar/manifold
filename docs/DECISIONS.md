@@ -1413,3 +1413,21 @@ failures. Do not embed identity in the mark or infer relationships from equal te
 A LibreOffice QA failure exposed duplication of multi-character custom marks in
 one w:t; scalar text nodes fix the same logical standard mark without deleting
 visible characters. Standard note-body reference atoms supply the body mark.
+
+## 2026-11-24 Resolve explicit note edges before reflow
+
+Use object-identity Ref edges in either direction; equal glyph text and paint order
+are not relationship evidence. Retain source binary ID bytes independently of a
+valid public identifier and all explicit owner/target edges. Move each rich body
+once; preserve reference-site positions/formatting and note-body navigation.
+An unspecified Note/FENote kind selects a disclosed editorial endnote default with
+KindInferred, not an unsupported claim about physical authoring policy. Ambiguous
+marks, nested/enclosing ActualText and unresolved cases retain visible flow/source
+edges with diagnostics; they remain required broader graph work. See PDF_NOTES.md.
+
+Independent visual QA found LibreOffice synthesized numbering between a list and
+its following table. A checked empty paragraph cancels numbering while preserving
+SF block semantics. Keep normal paragraph layout: tiny exact heights hid/clipped
+the table in the independent reader and were rejected. Original sources/oracles
+are unchanged; this is a generation interoperability fix discovered by the new
+rich-note probe, not a golden update to accept missing content.

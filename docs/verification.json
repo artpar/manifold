@@ -5189,5 +5189,49 @@
     "evidence": "output/note-labels ignored; scripts/verify_note_labels.py; examples/notes -custom-labels; docs/TESTING.md",
     "next": "recover explicit PDF Note/Reference/Ref graph and rich bodies with kind/placement uncertainty; native Colleaf adapter and original DOCX corpus/visual acceptance remain open",
     "production_dependencies": "unchanged; pure Go; no app/backend edits"
+  },
+  "explicit_pdf_note_graph": {
+    "date": "2026-11-24",
+    "implemented": [
+      "whole-tree forward and reverse Ref resolution by object identity",
+      "repeated reference atoms and one rich definition",
+      "explicit FENote NoteType versus KindInferred endnote editorial default",
+      "literal marks independent of public IDs and automatic counters",
+      "binary StructureID plus source owner/target edges, including unresolved targets and aggregates",
+      "Note.Source and independent LabelSource geometry/font/paint retained through SF/JSON/gzip",
+      "rich paragraph/strong/list/table/image/alt semantics and note-body navigation binding",
+      "checked DOCX inferred-kind metadata and list/table numbering boundary"
+    ],
+    "independent": {
+      "original_zero_note_probe": "now one typed endnote/default-kind note and one explicit reference; kind_inferred=true persists through DOCX",
+      "rich_probe": "one explicit Footnote, two forward/reverse-linked reference sites, *1 literal mark, strong paragraph/list/table text, exact 2x1 red/blue PNG pixels and alt, note-body physical view with separately inferred editable ownership",
+      "docx_roundtrip": "every editable note value/identity/style/anchor/raster byte matches after removing only acknowledged source provenance and empty default spellings",
+      "native_and_libreoffice": "one PDF page each; exactly three *1 marks; every body string once; at least two correct internal note links; exact embedded pixels; both pages inspected",
+      "actual_prosemirror": "214,815 nodes/marks/attributes across original MQTT/InDesign plus two source probes; 19 additional nodes in rich DOCX round trip; final three targeted files 44 nodes"
+    },
+    "real_source_regression": {
+      "mqtt_artifacts": 1530,
+      "mqtt_memberships": 15324,
+      "indesign_artifacts": 25,
+      "indesign_memberships": 160,
+      "mqtt_entire_sf_values": "exact equality with previous artifact milestone SF; no new source fields present in this original",
+      "semantic_sha256": "69f09f6d292f21356b38dfb834358a1a4d3e562388f5513462b534f7ace447b3",
+      "original_fixtures_and_oracles": "unchanged"
+    },
+    "failure_and_fix": "LibreOffice synthesized an extra list number before a following table. A checked empty paragraph cancels numbering; tiny exact heights hid/clipped the table and were rejected. Normal paragraph layout preserves content and table borders; SF semantics remain unchanged.",
+    "checks": {
+      "full_tests": "library 15.644s; CLI 0.715s; all packages pass",
+      "full_race": "library 178.359s; CLI 2.110s; all packages pass",
+      "focused_final_race": "2.328s including label-source geometry/font checks",
+      "vet": "pass",
+      "modules": "all modules verified",
+      "cgo_disabled": "host build/focused execution 0.420s pass; Linux amd64/arm64 cross-builds only",
+      "fuzz": "ten seconds each/two workers: PDF 261, SF 273 executions including seed coverage; pass. Large seed warmup limits new mutations in these short campaigns.",
+      "diff_check": "pass"
+    },
+    "evidence": "docs/PDF_NOTES.md; scripts/generate_pdf_semantic_audit.py; scripts/verify_pdf_notes.py; ignored output/audit/notes-* and output/note-labels",
+    "production_dependencies": "unchanged; pure Go, no services/executables/CGO/uploads or app/backend changes",
+    "remaining_required": "differing citation/body marks, differently labelled/complex/markerless references, nested/enclosing ActualText editable graphs and identified non-Ref adjacency/geometric inference; native Colleaf snapshot adapter, broader original DOCX corpus/visual evidence and final acceptance",
+    "goal": "active/incomplete; unambiguous explicit recovery milestone only"
   }
 }

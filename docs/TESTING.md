@@ -2312,3 +2312,17 @@ native versus Word reflow policy, not an equivalence claim. The initial duplicat
 multi-character mark failure remains reproducible by joining the two w:t nodes;
 scalar nodes correct that actual reader failure. Unit tests separately check
 SF/JSON/DOCX graph semantics, counter policy and malformed/contradictory labels.
+
+## Explicit PDF note graph and list/table boundary
+
+PDF_NOTES.md contains the full source generation, CLI, independent object/reader,
+rendering and focused test commands. The original zero-note audit now recovers one
+typed endnote/default-kind note; the rich probe recovers one explicit Footnote with
+two forward/reverse-linked reference sites, custom label, strong body marks,
+ordered list, table, exact red/blue pixels/alt and note-body view binding. All
+source/relationship/asset checks use original hand-authored object facts. Native
+and LibreOffice PDF pages were visually inspected, including the corrected list/
+table boundary. Final full checks, original artifact/ProseMirror checks and fuzz
+counts are in verification.json; ignored evidence uses output/audit/notes-*.
+Remaining graph/mark/inference cases are explicit requirements in PDF_NOTES.md,
+not a claim that all note semantics or the complete project are finished.
