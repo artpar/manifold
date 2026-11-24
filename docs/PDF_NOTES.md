@@ -94,11 +94,12 @@ semantic failures.
 
 This milestone closes the audit's zero-typed-note failure for explicit unambiguous
 relationships, including rich/repeated/reverse-linked cases. Broader note recovery
-still needs nested/enclosing-ActualText graphs and broader geometric inference
+still needs broader nested graphs and geometric inference
 where no Ref exists; existing adjacency/physical-link rules are qualified below.
 Rich/mixed-direction citation interiors are qualified in RICH_CITATIONS.md. Differing, literal and explicitly empty
-citation/body marks now have their own representation, described below. Enclosing
-ActualText/nested cases retain content and source evidence but do not yet expose a full editable note graph. Do not relabel
+citation/body marks now have their own representation, described below. Exact enclosing/nested ActualText now supports editable references as described
+below. Opaque replacement ranges retain content/graph evidence and uncertainty;
+broader nested-definition graphs remain required. Do not relabel
 these required follow-ups as a completed note contract. Original rich producer
 inputs, native Colleaf interoperability and final full-goal acceptance remain open.
 
@@ -301,7 +302,8 @@ projection and checked original intent; see DOCX_PRECISION.md for full original
 Word round-trip/reader evidence. Strict output still rejects inexact sizes.
 Heterogeneous/mixed-direction body labels are qualified in RICH_NOTE_LABELS.md;
 rich/internal mixed-direction citations are qualified in RICH_CITATIONS.md.
-Nested/ActualText graphs remain open.
+Exact enclosing ActualText correspondence is qualified below; broader nested
+graphs remain open.
 
 ```sh
 GOWORK=off go run ./examples/notes -variant-labels -styled-labels -out output/note-styles
@@ -319,3 +321,54 @@ It excludes the simple body string/template and does not change note identity or
 citation counters. Standard visible Word runs use checked bookmark boundaries;
 source paint/Word/native style/geometry/asset and mixed-script gutter checks pass.
 RICH_NOTE_LABELS.md contains complete behavior, producer limits and commands.
+
+
+## Exact enclosing and nested structural ActualText
+
+When a structural ActualText string equals the complete literal characters of one
+inline paragraph, its original text/style/source intervals are recoverable. Only
+inferred geometric separator runs are removed; literal spaces remain authoritative.
+The conditional preliminary traversal copies paint-consumption/diagnostic state
+and establishes these exact boundaries before note extraction. Explicit citations
+can cross nested exact spans. Main recovery compares the resolved citation strings
+again and preserves one atom per actual reference, with
+pdf_structure_actualtext_aligned source evidence. No schema or duplicate text
+metadata is added. Non-note exact spans also retain their individual styles.
+
+Different replacement strings cannot establish exact citation offsets from matching
+label substrings. Nontext/multiple-paragraph extents and extents containing note
+definitions remain opaque under the existing replacement/graph-evidence policy.
+A definition is never moved outside its own enclosing replacement just because the
+original body matched. Opaque cases preserve replacement text and unresolved source
+relationships with diagnostics; a prepared atom cannot silently disappear during
+materialization. Broader nested-definition/redundant-wrapper and untagged graphs
+remain open; this evidence does not establish arbitrary ActualText mapping.
+
+An independent source has outer ActualText BODY*1MIDDLE*1AFTER, an inner *1 boundary,
+explicit forward/reverse edges and original10pt black/8pt red citation operators.
+The recovered graph has both explicit reference sites, exact surrounding text,
+individual citation styles/regions and one rich note/list/table/red-blue2x1 raster.
+An altered outer replacement retains its complete different text and graph evidence
+without fabricated notes. Python pypdf audits original objects/operators; exact
+editable Word/SF comparison, python-docx, actual ProseMirror61 nodes/marks/attrs,
+MuPDF paint/native links and two inspected native/LibreOffice pages pass. Existing
+font/superscript/baseline/Word note-page producer differences remain unchanged.
+
+```sh
+output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
+GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
+bin/manydoc extract -format sf -o output/note-actual/source.sf output/audit/aligned-actual-note.pdf
+bin/manydoc extract -format sf -o output/note-actual/opaque.sf output/audit/opaque-actual-note.pdf
+bin/manydoc convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/note-actual/native.pdf output/note-actual/source.sf
+bin/manydoc convert -allow-lossy -o output/note-actual/word.docx output/note-actual/source.sf
+bin/manydoc extract -format sf -o output/note-actual/word.sf output/note-actual/word.docx
+/Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-note-actual-qa --headless --convert-to pdf --outdir output/note-actual/lo output/note-actual/word.docx
+output/qa-venv/bin/python scripts/verify_note_actual.py
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/note-actual/source.sf output/note-actual/word.sf output/note-actual/opaque.sf
+GOWORK=off go test -race -run 'TestPDFNoteAligned|TestPDFNoteActualText' -count=1 .
+```
+
+Full/final focused checks and their timing are in verification.json; ignored QA
+is output/note-actual. Runtime remains pure Go; optional QA readers are not runtime
+dependencies. Next: nested-definition/redundant-wrapper note graph cases, broader
+untagged recovery and the actual Colleaf adapter. Full goal remains incomplete.

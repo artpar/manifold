@@ -80,8 +80,7 @@ hyperlinks in PDF export. In the sectioned example its main page is approximatel
 420pt square. These are measured producer differences, not proof of exact Word
 page geometry or print equivalence. Standard source settings and semantic SF
 round trips are separately verified; broader producer qualification remains open.
-Nested/enclosing-ActualText relationships,
-broader untagged note recovery, the Colleaf adapter and original DOCX corpus/final
+Broader nested/untagged note recovery, the Colleaf adapter and original DOCX corpus/final
 audit remain required. The full goal is incomplete.
 
 ## Reproduction

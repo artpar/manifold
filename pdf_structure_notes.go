@@ -21,6 +21,7 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 	s.notes = map[*pdfStructureNode]*pdfRecoveredNote{}
 	s.noteRefs = map[*pdfStructureNode]*pdfRecoveredNote{}
 	s.cachedRefs = map[*pdfStructureNode][]Block{}
+	s.noteLabels = map[noteKey]string{}
 	byID := map[string]*pdfStructureNode{}
 	inNote, underActual := map[*pdfStructureNode]bool{}, map[*pdfStructureNode]bool{}
 	parents := map[*pdfStructureNode]*pdfStructureNode{}
@@ -40,6 +41,9 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 		}
 	}
 	collect(roots, nil, false, false)
+	if err := s.prepareActualNoteBoundaries(roots, nodes, parents, underActual); err != nil {
+		return err
+	}
 	targets := map[*pdfStructureNode]map[*pdfStructureNode]bool{}
 	add := func(ref, note *pdfStructureNode) {
 		if targets[ref] == nil {
@@ -153,6 +157,7 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 		}
 		ids[noteKey{kind, id}] = true
 		note.definition = Note{ID: id, Kind: kind, KindInferred: inferred, Label: label}
+		s.noteLabels[noteKey{kind, id}] = label
 		if label == "" {
 			value := ""
 			note.definition.BodyLabel = &value

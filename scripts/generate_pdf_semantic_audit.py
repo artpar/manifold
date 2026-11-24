@@ -121,3 +121,18 @@ mixed_citations={'type':'doc','attrs':{'schema':'manydoc-prosemirror/1','layout'
         {'type':'note_reference','attrs':{'id':'two','kind':'footnote','label':'بA'},'marks':[{'type':'textStyle','attrs':{'fontFamily':'DejaVu','fontSize':14}}]},
         {'type':'text','text':' after the atomic citations.'}]} for direction in ('ltr','rtl')]}
 (out/'mixed-citations.sf').write_text(json.dumps(mixed_citations,ensure_ascii=False))
+
+# Exact enclosing structural ActualText retains two explicit citation sites.
+# Paint operators and note/asset objects remain unchanged. One citation also has
+# its own exact nested ActualText boundary and individually styled fragments.
+aligned_note=rich_citation.copy()
+aligned_note[6]=aligned_note[6].replace('/S /P','/S /P /ActualText (BODY*1MIDDLE*1AFTER)',1)
+wrapper=len(aligned_note)+1
+aligned_note[6]=aligned_note[6].replace('/K [0 8 0 R',f'/K [0 {wrapper} 0 R',1)
+aligned_note[7]=aligned_note[7].replace('/P 7 0 R',f'/P {wrapper} 0 R',1)
+aligned_note.append('<< /Type /StructElem /S /Span /P 7 0 R /ActualText (*1) /K 8 0 R >>')
+(out/'aligned-actual-note.pdf').write_bytes(pdf(aligned_note))
+opaque_note=aligned_note.copy()
+opaque_note[6]=opaque_note[6].replace('BODY*1MIDDLE*1AFTER','DIFFERENT*1TEXT*1CONTENT')
+(out/'opaque-actual-note.pdf').write_bytes(pdf(opaque_note))
+print('Wrote exact nested/enclosing and opaque ActualText citation probes')

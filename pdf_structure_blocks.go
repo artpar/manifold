@@ -36,26 +36,44 @@ func (s *pdfStructureRecovery) node(n *pdfStructureNode) ([]Block, error) {
 		return nil, err
 	}
 	if n.actual != nil {
-		source := sourceFromBlocks(blocks, n)
-		source.Evidence = "pdf_structure_actualtext"
-		source.Precision = "replacement_span_bounds"
-		replacement := s.structureReplacement(blocks, *n.actual, source)
-		var out []Block
-		inserted := false
-		for _, b := range blocks {
-			if b.Kind == Paragraph || b.Kind == Heading {
-				if !inserted {
-					out = append(out, Block{Kind: Paragraph, Runs: []Run{replacement}, Source: source})
-					inserted = true
+		aligned, exact := s.alignActualNoteText(blocks, *n.actual, n)
+		if s.alignedActual != nil {
+			s.alignedActual[n] = exact
+		}
+		if exact {
+			blocks = aligned
+		} else {
+			// A prepared note atom must never disappear into a replacement.
+			// The preparation pass normally keeps opaque ancestors in flow.
+			if err := walkNoteRuns(blocks, func(run Run) error {
+				if run.Note != nil {
+					return fmt.Errorf("ActualText citation correspondence changed during recovery")
 				}
-			} else {
-				out = append(out, b)
+				return nil
+			}); err != nil {
+				return nil, err
 			}
+			source := sourceFromBlocks(blocks, n)
+			source.Evidence = "pdf_structure_actualtext"
+			source.Precision = "replacement_span_bounds"
+			replacement := s.structureReplacement(blocks, *n.actual, source)
+			var out []Block
+			inserted := false
+			for _, b := range blocks {
+				if b.Kind == Paragraph || b.Kind == Heading {
+					if !inserted {
+						out = append(out, Block{Kind: Paragraph, Runs: []Run{replacement}, Source: source})
+						inserted = true
+					}
+				} else {
+					out = append(out, b)
+				}
+			}
+			if !inserted && *n.actual != "" {
+				out = append([]Block{{Kind: Paragraph, Runs: []Run{replacement}, Source: source}}, out...)
+			}
+			blocks = out
 		}
-		if !inserted && *n.actual != "" {
-			out = append([]Block{{Kind: Paragraph, Runs: []Run{replacement}, Source: source}}, out...)
-		}
-		blocks = out
 	}
 	if n.role == "Link" {
 		target, conflict := s.logicalLink(n.kids)

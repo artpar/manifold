@@ -39,30 +39,29 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: rich citation labels and atomic mixed-direction layout
+## Latest progress: exact enclosing ActualText note correspondence
 
-NoteReference.LabelContent / note_reference.attrs.label_content now preserves
-literal fragments with individual text marks and source positions. It excludes
-the Label pointer; the note owns navigation. Shared outer marks canonicalize into
-child text nodes without mutating caller data. Source PDF citation MCID operators
-retain their individual 10pt black/8pt red fragments rather than a common style.
+Structural ActualText now preserves individual run styles/source regions when its
+complete character string exactly equals one inline paragraph after removing
+only inferred geometric separators. A conditional isolated preliminary traversal
+identifies these boundaries before note extraction, allowing explicit references
+inside nested exact replacement spans. It copies consumption/diagnostic state;
+original paint/source objects are not consumed or rewritten by the probe.
 
-Native PDF measures these fragments, including mixed Arabic/Latin plain labels,
-in one internal bidi box. Wrapping, preceding-anchor admission, footnote reservation
-and one complete reference link use the same atom. Word exports ordinary visible
-reference-styled runs inside the existing note-body hyperlink. Checked Unicode
-LRI/PDI boundary runs keep mixed labels together in independently rendered RTL
-paragraphs; imports validate/remove only the exact generated controls. Source text
-is never duplicated in metadata. See RICH_CITATIONS.md for contracts/reproduction.
+No substring or equal-label guess maps genuinely different replacement text.
+Opaque ranges, definition-containing ranges, nontext and multiple-paragraph ranges
+keep the existing replacement/source-evidence/diagnostic behavior. A defensive
+check prevents a prepared note atom being silently swallowed by a later replacement.
+The exact synthetic case retains both explicit sites, rich citation fragments,
+notes/list/table/raster, navigation and Word/SF meaning; independent object/operator,
+package/paint/link and two-page visual checks pass. Actual ProseMirror checks61
+nodes/marks/attrs. See PDF_NOTES.md and scripts/verify_note_actual.py.
 
-SF/JSON/gzip and ordinary/sectioned Word semantics, repeat/list references, actual
-ProseMirror184 nodes/marks/attributes, independent source operators/package/paint/
-link geometry and eight native/LibreOffice pages qualify this milestone. Existing
-Word font substitution, superscript ratios/baselines and dedicated Letter endnote
-page differ from native output. Broader producer qualification remains required.
-Tests and full check evidence are recorded in verification.json with this commit.
-QA artifacts remain ignored under output/rich-citations. No runtime dependencies,
-application, quota, authorization or upload boundary changed. Goal remains incomplete.
+Previous milestone5cde91b preserves rich/internal mixed-direction citations with
+atomic native layout and checked Word isolation; see RICH_CITATIONS.md. Full and
+final focused checks for the current milestone are recorded in verification.json.
+QA remains ignored under output/note-actual; no dependency/runtime/application/
+authorization/quota/upload boundary changed. The full goal remains incomplete.
 
 ## Existing verified evidence to preserve
 
@@ -98,7 +97,7 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
 
 ## Next concrete implementation order
 
-1. Complete remaining nested/ActualText/untagged note graphs;
+1. Complete remaining nested-definition/redundant-wrapper and broader untagged note graphs;
    use the original-guide evidence in PDF_NOTES.md, preserving source facts/content.
 2. Implement/qualify the actual Colleaf native snapshot adapter through the shared
    SF. Include UTF-16 boundaries, rich source maps, notes/stories and resources;
@@ -111,7 +110,7 @@ Linux execution evidence. Optional Node/Python/LibreOffice remain QA only.
    after every original criterion is proven. There is no external blocker now.
 
 ```sh
-# Next: resolve explicit relationships without conflating enclosing ActualText.
+# Next: resolve nested definitions/redundant wrappers without duplicating bodies.
 rg -n 'ActualText|nested|note' pdf_structure_notes.go pdf_structure.go pdf_marked.go
 GOWORK=off go test -race -run 'TestRichCitation|TestDOCXCitationIsolation|TestPDFRichCitation' -count=1 .
 # Full generation/reader commands: RICH_CITATIONS.md

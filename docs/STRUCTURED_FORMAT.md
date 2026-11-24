@@ -757,3 +757,11 @@ explicit fragment values taking precedence; canonical atoms have no outer typogr
 Native PDF treats this as one atomic citation with independently shaped interior.
 Word stores its actual literal runs, not duplicate text metadata. See
 RICH_CITATIONS.md for exact behavior and independent-reader evidence.
+
+
+Exact structural ActualText correspondence now retains ordinary text marks and
+note_reference atoms across enclosing/nested spans, with source evidence containing
+pdf_structure_actualtext_aligned. Literal characters and individual regions remain
+single authorities. Opaque replacement spans retain their replacement string and
+original Ref evidence/uncertainty; no schema extension or guessed text-to-citation
+offsets are introduced. See PDF_NOTES.md for full-equality boundaries and checks.

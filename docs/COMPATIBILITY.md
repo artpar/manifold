@@ -941,7 +941,7 @@ as the note label once. NoteType is explicit when present; unspecified kind sele
 a documented endnote editorial default with KindInferred and diagnostics. Binary
 source IDs and Ref object edges persist in SF/JSON/gzip; native/Word retain their
 existing acknowledged source-provenance/reflow policy. Broader differing marks,
-complex/nested/ActualText graphs and non-Ref inference remain required work, with
+complex/nested graphs and broader non-Ref inference remain required work, with
 visible content/source edges retained in current fallbacks. See PDF_NOTES.md.
 
 
@@ -1013,3 +1013,15 @@ its superscript ratio/baseline choices differ from native output; no Word-equiva
 print layout claim. Checked rich citation ranges currently require literal text
 runs; tracked-edit wrappers/fields there reject rather than lose content. See
 RICH_CITATIONS.md. General revision/comment/field policies remain unchanged.
+
+
+Structural ActualText now preserves exact one-paragraph run/style/source intervals
+when its full string equals the literal child characters, excluding only inferred
+geometric separators. Explicit citation relationships can cross nested/enclosing
+exact spans. A conditional isolated prepass establishes correspondence before
+moving note bodies; the main pass verifies it again. Different replacement strings,
+nontext/multiple-paragraph extents or extents containing note definitions remain
+opaque replacements with graph evidence/uncertainty. Equal label substrings alone
+never establish character mapping. Independent source/object/operator/Word/native
+checks qualify the exact case in PDF_NOTES.md. Broader nested/untagged note graphs
+remain required; this does not claim arbitrary replacement-string correspondence.

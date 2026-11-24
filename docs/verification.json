@@ -5418,5 +5418,26 @@
     "runtime": "pure Go; no new modules/CGO/required executables/services/uploads/application changes/permission or quota gates",
     "remaining": "nested/enclosing-ActualText and broader untagged note graphs; actual Colleaf native adapter; broader original DOCX note/story/revision/field corpus and producer qualification; final source/resource/API/acceptance audit",
     "next_commands": "rg -n 'ActualText|nested|note' pdf_structure_notes.go pdf_structure_blocks.go pdf_marked.go; GOWORK=off go test -run 'TestPDFNoteInlineAndEnclosingActualText|TestPDFAdjacentNotesConservativeBoundaries' -count=1 ."
+  },
+  "structural_actualtext_note_correspondence_2026_11_24": {
+    "goal": "active/incomplete",
+    "contract": "Complete exact one-paragraph character equality, excluding only inferred geometric separator runs, preserves structural ActualText intervals/styles/source and explicit note atoms through nested/enclosing boundaries. Literal spaces remain text; no substring/equal-label mapping is guessed.",
+    "preparation": "Conditional isolated recovery traversal copies unit-consumption and reader/diagnostic state before note grouping. Main materialization verifies resolved citation strings; defensive changed-correspondence check prevents silently swallowed atoms.",
+    "opaque_policy": "Different replacements, nontext/multiple-paragraph extents and ranges containing note definitions retain visible replacement text/source graph/uncertainty; definitions cannot move outside their own replacement extent. Broader nested/untagged graphs remain required.",
+    "independent": "pypdf original outer BODY*1MIDDLE*1AFTER/inner*1 ActualText and forward/reverse refs/operators; both explicit reference sites,10pt black/8pt red individual fragment geometry/style; exact editable Word/SF, python-docx, note/list/table/red-blue2x1 pixels, native complete reference links;61 actual ProseMirror nodes/marks/attrs; two native/LibreOffice pages inspected; opaque different replacement retains its text/graph without fabricated notes.",
+    "checks": {
+      "full_tests": "Final all-package tests16.392s library/0.773s CLI pass after all production/guard/test additions",
+      "full_race": "167.666s library/1.819s CLI all packages pass; predates final changed-correspondence defensive guard and final added regression tests",
+      "final_focused_race": "2.347s broad note/adjacency/ActualText/rich-citation focused pass after final production guard;1.713s final exact/opaque/definition guard tests pass",
+      "vet": "pass after final production changes",
+      "modules": "all modules verified; no dependency changes",
+      "cgo_disabled": "host CLI build and focused execution0.443s pass; Linux amd64/arm64 cross-builds pass, not execution evidence",
+      "fuzz_pdf": "10s/two workers requested,273 executions11.580s pass including new nested exact-span seed; short source-heavy campaign not exhaustive",
+      "diff_check": "pass"
+    },
+    "evidence": "PDF_NOTES.md exact enclosing/nested structural ActualText section; pdf_note_actual_aligned_test.go; generate_pdf_semantic_audit.py and verify_note_actual.py; ignored output/note-actual",
+    "runtime": "pure Go; no CGO/required executables/services/uploads/app changes/permission or quota gates; QA readers optional",
+    "remaining": "nested-definition/redundant-wrapper and broader untagged note graphs; actual Colleaf adapter; broader original DOCX note/story/revision/field corpus and producer qualification; final source/resource/API/acceptance audit",
+    "next_commands": "rg -n 'inNote|hasInner|grouped|recoverNote' pdf_structure_notes.go; GOWORK=off go test -run 'TestPDFNoteAligned|TestPDFNoteActualText' -count=1 ."
   }
 }

@@ -46,7 +46,8 @@ layout and full UniOffice/UniPDF parity are excluded by the original objective.
    KindInferred explicitly separates the endnote editorial default from source
    NoteType. PDF_NOTES.md records qualification and implemented different/empty citation and body labels,
    identified logical/physical inference and original guide cases, and still-required
-   nested/ActualText graphs and broader untagged recovery. Rich/internal mixed-direction
+   broader nested/untagged graphs; exact nested/enclosing ActualText correspondence
+   is now qualified in PDF_NOTES.md, while opaque replacements retain uncertainty. Rich/internal mixed-direction
    citations now have the independent evidence in RICH_CITATIONS.md. Artifact page roles and
    membership remain independently qualified without inventing running templates.
 3. **Actual Colleaf boundary:** implement/qualify a standalone native Univer 1.0.4

@@ -1534,3 +1534,22 @@ exact boundary roles/content before stripping them on import, never arbitrary
 user controls or visible text. Existing producer superscript/font/page differences
 remain explicit. RICH_CITATIONS.md records structural and independent visual QA;
 no source oracle or runtime/app boundary was changed.
+
+
+## 2026-11-24 Resolve exact ActualText boundaries before moving notes
+
+Use full character equality to preserve structural ActualText run intervals and
+citation identity, consistent with the existing content-stream exact-alignment
+policy. Remove only geometric synthetic separators; literal spaces remain text.
+An isolated preliminary traversal is needed before moving note bodies/replacing
+citation text. Its copied consumption and diagnostic state cannot claim original
+paint or leak preliminary warnings. Main recovery verifies exact characters again.
+
+Never map a repeated label substring into different replacement text. Keep opaque,
+nontext/multiple-paragraph and definition-containing replacements as visible text
+with graph evidence/diagnostics. A definition cannot move outside its replacement
+range merely because its body text happened to match. Reject an internal changed
+correspondence rather than silently swallowing a prepared atom. Independent raw
+PDF objects/operators, rich asset/style/graph checks and native/Word visual QA qualify
+the exact case; broader nested/untagged graphs and original producer qualification
+remain open. No canonical schema or runtime dependency changed.

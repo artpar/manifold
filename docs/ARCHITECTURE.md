@@ -101,6 +101,15 @@ only exact generated controls. Ordinary editable label text stays authoritative.
 PDF structure recovery retains heterogeneous fragments and per-run source evidence;
 physical alternate navigation remains separate from the editable note target.
 
+`pdf_structure_note_actual.go` conditionally probes structural ActualText with copied
+unit-consumption/reader-diagnostic state before note grouping. Exact one-paragraph
+character agreement (excluding only synthetic geometry separators) permits note
+references through enclosing/nested spans. The main traversal preserves literal
+runs/styles/source evidence and checks correspondence again using resolved citation
+labels. Opaque, nontext/multiple-paragraph or definition-containing ranges retain
+replacement semantics and uncertainty. No equal-label substring mapping is inferred;
+prepared atoms cannot be silently discarded into an incompatible replacement.
+
 ## PDF running stories and body rectangle
 
 `pdf_running.go` measures immutable header/footer flows once through the shared

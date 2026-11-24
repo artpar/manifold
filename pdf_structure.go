@@ -58,6 +58,8 @@ type pdfStructureRecovery struct {
 	notes          map[*pdfStructureNode]*pdfRecoveredNote
 	noteRefs       map[*pdfStructureNode]*pdfRecoveredNote
 	cachedRefs     map[*pdfStructureNode][]Block
+	alignedActual  map[*pdfStructureNode]bool
+	noteLabels     map[noteKey]string
 }
 
 func (r *pdfReader) recoverStructure(root types.Object) error {
