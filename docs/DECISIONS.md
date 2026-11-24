@@ -2129,3 +2129,19 @@ records. Preserve original width/span/physical facts and qualify edited content/
 grid/presentation historical. Qualify actual saves, TextX edits, marker detachment,
 covered placement, strict SF and repeated stability. Remaining source/API/UI/final
 acceptance is still required; no application policy or runtime dependency is added.
+
+
+## 2026-11-24 Preserve image provenance without restoring old assets
+
+Bind image sources through direct persisted drawing metadata, backed by validated
+source facts and SF semantic hashes. Keep current asset bytes, description, geometry
+and anchors authoritative after edits. Qualify changed semantics historical and
+archive source facts without current owners. Do not cache an old image as another
+content authority. Source geometry remains original physical evidence.
+
+Retain strict DOC_DRAWING_PLUGIN/direct-descriptor equality, including source
+references. Editing a snapshot requires coherent duplicate descriptors; a changed
+mirror reference must reject, rather than disappear as harmless metadata. Qualify
+actual plugin saves of resized/replaced/detached snapshots, exact JPEG bytes, SF
+structures/source states and fitted-section sources. Browser bitmap painting and
+remaining native/source/API/final acceptance remain open.

@@ -1095,5 +1095,15 @@ provenance; missing owners, including valid covered-cell marker placement, archi
 facts unbound with diagnostics. Source-only binding edits do not stale enclosing
 table semantics. All descriptor references validate and covered bodies must remain
 empty. Original geometry/width/span evidence stays distinct from native layout.
-Image/list/item/other container/anchor source slots and broader native/API/UI/corpus/
-final acceptance remain unfinished.
+Full per-node provenance and broader native/API/UI/corpus/final acceptance remain
+unfinished; the image component is qualified below.
+
+
+Private native image source bindings now preserve main/cell/list/running/note image
+provenance. Asset/description/presentation edits retain historical original facts;
+absent bindings archive sources unbound. Current bytes and geometry remain
+native-authoritative, with independent stale-size diagnostics. Registered drawing
+mirrors must agree with direct descriptors, including provenance. Synthetic save/
+resize/replacement/detachment, original JPEG, fitted-section and strict SF checks
+qualify this component. Browser bitmap paint, list/item/other container/anchor
+source bindings and full native/API/UI/corpus/final acceptance remain incomplete.

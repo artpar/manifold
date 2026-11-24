@@ -1275,5 +1275,33 @@ edit, binding removal and covered placement. Strict .vdocs/Go/SF compares full
 structures, width/span facts, source states and repeated stability. ProseMirror
 checks165 nodes/marks/attributes. Go also checks shared facts, malformed pools and
 missing covered references. This synthetic headless component does not complete
-image/list/item/other container/anchor source bindings or native/API/browser/final
-qualification.
+full per-node provenance or native/API/browser/final qualification. The image
+component is qualified separately below.
+
+
+## Current image origin component
+
+Direct drawings[id].manydocOrigin carries manydoc.image-origin/version1/ref;
+evidence.imageOrigins stores deduplicated SourceInfo plus source-free SF image
+fingerprints. Root/running/note descriptors all participate. There is no asset/body
+cache. Restoration follows current image bytes, alt text, preferred/fitted geometry
+and anchors. Changed semantics retain original facts with historical=true and
+colleaf_image_source_historical. Missing owners archive sources with
+colleaf_image_source_unbound. Stale size intent still diagnoses independently;
+source evidence cannot restore an old asset or override current geometry.
+
+Registered DOC_DRAWING_PLUGIN mirrors retain the same source property and must
+agree with persisted descriptors. The SDK probe changes coherent descriptors and
+mirrors before actual plugin saves. Go rejects a provenance-reference mismatch in
+the registered mirror. Profile/version/digest/missing/duplicate/contradictory direct
+source records also reject, and reads do not mutate native input.
+
+scripts/verify_colleaf_image_origins.cjs reuses pinned SDK/validator/renderer for
+seven main/cell/list/header/footer/note source records, embedded PNG/original JPEG
+bytes, a main drawing frame and styled emoji, two saves/reopens, resized/replaced
+snapshot assets and detached references. Strict .vdocs/Go/SF compares exact assets,
+structure, preferred sizes, source states, diagnostics and repeated stability.
+Actual ProseMirror checks96 nodes/marks/attributes. Go separately qualifies fitted
+explicit-section/running/note sources. This is synthetic headless provenance
+qualification; browser bitmap paint, list/item/other container/anchor source slots
+and full native/API/preset/final acceptance remain required.

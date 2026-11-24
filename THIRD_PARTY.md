@@ -225,3 +225,9 @@ package, production dependency or copied third-party implementation is introduce
 The table-origin probe reuses the same attributed pinned SDK/renderer/plugins,
 hash-pinned Colleaf validator and existing ProseMirror reader. No new package,
 production dependency or third-party implementation is incorporated.
+
+
+The image-origin probe reuses the same attributed pinned SDK/renderer/plugins,
+hash-pinned Colleaf validator and existing ProseMirror reader. It reuses existing
+attributed JPEG and synthetic PNG fixtures; no new production dependency or
+third-party implementation is introduced.

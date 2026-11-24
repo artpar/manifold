@@ -39,7 +39,46 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: table and cell source bindings
+## Latest progress: image source bindings and mirror consistency
+
+Private direct drawing descriptors now carry manydoc.image-origin/version1 source
+references; evidence.imageOrigins stores deduplicated original SourceInfo and
+source-free SF fingerprints, without an asset/body cache. Ordinary main/cell/list/
+header/footer/note images restore source ownership after current asset and fitted
+geometry composition. Changed assets, descriptions or presentation retain source
+facts as historical with a diagnostic. Missing current bindings archive sources
+unbound. Current bytes/description/geometry stay authoritative; source evidence
+never restores old images or claims current PDF coordinates.
+
+The registered DOC_DRAWING_PLUGIN mirror must agree with direct source descriptors,
+including provenance references. The new SDK probe edits both representations before
+actual plugin saves, checks mirror equality and unchanged source pools, and Go rejects
+an intentionally altered mirror reference. Seven synthetic sources span embedded
+PNG and original JPEG assets, main drawing frames and styled emoji, two saves/
+reopens, resized/replaced assets and binding detachment. Strict .vdocs/Go/SF verifies
+full structures/assets/source states and repeated stability; ProseMirror checks96
+nodes/marks/attributes. Go also qualifies fitted explicit-section/running/note image
+sources and malformed records. This is headless component evidence, not browser
+bitmap paint or full imported-PDF source/native qualification.
+
+Final tests16.832s/CLI0.799s, vet/modules, CGO-disabled focused tests0.684s,
+host CLI/--help and Linux amd64/arm64 cross-builds pass. Metadata-scanner fuzz
+passes102291 executions/10.482s, a short safety sample. Full race passes172.525s/
+CLI2.142s. verification.json records scopes and limitations. The full goal remains
+active/incomplete. Next implement list/item/other container and zero-width anchor
+sources, then remaining appearance/nonvisual intent, public native API/CLI, full-
+preset/browser and broader PDF/source/resource/final acceptance audits. Production
+stays pure Go, with no external blocker or application/backend change.
+
+```sh
+MANYDOC_COLLEAF_IMAGE_ORIGIN_QA=output/colleaf-qa/image-origins.json GOWORK=off go test -run TestColleafImageOrigins -count=1 .
+node scripts/verify_colleaf_image_origins.cjs
+MANYDOC_COLLEAF_IMAGE_ORIGIN_SAVED=output/colleaf-qa/image-origins-saved.json MANYDOC_COLLEAF_IMAGE_ORIGIN_RESIZED=output/colleaf-qa/image-origins-resized.json MANYDOC_COLLEAF_IMAGE_ORIGIN_ASSET=output/colleaf-qa/image-origins-asset.json MANYDOC_COLLEAF_IMAGE_ORIGIN_DETACHED=output/colleaf-qa/image-origins-detached.json GOWORK=off go test -run TestColleafImageOrigins -count=1 .
+NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/colleaf-qa/image-origins-saved.json.sf output/colleaf-qa/image-origins-resized.json.sf output/colleaf-qa/image-origins-asset.json.sf output/colleaf-qa/image-origins-detached.json.sf
+rg -n 'Source != nil|manydocOrigin' colleaf_lists.go colleaf_navigation.go colleaf_tables.go
+```
+
+## Earlier progress: table and cell source bindings
 
 Private native tableSource descriptors and origin tableCells now carry version1
 manydoc.table-origin / manydoc.cell-origin references. evidence.tableOrigins stores
@@ -65,25 +104,6 @@ states and repeated stability; ProseMirror checks165 nodes/marks/attributes. Go
 also checks malformed records, missing covered references and shared source facts.
 This is synthetic headless component evidence; imported-PDF/browser/final native
 qualification remains incomplete.
-
-Final check results are recorded in verification.json before commit. Next implement
-image/list/item/other container and zero-width anchor source bindings, then remaining
-appearance/nonvisual intent, public native API/CLI and full-preset/browser work.
-Nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/
-final acceptance audits remain required. Goal active/incomplete; no external blocker.
-
-Exploratory pinned SDK save also retains a custom direct drawing marker in both
-the drawing descriptor and DOC_DRAWING_PLUGIN mirror. This suggests the next image
-binding transport to qualify; it is not yet a semantic source mapping or a full
-edit/reader proof. Keep mirror consistency and actual asset/resize edits in scope.
-
-```sh
-MANYDOC_COLLEAF_TABLE_ORIGIN_QA=output/colleaf-qa/table-origins.json GOWORK=off go test -run TestColleafTableOrigins -count=1 .
-node scripts/verify_colleaf_table_origins.cjs
-MANYDOC_COLLEAF_TABLE_ORIGIN_SAVED=output/colleaf-qa/table-origins-saved.json MANYDOC_COLLEAF_TABLE_ORIGIN_EDITED=output/colleaf-qa/table-origins-edited.json MANYDOC_COLLEAF_TABLE_ORIGIN_DETACHED=output/colleaf-qa/table-origins-detached.json MANYDOC_COLLEAF_TABLE_ORIGIN_COVERED=output/colleaf-qa/table-origins-covered.json GOWORK=off go test -run TestColleafTableOrigins -count=1 .
-NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/colleaf-qa/table-origins-saved.json.sf output/colleaf-qa/table-origins-edited.json.sf output/colleaf-qa/table-origins-detached.json.sf output/colleaf-qa/table-origins-covered.json.sf
-rg -n 'Source != nil|manydocOrigin' colleaf_images.go colleaf_lists.go colleaf_navigation.go
-```
 
 Final all-package tests16.175s/CLI0.719s, vet/modules, CGO-disabled focused tests
 0.487s, host CLI/--help and Linux amd64/arm64 cross-builds pass. Descriptor-scanner

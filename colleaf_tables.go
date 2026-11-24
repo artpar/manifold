@@ -257,7 +257,7 @@ func (w *colleafBodyWriter) table(block Block, depth int) error {
 					if err != nil {
 						return err
 					}
-					sourceOrigin, err = newColleafTableOrigin(cell.Source, hash, colleafCellOriginProfile)
+					sourceOrigin, err = newColleafSourceOrigin(cell.Source, hash, colleafCellOriginProfile)
 					if err != nil {
 						return err
 					}
@@ -314,7 +314,7 @@ func (w *colleafBodyWriter) table(block Block, depth int) error {
 		if err != nil {
 			return err
 		}
-		sourceOrigin, err := newColleafTableOrigin(block.Source, hash, colleafTableOriginProfile)
+		sourceOrigin, err := newColleafSourceOrigin(block.Source, hash, colleafTableOriginProfile)
 		if err != nil {
 			return err
 		}

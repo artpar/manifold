@@ -6727,5 +6727,47 @@
       "MANYDOC_COLLEAF_TABLE_ORIGIN_SAVED=output/colleaf-qa/table-origins-saved.json MANYDOC_COLLEAF_TABLE_ORIGIN_EDITED=output/colleaf-qa/table-origins-edited.json MANYDOC_COLLEAF_TABLE_ORIGIN_DETACHED=output/colleaf-qa/table-origins-detached.json MANYDOC_COLLEAF_TABLE_ORIGIN_COVERED=output/colleaf-qa/table-origins-covered.json GOWORK=off go test -run TestColleafTableOrigins -count=1 .",
       "rg -n 'Source != nil|manydocOrigin' colleaf_images.go colleaf_lists.go colleaf_navigation.go"
     ]
+  },
+  "colleaf_image_origins_2026_11_24": {
+    "scope": "Private native image provenance through drawing descriptors, registered mirrors and current asset/geometry composition. Full native integration and overall goal remain active/incomplete.",
+    "implementation": [
+      "Direct drawing descriptors carry manydoc.image-origin/version1/ref only. evidence.imageOrigins deduplicates original SourceInfo and source-free SF image fingerprints; no old asset/body cache.",
+      "Current bytes, description, preferred/fitted geometry and anchors stay authoritative. Changed semantics qualify original facts historical; absent owners archive facts unbound. Physical source geometry never becomes current native layout authority.",
+      "All direct descriptor references validate profile/version/digest/missing/duplicate/inline contradictions. Registered drawing mirrors remain exactly checked against direct descriptors, including provenance.",
+      "Restoration precedes enclosing table-source qualification. Fitted layout keeps source geometry and authored preferred geometry separate. A shared source-record constructor preserves the existing table record digest contract; SF schema/value model unchanged."
+    ],
+    "independent_reader": {
+      "script": "scripts/verify_colleaf_image_origins.cjs",
+      "script_sha256": "2a25341001b12cd390333dad79be57844b67c0561b1d9a57999712847f1bb665",
+      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned Colleaf validator and prosemirror-model1.25.13; no new dependency.",
+      "results": [
+        "Seven synthetic source records across main/cell/list/header/footer/note images. Direct fields contain only references; evidence stores no asset/body/text cache.",
+        "Actual registered-plugin saves/reopens retain source pools, streams, descriptor/mirror equality, original JPEG SHA256, main32x16px frame and whole bold13pt emoji.",
+        "Coherent edited descriptor/mirror snapshots pass actual plugin saves for resize/description change, PNG replacement and source-reference detachment. Frames reflect64x32px resize, current replacement bytes remain exact and origin pool unchanged.",
+        "Strict .vdocs/Go/SF comparisons verify current authored sizes/assets/alt text, historical/unbound source states, diagnostics and stable repeated native round trips for all four actual artifacts.",
+        "Go rejects an intentionally changed provenance reference in the saved DOC_DRAWING_PLUGIN mirror with the specific contradictory-resource/source error. Negative tests cover malformed version/digest/duplicate/missing source records.",
+        "Actual ProseMirror checks96 nodes/marks/attributes. Go separately qualifies source bindings on fitted explicit-section/running/note images with authored preferred sizes intact.",
+        "Existing table-origin and foreign structural-cursor independent probes pass after integration."
+      ],
+      "limits": "Synthetic headless provenance and plugin-save evidence. Snapshot edits are not browser UI resize commands or bitmap-paint proof. Full imported-PDF provenance, remaining list/item/anchor slots and native API/CLI/browser/final acceptance remain incomplete."
+    },
+    "checks": {
+      "tests": "Final all-package tests with all four actual image artifacts pass library16.832s/CLI0.799s/internal cached.",
+      "race": "Final all-package race with all four actual image artifacts passes library172.525s/CLI2.142s/internal cached.",
+      "vet": "pass after final source/test changes",
+      "modules": "all modules verified; go.mod/go.sum unchanged",
+      "cgo_disabled": "Final focused image tests0.684s with actual artifacts, host CLI build/--help and Linux amd64/arm64 cross-builds pass. Cross-builds are not execution evidence.",
+      "fuzz": "Direct drawing metadata/marker scanner target102291 executions/10.482s with2workers passes; short malformed-input safety sample, not exhaustive coverage.",
+      "diff_check": "pass before commit"
+    },
+    "runtime": "Pure-Go/std-library production only. No dependency/runtime executable/service/CGO/license server/upload, application/backend/permission/quota change or modified original corpus/oracle. Existing attributed JPEG/synthetic PNG fixtures reused; generated QA artifacts ignored.",
+    "remaining": "List/item/other container/anchor sources and explicit zero-width empty-text source policy; remaining marker appearance/nonvisual run/settings intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
+      "MANYDOC_COLLEAF_IMAGE_ORIGIN_QA=output/colleaf-qa/image-origins.json GOWORK=off go test -run TestColleafImageOrigins -count=1 .",
+      "node scripts/verify_colleaf_image_origins.cjs",
+      "MANYDOC_COLLEAF_IMAGE_ORIGIN_SAVED=output/colleaf-qa/image-origins-saved.json MANYDOC_COLLEAF_IMAGE_ORIGIN_RESIZED=output/colleaf-qa/image-origins-resized.json MANYDOC_COLLEAF_IMAGE_ORIGIN_ASSET=output/colleaf-qa/image-origins-asset.json MANYDOC_COLLEAF_IMAGE_ORIGIN_DETACHED=output/colleaf-qa/image-origins-detached.json GOWORK=off go test -run TestColleafImageOrigins -count=1 .",
+      "rg -n 'Source != nil|manydocOrigin' colleaf_lists.go colleaf_navigation.go colleaf_tables.go"
+    ]
   }
 }

@@ -131,3 +131,10 @@ note-table save/edit/detached/covered-marker and exact SF evidence. Original wid
 span facts remain explicit and edited bindings use historical/unbound states.
 Image/list/item/other container/anchor sources and full native intent/API/UI/corpus/
 final acceptance remain required.
+
+
+Native image sources now have synthetic actual plugin-save/resize/replacement/
+detachment and exact asset/SF evidence, including registered mirror consistency and
+original JPEG bytes. Source facts remain separate from current native geometry.
+List/item/other container/anchor sources and full native intent/API/UI/corpus/final
+acceptance remain required; browser bitmap painting is not qualified by these probes.

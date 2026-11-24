@@ -27,6 +27,7 @@ type colleafDrawingTransform struct {
 	FlipY     bool             `json:"flipY,omitempty"`
 }
 type colleafNativeImage struct {
+	Origin      json.RawMessage          `json:"manydocOrigin,omitempty"`
 	ID          string                   `json:"drawingId"`
 	Type        *int                     `json:"drawingType"`
 	Layout      *int                     `json:"layoutType"`
@@ -87,7 +88,7 @@ func colleafImageHash(data []byte) string {
 	return hex.EncodeToString(hash[:])
 }
 func (w *colleafBodyWriter) picture(block Block) error {
-	if block.Image == nil || block.Source != nil || block.Direction != "" || block.PageBreakBefore || len(block.Runs) > 0 || len(block.Rows) > 0 || len(block.Items) > 0 || block.Section != nil || block.List != "" || block.Numbering != nil || block.Start != nil || block.Level != 0 {
+	if block.Image == nil || block.Direction != "" || block.PageBreakBefore || len(block.Runs) > 0 || len(block.Rows) > 0 || len(block.Items) > 0 || block.Section != nil || block.List != "" || block.Numbering != nil || block.Start != nil || block.Level != 0 {
 		return fmt.Errorf("%w: invalid/unmapped native picture annotations", ErrUnsupported)
 	}
 	cfg, kind, err := decodeOutputImage(w.ctx, block.Image.Data, w.imageCache)
@@ -114,6 +115,17 @@ func (w *colleafBodyWriter) picture(block Block) error {
 	}
 	zero := 0
 	drawing := colleafNativeImage{ID: id, Type: &zero, Layout: &zero, UnitID: w.documentID, SubUnitID: w.documentID, SourceType: "BASE64", Source: "data:" + block.Image.MediaType + ";base64," + base64.StdEncoding.EncodeToString(block.Image.Data), Description: block.Image.Alt, Transform: &colleafDrawingTransform{Size: size, PositionH: sfAttrs(map[string]int{"relativeFrom": 2, "posOffset": 0}), PositionV: sfAttrs(map[string]int{"relativeFrom": 2, "posOffset": 0})}}
+	if block.Source != nil {
+		hash, err := colleafImageFingerprint(block)
+		if err != nil {
+			return err
+		}
+		origin, err := newColleafSourceOrigin(block.Source, hash, colleafImageOriginProfile)
+		if err != nil {
+			return err
+		}
+		drawing.Origin = sfAttrs(origin)
+	}
 	w.drawings[id] = sfAttrs(drawing)
 	w.drawingOrder = append(w.drawingOrder, id)
 	w.imageGeometry = append(w.imageGeometry, colleafImageBinding{ID: id, Hash: colleafImageHash(block.Image.Data), Width: block.Image.Width, Height: block.Image.Height, NativeWidth: size.Width, NativeHeight: size.Height})
@@ -232,7 +244,7 @@ func (r *colleafBodyReader) nativeImage(id string) (*Image, error) {
 			r.doc.warn("colleaf_stale_image_geometry", "Stale image size intent ignored; actual native asset and resized geometry are retained")
 		}
 	}
-	r.presentationLosses(raw, []string{"drawingId", "drawingType", "layoutType", "unitId", "subUnitId", "imageSourceType", "source", "base64Cache", "description", "docTransform", "opacity", "hidden", "srcRect", "prstGeom", "title"}, "colleaf_image_presentation")
+	r.presentationLosses(raw, []string{"drawingId", "drawingType", "layoutType", "unitId", "subUnitId", "imageSourceType", "source", "base64Cache", "description", "docTransform", "opacity", "hidden", "srcRect", "prstGeom", "title", "manydocOrigin"}, "colleaf_image_presentation")
 	if drawing.Title != "" {
 		r.doc.warn("colleaf_image_title", "Native image title is not represented separately; description/alternative text and image bytes are retained")
 	}
@@ -352,7 +364,15 @@ func (r *colleafBodyReader) imageParagraph(start, end int, p colleafParagraphRec
 		if err != nil {
 			return nil, err
 		}
-		blocks = append(blocks, Block{Kind: Picture, Image: image, Anchors: r.containerPoints[pos]})
+		props, err := colleafStyleObject(r.settings.Drawings[atom.ID])
+		if err != nil {
+			return nil, err
+		}
+		origin, err := readColleafOriginProfile(props["manydocOrigin"], colleafImageOriginProfile)
+		if err != nil {
+			return nil, err
+		}
+		blocks = append(blocks, Block{Kind: Picture, Image: image, Anchors: r.containerPoints[pos], colleafImageOrigin: origin})
 		cursor = pos + 1
 		properties, err := colleafStyleObject(p.Style)
 		if err != nil {

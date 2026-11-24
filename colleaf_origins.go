@@ -274,3 +274,18 @@ func restoreColleafOrigins(d *Document, e *colleafDocumentEvidence) error {
 	}
 	return nil
 }
+
+func newColleafSourceOrigin(source *SourceInfo, hash, profile string) (*colleafOrigin, error) {
+	if source == nil {
+		return nil, nil
+	}
+	raw, err := json.Marshal(struct {
+		Source      *SourceInfo
+		Fingerprint string
+	}{source, hash})
+	if err != nil {
+		return nil, err
+	}
+	sum := sha256.Sum256(raw)
+	return &colleafOrigin{Profile: profile, Version: 1, Ref: hex.EncodeToString(sum[:]), Fingerprint: hash, Source: cloneSourceInfo(source)}, nil
+}

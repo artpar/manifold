@@ -1704,3 +1704,18 @@ semantics historical, and archives orphan facts unbound. It never invents covere
 content or current geometry. The read-only descriptor pass preserves input bytes.
 Merged/nested/main/running/note tables have actual save/edit/skeleton and strict SF
 component evidence. Other source slots and full native/API/UI/final work remain.
+
+
+## Native image origin bindings
+
+colleaf_image_origins.go stores direct drawing source references and an independent
+source/fingerprint pool in document evidence. Fingerprints cover current SF image
+bytes, alt text, preferred geometry and anchors; no old asset is cached. Restoration
+follows current asset/geometry composition and precedes enclosing table-source
+qualification. Edits retain historical source facts; absent bindings archive facts
+unbound. Descriptor scanning validates every reference without mutating input.
+The registered drawing mirror remains checked against all direct properties,
+including provenance. A shared source-record constructor retains existing table
+and run/paragraph value contracts. Actual save/edit/frame/asset/SF checks qualify
+this component; list/item/other container/anchor and full native/API/UI/final work
+remain required.
