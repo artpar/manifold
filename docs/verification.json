@@ -7724,5 +7724,48 @@
       "GOWORK=off go test ./...",
       "node scripts/verify_colleaf_note_order.cjs"
     ]
+  },
+  "pdf_cid_width_resources_uncertainty": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "CID W assignments are parsed/validated once,shared indirect numeric arrays converted once per font. Expanded work<=65536 uses direct assignment;larger work uses reverse successor skipping,materializing each final CID once. Existing last-assignment values remain accepted;no new quota/rejection budget or dependency. Context cancellation is observed during parse/application.",
+    "before": "Deterministic context cancellation after1024 materialized CID widths previously went unobserved:fontMetrics returnednil. Actual new regression failed pre-fix;now errors.Is(context.Canceled) passes before full expansion.",
+    "geometry_ambiguity": "Independent MuPDF initially failed the original exact-origin oracle on overlapping W declarations. Legacy ABCZA origins10,14,20,28,38pt differ from observed10,15,21,29,39pt;heavily repeated ranges yield10,15,20,25,30pt. Reader retains legacy values but adds pdf_cid_width_overlap plus general metric uncertainty,estimated_advance precision and0.5 run confidence. Overlap detection is conservative,including redundant declarations. No normative consumer winner is asserted.",
+    "independent": {
+      "command": "output/qa-venv/bin/python scripts/verify_pdf_cid_widths.py output/pdf-cid-qa",
+      "sha256": "e76c1001c97263c2890eee5bdda786b538d4606a35c2e4ca0e0b05a615c55e9f",
+      "result": "pypdf independently applies all65536CID values from actual direct/range/shared-array source entries;public SF text/geometry/page/stream/precision/confidence/diagnostics pass. Original three overlapping fixtures and shared-array fixture retain their legacy coordinate oracles;new non-overlapping control matches MuPDF exact origins/font_metrics precision.",
+      "retained_failure": "--require-mupdf-agreement still FAILS on original overlapping case0 and remains executable. Default checker discloses those differences and requires explicit uncertainty;it does not claim those coordinates match MuPDF."
+    },
+    "original_corpus": {
+      "command": "output/qa-venv/bin/python scripts/verify_published_pdf.py output/pdf-cid-published-final",
+      "result": "Original source bytes/metadata/10lists/57items/exactK membership/16URI targets/20531normalized chars/DOCX and9reflowed PDFpages/spacecounts/bounds pass.",
+      "baseline": "CLI built from exact pre-change Git archive2b4b4d0 produces byte-identical complete publicationSF. Non-overlapping synthetic control also has unchanged fullSF;overlap synthetic cases change only diagnostics and precision/confidence,with other fields equal to pre-change reader.",
+      "SF_sha256": "2d630c8ff72ec594b95b67542d66bf2df13886380672f6a213e5713b8095a7b2"
+    },
+    "benchmark": {
+      "command": "GOWORK=off go test -run '^$' -bench '^BenchmarkPDFCIDRepeatedRanges$' -benchtime=1x -count=1 .",
+      "sample": "Apple M1Max/darwinarm64:1000full ranges before506611750ns/5203264B/7111allocs;final5926833ns/5563760B/7128allocs. One-shot samples,not statistical/universal speedup. Bounded bookkeeping trades some allocation for avoiding repeated expansion."
+    },
+    "checks": {
+      "go_test_all": "passed final library28.955s/CLI0.454s",
+      "race": "passed final library338.766s/CLI2.781s on final production/test code",
+      "focused_race": "passed final1.825s current full-inventory/shared-array/source/cancellation/malformed tests and two declared fuzz seeds",
+      "CGO_disabled_focus": "passed final0.467s",
+      "vet": "passed final",
+      "modules": "all modules verified",
+      "builds": "CGO-disabled host and Linux amd64/arm64 cross-builds pass;not Linux execution.",
+      "fuzz": "Final11316executions/10.551s/two workers/79cached baseline seeds(two declared plus prior interesting corpus);short sample,not exhaustive safety. Earlier pre-uncertainty campaign passed12173executions/10.901s/two workers/two initial seeds.",
+      "diff_check": "passed"
+    },
+    "superseded_checks": "Full race on the earlier performance-only snapshot was deliberately terminated after adding overlap uncertainty,not because observation expired. Final full run started after production/test changes. New clean-control test initially shadowed its case index in a run loop;fixture assertion corrected to use the actual case,without altering geometry or consumer agreement oracle.",
+    "production_dependencies": "unchanged;independently authored Go interpretation and existing optional pypdf/MuPDF/real publication QA. Adobe published CID W format used as primary documentation;no proprietary implementation code copied.",
+    "remaining": "Decoded streams and broader font/source/resource/reflow/API/visual/original completion audit remain. Pinned-native repeated-footnote placement,Word-PDF annotations and ambiguous CID consumer geometry discrepancies remain explicit. No overall blocker or completion exemption.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/PDF_FONT_WIDTHS.md docs/PDF_RESOURCES.md",
+      "rg -n 'DecodeLength|Decode\\(' pdf_read.go pdf_images.go /Users/artpar/go/pkg/mod/github.com/pdfcpu/pdfcpu@v0.11.1/pkg/pdfcpu/types/streamdict.go",
+      "GOWORK=off go test ./...",
+      "output/qa-venv/bin/python scripts/verify_pdf_cid_widths.py output/pdf-cid-qa --require-mupdf-agreement"
+    ]
   }
 }

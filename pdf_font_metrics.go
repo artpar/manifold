@@ -47,7 +47,7 @@ func (f *pdfFont) displacement(b []byte, size, charSpace, wordSpace, scale float
 		return 0, false, err
 	}
 	advance := 0.0
-	estimated := false
+	estimated := f.cidWidthOverlap
 	for i, code := range codes {
 		width, ok := f.widths[code]
 		if f.composite && !f.identityCID {
@@ -112,45 +112,11 @@ func (r *pdfReader) fontMetrics(f *pdfFont, d types.Dict) error {
 		if err != nil {
 			return err
 		}
-		for i := 0; i < len(widths); {
-			start, err := r.pdf.DereferenceInteger(widths[i])
-			if err != nil || start == nil || *start < 0 || *start > 65535 {
-				return fmt.Errorf("invalid CID width start")
-			}
-			i++
-			if i >= len(widths) {
-				return fmt.Errorf("incomplete CID widths")
-			}
-			value, err := r.pdf.Dereference(widths[i])
-			if err != nil {
-				return err
-			}
-			i++
-			if list, ok := value.(types.Array); ok {
-				if int(*start)+len(list) > 65536 {
-					return fmt.Errorf("CID widths outside range")
-				}
-				for j, w := range list {
-					width, err := r.pdf.DereferenceNumber(w)
-					if err != nil {
-						return err
-					}
-					f.widths[uint32(int(*start)+j)] = width
-				}
-			} else {
-				end, ok := value.(types.Integer)
-				if !ok || int(end) < int(*start) || int(end) > 65535 || i >= len(widths) {
-					return fmt.Errorf("invalid CID width range")
-				}
-				width, err := r.pdf.DereferenceNumber(widths[i])
-				if err != nil {
-					return err
-				}
-				i++
-				for code := int(*start); code <= int(end); code++ {
-					f.widths[uint32(code)] = width
-				}
-			}
+		if err := r.readCIDWidths(f, widths); err != nil {
+			return err
+		}
+		if f.cidWidthOverlap {
+			r.warnPage("pdf_cid_width_overlap", "Overlapping CID width declarations use the last source assignment; advance geometry may differ between readers")
 		}
 	}
 	if descriptor != nil {

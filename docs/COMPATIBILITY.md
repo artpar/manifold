@@ -1252,3 +1252,11 @@ whole read; the CLI commits no partial extraction. Valid repeated transformed pa
 is still retained per occurrence. PDF_RESOURCES.md gives independent graph/count,
 placement/source/SF and unchanged publication evidence. This does not bound all
 other font/stream/image resources or certify arbitrary malformed PDF safety.
+
+CID widths retain the reader's last-assignment interpretation with bounded unique-
+CID expansion and cancellation checks. Overlapping declarations now produce
+pdf_cid_width_overlap and estimated_advance source precision; even redundant overlaps
+are conservatively flagged. Independent consumers can place the same text differently
+for these ambiguous inputs. Non-overlapping source widths keep exact metric behavior.
+PDF_FONT_WIDTHS.md gives independent source/geometry evidence and the retained strict
+consumer oracle. This does not bound all font/input/decoded-stream memory.

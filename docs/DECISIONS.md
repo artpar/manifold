@@ -2418,3 +2418,14 @@ pypdf counts and the unchanged original publication oracle qualify the fix. This
 an internal parser resource bound, not performer permissions or a completion waiver.
 Keep the separate pinned-native repeated-footnote failure and its original oracle;
 no duplicated-body/static-cache/vendor-patch workaround was adopted.
+
+## 2026-11-25 Avoid CID width amplification and expose overlap uncertainty
+
+Preserve existing CID W assignment values through reverse successor skipping when
+expanded work exceeds the finite CID domain; cache interpreted shared numeric
+arrays and observe cancellation. Do not reject a complex font merely because its
+ranges repeat. Validate source entries before skipping overridden work. Independent
+MuPDF geometry disagrees on overlapping declarations, so retain that strict oracle,
+report overlap and lower advance certainty rather than claiming exact physical
+positions. The non-overlapping control must still agree. PDF_FONT_WIDTHS.md records
+the algorithm, benchmark samples, complete CID/source/SF checks and original corpus.

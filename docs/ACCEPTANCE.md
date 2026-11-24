@@ -188,3 +188,12 @@ one concrete resource gap, not the full source/resource or completion audit.
 The original pinned-native repeated-footnote placement oracle still fails; no
 completion waiver or overall blocked state follows. See PDF_RESOURCES.md and
 COLLEAF_BROWSER.md.
+
+
+CID-width resource/source qualification now avoids repeated range expansion and
+converts shared numeric arrays once per font, retaining all CID values, content,
+positions and SF while observing cancellation. Independent MuPDF overlap differences
+are explicitly diagnosed and marked estimated; the strict original agreement oracle
+remains executable. The non-overlapping control and original publication agree with
+independent expectations. PDF_FONT_WIDTHS.md gives the scoped evidence. Decoded-
+stream/resource and full original-goal audits remain open.

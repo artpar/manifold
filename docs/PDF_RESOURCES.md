@@ -113,3 +113,14 @@ complete publication.sf to the guarded reader (SHA256
 This includes the current physical/source/navigation/diagnostic fields, not just
 plain text. An older unrelated historical output differed in those fields; it
 was not used as a failing oracle or overwritten to establish this comparison.
+
+## CID width amplification
+
+CID width interpretation now avoids replaying overlapping full-range assignments,
+converts shared numeric arrays once per font and observes cancellation during this
+work. It preserves the previous values without adding a new rejection budget.
+Independent reader checks also exposed geometry disagreement on overlapping W
+entries, now represented by explicit diagnostics and estimated advance precision.
+The unambiguous control agrees with MuPDF. PDF_FONT_WIDTHS.md records the algorithm,
+bounded auxiliary domain, complete-inventory/source/SF checks, retained strict
+consumer oracle, original publication comparison and remaining memory limits.

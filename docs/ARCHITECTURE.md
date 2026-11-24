@@ -1966,3 +1966,15 @@ rendered content is not memoized in a way that discards placements or source ord
 This parser work guard is separate from app quotas/admission and other PDF bounds.
 PDF_RESOURCES.md records source-only DAG, placement/SF, independent reader/CLI and
 original-publication checks; no general PDF safety or layout claim follows.
+
+## CID width interpretation
+
+Font metrics now parse CID W assignments once. Below65,536 expanded assignments,
+a direct path preserves order; above that, reverse application uses bounded
+successor links so each final CID is written once. Shared indirect numeric arrays
+are converted once per font. Cancellation/invalid-width checks occur during source
+interpretation and application. Existing last-assignment values persist, while
+conservative overlap detection emits pdf_cid_width_overlap and marks advances as
+estimated because independent consumers disagree. Unambiguous source geometry and
+original-publication SF remain unchanged. See PDF_FONT_WIDTHS.md for evidence and
+remaining decoded-stream/resource scope; no application quota or new dependency.

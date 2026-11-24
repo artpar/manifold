@@ -2485,3 +2485,11 @@ page combinations. `scripts/verify_pdf_xobject_budget.py` independently parses D
 operators with pypdf and verifies graph counts plus public CLI atomic rejection.
 Commands/evidence scope are in PDF_RESOURCES.md; native repeated-note order remains
 a separate deliberately failing optional check in COLLEAF_BROWSER.md.
+
+CID resource/source audit: TestPDFCID* covers ranges, shared indirect arrays, all
+65,536 final CID values, actual public text/baselines/page/stream/SF, overwritten
+invalid entries and deterministic mid-expansion cancellation. FuzzPDFCIDWidthOverrides
+varies source ranges/values/repetition. verify_pdf_cid_widths.py independently reads
+all W values with pypdf and origins with MuPDF. Its unambiguous control must agree;
+the --require-mupdf-agreement switch retains the overlapping-source discrepancy.
+PDF_FONT_WIDTHS.md has exact commands, benchmark samples and remaining scope.

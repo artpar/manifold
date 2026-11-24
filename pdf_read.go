@@ -314,7 +314,7 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 		r.warnPage("pdf_invisible_text", "Invisible/clipping-only text is retained with its render mode in source provenance")
 	}
 	if estimated {
-		r.warnPage("pdf_font_metrics", "Text advance estimated because font metrics/code-to-CID mapping are incomplete")
+		r.warnPage("pdf_font_metrics", "Text advance estimated because font metrics/code-to-CID mapping are incomplete or ambiguous")
 	}
 	if s.font.boundsEstimate {
 		r.warnPage("pdf_font_bounds", "Font ascent/descent bounds are estimated")
@@ -824,6 +824,7 @@ type pdfFont struct {
 	family, familyEvidence                                         string
 	ascent, descent, defaultWidth                                  float64
 	boundsEstimate, defaultExact, composite, identityCID, vertical bool
+	cidWidthOverlap                                                bool
 }
 
 func (f *pdfFont) decode(b []byte) (string, error) {

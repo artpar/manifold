@@ -40,7 +40,40 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Latest progress: bound expanded PDF XObject execution
+## Latest progress: bounded CID widths and explicit geometry ambiguity
+
+CID font widths no longer replay every overlapping range. The reader parses source
+assignments once, caches shared indirect numeric arrays and uses reverse successor
+skipping for large expansions. At most65,536 final CID values are materialized,
+while existing last-assignment values remain supported. No new font quota/rejection
+budget or dependency is introduced. Deterministic cancellation during expansion now
+returns context.Canceled instead of succeeding; invalid overwritten entries reject.
+
+Independent readers exposed a preexisting discrepancy for overlapping declarations:
+legacy origins10,14,20,28,38pt differ from MuPDF's observed10,15,21,29,39pt (and another
+pattern for heavily repeated ranges). The strict consumer-agreement oracle remains
+executable and FAILS. New pdf_cid_width_overlap diagnostics and estimated_advance/
+0.5 run confidence disclose that uncertainty. The non-overlapping control matches
+MuPDF exactly with font_metrics precision. Complete CID inventories, actual public
+text/baselines/source/SF and shared-array recovery pass targeted checks.
+
+The original InDesign source and9-page reflow checker pass unchanged. A CLI built
+from exact pre-change Git archive2b4b4d0 yields byte-identical full publication SF;
+synthetic controls differ only in the intended uncertainty fields when overlapping.
+One-shot benchmark samples for1000 full ranges improve506.6ms→5.93ms with modest
+extra bounded allocation; no statistical/universal speedup claim. See
+PDF_FONT_WIDTHS.md for commands, primary format references and exact evidence scope.
+
+The full goal remains active: decoded-stream/other font/source resources and the
+broader original acceptance audit continue. Pinned-native repeated-footnote order,
+Word-PDF annotation and ambiguous CID consumer differences remain recorded. Current
+Go suite passes (library28.955s/CLI0.454s), focused race1.825s, CGO-disabled focus
+0.467s, vet/modules and host/Linux amd64/arm64 CGO-disabled builds pass. Final
+fuzz11316executions/10.551s/two workers passes;short sample only. Full-race
+passes on final production/test code (library338.766s/CLI2.781s); all evidence
+is in verification.json.
+
+## Earlier: bound expanded PDF XObject execution
 
 A compact acyclic Form graph exposed another concrete source/resource gap:
 3203bytes/seven objects expanded to299,593 actual invocations and previously
@@ -543,8 +576,8 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-1. Continue the wider source/resource/reflow/native corpus audit, including CID
-   width-range work and decoded-stream handling after the new XObject bound. The
+1. Continue the wider source/resource/reflow/native corpus audit, including
+   decoded-stream handling after the XObject and CID-width fixes. The
    native repeated-footnote failure is revalidated in COLLEAF_BROWSER.md; retain
    its original oracle and seek new evidence rather than repeating the same check.
    Broaden source/structure and resource audits beyond the newly qualified
