@@ -40,6 +40,17 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
+## Work in progress: rich inferred note-body extent
+
+The uncommitted pdf_infer_note_extent.go prototype groups coherent consecutive
+blocks in separator-backed footnote zones and leading endnote pages. The authored
+two-paragraph source oracle now passes; focused tests also preserve a bold/blue
+URI paragraph, a2x2 table, centered two-pixel raster and following text, with exact
+physical glyph/source inventory and SF/gzip/JSON/DOCX semantic round trips. Both
+foot/endnote cases and negative separator/column/gap/footer cases pass0.887s.
+Broader multi-note/continuation/source qualification and full current checks are
+still pending; the parent full race result below does not qualify this prototype.
+
 ## Latest progress: untagged reciprocal note inference
 
 PDF_UNTAGGED_NOTES.md records geometric note graphs from matching raised labels
@@ -54,8 +65,8 @@ without leaving an extra blank reflow page; physical Pages remain recorded. This
 is not completion of arbitrary rich note recovery.
 Normal tests85.087s, final focused race5.375s, vet/module verification and CGO-
 disabled host/Linux builds pass. The default full race command timed out at601.321s
-in an existing custom-font seed; identical full-suite -timeout20m requalification
-is running and is not yet counted passed. Exact scopes are in verification.json.
+in an existing custom-font seed; the unchanged full suite with -timeout20m now
+passes at eb4573e: library677.584s/CLI4.442s. This predates current rich-extent work. Exact scopes are in verification.json.
 The goal remains active/incomplete; broader body ownership and final audits remain.
 
 ## Prior progress: direct encryption dictionaries now decrypt

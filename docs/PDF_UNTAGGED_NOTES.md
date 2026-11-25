@@ -121,8 +121,9 @@ git diff --check
 
 Verification scopes/timings are recorded in verification.json. The default full
 race run hit its ten-minute deadline in an existing custom-font seed; final
-focused race passes and the unchanged full suite is being requalified with
--timeout20m. This pending run is not reported as passed. The overall goal
+focused race passes and the unchanged full suite with -timeout20m passes at
+eb4573e: library677.584s/CLI4.442s. The original timeout remains recorded. This
+qualification predates the new rich-extent prototype. The overall goal
 remains active/incomplete. Next: broaden actual multi-paragraph/page and conflicting
 source note cases while retaining the existing physical/relationship oracles, then
 continue the source/resource/reflow/native and final acceptance audit.
@@ -135,18 +136,20 @@ owns a second italic paragraph, with24pt paragraph spacing to make the physical
 separation recoverable. The expected body comes directly from authored OOXML;
 this is a targeted derivative, not an unchanged real-export fixture.
 
-The independent LibreOffice PDF visibly retains both paragraphs. Current geometric
+The independent LibreOffice PDF visibly retains both paragraphs. At eb4573e, geometric
 recovery links only ` snoska` into the footnote; `Continuation paragraph belongs to
 this footnote, with italic text.` remains visible and italic in ordinary flow.
 The body-extent diagnostic is emitted, but the required two-paragraph note graph
-is not complete. The strict source oracle fails and must not be weakened. This is
+is not complete. The strict source oracle failed at that milestone and must not be weakened.
+The current uncommitted rich-extent prototype passes the same authored oracle;
+full qualification of that broader implementation is still pending. This is
 an implementation task, not an external blocker or a completion waiver.
 
 ```sh
 python3 scripts/generate_pdf_note_continuation_probe.py
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-note-continuation-qa --headless --convert-to pdf --outdir output/pdf-note-continuation output/pdf-note-continuation/continuation-source.docx
 bin/manydoc extract -pdf-skip-structure -format json -o output/pdf-note-continuation/geometric.json output/pdf-note-continuation/continuation-source.pdf
-# Currently FAILS: one recovered note paragraph instead of the authored two.
+# Failed at eb4573e; current rich-extent prototype must preserve this exact oracle.
 python3 scripts/generate_pdf_note_continuation_probe.py --check output/pdf-note-continuation/geometric.json
 ```
 

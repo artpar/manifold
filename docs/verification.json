@@ -8004,7 +8004,7 @@
     "original_regression": "Original publication/MQTT complete SF matches prior direct-encryption milestone byte-for-byte.",
     "checks": {
       "full_tests": "passed root85.087s; CLI cached",
-      "full_race": "Default full go test -race ./... timed out after600s (root601.321s), during existing FuzzCustomPDFFont seed; CLI8.090s passes. No assertion/race failure reported before timeout. Identical full suite with -timeout20m is running; not counted passed yet.",
+      "full_race": "Passed unchanged full suite with -timeout20m at committed eb4573e: library677.584s/CLI4.442s, all other packages pass. Default full race previously timed out after600s (root601.321s) during existing FuzzCustomPDFFont seed; that failed run is retained, not counted as a pass. This scope predates the new rich-extent prototype.",
       "cgo_disabled_tests": "passed focused TestPDFUntagged1.471s",
       "vet": "passed final",
       "modules": "all modules verified; no dependency changes",
