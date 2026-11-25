@@ -83,3 +83,9 @@ renderer result cache is now bounded to 4096 entries, with oversized keys exclud
 ## Results
 
 Measurement is in progress. No capacity claim is established by this plan alone.
+
+The large-input cohort additionally includes the original 137-page MQTT PDF
+(1,928,173 bytes, 90 tagged tables). It uses fewer concurrent workers than the
+small-input sweep; input complexity, not compressed byte size alone, controls
+conversion cost. This adds a workload only; production code remains frozen at
+45bebca for the capacity study.

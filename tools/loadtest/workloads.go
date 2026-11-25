@@ -47,6 +47,7 @@ func makeWorkloads(ctx context.Context, dir string) ([]workload, error) {
 		{"docx-small-sf", "testdata/corpus/docx_basic.docx", "Original corpus basic DOCX to serialized SF", manifold.DOCX, manifold.SF},
 		{"docx-mqtt-sf", "testdata/real/mqtt-v5.0-os.docx", "Original OASIS MQTT Word document: 4998 nonempty body paragraphs and 59 tables to SF", manifold.DOCX, manifold.SF},
 		{"pdf-small-sf", "testdata/assets/w3c-dummy.pdf", "Original one-page W3C PDF to SF, default structure/inference enabled", manifold.PDF, manifold.SF},
+		{"pdf-mqtt-sf", "testdata/real/mqtt-v5.0-os.pdf", "Original 137-page OASIS MQTT PDF, 90 tagged tables; full parse and SF serialization", manifold.PDF, manifold.SF},
 		{"pdf-circular-sf", "testdata/real/copyright-office-circular-1-2021.pdf", "Original ten-page Copyright Office PDF to SF, default structure/inference enabled", manifold.PDF, manifold.SF},
 	} {
 		data, err := os.ReadFile(spec.path)
