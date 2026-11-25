@@ -251,3 +251,11 @@ retain painted glyph content instead. Structural ActualText uses the same policy
 Alt controls remain literal escapes. A focused regression requires the original
 control-plus-dots pattern to retain its dots. The original full rerun and audit are
 pending. The earlier successful import scout is not final content qualification.
+
+Published format references used for independently authored preservation code:
+[Microsoft WMF header](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-wmf/d169108a-e3fe-436a-bb44-bea61a46ce56),
+[WMF framing](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-wmf/ba5458c6-e885-41e6-b5d7-d54ef9e1065f),
+[EMF framing](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-emf/daaf9447-0c47-446e-b72e-ac6bd7a2e8f1),
+[EMF signature](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-emf/b55cbd24-612d-47fe-81c9-1da6a682246f), and
+[Adobe CFF Technical Note 5176](https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf).
+No proprietary UniDoc implementation was copied or translated.
