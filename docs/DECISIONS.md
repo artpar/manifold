@@ -2508,3 +2508,14 @@ stop at conflicting/unqualified evidence and plan before graph mutation. The
 original authored two-paragraph oracle remains unchanged and now passes.
 PDF_NOTE_CONTINUATION.md records the exact heuristics, uncertainty, independent
 reader/asset/source proof and remaining cross-page/long-note policy work.
+
+## 2026-11-25 Separate cross-page note ownership from paragraph continuity
+
+Use reciprocal note links plus separator evidence for long-note placement; do not
+require a long footnote to start below an arbitrary page fraction. Carry ownership
+only through qualified later note regions, preserving ordinary flow/blank pages
+and competing note boundaries. Join inferred paragraphs separately using wrap/
+style evidence; preserve explicit roles and original glyph/page facts. Complete
+plans precede mutation. Mark generated continuation captions as artifacts instead
+of ordinary authored content. The unchanged three-page one-note/two-paragraph
+oracle now passes; PDF_NOTE_PAGES.md records tests and independent reader proof.

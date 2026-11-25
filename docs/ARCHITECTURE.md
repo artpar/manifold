@@ -2054,3 +2054,13 @@ roots remain boundaries. Complete plans precede mutation, preserving child block
 roles, glyph geometry, assets and navigation while disclosing inferred ownership.
 PDF_NOTE_CONTINUATION.md records public round trips, actual source/reader/visual
 checks and the remaining cross-page/long-note and final-audit work.
+
+## Cross-page note plans and pagination artifacts
+
+Note extent plans now distinguish block ownership, physical-page transitions and
+paragraph joins. Strong separator evidence can qualify long footnotes starting
+higher on a page; coherent later note regions preserve intervening ordinary flow.
+Stable planned joins preserve original glyph sources and multi-page regions. Only
+synthetic boundaries of fully moved note pages disappear from editable flow. The
+writer marks generated continuation captions as artifacts. PDF_NOTE_PAGES.md
+records independent typed-MCID/paint/source/roundtrip proof and the final audit queue.

@@ -270,7 +270,11 @@ func (r *pdfRenderer) paintFootnotes(chunks []pdfNoteChunk, continued bool) erro
 	if continued {
 		r.pdf.SetFont("Go", "", 7)
 		r.pdf.SetTextColor(0, 0, 0)
+		marked := r.beginOutputMark(nil)
 		r.pdf.Text(left, top-3, "Footnotes continued")
+		if marked {
+			r.pdf.RawWriteStr("EMC")
+		}
 	}
 	y := top + footnoteSeparatorHeight
 	for _, chunk := range chunks {

@@ -301,9 +301,21 @@ func (r *pdfReader) inferLinkedPDFNotes() error {
 			continue
 		}
 		if bs.Page == cs.Page {
-			_, y, _, _ := quadBounds(*bs.Quad)
-			if bs.Page < 1 || bs.Page > len(r.doc.Pages) || y < r.doc.Pages[bs.Page-1].Height*.6 || bs.Baseline[0].Y-cs.Baseline[0].Y < 40 {
+			left, y, _, _ := quadBounds(*bs.Quad)
+			if bs.Page < 1 || bs.Page > len(r.doc.Pages) || bs.Baseline[0].Y-cs.Baseline[0].Y < 40 {
 				continue
+			}
+			if y < r.doc.Pages[bs.Page-1].Height*.6 {
+				em := bs.FontSize
+				for _, run := range body.block.Runs {
+					if !r.noteInferenceStep() {
+						return r.ctx.Err()
+					}
+					em = max(em, run.FontSize)
+				}
+				if !r.pdfNoteSeparator(bs.Page, left, y, em) {
+					continue
+				}
 			}
 			kind = Footnote
 		}
@@ -353,6 +365,7 @@ func (r *pdfReader) inferLinkedPDFNotes() error {
 	}
 	removed := map[*Block]bool{}
 	continuations := 0
+	pageContinuations, paragraphJoins := 0, 0
 	bodyLinks := make([]int, 0, len(bodies))
 	for bodyLink := range bodies {
 		bodyLinks = append(bodyLinks, bodyLink)
@@ -372,18 +385,36 @@ func (r *pdfReader) inferLinkedPDFNotes() error {
 		labelSource := cloneSourceInfo(labelRun.Source)
 		id := fmt.Sprintf("pdf:inferred-note:%d:%d", labelSource.Page, labelSource.Order)
 		originalBody := []Block{*body.block}
-		for _, index := range extents[bodyLink] {
+		for _, index := range extents[bodyLink].blocks {
 			originalBody = append(originalBody, r.doc.Blocks[index])
 		}
 		source := inferredPDFSource(originalBody, "pdf_note_reciprocal_views", .8)
 		noteBody := *body.block
 		noteBody.Runs = append(append([]Run(nil), body.block.Runs[:body.index]...), body.block.Runs[body.index+1:]...)
 		noteBody.Source = inferredPDFSource([]Block{noteBody}, "pdf_note_reciprocal_body", .8)
-		noteBlocks := append([]Block{noteBody}, originalBody[1:]...)
+		noteBlocks := []Block{noteBody}
+		for _, index := range extents[bodyLink].blocks {
+			next := r.doc.Blocks[index]
+			if extents[bodyLink].joins[index] {
+				paragraphJoins++
+				previous := &noteBlocks[len(noteBlocks)-1]
+				source := inferredPDFSource([]Block{*previous, next}, "pdf_note_page_paragraph_continuation", .65)
+				previous.Runs = joinPDFLayoutRuns(append([]Run(nil), previous.Runs...), next.Runs)
+				previous.Anchors = append(append([]string(nil), previous.Anchors...), next.Anchors...)
+				previous.Source = source
+			} else {
+				noteBlocks = append(noteBlocks, next)
+			}
+		}
 		if len(noteBlocks) > 1 {
 			source.Evidence = "pdf_note_reciprocal_views;separated_note_zone_continuation"
 			source.Confidence = .7
 			continuations += len(noteBlocks) - 1
+		}
+		if extents[bodyLink].pages > 0 {
+			pageContinuations += extents[bodyLink].pages
+			source.Evidence += ";cross_page_note_zone"
+			source.Confidence = .65
 		}
 		labelRun.Text, labelRun.Source, labelRun.Anchor = "", nil, ""
 		r.doc.Notes = append(r.doc.Notes, Note{ID: id, Kind: kinds[bodyLink], KindInferred: true, Label: body.label, LabelSource: labelSource, BodyLabelStyle: &labelRun, Source: source, Blocks: noteBlocks})
@@ -395,31 +426,22 @@ func (r *pdfReader) inferLinkedPDFNotes() error {
 			run.Note = &NoteReference{ID: id, Kind: kinds[bodyLink], Inferred: true}
 		}
 		removed[body.block] = true
-		for _, index := range extents[bodyLink] {
+		for _, index := range extents[bodyLink].blocks {
 			removed[&r.doc.Blocks[index]] = true
 		}
 	}
 	if len(removed) > 0 {
-		trailingBodyMoved := removed[&r.doc.Blocks[len(r.doc.Blocks)-1]]
-		out := make([]Block, 0, len(r.doc.Blocks))
-		for i := range r.doc.Blocks {
-			if !removed[&r.doc.Blocks[i]] {
-				out = append(out, r.doc.Blocks[i])
-			}
-		}
-		// Physical page records survive independently of editable flow. A final
-		// page containing only a moved note must not create a blank reflow page.
-		if trailingBodyMoved {
-			for len(out) > 0 && out[len(out)-1].Kind == PageBreak {
-				out = out[:len(out)-1]
-				r.doc.warn("pdf_note_flow_boundary_inferred", "Trailing page boundaries leading only to moved note bodies are omitted from reflow; physical pages remain recorded")
-			}
-		}
-		r.doc.Blocks = out
+		r.removePDFNoteFlow(removed)
 		r.doc.warn("pdf_note_relationship_inferred", "Matching raised marks and reciprocal physical GoTo views infer note relationships; original annotations, views and glyph geometry remain source evidence")
 		r.doc.warn("pdf_note_body_extent_inferred", "Note body extent is inferred from its linked leading paragraph and available note-zone evidence; unqualified or ambiguous continuation remains in flow")
 		if continuations > 0 {
 			r.doc.warn("pdf_note_continuation_inferred", "Consecutive coherent rich blocks in a separator-backed footnote zone or leading endnote page are grouped as inferred continuation; physical bounds remain source facts")
+		}
+		if pageContinuations > 0 {
+			r.doc.warn("pdf_note_page_continuation_inferred", "Matching physical note zones infer ownership across pages; ordinary page content and original physical boundaries remain independently represented")
+		}
+		if paragraphJoins > 0 {
+			r.doc.warn("pdf_note_paragraph_continuation_inferred", "Compatible wrap geometry and boundary text infer one note paragraph across physical pages; explicit or ambiguous paragraph boundaries remain separate")
 		}
 		r.doc.warn("pdf_note_kind_inferred", "Foot/endnote reflow kind is inferred from page position, not an explicit authorial note policy")
 		r.doc.warn("pdf_note_label_presentation", "Inferred body marks retain original style and label_source; reflow may normalize their independent placement")

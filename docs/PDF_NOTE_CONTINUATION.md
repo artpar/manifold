@@ -1,5 +1,8 @@
 # Rich inferred PDF note bodies
 
+PDF_NOTE_PAGES.md records the current cross-page extension and resolves the long-
+note failure retained below as milestone history.
+
 The strict two-paragraph oracle in PDF_UNTAGGED_NOTES.md now passes unchanged.
 `pdf_infer_note_extent.go` plans continuation ownership after reciprocal mark/view
 relationships qualify a note and before any references or flow blocks mutate.
@@ -130,7 +133,7 @@ paragraph. Page1 has matching reciprocal citation/body links and a separator nea
 y209pt, with the body label near y212pt on an842pt page. Subsequent pages retain
 separator-backed continuation text without another label/link pair.
 
-Current geometric recovery returns zero notes: the base same-page footnote rule
+At1ef16ef, geometric recovery returned zero notes: the base same-page footnote rule
 requires a body below60% page height, even though this longer footnote's leading
 body starts higher. Extent planning also treats physical page changes as hard
 boundaries. All visible text stays in flow, but the authored one-note/two-paragraph
@@ -143,6 +146,6 @@ and cross-page ownership/paragraph continuity while retaining source expectation
 python3 scripts/generate_pdf_note_continuation_probe.py --cross-page
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-note-crosspage-qa --headless --convert-to pdf --outdir output/pdf-note-continuation-crosspage output/pdf-note-continuation-crosspage/continuation-source.docx
 bin/manydoc extract -pdf-skip-structure -format json -o output/pdf-note-continuation-crosspage/geometric.json output/pdf-note-continuation-crosspage/continuation-source.pdf
-# Currently FAILS: zero recovered notes instead of one source-owned note.
+# Failed at1ef16ef; the current PDF_NOTE_PAGES.md implementation passes unchanged.
 python3 scripts/generate_pdf_note_continuation_probe.py --cross-page --check output/pdf-note-continuation-crosspage/geometric.json
 ```

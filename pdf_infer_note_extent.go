@@ -104,29 +104,33 @@ func (r *pdfReader) pdfNoteExtentFacts(b *Block) pdfNoteExtentFacts {
 }
 
 func (r *pdfReader) pdfNoteSeparator(page int, left, top, em float64) bool {
+	return r.pdfNoteSeparatorWidth(page, left, top, em) > 0
+}
+
+func (r *pdfReader) pdfNoteSeparatorWidth(page int, left, top, em float64) float64 {
 	for _, line := range r.rulings[page] {
 		if !r.noteInferenceStep() {
-			return false
+			return 0
 		}
 		if line.horizontal && line.width <= max(3, em*.3) && line.pos <= top+1 && line.pos >= top-4*em && line.start <= left+em && line.end >= left+4*em {
-			return true
+			return line.end - line.start
 		}
 	}
 	for _, patch := range r.rulingPatches[page] {
 		if !r.noteInferenceStep() {
-			return false
+			return 0
 		}
 		if patch.y1-patch.y0 <= max(3, em*.3) && patch.y1 <= top+1 && patch.y0 >= top-4*em && patch.x0 <= left+em && patch.x1 >= left+4*em {
-			return true
+			return patch.x1 - patch.x0
 		}
 	}
-	return false
+	return 0
 }
 
 // Plan all moves before assigning references or removing blocks. Existing body
-// roots and citation owners are barriers, as are missing geometry, page changes,
-// large gaps, incompatible type sizes and unrelated text columns.
-func (r *pdfReader) planPDFNoteExtents(marks []pdfLinkedNoteMark, bodies map[int]int, kinds map[int]string, citations map[int][]int) (map[int][]int, bool) {
+// roots and citation owners are barriers, as are missing geometry, unqualified page
+// changes, large gaps, incompatible type sizes and unrelated text columns.
+func (r *pdfReader) planPDFNoteExtents(marks []pdfLinkedNoteMark, bodies map[int]int, kinds map[int]string, citations map[int][]int) (map[int]pdfNoteExtentPlan, bool) {
 	indices := map[*Block]int{}
 	for i := range r.doc.Blocks {
 		indices[&r.doc.Blocks[i]] = i
@@ -160,9 +164,10 @@ func (r *pdfReader) planPDFNoteExtents(marks []pdfLinkedNoteMark, bodies map[int
 		facts[index] = f
 		return f
 	}
-	extents := map[int][]int{}
+	extents := map[int]pdfNoteExtentPlan{}
 	claims := map[int]int{}
 	sharedZone := map[int]bool{}
+	sharedWidth := map[int]float64{}
 	for _, bodyLink := range bodyOrder {
 		markIndex := bodies[bodyLink]
 		if len(citations[bodyLink]) == 0 {
@@ -179,8 +184,10 @@ func (r *pdfReader) planPDFNoteExtents(marks []pdfLinkedNoteMark, bodies map[int
 		}
 		left, _, _, _ := quadBounds(*mark.run().Source.Quad)
 		zone := sharedZone[index]
+		width := sharedWidth[index]
 		if !zone && kinds[bodyLink] == Footnote {
-			zone = r.pdfNoteSeparator(base.page, left, base.y0, base.em)
+			width = r.pdfNoteSeparatorWidth(base.page, left, base.y0, base.em)
+			zone = width > 0
 		} else if !zone && kinds[bodyLink] == Endnote && base.y0 < r.doc.Pages[base.page-1].Height*.35 {
 			// A leading note page has no prior ordinary same-page content.
 			zone = true
@@ -202,24 +209,36 @@ func (r *pdfReader) planPDFNoteExtents(marks []pdfLinkedNoteMark, bodies map[int
 			continue
 		}
 		bottom := base.y1
+		currentPage, lastIndex := base.page, index
+		plan := pdfNoteExtentPlan{joins: map[int]bool{}}
 		for i := index + 1; i < len(r.doc.Blocks); i++ {
 			if !r.noteInferenceStep() {
 				return nil, false
 			}
 			b := &r.doc.Blocks[i]
+			if b.Kind == PageBreak {
+				next, join, ok := r.pdfNoteNextPage(i+1, lastIndex, fact(lastIndex), left, base.em, width, kinds[bodyLink], rootLinks, protected, fact)
+				if !ok {
+					return nil, false
+				}
+				if next < 0 {
+					break
+				}
+				i = next
+				b = &r.doc.Blocks[i]
+				currentPage = fact(i).page
+				bottom = fact(i).y0
+				plan.pages++
+				plan.joins[i] = join
+			}
 			f := fact(i)
-			if !f.ok || f.page != base.page || f.y0 < bottom-1 || f.y0-bottom > 4*base.em || f.x0 < left-1.5*base.em || f.x1 > r.doc.Pages[base.page-1].Width+1 {
-				break
-			}
-			if f.em > 0 && (f.em < base.em*.85 || f.em > base.em*1.8) {
-				break
-			}
-			if (b.Kind == Paragraph || b.Kind == Heading || b.Kind == ListBlock) && f.x0 > left+3*base.em {
+			if !pdfNoteCoherentBlock(b, f, currentPage, left, base.em, r.doc.Pages[currentPage-1].Width) || f.y0 < bottom-1 || f.y0-bottom > 4*base.em {
 				break
 			}
 			if protected[b] {
 				if next, exists := rootLinks[b]; exists && kinds[next] == kinds[bodyLink] {
 					sharedZone[i] = true
+					sharedWidth[i] = width
 				}
 				break
 			}
@@ -228,9 +247,11 @@ func (r *pdfReader) planPDFNoteExtents(marks []pdfLinkedNoteMark, bodies map[int
 				return nil, false
 			}
 			claims[i] = bodyLink
-			extents[bodyLink] = append(extents[bodyLink], i)
+			plan.blocks = append(plan.blocks, i)
+			lastIndex = i
 			bottom = f.y1
 		}
+		extents[bodyLink] = plan
 	}
 	if r.noteInferenceWork > pdfNoteInferenceLimit || r.ctx.Err() != nil {
 		return nil, false

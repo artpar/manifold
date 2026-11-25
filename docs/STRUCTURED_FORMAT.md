@@ -47,9 +47,10 @@ ProseMirror remains the canonical logical format because explicit child ownershi
 and marks support structural manipulation/provenance without an offset/control-token
 protocol. Univer snapshots remain the required application adapter boundary: rich
 lists/tables/drawings/stories/notes/plugin resources must be mapped and checked.
-Raw SF is not .vdocs, and no native adapter or app persistence compatibility is
-currently claimed. This corrects the earlier unavailable-schema claim; it does
-not require executing either editor at runtime. No Daptin/Colleaf files changed.
+Raw SF is not .vdocs. A checked offline native adapter is now public through
+ReadVDOCS/WriteVDOCS and the CLI; COLLEAF_FORMAT.md records its actual snapshot/save
+contracts and retained native-reader discrepancies. This corrects the earlier
+unavailable-schema claim; it does not require executing either editor at runtime. No Daptin/Colleaf files changed.
 
 ## Wire profile and current API
 

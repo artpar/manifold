@@ -8097,5 +8097,87 @@
       "GOWORK=off go test ./...",
       "GOWORK=off go test -race -timeout 20m ./..."
     ]
+  },
+  "pdf_cross_page_note_continuation": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "Qualify high-starting long footnotes through reciprocal views and nearby separator evidence. Plan later physical note-region ownership independently from inferred paragraph joins. Keep ordinary content, blank pages and competing owners in main flow; retain all physical Pages and per-glyph original sources. Move rich blocks without flattening; copy run slices when joining compatible inferred paragraphs, retaining multi-page regions.",
+    "paragraph_uncertainty": "Wrap joins require compatible inferred roles/styles/languages/directions, matching left edge and near-full last line, without sentence-ending/uppercase-new-start evidence. Explicit paragraphs/starts remain. Cross-page ownership/source evidence adds cross_page_note_zone with heuristic confidence0.65, and paragraph source evidence pdf_note_page_paragraph_continuation. This is not unique authorial reconstruction.",
+    "caption": "Independent qualification found the native Footnotes continued caption was unmarked ordinary text. It is now explicitly /Artifact marked, preserving its visible appearance/source membership separately from note-owned MCIDs. Default regression verifies membership on every continuation page and exclusion from typed note bodies. Artifact content remains available under the existing physical-flow policy; no string-based deletion or authoring-template invention.",
+    "default_tests": "Raw-object three-page mixed note/ordinary flow, distinct paragraphs, expanded separator/new paragraph, endnote continuation, cross-page RGB raster/2x2 table/URI, competing owner, missing separator, original blank page and high body without a separator. Complete glyph/source inventory and physical annotations compared to controls; SF/gzip/JSON/DOCX semantic cycles. Page-planning exhaustion/cancellation asserts no partial flow mutation. Caption regression spans multiple generated pages.",
+    "authored_source": "Unchanged synthetic POI Word extension has120 italic authored segments in one second paragraph under one original footnote ID. Original fixture hash9070094b27ff5201477f4de4b2c027730c66cb889106a1609c5adeed207a59c1 remains unchanged. LibreOffice PDF spans3 pages; at1ef16ef geometric recovery had0 notes. Current strict --cross-page --check passes1 footnote/2 paragraphs with3 original paragraph regions and complete text/italic style. Source SHA f85ecb4a59b4aede0c3becd14f22cbe957fcf905b98699d44c0d9ec3cb3b1c97. Explicitly synthetic derivative, not unchanged real-export evidence.",
+    "independent": {
+      "mixed": {
+        "glyphs": 1558,
+        "body_blocks": 2,
+        "physical_pages": 3,
+        "native_pages": 2,
+        "word_checked": true
+      },
+      "new-paragraph": {
+        "glyphs": 1553,
+        "body_blocks": 3,
+        "physical_pages": 3,
+        "native_pages": 2,
+        "word_checked": true
+      },
+      "wide-new-paragraph": {
+        "glyphs": 1553,
+        "body_blocks": 3,
+        "physical_pages": 3,
+        "native_pages": 2,
+        "word_checked": true
+      },
+      "endnote": {
+        "glyphs": 1051,
+        "body_blocks": 2,
+        "physical_pages": 3,
+        "native_pages": 2,
+        "word_checked": true
+      },
+      "rich-page": {
+        "glyphs": 1426,
+        "body_blocks": 5,
+        "physical_pages": 3,
+        "native_pages": 2,
+        "word_checked": true
+      },
+      "authored-long": {
+        "source_sha256": "f85ecb4a59b4aede0c3becd14f22cbe957fcf905b98699d44c0d9ec3cb3b1c97",
+        "paragraphs": 2,
+        "physical_pages": 3,
+        "strict_original_oracle": "passed unchanged",
+        "native_pages": 4,
+        "word_checked": true
+      }
+    },
+    "readers": "MuPDF verifies every original raw-profile painted character origin against recovered model evidence. Strict pypdf follows actual note subtree/MCID membership, retaining explicit artifact scopes separately; MuPDF painted baselines correlate with those memberships. Both require complete note text; no dropping strings by text content. DOCX XML owns one note/paragraph relationships and public CLI rereads it. All six DOCX outputs open/render in LibreOffice; both readers verify their note bodies. Native generated PDFs recover typed note bodies through actual structure, not cached SF.",
+    "visual": "Ten-page original/native/Word long-note sheet inspected; all120 segments remain italic/readable with safe rule/caption separation and no observed clipping. Explicit Go Mono mapping yields4 native pages vs3 original/Word pages, with a short final native continuation. Different pagination/font/spacing does not claim Word/source print equivalence.",
+    "prosemirror": "Actual pinned ProseMirror validates1689 nodes/marks/attributes across18 source/DOCX/native SFs.",
+    "checks": {
+      "normal": "passed final full library64.398s/CLI1.093s",
+      "race": "passed final current full go test -race -timeout20m ./... library659.249s/CLI5.859s; all packages pass. Earlier475.861s/CLI7.137s scope preceded the caption artifact fix and is not substituted for this final run.",
+      "focused": "passed final2.223s",
+      "focused_race": "passed final9.846s",
+      "cgo_disabled_tests": "passed final focused2.211s",
+      "vet": "passed final",
+      "modules": "all modules verified; dependencies unchanged",
+      "builds": "CGO-disabled host CLI build/execution and Linux amd64/arm64 cross-builds pass; not Linux execution",
+      "diff_check": "passed",
+      "malformed": "Existing malformed/graph/view and fuzz seeds in full checks, plus new page evidence/competing-owner/blank/budget/cancellation cases. No exhaustive parser safety claim."
+    },
+    "remaining": "The named three-page oracle is resolved. Keep the full original acceptance audit active: distinguish core all-four-path requirements from optional native/browser experiments, verify source/API/asset/visual evidence and current declared normalized semantics. Tagged fallback-kind policy, initial parser allocation boundary and retained native-reader discrepancies remain explicit; no overall blocker or completion waiver.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/ACCEPTANCE.md docs/PDF_NOTE_PAGES.md docs/COMPATIBILITY.md",
+      "GOWORK=off go test -run \"TestRealWordMQTTStructureAssetsAndNormalizedRoundtrip|TestRealExportFixtureHashes|TestVDOCSPublicGraphAndHistory\" -count=1 .",
+      "output/qa-venv/bin/python scripts/verify_pdf_note_pages.py --word-render output/pdf-note-pages/word-render",
+      "GOWORK=off go test ./...",
+      "GOWORK=off go test -race -timeout 20m ./..."
+    ],
+    "original_regression": {
+      "scope": "complete original publication/MQTT SF byte equality against direct-encryption qualification",
+      "mqtt_sha256": "14742c55e8295feb0058a74cc33afe394f1ac340fa82aa422af3ad325524f526",
+      "publication_sha256": "2d630c8ff72ec594b95b67542d66bf2df13886380672f6a213e5713b8095a7b2"
+    }
   }
 }

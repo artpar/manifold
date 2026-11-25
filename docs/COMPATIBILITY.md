@@ -1333,3 +1333,14 @@ or unqualified cues stop grouping and keep content in ordinary flow. Read
 PDF_NOTE_CONTINUATION.md for exact thresholds, source/reader proof and remaining
 cross-page/long-note policy and final acceptance work. No general authorial
 structure or print-fidelity guarantee follows from these heuristics.
+
+## Long and cross-page geometric notes
+
+Strong painted separator evidence can now qualify a same-page long footnote above
+the prior60% height threshold. Coherent next-page note regions may extend its rich
+body; paragraph joining remains separately inferred with confidence/source regions.
+Ordinary content, original blank pages and competing/unqualified owners remain in
+flow. Only entirely moved note-page synthetic boundaries are removed. Native
+continuation captions now carry explicit artifact membership, retaining physical
+appearance separately from note-owned structure. PDF_NOTE_PAGES.md records exact
+heuristics, source/reader proofs and remaining full-goal acceptance work.
