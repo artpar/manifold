@@ -84,9 +84,10 @@ The 4.13 GB derived ECMA SF read drops 167.20s → 142.39s and allocation
 live bytes stay near 4,940 MiB despite fewer objects. All observed released heaps
 remain below 1 MiB; this is not an RSS-return or long-lived service leak guarantee.
 
-Source is frozen at 4f32d78; subsequent report/KT commits do not change Go code.
-VERSION remains 0.4.0: these changes are published on main, with no new release
-or existing tag moved. Publication continues through the existing VERSION workflow.
+Source is frozen at 4f32d78; subsequent report/KT/version commits do not change Go code.
+VERSION is 0.4.1 for the user-requested performance release. Publication is pending
+the existing gated VERSION workflow; verify the hosted run and published assets
+before claiming delivery. No existing release or tag is moved.
 
 ## Known boundaries and next work
 

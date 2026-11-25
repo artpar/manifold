@@ -160,3 +160,8 @@ with the former implementation maps and qualification ledger.
   Do not claim independent additive speedups, constant-memory APIs, HTTP capacity
   or arbitrary-file fidelity. Source/check/profile evidence lives in the five-change
   comparison; VERSION publication remains independent and automated.
+
+- Release v0.4.1 contains the qualified five performance changes without an API or
+  SF schema change. At the user's request, bump VERSION and let the existing
+  checked GitHub Actions pipeline create/tag/package/publish; do not build or
+  upload a workstation release or move the published v0.4.0 tag.
