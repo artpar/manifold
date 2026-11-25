@@ -1,11 +1,18 @@
 # Compatibility and fidelity
 
-This initial implementation targets explicit, testable document operations.
-Passing the included corpus is not a guarantee for arbitrary customer files.
+This is the current supported conversion contract, with scoped evidence below
+and in ACCEPTANCE.md. The full goal remains active while its final source,
+resource, API and visual audit is completed. Historical qualification paragraphs
+record the behavior at their named milestone; later feature sections and linked
+contracts supersede earlier pending statements.
 
-The active completion goal is broader than this initial support table. Required
-work such as PDF structured recovery, broader DOCX visual qualification and richer footnote layout is unfinished;
-current rejection behavior must not be read as an exemption from that goal.
+All four paths through manydoc-prosemirror/1 exist. Rich PDF notes now include
+explicit graphs, reciprocal untagged inference, rich continuation and qualified
+cross-page ownership. Original Word/Mac Word/LibreOffice exports and independent
+rendering qualify the declared DOCX contract; they do not establish Word-equivalent
+pagination. PDF_NOTE_KIND.md records the current tagged placement policy and
+original-source ParentTree compatibility check. Optional Colleaf browser reader
+discrepancies are separate from the four required conversion paths.
 
 ## Format support
 
@@ -13,9 +20,9 @@ current rejection behavior must not be read as an exemption from that goal.
 | --- | --- | --- |
 | DOCX read | Paragraphs/headings, family/size/RGB/auto plus bold/italic/underline/strike, links, lists, tables/nested tables/row and column spans/repeating header prefixes, embedded images, metadata, headers/footers, notes | Model is smaller than OOXML; diagnostics describe known representation losses |
 | DOCX write | Paragraphs/headings/runs/links with named families/half-point sizes/RGB/auto, lists, tables/nesting/row and column spans/repeating header prefixes, PNG/JPEG images, metadata, section boundaries, four-edge layouts/distances and default/first/even header/footer variants, typed footnotes/endnotes with rich bodies | Unanchored draft notes reject; font embedding and Word layout are not provided |
-| PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; explicit typed notes/reciprocal citations recover; broader untagged inference and OCR unfinished; unsupported codecs/encodings/operators reject |
+| PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; explicit typed notes/reciprocal citations recover; ambiguous geometry stays literal with diagnostics; OCR is not provided; unsupported codecs/encodings/operators reject |
 | PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, per-section body margins/paper settings, metadata, rich measured headers/footers, linked rich footnotes/endnotes with continuation | Built-in Go coverage plus explicit supplied TTFs; qualified Hebrew/Arabic bidi below, broader scripts unfinished; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
-| SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; richer required features remain unfinished |
+| SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; revisions/comments/fields follow the explicit policies below |
 | Legacy JSON | Public model with base64 image data and diagnostics | Unknown JSON fields rejected; this is manydoc's model, not Colleaf's .vdocs schema |
 | Text | Body/table/note text; form feeds represent page breaks | Formatting and binary image data are not represented |
 
@@ -30,7 +37,7 @@ the final visible view. Revision history is not preserved. Content-control text,
 cached field results and text-box text are retained, with diagnostics for their
 unrepresented control/evaluation/layout semantics.
 
-Bookmark points and typed internal navigation now persist through SF/DOCX and native PDF; bookmark range/column editing semantics have explicit losses. Comment annotations and advanced page binding rules remain unfinished. Section-specific layouts and conditional running bindings are now represented. Static asymmetric edges and running distances are retained. Notes are
+Bookmark points and typed internal navigation now persist through SF/DOCX and native PDF; bookmark range/column editing semantics have explicit losses. Comment editing/ranges are not represented; import emits diagnostics while retaining visible body text. Advanced page binding differences have explicit diagnostics. Section-specific layouts and conditional running bindings are now represented. Static asymmetric edges and running distances are retained. Notes are
 extracted with typed inline identities and separate rich definitions. Automatic
 reference labels normalize to continuous decimal values; nondecimal/custom note
 marks, numbering/restart/placement changes and custom separator content have
@@ -42,7 +49,7 @@ positioning and arbitrary style properties remain incomplete with diagnostics.
 
 External relationships are never fetched. DOCX/PDF output never executes macros,
 scripts or field programs. DOCX font substitution depends on the reader's fonts;
-the writer does not embed fonts. Word visual pagination remains unverified.
+the writer does not embed fonts. Independent LibreOffice visual checks are recorded in REAL_DOCX_CORPUS.md; matching Microsoft Word pagination is not claimed.
 
 ## PDF interpretation and output
 
@@ -70,7 +77,7 @@ relative-size headings, consecutive marker lists/nesting/starts/continuations
 and aligned numeric tables now exist. Results are explicitly inferred, not
 semantic facts. `ReadOptions.PDFSkipInference` / `-pdf-skip-inference` retains
 untagged paint order. More complex ruling/occlusion/double-border/rotated-table recovery, complex
-layouts and cross-page inferred membership remain required unfinished work.
+layouts retain uncertain membership; qualified cross-page tables and notes are documented in PDF_NOTE_PAGES.md and the table contracts.
 Physical/internal destination recovery now exists with separately inferred flow
 bindings; see PDF_NAVIGATION.md. Whole-span URI/internal geometry can be recovered;
 partial/overlapping text spans and conflicting multi-target Link groups diagnose
@@ -97,7 +104,7 @@ missing glyphs return errors before output. CJK can be extracted from supported
 PDF encodings but cannot currently be generated with these built-in fonts.
 Hebrew/Arabic directional output now works with suitable caller-supplied TTFs
 (qualified below). Built-in Go faces lack that coverage; missing glyphs still reject.
-Devanagari and other guarded scripts remain required unfinished work. Output includes a painted PDF 2.0 logical tree; PDF/A, PDF/UA and WTPDF conformance are not claimed. Common typographic spaces
+Devanagari and other guarded scripts reject explicitly; support for every script is not claimed. Output includes a painted PDF 2.0 logical tree; PDF/A, PDF/UA and WTPDF conformance are not claimed. Common typographic spaces
 now use measured font/em advances with standard ActualText, so the published
 InDesign source renders to nine bounded pages. The earlier implied-paragraph
 fragmentation in tagged list-body import is fixed, with original /K membership
@@ -1344,3 +1351,12 @@ flow. Only entirely moved note-page synthetic boundaries are removed. Native
 continuation captions now carry explicit artifact membership, retaining physical
 appearance separately from note-owned structure. PDF_NOTE_PAGES.md records exact
 heuristics, source/reader proofs and remaining full-goal acceptance work.
+
+## Tagged note placement and original number-tree compatibility
+
+Explicit NoteType wins. Otherwise a lower-page Lbl, nearby horizontal separator
+and earlier same-page citation support inferred Footnote; unqualified placement
+retains the diagnosed Endnote default. PDFSkipInference disables that geometric
+selection. Ownership remains explicit/inferred independently. Direct ParentTree
+child dictionaries diagnose conformance without disabling reciprocal validation.
+PDF_NOTE_KIND.md records the original 71-page source and exact checks.

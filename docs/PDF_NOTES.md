@@ -21,7 +21,7 @@ Reference atoms keep their own explicit source positions, styles and relationshi
 
 FENote attributes with owner FENote and NoteType Footnote/Endnote select the
 corresponding kind explicitly. None/absent and older Note tags select an editorial
-endnote reflow default with Note.KindInferred / kind_inferred true and an explicit
+diagnosed placement policy with Note.KindInferred / kind_inferred true and an explicit
 diagnostic. This does not claim that physical placement proves the original
 foot/endnote policy. Original positions remain source facts. KindInferred persists
 through JSON/SF/gzip and checked DOCX metadata. Source provenance itself retains
@@ -234,8 +234,9 @@ c09a4c63f5cba37c53150c3f894e0bf8910690e43f8ae04a335cbcbb2d0e068c.
 Actual ProseMirror checks 89,397 nodes/marks/attributes across that original, the
 adjacent probe and its DOCX round trip. Original source pages 8/22 and generated
 native/LibreOffice note pages were inspected; no source-layout equivalence is
-claimed. The kind default remains editorial Endnote despite observed footnote
-placement, with KindInferred=true and original page/region provenance.
+claimed. That milestone retained editorial Endnote despite physical footnote placement.
+The current separator-backed policy in PDF_NOTE_KIND.md recovers both as inferred
+Footnote while preserving the original graph, paint and page/region provenance.
 
 The original leading labels now retain editable typography and backlinks through
 BodyLabelStyle / body_label_marks as well as independent physical PDFNavigation.
@@ -517,3 +518,6 @@ keeps ambiguous content literal. Original Word exports and separate untagged
 derivatives qualify editable notes and reflow; broader geometric rich bodies
 remain work. This rule does not turn physical GoTo annotations into explicit Ref
 structure edges.
+
+Current tagged placement and original ParentTree compatibility evidence is in
+PDF_NOTE_KIND.md; it supersedes the earlier unconditional Endnote default.

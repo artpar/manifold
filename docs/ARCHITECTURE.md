@@ -2064,3 +2064,10 @@ Stable planned joins preserve original glyph sources and multi-page regions. Onl
 synthetic boundaries of fully moved note pages disappear from editable flow. The
 writer marks generated continuation captions as artifacts. PDF_NOTE_PAGES.md
 records independent typed-MCID/paint/source/roundtrip proof and the final audit queue.
+
+Tagged note placement is separate from explicit Note/Ref ownership. Explicit
+NoteType wins; otherwise qualified same-page separator/label/citation geometry
+supports inferred footnote reflow, with an Endnote default for uncertain placement.
+PDFSkipInference disables this geometry policy. Direct ParentTree child dictionaries
+have a conformance diagnostic and retain reciprocal validation. PDF_NOTE_KIND.md
+records the original-source regression and qualification.

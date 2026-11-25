@@ -2519,3 +2519,13 @@ style evidence; preserve explicit roles and original glyph/page facts. Complete
 plans precede mutation. Mark generated continuation captions as artifacts instead
 of ordinary authored content. The unchanged three-page one-note/two-paragraph
 oracle now passes; PDF_NOTE_PAGES.md records tests and independent reader proof.
+
+## 2026-11-25 Infer tagged placement without changing explicit ownership
+
+Do not force every untyped tagged Note into endnote reflow. Qualified physical
+separator/label/same-page citation evidence supports inferred footnote placement;
+explicit NoteType remains authoritative and uncertain placement retains its
+diagnosed default. Keep graph facts and kind inference separate. Accept direct
+ParentTree child dictionaries with a conformance diagnostic while validating
+ownership and all existing bounds. The unchanged original tagging guide exposed
+the prior rejection and qualifies both recovered notes. See PDF_NOTE_KIND.md.

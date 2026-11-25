@@ -27,6 +27,22 @@ uploads. Daptin identity/access/quotas/storage/actions remain outside the librar
 Proprietary UniDoc implementations have not been copied or translated; no formal
 clean-room claim is made. go.mod/go.sum and THIRD_PARTY.md track reused components.
 
+## Latest: tagged note placement and original-source compatibility
+
+PDF_NOTE_KIND.md qualifies both real footnotes in the original71-page tagging
+guide as inferred Footnote, separately from graph ownership. Explicit NoteType
+wins and PDFSkipInference retains the default. The audit also reproduced and
+fixed the newer ParentTree validator's rejection of that original: direct child
+dictionaries now diagnose conformance while retaining ownership/shape/bounds
+checks. Rich source tests, SF/gzip/JSON/DOCX/native PDF, original label/body/view
+checks and complete current-SF comparison pass. Native and LibreOffice one-page
+outputs pass independent placement/link/raster checks and visual inspection.
+ProseMirror validates all51 accepted corpus files/9,034 nodes and marks.
+Normal tests97.951s/CLIcached pass on final production; later test-only additions
+pass focused tests1.545s and CGO-disabled focus1.555s. Vet/modules and host/Linux
+CGO-disabled builds pass. The full race run is pending; its exact scope/result
+will be recorded before qualification is claimed. The overall goal stays active.
+
 ## Actual Colleaf inspection changes the integration evidence
 
 The earlier local-only search missed the remotely available application. Read-only
@@ -56,6 +72,18 @@ Linux checks pass. Full final race passes659.249s/CLI5.859s with -timeout20m.
 Earlier475.861s/CLI7.137s predates the caption fix and remains a separate scope. Exact scopes are in
 verification.json. The goal remains active/incomplete; return to the full original
 acceptance audit rather than redefining completion around this milestone.
+
+## Current audit: tagged placement and original-source compatibility
+
+PDF_NOTE_KIND.md records a fresh original-source audit. The earlier 71-page guide
+failed before note recovery because the newer ParentTree validator rejected its
+direct child dictionaries. Current recovery diagnoses that conformance issue and
+continues all reciprocal ownership checks. Its two lower-page, separator-backed
+notes now infer Footnote while explicit NoteType remains authoritative. Graph and
+placement inference remain separate, and PDFSkipInference retains the Endnote
+default. Rich source tests/round trips and independent original note/view/paint
+checks qualify this scope. Current final check results are in verification.json.
+This is a concrete audit finding; the full goal remains active/incomplete.
 
 ## Prior progress: rich inferred note-body continuation
 
@@ -718,12 +746,12 @@ QA only. Historical codec timings are retained in the verification ledger.
 Long-note placement and cross-page ownership/paragraph continuity now pass the
 original strict oracle in PDF_NOTE_PAGES.md. Audit the full original objective
 against ACCEPTANCE.md and current sources, using declared semantics and actual
-original-source/reader/API/visual evidence. Tagged fallback-kind policy, initial
-parser allocation boundaries and retained native-reader discrepancies remain open;
+original-source/reader/API/visual evidence. Tagged fallback-kind policy now has qualified source evidence in PDF_NOTE_KIND.md;
+initial parser allocation boundaries and retained native-reader discrepancies remain open;
 do not treat every optional integration experiment as an unstated core requirement.
 
 ```sh
-cat docs/ACCEPTANCE.md docs/PDF_NOTE_PAGES.md docs/COMPATIBILITY.md
+cat docs/ACCEPTANCE.md docs/PDF_NOTE_KIND.md docs/PDF_NOTE_PAGES.md docs/COMPATIBILITY.md
 GOWORK=off go test -run TestPDFUntagged -count=1 .
 python3 scripts/generate_pdf_note_continuation_probe.py --cross-page
 # Render/extract and run its strict --check as in PDF_NOTE_CONTINUATION.md.
@@ -739,12 +767,13 @@ GOWORK=off go test -run 'TestPDF.*Note|TestGeneratedPDF|TestCLIVDOCSSemantics' -
    Broaden source/structure and resource audits beyond the newly qualified
    reciprocal ParentTree checks, using malformed and independently authored sources.
    Retain current physical and explicit/inferred source oracles; never recover from an embedded SF cache.
-2. Qualify remaining native rendering/intent/settings and browser/preset behavior
+2. Treat remaining native rendering/intent/settings and browser/preset behavior
+   as extra interoperability qualification, separate from required four-path acceptance. Qualify it
    against the pinned Colleaf/Univer packages. The public offline VDOCS adapter,
    rich mappings, source persistence and plugin saves already exist; do not repeat
    their implementation or modify the applications.
-3. Complete the remaining note-policy, custom/literal-list representation and
-   broader untagged/source/reflow audits. Record exact scope and reproducible
+3. Preserve the implemented note placement/continuation and literal-list contracts;
+   finish the broader source/reflow acceptance audit. Record exact scope and reproducible
    failures rather than treating a current rejection as completed capability.
 4. Preserve the original corpus and independent expectations, refresh the full
    acceptance matrix and visual/API/resource checks, and complete the goal only

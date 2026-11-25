@@ -23,6 +23,7 @@ func TestPDFParentTreeReciprocalOwnership(t *testing.T) {
 		diagnostic string
 	}{
 		{name: "flat", tree: "<< /Nums [0 [8 0 R 9 0 R]] >>"},
+		{name: "direct-child", tree: "<< /Kids [<< /Limits [0 0] /Nums [0 [8 0 R 9 0 R]] >>] >>", diagnostic: "pdf_parent_tree_direct_child"},
 		{name: "branches", tree: "<< /Kids [11 0 R 12 0 R] >>", extra: []string{"<< /Limits [0 0] /Nums [0 [8 0 R 9 0 R]] >>", "<< /Limits [3 3] /Nums [3 [null]] >>"}},
 		{name: "missing-key", tree: "<< /Nums [] >>", diagnostic: "pdf_parent_tree_incomplete"},
 		{name: "null-gap", tree: "<< /Nums [0 [8 0 R null]] >>", diagnostic: "pdf_parent_tree_incomplete"},
@@ -56,6 +57,8 @@ func TestPDFParentTreeMalformedOwnership(t *testing.T) {
 		{name: "duplicate-key", tree: "<< /Nums [0 [8 0 R] 0 [9 0 R]] >>"},
 		{name: "descending-keys", tree: "<< /Nums [3 [] 0 [8 0 R 9 0 R]] >>"},
 		{name: "negative-key", tree: "<< /Nums [-1 []] >>"},
+		{name: "direct-child-wrong-owner", tree: "<< /Kids [<< /Nums [0 [9 0 R 8 0 R]] >>] >>"},
+		{name: "direct-child-bad-type", tree: "<< /Kids [17] >>"},
 		{name: "noninteger-key", tree: "<< /Nums [(0) []] >>"},
 		{name: "odd-pairs", tree: "<< /Nums [0 [8 0 R] 2] >>"},
 		{name: "inconsistent-limits", tree: "<< /Limits [0 2] /Nums [0 [8 0 R 9 0 R]] >>"},

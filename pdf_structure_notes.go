@@ -156,7 +156,7 @@ func (s *pdfStructureRecovery) prepareNotes(roots []*pdfStructureNode) error {
 			s.warn("pdf_note_label", "Note references do not have recoverable literal text marks; exact content and Ref identities are retained in flow")
 			continue
 		}
-		kind, inferred, err := s.pdfNoteKind(n)
+		kind, inferred, err := s.pdfNoteKind(n, refs)
 		if err != nil {
 			return err
 		}
@@ -239,7 +239,7 @@ func pdfNoteMark(blocks []Block) (string, bool) {
 	return text, validateNoteLabel(text) == nil
 }
 
-func (s *pdfStructureRecovery) pdfNoteKind(n *pdfStructureNode) (string, bool, error) {
+func (s *pdfStructureRecovery) pdfNoteKind(n *pdfStructureNode, refs []*pdfStructureNode) (string, bool, error) {
 	if value := n.attrs["NoteType"]; value != nil {
 		v, err := s.reader.pdf.Dereference(value)
 		if err != nil {
@@ -259,10 +259,73 @@ func (s *pdfStructureRecovery) pdfNoteKind(n *pdfStructureNode) (string, bool, e
 			return "", false, fmt.Errorf("invalid FENote NoteType %q", name)
 		}
 	}
-	// Choosing an endnote avoids claiming that physical placement proved a
-	// reusable authorial bottom-of-page layout. This editorial default is explicit.
+	if !s.reader.skipNoteKindInference {
+		foot, err := s.taggedFootnotePlacement(n, refs)
+		if err != nil {
+			return "", false, err
+		}
+		if foot {
+			s.warn("pdf_note_kind_inferred", "Note has no explicit foot/endnote kind; a lower-page label below a separator and a same-page citation supports inferred footnote reflow; physical source regions remain authoritative")
+			return Footnote, true, nil
+		}
+	}
+	// Unqualified placement retains the explicit editorial default.
 	s.warn("pdf_note_kind_inferred", "Note has no explicit foot/endnote kind; endnote reflow is selected with kind_inferred=true; physical source regions remain authoritative")
 	return Endnote, true, nil
+}
+
+// The logical Note/Ref graph establishes ownership, not placement. Cache label
+// recovery so inspecting geometry neither consumes content twice nor changes it.
+func (s *pdfStructureRecovery) taggedFootnotePlacement(n *pdfStructureNode, refs []*pdfStructureNode) (bool, error) {
+	if n.actual != nil || len(n.kids) == 0 || n.kids[0].role != "Lbl" {
+		return false, nil
+	}
+	label := n.kids[0]
+	blocks, ok := s.cachedRefs[label]
+	if !ok {
+		var err error
+		blocks, err = s.node(label)
+		if err != nil {
+			return false, err
+		}
+		s.cachedRefs[label] = blocks
+	}
+	text, valid := pdfNoteMark(blocks)
+	if !valid || strings.TrimSpace(text) == "" {
+		return false, nil
+	}
+	source := sourceFromBlocks(blocks, label)
+	if source.Page < 1 || source.Page > len(s.reader.doc.Pages) || source.Quad == nil {
+		return false, nil
+	}
+	left, top, _, _ := quadBounds(*source.Quad)
+	if top < s.reader.doc.Pages[source.Page-1].Height*.6 {
+		return false, nil
+	}
+	em := 0.0
+	for _, b := range blocks {
+		for _, run := range b.Runs {
+			if run.Source != nil {
+				em = max(em, run.Source.FontSize)
+			}
+		}
+	}
+	if em <= 0 || !s.reader.pdfNoteSeparator(source.Page, left, top, em) {
+		return false, s.reader.ctx.Err()
+	}
+	for _, ref := range refs {
+		if !s.reader.noteInferenceStep() {
+			return false, s.reader.ctx.Err()
+		}
+		citation := sourceFromBlocks(s.cachedRefs[ref], ref)
+		if citation.Page == source.Page && citation.Quad != nil {
+			_, _, _, bottom := quadBounds(*citation.Quad)
+			if bottom < top-4*em {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
 }
 
 func (s *pdfStructureRecovery) recoverNote(n *pdfStructureNode, note *pdfRecoveredNote) ([]Block, error) {

@@ -21,7 +21,9 @@ containers. Null array slots may represent unused or unowned sequences.
   owner types, shared keys between different containers, duplicate forward MCIDs,
   wrong array/scalar entry shape or simultaneous StructParent/StructParents reject.
 - Number trees validate increasing nonnegative signed-32-bit keys, disjoint child
-  ranges, optional Limits when present, indirect Kids, paired Nums and node shape.
+  ranges, optional Limits when present, paired Nums and node shape. Direct child
+  dictionaries diagnose a number-tree conformance deviation while retaining full
+  ownership checks; see PDF_NOTE_KIND.md. Other non-reference children reject.
   Cyclic/repeated nodes reject. Missing nonroot Limits are tolerated; full PDF
   number-tree conformance is not claimed.
 

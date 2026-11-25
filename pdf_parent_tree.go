@@ -70,7 +70,10 @@ func (s *pdfStructureRecovery) validateParentTree(value types.Object, kids []*pd
 			}
 			for _, child := range children {
 				if _, ok := child.(types.IndirectRef); !ok {
-					return 0, 0, fmt.Errorf("ParentTree Kids must be indirect")
+					if _, direct := child.(types.Dict); !direct {
+						return 0, 0, fmt.Errorf("ParentTree child is not a dictionary or indirect reference")
+					}
+					s.warn("pdf_parent_tree_direct_child", "ParentTree has a direct child dictionary instead of an indirect reference; reciprocal ownership is still checked, without claiming number-tree conformance")
 				}
 				lo, hi, e := read(child, depth+1)
 				if e != nil {

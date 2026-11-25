@@ -46,7 +46,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 	// Accept version-extension conventions during object parsing, but never
 	// accept partially decoded corrupt page streams as successful extraction.
 	p.XRefTable.ValidationMode = model.ValidationStrict
-	r := &pdfReader{ctx: ctx, pdf: p}
+	r := &pdfReader{ctx: ctx, pdf: p, skipNoteKindInference: opts.PDFSkipInference}
 	if err := r.validateParserStreams(); err != nil {
 		return nil, err
 	}
@@ -210,6 +210,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 }
 
 type pdfReader struct {
+	skipNoteKindInference    bool
 	noteInferenceWork        int
 	streamBudget             *pdfStreamBudget
 	rasterPixels             int64

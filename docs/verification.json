@@ -6975,7 +6975,7 @@
       "sdk": "Actual registered Univer1.0.4 Docs/Drawing/DocsDrawing/HyperLink plugins, FUniver createDocument/save in fresh instances, DocumentSkeleton glyph-style propagation; same hash-pinned Colleaf validator.",
       "cases": 6,
       "saves_per_baseline": 2,
-      "edits": "Synthetic altLang ja-JP→zh-Hant and authored ComplexLanguage ar-SA→he-IL; separate altLang deletion. All five real documents remain in each artifact map.",
+      "edits": "Synthetic altLang ja-JP\u2192zh-Hant and authored ComplexLanguage ar-SA\u2192he-IL; separate altLang deletion. All five real documents remain in each artifact map.",
       "Go_reimport": "Strict .vdocs envelope plus another Go/native cycle compares full SF graphs for all saved/edited/cleared cases.",
       "ProseMirror": {
         "artifacts": 18,
@@ -7049,7 +7049,7 @@
       "expected_footnotes": 2,
       "expected_endnotes": 1,
       "actual_note_definitions": 0,
-      "diagnosis": "Generated PDF is untagged; existing text/placement checks do not prove typed-note semantic recovery. Same problem exists for direct SF→PDF, independent of native transport.",
+      "diagnosis": "Generated PDF is untagged; existing text/placement checks do not prove typed-note semantic recovery. Same problem exists for direct SF\u2192PDF, independent of native transport.",
       "oracle": "Expected values retained in the opt-in acceptance subtest; ordinary unit/race runs explicitly skip it. Not an unsupported-feature exemption or completed requirement.",
       "next": "Implement actual painted logical structure/relationships or conservative diagnosed recovery; no cached SF-body substitution."
     },
@@ -7059,7 +7059,7 @@
       "vet": "passed",
       "modules": "all modules verified",
       "CGO_disabled_public_tests": "passed5.630s",
-      "builds": "CGO-disabled host build/--help and CLI native→SF/gzip execution pass; Linux amd64/arm64 cross-builds pass (not execution)",
+      "builds": "CGO-disabled host build/--help and CLI native\u2192SF/gzip execution pass; Linux amd64/arm64 cross-builds pass (not execution)",
       "fuzz": "FuzzColleafEnvelope passed1861 executions/11.464s/two workers; short safety sample, not exhaustive",
       "diff_check": "passed"
     },
@@ -7418,7 +7418,7 @@
       "cases": 4,
       "items": 8,
       "labels": [
-        "§ fixed",
+        "\u00a7 fixed",
         "Case A",
         "100% done",
         ""
@@ -7540,7 +7540,7 @@
       "visual": "All17 Word-rendered pages inspected after Poppler rendering, using five labelled contact sheets and nested case full page. Rich labels/figures/tables/notes remain visible, requested starts separate pages, columns continue, RTL label is on right. Scoped synthetic evidence,not general Word fidelity.",
       "initial_reader_failures": "Word ignored cell-local pageBreakBefore and omitted the nested label table in a footnote layout cell. Original page/text/table oracles retained. Moved starts before cells and used sequential rich marker/body note flow; actual rendered source now passes both.",
       "Word_PDF_link_discrepancy": "Actual Word ODT save retains both exact authored URI/internal targets and destination bookmark; PDF export omits their two annotations while note links remain. Additional --require-pdf-links oracle intentionally FAILS and remains executable. Isolated w:history probe did not change it. The main checker reports this discrepancy and requires the actual ODT graph; no passing Word-PDF hyperlink claim.",
-      "native_PDF": "CLI DOCX→SF→native Go PDF retains actual marker URI/internal annotations and Greek text; distinct from the Word-PDF export discrepancy."
+      "native_PDF": "CLI DOCX\u2192SF\u2192native Go PDF retains actual marker URI/internal annotations and Greek text; distinct from the Word-PDF export discrepancy."
     },
     "checks": {
       "go_test_all": "passed final library26.621s/CLI0.794s",
@@ -7863,8 +7863,7 @@
       "rg -n 'ReadWithContext|DecodeLength|saveDecodedStreamContent|parseObjectStream' pdf_read.go /Users/artpar/go/pkg/mod/github.com/pdfcpu/pdfcpu@v0.11.1/pkg/pdfcpu/read.go",
       "GOWORK=off go test ./..."
     ]
-  }
-,
+  },
   "pdf_parser_stream_integrity": {
     "date": "2026-11-25",
     "goal": "active/incomplete",
@@ -8179,5 +8178,51 @@
       "mqtt_sha256": "14742c55e8295feb0058a74cc33afe394f1ac340fa82aa422af3ad325524f526",
       "publication_sha256": "2d630c8ff72ec594b95b67542d66bf2df13886380672f6a213e5713b8095a7b2"
     }
+  },
+  "pdf_tagged_note_placement": {
+    "date": "2026-11-25",
+    "status": "implemented; full race qualification pending",
+    "production": [
+      "pdf_structure_notes.go",
+      "pdf_read.go",
+      "pdf_parent_tree.go"
+    ],
+    "contract": "Explicit NoteType wins. Absent/None type can infer Footnote from lower-page Lbl/separator/earlier same-page citation. PDFSkipInference retains Endnote fallback. Kind and relationship inference remain independent.",
+    "original_source": {
+      "sha256": "8185a30793869379ea4c2d82f214a930368b3fa7520faba61df38c52a502335e",
+      "pages": 71,
+      "note_pages": [
+        8,
+        22
+      ],
+      "prechange": "Exact f171ab4 CLI rejects original with ParentTree Kids must be indirect",
+      "current": "Both original notes infer Footnote; direct ParentTree child dictionary conformance diagnostic preserves reciprocal validation"
+    },
+    "checks": {
+      "normal": "passed final production: library97.951s, CLIcached; later test-only additions focused1.545s",
+      "focused_race": "pending final test-only scope",
+      "cgo_focus": "passed1.555s",
+      "full_race": "pending; output/pdf-note-kind-race.log",
+      "vet": "passed",
+      "modules": "all modules verified",
+      "builds": "CGO-disabled host CLI built/executed and Linux amd64/arm64 cross-builds passed; Linux not executed",
+      "independent": "original label/body/MCID/view source checks pass; complete current SF equality after only declared kind/diagnostic normalization; both native and LibreOffice same-page footnote placement/bounds/repeated targets/exact red-blue raster pass",
+      "prosemirror": "51 accepted corpus files,9034 nodes and marks/attributes pass",
+      "visual": "native.pdf and actual LibreOffice DOCX render, one page each, inspected; source layout identity not claimed"
+    },
+    "raw_logs": [
+      "output/pdf-note-kind-tests.log",
+      "output/pdf-note-kind-race.log",
+      "output/pdf-note-kind-final-focus.log",
+      "output/pdf-note-kind-final-cgo.log",
+      "output/pdf-note-kind-final-focused-race.log",
+      "output/pdf-note-kind-independent.log",
+      "output/pdf-note-kind-placement.log",
+      "output/pdf-note-kind-prosemirror.log",
+      "output/pdf-note-kind-final-vet.log",
+      "output/pdf-note-kind-final-modules.log"
+    ],
+    "historical_difference": "The much earlier guide-styled SF does not match all current paint records; the strict historical comparator still fails and was not weakened. Current default versus current skip-inference complete-SF comparison is a separate oracle.",
+    "remaining": "Original overall acceptance audit remains active. Earlier initial parser allocations remain outside retained-stream guards. Optional pinned native browser repeated-note ordering discrepancy remains recorded."
   }
 }
