@@ -2,8 +2,9 @@
 
 Pure-Go document extraction, generation, and conversion for embedded applications.
 
-**Initial implementation.** See [current status](docs/STATUS.md) for verified
-behavior and remaining work. This is not a drop-in UniOffice/UniPDF replacement
+All four conversion paths are implemented and qualified for the declared support
+contract. See the [acceptance audit](docs/FINAL_AUDIT.md) and
+[current status](docs/STATUS.md) for evidence and compatibility limits. This is not a drop-in UniOffice/UniPDF replacement
 or a Word-compatible layout engine.
 
 The library reads and writes DOCX, extracts positioned text, raster images and supported tagged structure or disclosed geometric inference from PDF, generates PDFs from
@@ -13,7 +14,7 @@ through SF; see [native integration](docs/COLLEAF_FORMAT.md) for its contract an
 remaining rendering/browser limits. PDF output carries a logical tree tied to
 painted content; import checks present reciprocal ownership indexes.
 The [structured-format decision](docs/STRUCTURED_FORMAT.md) records the schema,
-tradeoffs and required unfinished expansion.
+tradeoffs, profile extensions and checked integration boundary.
 Sectioned SF supports separate body frames and default/first/even running stories.
 Run `GOWORK=off go run ./examples/sections` for all four conversion paths; see
 [compatibility limits](docs/COMPATIBILITY.md) for shared-page and producer differences.

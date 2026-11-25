@@ -2529,3 +2529,35 @@ diagnosed default. Keep graph facts and kind inference separate. Accept direct
 ParentTree child dictionaries with a conformance diagnostic while validating
 ownership and all existing bounds. The unchanged original tagging guide exposed
 the prior rejection and qualifies both recovered notes. See PDF_NOTE_KIND.md.
+
+
+## 2026-11-25 Close the original rich-document goal against its actual criteria
+
+FINAL_AUDIT.md records every required capability with source, structure, asset,
+relationship, independent-reader and visual evidence. Final current normal tests,
+full final-production race, later test-only focused race, vet/module verification,
+malformed/fuzz checks and CGO-disabled builds pass. A fresh original-source audit
+found and fixed the direct ParentTree compatibility regression rather than relying
+on the existing suite alone. Keep the declared script/codec/graphics/editing limits,
+initial parser allocation boundary and independent-reader discrepancies explicit.
+Do not add unstated Word layout, every-script or third-party browser parity gates;
+do not use those limits to substitute for the required rich conversion paths.
+The original goal is complete; future changes preserve source oracles, qualify
+affected behavior and commit aligned KT/evidence. No application boundary changed.
+
+
+## 2026-11-25 Close the original goal against its actual acceptance criteria
+
+The final audit maps every required path, rich feature, API/CLI/example, source
+fact/inference/loss policy and qualification criterion to implementation and
+independent evidence. It found and resolved a genuine original-source ParentTree
+regression instead of relying on the existing tests alone. Full normal/race,
+current focused coverage, malformed/fuzz, vet/modules, CGO-disabled builds,
+original-export readers and scoped visual checks pass. FINAL_AUDIT.md records
+exact scopes; ACCEPTANCE.md and STATUS.md now reflect completion.
+
+Retain documented compatibility limits and strict independent-reader discrepancies.
+Do not turn every optional third-party browser experiment or a universal memory/
+codec/script/layout guarantee into an unstated completion criterion. Required
+capabilities are implemented and qualified; future compatibility expansion should
+preserve original source oracles and use the same committed evidence workflow.

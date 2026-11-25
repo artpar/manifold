@@ -8181,7 +8181,7 @@
   },
   "pdf_tagged_note_placement": {
     "date": "2026-11-25",
-    "status": "implemented; full race qualification pending",
+    "status": "qualified; original acceptance audit complete",
     "production": [
       "pdf_structure_notes.go",
       "pdf_read.go",
@@ -8199,20 +8199,20 @@
       "current": "Both original notes infer Footnote; direct ParentTree child dictionary conformance diagnostic preserves reciprocal validation"
     },
     "checks": {
-      "normal": "passed final production: library97.951s, CLIcached; later test-only additions focused1.545s",
-      "focused_race": "pending final test-only scope",
+      "normal": "final current tree passes75.053s; CLI/internal bidi cached; output/pdf-note-kind-current-tests.log",
+      "focused_race": "current later test-only QA/fuzz-seed scope passes7.016s; output/pdf-note-kind-final-race-focus.log",
       "cgo_focus": "passed1.555s",
-      "full_race": "pending; output/pdf-note-kind-race.log",
-      "vet": "passed",
-      "modules": "all modules verified",
-      "builds": "CGO-disabled host CLI built/executed and Linux amd64/arm64 cross-builds passed; Linux not executed",
+      "full_race": "final production passes770.544s; CLI/internal bidi cached; -timeout20m; no races; output/pdf-note-kind-race.log",
+      "vet": "final tree passed; output/final-goal-vet.log",
+      "modules": "final all modules verified; output/final-goal-modules.log",
+      "builds": "Final CGO-disabled host CLI built/executed help and Linux amd64/arm64 cross-builds passed; Linux not executed",
       "independent": "original label/body/MCID/view source checks pass; complete current SF equality after only declared kind/diagnostic normalization; both native and LibreOffice same-page footnote placement/bounds/repeated targets/exact red-blue raster pass",
       "prosemirror": "51 accepted corpus files,9034 nodes and marks/attributes pass",
       "visual": "Native and actual LibreOffice one-page generated-DOCX render inspected; same-page footnote, two repeated navigation targets, text bounds and exact2x1 red/blue raster pass; output/pdf-note-kind-placement-final.log",
       "focused_current_race": "passed6.020s including native placement test; output/pdf-note-kind-current-race.log",
       "historical_paint": "exact56 old-only tagged_paragraph_word_gap/synthetic_separator spaces; no painted record removed, no new record; strict old projection remains failing as historical structural difference",
       "parent_tree_fuzz": "10000executions/two workers/9.025s, including direct-child seed, passed; output/pdf-note-kind-fuzz.log",
-      "original_exports": "Current CLI regenerated allfour paths for eight actual exports; verify_poi_corpus.py passes original semantics/notes/stories/nav/geometry and33 producer/native pages; output/pdf-note-kind-corpus-paths.log and output/pdf-note-kind-corpus-readers.log",
+      "original_exports": "Current CLI regenerated all four paths for eight actual exports; source semantics/notes/stories/navigation/geometry and33 producer/native pages pass; output/pdf-note-kind-corpus-paths.log and output/pdf-note-kind-corpus-readers.log",
       "sections": "Current rich section example and independent verifier pass; output/pdf-note-kind-sections.log",
       "actual_prosemirror": "51accepted corpus files/9034nodes and marks; output/pdf-note-kind-prosemirror.log"
     },
@@ -8230,5 +8230,14 @@
     ],
     "historical_difference": "The much earlier guide-styled SF does not match all current paint records; the strict historical comparator still fails and was not weakened. Current default versus current skip-inference complete-SF comparison is a separate oracle.",
     "remaining": "Original overall acceptance audit remains active. Earlier initial parser allocations remain outside retained-stream guards. Optional pinned native browser repeated-note ordering discrepancy remains recorded."
+  },
+  "original_goal_final_audit": {
+    "date": "2026-11-25",
+    "status": "complete for declared support contract",
+    "audit": "docs/FINAL_AUDIT.md",
+    "criteria": "All four paths, established SF and actual editor inspection, required rich content, explicit source/inference/loss policies, public API/CLI/examples, normalized semantic round trips, original plus targeted corpus, independent readers/visual inspection, normal/race/vet/malformed/fuzz/CGO checks and committed KT are qualified.",
+    "limits": "See COMPATIBILITY.md and FINAL_AUDIT.md. No Word pagination/API parity, OCR/every codec/script/graphics operator, universal parser memory cap or complete optional third-party browser parity claimed. Known CID/color/reader/native discrepancies remain recorded and executable.",
+    "regression_found_by_audit": "Original tagged-guide direct ParentTree children rejected at f171ab4; fcb2b45 recovers with explicit conformance diagnostic and reciprocal ownership checks; original source unchanged.",
+    "evidence_scope": "Full normal final tree75.053s; full final-production race770.544s and later test-only focus7.016s; CLI/internal bidi cached. Final vet/modules and host/Linux CGO-disabled builds; Linux not executed. Exact independent source/reader/visual/fuzz scopes in pdf_tagged_note_placement and historical milestones."
   }
 }

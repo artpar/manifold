@@ -9,8 +9,8 @@ is its ProseMirror schema declaration. `structured.go` exposes the public tree,
 strict codec and checked bridges to the existing Go engine. `.sf` and the `SF`
 format use that representation; `.json` remains the legacy custom model.
 The existing model is an implementation bridge, not the final scope of the SF.
-Untagged geometric inference now exists; broader reconstruction and rich model
-expansion remain required.
+Untagged geometric inference and the required rich model now exist;
+FINAL_AUDIT.md records the completed original scope and remaining compatibility limits.
 
 ## Application boundary
 

@@ -8,8 +8,12 @@ this file and ACCEPTANCE.md are the current authoritative queue.
 
 ## Outcome and current contract
 
-The full rich-document goal is **active/incomplete**. The standalone Go library
-and CLI implement DOCX→SF, SF→DOCX, SF→PDF and PDF→SF around a versioned established
+The original rich-document goal is **complete for the declared support contract**.
+FINAL_AUDIT.md and ACCEPTANCE.md record the criterion-by-criterion decision, exact
+verification scope and remaining compatibility limits. Historical milestones below
+retain their then-current active/incomplete state; they are not the current queue.
+
+The standalone Go library and CLI implement DOCX→SF, SF→DOCX, SF→PDF and PDF→SF around a versioned established
 ProseMirror JSON profile, manydoc-prosemirror/1. Legacy model JSON/text remain
 available; .sf.gz is standard gzip around the same SF, not another schema.
 
@@ -29,24 +33,24 @@ clean-room claim is made. go.mod/go.sum and THIRD_PARTY.md track reused componen
 
 ## Latest: tagged note placement and original-source compatibility
 
-PDF_NOTE_KIND.md qualifies both real footnotes in the original71-page tagging
+PDF_NOTE_KIND.md qualifies both real footnotes in the original 71-page tagging
 guide as inferred Footnote, separately from graph ownership. Explicit NoteType
-wins and PDFSkipInference retains the default. The audit also reproduced and
-fixed the newer ParentTree validator's rejection of that original: direct child
+wins and PDFSkipInference retains the default. The audit reproduced and fixed
+the newer ParentTree validator's rejection of that original: direct child
 dictionaries now diagnose conformance while retaining ownership/shape/bounds
-checks. Rich source tests, SF/gzip/JSON/DOCX/native PDF, original label/body/view
-checks and complete current-SF comparison pass. Native and LibreOffice one-page
-outputs pass independent placement/link/raster checks and visual inspection.
-ProseMirror validates all51 accepted corpus files/9,034 nodes and marks. Fresh
-all-four-path runs over eight original exports pass their unchanged source/reader
-checks (33 producer/native pages); the rich section example passes. The old guide
-difference is exactly56 synthesized label/body gaps, with all paint retained.
-ParentTree fuzz passes10,000executions/two workers/9.025s. Current focused race
-passes6.020s including native placement.
-Normal tests97.951s/CLIcached pass on final production; later test-only additions
-pass focused tests1.545s and CGO-disabled focus1.555s. Vet/modules and host/Linux
-CGO-disabled builds pass. The full race run is pending; its exact scope/result
-will be recorded before qualification is claimed. The overall goal stays active.
+checks. Complete current SF, original label/body/view checks, rich round trips,
+native and LibreOffice placement/link/raster checks and visual inspection pass.
+The older guide artifact differs by 56 synthesized label/body gaps; its painted
+records are all retained. Fresh all-four-path conversions of eight original
+exports pass unchanged source/reader checks (33 producer/native pages); the rich
+section example and ProseMirror corpus (51 files, 9,034 nodes/marks) pass.
+
+Final normal tests pass in 75.053s with CLI cached. Full final-production race
+passes in 770.544s with CLI cached and -timeout20m; later test-only additions pass
+focused race in 7.016s. CGO-disabled focus passes in 1.555s. Final vet/modules and
+CGO-disabled host/Linux builds pass; Linux was not executed. ParentTree fuzz
+passes 10,000 executions in 9.025s with two workers. Exact scopes are recorded
+in verification.json and FINAL_AUDIT.md.
 
 ## Actual Colleaf inspection changes the integration evidence
 
@@ -746,53 +750,32 @@ Latest scoped check results appear above and in verification.json. Linux builds
 establish compilation, not Linux execution. Optional Node/Python/LibreOffice remain
 QA only. Historical codec timings are retained in the verification ledger.
 
-## Next concrete implementation order
+## Maintenance and next commands
 
-Long-note placement and cross-page ownership/paragraph continuity now pass the
-original strict oracle in PDF_NOTE_PAGES.md. Audit the full original objective
-against ACCEPTANCE.md and current sources, using declared semantics and actual
-original-source/reader/API/visual evidence. Tagged fallback-kind policy now has qualified source evidence in PDF_NOTE_KIND.md;
-initial parser allocation boundaries and retained native-reader discrepancies remain open;
-do not treat every optional integration experiment as an unstated core requirement.
+No required original-goal work remains. Read FINAL_AUDIT.md for acceptance evidence
+and COMPATIBILITY.md for delivered limits. Optional Colleaf browser discrepancies,
+ambiguous source/color cases and the initial parser allocation boundary remain
+explicit qualification limits; they are not hidden completion exceptions.
 
 ```sh
-cat docs/ACCEPTANCE.md docs/PDF_NOTE_KIND.md docs/PDF_NOTE_PAGES.md docs/COMPATIBILITY.md
-GOWORK=off go test -run TestPDFUntagged -count=1 .
-python3 scripts/generate_pdf_note_continuation_probe.py --cross-page
-# Render/extract and run its strict --check as in PDF_NOTE_CONTINUATION.md.
-rg -n 'untagged|infer|remaining' pdf_infer.go pdf_structure_notes*.go docs/PDF_NOTES.md
-rg --files output | rg '(footnotes|endnotes).*\.pdf$'
-GOWORK=off go test -run 'TestPDF.*Note|TestGeneratedPDF|TestCLIVDOCSSemantics' -count=1 ./...
+GOWORK=off go test ./...
+GOWORK=off go test -race -timeout 20m ./...
+GOWORK=off go vet ./...
+GOWORK=off go mod verify
+CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+output/qa-venv/bin/python scripts/generate_poi_qa.py
+output/qa-venv/bin/python scripts/verify_poi_corpus.py
+output/qa-venv/bin/python scripts/verify_structured_corpus.py
+GOWORK=off go run ./examples/sections
+output/qa-venv/bin/python scripts/verify_sections.py
+git diff --check
 ```
 
-1. Continue the wider source/resource/reflow/native corpus audit, including
-   the remaining initial parser boundary and broader semantic recovery. The
-   native repeated-footnote failure is revalidated in COLLEAF_BROWSER.md; retain
-   its original oracle and seek new evidence rather than repeating the same check.
-   Broaden source/structure and resource audits beyond the newly qualified
-   reciprocal ParentTree checks, using malformed and independently authored sources.
-   Retain current physical and explicit/inferred source oracles; never recover from an embedded SF cache.
-2. Treat remaining native rendering/intent/settings and browser/preset behavior
-   as extra interoperability qualification, separate from required four-path acceptance. Qualify it
-   against the pinned Colleaf/Univer packages. The public offline VDOCS adapter,
-   rich mappings, source persistence and plugin saves already exist; do not repeat
-   their implementation or modify the applications.
-3. Preserve the implemented note placement/continuation and literal-list contracts;
-   finish the broader source/reflow acceptance audit. Record exact scope and reproducible
-   failures rather than treating a current rejection as completed capability.
-4. Preserve the original corpus and independent expectations, refresh the full
-   acceptance matrix and visual/API/resource checks, and complete the goal only
-   after every original criterion is proven. No external blocker is established.
-
-```sh
-cat docs/ACCEPTANCE.md docs/PDF_IMAGE_DECODING.md docs/COLLEAF_BROWSER.md
-GOWORK=off MANYDOC_PDF_IMAGE_QA=output/pdf-image-qa go test -run 'TestPDFImage|TestPDFRaster' -count=1 .
-output/qa-venv/bin/python scripts/verify_pdf_images.py output/pdf-image-qa
-rg -n 'ReadContext|Decode\(|ObjectStream|XRefStream' pdf_read.go /Users/artpar/go/pkg/mod/github.com/pdfcpu/pdfcpu@v0.11.1/pkg/pdfcpu/read.go
-GOWORK=off go test -run 'TestGeneratedPDF|TestPDFTagged|TestCLIVDOCSSemantics' -count=1 ./...
-output/qa-venv/bin/python scripts/verify_pdf_parent_tree.py testdata/real/copyright-office-circular-1-2021.pdf
-rg -n 'ErrUnsupported|requires mapping' colleaf_*.go
-```
+Optional QA setup/source downloads/fonts and independent producer renders are
+recorded in each feature contract. No library/CLI runtime invokes them. Preserve
+original source bytes and independent expectations, rerun affected structural/
+asset/relationship/visual checks after changes, keep the KT/evidence aligned and
+commit verified milestones. Linux cross-builds do not imply Linux execution.
 
 ## Code map and recovery commands
 

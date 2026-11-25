@@ -1,8 +1,8 @@
 # Original goal acceptance audit
 
 Audited 2026-11-25 against the original objective, rather than UniOffice API parity
-or Word pagination identity. This audit is in progress pending the current full
-race qualification and final evidence reconciliation. STATUS.md remains the
+or Word pagination identity. The original acceptance criteria are satisfied for the declared support
+contract. No required capability remains unimplemented in this audit. STATUS.md remains the
 current recovery entry point; verification.json records command scopes and history.
 
 ## Required capability and evidence
@@ -12,7 +12,7 @@ current recovery entry point; verification.json records command scopes and histo
 | Established shared rich representation, selected first | manydoc-prosemirror/1, standard ProseMirror JSON with an explicit schema profile; alternatives, extensions and actual pinned Colleaf/Univer inspection are documented in STRUCTURED_FORMAT.md and COLLEAF_FORMAT.md. Actual prosemirror-model validates the wire documents. No JavaScript engine is required at runtime. |
 | DOCX → SF and SF → DOCX | Original Word MQTT source tests verify headings, formatting, tables/merges, relationships and original JPEG. Eight additional original Word/Mac Word/LibreOffice exports have source-only ZIP/XML oracles and normalized full-SF round trips. REAL_DOCX_CORPUS.md and DOCX_PRECISION.md record independent readers and visual checks. |
 | SF → PDF | Native measured layout handles wrapping, pagination, merged/nested/continued/repeated tables, images, section frames, running stories and rich notes. Independent geometry, font programs/GIDs, links, raster pixels and page renders qualify the declared contract. See TABLE_WIDTHS.md, FONT_SUBSETTING.md, PDF_NOTE_PAGES.md and the corresponding verification ledger entries. |
-| PDF → SF | Explicit logical ownership, physical pages/positions/navigation and embedded raster assets survive; untagged geometric paragraphs/headings/lists/tables/notes disclose inference and uncertainty. Original137-page Word export has90 page-local tables/3,009 origins and11 continuation references. The original InDesign publication and original71-page tagging guide provide independent producer evidence. See TAGGED_TABLE_SPANS.md, PDF_NAVIGATION.md, PDF_NOTES.md and PDF_NOTE_KIND.md. |
+| PDF → SF | Explicit logical ownership, physical pages/positions/navigation and embedded raster assets survive; untagged geometric paragraphs/headings/lists/tables/notes disclose inference and uncertainty. Original137-page Word export has 90 page-local tables/3,009 origins and 11 continuation references. The original InDesign publication and original 71-page tagging guide provide independent producer evidence. See TAGGED_TABLE_SPANS.md, PDF_NAVIGATION.md, PDF_NOTES.md and PDF_NOTE_KIND.md. |
 | Practical rich features | The shared model/profile and both writers carry paragraphs, headings, formatted text, links/internal navigation, lists, merged tables, images, metadata, page/section settings, conditional headers/footers and rich foot/endnotes. Dedicated feature tests compare structure, marks, relationships and assets. Sections, notes, lists and merged-table examples provide usable public-API entry points. |
 | Revisions, comments, fields and unsupported constructs | DOCX uses final-visible revisions, cached field results and diagnosed loss of comment/history/control/evaluation semantics. Original exports qualify this behavior. Writers gate known representation losses with AllowLossy and still reject unrenderable content. COMPATIBILITY.md and REAL_DOCX_CORPUS.md define the policy. |
 | PDF facts distinct from inference | SourceInfo records explicit/inferred ownership, evidence, confidence, geometry, original IDs/Ref edges and physical navigation. Artifact page facts do not become invented header templates; note kind inference is separate from relationship inference. Skip controls expose physical paint. Missing/contradictory/ambiguous structure has explicit outcomes. |
@@ -20,8 +20,8 @@ current recovery entry point; verification.json records command scopes and histo
 | Supported semantic round trips | Exact SF/gzip/model JSON and normalized DOCX comparisons cover rich source graphs, styles, assets, note identity, sections and lists; the independent editor validates actual wire trees. Physical PDF provenance has an explicit reflow-loss acknowledgement, rather than a false editable round-trip claim. |
 | Stable embedding API, CLI and examples | Public Read/Write with context, readers/writers, options and typed formats/errors; structured tree codecs/bridges; CLI tests exercise every required path, gzip and atomic failure. examples/sections freshly exercises all four operations and exact editable DOCX/SF equality. |
 | Pure Go runtime and application boundary | go.mod/THIRD_PARTY.md track reusable open-source components. CGO-disabled host execution and Linux cross-builds qualify runtime compilation. Production invokes no Office/Python/Node process, conversion service or license server; identity, authorization, storage, quotas and action execution remain outside the library. |
-| Independent readers, visual inspection and representative originals | ProseMirror, standard XML/python-docx, pypdf, MuPDF, fontTools and LibreOffice are optional QA. Actual exported source bytes/hashes/oracles are retained; source and output checks are separate. Representative rendered pages and scoped visual evidence are documented, including33 original/native/Word corpus pages and the latest native/Word footnote pages. |
-| Tests, malformed input, race, vet and CGO builds | Full current production tests pass; a full race run is pending. Targeted race, malformed owner/index tests, a10,000-execution ParentTree fuzz campaign, vet, module verification and CGO-disabled builds pass. Exact scopes and later test-only additions must remain explicit in verification.json. |
+| Independent readers, visual inspection and representative originals | ProseMirror, standard XML/python-docx, pypdf, MuPDF, fontTools and LibreOffice are optional QA. Actual exported source bytes/hashes/oracles are retained; source and output checks are separate. Representative rendered pages and scoped visual evidence are documented, including 33 original/native/Word corpus pages and the latest native/Word footnote pages. |
+| Tests, malformed input, race, vet and CGO builds | Full normal tests pass 75.053s/CLI cached; full final-production race passes 770.544s/CLI cached with -timeout20m. Later test-only additions pass current focused race 7.016s. Targeted race, malformed owner/index tests, a 10,000-execution ParentTree fuzz campaign, vet, module verification and CGO-disabled builds pass. Exact scopes and later test-only additions must remain explicit in verification.json. |
 | Recoverable knowledge and ongoing commits | STATUS/ARCHITECTURE/DECISIONS/COMPATIBILITY, feature contracts, source manifests and the verification ledger are committed with implementation milestones. Generated documents, environments and binaries remain ignored. |
 
 ## Limits and scope decisions
@@ -75,5 +75,21 @@ git diff --check
 
 The optional scripts need their documented local QA environment/fonts/producer
 renders. They are not runtime dependencies. Do not regenerate source oracles to
-match output. Before closure, reconcile actual final check results into this
-audit, STATUS.md, ACCEPTANCE.md and verification.json and verify a clean commit.
+match output. The closure commit reconciles this audit, STATUS.md, ACCEPTANCE.md and
+verification.json. Future behavior changes should repeat affected source/reader
+checks and the required Go matrix, then update these records in the same commit.
+
+
+## Final verification scope
+
+- Full normal suite on the final tree: 75.053s, CLI/internal bidi cached; all packages pass.
+- Full race suite on final production code: 770.544s, CLI/internal bidi cached; no races. Later test-only QA export/fuzz-seed coverage passes focused race 7.016s.
+- Final vet and module verification pass. CGO-disabled host CLI builds and executes; Linux amd64/arm64 cross-builds pass (not executed on Linux).
+- ParentTree fuzz:10,000executions/two workers/9.025s passes, alongside all malformed suite cases. No exhaustive safety claim.
+- Current CLI regenerates all four paths for eight original exports; independent corpus checks pass33 producer/native pages. Section example/reader and all 51 accepted SF corpus documents/9,034 ProseMirror nodes and marks pass.
+- Original guide ownership/paint/views, current complete-SF placement-only comparison, native/Word footnote navigation/raster and visual checks pass. Historical56 synthesized list-gap differences are explained and checked, not painted-content omissions.
+
+Raw logs are ignored under output/pdf-note-kind-* and output/final-goal-*;
+verification.json records scopes. Source provenance, independent oracles and
+regeneration commands remain in the linked feature contracts. Known compatibility
+limits above remain part of the delivered contract.

@@ -3,11 +3,16 @@
 All ordinary tests are self-contained Go tests. Python and Poppler are optional
 independent verification tools, never production dependencies.
 
+The final original-goal audit and exact current scopes are in FINAL_AUDIT.md and
+verification.json. Full race qualification uses a 20-minute timeout because the
+custom-font seed exceeds Go's default 10-minute package timeout on this host.
+No tests are skipped by that timeout change.
+
 ## Required checks
 
 ```sh
 GOWORK=off go test ./... -count=1
-GOWORK=off go test -race ./... -count=1
+GOWORK=off go test -race -timeout 20m ./... -count=1
 GOWORK=off go vet ./...
 GOWORK=off go mod verify
 CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc

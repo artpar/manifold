@@ -39,7 +39,7 @@ separator/label/page geometry. Both now recover as inferred Footnote.
 
 The new verifier compares complete current SF with current PDFSkipInference SF:
 only kind values and the placement diagnostic text may differ. It does not weaken
-the old guide-styled paint comparison. The older artifact differs by exactly56 tagged_paragraph_word_gap records with
+the old guide-styled paint comparison. The older artifact differs by exactly 56 tagged_paragraph_word_gap records with
 synthetic_separator precision. Literal list-marker recovery now separates label
 and body ownership. The strict historical comparison still fails; the additional
 inventory oracle proves every omitted record is synthesized spacing, every
@@ -73,7 +73,7 @@ discrepancies remain documented separately.
 
 Current-code regression checks also regenerate all four paths for eight original
 Word/Mac Word/LibreOffice exports, then pass verify_poi_corpus.py against unchanged
-source oracles and existing independent producer renders (33pages). The sectioned
+source oracles and existing independent producer renders (33 pages). The sectioned
 rich example and independent section verifier pass. Actual ProseMirror validates
-all51 accepted synthetic corpus files/9,034nodes and marks. These scopes are
+all 51 accepted synthetic corpus files/9,034nodes and marks. These scopes are
 separate from the newly inspected two one-page placement outputs.
