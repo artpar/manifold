@@ -181,3 +181,21 @@ checks. Unpainted annotation OBJRs skip page content scans. This is an indexing
 repair, not a decision to omit tagged links. Focused navigation/structure checks
 are being rerun before final measurements. Earlier scout cancellations stay
 explicitly classified as cancelled.
+
+## Unrepresentable logical replacement metadata
+
+The original IPCC page 21 has marked-content ActualText `FEFF000900090007`
+(two tabs and BEL) over painted spaces; MuPDF reports the BEL too, while its paint
+trace does not contain a BEL glyph. Applying it caused final XML-compatible model
+validation to fail. If ActualText contains unrepresentable controls, retain painted
+content and diagnose the unapplied logical replacement with its exact original PDF
+string bytes in hexadecimal. Do not invent replacement Unicode or drop painted
+content. Structural Alt controls use literal escapes, also retaining exact original
+bytes in diagnostics. Oversized unrepresentable metadata rejects at 64 KiB rather
+than creating unbounded diagnostics. The focused ActualText preservation/SF checks
+pass. This is a disclosed logical/accessibility representation loss.
+
+The derived 1,186,617,547-byte C++ SF was read back through the central API and
+written with **identical SHA-256** (96bae814…): read 50.90s, read+write 70.37s during
+concurrent QA. This is persistence QA, not a quiet capacity measurement. The opt-in
+`TestHugeOriginalDerivedSFRead` keeps a Go soft limit and validates the entire graph.

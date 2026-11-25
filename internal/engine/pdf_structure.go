@@ -348,7 +348,18 @@ func (r *pdfReader) beginMarked(tag string, value any, resources types.Dict) err
 			if e != nil {
 				return e
 			}
-			frame.actual = &text
+			if err := validateString(text); err != nil {
+				raw, err := pdfString(v)
+				if err != nil {
+					return err
+				}
+				if len(raw) > 65536 {
+					return fmt.Errorf("%w: unrepresentable ActualText exceeds preservation budget", ErrUnsupported)
+				}
+				r.warnPage("pdf_actualtext_unrepresentable", fmt.Sprintf("ActualText contains controls outside the XML-compatible text model; original painted glyph content is retained instead of applying the replacement; original PDF string hex=%X", raw))
+			} else {
+				frame.actual = &text
+			}
 		}
 	}
 	if tag == "Artifact" {
@@ -1020,6 +1031,30 @@ func (s *pdfStructureRecovery) parse(value types.Object, page int, parent string
 				text, e := pdfTextString(value)
 				if e != nil {
 					return nil, e
+				}
+				if err := validateString(text); err != nil {
+					raw, err := pdfString(value)
+					if err != nil {
+						return nil, err
+					}
+					if len(raw) > 65536 {
+						return nil, fmt.Errorf("%w: unrepresentable structure text exceeds preservation budget", ErrUnsupported)
+					}
+					s.warn("pdf_structure_text_unrepresentable", fmt.Sprintf("Structure %s property %s contains controls outside the XML-compatible model; original PDF string hex=%X; painted content is retained and controls in Alt use literal Unicode escapes", n.id, entry.key, raw))
+					if entry.key == "ActualText" {
+						continue
+					}
+					var safe strings.Builder
+					for _, c := range text {
+						if validateString(string(c)) != nil {
+							fmt.Fprintf(&safe, "\\u%04X", c)
+						} else {
+							safe.WriteRune(c)
+						}
+					}
+					text = safe.String()
+					// Exact original bytes remain in the diagnostic; Alt is a
+					// non-rendered accessibility description, not glyph content.
 				}
 				*entry.target = &text
 			}

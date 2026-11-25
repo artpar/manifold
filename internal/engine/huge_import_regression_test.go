@@ -12,6 +12,7 @@ import (
 	"image/color"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -248,4 +249,24 @@ func TestPDFFontMatrixDefaultAndMalformed(t *testing.T) {
 			t.Fatalf("truncated CFF accepted at %d", i)
 		}
 	}
+}
+
+func TestPDFUnrepresentableActualTextRetainsPaintedContentAndOriginalBytes(t *testing.T) {
+	// Original IPCC page 21 uses ActualText FEFF000900090007 over painted spaces.
+	// Generalize the preservation rule: never apply invalid XML replacement text
+	// and thereby discard the actual painted content.
+	d := readRecovery(t, recoveryPage(`/Span << /ActualText <FEFF000900090007> >> BDC BT /F 10 Tf 20 100 Td (painted) Tj ET EMC`, ""))
+	if d.Text() != "painted" || !hasDiagnostic(d, "pdf_actualtext_unrepresentable") {
+		t.Fatalf("replacement discarded visible content: %q %+v", d.Text(), d.Diagnostics)
+	}
+	found := false
+	for _, v := range d.Diagnostics {
+		if strings.Contains(v.Message, "FEFF000900090007") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("original replacement bytes lost")
+	}
+	assertRecoverySF(t, d)
 }
