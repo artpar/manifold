@@ -869,3 +869,27 @@ marker (`attrs.version: 1`) in root content. An old ProseMirror schema rejects
 that unknown node instead of silently dropping an unfamiliar root attribute.
 The marker never duplicates content; editable content remains in the typed root
 presentation attribute. Missing/extra markers or mixed flowing content reject.
+
+## Native equations and huge persistence
+
+`office_math` is an additive, atomic flow block with `attrs.omml` containing a
+self-contained OOXML `oMath` or `oMathPara` root. `OfficeMathBlock` / `OfficeMath`
+expose it through the Go model. Native XML is authoritative; there is no second
+editable text cache. The bounded reader rejects directives, external/package
+relationships and unrelated namespaces. DOCX output retains native equations;
+SF and typed JSON retain the payload. `PlainText` derives source tokens only,
+without pretending to reconstruct fraction/radical/operator layout. Inline Word
+equations become separate flow blocks with a diagnostic. PDF/PPTX/VDOCS output
+of native equations rejects. An older schema rejects the unknown atomic node.
+
+Legacy WMF/EMF previews use the existing embedded `image` data URI, retaining exact
+source bytes. DOCX can re-embed them after bounded framing validation; this does
+not add a metafile renderer or execute embedded application objects. Unsupported
+rendering rejects explicitly.
+
+Flowing `Read` and `Write` process top-level SF body chunks while retaining one
+complete typed model and global cross-reference validation. Public
+`ReadStructured`/`ToStructured` explicitly request a complete SF tree. Streaming
+does not make model memory constant: sections, tables and root provenance can be
+large. SF.gz remains the same SF, compressed; no alternate large-file format is
+introduced. Gzip checksum, malformed suffix and cross-chunk reference errors reject.
