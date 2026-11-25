@@ -59,11 +59,14 @@ The final repaired results supersede those input blockers, not the baseline reco
 
 ## Profiling investigation in progress
 
-The development huge-file runner now supports separate per-stage CPU profiles and
-memory snapshots (natural stage end, two-GC live model, and after release). The
-real 3GPP i00 smoke run preserves its qualified SF SHA-256. ECMA, IPCC and Intel
-diagnostic campaigns are running; no new optimization or throughput claim follows
-from this instrumentation. Profiles stay under ignored `output/pprof-huge/`.
+Stage CPU and heap runs on IPCC, Intel and ECMA originals all complete with
+qualified SF hashes. Evidence identifies layout-copy churn (66–78% of Intel/ECMA
+read allocation bytes), PNG/DEFLATE allocation on IPCC, pointer-heavy model
+retention and small file-write costs. Post-release Go live heap is below 1 MiB in
+all three observed children. See [profiling investigation](verification/HUGE_PPROF.md).
+Caller-buffer controls and profiling of derived ECMA SF are underway. Production
+codec behavior and frozen capacity claims remain unchanged. Raw profiles stay
+under ignored `output/pprof-huge/`.
 
 ## Known boundaries and next work
 
