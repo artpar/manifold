@@ -112,3 +112,9 @@ with the former implementation maps and qualification ledger.
   distinguish cumulative allocation churn, live model retention and post-release
   residue. Preserve original hashes, large-policy limits and process RSS/deadline
   controls. Profiling remains development tooling, with no production codec change.
+
+- 2026-11-25: Cross-check pprof attribution with concrete counters and controlled
+  A/Bs. The ECMA caller-buffer control reduces file writes from 1,002,226 to 3,935
+  but write time only 63.37s to 61.17s in one pair. Do not promote syscall samples
+  into CPU accounting or latency savings. Prioritize measured layout/PNG/model
+  allocation and repeated SF encoding; retain negative/modest experimental results.

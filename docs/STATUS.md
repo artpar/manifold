@@ -64,7 +64,9 @@ qualified SF hashes. Evidence identifies layout-copy churn (66–78% of Intel/EC
 read allocation bytes), PNG/DEFLATE allocation on IPCC, pointer-heavy model
 retention and small file-write costs. Post-release Go live heap is below 1 MiB in
 all three observed children. See [profiling investigation](verification/HUGE_PPROF.md).
-Caller-buffer controls and profiling of derived ECMA SF are underway. Production
+Caller-buffer control cuts writes 255× but changes write time only 3.5% in one
+pair; the syscall sample share does not predict latency savings. Profiling of
+derived ECMA SF is underway. Production
 codec behavior and frozen capacity claims remain unchanged. Raw profiles stay
 under ignored `output/pprof-huge/`.
 
