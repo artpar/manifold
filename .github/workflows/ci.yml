@@ -67,6 +67,7 @@ jobs:
           if [[ "$RUNNER_OS" == Windows ]]; then binary="$binary.exe"; fi
           go build -trimpath -o "$binary" ./cmd/manifold
           "$binary" help
+          "$binary" presentation --help
 
   release:
     name: Publish version
@@ -158,7 +159,7 @@ jobs:
             gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$TAG" -f "sha=$GITHUB_SHA"
           fi
           cat > dist/release-notes.md <<NOTES
-          Pure-Go rich document conversion with a shared SF representation:
+          Pure-Go document conversion and presentation processing:
           - DOCX ↔ SF
           - PDF ↔ SF
           - Optional VDOCS ↔ SF

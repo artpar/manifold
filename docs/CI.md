@@ -6,7 +6,7 @@
 
 Pushes to `main`, pull requests and version tags run checks against the module's
 Go version. Linux/macOS/Windows run module verification, vet, tests and an actual
-CGO-disabled CLI build/help execution. Linux also checks gofmt/version syntax and
+CGO-disabled CLI build/help execution, including presentation command help. Linux also checks gofmt/version syntax and
 runs the complete race suite with a 20-minute package timeout. Pull requests have
 read-only permissions and cannot publish. Release jobs depend on all checks.
 
