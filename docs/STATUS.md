@@ -177,10 +177,12 @@ visually inspected. A standards check fixed the main presentation MIME and
 notes-body placeholder. See verification/PPTX_SF_BRIDGE.md. This does not upgrade
 unsupported native features to general PowerPoint fidelity.
 
-## Huge-input follow-up (in progress)
+## Huge real-input follow-up (in progress)
 
-The previous 137-page maximum does not establish 100 MB / 1,000-page capacity.
-Added tools/hugetest with independent deterministic PDF/OOXML fixtures, complete
-page-marker/image checks, isolated child processes, hard timeouts and sampled
-aggregate RSS guard. Small generator/read checks pass. Huge-input measurements,
-concurrency qualification and report updates are pending; see PERFORMANCE.md.
+At the user's explicit direction, stop synthetic huge-file tests and use only
+unmodified Internet originals for this qualification. Removed fixture generation;
+tools/hugetest now verifies the URL/hash/size manifest HUGE_CORPUS.json and runs
+isolated children with hard timeouts and an aggregate RSS guard. Independent
+PyMuPDF/XML counts qualify file scale. The real cohort includes a 423 MB IPCC PDF,
+two 5,000+ page PDFs, large 3GPP DOCX sources and a 1,624-page ETSI PDF. Single and
+concurrent measurements, rejection boundaries and final report are in progress.

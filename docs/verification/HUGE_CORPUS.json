@@ -1,0 +1,71 @@
+[
+  {
+    "name": "ipcc-ar6-wgi",
+    "path": "output/hugetest-real/ipcc-ar6-wgi.pdf",
+    "source_url": "https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_FullReport.pdf",
+    "bytes": 423349528,
+    "sha256": "1f51c28a343161e057103b120ba4396a7eb54eaa293473114f55c12af8243481",
+    "pdf_pages": 2409,
+    "retrieved_utc": "2026-11-25",
+    "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+  },
+  {
+    "name": "intel-sdm-084",
+    "path": "output/hugetest-real/intel-sdm.pdf",
+    "source_url": "https://cdrdv2-public.intel.com/825743/325462-sdm-vol-1-2abcd-3abcd-4.pdf",
+    "bytes": 25169252,
+    "sha256": "b0eb1fa3445b26dfa0eca6b8c264f74793367bb1f474988b2e48d2dd32b95662",
+    "pdf_pages": 5057,
+    "retrieved_utc": "2026-11-25",
+    "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+  },
+  {
+    "name": "ecma376-part1",
+    "path": "output/hugetest-real/ecma376-part1.pdf",
+    "source_url": "https://ecma-international.org/wp-content/uploads/ECMA-376-1_5th_edition_december_2016.zip",
+    "bytes": 35304993,
+    "sha256": "7cccfd0ad0e2ef89316acece15e44a8a088d0603ce4bba4e7b0361b50d13a37d",
+    "pdf_pages": 5039,
+    "archive_member": "Ecma Office Open XML Part 1 - Fundamentals And Markup Language Reference.pdf",
+    "retrieved_utc": "2026-11-25",
+    "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+  },
+  {
+    "name": "3gpp-38331-i00",
+    "path": "output/hugetest-real/38331-i00.docx",
+    "source_url": "https://www.3gpp.org/ftp/Specs/archive/38_series/38.331/38331-i00.zip",
+    "bytes": 3891288,
+    "sha256": "9e319813a4ba5e800702fe5991f7b6e671d889a552e1743e833c2af603ccdbc4",
+    "pdf_pages": 0,
+    "source_docx_paragraphs": 66185,
+    "producer_page_count": 1,
+    "note": "Producer page count is stale (1), not a pagination oracle. Original body contains 66,185 XML paragraphs.",
+    "archive_member": "38331-i00.docx",
+    "retrieved_utc": "2026-11-25",
+    "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+  },
+  {
+    "name": "3gpp-38331-i10",
+    "path": "output/hugetest-real/38331-i10.docx",
+    "source_url": "https://www.3gpp.org/ftp/Specs/archive/38_series/38.331/38331-i10.zip",
+    "bytes": 4002052,
+    "sha256": "58cdf26a2aa48c0c24e4f4bcf67fd969ce274d5f571b6418a90537fcc2e7659b",
+    "pdf_pages": 0,
+    "retrieved_utc": "2026-11-25",
+    "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed.",
+    "source_docx_paragraphs": 68220,
+    "producer_page_count": 1,
+    "archive_member": "38331-i10.docx",
+    "note": "Corresponding ETSI TS 138 331 V18.1.0 PDF is 1624 pages; this is not verified Word pagination. Producer page metadata is not an oracle."
+  },
+  {
+    "name": "etsi-38331-v180100",
+    "path": "output/hugetest-real/etsi-38331-v180100.pdf",
+    "source_url": "https://www.etsi.org/deliver/etsi_ts/138300_138399/138331/18.01.00_60/ts_138331v180100p.pdf",
+    "bytes": 7235315,
+    "sha256": "939befcf81d76ee493a45d8c9a47d32b0863bb0941a7b3ecf63f5907cf61ea3e",
+    "pdf_pages": 1624,
+    "retrieved_utc": "2026-11-25",
+    "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+  }
+]

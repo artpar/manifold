@@ -263,34 +263,40 @@ Linux race suite in [Actions run 45597860193](https://github.com/artpar/manifold
 contains six platform archives and checksums. Independent original-deck/SF/PDF
 qualification is recorded in [PPTX_SF_BRIDGE.md](verification/PPTX_SF_BRIDGE.md).
 
-## Huge-input extension (in progress)
+## Huge real-input extension (in progress)
 
-The user requested 100 MB PDFs and thousand-page documents beyond the original
-137-page cohort. `tools/hugetest` independently generates deterministic raw PDF
-and minimal OOXML fixtures: 100/1,000/5,000 pages with visible page markers and
-body text; 100/300-image PDFs contain distinct uncompressed 600×600 RGB image
-streams (~108/324 MB), not padding or attached dummy payloads. DOCX page counts
-mean explicit page breaks with bounded content, not independently rendered Word
-pagination. Synthetic tests qualify scale, not complex-document fidelity.
+The user explicitly requires original Internet-sourced documents. The earlier
+synthetic huge-input scout was stopped and excluded from real-file evidence;
+fixture-generation code was removed. tools/hugetest now reads the pinned source
+manifest [HUGE_CORPUS.json](verification/HUGE_CORPUS.json), verifies original-file
+SHA-256/byte lengths, and uses no generated or duplicated document content.
+Downloaded originals and raw evidence remain ignored under output/hugetest-real/.
 
-Each batch launches isolated cold Go child processes, with no warmup. Children
-read the file, parse using default options, check every source page marker and
-image count (PDF physical pages / DOCX explicit breaks), then serialize complete
-buffered output. Parse/write times exclude process startup; batch time includes
-startup and content verification. No output artifact is written to disk. JSONL
-records diagnostics, allocation/GC, sampled heap and aggregate child RSS. The Unix
-`ps` RSS sampler is development tooling only, not a production dependency. A
-120-second hard process deadline and 8 GiB aggregate RSS guard bound each batch;
-each child's Go soft limit is 4 GiB. Sampling can overshoot; this is not a hard OS
-memory sandbox. Failed/killed jobs are not counted as successful throughput.
+The cohort includes the 423 MB / 2,409-page original IPCC WGI report, 5,057-page
+Intel manual, 5,039-page ECMA OOXML reference, two original 3GPP Word specifications,
+and the corresponding 1,624-page ETSI V18.1.0 PDF. Page counts were independently
+read with PyMuPDF 1.28.2, not inferred from file names. DOCX XML paragraph counts
+are independently counted; cached Word page metadata is disclosed and not trusted
+as rendered pagination. Original publisher bytes are not committed/redistributed.
 
-Start at one child and two independent batches, then increase concurrency only
-for cases that fit the desktop. Test SF extraction and selected PDF/DOCX output
-separately. Record actual limits/rejections rather than raising engine limits to
-force success. Generated inputs/results stay ignored under output/. Reproduce:
+Each batch launches isolated cold Go children with no warmup. Children read the
+file, parse using default production options, check the PDF physical page count
+and nonempty recovered content, then serialize complete buffered output with
+AllowLossy=true. All diagnostics and recovered counts are recorded; successful
+execution is not proof of complete semantic/visual fidelity. Parse/write times
+exclude startup; batch time includes startup and checks. Output is materialized
+in memory, not written to disk or io.Discard. Unix ps samples aggregate child RSS
+at 200 ms; runtime heap sampling is 20 ms. These are development-tool dependencies,
+not production requirements. A 120-second hard deadline and 8 GiB sampled RSS
+batch guard bound testing, alongside each child's 4 GiB Go soft memory limit.
+Sampling can overshoot and the soft limit is not an OS memory sandbox. Failures,
+limits and killed jobs never count as successful throughput. Start at one child,
+repeat twice; only attempt higher concurrency within the guarded desktop budget.
 
 ```sh
 CGO_ENABLED=0 GOWORK=off go build -o bin/manifold-hugetest ./tools/hugetest
-bin/manifold-hugetest -cases all -repeat 2 > output/huge-single.jsonl
-bin/manifold-hugetest -cases pdf-text-1000,docx-text-1000,pdf-image-100mb -workers 2 -repeat 2 > output/huge-concurrent.jsonl
+bin/manifold-hugetest -repeat 2 > output/huge-real-single.jsonl
+bin/manifold-hugetest -cases ipcc-ar6-wgi -workers 2 -repeat 2 > output/huge-real-concurrent.jsonl
 ```
+
+Measurements and explicit rejection/timeout boundaries are being collected.

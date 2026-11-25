@@ -10,8 +10,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"regexp"
+
+	"crypto/sha256"
+	"io"
 	"runtime"
 	"runtime/debug"
 	"strconv"
@@ -22,7 +23,16 @@ import (
 	"github.com/artpar/manifold"
 )
 
-var marker = regexp.MustCompile(`PageToken[0-9]{6}`)
+type fixture struct {
+	Name              string `json:"name"`
+	Path              string `json:"path"`
+	SourceURL         string `json:"source_url"`
+	SHA256            string `json:"sha256"`
+	Bytes             int64  `json:"bytes"`
+	Pages             int    `json:"pdf_pages"`
+	SourceParagraphs  int    `json:"source_docx_paragraphs,omitempty"`
+	ProducerPageCount int    `json:"producer_page_count,omitempty"`
+}
 
 func emit(v any) { _ = json.NewEncoder(os.Stdout).Encode(v) }
 func main() {
@@ -32,8 +42,8 @@ func main() {
 	}
 }
 func run() error {
-	selected := flag.String("cases", "pdf-text-1000,docx-text-1000,pdf-image-100mb", "comma separated cases or all")
-	dir := flag.String("dir", "output/hugetest", "generated fixtures and evidence")
+	selected := flag.String("cases", "all", "comma separated manifest case names or all")
+	manifest := flag.String("manifest", "docs/verification/HUGE_CORPUS.json", "original-file manifest with source URLs and hashes")
 	target := flag.String("to", "sf", "output format: sf, pdf, docx")
 	workers := flag.Int("workers", 1, "isolated concurrent conversions per batch")
 	repeat := flag.Int("repeat", 2, "batches per case")
@@ -42,10 +52,10 @@ func run() error {
 	worker := flag.Bool("worker", false, "internal child mode")
 	input := flag.String("input", "", "internal input path")
 	pages := flag.Int("pages", 0, "internal expected markers")
-	images := flag.Int("images", 0, "internal expected images")
+
 	flag.Parse()
 	if *worker {
-		return convert(*input, manifold.Format(*target), *pages, *images)
+		return convert(*input, manifold.Format(*target), *pages)
 	}
 	if *workers < 1 || *repeat < 1 || *timeout <= 0 || *guard < 1 {
 		return fmt.Errorf("invalid batch bounds")
@@ -56,14 +66,22 @@ func run() error {
 	if _, e := exec.LookPath("ps"); e != nil {
 		return fmt.Errorf("RSS guard requires Unix ps: %w", e)
 	}
-	if e := os.MkdirAll(*dir, 0700); e != nil {
+	manifestBytes, e := os.ReadFile(*manifest)
+	if e != nil {
 		return e
+	}
+	var fixtures []fixture
+	if e = json.Unmarshal(manifestBytes, &fixtures); e != nil {
+		return e
+	}
+	if len(fixtures) == 0 {
+		return fmt.Errorf("empty source manifest")
 	}
 	exe, e := os.Executable()
 	if e != nil {
 		return e
 	}
-	emit(map[string]any{"kind": "environment", "go": runtime.Version(), "os": runtime.GOOS, "arch": runtime.GOARCH, "cpus": runtime.NumCPU(), "soft_memory_mib_per_child": 4096, "rss_guard_mib_batch": *guard, "timeout": timeout.String(), "started_utc": time.Now().UTC(), "measurement": "cold process, file read + parse + content checks + buffered output; separate timed parse/write; no warmup; synthetic fixtures"})
+	emit(map[string]any{"kind": "environment", "go": runtime.Version(), "os": runtime.GOOS, "arch": runtime.GOARCH, "cpus": runtime.NumCPU(), "soft_memory_mib_per_child": 4096, "rss_guard_mib_batch": *guard, "timeout": timeout.String(), "started_utc": time.Now().UTC(), "measurement": "cold process, file read + parse + content checks + buffered output; separate timed parse/write; no warmup; unmodified downloaded real documents"})
 	wanted := map[string]bool{}
 	for _, n := range strings.Split(*selected, ",") {
 		wanted[n] = false
@@ -73,12 +91,22 @@ func run() error {
 			continue
 		}
 		wanted[f.Name] = true
-		path := filepath.Join(*dir, f.Name+"."+f.Format)
-		size, hash, e := generate(path, f)
+		path := f.Path
+		source, e := os.Open(path)
 		if e != nil {
 			return e
 		}
-		emit(map[string]any{"kind": "fixture", "name": f.Name, "pages": f.Pages, "lines_per_page": f.Lines, "image_edge": f.ImageEdge, "bytes": size, "sha256": hash, "source": "independent deterministic raw PDF/OOXML generator; visible content, no padding"})
+		h := sha256.New()
+		size, e := io.Copy(h, source)
+		source.Close()
+		if e != nil {
+			return e
+		}
+		hash := fmt.Sprintf("%x", h.Sum(nil))
+		if hash != f.SHA256 || size != f.Bytes {
+			return fmt.Errorf("source integrity mismatch for %s", f.Name)
+		}
+		emit(map[string]any{"kind": "fixture", "name": f.Name, "bytes": size, "sha256": hash, "source_url": f.SourceURL, "pdf_pages": f.Pages, "source_docx_paragraphs": f.SourceParagraphs, "producer_page_count": f.ProducerPageCount})
 		for rep := 1; rep <= *repeat; rep++ {
 			ctx, cancel := context.WithTimeout(context.Background(), *timeout)
 			cmds := make([]*exec.Cmd, *workers)
@@ -87,12 +115,8 @@ func run() error {
 			completed := make(chan int, *workers)
 			var wg sync.WaitGroup
 			start := time.Now()
-			img := 0
-			if f.ImageEdge > 0 {
-				img = f.Pages
-			}
 			for i := range cmds {
-				cmd := exec.CommandContext(ctx, exe, "-worker", "-input", path, "-to", *target, "-pages", strconv.Itoa(f.Pages), "-images", strconv.Itoa(img))
+				cmd := exec.CommandContext(ctx, exe, "-worker", "-input", path, "-to", *target, "-pages", strconv.Itoa(f.Pages))
 				cmd.Stdout = &outs[i]
 				cmd.Stderr = &errs[i]
 				cmds[i] = cmd
@@ -173,7 +197,7 @@ func run() error {
 	}
 	return nil
 }
-func convert(path string, to manifold.Format, pages, images int) error {
+func convert(path string, to manifold.Format, pages int) error {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	debug.SetMemoryLimit(4096 << 20)
 	start := time.Now()
@@ -214,7 +238,7 @@ func convert(path string, to manifold.Format, pages, images int) error {
 		return e
 	}
 	readSeconds := time.Since(beginRead).Seconds()
-	found := map[string]bool{}
+	textBytes, paragraphs := 0, 0
 	pictures, breaks := 0, 0
 	var walk func([]manifold.Block)
 	walk = func(bs []manifold.Block) {
@@ -225,10 +249,11 @@ func convert(path string, to manifold.Format, pages, images int) error {
 			if b.Kind == manifold.PageBreak {
 				breaks++
 			}
+			if b.Kind == manifold.Paragraph || b.Kind == manifold.Heading {
+				paragraphs++
+			}
 			for _, r := range b.Runs {
-				for _, s := range marker.FindAllString(r.Text, -1) {
-					found[s] = true
-				}
+				textBytes += len(r.Text)
 			}
 			for _, row := range b.Rows {
 				for _, c := range row.Cells {
@@ -241,25 +266,18 @@ func convert(path string, to manifold.Format, pages, images int) error {
 		}
 	}
 	walk(d.Blocks)
-	if len(found) != pages || pictures != images {
-		return fmt.Errorf("content mismatch: markers %d/%d images %d/%d", len(found), pages, pictures, images)
-	}
-	for p := 1; p <= pages; p++ {
-		if !found[token(p)] {
-			return fmt.Errorf("missing %s", token(p))
-		}
-	}
 	if format == manifold.PDF && len(d.Pages) != pages {
 		return fmt.Errorf("PDF pages %d/%d", len(d.Pages), pages)
 	}
-	if format == manifold.DOCX && breaks != pages-1 {
-		return fmt.Errorf("DOCX explicit breaks %d/%d", breaks, pages-1)
+	if textBytes == 0 && pictures == 0 {
+		return fmt.Errorf("empty recovered document")
 	}
+
 	codes := map[string]int{}
 	for _, x := range d.Diagnostics {
 		codes[x.Code]++
 	}
-	emit(map[string]any{"stage": "read_complete", "read_seconds": readSeconds, "elapsed_seconds": time.Since(start).Seconds(), "input_bytes": len(data), "markers": len(found), "images": pictures, "explicit_breaks": breaks, "physical_pages": len(d.Pages), "diagnostics": codes})
+	emit(map[string]any{"stage": "read_complete", "read_seconds": readSeconds, "elapsed_seconds": time.Since(start).Seconds(), "input_bytes": len(data), "recovered_text_bytes": textBytes, "recovered_paragraphs": paragraphs, "images": pictures, "explicit_breaks": breaks, "physical_pages": len(d.Pages), "diagnostics": codes})
 	var out bytes.Buffer
 	beginWrite := time.Now()
 	e = manifold.Write(context.Background(), &out, d, to, manifold.WriteOptions{AllowLossy: true})
