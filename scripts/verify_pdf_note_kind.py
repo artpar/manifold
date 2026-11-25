@@ -1,5 +1,6 @@
 """Qualify placement separately from explicit PDF Note ownership (QA only)."""
 import argparse
+from collections import Counter
 import hashlib
 import gzip
 import json
@@ -12,6 +13,7 @@ parser.add_argument('--source', type=Path, default=Path('output/note-inference/t
 parser.add_argument('--sf', type=Path, default=Path('output/note-inference/guide-kind.sf.gz'))
 parser.add_argument('--uninferred', type=Path, default=Path('output/note-inference/guide-kind-uninferred.sf.gz'))
 parser.add_argument('--render-dir', type=Path)
+parser.add_argument('--historical-sf', type=Path)
 args = parser.parse_args()
 assert hashlib.sha256(args.source.read_bytes()).hexdigest() == '8185a30793869379ea4c2d82f214a930368b3fa7520faba61df38c52a502335e'
 
@@ -91,3 +93,36 @@ if args.render_dir:
                  and l.get('page') == 0 and l.get('to').y > page.rect.height*.6]
         assert len(links) >= 2, (path, 'repeated note targets absent')
         print(path, ': same-page footnote placement, bounds, repeated navigation and exact raster pass')
+
+if args.historical_sf:
+    def walk(nodes):
+        for node in nodes:
+            yield node
+            yield from walk(node.get('content', []))
+    def painted_records(document):
+        labels = {n['id']: n['label'] for n in document['attrs'].get('notes', [])}
+        records, synthetic = Counter(), Counter()
+        nodes = list(walk(document['content']))
+        for note in document['attrs'].get('notes', []):
+            nodes.extend(walk(note['content']))
+            source = note.get('label_source')
+            if source and note['label']:
+                records[(source['page'], source['order'], note['label'])] += 1
+        for node in nodes:
+            if node['type'] not in ('text', 'note_reference'):
+                continue
+            text = node.get('text') if node['type'] == 'text' else node['attrs'].get('label', labels[node['attrs']['id']])
+            source = next((m['attrs'] for m in node.get('marks', []) if m['type'] == 'source'), None)
+            if source and text:
+                key = (source['page'], source['order'], text)
+                records[key] += 1
+                if source.get('precision') == 'synthetic_separator' and source.get('evidence') == 'tagged_paragraph_word_gap':
+                    synthetic[key] += 1
+        return records, synthetic
+    old, synthetic = painted_records(load(args.historical_sf))
+    now, _ = painted_records(current)
+    omitted = old - now
+    assert not (now - old), 'unexpected new historical text records'
+    assert sum(omitted.values()) == 56
+    assert not (omitted - synthetic), 'a painted record was lost'
+    print('Historical comparison: all 56 omitted records are inferred synthetic word gaps; no painted text record omitted')

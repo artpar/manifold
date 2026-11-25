@@ -39,16 +39,21 @@ separator/label/page geometry. Both now recover as inferred Footnote.
 
 The new verifier compares complete current SF with current PDFSkipInference SF:
 only kind values and the placement diagnostic text may differ. It does not weaken
-the old guide-styled paint comparison. That much older artifact differs from
-current recovery in additional paint records; its strict historical comparison
-still fails and is not claimed as a regression baseline for this milestone.
+the old guide-styled paint comparison. The older artifact differs by exactly56 tagged_paragraph_word_gap records with
+synthetic_separator precision. Literal list-marker recovery now separates label
+and body ownership. The strict historical comparison still fails; the additional
+inventory oracle proves every omitted record is synthesized spacing, every
+original painted record remains and no new painted record appears. This is an
+explained historical semantic difference, not a waived painted-content loss.
 
 ## Reproduction and scope
 
 ```sh
 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+MANYDOC_PDF_NOTE_KIND_QA=output/pdf-note-kind GOWORK=off go test -run TestPDFTaggedNotePlacementKind -count=1 .
 bin/manydoc extract -format sf.gz -o output/note-inference/guide-kind.sf.gz output/note-inference/tagged-guide.pdf
 bin/manydoc extract -pdf-skip-inference -format sf.gz -o output/note-inference/guide-kind-uninferred.sf.gz output/note-inference/tagged-guide.pdf
+output/qa-venv/bin/python scripts/verify_pdf_note_kind.py --render-dir output/pdf-note-kind --historical-sf output/note-inference/guide-styled.sf.gz
 output/qa-venv/bin/python scripts/verify_note_inference.py --guide output/note-inference/tagged-guide.pdf --guide-sf output/note-inference/guide-kind.sf.gz
 output/qa-venv/bin/python scripts/verify_pdf_note_kind.py
 GOWORK=off go test -run 'TestPDFTaggedNotePlacementKind|TestPDFParentTree' -count=1 .
@@ -57,9 +62,18 @@ GOWORK=off go test -run 'TestPDFTaggedNotePlacementKind|TestPDFParentTree' -coun
 Raw authored rich-note sources check inferred, explicit and skipped placement;
 missing/short/misaligned separators; all rich body blocks, both references,
 physical glyph inventories, complete SF/gzip/JSON, DOCX kind persistence and
-native PDF NoteType. ParentTree tests cover direct children and unchanged
+native PDF NoteType. Native and actual LibreOffice-rendered DOCX each keep the
+rich footnote on one page, with two working citations and exact2x1 raster pixels;
+both pages were visually inspected. ParentTree tests cover direct children and unchanged
 contradictory/malformed ownership. Exact check scopes/results are in
 verification.json. This resolves one original-source compatibility/reflow issue;
 it does not establish general geometric note recognition or finish the original
 acceptance audit. Earlier parser allocation boundaries and native browser reader
 discrepancies remain documented separately.
+
+Current-code regression checks also regenerate all four paths for eight original
+Word/Mac Word/LibreOffice exports, then pass verify_poi_corpus.py against unchanged
+source oracles and existing independent producer renders (33pages). The sectioned
+rich example and independent section verifier pass. Actual ProseMirror validates
+all51 accepted synthetic corpus files/9,034nodes and marks. These scopes are
+separate from the newly inspected two one-page placement outputs.

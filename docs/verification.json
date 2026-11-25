@@ -8208,7 +8208,13 @@
       "builds": "CGO-disabled host CLI built/executed and Linux amd64/arm64 cross-builds passed; Linux not executed",
       "independent": "original label/body/MCID/view source checks pass; complete current SF equality after only declared kind/diagnostic normalization; both native and LibreOffice same-page footnote placement/bounds/repeated targets/exact red-blue raster pass",
       "prosemirror": "51 accepted corpus files,9034 nodes and marks/attributes pass",
-      "visual": "native.pdf and actual LibreOffice DOCX render, one page each, inspected; source layout identity not claimed"
+      "visual": "Native and actual LibreOffice one-page generated-DOCX render inspected; same-page footnote, two repeated navigation targets, text bounds and exact2x1 red/blue raster pass; output/pdf-note-kind-placement-final.log",
+      "focused_current_race": "passed6.020s including native placement test; output/pdf-note-kind-current-race.log",
+      "historical_paint": "exact56 old-only tagged_paragraph_word_gap/synthetic_separator spaces; no painted record removed, no new record; strict old projection remains failing as historical structural difference",
+      "parent_tree_fuzz": "10000executions/two workers/9.025s, including direct-child seed, passed; output/pdf-note-kind-fuzz.log",
+      "original_exports": "Current CLI regenerated allfour paths for eight actual exports; verify_poi_corpus.py passes original semantics/notes/stories/nav/geometry and33 producer/native pages; output/pdf-note-kind-corpus-paths.log and output/pdf-note-kind-corpus-readers.log",
+      "sections": "Current rich section example and independent verifier pass; output/pdf-note-kind-sections.log",
+      "actual_prosemirror": "51accepted corpus files/9034nodes and marks; output/pdf-note-kind-prosemirror.log"
     },
     "raw_logs": [
       "output/pdf-note-kind-tests.log",

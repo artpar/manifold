@@ -37,7 +37,12 @@ dictionaries now diagnose conformance while retaining ownership/shape/bounds
 checks. Rich source tests, SF/gzip/JSON/DOCX/native PDF, original label/body/view
 checks and complete current-SF comparison pass. Native and LibreOffice one-page
 outputs pass independent placement/link/raster checks and visual inspection.
-ProseMirror validates all51 accepted corpus files/9,034 nodes and marks.
+ProseMirror validates all51 accepted corpus files/9,034 nodes and marks. Fresh
+all-four-path runs over eight original exports pass their unchanged source/reader
+checks (33 producer/native pages); the rich section example passes. The old guide
+difference is exactly56 synthesized label/body gaps, with all paint retained.
+ParentTree fuzz passes10,000executions/two workers/9.025s. Current focused race
+passes6.020s including native placement.
 Normal tests97.951s/CLIcached pass on final production; later test-only additions
 pass focused tests1.545s and CGO-disabled focus1.555s. Vet/modules and host/Linux
 CGO-disabled builds pass. The full race run is pending; its exact scope/result

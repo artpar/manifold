@@ -138,7 +138,7 @@ func TestPDFParentTreeResourceBounds(t *testing.T) {
 }
 
 func FuzzPDFParentTree(f *testing.F) {
-	for _, tree := range []string{"<< /Nums [0 [8 0 R 9 0 R]] >>", "<< /Nums [0 [9 0 R 8 0 R]] >>", "<< /Kids [10 0 R] >>", "<< /Nums [0 [8 0 R null]] >>"} {
+	for _, tree := range []string{"<< /Kids [<< /Nums [0 [8 0 R 9 0 R]] >>] >>", "<< /Nums [0 [8 0 R 9 0 R]] >>", "<< /Nums [0 [9 0 R 8 0 R]] >>", "<< /Kids [10 0 R] >>", "<< /Nums [0 [8 0 R null]] >>"} {
 		f.Add(tree)
 	}
 	f.Fuzz(func(t *testing.T, tree string) {
