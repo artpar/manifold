@@ -50,7 +50,7 @@ summary = {
     "generated_output": json.loads((out / "independent-verification.json").read_text()),
     "fuzz_campaigns": fuzz,
     "limits": ["Short fuzz campaigns are not exhaustive", "Mostly synthetic corpus",
-               "Word/LibreOffice visual acceptance not completed", "No Daptin or Colleaf adapter integration tested"],
+               "Word/LibreOffice visual acceptance not completed", "No host application integration tested"],
     "raw_logs": "output/ (ignored, regenerable; see docs/TESTING.md)",
 }
 (root / "output/legacy-verification-reproduction.json").write_text(json.dumps(summary, indent=2) + "\n")

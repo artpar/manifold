@@ -15,11 +15,11 @@ body = "\n".join(p.text for p in doc.paragraphs)
 for marker in ["Quarterly report", "formatted text", "Unicode text: café Ελληνικά Привет", "Second page"]:
     assert marker in body, ("DOCX missing", marker)
 assert len(doc.tables) == 1
-assert doc.tables[0].cell(1, 0).text == "Colleaf"
+assert doc.tables[0].cell(1, 0).text == "Manifold"
 assert doc.tables[0].cell(1, 1).text == "42"
 assert len(doc.inline_shapes) == 1
 assert "Example organization" in doc.sections[0].header.paragraphs[0].text
-assert "Prepared with manydoc" in doc.sections[0].footer.paragraphs[0].text
+assert "Prepared with Manifold" in doc.sections[0].footer.paragraphs[0].text
 assert any(r.bold for p in doc.paragraphs for r in p.runs)
 assert any(len(p.hyperlinks) for p in doc.paragraphs)
 assert doc.core_properties.title == "Quarterly report"
@@ -27,7 +27,7 @@ assert doc.core_properties.title == "Quarterly report"
 pdf = PdfReader(root / "report.pdf")
 assert len(pdf.pages) == 2
 text = subprocess.check_output(["pdftotext", str(root / "report.pdf"), "-"], text=True)
-for marker in ["Quarterly report", "formatted text", "links", "Ελληνικά", "Привет", "Colleaf", "42", "Second page", "Prepared with manydoc"]:
+for marker in ["Quarterly report", "formatted text", "links", "Ελληνικά", "Привет", "Manifold", "42", "Second page", "Prepared with Manifold"]:
     assert marker in text, ("PDF missing", marker)
 assert text.count("Example organization") == 2
 result = {"docx_independent_reader": "passed", "pdf_poppler_text": "passed", "pdf_pages": len(pdf.pages),

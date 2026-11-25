@@ -31,12 +31,12 @@ func main() {
 	if e := png.Encode(&pic, im); e != nil {
 		log.Fatal(e)
 	}
-	d := &manifold.Document{Metadata: manifold.Metadata{Title: "Quarterly report", Author: "manydoc example"}, Headers: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Example organization"}}}}, Footers: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Prepared with manydoc"}}}}, Blocks: []manifold.Block{
+	d := &manifold.Document{Metadata: manifold.Metadata{Title: "Quarterly report", Author: "manydoc example"}, Headers: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Example organization"}}}}, Footers: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Prepared with Manifold"}}}}, Blocks: []manifold.Block{
 		{Kind: manifold.Heading, Level: 1, Runs: []manifold.Run{{Text: "Quarterly report"}}},
 		{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "This report demonstrates "}, {Text: "formatted text", Bold: true}, {Text: ", "}, {Text: "links", Link: "https://example.com"}, {Text: ", tables, images, and explicit page breaks."}}},
 		{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Unicode text: café Ελληνικά Привет"}}},
 		{Kind: manifold.Picture, Image: &manifold.Image{Data: pic.Bytes(), MediaType: "image/png", Width: 240, Height: 45, Alt: "Blue gradient banner"}},
-		{Kind: manifold.Table, Rows: []manifold.Row{{Cells: []manifold.Cell{{Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Product", Bold: true}}}}}, {Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Quantity", Bold: true}}}}}}}, {Cells: []manifold.Cell{{Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Colleaf"}}}}}, {Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "42"}}}}}}}}},
+		{Kind: manifold.Table, Rows: []manifold.Row{{Cells: []manifold.Cell{{Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Product", Bold: true}}}}}, {Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Quantity", Bold: true}}}}}}}, {Cells: []manifold.Cell{{Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Manifold"}}}}}, {Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "42"}}}}}}}}},
 		{Kind: manifold.Paragraph, List: "bullet", Runs: []manifold.Run{{Text: "One shared model for DOCX and PDF output."}}},
 		{Kind: manifold.PageBreak}, {Kind: manifold.Heading, Level: 2, Runs: []manifold.Run{{Text: "Second page"}}},
 		{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "End of the example report."}}},

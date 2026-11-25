@@ -13,8 +13,8 @@ from pypdf import PdfReader
 from pypdf.generic import ContentStream, IndirectObject
 
 parser = argparse.ArgumentParser()
-parser.add_argument("pdf", nargs="?", default="output/colleaf-tagged/document.pdf")
-parser.add_argument("--baseline", default="output/colleaf-baseline-1d13/document.pdf")
+parser.add_argument("pdf", nargs="?", default="output/vdocs-tagged/document.pdf")
+parser.add_argument("--baseline", default="output/vdocs-baseline-1d13/document.pdf")
 parser.add_argument("--source-sf", default="examples/notes/document.sf")
 args = parser.parse_args()
 source = json.loads(Path(args.source_sf).read_text())
