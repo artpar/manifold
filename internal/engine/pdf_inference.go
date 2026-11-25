@@ -173,14 +173,24 @@ func pdfBodySize(boxes []pdfLayoutBox) float64 {
 // recursive X-Y cut idea. Wide vertical gutters precede horizontal bands, so
 // a full-width title can be separated before columns underneath are ordered.
 func (r *pdfReader) layoutOrder(boxes []pdfLayoutBox, em float64, column string, depth int) []pdfLayoutBox {
-	if r.ctx.Err() != nil {
-		return boxes
+	ids := make([]int, len(boxes))
+	for i := range ids {
+		ids[i] = i
 	}
-	if len(boxes) < 2 {
-		for i := range boxes {
-			boxes[i].column = column
+	ids = r.layoutOrderIndices(boxes, ids, em, column, depth)
+	permutePDFLayoutBoxes(boxes, ids)
+	return boxes
+}
+
+func (r *pdfReader) layoutOrderIndices(boxes []pdfLayoutBox, ids []int, em float64, column string, depth int) []int {
+	if r.ctx.Err() != nil {
+		return ids
+	}
+	if len(ids) < 2 {
+		for _, id := range ids {
+			boxes[id].column = column
 		}
-		return boxes
+		return ids
 	}
 	if depth >= 64 {
 		r.warn("pdf_inference_uncertain", "Geometric subdivision reached its depth limit; remaining content uses top-to-bottom order")
@@ -189,24 +199,26 @@ func (r *pdfReader) layoutOrder(boxes []pdfLayoutBox, em float64, column string,
 		// Peel isolated wide edge bands before looking for a persistent gutter.
 		// Otherwise a title/footer masks the column whitespace, and selecting a
 		// larger gap halfway through the body interleaves the two columns.
-		left, right, top, bottom := boxes[0].x0, boxes[0].x1, 0, 0
-		for i, b := range boxes {
+		left, right, top, bottom := boxes[ids[0]].x0, boxes[ids[0]].x1, 0, 0
+		for i, id := range ids {
+			b := boxes[id]
 			left = min(left, b.x0)
 			right = max(right, b.x1)
-			if b.y0 < boxes[top].y0 {
+			if b.y0 < boxes[ids[top]].y0 {
 				top = i
 			}
-			if b.y1 > boxes[bottom].y1 {
+			if b.y1 > boxes[ids[bottom]].y1 {
 				bottom = i
 			}
 		}
 		for _, edge := range []int{top, bottom} {
-			b := boxes[edge]
+			b := boxes[ids[edge]]
 			if b.x1-b.x0 < (right-left)*.65 {
 				continue
 			}
 			separate := true
-			for i, other := range boxes {
+			for i, id := range ids {
+				other := boxes[id]
 				if i != edge && ((edge == top && other.y0-b.y1 <= max(.5, em*.12)) || (edge != top && b.y0-other.y1 <= max(.5, em*.12))) {
 					separate = false
 					break
@@ -215,46 +227,62 @@ func (r *pdfReader) layoutOrder(boxes []pdfLayoutBox, em float64, column string,
 			if !separate {
 				continue
 			}
-			rest := append(append([]pdfLayoutBox{}, boxes[:edge]...), boxes[edge+1:]...)
-			b.column = column
+			rest := append(append([]int{}, ids[:edge]...), ids[edge+1:]...)
+			boxes[ids[edge]].column = column
 			if edge == top {
-				return append([]pdfLayoutBox{b}, r.layoutOrder(rest, em, column, depth+1)...)
+				return append([]int{ids[edge]}, r.layoutOrderIndices(boxes, rest, em, column, depth+1)...)
 			}
-			return append(r.layoutOrder(rest, em, column, depth+1), b)
+			return append(r.layoutOrderIndices(boxes, rest, em, column, depth+1), ids[edge])
 		}
-		xs := append([]pdfLayoutBox(nil), boxes...)
-		sortPDFLayoutBoxes(xs, func(i, j int) bool { return xs[i].x0 < xs[j].x0 })
-		right = xs[0].x1
+		xs := append([]int(nil), ids...)
+		sort.SliceStable(xs, func(i, j int) bool { return boxes[xs[i]].x0 < boxes[xs[j]].x0 })
+		right = boxes[xs[0]].x1
 		for i := 1; i < len(xs); i++ {
-			if xs[i].x0-right >= max(2*em, 12) && pdfColumnExtent(xs[:i], em) && pdfColumnExtent(xs[i:], em) {
-				return append(r.layoutOrder(xs[:i], em, column+"L", depth+1), r.layoutOrder(xs[i:], em, column+"R", depth+1)...)
+			if boxes[xs[i]].x0-right >= max(2*em, 12) && pdfColumnIndexExtent(boxes, xs[:i], em) && pdfColumnIndexExtent(boxes, xs[i:], em) {
+				return append(r.layoutOrderIndices(boxes, xs[:i], em, column+"L", depth+1), r.layoutOrderIndices(boxes, xs[i:], em, column+"R", depth+1)...)
 			}
-			right = max(right, xs[i].x1)
+			right = max(right, boxes[xs[i]].x1)
 		}
-		ys := append([]pdfLayoutBox(nil), boxes...)
-		sortPDFLayoutBoxes(ys, func(i, j int) bool { return ys[i].y0 < ys[j].y0 })
-		yBottom, cut := ys[0].y1, 0
+		ys := append([]int(nil), ids...)
+		sort.SliceStable(ys, func(i, j int) bool { return boxes[ys[i]].y0 < boxes[ys[j]].y0 })
+		yBottom, cut := boxes[ys[0]].y1, 0
 		for i := 1; i < len(ys); i++ {
-			if ys[i].y0-yBottom > max(.5, em*.12) {
+			if boxes[ys[i]].y0-yBottom > max(.5, em*.12) {
 				cut = i
 				break
 			}
-			yBottom = max(yBottom, ys[i].y1)
+			yBottom = max(yBottom, boxes[ys[i]].y1)
 		}
 		if cut > 0 {
-			return append(r.layoutOrder(ys[:cut], em, column, depth+1), r.layoutOrder(ys[cut:], em, column, depth+1)...)
+			return append(r.layoutOrderIndices(boxes, ys[:cut], em, column, depth+1), r.layoutOrderIndices(boxes, ys[cut:], em, column, depth+1)...)
 		}
 	}
-	for i := range boxes {
-		boxes[i].column = column
+	for _, id := range ids {
+		boxes[id].column = column
 	}
-	sortPDFLayoutBoxes(boxes, func(i, j int) bool {
+	sort.SliceStable(ids, func(i, j int) bool {
+		i, j = ids[i], ids[j]
 		if math.Round(boxes[i].base*1000) == math.Round(boxes[j].base*1000) {
 			return boxes[i].x0 < boxes[j].x0
 		}
 		return boxes[i].base < boxes[j].base
 	})
-	return boxes
+	return ids
+}
+
+func pdfColumnIndexExtent(boxes []pdfLayoutBox, ids []int, em float64) bool {
+	if len(ids) < 2 {
+		return false
+	}
+	x0, y0, x1, y1 := boxes[ids[0]].x0, boxes[ids[0]].y0, boxes[ids[0]].x1, boxes[ids[0]].y1
+	for _, id := range ids {
+		b := boxes[id]
+		x0 = min(x0, b.x0)
+		y0 = min(y0, b.y0)
+		x1 = max(x1, b.x1)
+		y1 = max(y1, b.y1)
+	}
+	return x1-x0 >= 4*em && y1-y0 >= 1.5*em
 }
 
 func pdfColumnExtent(boxes []pdfLayoutBox, em float64) bool {
@@ -316,11 +344,26 @@ func sortPDFLayoutBoxes(boxes []pdfLayoutBox, less func(int, int) bool) {
 		ids[i] = i
 	}
 	sort.SliceStable(ids, func(i, j int) bool { return less(ids[i], ids[j]) })
-	ordered := make([]pdfLayoutBox, len(boxes))
-	for i, id := range ids {
-		ordered[i] = boxes[id]
+	permutePDFLayoutBoxes(boxes, ids)
+}
+
+// Apply new-position -> old-position cycles with one wide temporary record.
+func permutePDFLayoutBoxes(boxes []pdfLayoutBox, ids []int) {
+	for i := range ids {
+		if ids[i] < 0 {
+			continue
+		}
+		saved := boxes[i]
+		current := i
+		for ids[current] != i {
+			next := ids[current]
+			boxes[current] = boxes[next]
+			ids[current] = -1
+			current = next
+		}
+		boxes[current] = saved
+		ids[current] = -1
 	}
-	copy(boxes, ordered)
 }
 
 func joinPDFLayoutRuns(a, b []Run) []Run {

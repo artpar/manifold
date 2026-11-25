@@ -125,3 +125,7 @@ with the former implementation maps and qualification ledger.
   contractual. All 12 diagnostic outputs retain qualified hashes; codec changes
   are next work, not an optimization already delivered. See HUGE_PPROF.md and its
   curated results, with captured profiles kept outside version control.
+
+- Performance change 1: preserve the frozen layout algorithm's decisions while
+  moving recursive work to integer indices; validate stable ties/column labels
+  against the previous implementation and pinned original SF hashes.

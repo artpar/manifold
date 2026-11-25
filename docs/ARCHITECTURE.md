@@ -158,3 +158,8 @@ explicit caller-side buffer with `-profile-output-buffer`. Zero leaves normal
 output buffering in place. The hash still covers all SF bytes, and flushing is
 included in the write phase with errors propagated. This is a diagnostic A/B knob,
 not a codec default change. Child records also expose OS user/system CPU totals.
+
+Performance change 1: recursive layout ordering partitions integer indices into
+one page-owned box array; a final cycle permutation moves each wide box once.
+Stable sorts elsewhere also apply index cycles rather than allocating a second
+wide box array. Geometric decisions, stable ties and column labels remain intact.
