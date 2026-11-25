@@ -64,9 +64,8 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 		return err
 	}
 
-	if copySD.Dict["Mask"] != nil {
-		return fmt.Errorf("%w: PDF explicit/color-key image masks", ErrUnsupported)
-	}
+	explicit := copySD.Dict["Mask"]
+	delete(copySD.Dict, "Mask")
 	soft := copySD.Dict["SMask"]
 	delete(copySD.Dict, "SMask")
 	var pixels image.Image
@@ -84,6 +83,9 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 		if cs == types.Name("DeviceGray") {
 			components = 1
 		}
+		if cs == types.Name("DeviceCMYK") {
+			components = 4
+		}
 		if components == 0 || len(a) != 2*components {
 			return fmt.Errorf("%w: DCT Decode for this color space", ErrUnsupported)
 		}
@@ -93,6 +95,11 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 				return fmt.Errorf("invalid image Decode")
 			}
 			dctDecode = append(dctDecode, n)
+		}
+		// pdfcpu's DCT CMYK decoder applies Decode in CMYK component space,
+		// before RGB conversion (including Adobe JPEG sample inversion).
+		if components == 4 {
+			dctDecode = nil
 		}
 	}
 	if cs, ok := copySD.Dict["ColorSpace"].(types.Array); ok && len(cs) > 0 && (cs[0] == types.Name("ICCBased") || cs[0] == types.Name("Separation") || cs[0] == types.Name("DeviceN")) {
@@ -200,6 +207,12 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 		}
 		pixels = dst
 	}
+	if explicit != nil && soft == nil {
+		pixels, err = r.applyPDFExplicitMask(pixels, explicit, &copySD, w, h)
+		if err != nil {
+			return err
+		}
+	}
 	if soft != nil {
 		mask, _, e := r.pdf.DereferenceStreamDict(soft)
 		if e != nil {
@@ -212,9 +225,9 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 		if e != nil {
 			return e
 		}
-		// Matte needs unpremultiplication in the original color space, not a guessed RGB correction.
-		if mask.Dict["Matte"] != nil {
-			return fmt.Errorf("%w: PDF soft-mask Matte", ErrUnsupported)
+		matte, e := r.pdfImageMatte(mask, &copySD, w, h, mw, mh)
+		if e != nil {
+			return e
 		}
 		if cs := mask.NameEntry("ColorSpace"); cs == nil || *cs != "DeviceGray" {
 			return fmt.Errorf("invalid soft-mask color space")
@@ -277,6 +290,9 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 				for x := 0; x < w; x++ {
 					c := color.NRGBA64Model.Convert(pixels.At(x, y)).(color.NRGBA64)
 					a := color.Gray16Model.Convert(alpha.At(x*mw/w, y*mh/h)).(color.Gray16).Y
+					if len(matte) > 0 {
+						c = unblendPDFMatte(c, a, matte)
+					}
 					c.A = uint16(uint32(c.A) * uint32(a) / 65535)
 					dst.SetNRGBA64(x, y, c)
 				}
@@ -289,6 +305,11 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 				for x := 0; x < w; x++ {
 					a := color.GrayModel.Convert(alpha.At(x*mw/w, y*mh/h)).(color.Gray).Y
 					offset := dst.PixOffset(x, y)
+					if len(matte) > 0 {
+						c := dst.NRGBAAt(x, y)
+						c16 := unblendPDFMatte(color.NRGBA64{R: uint16(c.R) * 257, G: uint16(c.G) * 257, B: uint16(c.B) * 257, A: uint16(c.A) * 257}, uint16(a)*257, matte)
+						dst.Pix[offset], dst.Pix[offset+1], dst.Pix[offset+2] = uint8(c16.R>>8), uint8(c16.G>>8), uint8(c16.B>>8)
+					}
 					dst.Pix[offset+3] = uint8(uint16(dst.Pix[offset+3]) * uint16(a) / 255)
 				}
 			}

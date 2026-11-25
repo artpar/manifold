@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"github.com/benoitkugler/textlayout/fonts/glyphsnames"
 	"github.com/benoitkugler/textlayout/fonts/simpleencodings"
-	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 	"io"
@@ -520,18 +519,10 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 			err = fmt.Errorf("malformed PDF: %v", p)
 		}
 	}()
-	b, err := readContext(ctx, src)
+
+	p, err := readPDFSource(ctx, src, opts.Password)
 	if err != nil {
 		return nil, err
-	}
-	b, err = adaptDirectPDFEncryption(ctx, b)
-	if err != nil {
-		return nil, err
-	}
-	conf := &model.Configuration{Reader15: true, ValidationMode: model.ValidationRelaxed, UserPW: opts.Password, OwnerPW: opts.Password, Offline: true}
-	p, err := pdfcpu.ReadWithContext(ctx, bytes.NewReader(b), conf)
-	if err != nil {
-		return nil, fmt.Errorf("PDF read: %w", err)
 	}
 
 	p.XRefTable.ValidationMode = model.ValidationStrict
@@ -669,7 +660,9 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 	if e := r.recoverPDFNavigation(catalog); e != nil {
 		return nil, fmt.Errorf("PDF navigation: %w", e)
 	}
-	r.geometricLinks()
+	if e := r.geometricLinks(); e != nil {
+		return nil, e
+	}
 	if (catalog["StructTreeRoot"] == nil || opts.PDFSkipStructure) && !opts.PDFSkipInference {
 		if e := r.inferStructure(); e != nil {
 			return nil, fmt.Errorf("PDF inferred structure: %w", e)
@@ -806,6 +799,10 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 	text := ""
 	actual := r.actualFrame()
 	decoded, decodeErr := s.font.decode(b)
+	if s.font.fallbackUsed {
+		r.warnPage("pdf_cmap_encoding_fallback", "A partial simple-font ToUnicode map is completed using explicit source Encoding glyph names")
+		s.font.fallbackUsed = false
+	}
 	if actual == nil {
 		if decodeErr != nil {
 			return decodeErr
@@ -1335,6 +1332,8 @@ func (r *pdfReader) form(o types.Object, parent types.Dict, depth int, state pdf
 
 type pdfFont struct {
 	mapping                                                        *unicodeMap
+	explicitEncoding                                               map[byte]string
+	fallbackUsed                                                   bool
 	encoding                                                       simpleencodings.Encoding
 	unicode                                                        bool
 	bold, italic                                                   bool
@@ -1348,7 +1347,27 @@ type pdfFont struct {
 
 func (f *pdfFont) decode(b []byte) (string, error) {
 	if f.mapping != nil {
-		return f.mapping.decode(b)
+		text, err := f.mapping.decode(b)
+		if err == nil || f.composite || len(f.explicitEncoding) == 0 {
+			return text, err
+		}
+		var out strings.Builder
+		for _, code := range b {
+			part, e := f.mapping.decode([]byte{code})
+			if e != nil {
+				if !strings.HasPrefix(e.Error(), "unmapped ToUnicode code ") {
+					return "", e
+				}
+				var ok bool
+				part, ok = f.explicitEncoding[code]
+				if !ok {
+					return "", e
+				}
+				f.fallbackUsed = true
+			}
+			out.WriteString(part)
+		}
+		return out.String(), nil
 	}
 	if f.unicode {
 		return utf16Text(b)
@@ -1441,6 +1460,11 @@ func (r *pdfReader) font(resources types.Dict, name string) (*pdfFont, error) {
 		}
 		if err := r.normalizeSimpleCMap(f); err != nil {
 			return nil, err
+		}
+		if !f.composite {
+			if err := r.completeSimpleFontEncoding(f, d); err != nil {
+				return nil, err
+			}
 		}
 		r.fonts[key] = f
 		return f, nil

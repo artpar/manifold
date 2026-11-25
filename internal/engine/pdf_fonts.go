@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"github.com/benoitkugler/textlayout/fonts/glyphsnames"
 	"github.com/benoitkugler/textlayout/fonts/simpleencodings"
 	gtfont "github.com/go-text/typesetting/font"
 	"github.com/go-text/typesetting/harfbuzz"
@@ -1152,4 +1153,71 @@ func (r *pdfRenderer) finishGlyphFonts(input []byte) (output []byte, err error) 
 		return nil, err
 	}
 	return b.Bytes(), nil
+}
+
+// Complete only gaps in a simple font's ToUnicode map from explicit source
+// encoding names. Never interpret a CID or an undeclared glyph as ASCII.
+func (r *pdfReader) completeSimpleFontEncoding(f *pdfFont, d types.Dict) error {
+	obj, err := r.pdf.Dereference(d["Encoding"])
+	if err != nil {
+		return err
+	}
+	enc := simpleencodings.Encoding{}
+	explicit := false
+	choose := func(name string) {
+		switch name {
+		case "WinAnsiEncoding":
+			enc = simpleencodings.WinAnsi
+			explicit = true
+		case "MacRomanEncoding":
+			enc = simpleencodings.MacRoman
+			explicit = true
+		case "MacExpertEncoding":
+			enc = simpleencodings.MacExpert
+			explicit = true
+		case "StandardEncoding":
+			enc = simpleencodings.AdobeStandard
+			explicit = true
+		}
+	}
+	switch e := obj.(type) {
+	case types.Name:
+		choose(string(e))
+	case types.Dict:
+		if name := e.NameEntry("BaseEncoding"); name != nil {
+			choose(*name)
+		}
+		ds, err := r.pdf.DereferenceArray(e["Differences"])
+		if err != nil {
+			return err
+		}
+		code := 0
+		for _, o := range ds {
+			switch v := o.(type) {
+			case types.Integer:
+				code = int(v)
+			case types.Name:
+				if code < 0 || code > 255 {
+					return fmt.Errorf("font difference outside byte range")
+				}
+				enc[code] = string(v)
+				code++
+				explicit = true
+			default:
+				return fmt.Errorf("invalid font difference")
+			}
+		}
+	}
+	if !explicit {
+		return nil
+	}
+	f.explicitEncoding = map[byte]string{}
+	for code, name := range enc {
+		if name != "" {
+			if ch, ok := glyphsnames.GlyphToRune(name); ok {
+				f.explicitEncoding[byte(code)] = string(ch)
+			}
+		}
+	}
+	return nil
 }

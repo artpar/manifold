@@ -454,9 +454,6 @@ func (r *pdfReader) deviceImage(sd *types.StreamDict, w, h int) (image.Image, bo
 	case "DeviceRGB":
 		channels = 3
 	case "DeviceCMYK":
-		if bits == 8 {
-			return nil, false, nil
-		}
 		channels = 4
 		r.warnPage("pdf_image_color", "Device CMYK samples are converted to RGB; original device-color semantics are not retained")
 	default:

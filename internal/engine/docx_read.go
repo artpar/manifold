@@ -1210,7 +1210,21 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 			r.doc.warn("comments", "Comment annotations are not represented")
 			return nil
 		case "sym":
-			return fmt.Errorf("%w: DOCX symbol-font glyph requires an explicit font-to-Unicode mapping", ErrUnsupported)
+			text, err := docxSymbolUnicode(c.attr("font"), c.attr("char"))
+			if err != nil {
+				return err
+			}
+			style.Text = text
+			for i := range style.fonts {
+				style.fonts[i] = docxFontChoice{family: c.attr("font"), set: true}
+			}
+			parts, err := r.textRuns(style)
+			if err != nil {
+				return err
+			}
+			b.Runs = append(b.Runs, parts...)
+			r.doc.warn("symbol_font_unicode", "Legacy Symbol/ZapfDingbats glyph codes are normalized to explicit Unicode text with the declared font family")
+			return nil
 		case "noBreakHyphen":
 			style.Text = "\u2011"
 			parts, err := r.textRuns(style)

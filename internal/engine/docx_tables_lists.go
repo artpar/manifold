@@ -1121,11 +1121,20 @@ func (r *docxReader) table(n *xmlNode, rels map[string]docxRelation, depth int) 
 		if err := r.ctx.Err(); err != nil {
 			return Block{}, err
 		}
-		for _, name := range []string{"gridBefore", "gridAfter"} {
-			if prop := row.child("trPr").child(name); prop != nil && prop.attr("val") != "0" {
-				return Block{}, fmt.Errorf("%w: DOCX skipped table grid cells (%s)", ErrUnsupported, name)
+		skipped := [2]int{}
+		for i, name := range []string{"gridBefore", "gridAfter"} {
+			if prop := row.child("trPr").child(name); prop != nil {
+				value, err := strconv.Atoi(prop.attr("val"))
+				if err != nil || value < 0 || value > 1000 {
+					return Block{}, fmt.Errorf("invalid DOCX %s", name)
+				}
+				skipped[i] = value
 			}
 		}
+		if skipped[0] > 0 || skipped[1] > 0 {
+			r.doc.warn("table_grid_gaps", "Skipped Word table grid columns are retained as explicit empty cells; original open table-edge geometry is normalized")
+		}
+
 		ri := len(b.Rows)
 		repeat, err := docxTableHeader(row.child("trPr"))
 		if err != nil {
@@ -1137,7 +1146,10 @@ func (r *docxReader) table(n *xmlNode, rels map[string]docxRelation, depth int) 
 		}
 		b.Rows = append(b.Rows, Row{RepeatHeader: repeat})
 		next := map[int]origin{}
-		column := 0
+		column := skipped[0]
+		if skipped[0] > 0 {
+			b.Rows[ri].Cells = append(b.Rows[ri].Cells, Cell{ColSpan: skipped[0], Blocks: []Block{{Kind: Paragraph}}})
+		}
 		for _, cell := range row.Children {
 			if cell.Name.Local != "tc" {
 				continue
@@ -1191,6 +1203,9 @@ func (r *docxReader) table(n *xmlNode, rels map[string]docxRelation, depth int) 
 				b.Rows[ri].Cells = append(b.Rows[ri].Cells, c)
 			}
 			column += width
+		}
+		if skipped[1] > 0 {
+			b.Rows[ri].Cells = append(b.Rows[ri].Cells, Cell{ColSpan: skipped[1], Blocks: []Block{{Kind: Paragraph}}})
 		}
 		active = next
 	}

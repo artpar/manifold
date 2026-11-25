@@ -357,8 +357,19 @@ func (r *pdfReader) readLink(object types.Object, d types.Dict) error {
 	return nil
 }
 
-func (r *pdfReader) geometricLinks() {
+func (r *pdfReader) geometricLinks() error {
+	// Compare a span only with annotations on its physical page. Scanning every
+	// link in the document for every span is quadratic in multi-thousand-page PDFs.
+	byPage := map[int][]pdfRecoveredLink{}
+	for key, link := range r.links {
+		if !link.target.empty() {
+			byPage[key.page] = append(byPage[key.page], link)
+		}
+	}
 	for bi := range r.doc.Blocks {
+		if err := r.ctx.Err(); err != nil {
+			return err
+		}
 		for ri := range r.doc.Blocks[bi].Runs {
 			run := &r.doc.Blocks[bi].Runs[ri]
 			if run.Source == nil || run.Source.Quad == nil {
@@ -371,10 +382,7 @@ func (r *pdfReader) geometricLinks() {
 			}
 			target := pdfLinkTarget{}
 			ambiguous := false
-			for key, link := range r.links {
-				if key.page != run.Source.Page || link.target.empty() {
-					continue
-				}
+			for _, link := range byPage[run.Source.Page] {
 				for _, q := range link.regions {
 					x0, y0, x1, y1 := quadBounds(q)
 					intersection := max(0, math.Min(c, x1)-math.Max(a, x0)) * max(0, math.Min(d, y1)-math.Max(b, y0))
@@ -399,6 +407,7 @@ func (r *pdfReader) geometricLinks() {
 			}
 		}
 	}
+	return nil
 }
 func (s *pdfStructureRecovery) logicalLink(nodes []*pdfStructureNode) (pdfLinkTarget, bool) {
 	target := pdfLinkTarget{}

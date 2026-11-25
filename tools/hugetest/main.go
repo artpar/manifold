@@ -15,6 +15,7 @@ import (
 	"io"
 	"runtime"
 	"runtime/debug"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"sync"
@@ -49,13 +50,15 @@ func run() error {
 	repeat := flag.Int("repeat", 2, "batches per case")
 	timeout := flag.Duration("timeout", 120*time.Second, "hard child process deadline")
 	guard := flag.Int64("rss-mib", 8192, "sampled aggregate child RSS guard; requires ps on Unix")
+	profile := flag.String("cpuprofile", "", "child-only diagnostic CPU profile")
+	operationTimeout := flag.Duration("operation-timeout", 0, "child-only graceful conversion deadline; zero disables")
 	worker := flag.Bool("worker", false, "internal child mode")
 	input := flag.String("input", "", "internal input path")
 	pages := flag.Int("pages", 0, "internal expected markers")
 
 	flag.Parse()
 	if *worker {
-		return convert(*input, manifold.Format(*target), *pages)
+		return convert(*input, manifold.Format(*target), *pages, *profile, *operationTimeout)
 	}
 	if *workers < 1 || *repeat < 1 || *timeout <= 0 || *guard < 1 {
 		return fmt.Errorf("invalid batch bounds")
@@ -197,7 +200,25 @@ func run() error {
 	}
 	return nil
 }
-func convert(path string, to manifold.Format, pages int) error {
+func convert(path string, to manifold.Format, pages int, profile string, operationTimeout time.Duration) error {
+	ctx := context.Background()
+	if operationTimeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, operationTimeout)
+		defer cancel()
+	}
+	if profile != "" {
+		f, e := os.Create(profile)
+		if e != nil {
+			return e
+		}
+		if e = pprof.StartCPUProfile(f); e != nil {
+			f.Close()
+			return e
+		}
+		defer func() { pprof.StopCPUProfile(); f.Close() }()
+	}
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	debug.SetMemoryLimit(4096 << 20)
 	start := time.Now()
@@ -233,7 +254,7 @@ func convert(path string, to manifold.Format, pages int) error {
 		return e
 	}
 	beginRead := time.Now()
-	d, e := manifold.Read(context.Background(), bytes.NewReader(data), format, manifold.ReadOptions{})
+	d, e := manifold.Read(ctx, bytes.NewReader(data), format, manifold.ReadOptions{})
 	if e != nil {
 		return e
 	}
@@ -280,7 +301,7 @@ func convert(path string, to manifold.Format, pages int) error {
 	emit(map[string]any{"stage": "read_complete", "read_seconds": readSeconds, "elapsed_seconds": time.Since(start).Seconds(), "input_bytes": len(data), "recovered_text_bytes": textBytes, "recovered_paragraphs": paragraphs, "images": pictures, "explicit_breaks": breaks, "physical_pages": len(d.Pages), "diagnostics": codes})
 	var out bytes.Buffer
 	beginWrite := time.Now()
-	e = manifold.Write(context.Background(), &out, d, to, manifold.WriteOptions{AllowLossy: true})
+	e = manifold.Write(ctx, &out, d, to, manifold.WriteOptions{AllowLossy: true})
 	if e != nil {
 		return e
 	}

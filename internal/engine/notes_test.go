@@ -1454,7 +1454,19 @@ func TestAdjacentReferencesRemainSeparatePDFAnnotations(t *testing.T) {
 
 func TestDOCXSymbolGlyphIsNotSilentlyDiscarded(t *testing.T) {
 	body := `<w:p><w:r><w:t>Before</w:t></w:r><w:r><w:sym w:font="Symbol" w:char="F0B7"/></w:r><w:r><w:t>After</w:t></w:r></w:p>`
-	if _, err := ReadDOCX(context.Background(), bytes.NewReader(docxWithBody(t, body))); !errors.Is(err, ErrUnsupported) {
-		t.Fatalf("unmapped symbol glyph silently lost: %v", err)
+	d, err := ReadDOCX(context.Background(), bytes.NewReader(docxWithBody(t, body)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var text strings.Builder
+	for _, run := range d.Blocks[0].Runs {
+		text.WriteString(run.Text)
+	}
+	if text.String() != "Before•After" {
+		t.Fatalf("mapped symbol glyph lost: %q", text.String())
+	}
+	unknown := strings.Replace(body, `w:font="Symbol"`, `w:font="UnknownSymbolFont"`, 1)
+	if _, err := ReadDOCX(context.Background(), bytes.NewReader(docxWithBody(t, unknown))); !errors.Is(err, ErrUnsupported) {
+		t.Fatalf("unknown symbol font guessed: %v", err)
 	}
 }

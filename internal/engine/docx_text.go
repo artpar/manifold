@@ -4,6 +4,8 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/benoitkugler/textlayout/fonts/glyphsnames"
+	"github.com/benoitkugler/textlayout/fonts/simpleencodings"
 	"golang.org/x/text/language"
 	"golang.org/x/text/unicode/bidi"
 	"math"
@@ -429,13 +431,18 @@ func docxThemeRegion(value string) (group, region string, languageIndex int) {
 	}
 	return "", "", 0
 }
-func (r *docxReader) themeFont(value string) (string, error) {
+func (r *docxReader) themeFont(value, runLanguage string) (string, error) {
 	group, region, index := docxThemeRegion(value)
 	if group == "" {
 		return "", fmt.Errorf("invalid DOCX theme font %q", value)
 	}
 	node := r.theme.child("themeElements").child("fontScheme").child(group)
-	if locale := r.themeLanguages[index]; locale != "" {
+	locale := r.themeLanguages[index]
+	if locale == "" && node.child(region).attr("typeface") == "" && runLanguage != "" {
+		locale = runLanguage
+		r.doc.warn("font_theme_run_language", "An empty theme-region face is resolved from its supplemental script face using the explicit run language")
+	}
+	if locale != "" {
 		tag, err := language.Parse(locale)
 		if err == nil {
 			script, confidence := tag.Script()
@@ -516,7 +523,14 @@ func (r *docxReader) selectedFont(style docxRunStyle, slot int) (string, error) 
 	}
 	family := choice.family
 	if choice.theme != "" {
-		resolved, err := r.themeFont(choice.theme)
+		_, _, index := docxThemeRegion(choice.theme)
+		locale := style.Language
+		if index == 1 {
+			locale = style.EastAsiaLanguage
+		} else if index == 2 {
+			locale = style.ComplexLanguage
+		}
+		resolved, err := r.themeFont(choice.theme, locale)
 		if err != nil {
 			return "", err
 		}
@@ -1356,4 +1370,31 @@ func (r *docxReader) textColor(p *xmlNode) (string, error) {
 		return "", err
 	}
 	return "#" + strings.ToUpper(value), nil
+}
+
+func docxSymbolUnicode(font, hexCode string) (string, error) {
+	code, e := strconv.ParseUint(hexCode, 16, 16)
+	if e != nil {
+		return "", fmt.Errorf("invalid DOCX symbol code")
+	}
+	if code >= 0xf000 && code <= 0xf0ff {
+		code -= 0xf000
+	}
+	if code > 255 {
+		return "", fmt.Errorf("%w: DOCX symbol-font code outside known encoding", ErrUnsupported)
+	}
+	var enc simpleencodings.Encoding
+	switch strings.ToLower(strings.TrimSpace(font)) {
+	case "symbol":
+		enc = simpleencodings.Symbol
+	case "zapfdingbats", "zapf dingbats":
+		enc = simpleencodings.ZapfDingbats
+	default:
+		return "", fmt.Errorf("%w: DOCX symbol-font %q requires an explicit font-to-Unicode mapping", ErrUnsupported, font)
+	}
+	ch, ok := glyphsnames.GlyphToRune(enc[code])
+	if !ok || enc[code] == "" {
+		return "", fmt.Errorf("%w: unmapped DOCX symbol code", ErrUnsupported)
+	}
+	return string(ch), nil
 }

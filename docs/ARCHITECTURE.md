@@ -89,3 +89,10 @@ generator. A Unix development-only ps sampler guards aggregate child RSS and a
 parent deadline kills overdue children. These process controls are test-harness
 bounds, not new production admission limits. Publisher documents and raw profiles
 remain untracked; curated evidence and actual unsupported outcomes belong in KT.
+
+Huge-input repairs use existing seekable PDF sources without a redundant io.ReadAll
+copy, retaining the direct-encryption adapter on parser errors. Geometric annotation
+matching indexes links by physical page instead of scanning all document links for
+every span. Image masks operate in source component/sample space; uncertainty in
+device/profile color conversion remains diagnosed. The repair ledger distinguishes
+per-feature checks, original-file completion, fidelity and final capacity evidence.

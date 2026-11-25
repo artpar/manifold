@@ -200,3 +200,13 @@ Final huge-file QA checks: full normal suite and vet, CGO-disabled CLI build and
 diff check pass. Race tool tests and a two-child real-ETSI race-instrumented harness
 smoke pass their declared scope (the expected input rejections persist). Full local
 race was not repeated for tooling/docs; hosted CI owns the pushed-source matrix.
+
+## Huge-file repairs (in progress)
+
+The user requested fixing the actual original-file failures. Initial Go fixes
+cover source-backed theme/Symbol and partial CMap mappings, CMYK, explicit masks
+and Matte, diagnosed Word grid gaps, page-indexed link matching and direct seekable
+PDF input. Focused regressions and independent original-mask pixel checks pass.
+ETSI and C++ now complete full original PDF→SF scouts; memory/serialization remain
+expensive, and the complete seven-file cohort is not yet qualified. See
+verification/HUGE_FIXES.md for actual evidence, remaining work and limitations.
