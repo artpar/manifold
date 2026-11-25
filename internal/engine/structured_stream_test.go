@@ -49,7 +49,7 @@ func TestFlowStructuredPreflightRejectsBeforeWriting(t *testing.T) {
 }
 func TestPDFReadLimitsAndCacheRemainBounded(t *testing.T) {
 	limits, e := resolvePDFReadLimits(nil)
-	if e != nil || limits.MaxDecodedBytes != maxPDFDecodedBytes || limits.MaxNavigationEntries != 100000 || limits.MaxStructureEntries != 200000 {
+	if e != nil || limits.MaxDecodedBytes != maxPDFDecodedBytes || limits.MaxNavigationEntries != 100000 || limits.MaxStructureEntries != 200000 || limits.MaxParentTreeSlots != 400000 {
 		t.Fatal("default policy changed")
 	}
 	if _, e = resolvePDFReadLimits(&PDFReadLimits{MaxDecodedBytes: -1}); e == nil {
@@ -64,6 +64,9 @@ func TestPDFReadLimitsAndCacheRemainBounded(t *testing.T) {
 	limits, e = resolvePDFReadLimits(&PDFReadLimits{MaxStructureEntries: 2_000_000})
 	if e != nil || limits.MaxStructureEntries != 2_000_000 {
 		t.Fatal("explicit structure policy not applied")
+	}
+	if _, e = resolvePDFReadLimits(&PDFReadLimits{MaxParentTreeSlots: 100_000_001}); e == nil {
+		t.Fatal("ParentTree slot ceiling bypassed")
 	}
 	reader := &pdfReader{ctx: context.Background(), limits: PDFReadLimits{MaxStructureEntries: 1}}
 	recovery := &pdfStructureRecovery{reader: reader}

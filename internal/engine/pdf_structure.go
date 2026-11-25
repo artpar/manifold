@@ -649,6 +649,7 @@ func (s *pdfStructureRecovery) validateParentTree(value types.Object, kids []*pd
 	// Synthetic gaps only belong to a marked sequence when both neighboring
 	// painted runs identify that same sequence. Literal spaces are never dropped.
 
+	ownerSlots := 0
 	inverse := map[slot]string{}
 	arrayEntries := map[int]bool{}
 	ownerRef := func(value types.Object) (string, error) {
@@ -672,8 +673,8 @@ func (s *pdfStructureRecovery) validateParentTree(value types.Object, kids []*pd
 		}
 		if array, ok := obj.(types.Array); ok {
 			arrayEntries[key] = true
-			count += len(array)
-			if count > 2*s.reader.structureLimit() {
+			ownerSlots += len(array)
+			if ownerSlots > s.reader.parentTreeSlotLimit() {
 				return fmt.Errorf("ParentTree exceeds owner slot limit")
 			}
 			for mcid, v := range array {

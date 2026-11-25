@@ -52,7 +52,7 @@ func run() error {
 	storage := flag.String("storage", "memory", "memory or file: input/output materialization; file output is streamed to disk")
 	outputDir := flag.String("output-dir", "", "optional directory retaining converted files (file storage only)")
 	outputPath := flag.String("output", "", "internal output path")
-	large := flag.Bool("large", false, "explicit large-document work policy: 4 GiB decoded bytes, 2B raster pixels, 1M navigation entries, 2M logical structure entries")
+	large := flag.Bool("large", false, "explicit large-document work policy: 4 GiB decoded bytes, 2B raster pixels, 1M navigation entries, 2M logical structure entries, 32M ParentTree slots")
 	memoryMiB := flag.Int64("memory-mib", 4096, "Go soft memory limit per child, MiB; not an RSS cap")
 	workers := flag.Int("workers", 1, "isolated concurrent conversions per batch")
 	repeat := flag.Int("repeat", 2, "batches per case")
@@ -315,7 +315,7 @@ func convert(path string, to manifold.Format, pages int, profile string, operati
 	beginRead := time.Now()
 	opts := manifold.ReadOptions{}
 	if large {
-		opts.PDFLimits = &manifold.PDFReadLimits{MaxDecodedBytes: 4 << 30, MaxRasterPixels: 2_000_000_000, MaxNavigationEntries: 1_000_000, MaxStructureEntries: 2_000_000}
+		opts.PDFLimits = &manifold.PDFReadLimits{MaxDecodedBytes: 4 << 30, MaxRasterPixels: 2_000_000_000, MaxNavigationEntries: 1_000_000, MaxStructureEntries: 2_000_000, MaxParentTreeSlots: 32_000_000}
 	}
 	d, e := manifold.Read(ctx, source, format, opts)
 	if e != nil {

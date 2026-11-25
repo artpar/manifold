@@ -3,11 +3,11 @@ package engine
 import "fmt"
 
 func resolvePDFReadLimits(opts *PDFReadLimits) (PDFReadLimits, error) {
-	out := PDFReadLimits{MaxDecodedBytes: maxPDFDecodedBytes, MaxRasterPixels: maxPDFRasterPixels, MaxNavigationEntries: 100000, MaxStructureEntries: 200000}
+	out := PDFReadLimits{MaxDecodedBytes: maxPDFDecodedBytes, MaxRasterPixels: maxPDFRasterPixels, MaxNavigationEntries: 100000, MaxStructureEntries: 200000, MaxParentTreeSlots: 400000}
 	if opts == nil {
 		return out, nil
 	}
-	if opts.MaxStructureEntries < 0 || opts.MaxStructureEntries > 10_000_000 || opts.MaxDecodedBytes < 0 || opts.MaxRasterPixels < 0 || opts.MaxNavigationEntries < 0 || opts.MaxNavigationEntries > maxPDFNavigationEntries {
+	if opts.MaxParentTreeSlots < 0 || opts.MaxParentTreeSlots > 100_000_000 || opts.MaxStructureEntries < 0 || opts.MaxStructureEntries > 10_000_000 || opts.MaxDecodedBytes < 0 || opts.MaxRasterPixels < 0 || opts.MaxNavigationEntries < 0 || opts.MaxNavigationEntries > maxPDFNavigationEntries {
 		return out, fmt.Errorf("invalid PDF read limits")
 	}
 	if opts.MaxDecodedBytes > 0 {
@@ -18,6 +18,9 @@ func resolvePDFReadLimits(opts *PDFReadLimits) (PDFReadLimits, error) {
 	}
 	if opts.MaxNavigationEntries > 0 {
 		out.MaxNavigationEntries = opts.MaxNavigationEntries
+	}
+	if opts.MaxParentTreeSlots > 0 {
+		out.MaxParentTreeSlots = opts.MaxParentTreeSlots
 	}
 	if opts.MaxStructureEntries > 0 {
 		out.MaxStructureEntries = opts.MaxStructureEntries
@@ -48,4 +51,11 @@ func (r *pdfReader) structureLimit() int {
 		return r.limits.MaxStructureEntries
 	}
 	return 200000
+}
+
+func (r *pdfReader) parentTreeSlotLimit() int {
+	if r.limits.MaxParentTreeSlots > 0 {
+		return r.limits.MaxParentTreeSlots
+	}
+	return 400000
 }

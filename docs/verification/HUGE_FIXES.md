@@ -142,3 +142,16 @@ PDF character inventories are under review; these compare representations, not
 page visual parity. Original mask composites and CFF outline contact sheets have
 been independently rendered and visually checked; source/recovered glyph shapes
 agree in the inspected original page-98 spans.
+
+Independent MuPDF inspection of the unchanged IPCC ParentTree counted **22,003,851
+owner slots**, of which only **447,733** are nonnull (3,147 arrays, largest 54,815
+slots). This explains why the previous coupled owner-slot cap could not represent
+the original. Add `MaxParentTreeSlots` / `-pdf-max-parent-slots` as a distinct bounded
+scan-work policy: default 400,000, explicit maximum 100M, huge profile 32M. Logical
+entries and owner slots are distinct units; unused null slots do not consume the
+logical identity/reference budget. Every listed nonnull owner is still checked.
+
+The C++ and ETSI independent text inventories initially excluded original list
+labels held in `list_item.attrs.source.label` after diagnosed list normalization.
+The audit now counts those source labels separately from text nodes; it does not
+pretend original marker styling is rendered unchanged. Both audits are rerunning.

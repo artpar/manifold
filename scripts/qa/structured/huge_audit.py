@@ -29,6 +29,7 @@ def audit(source, sf):
     pages = collections.defaultdict(collections.Counter)
     all_text = collections.Counter()
     images = collections.Counter()
+    provenance_label_characters = 0
     math_count = 0
     math_trees = collections.Counter()
     nodes = 0
@@ -42,6 +43,13 @@ def audit(source, sf):
             for n in walk(body):
                 typ = n.get('type')
                 attrs = n.get('attrs') or {}
+                if typ == 'list_item' and source.suffix == '.pdf':
+                    original = attrs.get('source') or {}
+                    if original.get('label') and original.get('page'):
+                        chars = characters(original['label'])
+                        pages[original['page']].update(chars)
+                        all_text.update(chars)
+                        provenance_label_characters += chars.total()
                 if typ == 'text':
                     chars = characters(n['text'])
                     all_text.update(chars)
@@ -63,7 +71,7 @@ def audit(source, sf):
     checked = consumer.stdout.read()
     if consumer.wait():
         raise RuntimeError('independent ProseMirror rejection')
-    result = {'source': str(source), 'sf': str(sf), 'body_nodes': nodes, 'prosemirror': json.loads(checked), 'images': sum(images.values()), 'distinct_images': len(images), 'native_equations': math_count}
+    result = {'source': str(source), 'sf': str(sf), 'body_nodes': nodes, 'prosemirror': json.loads(checked), 'images': sum(images.values()), 'distinct_images': len(images), 'native_equations': math_count, 'original_list_label_characters_in_provenance': provenance_label_characters}
     if source.suffix == '.docx':
         with zipfile.ZipFile(source) as z:
             root = ET.fromstring(z.read('word/document.xml'))
