@@ -87,16 +87,16 @@ audit remain required. The full goal is incomplete.
 
 ```sh
 output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc extract -format sf -o output/rich-note-labels/source.sf output/audit/rich-label-note.pdf
-bin/manydoc convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/rich-note-labels/native.pdf output/rich-note-labels/source.sf
-bin/manydoc convert -allow-lossy -o output/rich-note-labels/word.docx output/rich-note-labels/source.sf
-bin/manydoc extract -format sf -o output/rich-note-labels/word.sf output/rich-note-labels/word.docx
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
+bin/manifold extract -format sf -o output/rich-note-labels/source.sf output/audit/rich-label-note.pdf
+bin/manifold convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/rich-note-labels/native.pdf output/rich-note-labels/source.sf
+bin/manifold convert -allow-lossy -o output/rich-note-labels/word.docx output/rich-note-labels/source.sf
+bin/manifold extract -format sf -o output/rich-note-labels/word.sf output/rich-note-labels/word.docx
 GOWORK=off go run ./examples/notes -rich-body-labels -sectioned -out output/rich-note-labels/example
-bin/manydoc extract -format sf -o output/rich-note-labels/example/word.sf output/rich-note-labels/example/notes.docx
+bin/manifold extract -format sf -o output/rich-note-labels/example/word.sf output/rich-note-labels/example/notes.docx
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-rich-label-source-lo --headless --convert-to pdf --outdir output/rich-note-labels/lo output/rich-note-labels/word.docx
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-rich-label-example-lo --headless --convert-to pdf --outdir output/rich-note-labels/example/lo output/rich-note-labels/example/notes.docx
-bin/manydoc convert -pdf-font DejaVu=testdata/assets/DejaVuSans.ttf -o output/rich-note-labels/mixed.pdf output/audit/mixed-note-labels.sf
+bin/manifold convert -pdf-font DejaVu=testdata/assets/DejaVuSans.ttf -o output/rich-note-labels/mixed.pdf output/audit/mixed-note-labels.sf
 output/qa-venv/bin/python scripts/verify_rich_note_labels.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/rich-note-labels/source.sf output/rich-note-labels/word.sf output/rich-note-labels/example/notes.sf output/rich-note-labels/example/word.sf output/audit/mixed-note-labels.sf
 GOWORK=off go test -race -run 'TestRichBodyLabel|TestPDFRichBodyLabel' -count=1 .

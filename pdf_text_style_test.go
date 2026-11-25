@@ -1,4 +1,4 @@
-package manydoc
+package manifold
 
 import (
 	"bytes"
@@ -103,7 +103,7 @@ func TestPDFRecoveredFontFamilyEvidence(t *testing.T) {
 	}
 	generated := append([]byte(nil), out.Bytes()...)
 	// Independently authored primitive-writer fixture omits FontFamily, keeping
-	// the embedded-name fallback oracle independent of manydoc's new descriptor.
+	// the embedded-name fallback oracle independent of manifold's new descriptor.
 	primitive := gofpdf.New("P", "pt", "A4", "")
 	primitive.AddUTF8FontFromBytes("Caller Alias", "", append([]byte(nil), goregular.TTF...))
 	primitive.AddPage()

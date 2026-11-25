@@ -80,11 +80,11 @@ for full command results and exact qualification scope.
 
 ```sh
 GOWORK=off go run ./examples/notes -variant-labels -styled-labels -fractional-sizes -sectioned -out output/note-precision/sectioned
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc extract -format sf -o output/note-precision/sectioned/notes-docx.sf output/note-precision/sectioned/notes.docx
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
+bin/manifold extract -format sf -o output/note-precision/sectioned/notes-docx.sf output/note-precision/sectioned/notes.docx
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-note-precision-lo --headless --convert-to pdf --outdir output/note-precision/sectioned/lo output/note-precision/sectioned/notes.docx
-bin/manydoc convert -allow-lossy -o output/note-inference/guide-precision.docx output/note-inference/guide-styled.sf.gz
-bin/manydoc extract -format sf.gz -o output/note-precision/guide-docx.sf.gz output/note-inference/guide-precision.docx
+bin/manifold convert -allow-lossy -o output/note-inference/guide-precision.docx output/note-inference/guide-styled.sf.gz
+bin/manifold extract -format sf.gz -o output/note-precision/guide-docx.sf.gz output/note-inference/guide-precision.docx
 output/qa-venv/bin/python scripts/verify_docx_precision.py --guide-sf output/note-inference/guide-styled.sf.gz --guide-docx output/note-inference/guide-precision.docx --guide-roundtrip output/note-precision/guide-docx.sf.gz
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/note-precision/sectioned/notes.sf output/note-precision/sectioned/notes-docx.sf output/note-precision/guide-docx.sf.gz
 GOWORK=off go test -race -run 'TestDOCXFractional|TestDOCXSize|TestDOCXSectionedStyledNote|TestXMLDuplicate' -count=1 .

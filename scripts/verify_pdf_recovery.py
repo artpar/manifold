@@ -1,4 +1,4 @@
-"""Independent positioned-PDF/SF oracle. Run after building bin/manydoc.
+"""Independent positioned-PDF/SF oracle. Run after building bin/manifold.
 
 The source is independently authored PDF syntax, not manydoc output. Python,
 pypdf, Pillow and MuPDF are optional QA tools only.
@@ -64,7 +64,7 @@ reader = PdfReader(pdf_path, strict=True)
 assert len(reader.pages) == 2
 assert len(reader.pages[0].images) >= 3
 sf_path = root / "positioned.sf"
-subprocess.run(["bin/manydoc", "extract", "-format", "sf", "-o", str(sf_path), str(pdf_path)], check=True)
+subprocess.run(["bin/manifold", "extract", "-format", "sf", "-o", str(sf_path), str(pdf_path)], check=True)
 sf = json.loads(sf_path.read_text())
 pages = sf["attrs"]["pages"]
 assert [(p["width"], p["height"]) for p in pages] == [(300, 400), (600, 400)]
@@ -137,7 +137,7 @@ print("Independent pypdf/MuPDF checks passed: 2 page coordinate systems, transfo
 # Exercise recovered SF through both rendered formats, explicitly acknowledging
 # flow-layout/provenance losses. Verify that supported content/assets survive.
 for ext in ("pdf", "docx"):
-    subprocess.run(["bin/manydoc", "convert", "-allow-lossy", "-pdf-font-map", "Courier=Go Mono", "-o", str(root / f"reflow.{ext}"), str(sf_path)], check=True)
+    subprocess.run(["bin/manifold", "convert", "-allow-lossy", "-pdf-font-map", "Courier=Go Mono", "-o", str(root / f"reflow.{ext}"), str(sf_path)], check=True)
 reflow = PdfReader(root / "reflow.pdf", strict=True)
 assert len(reflow.pages) == 2
 text = "".join(p.extract_text() for p in reflow.pages)

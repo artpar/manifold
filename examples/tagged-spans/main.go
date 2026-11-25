@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/artpar/manydoc"
+	"github.com/artpar/manifold"
 )
 
 type cell struct {
@@ -17,10 +17,10 @@ type cell struct {
 	ColSpan int                 `json:"colspan"`
 	RowSpan int                 `json:"rowspan"`
 	Text    string              `json:"text"`
-	Source  *manydoc.SourceInfo `json:"source"`
+	Source  *manifold.SourceInfo `json:"source"`
 }
 type table struct {
-	Source *manydoc.SourceInfo `json:"source"`
+	Source *manifold.SourceInfo `json:"source"`
 	Rows   int                 `json:"rows"`
 	Cells  []cell              `json:"cells"`
 }
@@ -34,20 +34,20 @@ func main() {
 		log.Fatal(err)
 	}
 	defer f.Close()
-	d, err := manydoc.ReadPDF(context.Background(), f, manydoc.ReadOptions{PDFSkipInference: true})
+	d, err := manifold.ReadPDF(context.Background(), f, manifold.ReadOptions{PDFSkipInference: true})
 	if err != nil {
 		log.Fatal(err)
 	}
 	var tables []table
-	sample := &manydoc.Document{Pages: d.Pages, Diagnostics: d.Diagnostics}
-	var walk func([]manydoc.Block)
-	walk = func(bs []manydoc.Block) {
+	sample := &manifold.Document{Pages: d.Pages, Diagnostics: d.Diagnostics}
+	var walk func([]manifold.Block)
+	walk = func(bs []manifold.Block) {
 		for _, b := range bs {
-			if b.Kind == manydoc.Table {
+			if b.Kind == manifold.Table {
 				t := table{Source: b.Source, Rows: len(b.Rows)}
 				for ri, r := range b.Rows {
 					for _, c := range r.Cells {
-						t.Cells = append(t.Cells, cell{ri, c.ColSpan, c.RowSpan, (&manydoc.Document{Blocks: c.Blocks}).Text(), c.Source})
+						t.Cells = append(t.Cells, cell{ri, c.ColSpan, c.RowSpan, (&manifold.Document{Blocks: c.Blocks}).Text(), c.Source})
 					}
 				}
 				tables = append(tables, t)
@@ -72,7 +72,7 @@ func main() {
 	report := struct {
 		Pages       int                  `json:"pages"`
 		Tables      []table              `json:"tables"`
-		Diagnostics []manydoc.Diagnostic `json:"diagnostics"`
+		Diagnostics []manifold.Diagnostic `json:"diagnostics"`
 	}{len(d.Pages), tables, d.Diagnostics}
 	raw, err := json.MarshalIndent(report, "", "  ")
 	if err != nil {
@@ -81,7 +81,7 @@ func main() {
 	if err := os.WriteFile(filepath.Join(*out, "tables.json"), raw, 0644); err != nil {
 		log.Fatal(err)
 	}
-	sf, err := manydoc.ToStructured(sample)
+	sf, err := manifold.ToStructured(sample)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,7 +89,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := manydoc.WriteStructured(context.Background(), fout, sf); err != nil {
+	if err := manifold.WriteStructured(context.Background(), fout, sf); err != nil {
 		log.Fatal(err)
 	}
 	if err := fout.Close(); err != nil {

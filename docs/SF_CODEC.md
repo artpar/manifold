@@ -84,9 +84,9 @@ code did not change; no new renderer/parity claim is made.
 ## Reproduce and continue
 
 ```sh
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc convert -o output/codec/mqtt.sf.gz output/navigation-import/mqtt.sf
-bin/manydoc convert -o output/codec/recovered.txt output/codec/mqtt.sf.gz
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
+bin/manifold convert -o output/codec/mqtt.sf.gz output/navigation-import/mqtt.sf
+bin/manifold convert -o output/codec/recovered.txt output/codec/mqtt.sf.gz
 output/qa-venv/bin/python scripts/verify_sf_codec.py output/navigation-import/mqtt.sf output/codec/mqtt.sf.gz --report output/codec/independent.json
 NODE_PATH=output/sf-qa/node_modules node --max-old-space-size=8192 scripts/verify_structured.cjs output/codec/mqtt.sf.gz
 GOWORK=off go test -run 'TestStructuredCompressed|TestStructuredCodec|TestCLIGzip' -count=1 ./...

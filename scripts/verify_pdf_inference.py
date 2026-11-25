@@ -70,7 +70,7 @@ with pymupdf.open(source) as doc:
                 x0,y0,x1,y1=line['bbox'];assert x0>=0 and y0>=0 and x1<=p.rect.width and y1<=p.rect.height
     for i,p in enumerate(doc):p.get_pixmap(matrix=pymupdf.Matrix(1.4,1.4)).save(out/f'source-{i+1}.png')
 sf_path=out/'recovered.sf'
-subprocess.run(['bin/manydoc','extract','-format','sf','-o',str(sf_path),str(source)],check=True)
+subprocess.run(['bin/manifold','extract','-format','sf','-o',str(sf_path),str(source)],check=True)
 sf=json.loads(sf_path.read_text());bs=sf['content'];assert len(sf['attrs']['pages'])==2
 plain=lambda n:n.get('text','')+''.join(plain(c) for c in n.get('content',[]))
 assert [n['type'] for n in bs]==['heading','paragraph','paragraph','paragraph','paragraph','page_break','table','ordered_list','image']
@@ -110,10 +110,10 @@ normalized=lambda s:Counter(''.join(unicodedata.normalize('NFKC',s).split()))
 assert normalized(plain(sf)+''.join(labels))==normalized(original)
 codes={d['code'] for d in sf['attrs']['diagnostics']};assert {'pdf_structure_inferred','pdf_list_inferred','pdf_table_inferred'}<=codes
 raw_path=out/'paint-order.sf'
-subprocess.run(['bin/manydoc','extract','-pdf-skip-inference','-format','sf','-o',str(raw_path),str(source)],check=True)
+subprocess.run(['bin/manifold','extract','-pdf-skip-inference','-format','sf','-o',str(raw_path),str(source)],check=True)
 raw=json.loads(raw_path.read_text());assert plain(raw['content'][0])=='RIGHT continues in the same paragraph.'
 assert 'pdf_structure_inferred' not in {d['code'] for d in raw['attrs']['diagnostics']}
-for ext in ('docx','pdf'):subprocess.run(['bin/manydoc','convert','-allow-lossy','-pdf-font-map','Helvetica=Go','-o',str(out/f'reflow.{ext}'),str(sf_path)],check=True)
+for ext in ('docx','pdf'):subprocess.run(['bin/manifold','convert','-allow-lossy','-pdf-font-map','Helvetica=Go','-o',str(out/f'reflow.{ext}'),str(sf_path)],check=True)
 word=Document(out/'reflow.docx');assert len(word.tables)==1 and len(word.inline_shapes)==1
 assert [[c.text for c in row.cells] for row in word.tables[0].rows]==values
 with ZipFile(out/'reflow.docx') as z:assert b'https://example.invalid/right' in z.read('word/_rels/document.xml.rels')

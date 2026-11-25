@@ -9,7 +9,7 @@ from pypdf.generic import ContentStream
 
 parser = argparse.ArgumentParser()
 parser.add_argument('directory', type=Path)
-parser.add_argument('--binary', type=Path, default=Path('bin/manydoc'))
+parser.add_argument('--binary', type=Path, default=Path('bin/manifold'))
 args = parser.parse_args()
 expected = {'acyclic-shared-form': 299593, 'shared-across-pages': 224694,
             'shared-appearances': 224694}

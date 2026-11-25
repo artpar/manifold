@@ -14,7 +14,7 @@ from pypdf import PdfReader, PdfWriter
 import pymupdf
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--cli', default='bin/manydoc')
+parser.add_argument('--cli', default='bin/manifold')
 parser.add_argument('--sources', type=Path, default=Path('output/real-docx-audit/original-render'))
 parser.add_argument('--out', type=Path, default=Path('output/pdf-untagged-notes'))
 parser.add_argument('--word-render', type=Path, help='optional independently LibreOffice-rendered DOCX PDFs')

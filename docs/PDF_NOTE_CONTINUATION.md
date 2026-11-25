@@ -102,7 +102,7 @@ Generated files/renders/environments stay ignored under output.
 
 ```sh
 GOWORK=off MANYDOC_PDF_NOTE_EXTENT_QA=output/pdf-note-extent go test -run TestPDFUntagged -count=1 .
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
 # Prepare the unchanged two-paragraph derivative as in PDF_UNTAGGED_NOTES.md.
 output/qa-venv/bin/python scripts/verify_pdf_note_extent.py
 mkdir -p output/pdf-note-extent/word-render/{footnote,endnote}
@@ -145,7 +145,7 @@ and cross-page ownership/paragraph continuity while retaining source expectation
 ```sh
 python3 scripts/generate_pdf_note_continuation_probe.py --cross-page
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-note-crosspage-qa --headless --convert-to pdf --outdir output/pdf-note-continuation-crosspage output/pdf-note-continuation-crosspage/continuation-source.docx
-bin/manydoc extract -pdf-skip-structure -format json -o output/pdf-note-continuation-crosspage/geometric.json output/pdf-note-continuation-crosspage/continuation-source.pdf
+bin/manifold extract -pdf-skip-structure -format json -o output/pdf-note-continuation-crosspage/geometric.json output/pdf-note-continuation-crosspage/continuation-source.pdf
 # Failed at1ef16ef; the current PDF_NOTE_PAGES.md implementation passes unchanged.
 python3 scripts/generate_pdf_note_continuation_probe.py --cross-page --check output/pdf-note-continuation-crosspage/geometric.json
 ```

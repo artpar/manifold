@@ -77,9 +77,9 @@ new visual or Word-pagination fidelity evidence.
 
 ```sh
 output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
-bin/manydoc extract -format sf -o output/artifacts/header.sf output/audit/pagination-artifact.pdf
-bin/manydoc extract -format sf.gz -o output/artifacts/mqtt.sf.gz testdata/real/mqtt-v5.0-os.pdf
-bin/manydoc extract -format sf -o output/artifacts/indesign.sf testdata/real/copyright-office-circular-1-2021.pdf
+bin/manifold extract -format sf -o output/artifacts/header.sf output/audit/pagination-artifact.pdf
+bin/manifold extract -format sf.gz -o output/artifacts/mqtt.sf.gz testdata/real/mqtt-v5.0-os.pdf
+bin/manifold extract -format sf -o output/artifacts/indesign.sf testdata/real/copyright-office-circular-1-2021.pdf
 output/qa-venv/bin/python scripts/verify_pdf_artifacts.py testdata/real/mqtt-v5.0-os.pdf output/artifacts/mqtt.sf.gz --projected-sha256 4b9ccc6f060fc45958494e3cfdf85ed3bad4d54076a97e79a153662e7d1d1d1b
 NODE_PATH=output/sf-qa/node_modules node --max-old-space-size=8192 scripts/verify_structured.cjs output/artifacts/header.sf output/artifacts/mqtt.sf.gz output/artifacts/indesign.sf
 GOWORK=off go test -run 'TestPDF.*Artifact' -count=1 .

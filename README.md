@@ -1,4 +1,4 @@
-# manydoc
+# Manifold
 
 Pure-Go document extraction, generation, and conversion for embedded applications.
 
@@ -40,20 +40,31 @@ No external Office installation or conversion service is required.
 - [Compatibility](docs/COMPATIBILITY.md): supported features and fidelity limits.
 - [Testing](docs/TESTING.md): regression corpus and independent verification.
 
+## Install
+
+```sh
+go get github.com/artpar/manifold
+go install github.com/artpar/manifold/cmd/manifold@latest
+```
+
+Import `github.com/artpar/manifold` as package `manifold`. The CLI is `manifold`.
+Existing files keep the `manydoc-prosemirror/1` schema and embedded metadata
+identifiers for compatibility. See [the rename contract](docs/RENAME.md).
+
 ## Build and use
 
 Go 1.25 or newer is required. There are no production executable/service/CGO
 dependencies. PDF output embeds licensed Go fonts.
 
 ```sh
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc extract input.docx
-bin/manydoc extract -format sf -o document.sf input.docx
-bin/manydoc convert -allow-lossy -o report.docx document.sf
-bin/manydoc convert -allow-lossy -o report.pdf document.sf
-bin/manydoc extract -format sf -o recovered.sf report.pdf
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
+bin/manifold extract input.docx
+bin/manifold extract -format sf -o document.sf input.docx
+bin/manifold convert -allow-lossy -o report.docx document.sf
+bin/manifold convert -allow-lossy -o report.pdf document.sf
+bin/manifold extract -format sf -o recovered.sf report.pdf
 # Inspect physical paint order without logical or geometric reconstruction:
-bin/manydoc extract -pdf-skip-structure -pdf-skip-inference -format sf -o physical.sf report.pdf
+bin/manifold extract -pdf-skip-structure -pdf-skip-inference -format sf -o physical.sf report.pdf
 ```
 
 Flags precede the input filename. SF uses the versioned ProseMirror profile;
@@ -68,7 +79,7 @@ conversion returns `ErrLossy`. Review its diagnostics, then explicitly allow
 that reduction if appropriate:
 
 ```sh
-bin/manydoc convert -allow-lossy -o imported.docx input.pdf
+bin/manifold convert -allow-lossy -o imported.docx input.pdf
 ```
 
 Unsupported output features still return errors. Conversion writes to a
@@ -78,7 +89,7 @@ conversion leaves an existing output file unchanged.
 For encrypted PDFs, supply the password through an environment variable:
 
 ```sh
-bin/manydoc extract -password-env DOCUMENT_PASSWORD protected.pdf
+bin/manifold extract -password-env DOCUMENT_PASSWORD protected.pdf
 ```
 
 The variable must already be set; the CLI does not print its value.
@@ -86,20 +97,20 @@ The variable must already be set; the CLI does not print its value.
 ## Embed the library
 
 ```go
-doc := &manydoc.Document{
-    Metadata: manydoc.Metadata{Title: "Report"},
-    Blocks: []manydoc.Block{
-        {Kind: manydoc.Heading, Level: 1,
-            Runs: []manydoc.Run{{Text: "Quarterly report"}}},
-        {Kind: manydoc.Paragraph,
-            Runs: []manydoc.Run{{Text: "Generated inside the Go process."}}},
+doc := &manifold.Document{
+    Metadata: manifold.Metadata{Title: "Report"},
+    Blocks: []manifold.Block{
+        {Kind: manifold.Heading, Level: 1,
+            Runs: []manifold.Run{{Text: "Quarterly report"}}},
+        {Kind: manifold.Paragraph,
+            Runs: []manifold.Run{{Text: "Generated inside the Go process."}}},
     },
 }
-err := manydoc.Write(ctx, destination, doc, manydoc.DOCX, manydoc.WriteOptions{})
+err := manifold.Write(ctx, destination, doc, manifold.DOCX, manifold.WriteOptions{})
 ```
 
-Read with `manydoc.Read(ctx, source, manydoc.DOCX, manydoc.ReadOptions{})` or
-`manydoc.ReadPDF(ctx, source, manydoc.ReadOptions{Password: password})`.
+Read with `manifold.Read(ctx, source, manifold.DOCX, manifold.ReadOptions{})` or
+`manifold.ReadPDF(ctx, source, manifold.ReadOptions{Password: password})`.
 Inputs/outputs are `io.Reader`/`io.Writer`; callers control persistence and
 authorization. Documents must not be concurrently mutated by the caller.
 
@@ -163,8 +174,8 @@ invalid data or unrepresentable dimensions.
 
 The Go engine model starts in `document.go`; the canonical SF tree is in
 `structured.go`. `Read` and `Write` are
-the application boundary. `errors.Is(err, manydoc.ErrUnsupported)` identifies
-unsupported output/features; `errors.Is(err, manydoc.ErrLossy)` identifies
+the application boundary. `errors.Is(err, manifold.ErrUnsupported)` identifies
+unsupported output/features; `errors.Is(err, manifold.ErrLossy)` identifies
 unacknowledged imported-document diagnostics.
 
 ## References
@@ -200,9 +211,9 @@ FontFace values with WriteOptions.PDFFonts for additional TTF faces. Missing
 families/styles/glyphs return errors. PDFFontMap explicitly selects alternatives.
 
 ```sh
-bin/manydoc convert -pdf-font 'App Sans=output/text-style/app-sans.ttf' -o output/text-style/cli.pdf output/text-style/text-style.sf
+bin/manifold convert -pdf-font 'App Sans=output/text-style/app-sans.ttf' -o output/text-style/cli.pdf output/text-style/text-style.sf
 # An explicit alternative for a retained source font, when desired:
-bin/manydoc convert -allow-lossy -pdf-font-map 'Calibri=Go' -pdf-font-map 'Cambria=Go' -o output/converted.pdf input.docx
+bin/manifold convert -allow-lossy -pdf-font-map 'Calibri=Go' -pdf-font-map 'Cambria=Go' -o output/converted.pdf input.docx
 ```
 
 DOCX sizes require half-points; PDF sizes require 0.01pt precision. Theme/script
@@ -301,18 +312,18 @@ Section-specific stories and signed running/body overlap remain unfinished.
 
 SF writes compact ProseMirror JSON. `.sf.gz` is the same schema/values in standard
 Go gzip, useful for source-heavy PDF provenance. CLI conversion infers that suffix;
-extraction selects it with `manydoc extract -format sf.gz -o document.sf.gz input.pdf`.
-Go callers use `manydoc.Read` / `manydoc.Write` with `manydoc.SFGzip`.
+extraction selects it with `manifold extract -format sf.gz -o document.sf.gz input.pdf`.
+Go callers use `manifold.Read` / `manifold.Write` with `manifold.SFGzip`.
 Schema/graph/checksum validation and all assets/source fields remain intact. Full
 large-document trees still take memory; see [codec evidence and limits](docs/SF_CODEC.md).
 
 Colleaf's actual native `.vdocs` format uses a pinned Univer snapshot rather than
-SF. The checked offline adapter is available as `manydoc.VDOCS`,
+SF. The checked offline adapter is available as `manifold.VDOCS`,
 `ReadVDOCS` / `WriteVDOCS`, and MIME constant `VDOCSMIME`:
 
 ```sh
-bin/manydoc convert -o document.vdocs examples/notes/document.sf
-bin/manydoc extract -format sf -o reopened.sf document.vdocs
+bin/manifold convert -o document.vdocs examples/notes/document.sf
+bin/manifold extract -format sf -o reopened.sf document.vdocs
 GOWORK=off go run ./examples/colleaf -out output/colleaf-example
 ```
 

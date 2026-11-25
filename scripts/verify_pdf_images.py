@@ -11,7 +11,7 @@ import pymupdf
 
 parser = argparse.ArgumentParser()
 parser.add_argument('directory', type=Path)
-parser.add_argument('--binary', type=Path, default=Path('bin/manydoc'))
+parser.add_argument('--binary', type=Path, default=Path('bin/manifold'))
 parser.add_argument('--require-cmyk-agreement', action='store_true')
 parser.add_argument('--require-mupdf-jpeg', action='store_true')
 args = parser.parse_args()

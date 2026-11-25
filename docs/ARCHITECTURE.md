@@ -2071,3 +2071,8 @@ supports inferred footnote reflow, with an Endnote default for uncertain placeme
 PDFSkipInference disables this geometry policy. Direct ParentTree child dictionaries
 have a conformance diagnostic and retain reciprocal validation. PDF_NOTE_KIND.md
 records the original-source regression and qualification.
+
+
+Project identity is now github.com/artpar/manifold (package manifold, CLI
+cmd/manifold). Persisted manydoc-prosemirror/1 and embedded metadata profiles keep
+their established spelling; RENAME.md defines this source/API versus wire boundary.

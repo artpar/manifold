@@ -8,7 +8,7 @@ import pymupdf
 
 parser = argparse.ArgumentParser()
 parser.add_argument('directory', type=Path)
-parser.add_argument('--binary', type=Path, default=Path('bin/manydoc'))
+parser.add_argument('--binary', type=Path, default=Path('bin/manifold'))
 parser.add_argument('--require-mupdf-agreement', action='store_true')
 args = parser.parse_args()
 for name in ['case-0', 'case-1', 'case-2', 'case-3', 'shared-array']:

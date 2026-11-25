@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/artpar/manydoc"
+	"github.com/artpar/manifold"
 )
 
 func main() {
@@ -16,25 +16,25 @@ func main() {
 	if err := os.MkdirAll(out, 0755); err != nil {
 		log.Fatal(err)
 	}
-	p := func(s string) manydoc.Block {
-		return manydoc.Block{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: s}}}
+	p := func(s string) manifold.Block {
+		return manifold.Block{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: s}}}
 	}
-	c := func(s string) manydoc.Cell { return manydoc.Cell{Blocks: []manydoc.Block{p(s)}} }
-	table := manydoc.Block{Kind: manydoc.Table, ColumnWidths: []float64{45, 180, 75}, Rows: []manydoc.Row{
-		{RepeatHeader: true, Cells: []manydoc.Cell{{ColSpan: 2, Blocks: []manydoc.Block{p("COMBINED HEADER")}}, c("VALUE")}},
-		{Cells: []manydoc.Cell{{RowSpan: 2, Blocks: []manydoc.Block{p("MERGED")}}, c("Session Expiry Interval (0)"), c("FIRST")}},
-		{Cells: []manydoc.Cell{c("Description stays readable"), c("SECOND")}},
+	c := func(s string) manifold.Cell { return manifold.Cell{Blocks: []manifold.Block{p(s)}} }
+	table := manifold.Block{Kind: manifold.Table, ColumnWidths: []float64{45, 180, 75}, Rows: []manifold.Row{
+		{RepeatHeader: true, Cells: []manifold.Cell{{ColSpan: 2, Blocks: []manifold.Block{p("COMBINED HEADER")}}, c("VALUE")}},
+		{Cells: []manifold.Cell{{RowSpan: 2, Blocks: []manifold.Block{p("MERGED")}}, c("Session Expiry Interval (0)"), c("FIRST")}},
+		{Cells: []manifold.Cell{c("Description stays readable"), c("SECOND")}},
 	}}
 	for i := 0; i < 22; i++ {
-		table.Rows = append(table.Rows, manydoc.Row{Cells: []manydoc.Cell{c("ITEM"), c("A wide description column retains its useful reading width."), c("DATA")}})
+		table.Rows = append(table.Rows, manifold.Row{Cells: []manifold.Cell{c("ITEM"), c("A wide description column retains its useful reading width."), c("DATA")}})
 	}
-	nested := manydoc.Block{Kind: manydoc.Table, ColumnWidths: []float64{90, 210}, Rows: []manydoc.Row{{Cells: []manydoc.Cell{c("INNER"), c("FITTED INNER")}}}}
-	table.Rows = append(table.Rows, manydoc.Row{Cells: []manydoc.Cell{c("NEST"), {ColSpan: 2, Blocks: []manydoc.Block{nested}}}})
-	d := &manydoc.Document{Layout: manydoc.Layout{Width: 400, Height: 400, Margin: 40}, Blocks: []manydoc.Block{p("PREFERRED COLUMN WIDTHS"), table}}
+	nested := manifold.Block{Kind: manifold.Table, ColumnWidths: []float64{90, 210}, Rows: []manifold.Row{{Cells: []manifold.Cell{c("INNER"), c("FITTED INNER")}}}}
+	table.Rows = append(table.Rows, manifold.Row{Cells: []manifold.Cell{c("NEST"), {ColSpan: 2, Blocks: []manifold.Block{nested}}}})
+	d := &manifold.Document{Layout: manifold.Layout{Width: 400, Height: 400, Margin: 40}, Blocks: []manifold.Block{p("PREFERRED COLUMN WIDTHS"), table}}
 	ctx := context.Background()
-	write := func(name string, d *manydoc.Document, f manydoc.Format) []byte {
+	write := func(name string, d *manifold.Document, f manifold.Format) []byte {
 		var b bytes.Buffer
-		if err := manydoc.Write(ctx, &b, d, f, manydoc.WriteOptions{AllowLossy: true}); err != nil {
+		if err := manifold.Write(ctx, &b, d, f, manifold.WriteOptions{AllowLossy: true}); err != nil {
 			log.Fatal(err)
 		}
 		if err := os.WriteFile(filepath.Join(out, name), b.Bytes(), 0644); err != nil {
@@ -42,18 +42,18 @@ func main() {
 		}
 		return b.Bytes()
 	}
-	write("source.sf", d, manydoc.SF)
-	word := write("widths.docx", d, manydoc.DOCX)
-	pdf := write("widths.pdf", d, manydoc.PDF)
+	write("source.sf", d, manifold.SF)
+	word := write("widths.docx", d, manifold.DOCX)
+	pdf := write("widths.pdf", d, manifold.PDF)
 	for _, item := range []struct {
 		name   string
 		data   []byte
-		format manydoc.Format
-	}{{"from-docx.sf", word, manydoc.DOCX}, {"from-pdf.sf", pdf, manydoc.PDF}} {
-		back, err := manydoc.Read(ctx, bytes.NewReader(item.data), item.format, manydoc.ReadOptions{})
+		format manifold.Format
+	}{{"from-docx.sf", word, manifold.DOCX}, {"from-pdf.sf", pdf, manifold.PDF}} {
+		back, err := manifold.Read(ctx, bytes.NewReader(item.data), item.format, manifold.ReadOptions{})
 		if err != nil {
 			log.Fatal(err)
 		}
-		write(item.name, back, manydoc.SF)
+		write(item.name, back, manifold.SF)
 	}
 }

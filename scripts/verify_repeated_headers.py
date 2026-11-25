@@ -138,7 +138,7 @@ if args.cli:
         ['convert', '-o', str(out/'from-docx.pdf'), str(out/'from-docx.sf')],
         ['extract', '-format', 'sf', '-o', str(out/'from-pdf.sf'), str(out/'repeated-headers.pdf')],
     ]:
-        subprocess.run(['bin/manydoc', *command], check=True)
+        subprocess.run(['bin/manifold', *command], check=True)
     assert json.loads((out/'from-docx.sf').read_text()) == sf
     with pymupdf.open(out/'repeated-headers.pdf') as a, pymupdf.open(out/'from-docx.pdf') as b:
         assert len(a) == len(b) == 5

@@ -6,6 +6,15 @@ by the user. Generated documents, binaries, source downloads and QA environments
 remain ignored. Git history and verification.json retain the historical milestones;
 this file and ACCEPTANCE.md are the current authoritative queue.
 
+## Project name and publication
+
+The project is now Manifold, module/package github.com/artpar/manifold / manifold,
+with CLI cmd/manifold. Publication is requested at https://github.com/artpar/manifold.
+The original checkout directory and historical evidence still use manydoc.
+RENAME.md records the migration and unchanged wire-format compatibility contract.
+Rename checks and publication are in progress; exact results will be recorded here
+and in verification.json before the publication handoff.
+
 ## Outcome and current contract
 
 The original rich-document goal is **complete for the declared support contract**.
@@ -680,7 +689,7 @@ Word fidelity or completion of all PDF/native/source/resource acceptance.
 
 ```sh
 GOWORK=off go test -run '^TestGeneratedPDF|^FuzzGeneratedPDFNoteGraph$' -count=1 .
-GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf|TestCLIPDFPhysicalInspection' -count=1 ./cmd/manydoc
+GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf|TestCLIPDFPhysicalInspection' -count=1 ./cmd/manifold
 GOWORK=off go run ./examples/colleaf -out output/colleaf-tagged
 # Recreate the independent pre-tagging baseline (fresh detached checkout):
 git worktree add --detach output/tagged-baseline-1d13d3c 1d13d3c
@@ -762,7 +771,7 @@ GOWORK=off go test ./...
 GOWORK=off go test -race -timeout 20m ./...
 GOWORK=off go vet ./...
 GOWORK=off go mod verify
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/generate_poi_qa.py
 output/qa-venv/bin/python scripts/verify_poi_corpus.py
 output/qa-venv/bin/python scripts/verify_structured_corpus.py
@@ -794,8 +803,8 @@ GOWORK=off go test ./... -count=1
 GOWORK=off go test -race ./... -count=1
 GOWORK=off go vet ./...
 GOWORK=off go mod verify
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
-GOWORK=off GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/manydoc-linux-amd64 ./cmd/manydoc
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
+GOWORK=off GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/manifold-linux-amd64 ./cmd/manifold
 git diff --check
 ```
 

@@ -12,7 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/artpar/manydoc"
+	"github.com/artpar/manifold"
 )
 
 func main() {
@@ -38,54 +38,54 @@ func main() {
 		return b.Bytes()
 	}
 	logo := imageData(32, 16)
-	picture := func(data []byte, w, h float64) manydoc.Block {
-		return manydoc.Block{Kind: manydoc.Picture, Image: &manydoc.Image{Data: data, MediaType: "image/png", Alt: "Original red and blue logo", Width: w, Height: h}}
+	picture := func(data []byte, w, h float64) manifold.Block {
+		return manifold.Block{Kind: manifold.Picture, Image: &manifold.Image{Data: data, MediaType: "image/png", Alt: "Original red and blue logo", Width: w, Height: h}}
 	}
-	para := func(text string, size float64) manydoc.Block {
-		return manydoc.Block{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: text, FontSize: size}}}
+	para := func(text string, size float64) manifold.Block {
+		return manifold.Block{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: text, FontSize: size}}}
 	}
 	headerLink := para("HEADER LINK", 9)
 	headerLink.Runs[0].Link = "https://example.invalid/header"
 	headerLink.Runs[0].Color = "#004499"
-	title := manydoc.Block{Kind: manydoc.Heading, Level: 2, Runs: []manydoc.Run{{Text: "LETTERHEAD", FontFamily: "Go Mono", FontSize: 10}}}
-	nested := manydoc.Block{Kind: manydoc.Table, Rows: []manydoc.Row{{Cells: []manydoc.Cell{{ColSpan: 2, Blocks: []manydoc.Block{para("DEPARTMENT", 8)}}}}, {Cells: []manydoc.Cell{{Blocks: []manydoc.Block{para("ENGINEERING", 8)}}, {Blocks: []manydoc.Block{para("REFERENCE", 8)}}}}}}
-	header := manydoc.Block{Kind: manydoc.Table, Rows: []manydoc.Row{
-		{RepeatHeader: true, Cells: []manydoc.Cell{{RowSpan: 2, Blocks: []manydoc.Block{picture(logo, 80, 40)}}, {Blocks: []manydoc.Block{title}}}},
-		{RepeatHeader: true, Cells: []manydoc.Cell{{Blocks: []manydoc.Block{headerLink}}}},
-		{Cells: []manydoc.Cell{{ColSpan: 2, Blocks: []manydoc.Block{nested}}}},
+	title := manifold.Block{Kind: manifold.Heading, Level: 2, Runs: []manifold.Run{{Text: "LETTERHEAD", FontFamily: "Go Mono", FontSize: 10}}}
+	nested := manifold.Block{Kind: manifold.Table, Rows: []manifold.Row{{Cells: []manifold.Cell{{ColSpan: 2, Blocks: []manifold.Block{para("DEPARTMENT", 8)}}}}, {Cells: []manifold.Cell{{Blocks: []manifold.Block{para("ENGINEERING", 8)}}, {Blocks: []manifold.Block{para("REFERENCE", 8)}}}}}}
+	header := manifold.Block{Kind: manifold.Table, Rows: []manifold.Row{
+		{RepeatHeader: true, Cells: []manifold.Cell{{RowSpan: 2, Blocks: []manifold.Block{picture(logo, 80, 40)}}, {Blocks: []manifold.Block{title}}}},
+		{RepeatHeader: true, Cells: []manifold.Cell{{Blocks: []manifold.Block{headerLink}}}},
+		{Cells: []manifold.Cell{{ColSpan: 2, Blocks: []manifold.Block{nested}}}},
 	}}
 	footerLink := para("FOOTER LINK", 9)
 	footerLink.Runs[0].Link = "https://example.invalid/footer"
-	footerList := manydoc.Block{Kind: manydoc.ListBlock, List: "bullet", Items: []manydoc.ListItem{{Blocks: []manydoc.Block{para("FOOTER ITEM", 8)}}}}
-	doc := &manydoc.Document{Metadata: manydoc.Metadata{Title: "Rich running content"}, Layout: manydoc.Layout{Width: 420, Height: 560, Margin: 48}, Headers: []manydoc.Block{header}, Footers: []manydoc.Block{footerLink, picture(logo, 40, 20), footerList}, Blocks: []manydoc.Block{para("BODY BEGIN", 11)}, Notes: []manydoc.Note{{Kind: manydoc.Footnote, ID: "running-note", Blocks: []manydoc.Block{para("NOTE STAYS ABOVE THE FOOTER", 8), picture(logo, 24, 12), para("NOTE END", 8)}}}}
-	table := manydoc.Block{Kind: manydoc.Table, Rows: []manydoc.Row{{RepeatHeader: true, Cells: []manydoc.Cell{{Blocks: []manydoc.Block{para("ROW", 9)}}, {Blocks: []manydoc.Block{para("VALUE", 9)}}}}}}
+	footerList := manifold.Block{Kind: manifold.ListBlock, List: "bullet", Items: []manifold.ListItem{{Blocks: []manifold.Block{para("FOOTER ITEM", 8)}}}}
+	doc := &manifold.Document{Metadata: manifold.Metadata{Title: "Rich running content"}, Layout: manifold.Layout{Width: 420, Height: 560, Margin: 48}, Headers: []manifold.Block{header}, Footers: []manifold.Block{footerLink, picture(logo, 40, 20), footerList}, Blocks: []manifold.Block{para("BODY BEGIN", 11)}, Notes: []manifold.Note{{Kind: manifold.Footnote, ID: "running-note", Blocks: []manifold.Block{para("NOTE STAYS ABOVE THE FOOTER", 8), picture(logo, 24, 12), para("NOTE END", 8)}}}}
+	table := manifold.Block{Kind: manifold.Table, Rows: []manifold.Row{{RepeatHeader: true, Cells: []manifold.Cell{{Blocks: []manifold.Block{para("ROW", 9)}}, {Blocks: []manifold.Block{para("VALUE", 9)}}}}}}
 	for i := 0; i < 30; i++ {
 		p := para(fmt.Sprintf("VALUE-%02d", i), 10)
 		if i == 8 {
-			p.Runs = append(p.Runs, manydoc.Run{Note: &manydoc.NoteReference{Kind: manydoc.Footnote, ID: "running-note"}, FontSize: 10})
+			p.Runs = append(p.Runs, manifold.Run{Note: &manifold.NoteReference{Kind: manifold.Footnote, ID: "running-note"}, FontSize: 10})
 		}
 		if i == 20 {
 			p.PageBreakBefore = true
 		}
-		table.Rows = append(table.Rows, manydoc.Row{Cells: []manydoc.Cell{{Blocks: []manydoc.Block{para(fmt.Sprintf("ROW-%02d", i), 10)}}, {Blocks: []manydoc.Block{p}}}})
+		table.Rows = append(table.Rows, manifold.Row{Cells: []manifold.Cell{{Blocks: []manifold.Block{para(fmt.Sprintf("ROW-%02d", i), 10)}}, {Blocks: []manifold.Block{p}}}})
 	}
 	doc.Blocks = append(doc.Blocks, table, para("BODY END", 11))
-	write := func(name string, d *manydoc.Document) {
-		for _, format := range []manydoc.Format{manydoc.SF, manydoc.DOCX, manydoc.PDF} {
+	write := func(name string, d *manifold.Document) {
+		for _, format := range []manifold.Format{manifold.SF, manifold.DOCX, manifold.PDF} {
 			var data bytes.Buffer
-			if err := manydoc.Write(context.Background(), &data, d, format, manydoc.WriteOptions{}); err != nil {
+			if err := manifold.Write(context.Background(), &data, d, format, manifold.WriteOptions{}); err != nil {
 				log.Fatal(err)
 			}
 			if err := os.WriteFile(filepath.Join(out, name+"."+string(format)), data.Bytes(), 0644); err != nil {
 				log.Fatal(err)
 			}
-			if format != manydoc.SF {
-				back, err := manydoc.Read(context.Background(), bytes.NewReader(data.Bytes()), format, manydoc.ReadOptions{})
+			if format != manifold.SF {
+				back, err := manifold.Read(context.Background(), bytes.NewReader(data.Bytes()), format, manifold.ReadOptions{})
 				if err != nil {
 					log.Fatal(err)
 				}
 				var sf bytes.Buffer
-				if err := manydoc.Write(context.Background(), &sf, back, manydoc.SF, manydoc.WriteOptions{}); err != nil {
+				if err := manifold.Write(context.Background(), &sf, back, manifold.SF, manifold.WriteOptions{}); err != nil {
 					log.Fatal(err)
 				}
 				if err := os.WriteFile(filepath.Join(out, name+"-"+string(format)+".sf"), sf.Bytes(), 0644); err != nil {
@@ -96,5 +96,5 @@ func main() {
 	}
 	write("letterhead", doc)
 	tall := picture(imageData(16, 128), 0, 1000)
-	write("tight", &manydoc.Document{Layout: manydoc.Layout{Width: 220, Height: 220, Margin: 20}, Headers: []manydoc.Block{tall}, Footers: []manydoc.Block{tall}, Blocks: []manydoc.Block{para("ONLY BODY", 11)}})
+	write("tight", &manifold.Document{Layout: manifold.Layout{Width: 220, Height: 220, Margin: 20}, Headers: []manifold.Block{tall}, Footers: []manifold.Block{tall}, Blocks: []manifold.Block{para("ONLY BODY", 11)}})
 }

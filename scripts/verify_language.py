@@ -40,7 +40,7 @@ r=p.add_run('OVERRIDE');r.style=char;prop(r._r.get_or_add_rPr(),'lang',{'val':'s
 doc.add_paragraph('INHERITED',style=derived)
 p=doc.add_paragraph('FORCED');prop(p.runs[0]._r.get_or_add_rPr(),'cs',{});prop(p.runs[0]._r.get_or_add_rPr(),'lang',{'val':'ru-RU','bidi':'sr-RS'})
 source=out/'source.docx';doc.save(source)
-subprocess.run(['bin/manydoc','extract','-format','sf','-o',str(out/'source.sf'),str(source)],check=True)
+subprocess.run(['bin/manifold','extract','-format','sf','-o',str(out/'source.sf'),str(source)],check=True)
 sf=json.loads((out/'source.sf').read_text())
 expected=[('DEFAULT','ltr','rtl','fr-CA','ja-JP','ar-SA',False),('OVERRIDE','ltr','ltr','sr-RS','zh-TW','he-IL',False),('INHERITED','rtl','rtl','fr-CA','zh-TW','ar-SA',False),('FORCED','ltr','rtl','ru-RU','ja-JP','sr-RS',True)]
 for para,(text,pdir,rdir,lang,ea,cs,complex_script) in zip(sf['content'],expected):
@@ -51,7 +51,7 @@ for para,(text,pdir,rdir,lang,ea,cs,complex_script) in zip(sf['content'],expecte
  assert style.get('complexScript',False)==complex_script
 assert len(sf['content'])==4
 assert not {'run_language','run_direction'} & {d['code'] for d in sf['attrs'].get('diagnostics',[])}
-subprocess.run(['bin/manydoc','convert','-allow-lossy','-o',str(out/'reflow.docx'),str(out/'source.sf')],check=True)
+subprocess.run(['bin/manifold','convert','-allow-lossy','-o',str(out/'reflow.docx'),str(out/'source.sf')],check=True)
 with ZipFile(out/'reflow.docx') as z:
  body=etree.fromstring(z.read('word/document.xml')).find('w:body',ns)
  for para,(_,pdir,rdir,lang,ea,cs,complex_script) in zip(body.findall('w:p',ns),expected):

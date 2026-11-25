@@ -1,4 +1,4 @@
-package manydoc
+package manifold
 
 func listStart(b Block) int {
 	if b.Start != nil {

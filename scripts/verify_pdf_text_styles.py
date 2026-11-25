@@ -38,7 +38,7 @@ for page in range(2):
         c.drawString(30, 450-j*65, token+str(page+1))
     c.showPage()
 c.save()
-subprocess.run(['bin/manydoc', 'extract', '-pdf-skip-inference', '-format', 'sf', '-o', str(out/'styles.sf'), str(source)], check=True)
+subprocess.run(['bin/manifold', 'extract', '-pdf-skip-inference', '-format', 'sf', '-o', str(out/'styles.sf'), str(source)], check=True)
 sf = json.loads((out/'styles.sf').read_text())
 def runs(node):
     if node['type'] == 'text':
@@ -66,7 +66,7 @@ with pymupdf.open(source) as doc:
             assert abs(evidence['baseline'][0]['y']-independent['origin'][1]) < .001
         page.get_pixmap(matrix=pymupdf.Matrix(1.3, 1.3)).save(out/f'source-{page_no+1}.png')
 for ext in ('docx', 'pdf'):
-    subprocess.run(['bin/manydoc', 'convert', '-allow-lossy', '-pdf-font-map', 'Helvetica=Go', '-pdf-font-map', 'Times=Go', '-pdf-font-map', 'Courier=Go Mono', '-o', str(out/f'reflow.{ext}'), str(out/'styles.sf')], check=True)
+    subprocess.run(['bin/manifold', 'convert', '-allow-lossy', '-pdf-font-map', 'Helvetica=Go', '-pdf-font-map', 'Times=Go', '-pdf-font-map', 'Courier=Go Mono', '-o', str(out/f'reflow.{ext}'), str(out/'styles.sf')], check=True)
 ns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
 w = '{'+ns['w']+'}'
 with ZipFile(out/'reflow.docx') as z:

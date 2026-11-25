@@ -1,4 +1,4 @@
-package manydoc
+package manifold
 
 import "golang.org/x/text/unicode/bidi"
 

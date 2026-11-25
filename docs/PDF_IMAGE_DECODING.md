@@ -92,7 +92,7 @@ No original expected behavior was changed to pass.
 ```sh
 GOWORK=off MANYDOC_PDF_IMAGE_QA=output/pdf-image-qa go test -run 'TestPDFImage|TestPDFRaster' -count=1 .
 GOWORK=off MANYDOC_PDF_IMAGE_LARGE=1 MANYDOC_PDF_IMAGE_QA=output/pdf-image-qa go test -run TestPDFImagePublicStageLimit -count=1 .
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_pdf_images.py output/pdf-image-qa
 # Retained strict reader discrepancies; both commands currently fail:
 output/qa-venv/bin/python scripts/verify_pdf_images.py output/pdf-image-qa --require-cmyk
@@ -101,7 +101,7 @@ output/qa-venv/bin/python scripts/verify_published_pdf.py output/pdf-image-publi
 GOWORK=off go test ./...
 GOWORK=off go test -race ./...
 GOWORK=off go vet ./...
-GOWORK=off CGO_ENABLED=0 go build -o output/manydoc ./cmd/manydoc
+GOWORK=off CGO_ENABLED=0 go build -o output/manydoc ./cmd/manifold
 git diff --check
 ```
 

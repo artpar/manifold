@@ -2561,3 +2561,13 @@ Do not turn every optional third-party browser experiment or a universal memory/
 codec/script/layout guarantee into an unstated completion criterion. Required
 capabilities are implemented and qualified; future compatibility expansion should
 preserve original source oracles and use the same committed evidence workflow.
+
+
+## 2026-11-25 Rename and publish as artpar/manifold
+
+The user requested the project name Manifold and publication at artpar/manifold.
+Rename the Go module/package, CLI, imports and current commands. Preserve versioned
+SF/OOXML/PDF/native metadata identifiers, source fixtures, historical ledger entries
+and existing QA environment variable names. This keeps existing documents readable;
+the Go source import path intentionally migrates. RENAME.md records the boundary.
+No proprietary code, runtime dependency or application permission boundary changes.

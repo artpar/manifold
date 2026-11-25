@@ -8,32 +8,32 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/artpar/manydoc"
+	"github.com/artpar/manifold"
 )
 
-func cliReadDocument(t *testing.T, path string) *manydoc.Document {
+func cliReadDocument(t *testing.T, path string) *manifold.Document {
 	t.Helper()
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	format, err := manydoc.FormatFromName(path)
+	format, err := manifold.FormatFromName(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	d, err := manydoc.Read(context.Background(), bytes.NewReader(raw), format, manydoc.ReadOptions{})
+	d, err := manifold.Read(context.Background(), bytes.NewReader(raw), format, manifold.ReadOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	return d
 }
-func cliAssertSF(t *testing.T, want, got *manydoc.Document) {
+func cliAssertSF(t *testing.T, want, got *manifold.Document) {
 	t.Helper()
-	a, err := manydoc.ToStructured(want)
+	a, err := manifold.ToStructured(want)
 	if err != nil {
 		t.Fatal(err)
 	}
-	b, err := manydoc.ToStructured(got)
+	b, err := manifold.ToStructured(got)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +56,7 @@ func TestCLIVDOCSSemantics(t *testing.T) {
 			if err := run(ctx, []string{"extract", "-format", "sf", native}, &out, &bytes.Buffer{}); err != nil {
 				t.Fatal(err)
 			}
-			got, err := manydoc.Read(ctx, &out, manydoc.SF, manydoc.ReadOptions{})
+			got, err := manifold.Read(ctx, &out, manifold.SF, manifold.ReadOptions{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -81,7 +81,7 @@ func TestCLIVDOCSSemantics(t *testing.T) {
 						for _, n := range recovered.Notes {
 							kinds[string(n.Kind)]++
 						}
-						if kinds[string(manydoc.Footnote)] != 2 || kinds[string(manydoc.Endnote)] != 1 {
+						if kinds[string(manifold.Footnote)] != 2 || kinds[string(manifold.Endnote)] != 1 {
 							t.Fatal("note kinds changed", ext, kinds)
 						}
 						if recovered.Metadata.Title != want.Metadata.Title {
@@ -110,7 +110,7 @@ func TestCLIVDOCSAtomicFailure(t *testing.T) {
 	if err != nil || string(raw) != "KEEP" {
 		t.Fatal("existing output replaced", err)
 	}
-	files, err := filepath.Glob(filepath.Join(dir, ".manydoc-*"))
+	files, err := filepath.Glob(filepath.Join(dir, ".manifold-*"))
 	if err != nil || len(files) != 0 {
 		t.Fatal("temporary output leaked", files, err)
 	}
@@ -127,7 +127,7 @@ func TestCLIPDFPhysicalInspection(t *testing.T) {
 	if err := run(ctx, []string{"extract", "-pdf-skip-structure", "-pdf-skip-inference", "-format", "sf", pdf}, &out, &bytes.Buffer{}); err != nil {
 		t.Fatal(err)
 	}
-	d, err := manydoc.Read(ctx, &out, manydoc.SF, manydoc.ReadOptions{})
+	d, err := manifold.Read(ctx, &out, manifold.SF, manifold.ReadOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,4 +1,4 @@
-module github.com/artpar/manydoc
+module github.com/artpar/manifold
 
 go 1.25.0
 

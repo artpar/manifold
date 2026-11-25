@@ -94,7 +94,7 @@ reflowed pages). This resource-only change has no new output-layout claim.
 
 ```sh
 MANYDOC_PDF_XOBJECT_QA=output/pdf-xobject-qa GOWORK=off go test -run 'TestPDFXObject' -count=1 .
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_pdf_xobject_budget.py output/pdf-xobject-qa
 GOWORK=off go test -race -run 'TestPDFXObject|FuzzPDFXObjectGraph' -count=1 .
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFXObjectGraph$' -fuzztime=10s -parallel=2 .

@@ -1,4 +1,4 @@
-package manydoc
+package manifold
 
 // An explicit same-target wrapper around one inline descendant contributes a
 // redundant relationship, not another occurrence. Additional paint/objects,

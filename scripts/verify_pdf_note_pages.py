@@ -15,7 +15,7 @@ from PIL import Image
 
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('root',nargs='?',type=Path,default=Path('output/pdf-note-pages'))
-parser.add_argument('--cli',default='bin/manydoc')
+parser.add_argument('--cli',default='bin/manifold')
 parser.add_argument('--probe',type=Path,default=Path('output/pdf-note-continuation-crosspage'))
 parser.add_argument('--word-render',type=Path)
 args=parser.parse_args()

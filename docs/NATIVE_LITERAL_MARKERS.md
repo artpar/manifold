@@ -147,7 +147,7 @@ To qualify the existing original automatic-numbering example separately:
 
 ```sh
 GOWORK=off go run ./examples/numbering
-GOWORK=off go run ./cmd/manydoc convert -o output/colleaf-browser/numbering.vdocs output/numbering/source.sf
+GOWORK=off go run ./cmd/manifold convert -o output/colleaf-browser/numbering.vdocs output/numbering/source.sf
 ```
 
 Then evaluate `await lists('numbering')` in the actual harness. Its fixed original

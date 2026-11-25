@@ -108,7 +108,7 @@ faces at output/font-subset/dejavu/ for the QA driver.
 
 ```sh
 output/qa-venv/bin/python scripts/audit_poi_sources.py
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/generate_poi_qa.py
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-poi-original-qa --headless --convert-to pdf --outdir output/real-docx-audit/original-render output/real-docx-audit/*.docx
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-poi-generated-qa --headless --convert-to pdf --outdir output/real-docx-audit/word-render output/real-docx-audit/generated/*.docx

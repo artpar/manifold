@@ -1,6 +1,6 @@
 """Compare manydoc CLI extraction with Poppler across non-malformed PDF fixtures.
 
-Usage: python scripts/compare_pdf_text.py [bin/manydoc] [output/pdf-comparison.json]
+Usage: python scripts/compare_pdf_text.py [bin/manifold] [output/pdf-comparison.json]
 """
 import json
 import os
@@ -9,7 +9,7 @@ import subprocess
 import sys
 
 root = Path(__file__).resolve().parents[1]
-binary = (root / (sys.argv[1] if len(sys.argv) > 1 else "bin/manydoc")).resolve()
+binary = (root / (sys.argv[1] if len(sys.argv) > 1 else "bin/manifold")).resolve()
 output = root / (sys.argv[2] if len(sys.argv) > 2 else "output/pdf-comparison.json")
 rows = []
 for case in json.loads((root / "testdata/corpus/manifest.json").read_text()):

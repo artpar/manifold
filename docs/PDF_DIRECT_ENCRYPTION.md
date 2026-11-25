@@ -97,7 +97,7 @@ The publication structure/content/DOCX and nine-page PDF reflow verifier passes.
 
 ```sh
 GOWORK=off MANYDOC_DIRECT_ENCRYPT_QA=output/pdf-direct-encrypt-qa go test -run TestPDFDirectEncryption -count=1 .
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_pdf_direct_encryption.py output/pdf-direct-encrypt-qa --generate-mupdf
 output/qa-venv/bin/python scripts/verify_pdf_parser_streams.py output/pdf-parser-qa --generate-encrypted --require-encrypted
 # Retained reader discrepancies on original repair-shaped sources; currently fail:
@@ -106,7 +106,7 @@ output/qa-venv/bin/python scripts/verify_pdf_direct_encryption.py output/pdf-dir
 GOWORK=off go test ./...
 GOWORK=off go test -race ./...
 GOWORK=off go vet ./...
-GOWORK=off CGO_ENABLED=0 go build -o output/manydoc ./cmd/manydoc
+GOWORK=off CGO_ENABLED=0 go build -o output/manydoc ./cmd/manifold
 git diff --check
 ```
 

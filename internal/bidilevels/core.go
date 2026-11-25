@@ -202,7 +202,7 @@ func (p *paragraph) run() {
 //     If there is no matching isolate initiator, or the character is not a PDI,
 //     it is set to -1.
 //
-// manydoc adaptation: match isolates with a stack in linear time. The upstream
+// manifold adaptation: match isolates with a stack in linear time. The upstream
 // reference rescans each suffix, taking quadratic time for unmatched initiators.
 func (p *paragraph) determineMatchingIsolates() {
 	p.matchingPDI = make([]int, p.Len())

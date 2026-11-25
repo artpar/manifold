@@ -1,6 +1,6 @@
 # Third party components
 
-manydoc's own code is MIT licensed. No UniOffice/UniPDF implementation code is
+manifold's own code is MIT licensed. No UniOffice/UniPDF implementation code is
 included. Third-party components remain under their respective licenses.
 
 | Component | Version | Purpose | License |

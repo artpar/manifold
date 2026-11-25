@@ -50,7 +50,7 @@ func TestCLIAtomicFailure(t *testing.T) {
 	if string(b) != "KEEP EXISTING OUTPUT" {
 		t.Fatal("existing output changed on failure")
 	}
-	files, e := filepath.Glob(filepath.Join(dir, ".manydoc-*"))
+	files, e := filepath.Glob(filepath.Join(dir, ".manifold-*"))
 	if e != nil || len(files) > 0 {
 		t.Fatal("temporary output leaked", files, e)
 	}

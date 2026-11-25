@@ -49,10 +49,10 @@ explained historical semantic difference, not a waived painted-content loss.
 ## Reproduction and scope
 
 ```sh
-GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+GOWORK=off go build -o bin/manifold ./cmd/manifold
 MANYDOC_PDF_NOTE_KIND_QA=output/pdf-note-kind GOWORK=off go test -run TestPDFTaggedNotePlacementKind -count=1 .
-bin/manydoc extract -format sf.gz -o output/note-inference/guide-kind.sf.gz output/note-inference/tagged-guide.pdf
-bin/manydoc extract -pdf-skip-inference -format sf.gz -o output/note-inference/guide-kind-uninferred.sf.gz output/note-inference/tagged-guide.pdf
+bin/manifold extract -format sf.gz -o output/note-inference/guide-kind.sf.gz output/note-inference/tagged-guide.pdf
+bin/manifold extract -pdf-skip-inference -format sf.gz -o output/note-inference/guide-kind-uninferred.sf.gz output/note-inference/tagged-guide.pdf
 output/qa-venv/bin/python scripts/verify_pdf_note_kind.py --render-dir output/pdf-note-kind --historical-sf output/note-inference/guide-styled.sf.gz
 output/qa-venv/bin/python scripts/verify_note_inference.py --guide output/note-inference/tagged-guide.pdf --guide-sf output/note-inference/guide-kind.sf.gz
 output/qa-venv/bin/python scripts/verify_pdf_note_kind.py

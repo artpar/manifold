@@ -110,7 +110,7 @@ ignored under output, with reproducible commands below. Original publication/MQT
 full SF remains unchanged against the prior direct-encryption milestone.
 
 ```sh
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
 GOWORK=off go test -run TestPDFUntagged -count=1 .
 # Prepare original-render PDFs and QA fonts as in REAL_DOCX_CORPUS.md.
 output/qa-venv/bin/python scripts/verify_pdf_untagged_notes.py
@@ -153,7 +153,7 @@ an implementation task, not an external blocker or a completion waiver.
 ```sh
 python3 scripts/generate_pdf_note_continuation_probe.py
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-note-continuation-qa --headless --convert-to pdf --outdir output/pdf-note-continuation output/pdf-note-continuation/continuation-source.docx
-bin/manydoc extract -pdf-skip-structure -format json -o output/pdf-note-continuation/geometric.json output/pdf-note-continuation/continuation-source.pdf
+bin/manifold extract -pdf-skip-structure -format json -o output/pdf-note-continuation/geometric.json output/pdf-note-continuation/continuation-source.pdf
 # Failed at eb4573e; the current rich-extent implementation passes this exact oracle.
 python3 scripts/generate_pdf_note_continuation_probe.py --check output/pdf-note-continuation/geometric.json
 ```

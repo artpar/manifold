@@ -1,4 +1,4 @@
-package manydoc
+package manifold
 
 // ProseMirror JSON is the persistence and editor interchange representation.
 // Document remains the conversion engine's Go model and legacy JSON API.

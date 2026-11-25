@@ -134,9 +134,9 @@ and numbering formats, qualify further body/link/asset recovery, and reduce the
 large PDF→SF provenance/codec overhead under the original full acceptance goal.
 
 ```sh
-bin/manydoc extract -format sf -o output/font-subset/mqtt.sf testdata/real/mqtt-v5.0-os.docx
+bin/manifold extract -format sf -o output/font-subset/mqtt.sf testdata/real/mqtt-v5.0-os.docx
 # Explicit font mappings used for the current native render:
-bin/manydoc convert -allow-lossy -pdf-font Han=output/font-research/BabelStoneHan.ttf -pdf-font Sans=output/font-subset/dejavu/DejaVuSans.ttf -pdf-font Sans/B=output/font-subset/dejavu/DejaVuSans-Bold.ttf -pdf-font Sans/I=output/font-subset/dejavu/DejaVuSans-Oblique.ttf -pdf-font Sans/BI=output/font-subset/dejavu/DejaVuSans-BoldOblique.ttf -pdf-font-map 'Arial,MingLiU-ExtB=Han' -pdf-font-map Arial=Sans -pdf-font-map 'Arial,Consolas=Go Mono' -pdf-font-map 'Arial,Verdana=Sans' -pdf-font-map Calibri=Sans -pdf-font-map 'Courier New=Go Mono' -pdf-font-map 'Arial Unicode MS=Sans' -pdf-font-map 'Arial,Arial Unicode MS=Sans' -o output/font-subset/mqtt.pdf output/font-subset/mqtt.sf
+bin/manifold convert -allow-lossy -pdf-font Han=output/font-research/BabelStoneHan.ttf -pdf-font Sans=output/font-subset/dejavu/DejaVuSans.ttf -pdf-font Sans/B=output/font-subset/dejavu/DejaVuSans-Bold.ttf -pdf-font Sans/I=output/font-subset/dejavu/DejaVuSans-Oblique.ttf -pdf-font Sans/BI=output/font-subset/dejavu/DejaVuSans-BoldOblique.ttf -pdf-font-map 'Arial,MingLiU-ExtB=Han' -pdf-font-map Arial=Sans -pdf-font-map 'Arial,Consolas=Go Mono' -pdf-font-map 'Arial,Verdana=Sans' -pdf-font-map Calibri=Sans -pdf-font-map 'Courier New=Go Mono' -pdf-font-map 'Arial Unicode MS=Sans' -pdf-font-map 'Arial,Arial Unicode MS=Sans' -o output/font-subset/mqtt.pdf output/font-subset/mqtt.sf
 output/qa-venv/bin/python scripts/verify_mqtt_render.py  # now passes after the URI_TARGETS.md fix
 rg -n 'LinkString|URI' pdf_text.go pdf_links.go
 ```

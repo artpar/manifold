@@ -11,7 +11,7 @@ import pymupdf
 
 parser = argparse.ArgumentParser()
 parser.add_argument('directory', type=Path)
-parser.add_argument('--binary', type=Path, default=Path('bin/manydoc'))
+parser.add_argument('--binary', type=Path, default=Path('bin/manifold'))
 parser.add_argument('--generate-mupdf', action='store_true')
 parser.add_argument('--require-pypdf-prefix', action='store_true')
 parser.add_argument('--require-mupdf-repairs', action='store_true')

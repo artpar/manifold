@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/artpar/manydoc"
+	"github.com/artpar/manifold"
 )
 
 func main() {
@@ -23,14 +23,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	d := &manydoc.Document{Layout: manydoc.Layout{Width: 400, Height: 200, Margin: 24}, Blocks: []manydoc.Block{{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: *text, FontFamily: *family, FontSize: 60}}}}}
+	d := &manifold.Document{Layout: manifold.Layout{Width: 400, Height: 200, Margin: 24}, Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: *text, FontFamily: *family, FontSize: 60}}}}}
 	if err := os.MkdirAll(filepath.Dir(*out), 0755); err != nil {
 		log.Fatal(err)
 	}
-	opts := manydoc.WriteOptions{PDFFonts: []manydoc.FontFace{{Family: *family, Data: data}}}
-	write := func(suffix string, d *manydoc.Document, format manydoc.Format) []byte {
+	opts := manifold.WriteOptions{PDFFonts: []manifold.FontFace{{Family: *family, Data: data}}}
+	write := func(suffix string, d *manifold.Document, format manifold.Format) []byte {
 		var b bytes.Buffer
-		if err := manydoc.Write(ctx, &b, d, format, opts); err != nil {
+		if err := manifold.Write(ctx, &b, d, format, opts); err != nil {
 			log.Fatal(err)
 		}
 		if err := os.WriteFile(*out+suffix, b.Bytes(), 0644); err != nil {
@@ -38,25 +38,25 @@ func main() {
 		}
 		return b.Bytes()
 	}
-	raw := write(".sf", d, manydoc.SF)
-	sf, err := manydoc.ReadStructured(ctx, bytes.NewReader(raw))
+	raw := write(".sf", d, manifold.SF)
+	sf, err := manifold.ReadStructured(ctx, bytes.NewReader(raw))
 	if err != nil {
 		log.Fatal(err)
 	}
-	d, err = manydoc.FromStructured(sf)
+	d, err = manifold.FromStructured(sf)
 	if err != nil {
 		log.Fatal(err)
 	}
-	word := write(".docx", d, manydoc.DOCX)
-	pdf := write(".pdf", d, manydoc.PDF)
-	back, err := manydoc.ReadDOCX(ctx, bytes.NewReader(word))
+	word := write(".docx", d, manifold.DOCX)
+	pdf := write(".pdf", d, manifold.PDF)
+	back, err := manifold.ReadDOCX(ctx, bytes.NewReader(word))
 	if err != nil {
 		log.Fatal(err)
 	}
-	write(".from-docx.sf", back, manydoc.SF)
-	back, err = manydoc.ReadPDF(ctx, bytes.NewReader(pdf), manydoc.ReadOptions{PDFSkipInference: true})
+	write(".from-docx.sf", back, manifold.SF)
+	back, err = manifold.ReadPDF(ctx, bytes.NewReader(pdf), manifold.ReadOptions{PDFSkipInference: true})
 	if err != nil {
 		log.Fatal(err)
 	}
-	write(".from-pdf.sf", back, manydoc.SF)
+	write(".from-pdf.sf", back, manifold.SF)
 }

@@ -1,4 +1,4 @@
-package manydoc
+package manifold
 
 // Geometric inference is deliberately separate from tagged-tree interpretation.
 // No geometric rule establishes authorial semantics. Source evidence and the

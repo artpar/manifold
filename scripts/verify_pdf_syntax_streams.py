@@ -9,7 +9,7 @@ import pymupdf
 
 parser = argparse.ArgumentParser()
 parser.add_argument('directory', type=Path)
-parser.add_argument('--binary', type=Path, default=Path('bin/manydoc'))
+parser.add_argument('--binary', type=Path, default=Path('bin/manifold'))
 parser.add_argument('--require-pypdf-all', action='store_true')
 args = parser.parse_args()
 body = b'BT /F 10 Tf 20 300 Td (FILTERED) Tj ET'

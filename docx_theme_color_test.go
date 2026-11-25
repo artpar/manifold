@@ -1,4 +1,4 @@
-package manydoc
+package manifold
 
 import (
 	"archive/zip"
@@ -13,7 +13,7 @@ import (
 
 const themeColorPalette = `<a:dk1><a:sysClr val="windowText" lastClr="102030"/></a:dk1><a:lt1><a:sysClr val="window" lastClr="F0E0D0"/></a:lt1><a:dk2><a:srgbClr val="204060"/></a:dk2><a:lt2><a:srgbClr val="E0C0A0"/></a:lt2><a:accent1><a:srgbClr val="4F81BD"/></a:accent1><a:accent2><a:srgbClr val="C0504D"/></a:accent2><a:accent3><a:srgbClr val="FF0000"/></a:accent3><a:accent4><a:srgbClr val="808080"/></a:accent4><a:accent5><a:srgbClr val="FFFFFF"/></a:accent5><a:accent6><a:srgbClr val="000000"/></a:accent6><a:hlink><a:srgbClr val="0000FF"/></a:hlink><a:folHlink><a:srgbClr val="800080"/></a:folHlink>`
 
-// Independently authored OPC parts. No manydoc writer supplies source colors.
+// Independently authored OPC parts. No manifold writer supplies source colors.
 func themeColorDOCX(t testing.TB, body, palette, settings, styles string) []byte {
 	t.Helper()
 	parts := map[string]string{

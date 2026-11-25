@@ -12,20 +12,20 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/artpar/manydoc"
+	"github.com/artpar/manifold"
 )
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if err := run(ctx, os.Args[1:], os.Stdout, os.Stderr); err != nil {
-		fmt.Fprintln(os.Stderr, "manydoc:", err)
+		fmt.Fprintln(os.Stderr, "manifold:", err)
 		os.Exit(1)
 	}
 }
 func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 || args[0] == "help" || args[0] == "-h" || args[0] == "--help" {
-		fmt.Fprintln(stdout, "Usage:\n  manydoc convert -o output.docx|pdf|sf|sf.gz|vdocs|json|txt [-allow-lossy] input.docx|pdf|sf|sf.gz|vdocs|json|txt\n  manydoc extract [-format txt|sf|sf.gz|json] [-o output|-] input.docx|pdf|vdocs\n\nOptions precede the input filename. PDF passwords may be supplied with -password-env NAME.\nPDF fonts: -pdf-font Family[/B|I|BI]=path.ttf and -pdf-font-map Requested=Target (repeatable).")
+		fmt.Fprintln(stdout, "Usage:\n  manifold convert -o output.docx|pdf|sf|sf.gz|vdocs|json|txt [-allow-lossy] input.docx|pdf|sf|sf.gz|vdocs|json|txt\n  manifold extract [-format txt|sf|sf.gz|json] [-o output|-] input.docx|pdf|vdocs\n\nOptions precede the input filename. PDF passwords may be supplied with -password-env NAME.\nPDF fonts: -pdf-font Family[/B|I|BI]=path.ttf and -pdf-font-map Requested=Target (repeatable).")
 		return nil
 	}
 	command := args[0]
@@ -53,14 +53,14 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 		return errors.New("exactly one input filename is required; flags precede the filename")
 	}
 	inName := fs.Arg(0)
-	inFormat, err := manydoc.FormatFromName(inName)
+	inFormat, err := manifold.FormatFromName(inName)
 	if err != nil {
 		return err
 	}
-	var outFormat manydoc.Format
+	var outFormat manifold.Format
 	if command == "extract" {
-		outFormat = manydoc.Format(*format)
-		if outFormat != manydoc.Text && outFormat != manydoc.JSON && outFormat != manydoc.SF && outFormat != manydoc.SFGzip {
+		outFormat = manifold.Format(*format)
+		if outFormat != manifold.Text && outFormat != manifold.JSON && outFormat != manifold.SF && outFormat != manifold.SFGzip {
 			return errors.New("extract format must be txt, sf, sf.gz or json")
 		}
 		if *output == "" {
@@ -70,12 +70,12 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 		if *output == "" || *output == "-" {
 			return errors.New("convert requires an output filename with a supported extension")
 		}
-		outFormat, err = manydoc.FormatFromName(*output)
+		outFormat, err = manifold.FormatFromName(*output)
 		if err != nil {
 			return err
 		}
 	}
-	opts := manydoc.ReadOptions{PDFSkipInference: *pdfSkipInference, PDFSkipStructure: *pdfSkipStructure}
+	opts := manifold.ReadOptions{PDFSkipInference: *pdfSkipInference, PDFSkipStructure: *pdfSkipStructure}
 	if *passwordEnv != "" {
 		var ok bool
 		opts.Password, ok = os.LookupEnv(*passwordEnv)
@@ -88,14 +88,14 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 		return err
 	}
 	defer in.Close()
-	doc, err := manydoc.Read(ctx, in, inFormat, opts)
+	doc, err := manifold.Read(ctx, in, inFormat, opts)
 	if err != nil {
 		return err
 	}
 	for _, d := range doc.Diagnostics {
 		fmt.Fprintf(stderr, "%s: %s\n", d.Code, d.Message)
 	}
-	writeOpts := manydoc.WriteOptions{AllowLossy: *lossy, PDFFontMap: map[string]string{}}
+	writeOpts := manifold.WriteOptions{AllowLossy: *lossy, PDFFontMap: map[string]string{}}
 	for _, value := range fontMaps {
 		from, to, ok := strings.Cut(value, "=")
 		if !ok || from == "" || to == "" {
@@ -123,17 +123,17 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 		if err != nil {
 			return err
 		}
-		writeOpts.PDFFonts = append(writeOpts.PDFFonts, manydoc.FontFace{Family: family, Bold: strings.Contains(style, "B"), Italic: strings.Contains(style, "I"), Data: data})
+		writeOpts.PDFFonts = append(writeOpts.PDFFonts, manifold.FontFace{Family: family, Bold: strings.Contains(style, "B"), Italic: strings.Contains(style, "I"), Data: data})
 	}
 	write := func(w io.Writer) error {
-		return manydoc.Write(ctx, w, doc, outFormat, writeOpts)
+		return manifold.Write(ctx, w, doc, outFormat, writeOpts)
 	}
 	if *output == "-" {
 		return write(stdout)
 	}
 	// Rename only after successful conversion so a failed operation preserves an
 	// existing destination and never exposes a partial generated document.
-	f, err := os.CreateTemp(filepath.Dir(*output), ".manydoc-*")
+	f, err := os.CreateTemp(filepath.Dir(*output), ".manifold-*")
 	if err != nil {
 		return err
 	}

@@ -2,7 +2,7 @@
 
 python-docx authors an ordinary full package; XML explicitly selects source
 palette, mappings and run properties. Source theme binding intentionally resolves
-to RGB in SF. Requires bin/manydoc and optional QA Python dependencies.
+to RGB in SF. Requires bin/manifold and optional QA Python dependencies.
 """
 import argparse
 import json
@@ -64,7 +64,7 @@ map_node.set('{'+w+'}t1','accent3');map_node.set('{'+w+'}bg2','accent4')
 parts['word/settings.xml']=etree.tostring(settings,xml_declaration=True,encoding='UTF-8',standalone=True)
 with ZipFile(source,'w') as z:
  for name,data in parts.items():z.writestr(name,data)
-subprocess.run(['bin/manydoc','extract','-format','sf','-o',str(out/'source.sf'),str(source)],check=True)
+subprocess.run(['bin/manifold','extract','-format','sf','-o',str(out/'source.sf'),str(source)],check=True)
 sf=json.loads((out/'source.sf').read_text())
 def runs(n):
  if n['type']=='text':yield n
@@ -76,7 +76,7 @@ for token,theme,tint,shade,cache,rgb in cases:
  assert observed[token]['fontSize']==14
 assert any(d['code']=='color_theme' for d in sf['attrs']['diagnostics'])
 for ext in ('docx','pdf'):
- subprocess.run(['bin/manydoc','convert','-allow-lossy','-pdf-font-map','Liberation Sans=Go','-o',str(out/f'reflow.{ext}'),str(out/'source.sf')],check=True)
+ subprocess.run(['bin/manifold','convert','-allow-lossy','-pdf-font-map','Liberation Sans=Go','-o',str(out/f'reflow.{ext}'),str(out/'source.sf')],check=True)
 with ZipFile(out/'reflow.docx') as z:
  root=etree.fromstring(z.read('word/document.xml'))
  for token,theme,tint,shade,cache,rgb in cases:

@@ -52,7 +52,7 @@ etree.SubElement(settings,'{'+w+'}themeFontLang',{'{'+w+'}val':'ja-JP','{'+w+'}e
 parts['word/settings.xml']=etree.tostring(settings,xml_declaration=True,encoding='UTF-8',standalone=True)
 with ZipFile(source,'w') as z:
  for name,data in parts.items():z.writestr(name,data)
-subprocess.run(['bin/manydoc','extract','-format','sf','-o',str(out/'source.sf'),str(source)],check=True)
+subprocess.run(['bin/manifold','extract','-format','sf','-o',str(out/'source.sf'),str(source)],check=True)
 sf=json.loads((out/'source.sf').read_text());assert len(sf['content'])==len(cases)
 for block,expected in zip(sf['content'],cases):
  runs=block['content'];assert len(runs)==len(expected),(runs,expected)
@@ -63,7 +63,7 @@ for block,expected in zip(sf['content'],cases):
   assert ('strong' in marks)==bold and ('em' in marks)==italic
 assert {'font_theme','font_selectors'} <= {d['code'] for d in sf['attrs']['diagnostics']}
 for ext in ('docx','pdf'):
- subprocess.run(['bin/manydoc','convert','-allow-lossy','-pdf-font-map','Liberation Sans=Go','-pdf-font-map','Liberation Serif=Go','-pdf-font-map','Liberation Mono=Go Mono','-o',str(out/f'reflow.{ext}'),str(out/'source.sf')],check=True)
+ subprocess.run(['bin/manifold','convert','-allow-lossy','-pdf-font-map','Liberation Sans=Go','-pdf-font-map','Liberation Serif=Go','-pdf-font-map','Liberation Mono=Go Mono','-o',str(out/f'reflow.{ext}'),str(out/'source.sf')],check=True)
 with ZipFile(out/'reflow.docx') as z:
  root=etree.fromstring(z.read('word/document.xml'))
  for para,expected in zip(root.findall('.//{'+w+'}body/{'+w+'}p'),cases):

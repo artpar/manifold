@@ -12,7 +12,7 @@ import pymupdf
 
 parser = argparse.ArgumentParser()
 parser.add_argument('directory', type=Path)
-parser.add_argument('--binary', type=Path, default=Path('bin/manydoc'))
+parser.add_argument('--binary', type=Path, default=Path('bin/manifold'))
 parser.add_argument('--generate-encrypted', action='store_true')
 parser.add_argument('--require-encrypted', action='store_true', help='Compatibility alias: encrypted sources are always required when present')
 parser.add_argument('--large', action='store_true')

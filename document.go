@@ -1,6 +1,6 @@
-// Package manydoc reads, writes and converts documents in-process in pure Go.
+// Package manifold reads, writes and converts documents in-process in pure Go.
 // Its structured model describes supported content; it is not a Word layout engine.
-package manydoc
+package manifold
 
 import (
 	"compress/gzip"
@@ -30,7 +30,7 @@ const (
 	Text  Format = "txt"
 )
 
-// Document is manydoc's interchange model. Diagnostics describe input features
+// Document is manifold's interchange model. Diagnostics describe input features
 // whose structure cannot be represented. Converters reject lossy output unless
 // the caller explicitly acknowledges those diagnostics.
 type Document struct {

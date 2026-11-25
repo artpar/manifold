@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/artpar/manydoc"
+	"github.com/artpar/manifold"
 )
 
 //go:embed document.sf
@@ -31,11 +31,11 @@ func main() {
 	richCitations := flag.Bool("rich-citations", false, "use individually styled literal citation fragments")
 	flag.Parse()
 	ctx := context.Background()
-	sf, err := manydoc.ReadStructured(ctx, bytes.NewReader(source))
+	sf, err := manifold.ReadStructured(ctx, bytes.NewReader(source))
 	if err != nil {
 		log.Fatal(err)
 	}
-	d, err := manydoc.FromStructured(sf)
+	d, err := manifold.FromStructured(sf)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func main() {
 		for bi := range d.Blocks {
 			for ri := range d.Blocks[bi].Runs {
 				run := &d.Blocks[bi].Runs[ri]
-				if run.Note != nil && run.Note.Kind == manydoc.Footnote && run.Note.ID == d.Notes[1].ID {
+				if run.Note != nil && run.Note.Kind == manifold.Footnote && run.Note.ID == d.Notes[1].ID {
 					seen++
 					if seen > 1 {
 						label := "see α"
@@ -67,7 +67,7 @@ func main() {
 	if *styledLabels {
 		d.Blocks[0].Anchors = append(d.Blocks[0].Anchors, "citation-return")
 		for i := range d.Notes {
-			d.Notes[i].BodyLabelStyle = &manydoc.Run{FontFamily: "Go", FontSize: 9.5, Bold: true, Italic: true, Color: "#203040", Underline: true, Destination: "citation-return", Link: "#citation-return", Language: "en"}
+			d.Notes[i].BodyLabelStyle = &manifold.Run{FontFamily: "Go", FontSize: 9.5, Bold: true, Italic: true, Color: "#203040", Underline: true, Destination: "citation-return", Link: "#citation-return", Language: "en"}
 		}
 	}
 	if *richBodyLabels {
@@ -75,7 +75,7 @@ func main() {
 		for i := range d.Notes {
 			d.Notes[i].BodyLabel = nil
 			d.Notes[i].BodyLabelStyle = nil
-			d.Notes[i].BodyLabelContent = []manydoc.Run{{Text: "N", Bold: true, FontFamily: "Go", FontSize: 9, Color: "#203040", Link: "#rich-return", Destination: "rich-return"}, {Text: "-" + strconv.Itoa(i+1), Italic: true, FontFamily: "Go", FontSize: 8, Link: "https://example.org/label"}}
+			d.Notes[i].BodyLabelContent = []manifold.Run{{Text: "N", Bold: true, FontFamily: "Go", FontSize: 9, Color: "#203040", Link: "#rich-return", Destination: "rich-return"}, {Text: "-" + strconv.Itoa(i+1), Italic: true, FontFamily: "Go", FontSize: 8, Link: "https://example.org/label"}}
 		}
 	}
 	if *fractionalSizes {
@@ -92,7 +92,7 @@ func main() {
 				}
 			} else {
 				if d.Notes[i].BodyLabelStyle == nil {
-					d.Notes[i].BodyLabelStyle = &manydoc.Run{}
+					d.Notes[i].BodyLabelStyle = &manifold.Run{}
 				}
 				d.Notes[i].BodyLabelStyle.FontSize = 6.959646
 			}
@@ -115,14 +115,14 @@ func main() {
 		styleExampleCitations(d.Blocks, map[string]string{})
 	}
 	if *sectioned {
-		d.Blocks = []manydoc.Block{{Kind: manydoc.SectionBlock, Section: &manydoc.Section{Blocks: d.Blocks, Headers: manydoc.RunningStories{Default: &manydoc.RunningStory{Blocks: d.Headers}}, Footers: manydoc.RunningStories{Default: &manydoc.RunningStory{Blocks: d.Footers}}}}}
+		d.Blocks = []manifold.Block{{Kind: manifold.SectionBlock, Section: &manifold.Section{Blocks: d.Blocks, Headers: manifold.RunningStories{Default: &manifold.RunningStory{Blocks: d.Headers}}, Footers: manifold.RunningStories{Default: &manifold.RunningStory{Blocks: d.Footers}}}}}
 		d.Headers = nil
 		d.Footers = nil
 	}
 	if *longNote {
 		for i := range d.Notes {
-			if d.Notes[i].Kind == manydoc.Footnote {
-				d.Notes[i].Blocks = []manydoc.Block{{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: strings.Repeat("Continued citation text. ", 50) + "LAST_NOTE_MARKER"}}}}
+			if d.Notes[i].Kind == manifold.Footnote {
+				d.Notes[i].Blocks = []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: strings.Repeat("Continued citation text. ", 50) + "LAST_NOTE_MARKER"}}}}
 				break
 			}
 		}
@@ -133,14 +133,14 @@ func main() {
 	if err := os.MkdirAll(*out, 0755); err != nil {
 		log.Fatal(err)
 	}
-	formats := []manydoc.Format{manydoc.SF, manydoc.DOCX, manydoc.PDF}
+	formats := []manifold.Format{manifold.SF, manifold.DOCX, manifold.PDF}
 	if *fractionalSizes {
-		formats = []manydoc.Format{manydoc.SF, manydoc.DOCX}
+		formats = []manifold.Format{manifold.SF, manifold.DOCX}
 	}
 	for _, format := range formats {
 		name := filepath.Join(*out, "notes."+string(format))
 		var buf bytes.Buffer
-		if err := manydoc.Write(ctx, &buf, d, format, manydoc.WriteOptions{AllowLossy: *variantLabels || *styledLabels || *fractionalSizes || *richBodyLabels || *richCitations}); err != nil {
+		if err := manifold.Write(ctx, &buf, d, format, manifold.WriteOptions{AllowLossy: *variantLabels || *styledLabels || *fractionalSizes || *richBodyLabels || *richCitations}); err != nil {
 			log.Fatal(err)
 		}
 		if err := os.WriteFile(name, buf.Bytes(), 0644); err != nil {
@@ -150,7 +150,7 @@ func main() {
 	}
 }
 
-func styleExampleCitations(blocks []manydoc.Block, labels map[string]string) {
+func styleExampleCitations(blocks []manifold.Block, labels map[string]string) {
 	for i := range blocks {
 		b := &blocks[i]
 		for j := range b.Runs {
@@ -165,7 +165,7 @@ func styleExampleCitations(blocks []manydoc.Block, labels map[string]string) {
 				labels[key] = suffix
 			}
 			ref.Label = nil
-			ref.LabelContent = []manydoc.Run{{Text: "C", FontFamily: "Go", FontSize: 9, Bold: true, Color: "#203040"}, {Text: "-" + suffix, FontFamily: "Go", FontSize: 8, Italic: true, Color: "#FF0000"}}
+			ref.LabelContent = []manifold.Run{{Text: "C", FontFamily: "Go", FontSize: 9, Bold: true, Color: "#203040"}, {Text: "-" + suffix, FontFamily: "Go", FontSize: 8, Italic: true, Color: "#FF0000"}}
 		}
 		for j := range b.Items {
 			styleExampleCitations(b.Items[j].Blocks, labels)

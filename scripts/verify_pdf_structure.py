@@ -66,7 +66,7 @@ data.extend(f'trailer\n<< /Size {len(offsets)} /Root 1 0 R >>\nstartxref\n{xref}
 source=root/'tagged.pdf';source.write_bytes(data)
 r=PdfReader(source,strict=True);assert len(r.pages)==2
 assert r.trailer['/Root']['/StructTreeRoot']['/ClassMap']['/Merged']['/RowSpan']==2
-sf_path=root/'tagged.sf';subprocess.run(['bin/manydoc','extract','-format','sf','-o',str(sf_path),str(source)],check=True)
+sf_path=root/'tagged.sf';subprocess.run(['bin/manifold','extract','-format','sf','-o',str(sf_path),str(source)],check=True)
 sf=json.loads(sf_path.read_text());bs=sf['content'];assert len(sf['attrs']['pages'])==2
 text=lambda n: ''.join(x.get('text','') for x in n.get('content',[]))
 assert bs[0]['type']=='heading' and bs[0]['attrs']['level']==2 and text(bs[0])=='Tagged heading'
@@ -82,7 +82,7 @@ assert text(bs[5])=='FORM TEXT' and text(bs[6])=='Example link'
 assert any(m['type']=='link' and m['attrs']['href']=='https://example.invalid/structure' for m in bs[6]['content'][0]['marks'])
 assert [text(b) for b in bs[-2:]]==['PAGE ONE FOOTER','PAGE TWO FOOTER']
 for ext in ('docx','pdf'):
-    subprocess.run(['bin/manydoc','convert','-allow-lossy','-pdf-font-map','Courier=Go Mono','-o',str(root/f'reflow.{ext}'),str(sf_path)],check=True)
+    subprocess.run(['bin/manifold','convert','-allow-lossy','-pdf-font-map','Courier=Go Mono','-o',str(root/f'reflow.{ext}'),str(sf_path)],check=True)
 word=Document(root/'reflow.docx');assert len(word.tables)==1 and len(word.inline_shapes)==1
 wt=word.tables[0];assert wt.cell(0,0)._tc is wt.cell(1,1)._tc and wt.cell(0,0).text=='MERGED'
 with ZipFile(root/'reflow.docx') as z:

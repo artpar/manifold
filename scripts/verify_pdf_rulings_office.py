@@ -36,7 +36,7 @@ subprocess.run([args.soffice,f'-env:UserInstallation={profile}','--headless','--
 source=out/'writer-source.pdf';reader=PdfReader(source,strict=True)
 assert '/StructTreeRoot' not in reader.trailer['/Root'] and len(reader.pages)==1
 sf_path=out/'recovered.sf'
-subprocess.run(['bin/manydoc','extract','-format','sf','-o',str(sf_path),str(source)],check=True)
+subprocess.run(['bin/manifold','extract','-format','sf','-o',str(sf_path),str(source)],check=True)
 sf=json.loads(sf_path.read_text());tables=[n for n in sf['content'] if n['type']=='table'];assert len(tables)==1
 rows=tables[0]['content'];assert [len(row['content']) for row in rows]==[2,3,2]
 assert rows[0]['content'][0]['attrs']['colspan']==2 and rows[1]['content'][0]['attrs']['rowspan']==2
@@ -52,7 +52,7 @@ with pymupdf.open(source) as pdf:
             q=a['quad'];actual.add(tuple(round(v,3) for v in (q[0]['x'],q[0]['y'],q[2]['x'],q[2]['y'])))
     assert actual==expected
     pdf[0].get_pixmap(matrix=pymupdf.Matrix(1.5,1.5)).save(out/'source.png')
-for ext in ('docx','pdf'):subprocess.run(['bin/manydoc','convert','-allow-lossy','-pdf-font-map','Liberation Sans=Go','-pdf-font-map','Carlito=Go','-pdf-font-map','Caladea=Go','-o',str(out/f'reflow.{ext}'),str(sf_path)],check=True)
+for ext in ('docx','pdf'):subprocess.run(['bin/manifold','convert','-allow-lossy','-pdf-font-map','Liberation Sans=Go','-pdf-font-map','Carlito=Go','-pdf-font-map','Caladea=Go','-o',str(out/f'reflow.{ext}'),str(sf_path)],check=True)
 word=Document(out/'reflow.docx');assert len(word.tables)==1
 t=word.tables[0];assert t.cell(0,0)._tc is t.cell(0,1)._tc and t.cell(1,0)._tc is t.cell(2,0)._tc and t.cell(1,2).text==''
 with pymupdf.open(out/'reflow.pdf') as pdf:

@@ -15,9 +15,9 @@ GOWORK=off go test ./... -count=1
 GOWORK=off go test -race -timeout 20m ./... -count=1
 GOWORK=off go vet ./...
 GOWORK=off go mod verify
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOWORK=off go build -o bin/manydoc-linux-amd64 ./cmd/manydoc
-CGO_ENABLED=0 GOOS=linux GOARCH=arm64 GOWORK=off go build -o bin/manydoc-linux-arm64 ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOWORK=off go build -o bin/manifold-linux-amd64 ./cmd/manifold
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 GOWORK=off go build -o bin/manifold-linux-arm64 ./cmd/manifold
 git diff --check
 ```
 
@@ -120,14 +120,14 @@ preservation, not the missing rich features in ACCEPTANCE.md.
 
 ```sh
 GOWORK=off go test -run '^$' -fuzz '^FuzzReadStructured$' -fuzztime=10s -fuzzminimizetime=1s -parallel=2 -timeout=25s .
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 npm install --prefix output/sf-qa --no-audit --no-fund prosemirror-model@1.25.13
 python3 scripts/verify_structured_corpus.py
 GOWORK=off go run ./examples/report -out output
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/report.sf
 mkdir -p output/sf-generated
-bin/manydoc convert -o output/sf-generated/report.docx output/report.sf
-bin/manydoc convert -o output/sf-generated/report.pdf output/report.sf
+bin/manifold convert -o output/sf-generated/report.docx output/report.sf
+bin/manifold convert -o output/sf-generated/report.pdf output/report.sf
 output/qa-venv/bin/python scripts/verify_outputs.py output/sf-generated
 pdftoppm -f 1 -l 2 -scale-to 1000 -png output/sf-generated/report.pdf output/sf-generated/page
 ```
@@ -233,7 +233,7 @@ unfinished qualification/layout work.
 
 ```sh
 GOWORK=off go test -run 'TestPDF(Positioned|PageCoordinate|TextMatrix|FormAnd|Composite|Marked|Raster|Inline|Source|ActualText)' -count=1
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_pdf_recovery.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/pdf-recovery/positioned.sf
 ```
@@ -263,7 +263,7 @@ because gofpdf shares its resource dictionary across pages.
 
 ```sh
 GOWORK=off go test -run 'TestPDF(Tagged|Published|SimpleFont)' -count=1
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_pdf_structure.py
 output/qa-venv/bin/python scripts/verify_published_pdf.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/pdf-structure/tagged.sf output/published-pdf/publication.sf
@@ -309,7 +309,7 @@ GOWORK=off go test -run 'TestPDF(Text|Discretionary|Typography|LineBoundary|Publ
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFTextLayout$' -fuzztime=20s -fuzzminimizetime=1s -parallel=2 -timeout=60s
 GOWORK=off go run ./examples/typography
 output/qa-venv/bin/python scripts/verify_typography.py
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_published_pdf.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/typography/typography.sf
 ```
@@ -342,7 +342,7 @@ changes. New dependency notices are in THIRD_PARTY.md and third_party/licenses/.
 
 ```sh
 GOWORK=off go test -run 'TestPDF(Tagged|CustomList|Published)' -count=1
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_published_pdf.py
 output/qa-venv/bin/python scripts/verify_pdf_structure.py
 ```
@@ -361,7 +361,7 @@ DOCX/PDF bounds/content remain independently checked.
 ```sh
 GOWORK=off go test -run 'TestPDFUntagged' -count=1
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFInferenceCoverage$' -fuzztime=15s -parallel=2 -timeout=40s
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_pdf_inference.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/pdf-inference/recovered.sf output/pdf-inference/paint-order.sf
 python3 scripts/verify_structured_corpus.py
@@ -419,7 +419,7 @@ were repeated after the whitespace-cut/metric corrections.
 ```sh
 GOWORK=off go test -run 'TestPDFRuled|FuzzPDFRuledGrid' -count=1
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFRuledGrid$' -fuzztime=15s -fuzzminimizetime=1s -parallel=2 -timeout=40s
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_pdf_rulings.py
 output/qa-venv/bin/python scripts/verify_pdf_rulings_office.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/pdf-rulings/ruled.sf output/pdf-rulings/office/recovered.sf
@@ -843,7 +843,7 @@ GOWORK=off go test -run '^$' -fuzz '^FuzzReadStructured$' -fuzztime=1000x -paral
 mkdir -p output/text-style/lo
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-text-style-profile --headless --convert-to pdf --outdir output/text-style/lo output/text-style/text-style.docx
 output/qa-venv/bin/python scripts/verify_text_style.py --office output/text-style/lo/text-style.pdf
-bin/manydoc convert -pdf-font 'App Sans=output/text-style/app-sans.ttf' -o output/text-style/cli.pdf output/text-style/text-style.sf
+bin/manifold convert -pdf-font 'App Sans=output/text-style/app-sans.ttf' -o output/text-style/cli.pdf output/text-style/text-style.sf
 ```
 
 All runtime paths remain in Go; external commands/readers above are optional QA.
@@ -911,7 +911,7 @@ GOWORK=off go test -run 'TestPDFRecovered|TestPDFActualTextRetains|TestPDFSource
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFEditableStyles$' -fuzztime=1000x -parallel=2 -timeout=90s
 GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=500x -parallel=2 -timeout=90s
 GOWORK=off go test -run '^$' -fuzz '^FuzzReadStructured$' -fuzztime=1000x -parallel=2 -timeout=90s
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_pdf_text_styles.py
 mkdir -p output/pdf-text-styles/lo
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/pdf-text-styles/lo-profile --headless --convert-to pdf --outdir output/pdf-text-styles/lo output/pdf-text-styles/reflow.docx
@@ -975,7 +975,7 @@ GOWORK=off go test -run 'TestDOCXTheme' -count=1
 GOWORK=off go test -run '^$' -fuzz '^FuzzDOCXThemeLuminance$' -fuzztime=10000x -parallel=2 -timeout=90s
 GOWORK=off go test -run '^$' -fuzz '^FuzzDOCXThemeColorPackage$' -fuzztime=1000x -parallel=2 -timeout=90s
 GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=500x -parallel=2 -timeout=90s
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_docx_theme_colors.py
 mkdir -p output/docx-theme-colors/source-lo output/docx-theme-colors/reflow-lo
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/docx-theme-colors/lo-profile --headless --convert-to pdf --outdir output/docx-theme-colors/source-lo output/docx-theme-colors/source.docx
@@ -1026,7 +1026,7 @@ page/running-content, shaping/bidi and real-export work remain required.
 GOWORK=off go test -run 'TestDOCXFont|TestDOCXScript' -count=1
 GOWORK=off go test -run '^$' -fuzz '^FuzzDOCXScriptFontSelection$' -fuzztime=1000x -parallel=2 -timeout=90s
 GOWORK=off go test -run '^$' -fuzz '^FuzzReadDOCX$' -fuzztime=500x -parallel=2 -timeout=90s
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_docx_font_selection.py
 mkdir -p output/docx-font-selection/lo
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/docx-font-selection/lo-profile --headless --convert-to pdf --outdir output/docx-font-selection/lo output/docx-font-selection/reflow.docx
@@ -1087,8 +1087,8 @@ LTR mark positioning and supplementary outline transport only.
 ```sh
 GOWORK=off go run ./examples/glyphs
 output/qa-venv/bin/python scripts/verify_glyphs.py
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc extract -format sf output/glyphs/glyphs.pdf > output/glyphs/recovered.sf
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
+bin/manifold extract -format sf output/glyphs/glyphs.pdf > output/glyphs/recovered.sf
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/glyphs/glyphs.sf output/glyphs/recovered.sf
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFGlyphClusters$' -fuzztime=1000x -parallel=2 -timeout=90s
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFGlyphFont$' -fuzztime=500x -parallel=2 -timeout=90s
@@ -1138,9 +1138,9 @@ and race suites passed after this correction. No fixture oracle changed.
 ```sh
 uv pip install --python output/qa-venv/bin/python -r scripts/requirements.txt
 GOWORK=off go run ./examples/language
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_language.py
-bin/manydoc extract -format sf -o output/language/direction-roundtrip.sf output/language/direction.docx
+bin/manifold extract -format sf -o output/language/direction-roundtrip.sf output/language/direction.docx
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/language/direction.sf output/language/localized.sf output/language/wrap.sf output/language/emergency.sf output/language/source.sf
 GOWORK=off go test -run '^$' -fuzz '^FuzzLanguageDirectionRoundtrip$' -fuzztime=1000x -parallel=2 -timeout=90s
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFLanguageLines$' -fuzztime=1000x -parallel=2 -timeout=90s
@@ -1209,8 +1209,8 @@ GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=500x -parallel=2 -t
 GOWORK=off go test ./... -count=1
 GOWORK=off go test -race ./... -count=1
 GOWORK=off go vet ./...
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc extract -format sf -o output/default-shaping/recovered.sf output/default-shaping/default.pdf
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
+bin/manifold extract -format sf -o output/default-shaping/recovered.sf output/default-shaping/default.pdf
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/default-shaping/default.sf output/default-shaping/emergency.sf output/default-shaping/marked-space.sf output/default-shaping/recovered.sf
 GOWORK=off go test -run '^$' -bench '^BenchmarkPDFUsedFontRegistration$' -benchtime=5x
 GOWORK=off go run ./examples/text-style
@@ -1274,7 +1274,7 @@ other acceptance rows remain required; no full-goal completion is claimed.
 
 ```sh
 GOWORK=off go run ./examples/paint-context
-bin/manydoc extract -format sf -o output/paint-context/recovered.sf output/paint-context/paint.pdf
+bin/manifold extract -format sf -o output/paint-context/recovered.sf output/paint-context/paint.pdf
 output/qa-venv/bin/python scripts/verify_paint_context.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/paint-context/paint.sf output/paint-context/emergency.sf output/paint-context/recovered.sf
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFPaintContext$' -fuzztime=500x -parallel=2 .
@@ -1365,9 +1365,9 @@ GOWORK=off go test -run '^$' -fuzz '^FuzzPDFBidiRoundTrip$' -fuzztime=1000x -par
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFBidiFont$' -fuzztime=500x -parallel=2 .
 GOWORK=off go test -run '^$' -fuzz '^FuzzReadPDF$' -fuzztime=500x -parallel=2 .
 GOWORK=off go test ./internal/bidilevels -run '^$' -fuzz '^FuzzParagraphLines$' -fuzztime=20000x -parallel=2
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc convert -pdf-font 'DejaVu=testdata/assets/DejaVuSans.ttf' -o output/bidi/cli.pdf output/bidi/bidi.sf
-bin/manydoc convert -pdf-font 'DejaVu=testdata/assets/DejaVuSans.ttf' -pdf-font 'DejaVu/B=testdata/assets/DejaVuSans-Bold.ttf' -o output/bidi/context-cli.pdf output/bidi/context.sf
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
+bin/manifold convert -pdf-font 'DejaVu=testdata/assets/DejaVuSans.ttf' -o output/bidi/cli.pdf output/bidi/bidi.sf
+bin/manifold convert -pdf-font 'DejaVu=testdata/assets/DejaVuSans.ttf' -pdf-font 'DejaVu/B=testdata/assets/DejaVuSans-Bold.ttf' -o output/bidi/context-cli.pdf output/bidi/context.sf
 output/qa-venv/bin/python scripts/verify_bidi_output.py output/bidi/cli.pdf
 output/qa-venv/bin/python scripts/verify_bidi_context.py output/bidi/context-cli.pdf
 ```
@@ -1614,8 +1614,8 @@ successful output rather than accepting ErrUnsupported.
 ```sh
 GOWORK=off go run ./examples/sections
 output/qa-venv/bin/python scripts/verify_sections.py --make-control
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc extract -format sf -o output/sections/control.sf output/sections/control.docx
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
+bin/manifold extract -format sf -o output/sections/control.sf output/sections/control.docx
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-sections-qa --headless --convert-to pdf --outdir output/sections/office output/sections/document.docx output/sections/control.docx
 output/qa-venv/bin/python scripts/verify_sections.py --office
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/sections/document.sf output/sections/docx.sf output/sections/pdf.sf output/sections/control.sf
@@ -1659,8 +1659,8 @@ still required, not waived. Flat documents retain their previous renderer path.
 ```sh
 GOWORK=off go run ./examples/continuous
 output/qa-venv/bin/python scripts/verify_continuous.py --make-controls
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
-for continuous_case in stories left top bottom width orientation first same; do bin/manydoc extract -format sf -o "output/continuous/control-${continuous_case}.sf" "output/continuous/${continuous_case}.docx"; done
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
+for continuous_case in stories left top bottom width orientation first same; do bin/manifold extract -format sf -o "output/continuous/control-${continuous_case}.sf" "output/continuous/${continuous_case}.docx"; done
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-continuous-qa --headless --convert-to pdf --outdir output/continuous/office output/continuous/document.docx output/continuous/stories.docx output/continuous/left.docx output/continuous/top.docx output/continuous/bottom.docx output/continuous/width.docx output/continuous/orientation.docx output/continuous/first.docx output/continuous/same.docx
 output/qa-venv/bin/python scripts/verify_continuous.py --office
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/continuous/document.sf output/continuous/docx.sf output/continuous/pdf.sf
@@ -1713,9 +1713,9 @@ ErrUnsupported escape for those cases.
 
 ```sh
 GOWORK=off go run ./examples/continuous-geometry
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 # Extract the original controls first, as documented in the preceding checkpoint.
-for continuous_case in stories left top bottom width orientation first same; do bin/manydoc convert -allow-lossy -pdf-font-map 'Cambria=Go' -pdf-font-map 'Calibri=Go' -o "output/continuous-geometry/controls/${continuous_case}.pdf" "output/continuous/control-${continuous_case}.sf"; done
+for continuous_case in stories left top bottom width orientation first same; do bin/manifold convert -allow-lossy -pdf-font-map 'Cambria=Go' -pdf-font-map 'Calibri=Go' -o "output/continuous-geometry/controls/${continuous_case}.pdf" "output/continuous/control-${continuous_case}.sf"; done
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-continuous-geometry-qa --headless --convert-to pdf --outdir output/continuous-geometry/office output/continuous-geometry/document.docx
 output/qa-venv/bin/python scripts/verify_continuous_geometry.py --office
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/continuous-geometry/document.sf output/continuous-geometry/docx.sf output/continuous-geometry/pdf.sf output/continuous-geometry/cli-docx.sf output/continuous-geometry/cli-pdf.sf
@@ -1745,7 +1745,7 @@ eight section and five same-geometry continuous page streams exactly unchanged:
 
 ```sh
 git worktree add --detach output/geometry-parent d1b6c96
-(cd output/geometry-parent && GOWORK=off go build -o ../../bin/geometry-parent ./cmd/manydoc)
+(cd output/geometry-parent && GOWORK=off go build -o ../../bin/geometry-parent ./cmd/manifold)
 bin/geometry-parent convert -o output/continuous-geometry/parent-sections.pdf output/sections/document.sf
 bin/geometry-parent convert -o output/continuous-geometry/parent-continuous.pdf output/continuous/document.sf
 output/qa-venv/bin/python scripts/verify_continuous_geometry.py --office
@@ -1772,7 +1772,7 @@ conversions, with no generic unsupported-feature escape.
 
 ```sh
 GOWORK=off go run ./examples/signed-overlap
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 # Optional QA dependencies are local; none is needed at library runtime.
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-signed-overlap-qa --headless --convert-to pdf --outdir output/signed-overlap/office output/signed-overlap/*.docx
 output/qa-venv/bin/python scripts/verify_signed_overlap.py --office
@@ -1831,7 +1831,7 @@ requires a fresh page when the common interval is positive but too short for a
 
 ```sh
 GOWORK=off go run ./examples/continuous-admission
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-continuous-admission-qa --headless --convert-to pdf --outdir output/continuous-admission/office output/continuous-admission/*.docx
 output/qa-venv/bin/python scripts/verify_continuous_admission.py --office
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/continuous-admission/*.sf
@@ -1898,7 +1898,7 @@ kinds present. The external-input ambiguity diagnostic remains unchanged.
 
 ```sh
 GOWORK=off go run ./examples/section-controls
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-section-controls-qa --headless --convert-to pdf --outdir output/section-controls/office output/section-controls/*.docx
 output/qa-venv/bin/python scripts/verify_section_controls.py --office
 # Run before producing parent-baseline *.sf artifacts, or select only the cases.
@@ -1969,11 +1969,11 @@ cmp testdata/real/mqtt-v5.0-oracle.json output/real-docx/source-oracle.json
 output/qa-venv/bin/python scripts/audit_mqtt_pdf.py --output output/real-docx/pdf-oracle.json
 cmp testdata/real/mqtt-v5.0-pdf-oracle.json output/real-docx/pdf-oracle.json
 GOWORK=off go test -run '^TestRealWordMQTT|^TestRealExportFixtureHashes' .
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc extract -format sf -o output/real-docx/mqtt.sf testdata/real/mqtt-v5.0-os.docx
-bin/manydoc convert -allow-lossy -o output/real-docx/roundtrip.docx output/real-docx/mqtt.sf
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
+bin/manifold extract -format sf -o output/real-docx/mqtt.sf testdata/real/mqtt-v5.0-os.docx
+bin/manifold convert -allow-lossy -o output/real-docx/roundtrip.docx output/real-docx/mqtt.sf
 output/qa-venv/bin/python scripts/audit_mqtt_source.py --source output/real-docx/roundtrip.docx --compare testdata/real/mqtt-v5.0-oracle.json
-bin/manydoc extract -format sf -o output/real-docx/roundtrip.sf output/real-docx/roundtrip.docx
+bin/manifold extract -format sf -o output/real-docx/roundtrip.sf output/real-docx/roundtrip.docx
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/real-docx/mqtt.sf output/real-docx/roundtrip.sf
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-real-docx-qa --headless --convert-to pdf --outdir output/real-docx/office output/real-docx/roundtrip.docx
 GOWORK=off go test ./...
@@ -2007,7 +2007,7 @@ The committed PDF oracle records original memberships/default widths, not invent
 successful recovery. The current Go PDF reader still rejects that source:
 
 ```sh
-bin/manydoc extract -format sf -pdf-skip-inference -o output/real-docx/mqtt-pdf.sf testdata/real/mqtt-v5.0-os.pdf
+bin/manifold extract -format sf -pdf-skip-inference -o output/real-docx/mqtt-pdf.sf testdata/real/mqtt-v5.0-os.pdf
 # Current error: PDF logical structure: tagged table rows do not cover the declared grid
 ```
 
@@ -2099,10 +2099,10 @@ URI_TARGETS.md/verification.json.
 
 ```sh
 GOWORK=off go run ./examples/table-widths
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc convert -o output/table-widths/mqtt.sf testdata/real/mqtt-v5.0-os.docx
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
+bin/manifold convert -o output/table-widths/mqtt.sf testdata/real/mqtt-v5.0-os.docx
 output/qa-venv/bin/python scripts/verify_table_widths.py --prepare-source
-bin/manydoc convert -allow-lossy -pdf-font Sans=output/font-subset/dejavu/DejaVuSans.ttf -pdf-font Sans/B=output/font-subset/dejavu/DejaVuSans-Bold.ttf -pdf-font-map Arial=Sans -o output/table-widths/mqtt-table.pdf output/table-widths/mqtt-table.sf
+bin/manifold convert -allow-lossy -pdf-font Sans=output/font-subset/dejavu/DejaVuSans.ttf -pdf-font Sans/B=output/font-subset/dejavu/DejaVuSans-Bold.ttf -pdf-font-map Arial=Sans -o output/table-widths/mqtt-table.pdf output/table-widths/mqtt-table.sf
 output/qa-venv/bin/python scripts/verify_table_widths.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/table-widths/source.sf output/table-widths/from-docx.sf output/table-widths/from-pdf.sf output/table-widths/mqtt-table.sf
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-width-profile --headless --convert-to pdf --outdir output/table-widths/lo output/table-widths/widths.docx
@@ -2110,7 +2110,7 @@ GOWORK=off go test ./...
 GOWORK=off go test -race ./...
 GOWORK=off go vet ./...
 GOWORK=off go mod verify
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOWORK=off go build -o bin/manydoc-linux-amd64 ./cmd/manydoc
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOWORK=off go build -o bin/manifold-linux-amd64 ./cmd/manifold
 git diff --check
 ```
 
@@ -2134,8 +2134,8 @@ output/qa-venv/bin/python scripts/verify_numbering.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/numbering/source.sf output/numbering/from-docx.sf output/numbering/from-pdf.sf
 output/qa-venv/bin/python scripts/author_numbering_probe.py
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///Users/artpar/workspace/code/github.com/artpar/manydoc/output/lo-number-profile --headless --convert-to pdf --outdir output/numbering output/numbering/format-probe.docx
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc convert -o output/numbering/mqtt.sf testdata/real/mqtt-v5.0-os.docx
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
+bin/manifold convert -o output/numbering/mqtt.sf testdata/real/mqtt-v5.0-os.docx
 output/qa-venv/bin/python scripts/verify_numbering_source.py
 ```
 
@@ -2150,7 +2150,7 @@ GOWORK=off go test -race ./...
 GOWORK=off go test -race -run 'TestNumberingAdmission|TestDOCXEmpty' .
 GOWORK=off go vet ./...
 GOWORK=off go mod verify
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOWORK=off go build -o bin/manydoc-linux-amd64 ./cmd/manydoc
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOWORK=off go build -o bin/manifold-linux-amd64 ./cmd/manifold
 git diff --check
 ```
 
@@ -2170,7 +2170,7 @@ After the 45-case authored probe and its external rendering, verify exact source
 format/template/start import and all external-reader labels with:
 
 ```sh
-bin/manydoc convert -o output/numbering/format-probe.sf output/numbering/format-probe.docx
+bin/manifold convert -o output/numbering/format-probe.sf output/numbering/format-probe.docx
 output/qa-venv/bin/python scripts/verify_numbering_probe.py
 ```
 
@@ -2185,9 +2185,9 @@ GOWORK=off go test ./...
 GOWORK=off go test -race ./...
 GOWORK=off go vet ./...
 GOWORK=off go mod verify
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc convert -o output/internal-destinations/mqtt.sf testdata/real/mqtt-v5.0-os.docx
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOWORK=off go build -o bin/manydoc-linux-amd64 ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
+bin/manifold convert -o output/internal-destinations/mqtt.sf testdata/real/mqtt-v5.0-os.docx
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOWORK=off go build -o bin/manifold-linux-amd64 ./cmd/manifold
 git diff --check
 ```
 
@@ -2239,8 +2239,8 @@ targets. This milestone does not qualify PDF-to-SF internal navigation.
 ```sh
 GOWORK=off go test -run 'TestPDFNavigation|TestPDFTaggedInternal|TestPDFPublishedInDesignExport' -count=1 .
 GOWORK=off CGO_ENABLED=0 go run ./examples/destinations
-bin/manydoc extract -format sf -o output/destinations/indesign.sf testdata/real/copyright-office-circular-1-2021.pdf
-bin/manydoc extract -format sf -o output/navigation-import/mqtt.sf testdata/real/mqtt-v5.0-os.pdf
+bin/manifold extract -format sf -o output/destinations/indesign.sf testdata/real/copyright-office-circular-1-2021.pdf
+bin/manifold extract -format sf -o output/navigation-import/mqtt.sf testdata/real/mqtt-v5.0-os.pdf
 output/qa-venv/bin/python scripts/verify_navigation_import.py output/destinations/destinations.pdf output/destinations/from-pdf.sf testdata/real/copyright-office-circular-1-2021.pdf output/destinations/indesign.sf testdata/real/mqtt-v5.0-os.pdf output/navigation-import/mqtt.sf --report output/navigation-import/independent.json
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/destinations/from-pdf.sf output/destinations/indesign.sf
 GOWORK=off go test -run '^$' -fuzz '^FuzzReadStructured$' -fuzztime=10s -parallel=2 .
@@ -2273,8 +2273,8 @@ codec robustness/retention checks, not new layout-fidelity or completion evidenc
 ```sh
 GOWORK=off go test -run 'TestPDFActualTextRetainsInternalNavigation|TestPDFActualTextLinkIntersection' -count=1 .
 output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
-bin/manydoc extract -format sf -o output/audit/explicit-note.sf output/audit/explicit-note.pdf
-bin/manydoc extract -format sf -o output/audit/pagination-artifact.sf output/audit/pagination-artifact.pdf
+bin/manifold extract -format sf -o output/audit/explicit-note.sf output/audit/explicit-note.pdf
+bin/manifold extract -format sf -o output/audit/pagination-artifact.sf output/audit/pagination-artifact.pdf
 ```
 
 New positive tests cover parent ActualText outside a Link element with single or

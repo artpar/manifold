@@ -91,7 +91,7 @@ spacing and pagination differ; Word/source print fidelity is not claimed.
 
 ```sh
 GOWORK=off MANYDOC_PDF_NOTE_PAGES_QA=output/pdf-note-pages go test -run 'TestPDFUntagged|TestPDFNotePagePlanning|TestPDFFootnoteContinuationCaption' -count=1 .
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
 # Generate/render the unchanged --cross-page source as in PDF_NOTE_CONTINUATION.md.
 output/qa-venv/bin/python scripts/verify_pdf_note_pages.py
 # For each mixed/new-paragraph/wide-new-paragraph/endnote/rich-page/authored-long:

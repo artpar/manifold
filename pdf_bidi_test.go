@@ -1,4 +1,4 @@
-package manydoc
+package manifold
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"github.com/artpar/manydoc/internal/bidilevels"
+	"github.com/artpar/manifold/internal/bidilevels"
 	"math"
 	"os"
 	"sort"

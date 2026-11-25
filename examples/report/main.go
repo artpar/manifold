@@ -12,7 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/artpar/manydoc"
+	"github.com/artpar/manifold"
 )
 
 func main() {
@@ -31,23 +31,23 @@ func main() {
 	if e := png.Encode(&pic, im); e != nil {
 		log.Fatal(e)
 	}
-	d := &manydoc.Document{Metadata: manydoc.Metadata{Title: "Quarterly report", Author: "manydoc example"}, Headers: []manydoc.Block{{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: "Example organization"}}}}, Footers: []manydoc.Block{{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: "Prepared with manydoc"}}}}, Blocks: []manydoc.Block{
-		{Kind: manydoc.Heading, Level: 1, Runs: []manydoc.Run{{Text: "Quarterly report"}}},
-		{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: "This report demonstrates "}, {Text: "formatted text", Bold: true}, {Text: ", "}, {Text: "links", Link: "https://example.com"}, {Text: ", tables, images, and explicit page breaks."}}},
-		{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: "Unicode text: café Ελληνικά Привет"}}},
-		{Kind: manydoc.Picture, Image: &manydoc.Image{Data: pic.Bytes(), MediaType: "image/png", Width: 240, Height: 45, Alt: "Blue gradient banner"}},
-		{Kind: manydoc.Table, Rows: []manydoc.Row{{Cells: []manydoc.Cell{{Blocks: []manydoc.Block{{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: "Product", Bold: true}}}}}, {Blocks: []manydoc.Block{{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: "Quantity", Bold: true}}}}}}}, {Cells: []manydoc.Cell{{Blocks: []manydoc.Block{{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: "Colleaf"}}}}}, {Blocks: []manydoc.Block{{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: "42"}}}}}}}}},
-		{Kind: manydoc.Paragraph, List: "bullet", Runs: []manydoc.Run{{Text: "One shared model for DOCX and PDF output."}}},
-		{Kind: manydoc.PageBreak}, {Kind: manydoc.Heading, Level: 2, Runs: []manydoc.Run{{Text: "Second page"}}},
-		{Kind: manydoc.Paragraph, Runs: []manydoc.Run{{Text: "End of the example report."}}},
+	d := &manifold.Document{Metadata: manifold.Metadata{Title: "Quarterly report", Author: "manydoc example"}, Headers: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Example organization"}}}}, Footers: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Prepared with manydoc"}}}}, Blocks: []manifold.Block{
+		{Kind: manifold.Heading, Level: 1, Runs: []manifold.Run{{Text: "Quarterly report"}}},
+		{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "This report demonstrates "}, {Text: "formatted text", Bold: true}, {Text: ", "}, {Text: "links", Link: "https://example.com"}, {Text: ", tables, images, and explicit page breaks."}}},
+		{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Unicode text: café Ελληνικά Привет"}}},
+		{Kind: manifold.Picture, Image: &manifold.Image{Data: pic.Bytes(), MediaType: "image/png", Width: 240, Height: 45, Alt: "Blue gradient banner"}},
+		{Kind: manifold.Table, Rows: []manifold.Row{{Cells: []manifold.Cell{{Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Product", Bold: true}}}}}, {Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Quantity", Bold: true}}}}}}}, {Cells: []manifold.Cell{{Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Colleaf"}}}}}, {Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "42"}}}}}}}}},
+		{Kind: manifold.Paragraph, List: "bullet", Runs: []manifold.Run{{Text: "One shared model for DOCX and PDF output."}}},
+		{Kind: manifold.PageBreak}, {Kind: manifold.Heading, Level: 2, Runs: []manifold.Run{{Text: "Second page"}}},
+		{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "End of the example report."}}},
 	}}
-	for _, format := range []manydoc.Format{manydoc.DOCX, manydoc.PDF, manydoc.SF, manydoc.JSON} {
+	for _, format := range []manifold.Format{manifold.DOCX, manifold.PDF, manifold.SF, manifold.JSON} {
 		name := filepath.Join(*out, "report."+string(format))
 		f, e := os.Create(name)
 		if e != nil {
 			log.Fatal(e)
 		}
-		e = manydoc.Write(context.Background(), f, d, format, manydoc.WriteOptions{})
+		e = manifold.Write(context.Background(), f, d, format, manifold.WriteOptions{})
 		ce := f.Close()
 		if e != nil {
 			log.Fatal(e)

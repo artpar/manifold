@@ -1,7 +1,7 @@
 """Independent structural oracle for the pinned, published InDesign export.
 
 Checks PDF -> SF structure/content, SF -> DOCX and reflowed SF -> PDF.
-Original-layout reproduction is not implied. Run after building bin/manydoc.
+Original-layout reproduction is not implied. Run after building bin/manifold.
 """
 from pathlib import Path
 from collections import Counter
@@ -46,7 +46,7 @@ assert roles['/_A_-_Head']=='/P' and roles['/_B_-_Head']=='/P'
 uris={str(a.get_object()['/A']['/URI']) for p in r.pages for a in p.get('/Annots',[]) if a.get_object().get('/A',{}).get('/S')=='/URI'}
 assert len(uris)==16
 sf_path=out/'publication.sf'
-subprocess.run(['bin/manydoc','extract','-format','sf','-o',str(sf_path),str(fixture)],check=True)
+subprocess.run(['bin/manifold','extract','-format','sf','-o',str(sf_path),str(fixture)],check=True)
 sf=json.loads(sf_path.read_text());node_counts=Counter();links=set();internal_targets=set();text=[];body=[];converted_items=[];converted_bodies=[]
 def converted(nodes):
     for n in nodes:
@@ -102,11 +102,11 @@ assert len({v['fontFamily'] for v in styles})==10 and len({v['fontSize'] for v i
 normalized_sf['attrs']['diagnostics'].append({'code':'qa_typesetting','message':'QA caller explicitly replaces recovered source typography with default Go 11pt for the existing normalized reflow oracle'})
 normalized_path=out/'publication-normalized.sf'
 normalized_path.write_text(json.dumps(normalized_sf))
-subprocess.run(['bin/manydoc','convert','-allow-lossy','-o',str(out/'publication.docx'),str(normalized_path)],check=True)
+subprocess.run(['bin/manifold','convert','-allow-lossy','-o',str(out/'publication.docx'),str(normalized_path)],check=True)
 word=Document(out/'publication.docx');assert word.core_properties.title==r.metadata.title
 assert normalized(''.join(p.text for p in word.paragraphs))==normalized(''.join(body))
 print('Published export passed: original bytes/metadata; 10 lists, 57 items/bodies with exact /K block membership and joined discretionary words, 16 URI targets; no invented explicit headings; 20,531 normalized nonspace characters; DOCX content/metadata')
-subprocess.run(['bin/manydoc','convert','-allow-lossy','-o',str(out/'publication.pdf'),str(normalized_path)],check=True)
+subprocess.run(['bin/manifold','convert','-allow-lossy','-o',str(out/'publication.pdf'),str(normalized_path)],check=True)
 flow=PdfReader(out/'publication.pdf',strict=True)
 assert flow.metadata.title==r.metadata.title and len(flow.pages)==9
 flow_uris={str(a.get_object()['/A']['/URI']) for p in flow.pages for a in p.get('/Annots',[]) if a.get_object().get('/A',{}).get('/S')=='/URI'}

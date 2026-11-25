@@ -1,4 +1,4 @@
-"""Optional independent SF QA. Build bin/manydoc and install prosemirror-model first."""
+"""Optional independent SF QA. Build bin/manifold and install prosemirror-model first."""
 import json
 import os
 from pathlib import Path
@@ -13,7 +13,7 @@ for case in json.loads(Path("testdata/corpus/manifest.json").read_text()):
     if case["expect"] == "reject":
         continue
     output = folder / (case["name"] + ".sf")
-    command = ["bin/manydoc", "extract", "-format", "sf", "-o", str(output)]
+    command = ["bin/manifold", "extract", "-format", "sf", "-o", str(output)]
     if case["expect"] == "password":
         command += ["-password-env", "MANYDOC_QA_PASSWORD"]
     command += ["testdata/corpus/" + case["name"]]

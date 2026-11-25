@@ -13,7 +13,7 @@ import pymupdf
 
 parser=argparse.ArgumentParser()
 parser.add_argument('directory',nargs='?',type=Path,default=Path('output/paragraph-breaks'))
-parser.add_argument('--binary',type=Path,default=Path('bin/manydoc'))
+parser.add_argument('--binary',type=Path,default=Path('bin/manifold'))
 parser.add_argument('--office',action='store_true')
 args=parser.parse_args();out=args.directory
 expected={'FIRST':1,'SECOND':2,'NOTE_FIRST':3,'NOTE_SECOND':4,'ITEM_FIRST':5,'ITEM_CONT':6,'CELL_FIRST':7,'CELL_SECOND':8,'SIDE_ZERO':7,'SIDE_ONE':8,'SIDE_TWO':8,'AFTER_TABLE':8}

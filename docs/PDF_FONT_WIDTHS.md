@@ -68,7 +68,7 @@ original disagreement expectation instead of changing the geometry oracle.
 
 ```sh
 MANYDOC_PDF_CID_QA=output/pdf-cid-qa GOWORK=off go test -run 'TestPDFCID' -count=1 .
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_pdf_cid_widths.py output/pdf-cid-qa
 # Expected FAIL on overlapping input; original consumer-agreement oracle:
 output/qa-venv/bin/python scripts/verify_pdf_cid_widths.py output/pdf-cid-qa --require-mupdf-agreement

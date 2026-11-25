@@ -1,4 +1,4 @@
-# Working on manydoc
+# Working on manifold
 
 Read `docs/STATUS.md` first for the current implementation state and next steps,
 then `docs/ARCHITECTURE.md` and `docs/DECISIONS.md`. Keep these current whenever
@@ -6,7 +6,7 @@ you change behavior or leave work for another contributor.
 
 ## Product contract
 
-manydoc is an independent, pure-Go document processing library and CLI for
+manifold is an independent, pure-Go document processing library and CLI for
 embedding in Daptin and applications such as Colleaf. Initial scope: DOCX and
 PDF extraction/generation, plus JSON/text interchange. It is not currently a
 drop-in replacement for UniOffice/UniPDF or a Word-compatible layout engine.
@@ -27,7 +27,7 @@ drop-in replacement for UniOffice/UniPDF or a Word-compatible layout engine.
 ## Commands and completion
 
 Use `go test ./...`, `go test -race ./...`, `go vet ./...`, and
-`CGO_ENABLED=0 go build ./cmd/manydoc` when the CLI exists. The module declares
+`CGO_ENABLED=0 go build ./cmd/manifold` when the CLI exists. The module declares
 Go 1.25.0. Prefer `GOWORK=off` during development to avoid surrounding workspace
 files selecting a different module graph. Run `git diff --check` after changes.
 

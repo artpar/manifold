@@ -61,7 +61,7 @@ GOWORK=off go test -run 'TestPDFParentTree|TestPDFTagged|TestGeneratedPDF' -coun
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFParentTree$' -fuzztime=10s -parallel=2 .
 output/qa-venv/bin/python scripts/verify_pdf_parent_tree.py testdata/real/copyright-office-circular-1-2021.pdf
 output/qa-venv/bin/python scripts/verify_pdf_parent_tree.py output/colleaf-tagged/document.pdf --out output/pdf-parent-tree/generated-mutated.pdf
-CGO_ENABLED=0 GOWORK=off go build -o output/manydoc-parent-tree ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o output/manydoc-parent-tree ./cmd/manifold
 # Expected failure, with ParentTree/forward-owner contradiction:
 output/manydoc-parent-tree extract -format sf -o output/pdf-parent-tree/rejected.sf output/pdf-parent-tree/mutated.pdf
 ```

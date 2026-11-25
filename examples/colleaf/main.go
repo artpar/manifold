@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"github.com/artpar/manydoc"
+	"github.com/artpar/manifold"
 )
 
 func main() {
@@ -25,27 +25,27 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	format, err := manydoc.FormatFromName(*input)
+	format, err := manifold.FormatFromName(*input)
 	if err != nil {
 		log.Fatal(err)
 	}
-	doc, err := manydoc.Read(ctx, bytes.NewReader(raw), format, manydoc.ReadOptions{})
+	doc, err := manifold.Read(ctx, bytes.NewReader(raw), format, manifold.ReadOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
 	var native bytes.Buffer
-	if err = manydoc.WriteVDOCS(ctx, &native, doc); err != nil {
+	if err = manifold.WriteVDOCS(ctx, &native, doc); err != nil {
 		log.Fatal(err)
 	}
-	reopened, err := manydoc.ReadVDOCS(ctx, bytes.NewReader(native.Bytes()))
+	reopened, err := manifold.ReadVDOCS(ctx, bytes.NewReader(native.Bytes()))
 	if err != nil {
 		log.Fatal(err)
 	}
-	before, err := manydoc.ToStructured(doc)
+	before, err := manifold.ToStructured(doc)
 	if err != nil {
 		log.Fatal(err)
 	}
-	after, err := manydoc.ToStructured(reopened)
+	after, err := manifold.ToStructured(reopened)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -53,9 +53,9 @@ func main() {
 		log.Fatal("native round trip changed the SF graph")
 	}
 	outputs := map[string][]byte{"document.vdocs": bytes.Clone(native.Bytes())}
-	for _, format := range []manydoc.Format{manydoc.SF, manydoc.DOCX, manydoc.PDF} {
+	for _, format := range []manifold.Format{manifold.SF, manifold.DOCX, manifold.PDF} {
 		var buf bytes.Buffer
-		if err = manydoc.Write(ctx, &buf, reopened, format, manydoc.WriteOptions{AllowLossy: *lossy}); err != nil {
+		if err = manifold.Write(ctx, &buf, reopened, format, manifold.WriteOptions{AllowLossy: *lossy}); err != nil {
 			log.Fatal(err)
 		}
 		outputs["document."+string(format)] = bytes.Clone(buf.Bytes())
@@ -68,5 +68,5 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	fmt.Printf("Wrote native/SF/DOCX/PDF to %s; exact native/SF graph verified.\nNative MIME: %s\n", *output, manydoc.VDOCSMIME)
+	fmt.Printf("Wrote native/SF/DOCX/PDF to %s; exact native/SF graph verified.\nNative MIME: %s\n", *output, manifold.VDOCSMIME)
 }

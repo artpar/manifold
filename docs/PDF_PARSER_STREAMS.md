@@ -98,7 +98,7 @@ successful exit code.
 
 ```sh
 GOWORK=off MANYDOC_PDF_PARSER_QA=output/pdf-parser-qa go test -run 'TestPDFParser|TestPDFObjectStream' -count=1 .
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_pdf_parser_streams.py output/pdf-parser-qa --large --generate-encrypted
 # Original library compatibility failure is fixed; strict success remains required:
 output/qa-venv/bin/python scripts/verify_pdf_parser_streams.py output/pdf-parser-qa --require-encrypted
@@ -106,7 +106,7 @@ GOWORK=off go test -run '^$' -fuzz '^FuzzPDFObjectStreamHeader$' -fuzztime=10000
 GOWORK=off go test ./...
 GOWORK=off go test -race ./...
 GOWORK=off go vet ./...
-GOWORK=off CGO_ENABLED=0 go build -o output/manydoc ./cmd/manydoc
+GOWORK=off CGO_ENABLED=0 go build -o output/manydoc ./cmd/manifold
 git diff --check
 ```
 

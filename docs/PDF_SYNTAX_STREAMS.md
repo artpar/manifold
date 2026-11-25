@@ -82,7 +82,7 @@ pre-change commit7727679. This change adds no output-layout/fidelity claim.
 
 ```sh
 MANYDOC_PDF_STREAM_QA=output/pdf-stream-qa GOWORK=off go test -run '^TestPDF(Syntax|Decoded|Predictor)' -count=1 .
-CGO_ENABLED=0 GOWORK=off go build -o bin/manydoc ./cmd/manydoc
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
 output/qa-venv/bin/python scripts/verify_pdf_syntax_streams.py output/pdf-stream-qa
 # Expected FAIL on long-lzw0; retained independent consumer oracle:
 output/qa-venv/bin/python scripts/verify_pdf_syntax_streams.py output/pdf-stream-qa --require-pypdf-all

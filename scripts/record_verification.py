@@ -15,8 +15,8 @@ out = root / "output"
 events = [json.loads(line) for line in (out / "tests-final.json").read_text().splitlines()]
 assert not any(e["Action"] == "fail" for e in events)
 packages = {e["Package"]: "passed" for e in events if e["Action"] == "pass" and "Test" not in e}
-assert "github.com/artpar/manydoc" in packages
-assert "github.com/artpar/manydoc/cmd/manydoc" in packages
+assert "github.com/artpar/manifold" in packages
+assert "github.com/artpar/manifold/cmd/manifold" in packages
 race = (out / "race-final.log").read_text()
 assert "FAIL" not in race and "DATA RACE" not in race and "ok  " in race
 assert not (out / "vet-final.log").read_text().strip()
@@ -37,7 +37,7 @@ comparisons = json.loads((out / "pdf-comparison.json").read_text())
 assert len(comparisons) == 28 and all(row["passed"] for row in comparisons)
 manifest = json.loads((root / "testdata/corpus/manifest.json").read_text())
 summary = {
-    "date": date.today().isoformat(), "project": "github.com/artpar/manydoc",
+    "date": date.today().isoformat(), "project": "github.com/artpar/manifold",
     "go": subprocess.check_output(["go", "version"], text=True).strip(),
     "host": platform.platform(), "packages": packages, "coverage_percent": coverage,
     "top_level_tests_passed": sum(e["Action"] == "pass" and "Test" in e and "/" not in e["Test"] for e in events),

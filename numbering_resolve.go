@@ -1,4 +1,4 @@
-package manydoc
+package manifold
 
 // Resolve nested counter contexts on owned containers; source runs, assets and
 // provenance remain shared read-only. A list's own start remains authoritative.

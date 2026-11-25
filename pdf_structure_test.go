@@ -1,4 +1,4 @@
-package manydoc
+package manifold
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ import (
 )
 
 // Objects 1-7 are stable; the tests own every structural expectation rather
-// than using manydoc's output as an oracle for its input.
+// than using manifold's output as an oracle for its input.
 func taggedTestPDF(content, root string, elements ...string) []byte {
 	return recoveryPDF(taggedTestObjects(content, root, elements...)...)
 }

@@ -8,7 +8,7 @@ for style,suffix in [('', ''),('/B','-Bold'),('/I','-Oblique'),('/BI','-BoldObli
 for family in ['Times New Roman','Calibri','Cambria','Tahoma','Liberation Serif','Liberation Sans','Arial']:fontargs+=['-pdf-font-map',family+'=DejaVu']
 fontargs+=['-pdf-font-map','Courier New=Go Mono']
 def run(args):
- result=subprocess.run(['bin/manydoc']+args,capture_output=True,text=True)
+ result=subprocess.run(['bin/manifold']+args,capture_output=True,text=True)
  if result.returncode:raise RuntimeError(result.stderr)
  return result
 for f in sorted(Path('testdata/real').glob('poi-*.docx')):

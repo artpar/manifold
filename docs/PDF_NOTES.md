@@ -54,12 +54,12 @@ a substitute for the remaining original producer corpus.
 
 ```sh
 python3 scripts/generate_pdf_semantic_audit.py
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc extract -format sf -o output/audit/explicit-note.sf output/audit/explicit-note.pdf
-bin/manydoc extract -format sf -o output/audit/rich-explicit-note.sf output/audit/rich-explicit-note.pdf
-bin/manydoc convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/audit/rich-note-native.pdf output/audit/rich-explicit-note.sf
-bin/manydoc convert -allow-lossy -o output/audit/rich-note.docx output/audit/rich-explicit-note.sf
-bin/manydoc extract -format sf -o output/audit/rich-note-docx.sf output/audit/rich-note.docx
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
+bin/manifold extract -format sf -o output/audit/explicit-note.sf output/audit/explicit-note.pdf
+bin/manifold extract -format sf -o output/audit/rich-explicit-note.sf output/audit/rich-explicit-note.pdf
+bin/manifold convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/audit/rich-note-native.pdf output/audit/rich-explicit-note.sf
+bin/manifold convert -allow-lossy -o output/audit/rich-note.docx output/audit/rich-explicit-note.sf
+bin/manifold extract -format sf -o output/audit/rich-note-docx.sf output/audit/rich-note.docx
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-pdf-notes-lo --headless --convert-to pdf --outdir output/audit/lo output/audit/rich-note.docx
 output/qa-venv/bin/python scripts/verify_pdf_notes.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/audit/explicit-note.sf output/audit/rich-explicit-note.sf
@@ -157,13 +157,13 @@ Colleaf save/quotas remain outside the library.
 ```sh
 GOWORK=off go run ./examples/notes -variant-labels -out output/note-variants
 python3 scripts/generate_pdf_semantic_audit.py
-bin/manydoc extract -format sf -o output/note-variants/variant-pdf.sf output/audit/variant-explicit-note.pdf
-bin/manydoc extract -format sf -o output/note-variants/markerless-pdf.sf output/audit/markerless-explicit-note.pdf
-bin/manydoc convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/note-variants/variant-native.pdf output/note-variants/variant-pdf.sf
-bin/manydoc convert -allow-lossy -o output/note-variants/variant.docx output/note-variants/variant-pdf.sf
-bin/manydoc extract -format sf -o output/note-variants/variant-docx.sf output/note-variants/variant.docx
-bin/manydoc convert -allow-lossy -o output/note-variants/markerless.docx output/note-variants/markerless-pdf.sf
-bin/manydoc extract -format sf -o output/note-variants/markerless-docx.sf output/note-variants/markerless.docx
+bin/manifold extract -format sf -o output/note-variants/variant-pdf.sf output/audit/variant-explicit-note.pdf
+bin/manifold extract -format sf -o output/note-variants/markerless-pdf.sf output/audit/markerless-explicit-note.pdf
+bin/manifold convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/note-variants/variant-native.pdf output/note-variants/variant-pdf.sf
+bin/manifold convert -allow-lossy -o output/note-variants/variant.docx output/note-variants/variant-pdf.sf
+bin/manifold extract -format sf -o output/note-variants/variant-docx.sf output/note-variants/variant.docx
+bin/manifold convert -allow-lossy -o output/note-variants/markerless.docx output/note-variants/markerless-pdf.sf
+bin/manifold extract -format sf -o output/note-variants/markerless-docx.sf output/note-variants/markerless.docx
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-note-variants-lo --headless --convert-to pdf --outdir output/note-variants/lo output/note-variants/notes.docx
 output/qa-venv/bin/python scripts/verify_note_variants.py
 GOWORK=off go test -race -run 'TestNoteVariant|TestPDFDifferent|TestMarkerless|TestPDFMarkerless|TestIndependentBody|TestVariantCitation|TestMissingCitation' -count=1 .
@@ -245,10 +245,10 @@ Physical geometry and inferred semantic anchor ownership remain separate facts.
 
 ```sh
 python3 scripts/generate_pdf_semantic_audit.py
-bin/manydoc extract -format sf -o output/note-inference/adjacent.sf output/audit/adjacent-note.pdf
-bin/manydoc convert -allow-lossy -o output/note-inference/adjacent.docx output/note-inference/adjacent.sf
-bin/manydoc extract -format sf -o output/note-inference/adjacent-docx.sf output/note-inference/adjacent.docx
-bin/manydoc extract -format sf.gz -o output/note-inference/guide-styled.sf.gz output/note-inference/tagged-guide.pdf
+bin/manifold extract -format sf -o output/note-inference/adjacent.sf output/audit/adjacent-note.pdf
+bin/manifold convert -allow-lossy -o output/note-inference/adjacent.docx output/note-inference/adjacent.sf
+bin/manifold extract -format sf -o output/note-inference/adjacent-docx.sf output/note-inference/adjacent.docx
+bin/manifold extract -format sf.gz -o output/note-inference/guide-styled.sf.gz output/note-inference/tagged-guide.pdf
 output/qa-venv/bin/python scripts/verify_note_inference.py --guide output/note-inference/tagged-guide.pdf --guide-sf output/note-inference/guide-styled.sf.gz --baseline-guide-sf output/note-inference/guide-linked.sf.gz
 GOWORK=off go test -race -run 'TestPDFAdjacent|TestPDFPhysicalLinkNoteInference|TestDOCXNoteRelationshipInference|TestPDFNoteLinkAmbiguity' -count=1 .
 ```
@@ -308,7 +308,7 @@ definitions/Ref wrappers are qualified below; broader untagged recovery remains 
 
 ```sh
 GOWORK=off go run ./examples/notes -variant-labels -styled-labels -out output/note-styles
-bin/manydoc extract -format sf -o output/note-styles/notes-docx.sf output/note-styles/notes.docx
+bin/manifold extract -format sf -o output/note-styles/notes-docx.sf output/note-styles/notes.docx
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-note-styles-lo --headless --convert-to pdf --outdir output/note-styles/lo output/note-styles/notes.docx
 output/qa-venv/bin/python scripts/verify_note_styles.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/note-styles/notes.sf output/note-styles/notes-docx.sf output/note-inference/guide-styled.sf.gz
@@ -357,12 +357,12 @@ font/superscript/baseline/Word note-page producer differences remain unchanged.
 
 ```sh
 output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc extract -format sf -o output/note-actual/source.sf output/audit/aligned-actual-note.pdf
-bin/manydoc extract -format sf -o output/note-actual/opaque.sf output/audit/opaque-actual-note.pdf
-bin/manydoc convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/note-actual/native.pdf output/note-actual/source.sf
-bin/manydoc convert -allow-lossy -o output/note-actual/word.docx output/note-actual/source.sf
-bin/manydoc extract -format sf -o output/note-actual/word.sf output/note-actual/word.docx
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
+bin/manifold extract -format sf -o output/note-actual/source.sf output/audit/aligned-actual-note.pdf
+bin/manifold extract -format sf -o output/note-actual/opaque.sf output/audit/opaque-actual-note.pdf
+bin/manifold convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/note-actual/native.pdf output/note-actual/source.sf
+bin/manifold convert -allow-lossy -o output/note-actual/word.docx output/note-actual/source.sf
+bin/manifold extract -format sf -o output/note-actual/word.sf output/note-actual/word.docx
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-note-actual-qa --headless --convert-to pdf --outdir output/note-actual/lo output/note-actual/word.docx
 output/qa-venv/bin/python scripts/verify_note_actual.py
 NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/note-actual/source.sf output/note-actual/word.sf output/note-actual/opaque.sf
@@ -426,12 +426,12 @@ final source consistency/resource/API/acceptance audit remain open.
 
 ```sh
 output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
 for name in nested-definition redundant-wrapper opaque-wrapper; do
-  bin/manydoc extract -format sf -o output/nested-notes/$name.sf output/audit/$name-note.pdf
-  bin/manydoc convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/nested-notes/$name.pdf output/nested-notes/$name.sf
-  bin/manydoc convert -allow-lossy -o output/nested-notes/$name.docx output/nested-notes/$name.sf
-  bin/manydoc extract -format sf -o output/nested-notes/$name-word.sf output/nested-notes/$name.docx
+  bin/manifold extract -format sf -o output/nested-notes/$name.sf output/audit/$name-note.pdf
+  bin/manifold convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/nested-notes/$name.pdf output/nested-notes/$name.sf
+  bin/manifold convert -allow-lossy -o output/nested-notes/$name.docx output/nested-notes/$name.sf
+  bin/manifold extract -format sf -o output/nested-notes/$name-word.sf output/nested-notes/$name.docx
 done
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-nested-notes-qa --headless --convert-to pdf --outdir output/nested-notes/lo output/nested-notes/*.docx
 output/qa-venv/bin/python scripts/verify_nested_notes.py
@@ -455,7 +455,7 @@ semantic path. Independent pypdf confirms the absent tree and retained text; the
 new expected count/kinds are unchanged in the CLI acceptance subtest:
 
 ```sh
-MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf' -count=1 ./cmd/manydoc
+MANYDOC_REQUIRE_PDF_NOTE_GRAPH=1 GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf' -count=1 ./cmd/manifold
 ```
 
 At discovery this failed explicitly and ordinary runs skipped it. The painted
@@ -498,7 +498,7 @@ asset expected values are unchanged. Source/raw corpus oracles were not edited.
 
 ```sh
 GOWORK=off go test -run '^TestGeneratedPDF|^FuzzGeneratedPDFNoteGraph$' -count=1 .
-GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf' -count=1 ./cmd/manydoc
+GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf' -count=1 ./cmd/manifold
 ```
 
 This closes the concrete generated-note graph failure. General untagged recovery,

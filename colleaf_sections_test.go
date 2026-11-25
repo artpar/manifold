@@ -1,4 +1,4 @@
-package manydoc
+package manifold
 
 import (
 	"context"
@@ -176,7 +176,7 @@ func TestColleafNativeSectionPolicies(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	opened.Resources = nil // A genuine foreign document has no manydoc layout intent.
+	opened.Resources = nil // A genuine foreign document has no manifold layout intent.
 	got, err := decodeColleafDocument(ctx, opened)
 	if err != nil {
 		t.Fatal(err)

@@ -6,7 +6,7 @@ The persistence/editor format is a versioned ProseMirror document schema,
 `manydoc-prosemirror/1`, stored in `.sf` files. The machine-readable NodeSpec and
 MarkSpec are in `schema/prosemirror-v1.json`. This is the established ProseMirror
 JSON encoding (`type`, `attrs`, `content`, `marks`, `text`), with an explicit
-manydoc schema profile; it is not a claim that arbitrary ProseMirror, Tiptap or
+manifold schema profile; it is not a claim that arbitrary ProseMirror, Tiptap or
 Colleaf documents use the same schema. All production code is Go. Using this
 encoding does not require running ProseMirror or a JavaScript engine.
 
@@ -30,7 +30,7 @@ Pandoc's AST would also need application conventions for page layout, running
 headers/footers, asset persistence and PDF extraction provenance. HTML was
 considered for browser interoperability, but is ambiguous about document page
 semantics and requires CSS interpretation; plain text/Markdown cannot preserve
-all required rich content. The old manydoc JSON was not selected as the canonical
+all required rich content. The old manifold JSON was not selected as the canonical
 format because it invents a document vocabulary and is already too limited.
 ProseMirror also requires explicit extensions for page layout and PDF provenance;
 those extensions must be documented and tested, rather than called universal

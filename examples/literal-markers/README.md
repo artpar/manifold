@@ -8,11 +8,11 @@ From the repository root:
 
 ```sh
 mkdir -p output/literal-example
-GOWORK=off go run ./cmd/manydoc convert -o output/literal-example/document.pdf examples/literal-markers/document.sf
-GOWORK=off go run ./cmd/manydoc convert -o output/literal-example/document.docx examples/literal-markers/document.sf
-GOWORK=off go run ./cmd/manydoc convert -o output/literal-example/document.vdocs examples/literal-markers/document.sf
-GOWORK=off go run ./cmd/manydoc extract -format sf -o output/literal-example/native-recovered.sf output/literal-example/document.vdocs
-GOWORK=off go run ./cmd/manydoc extract -format sf -o output/literal-example/recovered.sf output/literal-example/document.pdf
+GOWORK=off go run ./cmd/manifold convert -o output/literal-example/document.pdf examples/literal-markers/document.sf
+GOWORK=off go run ./cmd/manifold convert -o output/literal-example/document.docx examples/literal-markers/document.sf
+GOWORK=off go run ./cmd/manifold convert -o output/literal-example/document.vdocs examples/literal-markers/document.sf
+GOWORK=off go run ./cmd/manifold extract -format sf -o output/literal-example/native-recovered.sf output/literal-example/document.vdocs
+GOWORK=off go run ./cmd/manifold extract -format sf -o output/literal-example/recovered.sf output/literal-example/document.pdf
 ```
 
 API callers use `Read(..., SF, ...)` and `Write(..., PDF, ...)` or `Write(..., DOCX, ...)`. PDF label/body

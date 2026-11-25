@@ -54,7 +54,7 @@ with pymupdf.open(source) as doc:
         assert {tuple(cell) for cell in t.cells if cell is not None}==expected_bounds
         page.get_pixmap(matrix=pymupdf.Matrix(1.5,1.5)).save(out/f'source-{i+1}.png')
 sf_path=out/'ruled.sf'
-subprocess.run(['bin/manydoc','extract','-format','sf','-o',str(sf_path),str(source)],check=True)
+subprocess.run(['bin/manifold','extract','-format','sf','-o',str(sf_path),str(source)],check=True)
 sf=json.loads(sf_path.read_text());bs=sf['content'];assert [n['type'] for n in bs]==['table','page_break','table']
 plain=lambda n:n.get('text','')+''.join(plain(c) for c in n.get('content',[]))
 for table in (bs[0],bs[2]):
@@ -72,7 +72,7 @@ for table in (bs[0],bs[2]):
 norm=lambda s:Counter(''.join(s.split()))
 assert norm(plain(sf))==norm(original)
 assert any(d['code']=='pdf_table_rulings_inferred' for d in sf['attrs']['diagnostics'])
-for ext in ('docx','pdf'):subprocess.run(['bin/manydoc','convert','-allow-lossy','-pdf-font-map','Helvetica=Go','-o',str(out/f'reflow.{ext}'),str(sf_path)],check=True)
+for ext in ('docx','pdf'):subprocess.run(['bin/manifold','convert','-allow-lossy','-pdf-font-map','Helvetica=Go','-o',str(out/f'reflow.{ext}'),str(sf_path)],check=True)
 word=Document(out/'reflow.docx');assert len(word.tables)==2
 for t in word.tables:
     assert t.cell(0,0)._tc is t.cell(0,1)._tc and t.cell(1,0)._tc is t.cell(2,0)._tc

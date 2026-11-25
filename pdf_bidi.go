@@ -1,4 +1,4 @@
-package manydoc
+package manifold
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/artpar/manydoc/internal/bidilevels"
+	"github.com/artpar/manifold/internal/bidilevels"
 	"golang.org/x/text/unicode/bidi"
 )
 

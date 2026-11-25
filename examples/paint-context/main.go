@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/artpar/manydoc"
+	"github.com/artpar/manifold"
 )
 
 func main() {
@@ -20,8 +20,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	run := func(text, color string) manydoc.Run {
-		return manydoc.Run{Text: text, FontFamily: "Noto Sans", FontSize: 32, Color: color}
+	run := func(text, color string) manifold.Run {
+		return manifold.Run{Text: text, FontFamily: "Noto Sans", FontSize: 32, Color: color}
 	}
 	red, blue, green := "#FF0000", "#0000FF", "#008800"
 	a, v := run("A", red), run("V", blue)
@@ -29,26 +29,26 @@ func main() {
 	o.Underline = true
 	f.Strike = true
 	f.Link = "https://example.invalid/ligature"
-	paragraph := func(runs ...manydoc.Run) manydoc.Block { return manydoc.Block{Kind: manydoc.Paragraph, Runs: runs} }
+	paragraph := func(runs ...manifold.Run) manifold.Block { return manifold.Block{Kind: manifold.Paragraph, Runs: runs} }
 	header := paragraph(run("A", red), run("V", blue))
 	for j := range header.Runs {
 		header.Runs[j].FontSize = 10
 	}
-	doc := &manydoc.Document{Metadata: manydoc.Metadata{Title: "Paint preserves shaping"}, Layout: manydoc.Layout{Width: 360, Height: 420, Margin: 40}, Headers: []manydoc.Block{header}, Footers: []manydoc.Block{header}, Blocks: []manydoc.Block{paragraph(a, v), paragraph(o, f, i, ce), {Kind: manydoc.Table, Rows: []manydoc.Row{{Cells: []manydoc.Cell{{Blocks: []manydoc.Block{paragraph(o, f, i, ce)}}}}}}}}
-	opts := manydoc.WriteOptions{PDFFonts: []manydoc.FontFace{{Family: "Noto Sans", Data: font}}}
-	write := func(name string, d *manydoc.Document, format manydoc.Format) {
+	doc := &manifold.Document{Metadata: manifold.Metadata{Title: "Paint preserves shaping"}, Layout: manifold.Layout{Width: 360, Height: 420, Margin: 40}, Headers: []manifold.Block{header}, Footers: []manifold.Block{header}, Blocks: []manifold.Block{paragraph(a, v), paragraph(o, f, i, ce), {Kind: manifold.Table, Rows: []manifold.Row{{Cells: []manifold.Cell{{Blocks: []manifold.Block{paragraph(o, f, i, ce)}}}}}}}}
+	opts := manifold.WriteOptions{PDFFonts: []manifold.FontFace{{Family: "Noto Sans", Data: font}}}
+	write := func(name string, d *manifold.Document, format manifold.Format) {
 		var b bytes.Buffer
-		if err := manydoc.Write(context.Background(), &b, d, format, opts); err != nil {
+		if err := manifold.Write(context.Background(), &b, d, format, opts); err != nil {
 			log.Fatal(err)
 		}
 		if err := os.WriteFile(filepath.Join(out, name), b.Bytes(), 0644); err != nil {
 			log.Fatal(err)
 		}
 	}
-	for _, format := range []manydoc.Format{manydoc.SF, manydoc.DOCX, manydoc.PDF} {
+	for _, format := range []manifold.Format{manifold.SF, manifold.DOCX, manifold.PDF} {
 		write("paint."+string(format), doc, format)
 	}
-	emergency := &manydoc.Document{Layout: manydoc.Layout{Width: 32, Height: 220, Margin: 10}, Blocks: []manydoc.Block{paragraph(run("f", red), run("f", blue), run("i", green))}}
-	write("emergency.sf", emergency, manydoc.SF)
-	write("emergency.pdf", emergency, manydoc.PDF)
+	emergency := &manifold.Document{Layout: manifold.Layout{Width: 32, Height: 220, Margin: 10}, Blocks: []manifold.Block{paragraph(run("f", red), run("f", blue), run("i", green))}}
+	write("emergency.sf", emergency, manifold.SF)
+	write("emergency.pdf", emergency, manifold.PDF)
 }

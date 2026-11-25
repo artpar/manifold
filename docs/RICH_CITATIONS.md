@@ -62,16 +62,16 @@ Reproduce (optional Python/Node/LibreOffice are QA only):
 
 ```sh
 output/qa-venv/bin/python scripts/generate_pdf_semantic_audit.py
-GOWORK=off CGO_ENABLED=0 go build -o bin/manydoc ./cmd/manydoc
-bin/manydoc extract -format sf -o output/rich-citations/source.sf output/audit/rich-citation-note.pdf
-bin/manydoc convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/rich-citations/native.pdf output/rich-citations/source.sf
-bin/manydoc convert -allow-lossy -o output/rich-citations/word.docx output/rich-citations/source.sf
-bin/manydoc extract -format sf -o output/rich-citations/word.sf output/rich-citations/word.docx
+GOWORK=off CGO_ENABLED=0 go build -o bin/manifold ./cmd/manifold
+bin/manifold extract -format sf -o output/rich-citations/source.sf output/audit/rich-citation-note.pdf
+bin/manifold convert -allow-lossy -pdf-font-map 'Courier=Go Mono' -o output/rich-citations/native.pdf output/rich-citations/source.sf
+bin/manifold convert -allow-lossy -o output/rich-citations/word.docx output/rich-citations/source.sf
+bin/manifold extract -format sf -o output/rich-citations/word.sf output/rich-citations/word.docx
 GOWORK=off go run ./examples/notes -rich-citations -rich-body-labels -sectioned -out output/rich-citations/example
-bin/manydoc extract -format sf -o output/rich-citations/example/word.sf output/rich-citations/example/notes.docx
-bin/manydoc convert -pdf-font DejaVu=testdata/assets/DejaVuSans.ttf -o output/rich-citations/mixed.pdf output/audit/mixed-citations.sf
-bin/manydoc convert -allow-lossy -o output/rich-citations/mixed.docx output/audit/mixed-citations.sf
-bin/manydoc extract -format sf -o output/rich-citations/mixed-word.sf output/rich-citations/mixed.docx
+bin/manifold extract -format sf -o output/rich-citations/example/word.sf output/rich-citations/example/notes.docx
+bin/manifold convert -pdf-font DejaVu=testdata/assets/DejaVuSans.ttf -o output/rich-citations/mixed.pdf output/audit/mixed-citations.sf
+bin/manifold convert -allow-lossy -o output/rich-citations/mixed.docx output/audit/mixed-citations.sf
+bin/manifold extract -format sf -o output/rich-citations/mixed-word.sf output/rich-citations/mixed.docx
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-rich-citation-qa --headless --convert-to pdf --outdir output/rich-citations/lo output/rich-citations/word.docx output/rich-citations/mixed.docx
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-rich-citation-example-qa --headless --convert-to pdf --outdir output/rich-citations/example/lo output/rich-citations/example/notes.docx
 output/qa-venv/bin/python scripts/verify_rich_citations.py
