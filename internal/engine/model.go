@@ -23,7 +23,7 @@ const (
 	SF Format = "sf"
 	// SFGzip is the same ProseMirror JSON in an RFC 1952 gzip stream (.sf.gz).
 	SFGzip Format = "sf.gz"
-	// VDOCS is the Colleaf version-3 envelope for Univer 1.0.4 snapshots.
+	// VDOCS is the VDOCS version-3 envelope for Univer 1.0.4 snapshots.
 	VDOCS Format = "vdocs"
 	Text  Format = "txt"
 )
@@ -342,7 +342,7 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 	}
 	switch format {
 	case VDOCS:
-		return writeColleaf(ctx, w, d)
+		return writeVDOCS(ctx, w, d)
 	case DOCX:
 		return writeDOCX(ctx, w, d, opts.AllowLossy)
 	case PDF:

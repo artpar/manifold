@@ -1009,14 +1009,14 @@ body nodes; root attributes and individual node/asset values remain materialized
 Context/error checks cover encoding and gzip finalization. See SF_CODEC.md for
 full original-value/provenance proof, independent ProseMirror checks and memory costs.
 
-## Current audit and Colleaf boundary (2026-11-24)
+## Current audit and VDOCS boundary (2026-11-24)
 
 ACCEPTANCE.md is now the current requirement audit rather than a cumulative list
-of obsolete pending milestones. The actual Colleaf contract was inspected read-only
+of obsolete pending milestones. The actual VDOCS contract was inspected read-only
 at pinned GitHub source and matching Univer 1.0.4 published declarations. Its .vdocs
 snapshot requires an explicit native adapter through SF; it is not ProseMirror.
-See COLLEAF_FORMAT.md. Application access/quotas/storage/conflicts stay outside
-manydoc, and neither Colleaf nor Daptin was modified.
+See VDOCS_FORMAT.md. Application access/quotas/storage/conflicts stay outside
+manydoc, and neither VDOCS nor Daptin was modified.
 
 The audit's ActualText regression fix copies typed internal destinations alongside
 hrefs and intersects URI/internal ownership as separate target kinds. Matching
@@ -1130,45 +1130,45 @@ names before interpretation. DOCX_PRECISION.md records the original-guide and
 independent-reader qualification, precise bounds and remaining PDF precision policy.
 
 
-## Colleaf native adapter foundation (internal, incomplete)
+## VDOCS native adapter foundation (internal, incomplete)
 
-colleaf_stream.go maps UTF-16 positions to validated UTF-8 scalar boundaries and
+vdocs_stream.go maps UTF-16 positions to validated UTF-8 scalar boundaries and
 parses actual Univer 1.0.4 paragraph/section/table controls. It preserves original
-scalar sequences rather than normalizing before indexing. colleaf_body.go shares
+scalar sequences rather than normalizing before indexing. vdocs_body.go shares
 that index to validate style/range/control metadata ownership. The internal AST
 uses exclusive ends; native annotation/tree ends have distinct inclusive rules.
 Context cancellation and existing nesting bounds apply. These helpers do not
 replace the canonical SF or expose a partial native format/API.
 
-Actual pinned Colleaf validator and DocumentDataModel/DocumentViewModel/table
+Actual pinned native SDK and DocumentDataModel/DocumentViewModel/table
 parser probes qualify token values, control ownership, astral style/link/note
 records and nested table bounds. They exposed stale table-token prose and the
 need for CR/LF inside cells. Geometry is pixels; text fs is points. Full semantic
 mapping, inherited styles/sections/stories, merged tables/lists/assets/notes and
-native edit/save checks remain open. See COLLEAF_FORMAT.md.
+native edit/save checks remain open. See VDOCS_FORMAT.md.
 
 
-## Private Colleaf text/style mapping
+## Private VDOCS text/style mapping
 
-colleaf_styles.go computes a UTF-16 interval partition with an event sweep and
+vdocs_styles.go computes a UTF-16 interval partition with an event sweep and
 last-whole-record priority, resolves named basedOn styles with cycle/depth checks,
 and projects supported typography with explicit loss diagnostics. Font fs remains
 points. Native lang maps to the authored general language, while altLang/script-
 specific bindings still require a checked mapping. Hidden text cannot become visible.
 
-colleaf_text.go shares validated indexes for paragraph/heading semantics, link
+vdocs_text.go shares validated indexes for paragraph/heading semantics, link
 ranges and native VT↔SF newline. It does not return partial rich containers or
 multiple sections. Native text and styles are authoritative; no private whole-SF
 payload exists. The SF href plus matching destination normalization is accepted.
 These workers remain private pending rich ownership/asset/section/story mappings.
 Tests cross the canonical SF and compare native records, verify style interval
 winners/inheritance, and re-import actual pinned SDK TextX edit/save output.
-Optional scripts/qa/colleaf/verify_colleaf_text.cjs is reader/mutation QA, not renderer QA.
+Optional scripts/qa/vdocs/verify_vdocs_text.cjs is reader/mutation QA, not renderer QA.
 
 
-## Private Colleaf rich body/table mapping
+## Private VDOCS rich body/table mapping
 
-colleaf_tables.go composes actual stream/source records recursively. Native
+vdocs_tables.go composes actual stream/source records recursively. Native
 vertical continuations have rowSpan0, a positive columnSpan and empty CR/LF cell
 bodies; SF keeps only origin cells. Optional horizontal zero/zero placeholders
 are checked against an owning span. A bounded occupancy grid verifies every
@@ -1185,13 +1185,13 @@ SF point widths multiply by4/3 for native unit3. Equal default columns are nativ
 specified percentages totaling100, not zero automatic widths (which rendered
 invisible in the pinned skeleton). Named formatting stays in the shared text
 worker. Actual record/tree/geometry/edit/save probes are in
-scripts/qa/colleaf/verify_colleaf_tables.cjs; font metrics/browser rendering remain open.
+scripts/qa/vdocs/verify_vdocs_tables.cjs; font metrics/browser rendering remain open.
 This internal composition is not a public partial native format support claim.
 
 
-## Private Colleaf note graph composition
+## Private VDOCS note graph composition
 
-colleaf_notes.go composes the shared native text/table workers for main and note
+vdocs_notes.go composes the shared native text/table workers for main and note
 bodies. Note reference atoms occupy one UTF-16 BACKSPACE control and carry real
 customBlocks noteId/noteType metadata; interval styles remain native. Definition
 bodies/tables live in real notes records. Repeated references share one definition.
@@ -1200,7 +1200,7 @@ and original definition order only. It duplicates no visible text or labels.
 Bindings apply only to matching actual native ID/kind; stale bindings diagnose
 and leave actual native identity authoritative. Definition aliasing is rejected.
 
-colleaf_text.go isolates atom boundaries alongside style/link ranges; the rich
+vdocs_text.go isolates atom boundaries alongside style/link ranges; the rich
 body reader translates custom-block metadata through paragraph/cell fragments using
 sorted atom positions. A matching leading body-marker atom maps to BodyLabelStyle;
 nonleading/self/foreign citations still fail note graph validation. Native shared
@@ -1211,9 +1211,9 @@ defaults/intent and browser/native placement qualification are still needed. The
 public API/CLI and runtime dependency graph are unchanged.
 
 
-## Private Colleaf list composition and ownership
+## Private VDOCS list composition and ownership
 
-colleaf_lists.go emits actual paragraph bullet records, named list sources and
+vdocs_lists.go emits actual paragraph bullet records, named list sources and
 nine-level native glyph/counter definitions. SF starts map to native startNumber-1;
 shared group IDs bind non-independent nested counters, while separate groups keep
 independent counters. Native templates/levels/styles remain the real presentation
@@ -1238,9 +1238,9 @@ actual GlyphType.LIST content, not only the mutable counter history cache. Brows
 layout and full editor resource persistence remain separate required evidence.
 
 
-## Private Colleaf embedded image transport
+## Private VDOCS embedded image transport
 
-colleaf_images.go composes actual inline drawing atoms, embedded data-URI sources,
+vdocs_images.go composes actual inline drawing atoms, embedded data-URI sources,
 per-story drawings/order and pixel docTransform boxes. All occurrences have distinct
 IDs including a story prefix: the actual drawing registry is flat across notes.
 The shared body encoder now returns a typed composition containing text/tables/
@@ -1266,7 +1266,7 @@ contextual fitting and editor resource-manager persistence remain open.
 
 ## Native intent persistence through the actual facade
 
-colleaf_intent.go replaces unregistered-resource output with a versioned CUSTOM5
+vdocs_intent.go replaces unregistered-resource output with a versioned CUSTOM5
 annotation on the final LF: profile manydoc.native-intent, version1, records holding
 only the existing checked identity/ownership/geometry intent. FDocument.save
 regenerates registered resources and drops unknown ones, so model getSnapshot
@@ -1281,7 +1281,7 @@ second asset authority. Empty word/note plugin resources do not create false los
 diagnostics. DOC_OBJECT_PERMISSION_PLUGIN is outside document interpretation;
 its payload is never evaluated and introduces no admission/permission gate.
 
-scripts/qa/colleaf/verify_colleaf_facade.cjs creates real Univer/Docs/Drawing model plugins,
+scripts/qa/vdocs/verify_vdocs_facade.cjs creates real Univer/Docs/Drawing model plugins,
 uses actual FUniver.createDocument and FDocument.save, reopens in fresh instances,
 and tests TextX edits. It deliberately reproduces the old resource-drop failure.
 Go verifies full mapped model semantics after saved/reopened fixtures. Browser
@@ -1291,7 +1291,7 @@ render-manager service remain separate, unfinished qualification.
 
 ## Native document/page/section and running-story composition
 
-colleaf_sections.go composes the private native workers through the shared Go/SF
+vdocs_sections.go composes the private native workers through the shared Go/SF
 model. It uses one main UTF-16 body writer/index across root sections and separate
 body indexes per running story. Section closing LF records carry current section
 properties; native sectionTypeNext can override the following start. Points project
@@ -1319,7 +1319,7 @@ geometry and story selection, separately from unfinished browser/font/paint chec
 
 ## Native frame bounds and executable note citations
 
-colleaf_image_fit.go bounds individual frames after document composition. Shared
+vdocs_image_fit.go bounds individual frames after document composition. Shared
 fitImageBox preserves the preferred rectangle's aspect without enlarging. Main
 sections have distinct body boxes; table grid/span recursion accounts for native
 10px horizontal cell margins, nested containers and conservative height allowances.
@@ -1348,7 +1348,7 @@ actual facade save qualify the correction; browser font/paint is still separate.
 
 ## Native automatic numbering resolution before semantic decoding
 
-colleaf_note_numbering.go resolves modern native note ranges against root section
+vdocs_note_numbering.go resolves modern native note ranges against root section
 ownership and document/section note settings before body mapping. Independent
 per-kind counters follow scalar reference order, reset only under the active
 restart policy and exclude custom marks. Default footnotes are decimal; native
@@ -1376,7 +1376,7 @@ explicit own projection values are unaffected.
 
 ## Native editable body-mark projection and recovery
 
-colleaf_note_body_mark.go projects existing Note.BodyLabel/BodyLabelStyle/
+vdocs_note_body_mark.go projects existing Note.BodyLabel/BodyLabelStyle/
 BodyLabelContent into real text/style/link records at the beginning of the note
 story. It prepends to the first paragraph/heading or adds a dedicated paragraph
 before table/list/image/empty content. A terminal tab separates the mark from body
@@ -1406,7 +1406,7 @@ workers; this body-mark layer does not expose a partial public native format.
 
 ## Native per-citation label projection
 
-colleaf_citation.go projects a note group with per-citation overrides/rich labels
+vdocs_citation.go projects a note group with per-citation overrides/rich labels
 into markerless real note atoms, editable superscript label runs and U+2060 end
 delimiters. A neutral CUSTOM annotation stores only profile/version/token/note ID/
 mode/inferred flags. It does not cache label text, styles or a second note body.
@@ -1433,9 +1433,9 @@ note bodies do not accidentally reuse root citation IDs. All of this remains a
 private adapter pending broader intent, strict envelope and actual browser/API QA.
 
 
-## Private Colleaf native file boundary
+## Private VDOCS native file boundary
 
-colleaf_codec.go wraps the rich section/story/note workers in the actual pinned
+vdocs_codec.go wraps the rich section/story/note workers in the actual pinned
 v3 .vdocs envelope; it does not add a public Format or rename SF. Strict lexical
 validation runs before typed decoding: duplicate decoded keys, invalid UTF-8,
 unpaired surrogate escapes, case aliases in known typed records, null scalar
@@ -1443,7 +1443,7 @@ values and excessive parser depth reject. Raw native property objects still use
 their existing semantic checks/diagnostics. Interpreted JSON resource strings are
 also validated before their maps can be collapsed. Large strings scan in place;
 key sets/schema maps allocate. Input is buffered and broader allocation auditing
-remains unfinished. No Colleaf snapshot/image budgets are runtime library quotas.
+remains unfinished. No VDOCS snapshot/image budgets are runtime library quotas.
 
 Known native settings accept empty objects or finite positive zoomRatio; view zoom
 and nondefault editor locale get explicit loss diagnostics because logical SF has
@@ -1456,7 +1456,7 @@ still gate native adapter completion.
 
 ## Native list template grammar projection
 
-colleaf_list_template.go keeps SF's single-digit %1..%9 grammar independent from
+vdocs_list_template.go keeps SF's single-digit %1..%9 grammar independent from
 native glyphFormat's whole-index grammar. Fixed-symbol native source entries at
 index9+ carry literal percent and digit suffix fragments; real paragraph levels
 stay0..8 and number counters remain native/automatic. This also works when all
@@ -1476,7 +1476,7 @@ zero/legal mappings are now described below; broader marker policies remain unfi
 
 ## Native zero/legal numbering projection and import
 
-colleaf_numbering_projection.go maps SF's existing zero/legal convention without
+vdocs_numbering_projection.go maps SF's existing zero/legal convention without
 changing canonical SF. First nondecimal-zero items use a decimal type variant;
 normal items keep their number format in the same native counter group. Ancestor
 zero fields and legal decimalZero fields project to decimal as needed. Sparse
@@ -1499,7 +1499,7 @@ qualification remain on the required queue.
 
 ## Registered native hyperlink URL resource
 
-colleaf_hyperlink_resource.go interprets DOC_HYPER_LINK_PLUGIN before ordinary
+vdocs_hyperlink_resource.go interprets DOC_HYPER_LINK_PLUGIN before ordinary
 main/running text. The pinned plugin applies URL payloads to global hyperlink
 rangeIds in main/header/footer bodies, excluding notes. Export prefixes running
 link IDs by story. Import follows actual resource precedence over missing/different
@@ -1521,7 +1521,7 @@ and remaining intent/API/browser/resource work still gate adapter completion.
 
 ## Native bookmark points and typed destination graph
 
-colleaf_navigation.go maps real BOOKMARK3 records to the existing SF paragraph/
+vdocs_navigation.go maps real BOOKMARK3 records to the existing SF paragraph/
 heading anchors and inline anchor atoms. Zero-width native points validate their
 UTF-16 start boundary independently of inclusive formatting extents, including
 before astral scalars. Rich paragraph fragments carry point records separately
@@ -1580,7 +1580,7 @@ Standalone AnchorPoint export and other structural cursors remain unfinished.
 
 ## Native standalone point projection
 
-colleaf_standalone_points.go adds sparse point scope/group/order/carrier intent to
+vdocs_standalone_points.go adds sparse point scope/group/order/carrier intent to
 real BOOKMARK3 ranges. Native section IDs bind ordinary/cell flows; the first
 paragraph ID binds list items. Grouping inserts zero-height blocks at current
 flow boundaries after list ownership reconstruction. Existing inline/container
@@ -1605,7 +1605,7 @@ API/browser and the broader goal acceptance audit remain required.
 
 ## Foreign native control cursors
 
-colleaf_structural_cursors.go indexes row/cell edges, section/table terminators
+vdocs_structural_cursors.go indexes row/cell edges, section/table terminators
 and bare image/page-break paragraph terminators in the validated stream tree.
 Recognized current points retain existing exact mappings; foreign control points
 become explicit logical SF boundaries with source-position/story and target-loss
@@ -1625,7 +1625,7 @@ remaining appearance/provenance/API and final acceptance work remain open.
 
 ## Native document-level history/evidence
 
-colleaf_evidence.go carries version1 diagnostics, metadata page count, original
+vdocs_evidence.go carries version1 diagnostics, metadata page count, original
 PDF pages and view/annotation evidence in existing native document intent. It
 contains no editable body. Deep clones separate returned evidence from inputs.
 History order/duplicates persist; only new identical warnings are deduplicated.
@@ -1647,7 +1647,7 @@ note components are described below.
 
 ## Native paragraph origin bindings
 
-colleaf_origins.go stores direct manydocOrigin references in native paragraph
+vdocs_origins.go stores direct manydocOrigin references in native paragraph
 properties and one deduplicated pool of SourceInfo plus source-free semantic hashes
 in document evidence. No alternate content tree is stored. Final restoration follows
 citation/list/section composition; semantic mismatch marks SourceInfo.Historical,
@@ -1665,7 +1665,7 @@ acceptance work remain required.
 
 ## Native note origin bindings
 
-colleaf_note_origins.go stores version1 source facts, kind-inference flags and
+vdocs_note_origins.go stores version1 source facts, kind-inference flags and
 separate source-free SF body/marker fingerprints in document evidence. Hashing
 removes source marks and empty source-only attrs as well as source values, so
 provenance-only changes do not change content identity. Native note
@@ -1682,7 +1682,7 @@ corpus/final qualification remain required.
 
 ## Native run origin bindings
 
-colleaf_run_origins.go stores direct text-style source references and a separate
+vdocs_run_origins.go stores direct text-style source references and a separate
 version1 run-origin pool. Native last-record-wins spans and final citation/body-mark
 composition determine current owners. A semantic hash mismatch marks a surviving
 fragment historical; no surviving reference archives original source facts unbound.
@@ -1698,7 +1698,7 @@ qualification remain required; empty text source output rejects explicitly.
 
 ## Native table/cell origin bindings
 
-colleaf_table_origins.go collects reference-only tableSource/tableCells markers
+vdocs_table_origins.go collects reference-only tableSource/tableCells markers
 into a deterministic source/fingerprint pool. Table and cell SF fingerprint shapes
 remain distinct even for shared facts; nested source attributes/marks normalize out.
 All descriptor references validate, including covered cells without current SF
@@ -1711,7 +1711,7 @@ component evidence. Other source slots and full native/API/UI/final work remain.
 
 ## Native image origin bindings
 
-colleaf_image_origins.go stores direct drawing source references and an independent
+vdocs_image_origins.go stores direct drawing source references and an independent
 source/fingerprint pool in document evidence. Fingerprints cover current SF image
 bytes, alt text, preferred geometry and anchors; no old asset is cached. Restoration
 follows current asset/geometry composition and precedes enclosing table-source
@@ -1726,7 +1726,7 @@ remain required.
 
 ## Native list/item origin bindings
 
-colleaf_list_origins.go binds sources through direct leading-paragraph metadata and
+vdocs_list_origins.go binds sources through direct leading-paragraph metadata and
 a deduplicated document-evidence pool. Final list composition determines current
 owners; old offsets and cached item trees have no authority. List fingerprints
 cover the current list; item fingerprints cover the selected item subtree plus
@@ -1740,7 +1740,7 @@ qualify this component; remaining container/anchor/native/API/UI/final work rema
 
 ## Native inline-anchor origin bindings
 
-colleaf_anchor_origins.go carries source references in native bookmark properties
+vdocs_anchor_origins.go carries source references in native bookmark properties
 and a deduplicated evidence pool. Source-free paragraph context plus current point
 identity supplies a conservative semantic hash; surrounding edits may qualify the
 anchor historical without any claim of current physical geometry. Current point
@@ -1754,7 +1754,7 @@ sources, identityless empty-text policy and native/API/UI/final work stay open.
 
 ## Native section/break/standalone origin bindings
 
-colleaf_flow_origins.go stores source refs on native section extras, single-hard-
+vdocs_flow_origins.go stores source refs on native section extras, single-hard-
 break paragraph properties and the first standalone-group bookmark. Final owners
 restore source facts after all content/layout/group composition. SF semantic hashes
 qualify changed sources historical; unused records archive facts unbound. Soft or
@@ -1783,7 +1783,7 @@ qualify combined paragraph/run/list provenance; browser and broader audits remai
 
 ## Native language-style intent
 
-colleaf_languages.go validates a versioned manydocLanguages text-style property.
+vdocs_languages.go validates a versioned manydocLanguages text-style property.
 The native altLang scalar remains the authority for SF EastAsiaLanguage; the
 marker declares that interpretation and preserves ComplexLanguage separately.
 These are inheritable authored styles, not source ownership or cached text.
@@ -1872,7 +1872,7 @@ Actual desktop preset browser qualification now has a reproducible repeated-note
 placement failure. The unchanged public notes example places label 2 above label 1;
 the pinned renderer uses the later repeated citation index for the first note.
 The source identity/content graph still persists, but that does not prove correct
-body order. COLLEAF_BROWSER.md and scripts/qa/colleaf/verify_colleaf_note_order.cjs preserve
+body order. VDOCS_FORMAT.md#limits and scripts/qa/vdocs/verify_vdocs_note_order.cjs preserve
 the original first-reference-order oracle and passing no-repeat control. Ordinary
 Go tests do not run this optional native-reader check, which currently FAILS.
 No application/vendor/production change or full browser/fidelity claim is made.

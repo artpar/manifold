@@ -27,12 +27,12 @@ func vdocsAnchorOriginExample(t *testing.T) *Document {
 func TestVDOCSAnchorOriginsAndActualSave(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsAnchorOriginExample(t)
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
 	before, _ := json.Marshal(wire)
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,12 +41,12 @@ func TestVDOCSAnchorOriginsAndActualSave(t *testing.T) {
 		t.Fatal("native source mutated")
 	}
 	assertEvidenceSF(t, want, got)
-	if file := os.Getenv("MANYDOC_COLLEAF_ANCHOR_ORIGIN_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_ANCHOR_ORIGIN_QA"); file != "" {
 		if err = os.WriteFile(file, before, 0600); err != nil {
 			t.Fatal(err)
 		}
 	}
-	for _, spec := range []struct{ env, mode string }{{"MANYDOC_COLLEAF_ANCHOR_ORIGIN_SAVED", "saved"}, {"MANYDOC_COLLEAF_ANCHOR_ORIGIN_EDITED", "edited"}, {"MANYDOC_COLLEAF_ANCHOR_ORIGIN_MOVED", "moved"}, {"MANYDOC_COLLEAF_ANCHOR_ORIGIN_RENAMED", "renamed"}, {"MANYDOC_COLLEAF_ANCHOR_ORIGIN_DETACHED", "detached"}} {
+	for _, spec := range []struct{ env, mode string }{{"MANYDOC_VDOCS_ANCHOR_ORIGIN_SAVED", "saved"}, {"MANYDOC_VDOCS_ANCHOR_ORIGIN_EDITED", "edited"}, {"MANYDOC_VDOCS_ANCHOR_ORIGIN_MOVED", "moved"}, {"MANYDOC_VDOCS_ANCHOR_ORIGIN_RENAMED", "renamed"}, {"MANYDOC_VDOCS_ANCHOR_ORIGIN_DETACHED", "detached"}} {
 		t.Run(spec.mode, func(t *testing.T) {
 			file := os.Getenv(spec.env)
 			if file == "" {
@@ -61,7 +61,7 @@ func TestVDOCSAnchorOriginsAndActualSave(t *testing.T) {
 				t.Fatal(err)
 			}
 			envelope, _ := json.Marshal(vdocsEnvelope{vdocsEnvelopeType, 3, "univer", vdocsEngineVersion, native})
-			actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+			actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -85,10 +85,10 @@ func TestVDOCSAnchorOriginsAndActualSave(t *testing.T) {
 				expected.Blocks[0].Runs[1].Source = nil
 			}
 			if spec.mode == "edited" || spec.mode == "moved" || spec.mode == "renamed" {
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_anchor_source_historical", Message: "Original anchor source facts are retained as historical after current point identity or paragraph context changed"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_anchor_source_historical", Message: "Original anchor source facts are retained as historical after current point identity or paragraph context changed"}}
 			}
 			if spec.mode == "detached" {
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_anchor_source_unbound", Message: "Original anchor source facts are retained unbound after their native point ownership disappeared"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_anchor_source_unbound", Message: "Original anchor source facts are retained unbound after their native point ownership disappeared"}}
 			}
 			assertEvidenceSF(t, expected, actual)
 			sf, err := ToStructured(actual)
@@ -103,11 +103,11 @@ func TestVDOCSAnchorOriginsAndActualSave(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			next, err := encodeColleafDocument(ctx, model)
+			next, err := encodeVDOCSDocument(ctx, model)
 			if err != nil {
 				t.Fatal(err)
 			}
-			stable, err := decodeColleafDocument(ctx, next)
+			stable, err := decodeVDOCSDocument(ctx, next)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -117,11 +117,11 @@ func TestVDOCSAnchorOriginsAndActualSave(t *testing.T) {
 }
 func TestVDOCSAnchorOriginsMalformed(t *testing.T) {
 	ctx := context.Background()
-	wire, err := encodeColleafDocument(ctx, vdocsAnchorOriginExample(t))
+	wire, err := encodeVDOCSDocument(ctx, vdocsAnchorOriginExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
-	opened, err := openColleafIntent(ctx, wire)
+	opened, err := openVDOCSIntent(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func TestVDOCSAnchorOriginsMalformed(t *testing.T) {
 			}
 			candidate := opened
 			candidate.Resources = vdocsReplaceResource(candidate.Resources, vdocsDocumentResource, copy)
-			if _, err = decodeColleafDocument(ctx, candidate); err == nil {
+			if _, err = decodeVDOCSDocument(ctx, candidate); err == nil {
 				t.Fatal("malformed anchor source accepted")
 			}
 		})
@@ -155,7 +155,7 @@ func TestVDOCSAnchorOriginsMalformed(t *testing.T) {
 		if a.Type != 3 {
 			continue
 		}
-		p, err := readColleafBookmark(a)
+		p, err := readVDOCSBookmark(a)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -166,11 +166,11 @@ func TestVDOCSAnchorOriginsMalformed(t *testing.T) {
 		wire.Body.CustomRanges[i].Properties = sfAttrs(p)
 		break
 	}
-	if _, err = decodeColleafDocument(ctx, wire); err == nil {
+	if _, err = decodeVDOCSDocument(ctx, wire); err == nil {
 		t.Fatal("contradictory inline anchor source accepted")
 	}
 }
-func FuzzColleafAnchorOrigins(f *testing.F) {
+func FuzzVDOCSAnchorOrigins(f *testing.F) {
 	f.Add([]byte(`{"bookmarkId":"point"}`))
 	f.Add([]byte(`{"bookmarkId":"point","manydocOrigin":{"version":2}}`))
 	f.Add([]byte(sfAttrs(vdocsBookmarkProperties{BookmarkID: "point", Origin: &vdocsOrigin{Profile: vdocsAnchorOriginProfile, Version: 1, Ref: strings.Repeat("0", 64)}})))
@@ -179,13 +179,13 @@ func FuzzColleafAnchorOrigins(f *testing.F) {
 			return
 		}
 		snapshot := vdocsNoteSnapshot{Body: vdocsBody{CustomRanges: []vdocsRangeRecord{{Type: 3, Properties: raw}}}}
-		_ = visitColleafAnchorOrigins(&snapshot, false, func(*vdocsOrigin) error { return nil })
+		_ = visitVDOCSAnchorOrigins(&snapshot, false, func(*vdocsOrigin) error { return nil })
 	})
 }
 
 func TestVDOCSAnchorOriginsChangedOwnerAndFormatting(t *testing.T) {
 	ctx := context.Background()
-	wire, err := encodeColleafDocument(ctx, vdocsAnchorOriginExample(t))
+	wire, err := encodeVDOCSDocument(ctx, vdocsAnchorOriginExample(t))
 	if err != nil {
 		t.Fatal(
 
@@ -217,7 +217,7 @@ func TestVDOCSAnchorOriginsChangedOwnerAndFormatting(t *testing.T) {
 				if a.Type != 3 {
 					continue
 				}
-				p, err := readColleafBookmark(*a)
+				p, err := readVDOCSBookmark(*a)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -232,7 +232,7 @@ func TestVDOCSAnchorOriginsChangedOwnerAndFormatting(t *testing.T) {
 				}
 				a.Properties = sfAttrs(p)
 			}
-			got, err := decodeColleafDocument(ctx, candidate)
+			got, err := decodeVDOCSDocument(ctx, candidate)
 			if missing {
 				if err == nil {
 					t.Fatal("invalid unconsumed reference accepted")
@@ -245,11 +245,11 @@ func TestVDOCSAnchorOriginsChangedOwnerAndFormatting(t *testing.T) {
 			if len(got.UnboundSources) != 1 || got.UnboundSources[0].Element != "middle" || len(got.Blocks[0].Anchors) != 1 || got.Blocks[0].Anchors[0] != "middle" {
 				t.Fatal("changed owner incorrectly asserted inline source")
 			}
-			next, err := encodeColleafDocument(ctx, got)
+			next, err := encodeVDOCSDocument(ctx, got)
 			if err != nil {
 				t.Fatal(err)
 			}
-			stable, err := decodeColleafDocument(ctx, next)
+			stable, err := decodeVDOCSDocument(ctx, next)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -258,7 +258,7 @@ func TestVDOCSAnchorOriginsChangedOwnerAndFormatting(t *testing.T) {
 	}
 	d := vdocsAnchorOriginExample(t)
 	d.Blocks[0].Runs[1].Bold = true
-	if _, err = encodeColleafDocument(ctx, d); err == nil {
+	if _, err = encodeVDOCSDocument(ctx, d); err == nil {
 		t.Fatal("source support admitted formatted anchor")
 	}
 }
@@ -282,12 +282,12 @@ func vdocsFlowOriginExample(t *testing.T) *Document {
 func TestVDOCSFlowOriginsAndActualSave(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsFlowOriginExample(t)
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
 	before, _ := json.Marshal(wire)
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -296,12 +296,12 @@ func TestVDOCSFlowOriginsAndActualSave(t *testing.T) {
 		t.Fatal("native input mutated")
 	}
 	assertEvidenceSF(t, want, got)
-	if file := os.Getenv("MANYDOC_COLLEAF_FLOW_ORIGIN_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_FLOW_ORIGIN_QA"); file != "" {
 		if err = os.WriteFile(file, before, 0600); err != nil {
 			t.Fatal(err)
 		}
 	}
-	for _, spec := range []struct{ env, mode string }{{"MANYDOC_COLLEAF_FLOW_ORIGIN_SAVED", "saved"}, {"MANYDOC_COLLEAF_FLOW_ORIGIN_EDITED", "edited"}, {"MANYDOC_COLLEAF_FLOW_ORIGIN_RENAMED", "renamed"}, {"MANYDOC_COLLEAF_FLOW_ORIGIN_DETACHED", "detached"}, {"MANYDOC_COLLEAF_FLOW_ORIGIN_SOFT", "soft"}} {
+	for _, spec := range []struct{ env, mode string }{{"MANYDOC_VDOCS_FLOW_ORIGIN_SAVED", "saved"}, {"MANYDOC_VDOCS_FLOW_ORIGIN_EDITED", "edited"}, {"MANYDOC_VDOCS_FLOW_ORIGIN_RENAMED", "renamed"}, {"MANYDOC_VDOCS_FLOW_ORIGIN_DETACHED", "detached"}, {"MANYDOC_VDOCS_FLOW_ORIGIN_SOFT", "soft"}} {
 		t.Run(spec.mode, func(t *testing.T) {
 			file := os.Getenv(spec.env)
 			if file == "" {
@@ -316,7 +316,7 @@ func TestVDOCSFlowOriginsAndActualSave(t *testing.T) {
 				t.Fatal(err)
 			}
 			envelope, _ := json.Marshal(vdocsEnvelope{vdocsEnvelopeType, 3, "univer", vdocsEngineVersion, native})
-			actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+			actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -330,21 +330,21 @@ func TestVDOCSFlowOriginsAndActualSave(t *testing.T) {
 				last := b.Runs[0]
 				last.Text = "First"
 				b.Runs = []Run{first, {Text: "Q"}, last}
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_flow_source_historical", Message: "Original section, break or point source facts are retained as historical after current semantics changed"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_flow_source_historical", Message: "Original section, break or point source facts are retained as historical after current semantics changed"}}
 			case "renamed":
 				expected.Blocks[0].Source.Historical = true
 				expected.Blocks[0].Section.Blocks[0].Anchors[1] = "alias-renamed"
 				expected.Blocks[0].Section.Blocks[0].Source.Historical = true
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_flow_source_historical", Message: "Original section, break or point source facts are retained as historical after current semantics changed"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_flow_source_historical", Message: "Original section, break or point source facts are retained as historical after current semantics changed"}}
 			case "detached":
 				expected.UnboundSources = []SourceInfo{*cloneSourceInfo(expected.Blocks[0].Source)}
 				expected.Blocks[0].Source = nil
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_flow_source_unbound", Message: "Original section, break or point source facts are retained unbound after native ownership disappeared"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_flow_source_unbound", Message: "Original section, break or point source facts are retained unbound after native ownership disappeared"}}
 			case "soft":
 				expected.Blocks[0].Source.Historical = true
 				expected.UnboundSources = []SourceInfo{*cloneSourceInfo(expected.Blocks[0].Section.Blocks[2].Source)}
 				expected.Blocks[0].Section.Blocks[2] = Block{Kind: AnchorPoint, Anchors: []string{"break"}}
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_soft_page_break", Message: "Native rendered soft page boundary omitted from logical flow; literal content is retained"}, {Code: "colleaf_flow_source_historical", Message: "Original section, break or point source facts are retained as historical after current semantics changed"}, {Code: "colleaf_flow_source_unbound", Message: "Original section, break or point source facts are retained unbound after native ownership disappeared"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_soft_page_break", Message: "Native rendered soft page boundary omitted from logical flow; literal content is retained"}, {Code: "vdocs_flow_source_historical", Message: "Original section, break or point source facts are retained as historical after current semantics changed"}, {Code: "vdocs_flow_source_unbound", Message: "Original section, break or point source facts are retained unbound after native ownership disappeared"}}
 			}
 			assertEvidenceSF(t, expected, actual)
 			sf, err := ToStructured(actual)
@@ -359,11 +359,11 @@ func TestVDOCSFlowOriginsAndActualSave(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			next, err := encodeColleafDocument(ctx, model)
+			next, err := encodeVDOCSDocument(ctx, model)
 			if err != nil {
 				t.Fatal(err)
 			}
-			stable, err := decodeColleafDocument(ctx, next)
+			stable, err := decodeVDOCSDocument(ctx, next)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -373,11 +373,11 @@ func TestVDOCSFlowOriginsAndActualSave(t *testing.T) {
 }
 func TestVDOCSFlowOriginsMalformed(t *testing.T) {
 	ctx := context.Background()
-	wire, err := encodeColleafDocument(ctx, vdocsFlowOriginExample(t))
+	wire, err := encodeVDOCSDocument(ctx, vdocsFlowOriginExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
-	opened, err := openColleafIntent(ctx, wire)
+	opened, err := openVDOCSIntent(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -402,13 +402,13 @@ func TestVDOCSFlowOriginsMalformed(t *testing.T) {
 			}
 			candidate := opened
 			candidate.Resources = vdocsReplaceResource(candidate.Resources, vdocsDocumentResource, copy)
-			if _, err = decodeColleafDocument(ctx, candidate); err == nil {
+			if _, err = decodeVDOCSDocument(ctx, candidate); err == nil {
 				t.Fatal("malformed flow source accepted")
 			}
 		})
 	}
 }
-func FuzzColleafFlowOrigins(f *testing.F) {
+func FuzzVDOCSFlowOrigins(f *testing.F) {
 	f.Add([]byte(`{"manydocFlowOrigin":{"version":2}}`))
 	f.Add([]byte(sfAttrs(map[string]any{"manydocFlowOrigin": vdocsOrigin{Profile: vdocsFlowOriginProfile, Version: 1, Ref: strings.Repeat("0", 64)}})))
 	f.Fuzz(func(t *testing.T, raw []byte) {
@@ -416,7 +416,7 @@ func FuzzColleafFlowOrigins(f *testing.F) {
 			return
 		}
 		snapshot := vdocsNoteSnapshot{Body: vdocsBody{Paragraphs: []vdocsParagraphRecord{{Style: raw}}}}
-		_ = visitColleafFlowOrigins(&snapshot, false, func(*vdocsOrigin) error { return nil })
+		_ = visitVDOCSFlowOrigins(&snapshot, false, func(*vdocsOrigin) error { return nil })
 	})
 }
 
@@ -472,12 +472,12 @@ func vdocsImageOriginExample(t *testing.T) *Document {
 func TestVDOCSImageOriginsAndActualSave(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsImageOriginExample(t)
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
 	before, _ := json.Marshal(wire)
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -486,7 +486,7 @@ func TestVDOCSImageOriginsAndActualSave(t *testing.T) {
 		t.Fatal("source snapshot mutated")
 	}
 	assertEvidenceSF(t, want, got)
-	if file := os.Getenv("MANYDOC_COLLEAF_IMAGE_ORIGIN_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_IMAGE_ORIGIN_QA"); file != "" {
 		if err = os.WriteFile(file, before, 0600); err != nil {
 			t.Fatal(err)
 		}
@@ -494,7 +494,7 @@ func TestVDOCSImageOriginsAndActualSave(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	for _, spec := range []struct{ env, mode string }{{"MANYDOC_COLLEAF_IMAGE_ORIGIN_SAVED", "saved"}, {"MANYDOC_COLLEAF_IMAGE_ORIGIN_RESIZED", "resized"}, {"MANYDOC_COLLEAF_IMAGE_ORIGIN_ASSET", "asset"}, {"MANYDOC_COLLEAF_IMAGE_ORIGIN_DETACHED", "detached"}} {
+	for _, spec := range []struct{ env, mode string }{{"MANYDOC_VDOCS_IMAGE_ORIGIN_SAVED", "saved"}, {"MANYDOC_VDOCS_IMAGE_ORIGIN_RESIZED", "resized"}, {"MANYDOC_VDOCS_IMAGE_ORIGIN_ASSET", "asset"}, {"MANYDOC_VDOCS_IMAGE_ORIGIN_DETACHED", "detached"}} {
 		t.Run(spec.mode, func(t *testing.T) {
 			file := os.Getenv(spec.env)
 			if file == "" {
@@ -509,7 +509,7 @@ func TestVDOCSImageOriginsAndActualSave(t *testing.T) {
 				t.Fatal(err)
 			}
 			envelope, _ := json.Marshal(vdocsEnvelope{vdocsEnvelopeType, 3, "univer", vdocsEngineVersion, native})
-			actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+			actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -524,11 +524,11 @@ func TestVDOCSImageOriginsAndActualSave(t *testing.T) {
 				} else {
 					expected.Blocks[1].Image.Data = runningPNG(t, true)
 				}
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_stale_image_geometry", Message: "Stale image size intent ignored; actual native asset and resized geometry are retained"}, {Code: "colleaf_image_source_historical", Message: "Original image source facts are retained as historical after current asset, description or presentation changed"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_stale_image_geometry", Message: "Stale image size intent ignored; actual native asset and resized geometry are retained"}, {Code: "vdocs_image_source_historical", Message: "Original image source facts are retained as historical after current asset, description or presentation changed"}}
 			case "detached":
 				expected.UnboundSources = []SourceInfo{*cloneSourceInfo(expected.Blocks[1].Source)}
 				expected.Blocks[1].Source = nil
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_image_source_unbound", Message: "Original image source facts are retained unbound after their native ownership disappeared"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_image_source_unbound", Message: "Original image source facts are retained unbound after their native ownership disappeared"}}
 			}
 
 			if spec.mode == "saved" {
@@ -548,7 +548,7 @@ func TestVDOCSImageOriginsAndActualSave(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-					origin, err := readColleafOriginProfile(props["manydocOrigin"], vdocsImageOriginProfile)
+					origin, err := readVDOCSOriginProfile(props["manydocOrigin"], vdocsImageOriginProfile)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -558,7 +558,7 @@ func TestVDOCSImageOriginsAndActualSave(t *testing.T) {
 					candidate := native
 					candidate.Resources = append([]vdocsResource(nil), native.Resources...)
 					candidate.Resources[j].Data = string(sfAttrs(mirror))
-					if _, err = decodeColleafDocument(ctx, candidate); err == nil || !strings.Contains(err.Error(), "contradictory native drawing resource/source") {
+					if _, err = decodeVDOCSDocument(ctx, candidate); err == nil || !strings.Contains(err.Error(), "contradictory native drawing resource/source") {
 						t.Fatal("mirror source-binding disagreement was not rejected", err)
 					}
 				}
@@ -576,11 +576,11 @@ func TestVDOCSImageOriginsAndActualSave(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			next, err := encodeColleafDocument(ctx, model)
+			next, err := encodeVDOCSDocument(ctx, model)
 			if err != nil {
 				t.Fatal(err)
 			}
-			stable, err := decodeColleafDocument(ctx, next)
+			stable, err := decodeVDOCSDocument(ctx, next)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -626,20 +626,20 @@ func TestVDOCSImageOriginsFittedSectionsAndMalformed(t *testing.T) {
 	for i := range d.Notes {
 		walk(d.Notes[i].Blocks)
 	}
-	wire, err := encodeColleafDocument(ctx, d)
+	wire, err := encodeVDOCSDocument(ctx, d)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
 	assertEvidenceSF(t, d, got)
-	native, err := encodeColleafDocument(ctx, vdocsImageOriginExample(t))
+	native, err := encodeVDOCSDocument(ctx, vdocsImageOriginExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
-	opened, err := openColleafIntent(ctx, native)
+	opened, err := openVDOCSIntent(ctx, native)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -664,13 +664,13 @@ func TestVDOCSImageOriginsFittedSectionsAndMalformed(t *testing.T) {
 			}
 			candidate := opened
 			candidate.Resources = vdocsReplaceResource(candidate.Resources, vdocsDocumentResource, copy)
-			if _, err = decodeColleafDocument(ctx, candidate); err == nil {
+			if _, err = decodeVDOCSDocument(ctx, candidate); err == nil {
 				t.Fatal("malformed image source accepted")
 			}
 		})
 	}
 }
-func FuzzColleafImageOrigins(f *testing.F) {
+func FuzzVDOCSImageOrigins(f *testing.F) {
 	f.Add([]byte(`{"drawingId":"image"}`))
 	f.Add([]byte(sfAttrs(map[string]any{"manydocOrigin": vdocsOrigin{Profile: vdocsImageOriginProfile, Version: 1, Ref: strings.Repeat("0", 64)}})))
 	f.Add([]byte(`{"manydocOrigin":{"profile":"manydoc.image-origin","version":2}}`))
@@ -679,7 +679,7 @@ func FuzzColleafImageOrigins(f *testing.F) {
 			return
 		}
 		snapshot := vdocsNoteSnapshot{Drawings: map[string]json.RawMessage{"image": raw}}
-		_ = visitColleafImageOrigins(&snapshot, false, func(*vdocsOrigin) error { return nil })
+		_ = visitVDOCSImageOrigins(&snapshot, false, func(*vdocsOrigin) error { return nil })
 	})
 }
 func vdocsListOriginExample(t *testing.T) *Document {
@@ -739,12 +739,12 @@ func vdocsListOriginExample(t *testing.T) *Document {
 func TestVDOCSListOriginsAndActualSave(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsListOriginExample(t)
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
 	before, _ := json.Marshal(wire)
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -753,12 +753,12 @@ func TestVDOCSListOriginsAndActualSave(t *testing.T) {
 		t.Fatal("native input mutated")
 	}
 	assertEvidenceSF(t, want, got)
-	if file := os.Getenv("MANYDOC_COLLEAF_LIST_ORIGIN_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_LIST_ORIGIN_QA"); file != "" {
 		if err = os.WriteFile(file, before, 0600); err != nil {
 			t.Fatal(err)
 		}
 	}
-	for _, spec := range []struct{ env, mode string }{{"MANYDOC_COLLEAF_LIST_ORIGIN_SAVED", "saved"}, {"MANYDOC_COLLEAF_LIST_ORIGIN_EDITED", "edited"}, {"MANYDOC_COLLEAF_LIST_ORIGIN_RESTARTED", "restarted"}, {"MANYDOC_COLLEAF_LIST_ORIGIN_DETACHED", "detached"}, {"MANYDOC_COLLEAF_LIST_ORIGIN_ITEM_DETACHED", "item-detached"}} {
+	for _, spec := range []struct{ env, mode string }{{"MANYDOC_VDOCS_LIST_ORIGIN_SAVED", "saved"}, {"MANYDOC_VDOCS_LIST_ORIGIN_EDITED", "edited"}, {"MANYDOC_VDOCS_LIST_ORIGIN_RESTARTED", "restarted"}, {"MANYDOC_VDOCS_LIST_ORIGIN_DETACHED", "detached"}, {"MANYDOC_VDOCS_LIST_ORIGIN_ITEM_DETACHED", "item-detached"}} {
 		t.Run(spec.mode, func(t *testing.T) {
 			file := os.Getenv(spec.env)
 			if file == "" {
@@ -773,7 +773,7 @@ func TestVDOCSListOriginsAndActualSave(t *testing.T) {
 				t.Fatal(err)
 			}
 			envelope, _ := json.Marshal(vdocsEnvelope{vdocsEnvelopeType, 3, "univer", vdocsEngineVersion, native})
-			actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+			actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -783,22 +783,22 @@ func TestVDOCSListOriginsAndActualSave(t *testing.T) {
 				expected.Blocks[1].Source.Historical = true
 				expected.Blocks[1].Items[0].Source.Historical = true
 				expected.Blocks[1].Items[0].Blocks[0].Runs = []Run{{Text: "Q"}, {Text: "Parent one"}}
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_list_source_historical", Message: "Original list or item source facts are retained as historical after current content, numbering or ownership changed"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_list_source_historical", Message: "Original list or item source facts are retained as historical after current content, numbering or ownership changed"}}
 			case "restarted":
 				expected.Blocks[2].Start = listStartPointer(9)
 				expected.Blocks[2].Source.Historical = true
 				for i := range expected.Blocks[2].Items {
 					expected.Blocks[2].Items[i].Source.Historical = true
 				}
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_list_source_historical", Message: "Original list or item source facts are retained as historical after current content, numbering or ownership changed"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_list_source_historical", Message: "Original list or item source facts are retained as historical after current content, numbering or ownership changed"}}
 			case "detached":
 				expected.UnboundSources = []SourceInfo{*cloneSourceInfo(expected.Blocks[1].Source)}
 				expected.Blocks[1].Source = nil
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_list_source_unbound", Message: "Original list or item source facts are retained unbound after their native list ownership disappeared"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_list_source_unbound", Message: "Original list or item source facts are retained unbound after their native list ownership disappeared"}}
 			case "item-detached":
 				expected.UnboundSources = []SourceInfo{*cloneSourceInfo(expected.Blocks[1].Items[0].Source)}
 				expected.Blocks[1].Items[0].Source = nil
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_list_source_unbound", Message: "Original list or item source facts are retained unbound after their native list ownership disappeared"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_list_source_unbound", Message: "Original list or item source facts are retained unbound after their native list ownership disappeared"}}
 			}
 			assertEvidenceSF(t, expected, actual)
 			sf, err := ToStructured(actual)
@@ -813,11 +813,11 @@ func TestVDOCSListOriginsAndActualSave(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			next, err := encodeColleafDocument(ctx, model)
+			next, err := encodeVDOCSDocument(ctx, model)
 			if err != nil {
 				t.Fatal(err)
 			}
-			stable, err := decodeColleafDocument(ctx, next)
+			stable, err := decodeVDOCSDocument(ctx, next)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -828,11 +828,11 @@ func TestVDOCSListOriginsAndActualSave(t *testing.T) {
 func TestVDOCSListOriginsMalformedAndSourceFreeContext(t *testing.T) {
 	ctx := context.Background()
 	d := vdocsListOriginExample(t)
-	wire, err := encodeColleafDocument(ctx, d)
+	wire, err := encodeVDOCSDocument(ctx, d)
 	if err != nil {
 		t.Fatal(err)
 	}
-	opened, err := openColleafIntent(ctx, wire)
+	opened, err := openVDOCSIntent(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -857,7 +857,7 @@ func TestVDOCSListOriginsMalformedAndSourceFreeContext(t *testing.T) {
 			}
 			candidate := opened
 			candidate.Resources = vdocsReplaceResource(candidate.Resources, vdocsDocumentResource, copy)
-			if _, err = decodeColleafDocument(ctx, candidate); err == nil {
+			if _, err = decodeVDOCSDocument(ctx, candidate); err == nil {
 				t.Fatal("malformed list source accepted")
 			}
 		})
@@ -875,7 +875,7 @@ func TestVDOCSListOriginsMalformedAndSourceFreeContext(t *testing.T) {
 		t.Fatal("source-only edit changed item semantics", err)
 	}
 }
-func FuzzColleafListOrigins(f *testing.F) {
+func FuzzVDOCSListOrigins(f *testing.F) {
 	f.Add([]byte(`{"manydocListOrigin":{"profile":"manydoc.list-origin","version":2}}`))
 	f.Add([]byte(sfAttrs(map[string]any{"manydocItemOrigin": vdocsOrigin{Profile: vdocsItemOriginProfile, Version: 1, Ref: strings.Repeat("0", 64)}})))
 	f.Fuzz(func(t *testing.T, raw []byte) {
@@ -883,7 +883,7 @@ func FuzzColleafListOrigins(f *testing.F) {
 			return
 		}
 		snapshot := vdocsNoteSnapshot{Body: vdocsBody{Paragraphs: []vdocsParagraphRecord{{Style: raw}}}}
-		_ = visitColleafListOrigins(&snapshot, false, func(*vdocsOrigin) error { return nil })
+		_ = visitVDOCSListOrigins(&snapshot, false, func(*vdocsOrigin) error { return nil })
 	})
 }
 
@@ -893,7 +893,7 @@ func TestVDOCSListOriginsLostAndInheritedOwnership(t *testing.T) {
 		t.Run(mode, func(t *testing.T) {
 			source := vdocsListOriginExample(t)
 			d := &Document{Pages: source.Pages, Blocks: []Block{source.Headers[0]}}
-			wire, err := encodeColleafDocument(ctx, d)
+			wire, err := encodeVDOCSDocument(ctx, d)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -912,7 +912,7 @@ func TestVDOCSListOriginsLostAndInheritedOwnership(t *testing.T) {
 				style["defaultParagraphStyle"] = sfAttrs(map[string]json.RawMessage{"manydocListOrigin": marker})
 				wire.DocumentStyle = sfAttrs(style)
 			case "contradictory":
-				origin, err := readColleafOriginProfile(props["manydocListOrigin"], vdocsListOriginProfile)
+				origin, err := readVDOCSOriginProfile(props["manydocListOrigin"], vdocsListOriginProfile)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -920,7 +920,7 @@ func TestVDOCSListOriginsLostAndInheritedOwnership(t *testing.T) {
 				props["manydocListOrigin"] = sfAttrs(origin)
 				wire.Body.Paragraphs[0].Style = sfAttrs(props)
 			}
-			got, err := decodeColleafDocument(ctx, wire)
+			got, err := decodeVDOCSDocument(ctx, wire)
 			if mode == "contradictory" {
 				if err == nil {
 					t.Fatal("contradictory list source accepted")
@@ -941,7 +941,7 @@ func TestVDOCSListOriginsLostAndInheritedOwnership(t *testing.T) {
 				}
 				found := false
 				for _, diagnostic := range got.Diagnostics {
-					found = found || diagnostic.Code == "colleaf_list_origin_inheritance"
+					found = found || diagnostic.Code == "vdocs_list_origin_inheritance"
 				}
 				if !found {
 					t.Fatal("missing inherited ownership warning")
@@ -955,11 +955,11 @@ func TestVDOCSListOriginsLostAndInheritedOwnership(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			next, err := encodeColleafDocument(ctx, model)
+			next, err := encodeVDOCSDocument(ctx, model)
 			if err != nil {
 				t.Fatal(err)
 			}
-			stable, err := decodeColleafDocument(ctx, next)
+			stable, err := decodeVDOCSDocument(ctx, next)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -981,11 +981,11 @@ func vdocsNavigationExample(t testing.TB) *Document {
 func TestVDOCSNavigationPointsSFAndActualSave(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsNavigationExample(t)
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1002,11 +1002,11 @@ func TestVDOCSNavigationPointsSFAndActualSave(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	again, err := encodeColleafDocument(ctx, model)
+	again, err := encodeVDOCSDocument(ctx, model)
 	if err != nil {
 		t.Fatal(err)
 	}
-	recovered, err := decodeColleafDocument(ctx, again)
+	recovered, err := decodeVDOCSDocument(ctx, again)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1017,7 +1017,7 @@ func TestVDOCSNavigationPointsSFAndActualSave(t *testing.T) {
 	if !reflect.DeepEqual(sf, recoveredSF) {
 		t.Fatal("SF normalization/round trip changed point graph, formatting or structure")
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_NAVIGATION_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_NAVIGATION_QA"); file != "" {
 		raw, err := json.Marshal(wire)
 		if err != nil {
 			t.Fatal(err)
@@ -1026,7 +1026,7 @@ func TestVDOCSNavigationPointsSFAndActualSave(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_NAVIGATION_HEADING"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_NAVIGATION_HEADING"); file != "" {
 		raw, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -1035,7 +1035,7 @@ func TestVDOCSNavigationPointsSFAndActualSave(t *testing.T) {
 		if err = json.Unmarshal(raw, &native); err != nil {
 			t.Fatal(err)
 		}
-		foreign, err := decodeColleafDocument(ctx, native)
+		foreign, err := decodeVDOCSDocument(ctx, native)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1045,7 +1045,7 @@ func TestVDOCSNavigationPointsSFAndActualSave(t *testing.T) {
 		}
 		found := false
 		for _, diag := range foreign.Diagnostics {
-			found = found || diag.Code == "colleaf_heading_navigation"
+			found = found || diag.Code == "vdocs_heading_navigation"
 		}
 		if !found {
 			t.Fatal("heading namespace normalization not disclosed")
@@ -1054,7 +1054,7 @@ func TestVDOCSNavigationPointsSFAndActualSave(t *testing.T) {
 	for _, spec := range []struct {
 		env    string
 		edited bool
-	}{{"MANYDOC_COLLEAF_NAVIGATION_SAVED", false}, {"MANYDOC_COLLEAF_NAVIGATION_EDITED", true}} {
+	}{{"MANYDOC_VDOCS_NAVIGATION_SAVED", false}, {"MANYDOC_VDOCS_NAVIGATION_EDITED", true}} {
 		file := os.Getenv(spec.env)
 		if file == "" {
 			continue
@@ -1068,7 +1068,7 @@ func TestVDOCSNavigationPointsSFAndActualSave(t *testing.T) {
 			t.Fatal(err)
 		}
 		before, _ := json.Marshal(native)
-		got, err = decodeColleafDocument(ctx, native)
+		got, err = decodeVDOCSDocument(ctx, native)
 		if err != nil {
 			t.Fatal(spec.env, err)
 		}
@@ -1080,7 +1080,7 @@ func TestVDOCSNavigationPointsSFAndActualSave(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		strict, err := readColleaf(ctx, bytes.NewReader(envelope))
+		strict, err := readVDOCS(ctx, bytes.NewReader(envelope))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1103,7 +1103,7 @@ func TestVDOCSNavigationPointsSFAndActualSave(t *testing.T) {
 			}
 			found := false
 			for _, diag := range got.Diagnostics {
-				found = found || diag.Code == "colleaf_stale_bookmark_placement"
+				found = found || diag.Code == "vdocs_stale_bookmark_placement"
 			}
 			if !found {
 				t.Fatal("stale block placement not diagnosed")
@@ -1131,7 +1131,7 @@ func navigationParagraphPositions(b Block) map[string]int {
 func TestVDOCSForeignHeadingBookmarkAliasAndMissingTargets(t *testing.T) {
 	ctx := context.Background()
 	base := &Document{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "Jump"}}}, {Kind: Heading, Level: 1, Runs: []Run{{Text: "😀 heading"}}}}}
-	wire, err := encodeColleafDocument(ctx, base)
+	wire, err := encodeVDOCSDocument(ctx, base)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1139,7 +1139,7 @@ func TestVDOCSForeignHeadingBookmarkAliasAndMissingTargets(t *testing.T) {
 	props["headingId"] = sfAttrs("foreign-heading")
 	wire.Body.Paragraphs[1].Style = sfAttrs(props)
 	wire.Body.CustomRanges = append(wire.Body.CustomRanges, vdocsRangeRecord{ID: "heading-link", Type: 0, StartIndex: 0, EndIndex: 3, Properties: sfAttrs(map[string]string{"headingId": "foreign-heading", "url": "#foreign-heading", "textStyleMode": "text"})})
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1148,14 +1148,14 @@ func TestVDOCSForeignHeadingBookmarkAliasAndMissingTargets(t *testing.T) {
 		t.Fatal("heading target did not resolve to its explicit point")
 	}
 
-	wire, err = encodeColleafDocument(ctx, vdocsNavigationExample(t))
+	wire, err = encodeVDOCSDocument(ctx, vdocsNavigationExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	var rangeID string
 	for _, r := range wire.Body.CustomRanges {
 		if r.Type == 3 {
-			p, _ := readColleafBookmark(r)
+			p, _ := readVDOCSBookmark(r)
 			if p.BookmarkID == "before" {
 				rangeID = r.ID
 			}
@@ -1167,7 +1167,7 @@ func TestVDOCSForeignHeadingBookmarkAliasAndMissingTargets(t *testing.T) {
 			break
 		}
 	}
-	got, err = decodeColleafDocument(ctx, wire)
+	got, err = decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1180,7 +1180,7 @@ func TestVDOCSForeignHeadingBookmarkAliasAndMissingTargets(t *testing.T) {
 			break
 		}
 	}
-	got, err = decodeColleafDocument(ctx, wire)
+	got, err = decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1194,7 +1194,7 @@ func TestVDOCSForeignHeadingBookmarkAliasAndMissingTargets(t *testing.T) {
 }
 func TestVDOCSNavigationMalformedAndStructuralPoints(t *testing.T) {
 	ctx := context.Background()
-	wire, err := encodeColleafDocument(ctx, vdocsNavigationExample(t))
+	wire, err := encodeVDOCSDocument(ctx, vdocsNavigationExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1202,14 +1202,14 @@ func TestVDOCSNavigationMalformedAndStructuralPoints(t *testing.T) {
 		bad := wire
 		bad.Body.CustomRanges = append([]vdocsRangeRecord(nil), wire.Body.CustomRanges...)
 		bad.Body.CustomRanges = append(bad.Body.CustomRanges, vdocsRangeRecord{ID: "bad-point", Type: 3, StartIndex: offset, EndIndex: offset, Properties: sfAttrs(map[string]string{"bookmarkId": "bad"})})
-		if _, err = decodeColleafDocument(ctx, bad); err == nil {
+		if _, err = decodeVDOCSDocument(ctx, bad); err == nil {
 			t.Fatal("invalid/surrogate-split bookmark accepted", offset)
 		}
 	}
 	bad := wire
 	bad.Body.CustomRanges = append([]vdocsRangeRecord(nil), wire.Body.CustomRanges...)
 	bad.Body.CustomRanges = append(bad.Body.CustomRanges, vdocsRangeRecord{ID: "structural", Type: 3, StartIndex: wire.Body.Tables[0].StartIndex, EndIndex: wire.Body.Tables[0].StartIndex, Properties: sfAttrs(map[string]string{"bookmarkId": "structural"})})
-	recovered, err := decodeColleafDocument(ctx, bad)
+	recovered, err := decodeVDOCSDocument(ctx, bad)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1217,12 +1217,12 @@ func TestVDOCSNavigationMalformedAndStructuralPoints(t *testing.T) {
 		t.Fatal("native table-start point lost")
 	}
 	for _, raw := range []string{`{"BookmarkID":"x"}`, `{"bookmarkId":"x","manydocNavigation":{"Version":1,"role":"run","paragraphId":"p"}}`} {
-		if _, err := readColleafBookmark(vdocsRangeRecord{ID: "a", Properties: json.RawMessage(raw)}); err == nil {
+		if _, err := readVDOCSBookmark(vdocsRangeRecord{ID: "a", Properties: json.RawMessage(raw)}); err == nil {
 			t.Fatal("noncanonical native point field accepted")
 		}
 	}
 	for _, hint := range []string{`{"version":2,"role":"run","paragraphId":"p"}`, `{"version":1,"role":"unknown","paragraphId":"p"}`, `{"version":1,"role":"run","paragraphId":"p","hidden":true}`} {
-		_, err := readColleafBookmark(vdocsRangeRecord{ID:
+		_, err := readVDOCSBookmark(vdocsRangeRecord{ID:
 
 		// The last main table is a list continuation. Its new terminal point must
 		// remain in that item without invalidating paragraph-ID ownership metadata.
@@ -1232,8 +1232,8 @@ func TestVDOCSNavigationMalformedAndStructuralPoints(t *testing.T) {
 		}
 	}
 }
-func FuzzColleafNavigation(f *testing.F) {
-	wire, err := encodeColleafDocument(context.Background(), vdocsNavigationExample(f))
+func FuzzVDOCSNavigation(f *testing.F) {
+	wire, err := encodeVDOCSDocument(context.Background(), vdocsNavigationExample(f))
 	if err != nil {
 		f.Fatal(err)
 	}
@@ -1244,7 +1244,7 @@ func FuzzColleafNavigation(f *testing.F) {
 		if json.Unmarshal(raw, &input) != nil {
 			return
 		}
-		d, err := decodeColleafDocument(context.Background(), input)
+		d, err := decodeVDOCSDocument(context.Background(), input)
 		if err != nil {
 			return
 		}
@@ -1260,14 +1260,14 @@ func FuzzColleafNavigation(f *testing.F) {
 func TestVDOCSNavigationGeneratedAliasesAndNonmainData(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsNavigationExample(t)
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
 	var accidental string
 	for _, a := range wire.Body.CustomRanges {
 		if a.Type == 3 {
-			p, _ := readColleafBookmark(a)
+			p, _ := readVDOCSBookmark(a)
 			if p.BookmarkID == "before" {
 				accidental = a.ID
 			}
@@ -1275,7 +1275,7 @@ func TestVDOCSNavigationGeneratedAliasesAndNonmainData(t *testing.T) {
 	}
 	want.UnresolvedDestinations = append(want.UnresolvedDestinations, accidental)
 	want.Blocks = append(want.Blocks, Block{Kind: Paragraph, Runs: []Run{{Text: "must remain missing", Destination: accidental}}})
-	reserved, err := encodeColleafDocument(ctx, want)
+	reserved, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1284,22 +1284,22 @@ func TestVDOCSNavigationGeneratedAliasesAndNonmainData(t *testing.T) {
 			t.Fatal("transport ID accidentally resolves a declared missing target")
 		}
 	}
-	if _, err = decodeColleafDocument(ctx, reserved); err != nil {
+	if _, err = decodeVDOCSDocument(ctx, reserved); err != nil {
 		t.Fatal(err)
 	}
 	want = vdocsNavigationExample(t)
 	want.Blocks = append(want.Blocks, Block{Kind: Paragraph, Runs: []Run{{Text: "nonmain target", Destination: "note-point"}}})
-	wire, err = encodeColleafDocument(ctx, want)
+	wire, err = encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
 	found := false
 	for _, diag := range got.Diagnostics {
-		found = found || diag.Code == "colleaf_nonmain_navigation"
+		found = found || diag.Code == "vdocs_nonmain_navigation"
 	}
 	if !found {
 		t.Fatal("SDK main-story target limitation was not disclosed")
@@ -1311,11 +1311,11 @@ func TestVDOCSNavigationDenseParagraphGraph(t *testing.T) {
 	for i := 0; i < 1024; i++ {
 		d.Blocks = append(d.Blocks, Block{Kind: Paragraph, Anchors: []string{fmt.Sprintf("point-%d", i)}, Runs: []Run{{Text: "😀x"}}})
 	}
-	wire, err := encodeColleafDocument(context.Background(), d)
+	wire, err := encodeVDOCSDocument(context.Background(), d)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(context.Background(), wire)
+	got, err := decodeVDOCSDocument(context.Background(), wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1324,7 +1324,7 @@ func TestVDOCSNavigationDenseParagraphGraph(t *testing.T) {
 	}
 }
 func TestVDOCSNativeBookmarkSpanLossIsExplicit(t *testing.T) {
-	wire, err := encodeColleafDocument(context.Background(), vdocsNavigationExample(t))
+	wire, err := encodeVDOCSDocument(context.Background(), vdocsNavigationExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1334,13 +1334,13 @@ func TestVDOCSNativeBookmarkSpanLossIsExplicit(t *testing.T) {
 			break
 		}
 	}
-	d, err := decodeColleafDocument(context.Background(), wire)
+	d, err := decodeVDOCSDocument(context.Background(), wire)
 	if err != nil {
 		t.Fatal(err)
 	}
 	found := false
 	for _, diag := range d.Diagnostics {
-		found = found || diag.Code == "colleaf_bookmark_span"
+		found = found || diag.Code == "vdocs_bookmark_span"
 	}
 	if !found {
 		t.Fatal("native bookmark editing extent was silently lost")
@@ -1350,9 +1350,9 @@ func TestVDOCSNativeBookmarkSpanLossIsExplicit(t *testing.T) {
 	}
 }
 
-func FuzzColleafNavigationPoint(f *testing.F) {
+func FuzzVDOCSNavigationPoint(f *testing.F) {
 	ctx := context.Background()
-	base, err := encodeColleafDocument(ctx, &Document{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "😀A"}}}}})
+	base, err := encodeVDOCSDocument(ctx, &Document{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "😀A"}}}}})
 	if err != nil {
 		f.Fatal(err)
 	}
@@ -1362,7 +1362,7 @@ func FuzzColleafNavigationPoint(f *testing.F) {
 		input := base
 		input.Body.CustomRanges = append([]vdocsRangeRecord(nil), base.Body.CustomRanges...)
 		input.Body.CustomRanges = append(input.Body.CustomRanges, vdocsRangeRecord{ID: "point", Type: 3, StartIndex: start, EndIndex: end, Properties: props})
-		d, err := decodeColleafDocument(ctx, input)
+		d, err := decodeVDOCSDocument(ctx, input)
 		if err != nil {
 			return
 		}
@@ -1376,13 +1376,13 @@ func FuzzColleafNavigationPoint(f *testing.F) {
 }
 
 func TestVDOCSStaleBookmarkStillReportsUnknownMetadata(t *testing.T) {
-	wire, err := encodeColleafDocument(context.Background(), vdocsNavigationExample(t))
+	wire, err := encodeVDOCSDocument(context.Background(), vdocsNavigationExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	for i, a := range wire.Body.CustomRanges {
 		if a.Type == 3 {
-			p, _ := readColleafBookmark(a)
+			p, _ := readVDOCSBookmark(a)
 			if p.BookmarkID == "paragraph" {
 				props, _ := vdocsStyleObject(a.Properties)
 				props["title"] = sfAttrs("unsupported bookmark metadata")
@@ -1393,7 +1393,7 @@ func TestVDOCSStaleBookmarkStillReportsUnknownMetadata(t *testing.T) {
 			}
 		}
 	}
-	d, err := decodeColleafDocument(context.Background(), wire)
+	d, err := decodeVDOCSDocument(context.Background(), wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1401,7 +1401,7 @@ func TestVDOCSStaleBookmarkStillReportsUnknownMetadata(t *testing.T) {
 	for _, diag := range d.Diagnostics {
 		codes[diag.Code] = true
 	}
-	if !codes["colleaf_bookmark_metadata"] || !codes["colleaf_stale_bookmark_placement"] {
+	if !codes["vdocs_bookmark_metadata"] || !codes["vdocs_stale_bookmark_placement"] {
 		t.Fatal("stale placement hid metadata loss", d.Diagnostics)
 	}
 }
@@ -1420,12 +1420,12 @@ func vdocsOriginExample(t *testing.T) *Document {
 func TestVDOCSParagraphOriginsAndNativeSave(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsOriginExample(t)
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
 	before, _ := json.Marshal(wire)
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1442,22 +1442,22 @@ func TestVDOCSParagraphOriginsAndNativeSave(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	again, err := encodeColleafDocument(ctx, model)
+	again, err := encodeVDOCSDocument(ctx, model)
 	if err != nil {
 		t.Fatal(err)
 	}
-	round, err := decodeColleafDocument(ctx, again)
+	round, err := decodeVDOCSDocument(ctx, again)
 	if err != nil {
 		t.Fatal(err)
 	}
 	assertEvidenceSF(t, want, round)
 	got.Blocks[0].Source.StructureID[0] = 0
-	againModel, err := decodeColleafDocument(ctx, wire)
+	againModel, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
 	assertEvidenceSF(t, want, againModel)
-	if file := os.Getenv("MANYDOC_COLLEAF_ORIGIN_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_ORIGIN_QA"); file != "" {
 		rawSF, err := json.Marshal(sf)
 		if err != nil {
 			t.Fatal(err)
@@ -1469,7 +1469,7 @@ func TestVDOCSParagraphOriginsAndNativeSave(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	for _, spec := range []struct{ env, mode string }{{"MANYDOC_COLLEAF_ORIGIN_SAVED", "saved"}, {"MANYDOC_COLLEAF_ORIGIN_EDITED", "edited"}, {"MANYDOC_COLLEAF_ORIGIN_DETACHED", "detached"}} {
+	for _, spec := range []struct{ env, mode string }{{"MANYDOC_VDOCS_ORIGIN_SAVED", "saved"}, {"MANYDOC_VDOCS_ORIGIN_EDITED", "edited"}, {"MANYDOC_VDOCS_ORIGIN_DETACHED", "detached"}} {
 		file := os.Getenv(spec.env)
 		if file == "" {
 			continue
@@ -1486,7 +1486,7 @@ func TestVDOCSParagraphOriginsAndNativeSave(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+		actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1498,11 +1498,11 @@ func TestVDOCSParagraphOriginsAndNativeSave(t *testing.T) {
 		case "edited":
 			expected.Blocks[0].Runs = append([]Run{{Text: "Q"}}, expected.Blocks[0].Runs...)
 			expected.Blocks[0].Source.Historical = true
-			expected.Diagnostics = append(expected.Diagnostics, Diagnostic{Code: "colleaf_source_historical", Message: "Original PDF source facts are retained as historical after current paragraph content or presentation changed"})
+			expected.Diagnostics = append(expected.Diagnostics, Diagnostic{Code: "vdocs_source_historical", Message: "Original PDF source facts are retained as historical after current paragraph content or presentation changed"})
 		case "detached":
 			expected.UnboundSources = []SourceInfo{*cloneSourceInfo(expected.Blocks[0].Source)}
 			expected.Blocks[0].Source = nil
-			expected.Diagnostics = append(expected.Diagnostics, Diagnostic{Code: "colleaf_source_unbound", Message: "Original PDF source facts are retained unbound after their native paragraph binding disappeared"})
+			expected.Diagnostics = append(expected.Diagnostics, Diagnostic{Code: "vdocs_source_unbound", Message: "Original PDF source facts are retained unbound after their native paragraph binding disappeared"})
 		}
 		aSF, err := ToStructured(actual)
 		if err != nil {
@@ -1516,11 +1516,11 @@ func TestVDOCSParagraphOriginsAndNativeSave(t *testing.T) {
 			t.Fatal(err)
 		}
 		assertEvidenceSF(t, expected, actual)
-		next, err := encodeColleafDocument(ctx, actual)
+		next, err := encodeVDOCSDocument(ctx, actual)
 		if err != nil {
 			t.Fatal(err)
 		}
-		stable, err := decodeColleafDocument(ctx, next)
+		stable, err := decodeVDOCSDocument(ctx, next)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1567,16 +1567,16 @@ func TestVDOCSParagraphOriginsExplicitSectionAndMalformed(t *testing.T) {
 	d.Footers = nil
 	d.Blocks = []Block{{Kind: SectionBlock, Section: &Section{Headers: RunningStories{Default: header}, Footers: RunningStories{Default: footer}, Blocks: d.Blocks}}}
 	d.Blocks[0].Section.Blocks[4].Source = cloneSourceInfo(d.Blocks[0].Section.Blocks[0].Source)
-	wire, err := encodeColleafDocument(ctx, d)
+	wire, err := encodeVDOCSDocument(ctx, d)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
 	assertEvidenceSF(t, d, got)
-	opened, err := openColleafIntent(ctx, wire)
+	opened, err := openVDOCSIntent(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1600,21 +1600,21 @@ func TestVDOCSParagraphOriginsExplicitSectionAndMalformed(t *testing.T) {
 				bad.Resources[i].Data = string(sfAttrs(intent))
 			}
 		}
-		if _, err = decodeColleafDocument(ctx, bad); err == nil {
+		if _, err = decodeVDOCSDocument(ctx, bad); err == nil {
 			t.Fatal("invalid origin record accepted", mode)
 		}
 	}
 }
 
-func FuzzColleafParagraphOrigins(f *testing.F) {
+func FuzzVDOCSParagraphOrigins(f *testing.F) {
 	ctx := context.Background()
 	page := PDFPage{Number: 1, MediaBox: [4]float64{0, 0, 200, 300}, CropBox: [4]float64{0, 0, 200, 300}, Width: 200, Height: 300, UserUnit: 1, Transform: Matrix{1, 0, 0, -1, 0, 300}}
 	d := &Document{Pages: []PDFPage{page}, Blocks: []Block{{Kind: Paragraph, Source: &SourceInfo{Format: PDF, Page: 1, Element: "p", Structure: "explicit", Evidence: "synthetic", Confidence: 1}, Runs: []Run{{Text: "Body"}}}}}
-	wire, err := encodeColleafDocument(ctx, d)
+	wire, err := encodeVDOCSDocument(ctx, d)
 	if err != nil {
 		f.Fatal(err)
 	}
-	base, err := openColleafIntent(ctx, wire)
+	base, err := openVDOCSIntent(ctx, wire)
 	if err != nil {
 		f.Fatal(err)
 	}
@@ -1634,7 +1634,7 @@ func FuzzColleafParagraphOrigins(f *testing.F) {
 				input.Resources[i].Data = `{"layouts":[],"evidence":{"version":1,"pages":` + string(pageJSON) + `,"origins":[` + string(raw) + `]}}`
 			}
 		}
-		got, err := decodeColleafDocument(ctx, input)
+		got, err := decodeVDOCSDocument(ctx, input)
 		if err != nil {
 			return
 		}
@@ -1671,12 +1671,12 @@ func vdocsRunOriginExample(t *testing.T) *Document {
 func TestVDOCSRunOriginsAndActualSave(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsRunOriginExample(t)
-	native, err := encodeColleafDocument(ctx, want)
+	native, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
 	before, _ := json.Marshal(native)
-	got, err := decodeColleafDocument(ctx, native)
+	got, err := decodeVDOCSDocument(ctx, native)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1685,12 +1685,12 @@ func TestVDOCSRunOriginsAndActualSave(t *testing.T) {
 		t.Fatal("native source mutated")
 	}
 	assertEvidenceSF(t, want, got)
-	if file := os.Getenv("MANYDOC_COLLEAF_RUN_ORIGIN_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_RUN_ORIGIN_QA"); file != "" {
 		if err = os.WriteFile(file, before, 0600); err != nil {
 			t.Fatal(err)
 		}
 	}
-	for _, spec := range []struct{ env, mode string }{{"MANYDOC_COLLEAF_RUN_ORIGIN_SAVED", "saved"}, {"MANYDOC_COLLEAF_RUN_ORIGIN_EDITED", "edited"}, {"MANYDOC_COLLEAF_RUN_ORIGIN_CITATION", "citation"}, {"MANYDOC_COLLEAF_RUN_ORIGIN_DETACHED", "detached"}} {
+	for _, spec := range []struct{ env, mode string }{{"MANYDOC_VDOCS_RUN_ORIGIN_SAVED", "saved"}, {"MANYDOC_VDOCS_RUN_ORIGIN_EDITED", "edited"}, {"MANYDOC_VDOCS_RUN_ORIGIN_CITATION", "citation"}, {"MANYDOC_VDOCS_RUN_ORIGIN_DETACHED", "detached"}} {
 		t.Run(spec.mode, func(t *testing.T) {
 			file := os.Getenv(spec.env)
 			if file == "" {
@@ -1705,7 +1705,7 @@ func TestVDOCSRunOriginsAndActualSave(t *testing.T) {
 				t.Fatal(err)
 			}
 			envelope, _ := json.Marshal(vdocsEnvelope{vdocsEnvelopeType, 3, "univer", vdocsEngineVersion, wire})
-			actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+			actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1721,16 +1721,16 @@ func TestVDOCSRunOriginsAndActualSave(t *testing.T) {
 				right.Source.Historical = true
 				expected.Blocks[0].Runs = []Run{left, {Text: "Q"}, right}
 				expected.Blocks[0].Source.Historical = true
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_run_source_historical", Message: "Original PDF source facts are retained as historical after current run content or presentation changed"}, {Code: "colleaf_source_historical", Message: "Original PDF source facts are retained as historical after current paragraph content or presentation changed"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_run_source_historical", Message: "Original PDF source facts are retained as historical after current run content or presentation changed"}, {Code: "vdocs_source_historical", Message: "Original PDF source facts are retained as historical after current paragraph content or presentation changed"}}
 			case "citation":
 				expected.Blocks[4].Runs[1].Note.LabelContent[0].Text = "X"
 				expected.Blocks[4].Runs[1].Note.LabelContent[0].Source.Historical = true
 				expected.Blocks[4].Runs[1].Source.Historical = true
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_run_source_historical", Message: "Original PDF source facts are retained as historical after current run content or presentation changed"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_run_source_historical", Message: "Original PDF source facts are retained as historical after current run content or presentation changed"}}
 			case "detached":
 				expected.UnboundSources = []SourceInfo{*cloneSourceInfo(expected.Blocks[0].Runs[0].Source)}
 				expected.Blocks[0].Runs[0].Source = nil
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_run_source_unbound", Message: "Original PDF source facts are retained unbound after their native run binding disappeared"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_run_source_unbound", Message: "Original PDF source facts are retained unbound after their native run binding disappeared"}}
 			}
 			assertEvidenceSF(t, expected, actual)
 			sf, err := ToStructured(actual)
@@ -1741,11 +1741,11 @@ func TestVDOCSRunOriginsAndActualSave(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			next, err := encodeColleafDocument(ctx, model)
+			next, err := encodeVDOCSDocument(ctx, model)
 			if err != nil {
 				t.Fatal(err)
 			}
-			stable, err := decodeColleafDocument(ctx, next)
+			stable, err := decodeVDOCSDocument(ctx, next)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1760,11 +1760,11 @@ func TestVDOCSRunOriginsAndActualSave(t *testing.T) {
 func TestVDOCSRunOriginMalformedAndUnsupportedSlots(t *testing.T) {
 	ctx := context.Background()
 	d := vdocsRunOriginExample(t)
-	native, err := encodeColleafDocument(ctx, d)
+	native, err := encodeVDOCSDocument(ctx, d)
 	if err != nil {
 		t.Fatal(err)
 	}
-	opened, err := openColleafIntent(ctx, native)
+	opened, err := openVDOCSIntent(ctx, native)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1789,7 +1789,7 @@ func TestVDOCSRunOriginMalformedAndUnsupportedSlots(t *testing.T) {
 			}
 			wire := opened
 			wire.Resources = vdocsReplaceResource(wire.Resources, vdocsDocumentResource, copy)
-			if _, err = decodeColleafDocument(ctx, wire); err == nil {
+			if _, err = decodeVDOCSDocument(ctx, wire); err == nil {
 				t.Fatal("invalid run source accepted")
 			}
 		})
@@ -1797,7 +1797,7 @@ func TestVDOCSRunOriginMalformedAndUnsupportedSlots(t *testing.T) {
 
 	source := cloneSourceInfo(d.Blocks[0].Runs[0].Source)
 	for _, r := range []Run{{Source: source}} {
-		if _, err = encodeColleafTextBody(ctx, []Block{{Kind: Paragraph, Runs: []Run{r}}}); err == nil {
+		if _, err = encodeVDOCSTextBody(ctx, []Block{{Kind: Paragraph, Runs: []Run{r}}}); err == nil {
 			t.Fatal("unmapped empty source silently discarded")
 		}
 	}
@@ -1808,7 +1808,7 @@ func TestVDOCSRunOriginDirectOwnership(t *testing.T) {
 	for _, mode := range []string{"inherited", "overwritten", "contradictory"} {
 		t.Run(mode, func(t *testing.T) {
 			d := vdocsRunOriginExample(t)
-			wire, err := encodeColleafDocument(ctx, d)
+			wire, err := encodeVDOCSDocument(ctx, d)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1830,7 +1830,7 @@ func TestVDOCSRunOriginDirectOwnership(t *testing.T) {
 				last.TS = sfAttrs(props)
 				wire.Body.TextRuns = append(wire.Body.TextRuns, last)
 			case "contradictory":
-				origin, err := readColleafOriginProfile(ref, vdocsRunOriginProfile)
+				origin, err := readVDOCSOriginProfile(ref, vdocsRunOriginProfile)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -1838,7 +1838,7 @@ func TestVDOCSRunOriginDirectOwnership(t *testing.T) {
 				props["manydocOrigin"] = sfAttrs(origin)
 				wire.Body.TextRuns[0].TS = sfAttrs(props)
 			}
-			got, err := decodeColleafDocument(ctx, wire)
+			got, err := decodeVDOCSDocument(ctx, wire)
 			if mode == "contradictory" {
 				if err == nil {
 					t.Fatal("contradictory reference metadata accepted")
@@ -1857,7 +1857,7 @@ func TestVDOCSRunOriginDirectOwnership(t *testing.T) {
 			if mode == "inherited" {
 				found := false
 				for _, diagnostic := range got.Diagnostics {
-					found = found || diagnostic.Code == "colleaf_run_origin_inheritance"
+					found = found || diagnostic.Code == "vdocs_run_origin_inheritance"
 				}
 				if !found {
 					t.Fatal("missing inherited ownership warning")
@@ -1866,14 +1866,14 @@ func TestVDOCSRunOriginDirectOwnership(t *testing.T) {
 		})
 	}
 }
-func FuzzColleafRunOrigin(f *testing.F) {
+func FuzzVDOCSRunOrigin(f *testing.F) {
 	f.Add([]byte(sfAttrs(vdocsOrigin{Profile: vdocsRunOriginProfile, Version: 1, Ref: strings.Repeat("0", 64)})))
 	f.Add([]byte(`{"profile":"manydoc.run-origin","version":2}`))
 	f.Fuzz(func(t *testing.T, raw []byte) {
 		if len(raw) > 32768 {
 			return
 		}
-		_, _ = readColleafOriginProfile(raw, vdocsRunOriginProfile)
+		_, _ = readVDOCSOriginProfile(raw, vdocsRunOriginProfile)
 	})
 }
 func vdocsStandaloneExample(t testing.TB) *Document {
@@ -1893,12 +1893,12 @@ func TestVDOCSStandalonePointsRoundTrip(t *testing.T) {
 	}
 	links = append(links, Run{Note: &NoteReference{Kind: Footnote, ID: "n"}})
 	want.Blocks[11].Runs = links
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
 	before, _ := json.Marshal(wire)
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1919,11 +1919,11 @@ func TestVDOCSStandalonePointsRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	again, err := encodeColleafDocument(ctx, model)
+	again, err := encodeVDOCSDocument(ctx, model)
 	if err != nil {
 		t.Fatal(err)
 	}
-	round, err := decodeColleafDocument(ctx, again)
+	round, err := decodeVDOCSDocument(ctx, again)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1934,12 +1934,12 @@ func TestVDOCSStandalonePointsRoundTrip(t *testing.T) {
 	if !reflect.DeepEqual(sf, roundSF) {
 		t.Fatal("SF point grouping/flow ownership changed")
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_STANDALONE_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_STANDALONE_QA"); file != "" {
 		if err = os.WriteFile(file, before, 0600); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_STANDALONE_SAVED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_STANDALONE_SAVED"); file != "" {
 		raw, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -1952,7 +1952,7 @@ func TestVDOCSStandalonePointsRoundTrip(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		saved, err := readColleaf(ctx, bytes.NewReader(envelope))
+		saved, err := readVDOCS(ctx, bytes.NewReader(envelope))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1966,7 +1966,7 @@ func TestVDOCSStandalonePointsRoundTrip(t *testing.T) {
 			t.Fatalf("actual native save changed\ngot%s\nwant%s", a, b)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_STANDALONE_EDITED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_STANDALONE_EDITED"); file != "" {
 		raw, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -1975,7 +1975,7 @@ func TestVDOCSStandalonePointsRoundTrip(t *testing.T) {
 		if err = json.Unmarshal(raw, &native); err != nil {
 			t.Fatal(err)
 		}
-		actual, err := decodeColleafDocument(ctx, native)
+		actual, err := decodeVDOCSDocument(ctx, native)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1985,7 +1985,7 @@ func TestVDOCSStandalonePointsRoundTrip(t *testing.T) {
 		}
 		expected.Blocks = expected.Blocks[2:]
 		expected.Blocks[0].Runs = append([]Run{{Text: "Q"}, {Anchor: "a"}, {Anchor: "alias"}, {Anchor: "b"}}, expected.Blocks[0].Runs...)
-		expected.Diagnostics = []Diagnostic{{Code: "colleaf_stale_point_ownership", Message: "Standalone point retains its current native location because its owning flow or boundary changed"}}
+		expected.Diagnostics = []Diagnostic{{Code: "vdocs_stale_point_ownership", Message: "Standalone point retains its current native location because its owning flow or boundary changed"}}
 		expectedSF, err := ToStructured(expected)
 		if err != nil {
 			t.Fatal(err)
@@ -2006,11 +2006,11 @@ func TestVDOCSStandaloneDenseItems(t *testing.T) {
 	for i := 0; i < 256; i++ {
 		d.Blocks[0].Items = append(d.Blocks[0].Items, ListItem{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: fmt.Sprint(i)}}}, {Kind: AnchorPoint, Anchors: []string{fmt.Sprint("end-", i)}}}})
 	}
-	wire, err := encodeColleafDocument(context.Background(), d)
+	wire, err := encodeVDOCSDocument(context.Background(), d)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(context.Background(), wire)
+	got, err := decodeVDOCSDocument(context.Background(), wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2022,7 +2022,7 @@ func TestVDOCSStandaloneDenseItems(t *testing.T) {
 func TestVDOCSStandaloneCurrentNativeEdits(t *testing.T) {
 	ctx := context.Background()
 	d := &Document{Blocks: []Block{{Kind: AnchorPoint, Anchors: []string{"point"}}, {Kind: Paragraph, Runs: []Run{{Text: "Text"}}}}}
-	wire, err := encodeColleafDocument(ctx, d)
+	wire, err := encodeVDOCSDocument(ctx, d)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2033,24 +2033,24 @@ func TestVDOCSStandaloneCurrentNativeEdits(t *testing.T) {
 			break
 		}
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(got.Blocks) != 1 || len(got.Blocks[0].Runs) != 3 || got.Blocks[0].Runs[1].Anchor != "point" {
 		t.Fatal("moved point restored obsolete boundary")
 	}
-	if len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "colleaf_stale_point_ownership" {
+	if len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "vdocs_stale_point_ownership" {
 		t.Fatal("ownership change not disclosed")
 	}
 
-	wire, err = encodeColleafDocument(ctx, &Document{Blocks: []Block{{Kind: AnchorPoint, Anchors: []string{"point"}}, {Kind: Paragraph, Runs: []Run{{Text: "Text"}}}, {Kind: Paragraph}}})
+	wire, err = encodeVDOCSDocument(ctx, &Document{Blocks: []Block{{Kind: AnchorPoint, Anchors: []string{"point"}}, {Kind: Paragraph, Runs: []Run{{Text: "Text"}}}, {Kind: Paragraph}}})
 	if err != nil {
 		t.Fatal(err)
 	}
 	for i, a := range wire.Body.CustomRanges {
 		if a.Type == 3 {
-			p, err := readColleafBookmark(a)
+			p, err := readVDOCSBookmark(a)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -2058,7 +2058,7 @@ func TestVDOCSStandaloneCurrentNativeEdits(t *testing.T) {
 			wire.Body.CustomRanges[i].Properties = sfAttrs(p)
 		}
 	}
-	got, err = decodeColleafDocument(ctx, wire)
+	got, err = decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2067,7 +2067,7 @@ func TestVDOCSStandaloneCurrentNativeEdits(t *testing.T) {
 	}
 	found := false
 	for _, diag := range got.Diagnostics {
-		found = found || diag.Code == "colleaf_stale_point_carrier"
+		found = found || diag.Code == "vdocs_stale_point_carrier"
 	}
 	if !found {
 		t.Fatal("invalid carrier binding not disclosed")
@@ -2076,14 +2076,14 @@ func TestVDOCSStandaloneCurrentNativeEdits(t *testing.T) {
 func TestVDOCSStandalonePointOnlyAndMalformed(t *testing.T) {
 	ctx := context.Background()
 	d := &Document{Blocks: []Block{{Kind: AnchorPoint, Anchors: []string{"a"}}, {Kind: AnchorPoint, Anchors: []string{"b", "c"}}}}
-	wire, err := encodeColleafDocument(ctx, d)
+	wire, err := encodeVDOCSDocument(ctx, d)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if wire.Body.DataStream != "\r\n" {
 		t.Fatal("point-only body inserted extra visible structure")
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2093,7 +2093,7 @@ func TestVDOCSStandalonePointOnlyAndMalformed(t *testing.T) {
 	for _, field := range []string{"pointScope", "pointOrder"} {
 		bad := wire
 		bad.Body.CustomRanges = append([]vdocsRangeRecord(nil), wire.Body.CustomRanges...)
-		p, err := readColleafBookmark(bad.Body.CustomRanges[0])
+		p, err := readVDOCSBookmark(bad.Body.CustomRanges[0])
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -2103,30 +2103,30 @@ func TestVDOCSStandalonePointOnlyAndMalformed(t *testing.T) {
 			p.Hint.PointOrder = 0
 		}
 		bad.Body.CustomRanges[0].Properties = sfAttrs(p)
-		if _, err = decodeColleafDocument(ctx, bad); err == nil {
+		if _, err = decodeVDOCSDocument(ctx, bad); err == nil {
 			t.Fatal("malformed standalone intent accepted", field)
 		}
 	}
 	bad := wire
 	bad.Body.CustomRanges = append([]vdocsRangeRecord(nil), wire.Body.CustomRanges...)
-	p, err := readColleafBookmark(bad.Body.CustomRanges[2])
+	p, err := readVDOCSBookmark(bad.Body.CustomRanges[2])
 	if err != nil {
 		t.Fatal(err)
 	}
 	p.Hint.PointIndex = 0
 	bad.Body.CustomRanges[2].Properties = sfAttrs(p)
-	if _, err = decodeColleafDocument(ctx, bad); err == nil {
+	if _, err = decodeVDOCSDocument(ctx, bad); err == nil {
 		t.Fatal("duplicate alias order accepted")
 	}
 }
 
 func TestVDOCSStandaloneExplicitSections(t *testing.T) {
 	d := &Document{Blocks: []Block{{Kind: SectionBlock, Anchors: []string{"section"}, Section: &Section{Blocks: []Block{{Kind: AnchorPoint, Anchors: []string{"only"}}}}}, {Kind: SectionBlock, Section: &Section{Start: SectionNextPage, Blocks: []Block{{Kind: AnchorPoint, Anchors: []string{"start"}}, {Kind: Paragraph, Runs: []Run{{Text: "Back", Destination: "only"}, {Text: "Section", Destination: "section"}}}, {Kind: AnchorPoint, Anchors: []string{"end"}}}}}}}
-	wire, err := encodeColleafDocument(context.Background(), d)
+	wire, err := encodeVDOCSDocument(context.Background(), d)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(context.Background(), wire)
+	got, err := decodeVDOCSDocument(context.Background(), wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2180,7 +2180,7 @@ func vdocsForeignCursorExample(t testing.TB) (vdocsNoteSnapshot, *Document) {
 		missing = append(missing, c.id)
 	}
 	d := &Document{Blocks: []Block{p("Lead 😀"), table, {Kind: Picture, Image: &Image{Data: runningPNG(t, false), MediaType: "image/png", Width: 12, Height: 9}}, {Kind: Paragraph, Runs: links}}, UnresolvedDestinations: missing}
-	wire, err := encodeColleafDocument(context.Background(), d)
+	wire, err := encodeVDOCSDocument(context.Background(), d)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2208,7 +2208,7 @@ func vdocsForeignCursorExample(t testing.TB) (vdocsNoteSnapshot, *Document) {
 	table.Rows[1].Cells[0].Blocks = []Block{point("c-start"), p("C"), point("c-lf"), point("c-end"), point("row-two-end")}
 	expected := &Document{Blocks: []Block{p("Lead 😀"), table, point("table-end"), point("table-cr"), d.Blocks[2], point("image-cr"), d.Blocks[3], point("main-lf")}}
 	for _, c := range cases {
-		expected.Diagnostics = append(expected.Diagnostics, Diagnostic{Code: "colleaf_structural_cursor", Message: fmt.Sprintf("Native bookmark at UTF-16 offset %d (%s) projects to %s; exact native control cursor identity is not retained", c.offset, c.kind, c.boundary)})
+		expected.Diagnostics = append(expected.Diagnostics, Diagnostic{Code: "vdocs_structural_cursor", Message: fmt.Sprintf("Native bookmark at UTF-16 offset %d (%s) projects to %s; exact native control cursor identity is not retained", c.offset, c.kind, c.boundary)})
 	}
 	return wire, expected
 }
@@ -2216,7 +2216,7 @@ func TestVDOCSForeignStructuralCursorProjection(t *testing.T) {
 	ctx := context.Background()
 	wire, expected := vdocsForeignCursorExample(t)
 	before, _ := json.Marshal(wire)
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2233,7 +2233,7 @@ func TestVDOCSForeignStructuralCursorProjection(t *testing.T) {
 		t.Fatalf("wrong diagnostic count: %+v", got.Diagnostics)
 	}
 	for _, d := range got.Diagnostics {
-		if d.Code != "colleaf_structural_cursor" || !wantDiagnostics[d.Message] {
+		if d.Code != "vdocs_structural_cursor" || !wantDiagnostics[d.Message] {
 			t.Fatal("unexpected or missing loss evidence", d)
 		}
 	}
@@ -2263,11 +2263,11 @@ func TestVDOCSForeignStructuralCursorProjection(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	normalized, err := encodeColleafDocument(ctx, normalizedInput)
+	normalized, err := encodeVDOCSDocument(ctx, normalizedInput)
 	if err != nil {
 		t.Fatal(err)
 	}
-	normalizedModel, err := decodeColleafDocument(ctx, normalized)
+	normalizedModel, err := decodeVDOCSDocument(ctx, normalized)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2282,7 +2282,7 @@ func TestVDOCSForeignStructuralCursorProjection(t *testing.T) {
 	if !reflect.DeepEqual(expectedNormalizedSF, normalizedSF) {
 		t.Fatal("normalized native fixed point changed data/relationships")
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_CURSOR_NORMALIZED_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_CURSOR_NORMALIZED_QA"); file != "" {
 		raw, err := json.Marshal(normalized)
 		if err != nil {
 			t.Fatal(err)
@@ -2291,7 +2291,7 @@ func TestVDOCSForeignStructuralCursorProjection(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_CURSOR_NORMALIZED_SAVED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_CURSOR_NORMALIZED_SAVED"); file != "" {
 		raw, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -2304,7 +2304,7 @@ func TestVDOCSForeignStructuralCursorProjection(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+		actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -2316,12 +2316,12 @@ func TestVDOCSForeignStructuralCursorProjection(t *testing.T) {
 			t.Fatal("actual normalized save changed data/relationships")
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_CURSOR_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_CURSOR_QA"); file != "" {
 		if err = os.WriteFile(file, before, 0600); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_CURSOR_SAVED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_CURSOR_SAVED"); file != "" {
 		raw, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -2334,7 +2334,7 @@ func TestVDOCSForeignStructuralCursorProjection(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+		actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -2347,7 +2347,7 @@ func TestVDOCSForeignStructuralCursorProjection(t *testing.T) {
 		}
 	}
 
-	if file := os.Getenv("MANYDOC_COLLEAF_CURSOR_EDITED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_CURSOR_EDITED"); file != "" {
 		raw, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -2360,7 +2360,7 @@ func TestVDOCSForeignStructuralCursorProjection(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+		actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -2396,14 +2396,14 @@ func TestVDOCSForeignStructuralCursorProjection(t *testing.T) {
 func TestVDOCSForeignStructuralCursorListOwnership(t *testing.T) {
 	ctx := context.Background()
 	base := vdocsContainerNavigationExample(t)
-	wire, err := encodeColleafDocument(ctx, base)
+	wire, err := encodeVDOCSDocument(ctx, base)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	table := wire.Body.Tables[len(wire.Body.Tables)-1]
 	wire.Body.CustomRanges = append(wire.Body.CustomRanges, vdocsRangeRecord{ID: "end", Type: 3, StartIndex: table.EndIndex - 1, EndIndex: table.EndIndex - 1})
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2423,7 +2423,7 @@ func TestVDOCSForeignStructuralHorizontalContinuations(t *testing.T) {
 	for i, position := range []int{7, 9, 14} {
 		body.CustomRanges = append(body.CustomRanges, vdocsRangeRecord{ID: fmt.Sprintf("horizontal-%d", i), Type: 3, StartIndex: position, EndIndex: position})
 	}
-	d, err := decodeColleafBody(context.Background(), body, vdocsTextContext{}, tables)
+	d, err := decodeVDOCSBody(context.Background(), body, vdocsTextContext{}, tables)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2441,7 +2441,7 @@ func TestVDOCSForeignStructuralHorizontalContinuations(t *testing.T) {
 func TestVDOCSForeignStructuralRunningAndNoteStories(t *testing.T) {
 	p := func(s string) Block { return Block{Kind: Paragraph, Runs: []Run{{Text: s}}} }
 	table := func(s string) Block { return Block{Kind: Table, Rows: []Row{{Cells: []Cell{{Blocks: []Block{p(s)}}}}}} }
-	wire, err := encodeColleafDocument(context.Background(), &Document{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "Body"}, {Note: &NoteReference{Kind: Footnote, ID: "n"}}}}}, Headers: []Block{table("Header")}, Footers: []Block{table("Footer")}, Notes: []Note{{Kind: Footnote, ID: "n", Blocks: []Block{table("Note")}}}})
+	wire, err := encodeVDOCSDocument(context.Background(), &Document{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "Body"}, {Note: &NoteReference{Kind: Footnote, ID: "n"}}}}}, Headers: []Block{table("Header")}, Footers: []Block{table("Footer")}, Notes: []Note{{Kind: Footnote, ID: "n", Blocks: []Block{table("Note")}}}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2457,7 +2457,7 @@ func TestVDOCSForeignStructuralRunningAndNoteStories(t *testing.T) {
 		note.Body.CustomRanges = append(note.Body.CustomRanges, vdocsRangeRecord{ID: "note-lf", Type: 3, StartIndex: 8, EndIndex: 8})
 		wire.Notes[id] = note
 	}
-	got, err := decodeColleafDocument(context.Background(), wire)
+	got, err := decodeVDOCSDocument(context.Background(), wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2468,9 +2468,9 @@ func TestVDOCSForeignStructuralRunningAndNoteStories(t *testing.T) {
 		t.Fatal("story cursor losses not explicit", got.Diagnostics)
 	}
 }
-func FuzzColleafForeignStructuralCursor(f *testing.F) {
+func FuzzVDOCSForeignStructuralCursor(f *testing.F) {
 	ctx := context.Background()
-	base, err := encodeColleafDocument(ctx, &Document{Blocks: []Block{{Kind: Table, Rows: []Row{{Cells: []Cell{{RowSpan: 2, Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "😀"}}}}}, {Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "B"}}}}}}}, {Cells: []Cell{{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "C"}}}}}}}}}}})
+	base, err := encodeVDOCSDocument(ctx, &Document{Blocks: []Block{{Kind: Table, Rows: []Row{{Cells: []Cell{{RowSpan: 2, Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "😀"}}}}}, {Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "B"}}}}}}}, {Cells: []Cell{{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "C"}}}}}}}}}}})
 	if err != nil {
 		f.Fatal(err)
 	}
@@ -2481,7 +2481,7 @@ func FuzzColleafForeignStructuralCursor(f *testing.F) {
 		wire := base
 		wire.Body.CustomRanges = append([]vdocsRangeRecord(nil), base.Body.CustomRanges...)
 		wire.Body.CustomRanges = append(wire.Body.CustomRanges, vdocsRangeRecord{ID: "fuzz-point", Type: 3, StartIndex: position, EndIndex: position, Properties: props})
-		d, err := decodeColleafDocument(ctx, wire)
+		d, err := decodeVDOCSDocument(ctx, wire)
 		if err != nil {
 			return
 		}
@@ -2497,7 +2497,7 @@ func FuzzColleafForeignStructuralCursor(f *testing.F) {
 func TestVDOCSForeignStructuralEveryScalarBoundary(t *testing.T) {
 	ctx := context.Background()
 	base, _ := vdocsForeignCursorExample(t)
-	index, err := newColleafTextIndex(ctx, base.Body.DataStream)
+	index, err := newVDOCSTextIndex(ctx, base.Body.DataStream)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2510,7 +2510,7 @@ func TestVDOCSForeignStructuralEveryScalarBoundary(t *testing.T) {
 		wire := base
 		wire.Body.CustomRanges = append([]vdocsRangeRecord(nil), base.Body.CustomRanges...)
 		wire.Body.CustomRanges = append(wire.Body.CustomRanges, vdocsRangeRecord{ID: "probe", Type: 3, StartIndex: position, EndIndex: position})
-		d, err := decodeColleafDocument(ctx, wire)
+		d, err := decodeVDOCSDocument(ctx, wire)
 		if err != nil {
 			t.Fatalf("valid scalar cursor %d: %v", position, err)
 		}
@@ -2533,12 +2533,12 @@ func TestVDOCSForeignStructuralEveryScalarBoundary(t *testing.T) {
 }
 func TestVDOCSForeignStructuralPageBreakParagraph(t *testing.T) {
 	ctx := context.Background()
-	wire, err := encodeColleafDocument(ctx, &Document{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "Before"}}}, {Kind: PageBreak}, {Kind: Paragraph, Runs: []Run{{Text: "After"}}}}})
+	wire, err := encodeVDOCSDocument(ctx, &Document{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "Before"}}}, {Kind: PageBreak}, {Kind: Paragraph, Runs: []Run{{Text: "After"}}}}})
 	if err != nil {
 		t.Fatal(err)
 	}
 	wire.Body.CustomRanges = append(wire.Body.CustomRanges, vdocsRangeRecord{ID: "break-end", Type: 3, StartIndex: 8, EndIndex: 8})
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2576,12 +2576,12 @@ func vdocsTableOriginExample(t *testing.T) *Document {
 func TestVDOCSTableOriginsAndActualSave(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsTableOriginExample(t)
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
 	before, _ := json.Marshal(wire)
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2590,12 +2590,12 @@ func TestVDOCSTableOriginsAndActualSave(t *testing.T) {
 		t.Fatal("native source mutated")
 	}
 	assertEvidenceSF(t, want, got)
-	if file := os.Getenv("MANYDOC_COLLEAF_TABLE_ORIGIN_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_TABLE_ORIGIN_QA"); file != "" {
 		if err = os.WriteFile(file, before, 0600); err != nil {
 			t.Fatal(err)
 		}
 	}
-	for _, spec := range []struct{ env, mode string }{{"MANYDOC_COLLEAF_TABLE_ORIGIN_SAVED", "saved"}, {"MANYDOC_COLLEAF_TABLE_ORIGIN_EDITED", "edited"}, {"MANYDOC_COLLEAF_TABLE_ORIGIN_DETACHED", "detached"}, {"MANYDOC_COLLEAF_TABLE_ORIGIN_COVERED", "covered"}} {
+	for _, spec := range []struct{ env, mode string }{{"MANYDOC_VDOCS_TABLE_ORIGIN_SAVED", "saved"}, {"MANYDOC_VDOCS_TABLE_ORIGIN_EDITED", "edited"}, {"MANYDOC_VDOCS_TABLE_ORIGIN_DETACHED", "detached"}, {"MANYDOC_VDOCS_TABLE_ORIGIN_COVERED", "covered"}} {
 		t.Run(spec.mode, func(t *testing.T) {
 			file := os.Getenv(spec.env)
 			if file == "" {
@@ -2610,7 +2610,7 @@ func TestVDOCSTableOriginsAndActualSave(t *testing.T) {
 				t.Fatal(err)
 			}
 			envelope, _ := json.Marshal(vdocsEnvelope{vdocsEnvelopeType, 3, "univer", vdocsEngineVersion, native})
-			actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+			actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -2620,15 +2620,15 @@ func TestVDOCSTableOriginsAndActualSave(t *testing.T) {
 				expected.Blocks[1].Source.Historical = true
 				expected.Blocks[1].Rows[0].Cells[0].Source.Historical = true
 				expected.Blocks[1].Rows[0].Cells[0].Blocks[0].Runs = []Run{{Text: "Q"}, {Text: "Wide"}}
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_table_source_historical", Message: "Original table or cell source facts are retained as historical after current content, grid or presentation changed"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_table_source_historical", Message: "Original table or cell source facts are retained as historical after current content, grid or presentation changed"}}
 			case "detached":
 				expected.UnboundSources = []SourceInfo{*cloneSourceInfo(expected.Blocks[1].Rows[0].Cells[0].Source)}
 				expected.Blocks[1].Rows[0].Cells[0].Source = nil
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_table_source_unbound", Message: "Original table or cell source facts are retained unbound after their native ownership disappeared"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_table_source_unbound", Message: "Original table or cell source facts are retained unbound after their native ownership disappeared"}}
 			case "covered":
 				expected.UnboundSources = []SourceInfo{*cloneSourceInfo(expected.Blocks[1].Rows[1].Cells[0].Source)}
 				expected.Blocks[1].Rows[1].Cells[0].Source = nil
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_table_source_unbound", Message: "Original table or cell source facts are retained unbound after their native ownership disappeared"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_table_source_unbound", Message: "Original table or cell source facts are retained unbound after their native ownership disappeared"}}
 			}
 			assertEvidenceSF(t, expected, actual)
 			sf, err := ToStructured(actual)
@@ -2643,11 +2643,11 @@ func TestVDOCSTableOriginsAndActualSave(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			next, err := encodeColleafDocument(ctx, model)
+			next, err := encodeVDOCSDocument(ctx, model)
 			if err != nil {
 				t.Fatal(err)
 			}
-			stable, err := decodeColleafDocument(ctx, next)
+			stable, err := decodeVDOCSDocument(ctx, next)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -2657,11 +2657,11 @@ func TestVDOCSTableOriginsAndActualSave(t *testing.T) {
 }
 func TestVDOCSTableOriginsMalformed(t *testing.T) {
 	ctx := context.Background()
-	wire, err := encodeColleafDocument(ctx, vdocsTableOriginExample(t))
+	wire, err := encodeVDOCSDocument(ctx, vdocsTableOriginExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
-	opened, err := openColleafIntent(ctx, wire)
+	opened, err := openVDOCSIntent(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2688,7 +2688,7 @@ func TestVDOCSTableOriginsMalformed(t *testing.T) {
 			}
 			native := opened
 			native.Resources = vdocsReplaceResource(native.Resources, vdocsDocumentResource, copy)
-			if _, err = decodeColleafDocument(ctx, native); err == nil {
+			if _, err = decodeVDOCSDocument(ctx, native); err == nil {
 				t.Fatal("invalid table source accepted")
 			}
 		})
@@ -2705,16 +2705,16 @@ func TestVDOCSTableOriginsSharedFactsAndCoveredReference(t *testing.T) {
 	d.Blocks[1].Rows[0].Cells[0].ColSpan = 0
 	d.Blocks[1].Rows[0].Cells[0].Source = source
 	d.Blocks[1].Source = source
-	native, err := encodeColleafDocument(ctx, d)
+	native, err := encodeVDOCSDocument(ctx, d)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(ctx, native)
+	got, err := decodeVDOCSDocument(ctx, native)
 	if err != nil {
 		t.Fatal(err)
 	}
 	assertEvidenceSF(t, d, got)
-	wire, err := encodeColleafDocument(ctx, vdocsTableOriginExample(t))
+	wire, err := encodeVDOCSDocument(ctx, vdocsTableOriginExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2736,11 +2736,11 @@ func TestVDOCSTableOriginsSharedFactsAndCoveredReference(t *testing.T) {
 		props["tableRows"] = sfAttrs(rows)
 		wire.Tables[id] = sfAttrs(props)
 	}
-	if _, err = decodeColleafDocument(ctx, wire); err == nil {
+	if _, err = decodeVDOCSDocument(ctx, wire); err == nil {
 		t.Fatal("missing reference on covered cell accepted")
 	}
 }
-func FuzzColleafTableOrigins(f *testing.F) {
+func FuzzVDOCSTableOrigins(f *testing.F) {
 	f.Add([]byte(`{"tableId":"probe","tableRows":[{"tableCells":[{"rowSpan":1,"columnSpan":1}]}]}`))
 	f.Add([]byte(`{"tableRows":null}`))
 	f.Fuzz(func(t *testing.T, raw []byte) {
@@ -2748,6 +2748,6 @@ func FuzzColleafTableOrigins(f *testing.F) {
 			return
 		}
 		snapshot := vdocsNoteSnapshot{Tables: map[string]json.RawMessage{"probe": raw}}
-		_ = visitColleafTableOrigins(&snapshot, false, func(*vdocsOrigin) error { return nil })
+		_ = visitVDOCSTableOrigins(&snapshot, false, func(*vdocsOrigin) error { return nil })
 	})
 }

@@ -47,7 +47,6 @@ marks retain their respective rights/notices; they are kept inside the unmodifie
 reference PDF, not extracted or reused as manydoc output fonts. This reference
 file is not licensed as manydoc implementation code.
 
-
 The newly used textlayout HarfBuzz, Graphite and font packages have their own
 MIT notices, preserved in `third_party/licenses/harfbuzz.txt`, `graphite.txt` and
 `textlayout-fonts.txt`. No new module dependency is introduced. Graphite's compiled
@@ -68,7 +67,6 @@ reader/oracle, not a Go runtime dependency or required conversion executable.
 pinned x/image v0.32.0 byte constants. These QA facts qualify actual embedded
 programs independently of PDF resource aliases; no new font asset is vendored.
 
-
 internal/bidilevels/core.go and bracket.go adapt the Go Authors' BSD-licensed
 x/text v0.30.0 reference bidi core; their original headers and adjacent LICENSE
 are preserved. The internal README and testdata/manifest.json identify upstream
@@ -83,14 +81,12 @@ existing third_party/licenses/Unicode-V3.txt applies. Authored line scenarios re
 native FriBidi 1.0.16 and ICU 78.3 observations. Those native libraries are optional
 QA tools only; neither native nor Go textprocessing/fribidi is a runtime dependency.
 
-
 `testdata/rtl-shaping.json` contains authored Hebrew/Arabic/LTR vectors measured
 with optional native HarfBuzz 15.0.0 / uharfbuzz 0.57.0 against the existing original
 DejaVu Sans asset. `scripts/qa/layout/verify_bidi_output.py` independently compares actual
 PDF groups with native HarfBuzz and C FriBidi; these are optional QA tools only.
 The two FuzzPDFBidiRoundTrip inputs are exact synthetic invented-space regressions.
 No additional font/module/service/CGO or proprietary code is introduced.
-
 
 `testdata/assets/DejaVuSans-Bold.ttf` is the original DejaVu Sans Bold 2.37 from
 the same pinned official release ZIP (SHA256 7576310b219e04159d35ff61dd4a4ec4cdba4f35c00e002a136f00e96a908b0a).
@@ -100,7 +96,6 @@ It is test/example data, not embedded into the library/CLI. The authored
 `testdata/rtl-item-context.json` records fourteen original-font native HarfBuzz
 item-context measurements; optional scripts/qa/layout/verify_bidi_context.py checks actual
 regular/bold PDF glyphs/positions. No proprietary implementation or new module.
-
 
 `testdata/real/mqtt-v5.0-os.docx` and `.pdf` are the unmodified authoritative Word
 source and paired published PDF of **MQTT Version 5.0**, OASIS Standard,
@@ -115,7 +110,6 @@ contains independently extracted counts, geometry and content hashes, not anothe
 edition of the standard. Original embedded fonts/marks remain inside the originals
 and are not reused as manydoc output fonts. No endorsement is implied. Optional
 QA conversions stay ignored.
-
 
 Optional font-subset verification now pins fontTools 4.68.0 (MIT) in
 scripts/qa/requirements.txt. It is used only by independent development oracles,
@@ -149,15 +143,14 @@ generated output and rendered comparison sheets remain ignored.
 
 Pinned `@univerjs/core`, `@univerjs/docs` and `@univerjs/engine-render` 1.0.4
 (Apache-2.0) are optional independently installed native-format QA readers under
-ignored output/colleaf-qa. They are not production Go modules, vendored source or
-runtime requirements. The private Colleaf stream implementation is independently
+ignored output/vdocs-qa. They are not production Go modules, vendored source or
+runtime requirements. The private VDOCS stream implementation is independently
 authored against published format declarations and executable reader APIs; no
-Univer implementation code is incorporated or translated. The unmodified app
-validator is loaded from its pinned ignored source only during QA. The native
-reference JSON fixture is manydoc-authored test data. See VDOCS_FORMAT.md for
+Univer implementation code is incorporated or translated. Host-application
+validators and source loading have been removed. The native reference JSON
+fixture is independently authored test data. See VDOCS_FORMAT.md for
 exact versions, source hashes, unit/token discrepancies, commands and remaining
 semantic-adapter work.
-
 
 The optional pinned native image QA additionally uses @univerjs/docs-drawing and
 @univerjs/drawing1.0.4 (Apache-2.0). Published IDocImage/IImageData declarations and
@@ -167,7 +160,6 @@ lockfile remain ignored QA material. The existing original OASIS MQTT reference'
 JPEG is reused unchanged by image transport tests, with its original byte oracle.
 Pillow is an optional independent raster reader only. VDOCS_FORMAT.md records
 primary source/hash, commands, measured boxes/pixels and remaining qualification.
-
 
 The optional native hyperlink QA uses @univerjs/docs-hyper-link1.0.4 and reads
 @univerjs/docs-hyper-link-ui1.0.4 published source (Apache-2.0). Their pinned npm
@@ -205,69 +197,58 @@ The structural-cursor probe reuses the same attributed pinned packages, validato
 and unmodified handler for original/normalized/save/edit selection evidence.
 
 The document-evidence probe reuses the attributed pinned core/renderer/plugins
-and hash-pinned Colleaf validator for opaque history transport and glyph/skeleton
+and hash-pinned native SDK for opaque history transport and glyph/skeleton
 checks. No additional package or production dependency is introduced.
 
 The paragraph-origin probe reuses the same attributed pinned SDK/renderer/plugins
 and hash-pinned validator; the existing ProseMirror reader checks new source
 attributes. No additional package or production dependency is introduced.
 
-
 The note-origin probe reuses those same pinned/attributed SDK plugins, renderer and
-hash-pinned Colleaf validator for nonvisual evidence, rich-marker glyphs and actual
+hash-pinned native SDK for nonvisual evidence, rich-marker glyphs and actual
 save/edit checks. No new dependency or third-party production source is added.
 
-
 The run-origin probe reuses the attributed pinned Univer SDK/renderer/plugins,
-hash-pinned Colleaf validator and existing ProseMirror reader. No additional
+hash-pinned native SDK and existing ProseMirror reader. No additional
 package, production dependency or copied third-party implementation is introduced.
 
-
 The table-origin probe reuses the same attributed pinned SDK/renderer/plugins,
-hash-pinned Colleaf validator and existing ProseMirror reader. No new package,
+hash-pinned native SDK and existing ProseMirror reader. No new package,
 production dependency or third-party implementation is incorporated.
 
-
 The image-origin probe reuses the same attributed pinned SDK/renderer/plugins,
-hash-pinned Colleaf validator and existing ProseMirror reader. It reuses existing
+hash-pinned native SDK and existing ProseMirror reader. It reuses existing
 attributed JPEG and synthetic PNG fixtures; no new production dependency or
 third-party implementation is introduced.
 
-
 The list-origin probe reuses the same attributed pinned SDK/renderer/plugins,
-hash-pinned Colleaf validator and existing ProseMirror reader. No new production
+hash-pinned native SDK and existing ProseMirror reader. No new production
 dependency or third-party implementation is introduced.
-
 
 The anchor-origin probe reuses the same attributed pinned SDK/renderer/plugins,
-hash-pinned Colleaf validator and existing ProseMirror reader. No new production
+hash-pinned native SDK and existing ProseMirror reader. No new production
 dependency or third-party implementation is introduced.
-
 
 The flow-origin probe reuses the same attributed pinned SDK/renderer/plugins,
-hash-pinned Colleaf validator and existing ProseMirror reader. No new production
+hash-pinned native SDK and existing ProseMirror reader. No new production
 dependency or third-party implementation is introduced.
 
-
 The real-source native transport probe reuses the attributed original Copyright
-Office InDesign PDF, pinned Colleaf validator, Univer1.0.4 plugins/facade and
+Office InDesign PDF, pinned native SDK, Univer1.0.4 plugins/facade and
 ProseMirror reader. Standard gzip uses Go compress/gzip at runtime and Node zlib
 only for independent QA. No new production dependency or third-party implementation
 is incorporated. Source publication rights and original hash remain unchanged.
 
-
 The native language probe reuses the already attributed Apache POI original
-DOCX fixtures, pinned Univer1.0.4 types/renderer/plugins/facade, hash-pinned Colleaf
+DOCX fixtures, pinned Univer1.0.4 types/renderer/plugins/facade, hash-pinned VDOCS
 validator and ProseMirror reader. No new production dependency or third-party
 implementation is introduced. The original fixtures and source-only oracles are
 unchanged; native shaping/paint equivalence is not claimed.
 
-
 The public native profile/example reuses existing attributed source fixtures,
-pinned Colleaf validator/Univer facade plugins and ProseMirror. Independent
+pinned native SDK/Univer facade plugins and ProseMirror. Independent
 example checks use the existing optional pypdf and standard-library OOXML reader.
 No new production dependency or third-party implementation is incorporated.
-
 
 The generated PDF structure is independently authored against published PDF
 mechanisms and the PDF Association's WTPDF1.0 FENote/NoteType description
@@ -277,7 +258,6 @@ errata (https://pdf-issues.pdfa.org/32000-2-2020/clause14.html). No implementati
 code is copied or translated. Existing attributed gofpdf/pdfcpu run in-process;
 pypdf/MuPDF/Poppler are optional independent QA. No new production dependency.
 
-
 Tagged PDF list recovery uses independently authored canonical parsing against
 the Adobe PDF1.7 reference's standard ListNumbering families
 (https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf)
@@ -285,20 +265,8 @@ and the existing attributed OOXML numbering contract. No implementation code is
 copied/translated. Optional independent pypdf/OOXML checks add no production
 dependency; existing source fixtures and physical expected labels are unchanged.
 
-
 Reciprocal PDF ownership validation is independently authored against PDF 2.0
 clause 14.7.5.4 and its public corrections:
 https://pdf-issues.pdfa.org/32000-2-2020/clause14.html#14754-finding-structure-elements-from-content-items
 Optional pypdf checks reuse the previously attributed original Copyright Office
 PDF and generated notes; no production dependency or proprietary code is added.
-
-
-Optional browser QA downloads/bundles the already attributed actual Colleaf mount
-and validator at 5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6 with checked original
-hashes; see [browser QA](docs/VDOCS_BROWSER.md). They remain ignored QA source, not Go implementation.
-Univer core/drawing/hyperlink presets and find/replace 1.0.4 and RxJS 7.8.2 are
-Apache-2.0; Univer icons 1.43.1, React/ReactDOM 19.0.0 and esbuild 0.27.0 are MIT per installed package
-metadata. These optional pinned development dependencies are installed only in
-ignored output/colleaf-browser. No production module, executable, service, CGO or
-proprietary UniDoc implementation is introduced. The note-order checker inspects
-actual vendor placement without copying that implementation into manydoc.

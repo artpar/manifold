@@ -68,5 +68,39 @@
       "output/reorg/corpus-equality.json"
     ],
     "remaining": "No rename/organization/publication work pending. Existing documented compatibility and native-reader limitations remain. The internal engine is a shared Go package, not independent codec packages."
+  },
+  "reference_cleanup": {
+    "status": "qualified; push verification pending",
+    "report": "docs/verification/REFERENCE_CLEANUP.md",
+    "formats": "SF canonical; DOCX/PDF/VDOCS map to shared model; VDOCS retained at user request",
+    "native_container": {
+      "type": "manifold-document",
+      "mime": "application/vnd.manifold.docs+json;version=3",
+      "version": 3,
+      "engine": "univer",
+      "engineVersion": "1.0.4",
+      "migration": "Retired branded headers require explicit migration; full payload validation remains mandatory",
+      "fixture": "testdata/univer/native-stream.json; complete document payload unchanged"
+    },
+    "qa_scope": "Host-specific source/validator/browser tooling retired; all33 retained native SDK probes pass; fresh facade save/reopen and Go re-import preserve semantics",
+    "normal": "root5.943s / CLI1.051s / engine24.031s; later full run cached",
+    "race": "root76.791s / CLI3.055s / engine278.612s; -timeout20m; no races",
+    "vet_modules_builds": "passed; CGO-disabled host executes and Linux amd64/arm64 cross-builds pass; Linux not executed",
+    "core_equality": "All51 accepted unchanged core fixtures retain byte-identical complete SF versus baseline;9034 actual ProseMirror nodes/marks pass",
+    "references": "Current tracked tree has no requested names; historical narrative labels sanitized, Git history not rewritten",
+    "logs": [
+      "output/reference-cleanup/tests.log",
+      "output/reference-cleanup/final-tests.log",
+      "output/reference-cleanup/final-race.log",
+      "output/reference-cleanup/final-vet.log",
+      "output/reference-cleanup/final-modules.log",
+      "output/reference-cleanup/sdk-checks.json",
+      "output/reference-cleanup/native-export.log",
+      "output/reference-cleanup/native-sdk.log",
+      "output/reference-cleanup/native-reimport.log",
+      "output/reference-cleanup/native-public.log",
+      "output/reference-cleanup/core-equality.json",
+      "output/reference-cleanup/current-prosemirror.log"
+    ]
   }
 }

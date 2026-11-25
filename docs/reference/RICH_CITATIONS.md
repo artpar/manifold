@@ -55,7 +55,7 @@ superscript size/baselines (source red digit4.6pt versus native5.6pt); mixed fra
 need not share the native baseline. The example still uses a dedicated Letter
 endnote page versus native420pt square. Its PDF exporter omits custom-label links.
 Package/SF meaning and native navigation are verified separately; no source-layout
-or Word-equivalent print-fidelity claim is made. Broader nested/untagged note recovery, actual Colleaf adapter, broader original DOCX
+or Word-equivalent print-fidelity claim is made. Broader nested/untagged note recovery, actual VDOCS adapter, broader original DOCX
 corpus/producer qualification and final acceptance audit remain required.
 
 Reproduce (optional Python/Node/LibreOffice are QA only):

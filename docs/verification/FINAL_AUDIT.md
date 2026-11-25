@@ -9,7 +9,7 @@ current recovery entry point; verification.json records command scopes and histo
 
 | Requirement | Current implementation and independent evidence |
 | --- | --- |
-| Established shared rich representation, selected first | manydoc-prosemirror/1, standard ProseMirror JSON with an explicit schema profile; alternatives, extensions and actual pinned Colleaf/Univer inspection are documented in STRUCTURED_FORMAT.md and VDOCS_FORMAT.md. Actual prosemirror-model validates the wire documents. No JavaScript engine is required at runtime. |
+| Established shared rich representation, selected first | manydoc-prosemirror/1, standard ProseMirror JSON with an explicit schema profile; alternatives, extensions and actual pinned VDOCS/Univer inspection are documented in STRUCTURED_FORMAT.md and VDOCS_FORMAT.md. Actual prosemirror-model validates the wire documents. No JavaScript engine is required at runtime. |
 | DOCX → SF and SF → DOCX | Original Word MQTT source tests verify headings, formatting, tables/merges, relationships and original JPEG. Eight additional original Word/Mac Word/LibreOffice exports have source-only ZIP/XML oracles and normalized full-SF round trips. REAL_DOCX_CORPUS.md and DOCX_PRECISION.md record independent readers and visual checks. |
 | SF → PDF | Native measured layout handles wrapping, pagination, merged/nested/continued/repeated tables, images, section frames, running stories and rich notes. Independent geometry, font programs/GIDs, links, raster pixels and page renders qualify the declared contract. See TABLE_WIDTHS.md, FONT_SUBSETTING.md, PDF_NOTE_PAGES.md and the corresponding verification ledger entries. |
 | PDF → SF | Explicit logical ownership, physical pages/positions/navigation and embedded raster assets survive; untagged geometric paragraphs/headings/lists/tables/notes disclose inference and uncertainty. Original137-page Word export has 90 page-local tables/3,009 origins and 11 continuation references. The original InDesign publication and original 71-page tagging guide provide independent producer evidence. See TAGGED_TABLE_SPANS.md, PDF_NAVIGATION.md, PDF_NOTES.md and PDF_NOTE_KIND.md. |
@@ -36,7 +36,7 @@ unsupported/uncertain source behavior is diagnosed or rejected as documented.
 
 Known independent-reader discrepancies remain executable and recorded: ambiguous
 CID width overlap, managed CMYK/JPEG interpolation differences, a pinned pypdf LZW
-EarlyChange limitation, and the pinned optional Colleaf browser's repeated-note
+EarlyChange limitation, and the pinned optional VDOCS browser's repeated-note
 ordering behavior. They do not establish missing core operations. The public
 offline .vdocs adapter is additional interoperability work; complete browser/API
 parity with that third-party editor is not an original acceptance gate.

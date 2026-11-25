@@ -1,6 +1,6 @@
 /* Optional pinned literal/rich body-mark ownership, editor and facade QA. */
-const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{createRequire,stripTypeScriptTypes}=require('node:module');
-const qa=path.resolve(__dirname,'../../../output/colleaf-qa'),req=createRequire(path.join(qa,'package.json'));
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{createRequire}=require('node:module');
+const qa=path.resolve(__dirname,'../../../output/vdocs-qa'),req=createRequire(path.join(qa,'package.json'));
 const core=req('@univerjs/core'),engine=req('@univerjs/engine-render'),docs=req('@univerjs/docs'),drawing=req('@univerjs/drawing'),dd=req('@univerjs/docs-drawing'),{FUniver}=req('@univerjs/core/facade');req('@univerjs/docs/facade');
 for(const n of ['core','engine-render','docs','drawing','docs-drawing'])assert.equal(JSON.parse(fs.readFileSync(path.join(qa,'node_modules/@univerjs',n,'package.json'))).version,'1.0.4');
 function inspect(data,edited=false){
@@ -27,8 +27,7 @@ function inspect(data,edited=false){
 function save(data){const u=new core.Univer();try{for(const p of[docs.UniverDocsPlugin,drawing.UniverDrawingPlugin,dd.UniverDocsDrawingPlugin])u.registerPlugin(p);return JSON.parse(JSON.stringify(FUniver.newAPI(u).createDocument(structuredClone(data)).save()))}finally{u.dispose()}}
 async function main(){
  const data=JSON.parse(fs.readFileSync(path.join(qa,'body-marks.json')));
- const source=fs.readFileSync(path.resolve(__dirname,'../../../output/codec/colleaf-format-0.txt'),'utf8');assert.equal(crypto.createHash('sha256').update(source).digest('hex'),'c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0');const app=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(source)).toString('base64'));
- const validate=document=>app.validateDocument({type:'vibedada-document',version:3,engine:'univer',engineVersion:'1.0.4',document});
+
  // Reproduce the original failure: unneutralized CUSTOM annotations decorate
  // ordinary marker text, regardless of the authored red/color/underline fields.
  const raw=structuredClone(data),annotation=raw.notes['manydoc-note-2'].body.customRanges.find(r=>r.properties?.profile==='manydoc.note-body-mark');delete annotation.active;delete annotation.properties.textColorMode;
@@ -36,10 +35,10 @@ async function main(){
   rs.calculate();let star;for(const p of rs.getSkeletonData().pages)for(const n of p.notes||[])if(n.noteId==='manydoc-note-2')for(const sec of n.page.sections)for(const c of sec.columns)for(const l of c.lines)for(const d of l.divides)star ||= d.glyphGroup.find(g=>g.content==='*');
   assert.ok(star);assert.equal(star.ts.cl.rgb,'blue.600');assert.equal(star.ts.ul.s,1);
  }finally{rs.dispose();rv.dispose();rm.dispose()}
- validate(data);inspect(data);const saved=save(save(data));validate(saved);inspect(saved);fs.writeFileSync(path.join(qa,'body-marks-saved.json'),JSON.stringify(saved,null,2));
+ inspect(data);const saved=save(save(data));inspect(saved);fs.writeFileSync(path.join(qa,'body-marks-saved.json'),JSON.stringify(saved,null,2));
  const edit=structuredClone(saved);edit.notes['manydoc-note-1'].body=core.TextX.apply(edit.notes['manydoc-note-1'].body,new core.TextX().delete(1).insert(1,{dataStream:'8'}).serialize());
  const first=edit.notes['manydoc-note-2'].body.textRuns.find(r=>r.st===0);first.ts.bl=0;first.ts.fs=14;
- const edited=save(edit);validate(edited);inspect(edited,true);fs.writeFileSync(path.join(qa,'body-marks-edited.json'),JSON.stringify(edited,null,2));
+ const edited=save(edit);inspect(edited,true);fs.writeFileSync(path.join(qa,'body-marks-edited.json'),JSON.stringify(edited,null,2));
  console.log('Pinned real literal/rich/styled/separate/table/empty note body marks, actual glyph styles/link/body placement and TextX/style edits plus facade save pass; browser paint and wrapping unqualified');
 }
 main().catch(e=>{console.error(e);process.exitCode=1});

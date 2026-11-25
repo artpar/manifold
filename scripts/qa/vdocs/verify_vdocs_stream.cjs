@@ -1,22 +1,20 @@
-/* Optional independent pinned Colleaf/Univer reader QA, not a runtime dependency. */
+/* Optional independent pinned VDOCS/Univer reader QA, not a runtime dependency. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 const { stripTypeScriptTypes } = require('node:module');
 const path = require('node:path');
 const root = path.resolve(__dirname, '../../..');
-const qa = path.join(root, 'output/colleaf-qa/node_modules');
+const qa = path.join(root, 'output/vdocs-qa/node_modules');
 const core = require(path.join(qa, '@univerjs/core'));
 const engine = require(path.join(qa, '@univerjs/engine-render'));
 for (const name of ['core', 'engine-render']) {
   assert.equal(JSON.parse(fs.readFileSync(path.join(qa, '@univerjs', name, 'package.json'))).version, '1.0.4');
 }
-const input = JSON.parse(fs.readFileSync(path.join(root, 'testdata/colleaf/native-stream.json')));
-const source = fs.readFileSync(path.join(root, 'output/codec/colleaf-format-0.txt'), 'utf8');
-assert.equal(crypto.createHash('sha256').update(source).digest('hex'), 'c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0');
+const input = JSON.parse(fs.readFileSync(path.join(root, 'testdata/univer/native-stream.json')));
+
 async function main() {
-  const app = await import('data:text/javascript;base64,' + Buffer.from(stripTypeScriptTypes(source)).toString('base64'));
-  app.validateDocument(input);
+
   assert.equal(core.DataStreamTreeTokenType.TABLE_ROW_END, '\x0e');
   assert.equal(core.DataStreamTreeTokenType.TABLE_END, '\x0f');
   assert.equal(engine.ptToPixel(72), 96);
@@ -24,7 +22,7 @@ async function main() {
   const names = {SECTION_BREAK:'section', PARAGRAPH:'paragraph', TABLE:'table', TABLE_ROW:'row', TABLE_CELL:'cell'};
   const normalize = (nodes) => nodes.map(n => ({kind:names[n.nodeType],start:n.startIndex,end:n.endIndex+1,children:normalize(n.children)}));
   const actual = engine.parseDataStreamToTree(input.document.body.dataStream, input.document.body.tables);
-  const expected = JSON.parse(fs.readFileSync(path.join(root, 'output/colleaf-qa/go-tree.json')));
+  const expected = JSON.parse(fs.readFileSync(path.join(root, 'output/vdocs-qa/go-tree.json')));
   assert.deepEqual(normalize(actual.sectionList), expected);
   const model = new core.DocumentDataModel(input.document);
   const view = new engine.DocumentViewModel(model);
@@ -49,6 +47,6 @@ async function main() {
   assert.deepEqual(overlapView.getTextRun(3).ts,{it:1});
   assert.equal(overlapView.getTextRun(4),undefined);
   overlapView.dispose();overlap.dispose();
-  console.log('Pinned Colleaf validator, actual Univer UTF-16 style/link/note metadata and nested table/section AST bounds match Go; no bridge/renderer-completion claim');
+  console.log('Actual pinned Univer UTF-16 style/link/note metadata and nested table/section AST bounds match Go; no bridge/renderer-completion claim');
 }
 main().catch(error => {console.error(error); process.exitCode=1;});

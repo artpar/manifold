@@ -29,11 +29,11 @@ func vdocsCitationsExample() *Document {
 func TestVDOCSLiteralRichCitationsAndSF(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsCitationsExample()
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,14 +50,14 @@ func TestVDOCSLiteralRichCitationsAndSF(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	again, err := encodeColleafDocument(ctx, d)
+	again, err := encodeVDOCSDocument(ctx, d)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(wire, again) {
 		t.Fatal("SF changed native citation text/styles/relationships")
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_CITATION_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_CITATION_QA"); file != "" {
 		data, err := json.MarshalIndent(wire, "", "  ")
 		if err != nil {
 			t.Fatal(err)
@@ -66,7 +66,7 @@ func TestVDOCSLiteralRichCitationsAndSF(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_CITATION_SAVED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_CITATION_SAVED"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -75,7 +75,7 @@ func TestVDOCSLiteralRichCitationsAndSF(t *testing.T) {
 		if err = json.Unmarshal(data, &saved); err != nil {
 			t.Fatal(err)
 		}
-		got, err = decodeColleafDocument(ctx, saved)
+		got, err = decodeVDOCSDocument(ctx, saved)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -85,7 +85,7 @@ func TestVDOCSLiteralRichCitationsAndSF(t *testing.T) {
 			t.Fatalf("facade changed citations\ngot%s\nwant%s", a, b)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_CITATION_EDITED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_CITATION_EDITED"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -94,7 +94,7 @@ func TestVDOCSLiteralRichCitationsAndSF(t *testing.T) {
 		if err = json.Unmarshal(data, &saved); err != nil {
 			t.Fatal(err)
 		}
-		got, err = decodeColleafDocument(ctx, saved)
+		got, err = decodeVDOCSDocument(ctx, saved)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -113,8 +113,8 @@ func TestVDOCSLiteralRichCitationsAndSF(t *testing.T) {
 	}
 
 }
-func FuzzColleafCitations(f *testing.F) {
-	wire, err := encodeColleafDocument(context.Background(), vdocsCitationsExample())
+func FuzzVDOCSCitations(f *testing.F) {
+	wire, err := encodeVDOCSDocument(context.Background(), vdocsCitationsExample())
 	if err != nil {
 		f.Fatal(err)
 	}
@@ -128,7 +128,7 @@ func FuzzColleafCitations(f *testing.F) {
 		if json.Unmarshal(data, &w) != nil {
 			return
 		}
-		d, err := decodeColleafDocument(context.Background(), w)
+		d, err := decodeVDOCSDocument(context.Background(), w)
 		if err == nil {
 			if err = d.Validate(); err != nil {
 				t.Fatal(err)
@@ -139,7 +139,7 @@ func FuzzColleafCitations(f *testing.F) {
 
 func TestVDOCSLostCitationOwnershipKeepsVisibleLabel(t *testing.T) {
 	ctx := context.Background()
-	w, err := encodeColleafDocument(ctx, vdocsCitationsExample())
+	w, err := encodeVDOCSDocument(ctx, vdocsCitationsExample())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,7 +160,7 @@ func TestVDOCSLostCitationOwnershipKeepsVisibleLabel(t *testing.T) {
 		ranges = append(ranges, a)
 	}
 	w.Body.CustomRanges = ranges
-	got, err := decodeColleafDocument(ctx, w)
+	got, err := decodeVDOCSDocument(ctx, w)
 	if err != nil {
 		t.
 
@@ -174,7 +174,7 @@ func TestVDOCSLostCitationOwnershipKeepsVisibleLabel(t *testing.T) {
 	}
 	found := false
 	for _, d := range got.Diagnostics {
-		found = found || d.Code == "colleaf_stale_citation"
+		found = found || d.Code == "vdocs_stale_citation"
 	}
 	if !found {
 		t.Fatal("ownership loss not disclosed", got.Diagnostics)
@@ -191,7 +191,7 @@ func TestVDOCSMalformedCitationOwnershipRejects(t *testing.T) {
 			a.Properties = sfAttrs(h)
 		},
 	} {
-		w, err := encodeColleafDocument(context.Background(), vdocsCitationsExample())
+		w, err := encodeVDOCSDocument(context.Background(), vdocsCitationsExample())
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -203,7 +203,7 @@ func TestVDOCSMalformedCitationOwnershipRejects(t *testing.T) {
 				break
 			}
 		}
-		if _, err = decodeColleafDocument(context.Background(), w); err ==
+		if _, err = decodeVDOCSDocument(context.Background(), w); err ==
 
 			// Remove just the first identity binding, retaining visible note body/mark.
 
@@ -223,11 +223,11 @@ func TestVDOCSLongCitationParagraphPreservesEveryReference(t *testing.T) {
 		}
 		d.Blocks[0].Runs = append(d.Blocks[0].Runs, Run{Note: ref})
 	}
-	wire, err := encodeColleafDocument(context.Background(), d)
+	wire, err := encodeVDOCSDocument(context.Background(), d)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(context.Background(), wire)
+	got, err := decodeVDOCSDocument(context.Background(), wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -252,11 +252,11 @@ func vdocsBodyMarksExample(t testing.TB) *Document {
 func TestVDOCSIndependentRichBodyMarksAndSF(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsBodyMarksExample(t)
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -273,7 +273,7 @@ func TestVDOCSIndependentRichBodyMarksAndSF(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	native, err := encodeColleafDocument(ctx, again)
+	native, err := encodeVDOCSDocument(ctx, again)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -285,7 +285,7 @@ func TestVDOCSIndependentRichBodyMarksAndSF(t *testing.T) {
 			t.Fatal("duplicate generated body marker", id)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_BODY_MARK_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_BODY_MARK_QA"); file != "" {
 		data, err := json.MarshalIndent(wire, "", "  ")
 		if err != nil {
 			t.Fatal(err)
@@ -294,7 +294,7 @@ func TestVDOCSIndependentRichBodyMarksAndSF(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_BODY_MARK_SAVED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_BODY_MARK_SAVED"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -303,7 +303,7 @@ func TestVDOCSIndependentRichBodyMarksAndSF(t *testing.T) {
 		if err = json.Unmarshal(data, &saved); err != nil {
 			t.Fatal(err)
 		}
-		got, err = decodeColleafDocument(ctx, saved)
+		got, err = decodeVDOCSDocument(ctx, saved)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -313,7 +313,7 @@ func TestVDOCSIndependentRichBodyMarksAndSF(t *testing.T) {
 			t.Fatalf("facade changed body-label semantics\ngot%s\nwant%s", a, b)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_BODY_MARK_EDITED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_BODY_MARK_EDITED"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -322,7 +322,7 @@ func TestVDOCSIndependentRichBodyMarksAndSF(t *testing.T) {
 		if err = json.Unmarshal(data, &saved); err != nil {
 			t.Fatal(err)
 		}
-		got, err = decodeColleafDocument(ctx, saved)
+		got, err = decodeVDOCSDocument(ctx, saved)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -339,14 +339,14 @@ func TestVDOCSIndependentRichBodyMarksAndSF(t *testing.T) {
 }
 func TestVDOCSBodyMarkEditsKeepActualTextAndStyles(t *testing.T) {
 	ctx := context.Background()
-	wire, err := encodeColleafDocument(ctx, vdocsBodyMarksExample(t))
+	wire, err := encodeVDOCSDocument(ctx, vdocsBodyMarksExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	n := wire.Notes["manydoc-note-1"]
 	n.Body.DataStream = strings.Replace(n.Body.DataStream, "9", "8", 1)
 	wire.Notes[n.ID] = n
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -356,7 +356,7 @@ func TestVDOCSBodyMarkEditsKeepActualTextAndStyles(t *testing.T) {
 	n = wire.Notes["manydoc-note-1"]
 	n.Body.TextRuns[0].TS = sfAttrs(map[string]int{"bl": 1})
 	wire.Notes[n.ID] = n
-	got, err = decodeColleafDocument(ctx, wire)
+	got, err = decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -368,7 +368,7 @@ func TestVDOCSBodyMarkEditsKeepActualTextAndStyles(t *testing.T) {
 	show := true
 	n.ShowBodyReference = &show
 	wire.Notes[n.ID] = n
-	got, err = decodeColleafDocument(ctx, wire)
+	got, err = decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -392,14 +392,14 @@ func TestVDOCSMalformedBodyMarkOwnershipRejects(t *testing.T) {
 			n.Body.CustomRanges[len(n.Body.CustomRanges)-1].Properties = json.RawMessage(`{"profile":"manydoc.note-body-mark","version":2,"noteId":"manydoc-note-1","mode":"literal"}`)
 		},
 	} {
-		w, err := encodeColleafDocument(context.Background(), vdocsBodyMarksExample(t))
+		w, err := encodeVDOCSDocument(context.Background(), vdocsBodyMarksExample(t))
 		if err != nil {
 			t.Fatal(err)
 		}
 		n := w.Notes["manydoc-note-1"]
 		mutate(&n)
 		w.Notes[n.ID] = n
-		if _, err = decodeColleafDocument(context.Background(), w); err == nil {
+		if _, err = decodeVDOCSDocument(context.Background(), w); err == nil {
 			t.Fatal("bad body ownership accepted")
 		}
 	}
@@ -407,24 +407,24 @@ func TestVDOCSMalformedBodyMarkOwnershipRejects(t *testing.T) {
 
 func TestVDOCSLostBodyMarkOwnershipRetainsVisiblePrefix(t *testing.T) {
 	ctx := context.Background()
-	w, err := encodeColleafDocument(ctx, vdocsBodyMarksExample(t))
+	w, err := encodeVDOCSDocument(ctx, vdocsBodyMarksExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	n := w.Notes["manydoc-note-1"]
 	n.Body.CustomRanges = nil
 	w.Notes[n.ID] = n
-	got, err := decodeColleafDocument(ctx, w)
+	got, err := decodeVDOCSDocument(ctx, w)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.HasPrefix(noteLabelContentText(got.Notes[0].Blocks[0].Runs), "9\tLiteral body") || got.Notes[0].BodyLabel == nil || *got.Notes[0].BodyLabel != "" || len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "colleaf_stale_note_body_mark" {
+	if !strings.HasPrefix(noteLabelContentText(got.Notes[0].Blocks[0].Runs), "9\tLiteral body") || got.Notes[0].BodyLabel == nil || *got.Notes[0].BodyLabel != "" || len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "vdocs_stale_note_body_mark" {
 		t.Fatal("missing annotation silently discarded text/semantics", got.Notes[0], got.Diagnostics)
 	}
 }
 
-func FuzzColleafBodyMarks(f *testing.F) {
-	wire, err := encodeColleafDocument(context.Background(), vdocsBodyMarksExample(f))
+func FuzzVDOCSBodyMarks(f *testing.F) {
+	wire, err := encodeVDOCSDocument(context.Background(), vdocsBodyMarksExample(f))
 	if err != nil {
 		f.Fatal(err)
 	}
@@ -438,7 +438,7 @@ func FuzzColleafBodyMarks(f *testing.F) {
 		if json.Unmarshal(data, &input) != nil {
 			return
 		}
-		doc, err := decodeColleafDocument(context.Background(), input)
+		doc, err := decodeVDOCSDocument(context.Background(), input)
 		if err == nil {
 			if err = doc.Validate(); err != nil {
 				t.Fatal(err)
@@ -488,7 +488,7 @@ func vdocsForeignNumberingExample() vdocsNoteSnapshot {
 }
 func TestVDOCSForeignAutomaticNoteNumbers(t *testing.T) {
 	w := vdocsForeignNumberingExample()
-	doc, err := decodeColleafDocument(context.Background(), w)
+	doc, err := decodeVDOCSDocument(context.Background(), w)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -542,7 +542,7 @@ func TestVDOCSForeignAutomaticNoteNumbers(t *testing.T) {
 	if !reflect.DeepEqual(got, doc) {
 		t.Fatal("SF changed actual note marks")
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_NUMBER_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_NUMBER_QA"); file != "" {
 		data, err := json.MarshalIndent(w, "", "  ")
 		if err != nil {
 			t.Fatal(err)
@@ -551,7 +551,7 @@ func TestVDOCSForeignAutomaticNoteNumbers(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_NUMBER_SAVED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_NUMBER_SAVED"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -560,7 +560,7 @@ func TestVDOCSForeignAutomaticNoteNumbers(t *testing.T) {
 		if err = json.Unmarshal(data, &saved); err != nil {
 			t.Fatal(err)
 		}
-		got, err = decodeColleafDocument(context.Background(), saved)
+		got, err = decodeVDOCSDocument(context.Background(), saved)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -583,7 +583,7 @@ func TestVDOCSDefaultNativeEndnoteRomanAndEmptyMark(t *testing.T) {
 	for _, id := range []string{"f3", "e2", "silent"} {
 		delete(w.Notes, id)
 	}
-	doc, err := decodeColleafDocument(context.Background(), w)
+	doc, err := decodeVDOCSDocument(context.Background(), w)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -596,7 +596,7 @@ func TestVDOCSDefaultNativeEndnoteRomanAndEmptyMark(t *testing.T) {
 	empty := ""
 	n.Mark = &empty
 	w.Notes["custom"] = n
-	doc, err = decodeColleafDocument(context.Background(), w)
+	doc, err = decodeVDOCSDocument(context.Background(), w)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -610,13 +610,13 @@ func TestVDOCSNativeNumberingRejectsUnprovenOrMalformedSettings(t *testing.T) {
 	for _, raw := range []string{`{"footnote":{"restart":"eachPage"}}`, `{"footnote":{"startNumber":-1}}`, `{"footnote":{"startNumber":null}}`, `{"endnote":{"columnCount":2}}`, `{"footnote":{"position":"docEnd"}}`, `{"footnote":{"separator":{"dataStream":"Visible separator\r\n"}}}`, `{"footnote":{"numberFormat":"not-a-format"}}`} {
 		w := vdocsForeignNumberingExample()
 		w.NoteSettings = json.RawMessage(raw)
-		if _, err := decodeColleafDocument(context.Background(), w); err == nil {
+		if _, err := decodeVDOCSDocument(context.Background(), w); err == nil {
 			t.Fatal("unproven setting accepted", raw)
 		}
 	}
 	w := vdocsForeignNumberingExample()
 	w.Body.CustomRanges[0], w.Body.CustomRanges[1] = w.Body.CustomRanges[1], w.Body.CustomRanges[0]
-	if _, err := decodeColleafDocument(context.Background(), w); err == nil {
+	if _, err := decodeVDOCSDocument(context.Background(), w); err == nil {
 		t.Fatal("counter order silently changed")
 	}
 }
@@ -647,17 +647,17 @@ func TestVDOCSNativeLiteralMarksDoNotRequirePageNumberInference(t *testing.T) {
 	for i := range w.Body.SectionBreaks {
 		w.Body.SectionBreaks[i].Extra = nil
 	}
-	doc, err := decodeColleafDocument(context.Background(), w)
+	doc, err := decodeVDOCSDocument(context.Background(), w)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(doc.Diagnostics) != 1 || doc.Diagnostics[0].Code != "colleaf_note_settings" {
+	if len(doc.Diagnostics) != 1 || doc.Diagnostics[0].Code != "vdocs_note_settings" {
 		t.Fatal(doc.Diagnostics)
 	}
 }
 func TestVDOCSImportedNativeMarksUseSharedOutputPaths(t *testing.T) {
 	ctx := context.Background()
-	doc, err := decodeColleafDocument(ctx, vdocsForeignNumberingExample())
+	doc, err := decodeVDOCSDocument(ctx, vdocsForeignNumberingExample())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -698,7 +698,7 @@ func TestVDOCSImportedNativeMarksUseSharedOutputPaths(t *testing.T) {
 					t.Fatal("Word conversion changed native marks", labels)
 				}
 			}
-			if file := os.Getenv("MANYDOC_COLLEAF_NUMBER_OUTPUT"); file != "" {
+			if file := os.Getenv("MANYDOC_VDOCS_NUMBER_OUTPUT"); file != "" {
 				if err = os.WriteFile(file+"."+string(format), out.Bytes(), 0600); err != nil {
 					t.Fatal(err)
 				}
@@ -718,12 +718,12 @@ func vdocsNoteOriginExample(t *testing.T) *Document {
 func TestVDOCSNoteOriginsAndActualSave(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsNoteOriginExample(t)
-	native, err := encodeColleafDocument(ctx, want)
+	native, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
 	before, _ := json.Marshal(native)
-	got, err := decodeColleafDocument(ctx, native)
+	got, err := decodeVDOCSDocument(ctx, native)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -733,17 +733,17 @@ func TestVDOCSNoteOriginsAndActualSave(t *testing.T) {
 	}
 	assertEvidenceSF(t, want, got)
 	got.Notes[0].Source.StructureID[0] = 0
-	got, err = decodeColleafDocument(ctx, native)
+	got, err = decodeVDOCSDocument(ctx, native)
 	if err != nil {
 		t.Fatal(err)
 	}
 	assertEvidenceSF(t, want, got)
-	if file := os.Getenv("MANYDOC_COLLEAF_NOTE_ORIGIN_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_NOTE_ORIGIN_QA"); file != "" {
 		if err = os.WriteFile(file, before, 0600); err != nil {
 			t.Fatal(err)
 		}
 	}
-	for _, spec := range []struct{ env, mode string }{{"MANYDOC_COLLEAF_NOTE_ORIGIN_SAVED", "saved"}, {"MANYDOC_COLLEAF_NOTE_ORIGIN_BODY_EDITED", "body"}, {"MANYDOC_COLLEAF_NOTE_ORIGIN_MARK_EDITED", "mark"}, {"MANYDOC_COLLEAF_NOTE_ORIGIN_DETACHED", "detach"}} {
+	for _, spec := range []struct{ env, mode string }{{"MANYDOC_VDOCS_NOTE_ORIGIN_SAVED", "saved"}, {"MANYDOC_VDOCS_NOTE_ORIGIN_BODY_EDITED", "body"}, {"MANYDOC_VDOCS_NOTE_ORIGIN_MARK_EDITED", "mark"}, {"MANYDOC_VDOCS_NOTE_ORIGIN_DETACHED", "detach"}} {
 		t.Run(spec.mode, func(t *testing.T) {
 			file := os.Getenv(spec.env)
 			if file == "" {
@@ -761,7 +761,7 @@ func TestVDOCSNoteOriginsAndActualSave(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+			actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -771,18 +771,18 @@ func TestVDOCSNoteOriginsAndActualSave(t *testing.T) {
 				expected.Notes[0].Blocks[0].Runs = []Run{{Text: "Q"}, {Text: "Footnote body"}}
 				expected.Notes[0].Blocks[0].Source.Historical = true
 				expected.Notes[0].Source.Historical = true
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_source_historical", Message: "Original PDF source facts are retained as historical after current paragraph content or presentation changed"}, {Code: "colleaf_note_source_historical", Message: "Original note source facts are retained as historical after current body or marker semantics changed"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_source_historical", Message: "Original PDF source facts are retained as historical after current paragraph content or presentation changed"}, {Code: "vdocs_note_source_historical", Message: "Original note source facts are retained as historical after current body or marker semantics changed"}}
 			case "mark":
 				expected.Notes[0].BodyLabelContent[0].Text = "β"
 				expected.Notes[0].Source.Historical = true
 				expected.Notes[0].LabelSource.Historical = true
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_note_source_historical", Message: "Original note source facts are retained as historical after current body or marker semantics changed"}, {Code: "colleaf_note_label_source_historical", Message: "Original note-label source facts are retained as historical after current marker semantics changed"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_note_source_historical", Message: "Original note source facts are retained as historical after current body or marker semantics changed"}, {Code: "vdocs_note_label_source_historical", Message: "Original note-label source facts are retained as historical after current marker semantics changed"}}
 			case "detach":
 				expected.Notes[2].ID = "manydoc-note-3"
 				expected.Notes[2].KindInferred = false
 				expected.Notes[2].Label = "1"
 				expected.Blocks[0].Runs[5].Note.ID = "manydoc-note-3"
-				expected.Diagnostics = []Diagnostic{{Code: "colleaf_note_source_unbound", Message: "Original footnote \"inference\" source facts are retained unbound after its native identity binding disappeared"}, {Code: "colleaf_note_kind_history", Message: "Original footnote \"inference\" placement was inferred; no current note-kind assertion is made"}}
+				expected.Diagnostics = []Diagnostic{{Code: "vdocs_note_source_unbound", Message: "Original footnote \"inference\" source facts are retained unbound after its native identity binding disappeared"}, {Code: "vdocs_note_kind_history", Message: "Original footnote \"inference\" placement was inferred; no current note-kind assertion is made"}}
 			}
 			assertEvidenceSF(t, expected, actual)
 			sf, err := ToStructured(actual)
@@ -793,11 +793,11 @@ func TestVDOCSNoteOriginsAndActualSave(t *testing.T) {
 			if err = os.WriteFile(file+".sf", sfRaw, 0600); err != nil {
 				t.Fatal(err)
 			}
-			next, err := encodeColleafDocument(ctx, actual)
+			next, err := encodeVDOCSDocument(ctx, actual)
 			if err != nil {
 				t.Fatal(err)
 			}
-			stable, err := decodeColleafDocument(ctx, next)
+			stable, err := decodeVDOCSDocument(ctx, next)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -808,11 +808,11 @@ func TestVDOCSNoteOriginsAndActualSave(t *testing.T) {
 func TestVDOCSNoteOriginsMalformedAndUnbound(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsNoteOriginExample(t)
-	native, err := encodeColleafDocument(ctx, want)
+	native, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
-	opened, err := openColleafIntent(ctx, native)
+	opened, err := openVDOCSIntent(ctx, native)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -837,7 +837,7 @@ func TestVDOCSNoteOriginsMalformedAndUnbound(t *testing.T) {
 			}
 			wire := opened
 			wire.Resources = vdocsReplaceResource(wire.Resources, vdocsDocumentResource, copy)
-			if _, err = decodeColleafDocument(ctx, wire); err == nil {
+			if _, err = decodeVDOCSDocument(ctx, wire); err == nil {
 				t.Fatal("malformed source record accepted")
 			}
 		})
@@ -849,25 +849,25 @@ func TestVDOCSNoteOriginsMalformedAndUnbound(t *testing.T) {
 	}
 	ids.Bindings = ids.Bindings[1:]
 	opened.Resources = vdocsReplaceResource(opened.Resources, vdocsNoteIdentityResource, ids)
-	got, err := decodeColleafDocument(ctx, opened)
+	got, err := decodeVDOCSDocument(ctx, opened)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(got.UnboundSources) != 2 || got.Notes[2].Source != nil || got.Notes[2].LabelSource != nil || got.Notes[2].KindInferred {
 		t.Fatal("lost identity incorrectly asserts current note provenance", got)
 	}
-	again, err := encodeColleafDocument(ctx, got)
+	again, err := encodeVDOCSDocument(ctx, got)
 	if err != nil {
 		t.Fatal(err)
 	}
-	stable, err := decodeColleafDocument(ctx, again)
+	stable, err := decodeVDOCSDocument(ctx, again)
 	if err != nil {
 		t.Fatal(err)
 	}
 	assertEvidenceSF(t, got, stable)
 }
 
-func FuzzColleafNoteOrigins(f *testing.F) {
+func FuzzVDOCSNoteOrigins(f *testing.F) {
 	seed := vdocsNoteOrigin{Version: 1, NativeID: "native", Kind: Footnote, ID: "n", KindInferred: true, BodyFingerprint: strings.Repeat("0", 64), LabelFingerprint: strings.Repeat("1", 64)}
 	f.Add([]byte(sfAttrs(seed)))
 	f.Add([]byte(`{"version":2}`))
@@ -943,14 +943,14 @@ func TestVDOCSNoteIdentityReferenceBodyAndSFRoundTrip(t *testing.T) {
 	original.Blocks[0].Runs[1].Bold = true
 	original.Blocks[0].Runs[1].FontSize = 12
 	original.Blocks[0].Runs[1].Language = "en-US"
-	wire, err := encodeColleafNotes(ctx, original)
+	wire, err := encodeVDOCSNotes(ctx, original)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(wire.Body.CustomRanges) != 5 || len(wire.Notes) != 3 || wire.Body.CustomRanges[0].StartIndex != 3 {
 		t.Fatal("note range identity/UTF-16 anchors", wire.Body.CustomRanges)
 	}
-	doc, err := decodeColleafNotes(ctx, wire, vdocsTextContext{})
+	doc, err := decodeVDOCSNotes(ctx, wire, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -965,14 +965,14 @@ func TestVDOCSNoteIdentityReferenceBodyAndSFRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	wireAgain, err := encodeColleafNotes(ctx, through)
+	wireAgain, err := encodeVDOCSNotes(ctx, through)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(wire, wireAgain) {
 		t.Fatal("SF changed native text/marks/notes/relations")
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_NOTE_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_NOTE_QA"); file != "" {
 		data, err := json.MarshalIndent(wire, "", "  ")
 		if err != nil {
 			t.Fatal(err)
@@ -981,7 +981,7 @@ func TestVDOCSNoteIdentityReferenceBodyAndSFRoundTrip(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_NOTE_EDIT"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_NOTE_EDIT"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -990,7 +990,7 @@ func TestVDOCSNoteIdentityReferenceBodyAndSFRoundTrip(t *testing.T) {
 		if err = json.Unmarshal(data, &edited); err != nil {
 			t.Fatal(err)
 		}
-		doc, err = decodeColleafNotes(ctx, edited, vdocsTextContext{})
+		doc, err = decodeVDOCSNotes(ctx, edited, vdocsTextContext{})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1001,23 +1001,23 @@ func TestVDOCSNoteIdentityReferenceBodyAndSFRoundTrip(t *testing.T) {
 }
 func TestVDOCSNoteNativeIdentityAndStaleBindings(t *testing.T) {
 	ctx := context.Background()
-	wire, err := encodeColleafNotes(ctx, vdocsNoteExample())
+	wire, err := encodeVDOCSNotes(ctx, vdocsNoteExample())
 	if err != nil {
 		t.Fatal(err)
 	}
-	wire, err = openColleafIntent(ctx, wire)
+	wire, err = openVDOCSIntent(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
 	wire.Resources = nil
-	doc, err := decodeColleafNotes(ctx, wire, vdocsTextContext{})
+	doc, err := decodeVDOCSNotes(ctx, wire, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if doc.Notes[0].ID != "manydoc-note-1" || doc.Notes[0].Kind != Endnote {
 		t.Fatal(doc.Notes)
 	}
-	wire, err = encodeColleafNotes(ctx, vdocsNoteExample())
+	wire, err = encodeVDOCSNotes(ctx, vdocsNoteExample())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1030,11 +1030,11 @@ func TestVDOCSNoteNativeIdentityAndStaleBindings(t *testing.T) {
 			wire.Body.CustomRanges[i].Properties = sfAttrs(map[string]string{"noteId": note.ID})
 		}
 	}
-	doc, err = decodeColleafNotes(ctx, wire, vdocsTextContext{})
+	doc, err = decodeVDOCSNotes(ctx, wire, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if doc.Notes[2].ID != "edited-id" || len(doc.Diagnostics) != 1 || doc.Diagnostics[0].Code != "colleaf_stale_note_identity" {
+	if doc.Notes[2].ID != "edited-id" || len(doc.Diagnostics) != 1 || doc.Diagnostics[0].Code != "vdocs_stale_note_identity" {
 		t.Fatal(doc.Notes, doc.Diagnostics)
 	}
 }
@@ -1050,7 +1050,7 @@ func TestVDOCSNoteRejectsDanglingAndContradictoryGraph(t *testing.T) {
 		},
 		func(w *vdocsNoteSnapshot) {
 			var err error
-			*w, err = openColleafIntent(ctx, *w)
+			*w, err = openVDOCSIntent(ctx, *w)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1062,12 +1062,12 @@ func TestVDOCSNoteRejectsDanglingAndContradictoryGraph(t *testing.T) {
 			w.Notes["manydoc-note-1"] = n
 		},
 	} {
-		wire, err := encodeColleafNotes(ctx, vdocsNoteExample())
+		wire, err := encodeVDOCSNotes(ctx, vdocsNoteExample())
 		if err != nil {
 			t.Fatal(err)
 		}
 		mutate(&wire)
-		if _, err = decodeColleafNotes(ctx, wire, vdocsTextContext{}); err == nil {
+		if _, err = decodeVDOCSNotes(ctx, wire, vdocsTextContext{}); err == nil {
 			t.Fatal("invalid note graph accepted")
 		}
 	}
@@ -1077,7 +1077,7 @@ func TestVDOCSNativeExplicitBodyMarkerIsNotRecursiveCitation(t *testing.T) {
 	one := 1
 	native := vdocsNativeNote{ID: "n", Kind: Footnote, Mark: nil, Body: vdocsBody{DataStream: "\bBody\r\n", CustomBlocks: []vdocsBlockRecord{{StartIndex: 0, Type: &one, ID: "body-marker", NoteID: "n", NoteType: Footnote}}, TextRuns: []vdocsTextRun{{St: 0, Ed: 1, TS: sfAttrs(map[string]any{"it": 1, "fs": 10})}}}}
 	wire := vdocsNoteSnapshot{Body: vdocsBody{DataStream: "Main\b\r\n", CustomBlocks: []vdocsBlockRecord{{StartIndex: 4, Type: &one, ID: "reference", NoteID: "n", NoteType: Footnote}}}, Notes: map[string]vdocsNativeNote{"n": native}}
-	doc, err := decodeColleafNotes(context.Background(), wire, vdocsTextContext{})
+	doc, err := decodeVDOCSNotes(context.Background(), wire, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1092,13 +1092,13 @@ func TestVDOCSNativeExplicitBodyMarkerIsNotRecursiveCitation(t *testing.T) {
 	native.Body.CustomBlocks[0].StartIndex = 4
 	native.Body.TextRuns = nil
 	wire.Notes["n"] = native
-	if _, err = decodeColleafNotes(context.Background(), wire, vdocsTextContext{}); err == nil {
+	if _, err = decodeVDOCSNotes(context.Background(), wire, vdocsTextContext{}); err == nil {
 		t.Fatal("non-leading recursive reference accepted")
 	}
 }
 
-func FuzzColleafNotes(f *testing.F) {
-	wire, err := encodeColleafNotes(context.Background(), vdocsNoteExample())
+func FuzzVDOCSNotes(f *testing.F) {
+	wire, err := encodeVDOCSNotes(context.Background(), vdocsNoteExample())
 	if err != nil {
 		f.Fatal(err)
 	}
@@ -1113,7 +1113,7 @@ func FuzzColleafNotes(f *testing.F) {
 		if json.Unmarshal(data, &input) != nil {
 			return
 		}
-		doc, err := decodeColleafNotes(context.Background(), input, vdocsTextContext{})
+		doc, err := decodeVDOCSNotes(context.Background(), input, vdocsTextContext{})
 		if err == nil {
 			if err = validateNotes(doc); err != nil {
 				t.Fatal(err)
@@ -1128,7 +1128,7 @@ func FuzzColleafNotes(f *testing.F) {
 func TestVDOCSNativeNoteRangesAndChangedAutomaticOrder(t *testing.T) {
 	ctx := context.Background()
 	d := &Document{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Note: &NoteReference{Kind: Footnote, ID: "a"}}, {Note: &NoteReference{Kind: Footnote, ID: "b"}}, {Note: &NoteReference{Kind: Footnote, ID: "a"}}}}}, Notes: []Note{{Kind: Footnote, ID: "a", Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "A"}}}}}, {Kind: Footnote, ID: "b", Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "B"}}}}}}}
-	wire, err := encodeColleafNotes(ctx, d)
+	wire, err := encodeVDOCSNotes(ctx, d)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1141,11 +1141,11 @@ func TestVDOCSNativeNoteRangesAndChangedAutomaticOrder(t *testing.T) {
 	a, b := wire.Body.CustomRanges[0].Properties, wire.Body.CustomRanges[1].Properties
 	wire.Body.CustomRanges[0].Properties = b
 	wire.Body.CustomRanges[1].Properties = a
-	got, err := decodeColleafNotes(ctx, wire, vdocsTextContext{})
+	got, err := decodeVDOCSNotes(ctx, wire, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Notes[0].Label != "1" || got.Notes[1].Label != "2" || len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "colleaf_stale_note_numbering" {
+	if got.Notes[0].Label != "1" || got.Notes[1].Label != "2" || len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "vdocs_stale_note_numbering" {
 		t.Fatal("reordered native marks replaced by old automatic intent", got.Notes, got.Diagnostics)
 	}
 	for _, mutate := range []func(*vdocsNoteSnapshot){
@@ -1163,12 +1163,12 @@ func TestVDOCSNativeNoteRangesAndChangedAutomaticOrder(t *testing.T) {
 			w.Body.CustomRanges = append(w.Body.CustomRanges, a)
 		},
 	} {
-		wire, err := encodeColleafNotes(ctx, d)
+		wire, err := encodeVDOCSNotes(ctx, d)
 		if err != nil {
 			t.Fatal(err)
 		}
 		mutate(&wire)
-		if _, err = decodeColleafNotes(ctx, wire, vdocsTextContext{}); err == nil {
+		if _, err = decodeVDOCSNotes(ctx, wire, vdocsTextContext{}); err == nil {
 			t.Fatal("invalid note range accepted")
 		}
 	}

@@ -1,7 +1,7 @@
 /* Optional independent pinned drawing ownership/geometry/edit-save QA. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {stripTypeScriptTypes}=require('node:module');
-const root=path.resolve(__dirname,'../../..'),qa=path.join(root,'output/colleaf-qa');
+const root=path.resolve(__dirname,'../../..'),qa=path.join(root,'output/vdocs-qa');
 const core=require(path.join(qa,'node_modules/@univerjs/core')),engine=require(path.join(qa,'node_modules/@univerjs/engine-render')),drawing=require(path.join(qa,'node_modules/@univerjs/docs-drawing'));
 for(const name of ['core','engine-render','docs-drawing','drawing'])assert.equal(JSON.parse(fs.readFileSync(path.join(qa,'node_modules/@univerjs',name,'package.json'))).version,'1.0.4');
 function boxes(snapshot){
@@ -13,9 +13,8 @@ function boxes(snapshot){
 }
 async function main(){
  const snapshot={...JSON.parse(fs.readFileSync(path.join(qa,'images.json'))),title:'Native embedded assets',documentStyle:{documentFlavor:1,pageSize:{width:800,height:1000},marginLeft:40,marginRight:40}};
- const code=fs.readFileSync(path.join(root,'output/codec/colleaf-format-0.txt'),'utf8');assert.equal(crypto.createHash('sha256').update(code).digest('hex'),'c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0');
- const app=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(code)).toString('base64'));
- const envelope=document=>({type:'vibedada-document',version:3,engine:'univer',engineVersion:'1.0.4',document});app.validateDocument(envelope(snapshot));
+
+ const envelope=document=>({type:'manifold-document',version:3,engine:'univer',engineVersion:'1.0.4',document});
  const flat=drawing.collectDocDrawings(snapshot);assert.equal(Object.keys(flat.drawings).length,5);assert.equal(new Set(flat.drawingsOrder).size,5);
  const topBoxes=boxes(snapshot);assert.equal(topBoxes.size,4);
  for(const [id,source]of Object.entries(flat.drawings)){
@@ -34,7 +33,7 @@ async function main(){
  const model=new core.DocumentDataModel(snapshot);const saved=structuredClone(model.getSnapshot());
  saved.drawings[id].docTransform.size={width:64,height:32};saved.drawings[id].description='Resized PNG';model.reset(saved);
  const edited=model.getSnapshot();assert.deepEqual(boxes(edited).get(id),[64,32]);assert.equal(drawing.findDocDrawing(edited,id).drawing.description,'Resized PNG');
- assert.deepEqual(edited.resources,snapshot.resources);app.validateDocument(envelope(edited));fs.writeFileSync(path.join(qa,'images-edited.json'),JSON.stringify(edited,null,2));model.dispose();
+ assert.deepEqual(edited.resources,snapshot.resources);fs.writeFileSync(path.join(qa,'images-edited.json'),JSON.stringify(edited,null,2));model.dispose();
  console.log('Pinned native main/cell/list/note image ownership, original JPEG bytes, drawing box geometry and resize/save passed; browser bitmap paint/resource persistence unqualified');
 }
 main().catch(error=>{console.error(error);process.exitCode=1});

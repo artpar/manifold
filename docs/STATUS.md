@@ -23,11 +23,8 @@ grouped by concern under `scripts/qa`. Current guides, detailed contracts and
 historical evidence are separate. The engine deliberately shares one document
 model; it does not claim independent codec packages that the implementation lacks.
 
-The optional VDOCS adapter handles a Univer snapshot envelope observed in Colleaf.
-No Colleaf service, application code or runtime dependency is required. Its source
-provenance stays in the [adapter contract](reference/VDOCS_FORMAT.md); it is not
-Manifold's product identity. Persisted metadata identifiers and QA environment
-variables retain their old spelling for compatibility.
+The optional VDOCS adapter handles a pinned Univer snapshot profile. It requires
+no editor service or host application. See the [adapter contract](reference/VDOCS_FORMAT.md).
 
 ## Verification
 
@@ -57,3 +54,15 @@ For future changes, run affected checks and the required matrix, commit aligned
 code/docs/evidence and verify the pushed commit. No publication work remains.
 Keep Daptin/application code unchanged.
 For earlier milestones and old filenames, use [history](history/README.md).
+
+
+## Reference cleanup
+
+Application-specific names/source links were removed while VDOCS was retained at
+user request. SF remains canonical; DOCX/PDF/native snapshot paths share its model.
+VDOCS now uses `manifold-document` and Manifold-owned MIME; retired headers need
+explicit migration. The native fixture's document payload is unchanged. Current
+normal/race/vet/build checks, all33 retained native SDK probes, fresh save/re-import
+and complete-SF equality for all51 accepted core fixtures pass. See
+[the report](verification/REFERENCE_CLEANUP.md) and [native contract](reference/VDOCS_FORMAT.md).
+Commit/push verification remains for this follow-up; prior publication is unchanged.

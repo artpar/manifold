@@ -5,7 +5,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { stripTypeScriptTypes } = require('node:module');
 const root = path.resolve(__dirname, '../../..');
-const qa = path.join(root, 'output/colleaf-qa');
+const qa = path.join(root, 'output/vdocs-qa');
 const core = require(path.join(qa, 'node_modules/@univerjs/core'));
 const engine = require(path.join(qa, 'node_modules/@univerjs/engine-render'));
 for (const name of ['core', 'engine-render']) {
@@ -13,11 +13,9 @@ for (const name of ['core', 'engine-render']) {
 }
 async function main() {
 const snapshot = JSON.parse(fs.readFileSync(path.join(qa, 'tables.json')));
-const sourceCode = fs.readFileSync(path.join(root,'output/codec/colleaf-format-0.txt'),'utf8');
-assert.equal(crypto.createHash('sha256').update(sourceCode).digest('hex'),'c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0');
-const app = await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(sourceCode)).toString('base64'));
-const envelope = document => ({type:'vibedada-document',version:3,engine:'univer',engineVersion:'1.0.4',document});
-app.validateDocument(envelope(snapshot));
+
+const envelope = document => ({type:'manifold-document',version:3,engine:'univer',engineVersion:'1.0.4',document});
+
 const model = new core.DocumentDataModel(snapshot);
 let view = new engine.DocumentViewModel(model);
 const records = snapshot.body.tables;
@@ -75,7 +73,7 @@ view = new engine.DocumentViewModel(model);
 assert.equal(model.getBody().dataStream.slice(changeOffset,changeOffset+1),'Z');
 assert.deepEqual(model.getSnapshot().tableSource[outer.tableId],source);
 assert.equal(view.getTableByStartIndex(outer.startIndex).tableSource.tableRows[1].tableCells[0].rowSpan,0);
-app.validateDocument(envelope(model.getSnapshot()));
+
 fs.writeFileSync(path.join(qa,'tables-edited.json'),JSON.stringify(model.getSnapshot(),null,2));
 view.dispose();model.dispose();
 console.log('Pinned native nested/merged/auto-width table records, cell geometry and TextX edit/save passed; font metrics/browser rendering not qualified');

@@ -46,6 +46,21 @@ errors. Callers own readers/writers, persistence and authorization. See
 [sections](examples/sections), [rich tables](examples/merged-tables) and
 [notes](examples/notes) for complete examples.
 
+## Conversion model
+
+SF is the canonical structured representation shared by the converters:
+
+```text
+DOCX ↔ SF ↔ PDF
+       ↕
+     VDOCS
+```
+
+VDOCS is optional native snapshot interchange, not another canonical model or a
+second DOCX/PDF pipeline. Word support is DOCX; legacy binary DOC is not provided.
+PDF import reconstructs recoverable structure and positions with diagnostics;
+source-identical layout is not promised.
+
 ## Support and layout
 
 Paragraphs/headings, formatted runs, links, lists, merged/nested tables, images,

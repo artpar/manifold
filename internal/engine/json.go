@@ -343,6 +343,6 @@ func (p *strictJSONParser) recordFields(typ reflect.Type) map[string]reflect.Typ
 	return fields
 }
 
-func validateColleafJSON(ctx context.Context, data []byte) error {
+func validateVDOCSJSON(ctx context.Context, data []byte) error {
 	return validateTypedJSON(ctx, data, reflect.TypeFor[vdocsEnvelope]())
 }

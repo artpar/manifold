@@ -7,7 +7,7 @@ The persistence/editor format is a versioned ProseMirror document schema,
 MarkSpec are in `schema/prosemirror-v1.json`. This is the established ProseMirror
 JSON encoding (`type`, `attrs`, `content`, `marks`, `text`), with an explicit
 manifold schema profile; it is not a claim that arbitrary ProseMirror, Tiptap or
-Colleaf documents use the same schema. All production code is Go. Using this
+VDOCS documents use the same schema. All production code is Go. Using this
 encoding does not require running ProseMirror or a JavaScript engine.
 
 Sources consulted on 2026-11-23:
@@ -36,21 +36,16 @@ ProseMirror also requires explicit extensions for page layout and PDF provenance
 those extensions must be documented and tested, rather than called universal
 editor compatibility.
 
-The initial workspace-only search found no Colleaf checkout. A later read-only
-GitHub audit found and inspected actual `artpar/colleaf` at
-`5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6`. Its native .vdocs is a version-3 wrapper
-around Univer 1.0.4 IDocumentData, not this ProseMirror profile. Matching published
-Apache-2.0 type declarations were inspected with verified distribution integrity.
-VDOCS_FORMAT.md records exact source links, fields, range semantics and constraints.
+The optional VDOCS path transports Univer 1.0.4 IDocumentData snapshots. Published
+SDK type declarations and executable reader/save APIs were reviewed alongside
+ProseMirror. Indexed UTF-16/control-token snapshots need a checked conversion;
+raw SF cannot simply be renamed into a native editor file.
 
-ProseMirror remains the canonical logical format because explicit child ownership
-and marks support structural manipulation/provenance without an offset/control-token
-protocol. Univer snapshots remain the required application adapter boundary: rich
-lists/tables/drawings/stories/notes/plugin resources must be mapped and checked.
-Raw SF is not .vdocs. A checked offline native adapter is now public through
-ReadVDOCS/WriteVDOCS and the CLI; VDOCS_FORMAT.md records its actual snapshot/save
-contracts and retained native-reader discrepancies. This corrects the earlier
-unavailable-schema claim; it does not require executing either editor at runtime. No Daptin/Colleaf files changed.
+ProseMirror remains the canonical representation for rich manipulation and
+persistence. VDOCS is an additional interchange format connected to that same
+representation. [The VDOCS contract](VDOCS_FORMAT.md) records the Manifold-owned
+container, native mappings and limits. Neither format requires executing an
+editor at runtime.
 
 ## Wire profile and current API
 
@@ -253,7 +248,7 @@ NODE_PATH=output/sf-qa/node_modules node scripts/qa/structured/verify_structured
 The verifier uses the actual ProseMirror reader and `Node.check()`, and checks
 node/mark attributes and text, including side content. It proves schema/read
 compatibility for supplied files; it does not prove a browser editor integration,
-a Colleaf adapter, DOCX layout fidelity or complete rich-document support.
+a VDOCS adapter, DOCX layout fidelity or complete rich-document support.
 
 ## Positioned PDF provenance
 
@@ -364,7 +359,7 @@ empty), `fontSize` (nonnegative finite numeric points, default zero) and `color`
 bindings described below. Null/wrongly typed attributes reject. Hex spelling
 canonicalizes while semantic values persist. Font family names are single lookup
 names, not CSS fallback lists. The established TextStyle editor pattern is reused,
-with this profile's point-unit contract; native Tiptap/Colleaf compatibility is not
+with this profile's point-unit contract; native Tiptap/VDOCS compatibility is not
 implied. Existing omitted styles and profile version meanings are unchanged.
 
 DOCX resolves inherited/direct fields and preserves our unset values via checked

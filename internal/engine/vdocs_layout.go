@@ -37,7 +37,7 @@ func vdocsImageBoxes(ctx context.Context, blocks []Block, box vdocsImageSize) ([
 				boxes = append(boxes, available)
 			case ListBlock:
 				for i, item := range b.Items {
-					if hasColleafLiteralItems(b) {
+					if hasVDOCSLiteralItems(b) {
 						if err := visit([]Block{vdocsLiteralTable(b, item, i)}, available, depth+1); err != nil {
 							return err
 						}
@@ -134,7 +134,7 @@ func vdocsBoundImages(ctx context.Context, blocks []Block, box vdocsImageSize, b
 	return nil
 }
 
-func fitColleafDocumentImages(ctx context.Context, d *Document, out *vdocsNoteSnapshot, geometry *vdocsImageGeometry, running map[string][]Block, cache outputImageCache) error {
+func fitVDOCSDocumentImages(ctx context.Context, d *Document, out *vdocsNoteSnapshot, geometry *vdocsImageGeometry, running map[string][]Block, cache outputImageCache) error {
 	sections := d.Blocks
 	if !hasSectionBlocks(sections) {
 		sections = []Block{{Kind: SectionBlock, Section: &Section{Blocks: d.Blocks}}}
@@ -366,7 +366,7 @@ func (w *vdocsBodyWriter) picture(block Block) error {
 		if err != nil {
 			return err
 		}
-		origin, err := newColleafSourceOrigin(block.Source, hash, vdocsImageOriginProfile)
+		origin, err := newVDOCSSourceOrigin(block.Source, hash, vdocsImageOriginProfile)
 		if err != nil {
 			return err
 		}
@@ -381,7 +381,7 @@ func (w *vdocsBodyWriter) picture(block Block) error {
 	w.text("\r")
 	return nil
 }
-func encodeColleafAssetBody(ctx context.Context, blocks []Block, noteIDs map[noteKey]string, documentID, storyID string, cache outputImageCache, projection ...map[noteKey]string) (vdocsEncodedBody, error) {
+func encodeVDOCSAssetBody(ctx context.Context, blocks []Block, noteIDs map[noteKey]string, documentID, storyID string, cache outputImageCache, projection ...map[noteKey]string) (vdocsEncodedBody, error) {
 	if cache == nil {
 		cache = outputImageCache{}
 	}
@@ -393,7 +393,7 @@ func encodeColleafAssetBody(ctx context.Context, blocks []Block, noteIDs map[not
 		return vdocsEncodedBody{}, err
 	}
 	w.body.DataStream = w.stream.String()
-	if _, err := indexColleafBody(ctx, w.body); err != nil {
+	if _, err := indexVDOCSBody(ctx, w.body); err != nil {
 		return vdocsEncodedBody{}, err
 	}
 	return vdocsEncodedBody{Body: w.body, Tables: w.tables, Lists: w.lists, Drawings: w.drawings, DrawingOrder: w.drawingOrder, ListsOwnership: w.listBindings, ImageGeometry: w.imageGeometry}, nil
@@ -487,12 +487,12 @@ func (r *vdocsBodyReader) nativeImage(id string) (*Image, error) {
 			im.Width = binding.Width
 			im.Height = binding.Height
 		} else {
-			r.doc.warn("colleaf_stale_image_geometry", "Stale image size intent ignored; actual native asset and resized geometry are retained")
+			r.doc.warn("vdocs_stale_image_geometry", "Stale image size intent ignored; actual native asset and resized geometry are retained")
 		}
 	}
-	r.presentationLosses(raw, []string{"drawingId", "drawingType", "layoutType", "unitId", "subUnitId", "imageSourceType", "source", "base64Cache", "description", "docTransform", "opacity", "hidden", "srcRect", "prstGeom", "title", "manydocOrigin"}, "colleaf_image_presentation")
+	r.presentationLosses(raw, []string{"drawingId", "drawingType", "layoutType", "unitId", "subUnitId", "imageSourceType", "source", "base64Cache", "description", "docTransform", "opacity", "hidden", "srcRect", "prstGeom", "title", "manydocOrigin"}, "vdocs_image_presentation")
 	if drawing.Title != "" {
-		r.doc.warn("colleaf_image_title", "Native image title is not represented separately; description/alternative text and image bytes are retained")
+		r.doc.warn("vdocs_image_title", "Native image title is not represented separately; description/alternative text and image bytes are retained")
 	}
 	r.images[id] = im
 	copy := *im
@@ -524,12 +524,12 @@ func (r *vdocsBodyReader) imageAnchorVisible(position int, p vdocsParagraphRecor
 	if err != nil {
 		return err
 	}
-	props = mergeColleafStyle(mergeColleafStyle(props, inherited), direct)
+	props = mergeVDOCSStyle(mergeVDOCSStyle(props, inherited), direct)
 	paragraphText, err := vdocsStyleObject(props["textStyle"])
 	if err != nil {
 		return err
 	}
-	style := mergeColleafStyle(mergeColleafStyle(base, namedText), paragraphText)
+	style := mergeVDOCSStyle(mergeVDOCSStyle(base, namedText), paragraphText)
 	i := sort.Search(len(r.spans), func(i int) bool { return r.spans[i].end > position })
 	if i < len(r.spans) && r.spans[i].record >= 0 {
 		run := r.body.TextRuns[r.spans[i].record]
@@ -545,9 +545,9 @@ func (r *vdocsBodyReader) imageAnchorVisible(position int, p vdocsParagraphRecor
 		if err != nil {
 			return err
 		}
-		style = mergeColleafStyle(mergeColleafStyle(style, inherited), direct)
+		style = mergeVDOCSStyle(mergeVDOCSStyle(style, inherited), direct)
 		if run.StyleID != "" || len(direct) > 0 {
-			r.doc.warn("colleaf_image_anchor_style", "Native inline drawing text style is normalized to standalone image flow; image bytes and geometry are retained")
+			r.doc.warn("vdocs_image_anchor_style", "Native inline drawing text style is normalized to standalone image flow; image bytes and geometry are retained")
 		}
 	}
 	if raw, ok := style["hidden"]; ok && string(raw) != "null" {
@@ -614,7 +614,7 @@ func (r *vdocsBodyReader) imageParagraph(start, end int, p vdocsParagraphRecord)
 		if err != nil {
 			return nil, err
 		}
-		origin, err := readColleafOriginProfile(props["manydocOrigin"], vdocsImageOriginProfile)
+		origin, err := readVDOCSOriginProfile(props["manydocOrigin"], vdocsImageOriginProfile)
 		if err != nil {
 			return nil, err
 		}
@@ -635,7 +635,7 @@ func (r *vdocsBodyReader) imageParagraph(start, end int, p vdocsParagraphRecord)
 		blocks = append(blocks, part...)
 	}
 	if len(positions) > 1 || start != positions[0] || end != positions[0]+1 || len(p.Bullet) > 0 {
-		r.doc.warn("colleaf_inline_image_reflow", "Native inline images and text sharing one paragraph become ordered SF blocks; image bytes, dimensions and visible text are retained")
+		r.doc.warn("vdocs_inline_image_reflow", "Native inline images and text sharing one paragraph become ordered SF blocks; image bytes, dimensions and visible text are retained")
 	}
 	after, err := r.cursorBlocks(end, "boundary after image paragraph", false)
 	if err != nil {
@@ -643,7 +643,7 @@ func (r *vdocsBodyReader) imageParagraph(start, end int, p vdocsParagraphRecord)
 	}
 	blocks = append(blocks, after...)
 	if authoredPresentation {
-		r.doc.warn("colleaf_image_paragraph", "Native picture paragraph presentation is normalized to SF image block flow; image and supported surrounding text remain")
+		r.doc.warn("vdocs_image_paragraph", "Native picture paragraph presentation is normalized to SF image block flow; image and supported surrounding text remain")
 	}
 	return blocks, nil
 }
@@ -809,7 +809,7 @@ func vdocsReplaceResource(records []vdocsResource, name string, value any) []vdo
 	return append(out, vdocsResource{Name: name, Data: string(sfAttrs(value))})
 }
 
-func encodeColleafDocument(ctx context.Context, d *Document) (vdocsNoteSnapshot, error) {
+func encodeVDOCSDocument(ctx context.Context, d *Document) (vdocsNoteSnapshot, error) {
 	if err := d.Validate(); err != nil {
 		return vdocsNoteSnapshot{}, err
 	}
@@ -846,11 +846,11 @@ func encodeColleafDocument(ctx context.Context, d *Document) (vdocsNoteSnapshot,
 	if err != nil {
 		return vdocsNoteSnapshot{}, err
 	}
-	out, err := encodeColleafNotesWithCatalog(ctx, &plain, catalog, vdocsCitationProjection(resolved, catalog))
+	out, err := encodeVDOCSNotesWithCatalog(ctx, &plain, catalog, vdocsCitationProjection(resolved, catalog))
 	if err != nil {
 		return out, err
 	}
-	out, err = openColleafIntent(ctx, out)
+	out, err = openVDOCSIntent(ctx, out)
 	if err != nil {
 		return out, err
 	}
@@ -858,7 +858,7 @@ func encodeColleafDocument(ctx context.Context, d *Document) (vdocsNoteSnapshot,
 	if err != nil {
 		return out, err
 	}
-	if err = collectColleafNoteOrigins(resolved, &evidence); err != nil {
+	if err = collectVDOCSNoteOrigins(resolved, &evidence); err != nil {
 		return out, err
 	}
 	intent := vdocsDocumentIntent{Evidence: evidence, Unresolved: append([]string(nil), d.UnresolvedDestinations...), Author: d.Metadata.Author, Subject: d.Metadata.Subject, EmptyTitle: d.Metadata.Title == "", Sectioned: hasSectionBlocks(d.Blocks), EmptyStories: map[string]bool{}}
@@ -905,7 +905,7 @@ func encodeColleafDocument(ctx context.Context, d *Document) (vdocsNoteSnapshot,
 		}
 		id := fmt.Sprintf("manydoc-%s-%d", prefix, storySerial)
 		runningBlocks[id] = story.Blocks
-		e, err := encodeColleafAssetBody(ctx, story.Blocks, nil, out.ID, id, cache)
+		e, err := encodeVDOCSAssetBody(ctx, story.Blocks, nil, out.ID, id, cache)
 		if err != nil {
 			return nil, err
 		}
@@ -972,7 +972,7 @@ func encodeColleafDocument(ctx context.Context, d *Document) (vdocsNoteSnapshot,
 		}
 		record := &w.body.SectionBreaks[len(w.body.SectionBreaks)-1]
 		if b.Source != nil {
-			origin, err := newColleafFlowOrigin(b)
+			origin, err := newVDOCSFlowOrigin(b)
 			if err != nil {
 				return out, err
 			}
@@ -983,7 +983,7 @@ func encodeColleafDocument(ctx context.Context, d *Document) (vdocsNoteSnapshot,
 		}
 		oldSectionID := record.ID
 		record.ID = fmt.Sprintf("manydoc-section-%d", i+1)
-		if err = rebindColleafPointScope(&w.body, oldSectionID, record.ID, firstRange); err != nil {
+		if err = rebindVDOCSPointScope(&w.body, oldSectionID, record.ID, firstRange); err != nil {
 			return out, err
 		}
 		if err = w.containerAnchors(b.Anchors, sectionOffset, "section", record.ID); err != nil {
@@ -1017,7 +1017,7 @@ func encodeColleafDocument(ctx context.Context, d *Document) (vdocsNoteSnapshot,
 		w.listGroup = ""
 	}
 	w.body.DataStream = w.stream.String()
-	if _, err = indexColleafBody(ctx, w.body); err != nil {
+	if _, err = indexVDOCSBody(ctx, w.body); err != nil {
 		return out, err
 	}
 	out.Body = w.body
@@ -1060,7 +1060,7 @@ func encodeColleafDocument(ctx context.Context, d *Document) (vdocsNoteSnapshot,
 			if a.Type != 3 {
 				continue
 			}
-			p, err := readColleafBookmark(*a)
+			p, err := readVDOCSBookmark(*a)
 			if err != nil {
 				return out, err
 			}
@@ -1153,36 +1153,36 @@ func encodeColleafDocument(ctx context.Context, d *Document) (vdocsNoteSnapshot,
 	styleOutput["doNotHyphenateCaps"] = json.RawMessage("0")
 	out.DocumentStyle = sfAttrs(styleOutput)
 	out.Resources = vdocsReplaceResource(out.Resources, vdocsListResource, ownership)
-	if err = fitColleafDocumentImages(ctx, resolved, &out, &geometry, runningBlocks, cache); err != nil {
+	if err = fitVDOCSDocumentImages(ctx, resolved, &out, &geometry, runningBlocks, cache); err != nil {
 		return out, err
 	}
 	out.Resources = vdocsReplaceResource(out.Resources, vdocsImageResource, geometry)
-	if err = collectColleafFlowOrigins(&out, &intent.Evidence); err != nil {
+	if err = collectVDOCSFlowOrigins(&out, &intent.Evidence); err != nil {
 		return out, err
 	}
-	if err = collectColleafAnchorOrigins(&out, &intent.Evidence); err != nil {
+	if err = collectVDOCSAnchorOrigins(&out, &intent.Evidence); err != nil {
 		return out, err
 	}
-	if err = collectColleafListOrigins(&out, &intent.Evidence); err != nil {
+	if err = collectVDOCSListOrigins(&out, &intent.Evidence); err != nil {
 		return out, err
 	}
-	if err = collectColleafImageOrigins(&out, &intent.Evidence); err != nil {
+	if err = collectVDOCSImageOrigins(&out, &intent.Evidence); err != nil {
 		return out, err
 	}
-	if err = collectColleafTableOrigins(&out, &intent.Evidence); err != nil {
+	if err = collectVDOCSTableOrigins(&out, &intent.Evidence); err != nil {
 		return out, err
 	}
-	if err = collectColleafRunOrigins(&out, &intent.Evidence); err != nil {
+	if err = collectVDOCSRunOrigins(&out, &intent.Evidence); err != nil {
 		return out, err
 	}
-	if err = collectColleafOrigins(&out, &intent.Evidence); err != nil {
+	if err = collectVDOCSOrigins(&out, &intent.Evidence); err != nil {
 		return out, err
 	}
 	out.Resources = vdocsReplaceResource(out.Resources, vdocsDocumentResource, intent)
-	if err = scopeColleafBookmarkIDs(ctx, &out, d); err != nil {
+	if err = scopeVDOCSBookmarkIDs(ctx, &out, d); err != nil {
 		return out, err
 	}
-	if err = sealColleafIntent(&out); err != nil {
+	if err = sealVDOCSIntent(&out); err != nil {
 		return out, err
 	}
 	// Univer's drawing controller initializes its registry from this built-in
@@ -1202,18 +1202,18 @@ func encodeColleafDocument(ctx context.Context, d *Document) (vdocsNoteSnapshot,
 	return out, nil
 }
 
-func decodeColleafDocument(ctx context.Context, input vdocsNoteSnapshot) (*Document, error) {
-	opened, err := openColleafIntent(ctx, input)
+func decodeVDOCSDocument(ctx context.Context, input vdocsNoteSnapshot) (*Document, error) {
+	opened, err := openVDOCSIntent(ctx, input)
 	if err != nil {
 		return nil, err
 	}
-	opened, hyperlinkDiagnostics, err := applyColleafHyperlinkResource(ctx, opened)
+	opened, hyperlinkDiagnostics, err := applyVDOCSHyperlinkResource(ctx, opened)
 	if err != nil {
 		return nil, err
 	}
 	for _, r := range opened.Resources {
 		if r.Name == "DOC_DRAWING_PLUGIN" {
-			if err := checkColleafDrawingMirror(opened, r); err != nil {
+			if err := checkVDOCSDrawingMirror(opened, r); err != nil {
 				return nil, err
 			}
 		}
@@ -1230,11 +1230,11 @@ func decodeColleafDocument(ctx context.Context, input vdocsNoteSnapshot) (*Docum
 	if root.Flavor != nil && *root.Flavor != 0 && *root.Flavor != 1 {
 		return nil, fmt.Errorf("%w: native nontraditional document flavor", ErrUnsupported)
 	}
-	opened, citations, err := openColleafCitations(ctx, opened)
+	opened, citations, err := openVDOCSCitations(ctx, opened)
 	if err != nil {
 		return nil, err
 	}
-	numberPlan, err := planColleafNoteNumbers(ctx, opened)
+	numberPlan, err := planVDOCSNoteNumbers(ctx, opened)
 	if err != nil {
 		return nil, err
 	}
@@ -1266,7 +1266,7 @@ func decodeColleafDocument(ctx context.Context, input vdocsNoteSnapshot) (*Docum
 				l := cloneLayout(*h.Original)
 				return &l
 			}
-			diagnostics = append(diagnostics, Diagnostic{Code: "colleaf_stale_layout", Message: "Stale page size intent ignored; actual native layout is retained"})
+			diagnostics = append(diagnostics, Diagnostic{Code: "vdocs_stale_layout", Message: "Stale page size intent ignored; actual native layout is retained"})
 		}
 		l := cloneLayout(actual)
 		return &l
@@ -1319,7 +1319,7 @@ func decodeColleafDocument(ctx context.Context, input vdocsNoteSnapshot) (*Docum
 	stub.Resources = vdocsReplaceResource(stub.Resources, vdocsImageResource, stubGeometry)
 	noteSettings := settings
 	noteSettings.DeferNoteNumbering = true
-	doc, err := decodeColleafNotes(ctx, stub, noteSettings)
+	doc, err := decodeVDOCSNotes(ctx, stub, noteSettings)
 	if err != nil {
 		return nil, err
 	}
@@ -1346,7 +1346,7 @@ func decodeColleafDocument(ctx context.Context, input vdocsNoteSnapshot) (*Docum
 	}
 	sort.Strings(styleKeys)
 	for _, key := range styleKeys {
-		doc.warn("colleaf_document_style", "Native document property "+key+" is not represented; supported page geometry and content are retained")
+		doc.warn("vdocs_document_style", "Native document property "+key+" is not represented; supported page geometry and content are retained")
 	}
 	doc.Blocks = nil
 	doc.Layout = *rootLayout
@@ -1465,11 +1465,11 @@ func decodeColleafDocument(ctx context.Context, input vdocsNoteSnapshot) (*Docum
 	settings.Drawings = mainDrawings
 	settings.DrawingOrder = opened.DrawingOrder
 	settings.ImageBindings = geometry.Stories[""]
-	index, err := indexColleafBody(ctx, opened.Body)
+	index, err := indexVDOCSBody(ctx, opened.Body)
 	if err != nil {
 		return nil, err
 	}
-	reader, err := newColleafBodyReader(ctx, opened.Body, settings, mainTables)
+	reader, err := newVDOCSBodyReader(ctx, opened.Body, settings, mainTables)
 	if err != nil {
 		return nil, err
 	}
@@ -1514,7 +1514,7 @@ func decodeColleafDocument(ctx context.Context, input vdocsNoteSnapshot) (*Docum
 			}
 		}
 		child.ImageBindings = geometry.Stories[*id]
-		parsed, err := decodeColleafBody(ctx, native.Body, child, tables)
+		parsed, err := decodeVDOCSBody(ctx, native.Body, child, tables)
 		if err != nil {
 			return nil, err
 		}
@@ -1565,7 +1565,7 @@ func decodeColleafDocument(ctx context.Context, input vdocsNoteSnapshot) (*Docum
 		}
 		sort.Strings(extras)
 		for _, key := range extras {
-			doc.warn("colleaf_section_style", "Native section property "+key+" is not represented; supported body order and page geometry are retained")
+			doc.warn("vdocs_section_style", "Native section property "+key+" is not represented; supported body order and page geometry are retained")
 		}
 		if record.EvenOdd != nil && ((*record.EvenOdd != 0 && *record.EvenOdd != 1) || (*record.EvenOdd == 1) != doc.EvenAndOddHeaders) {
 			return nil, fmt.Errorf("%w: per-section even/odd mode cannot use a single document-wide flag",
@@ -1618,7 +1618,7 @@ func decodeColleafDocument(ctx context.Context, input vdocsNoteSnapshot) (*Docum
 			}
 			section.FirstPage = *record.FirstPage == 1
 		}
-		origin, err := readColleafOriginProfile(record.Extra["manydocFlowOrigin"], vdocsFlowOriginProfile)
+		origin, err := readVDOCSOriginProfile(record.Extra["manydocFlowOrigin"], vdocsFlowOriginProfile)
 		if err != nil {
 			return nil, err
 		}
@@ -1651,9 +1651,9 @@ func decodeColleafDocument(ctx context.Context, input vdocsNoteSnapshot) (*Docum
 			autoLabels[noteKey{binding.Kind, binding.ID}] = *binding.AutoLabel
 		}
 	}
-	applyColleafNoteNumbers(doc, numberPlan, noteIDs)
+	applyVDOCSNoteNumbers(doc, numberPlan, noteIDs)
 	citations.restoreDefinitions(doc, noteIDs)
-	if err = finishColleafNoteNumbering(doc, autoLabels); err != nil {
+	if err = finishVDOCSNoteNumbering(doc, autoLabels); err != nil {
 		return nil, err
 	}
 	doc.Diagnostics = append(doc.Diagnostics, hyperlinkDiagnostics...)
@@ -1664,34 +1664,34 @@ func decodeColleafDocument(ctx context.Context, input vdocsNoteSnapshot) (*Docum
 	if err = citations.collapse(ctx, doc); err != nil {
 		return nil, err
 	}
-	if err = finishColleafNavigation(ctx, opened, doc, intent.Unresolved); err != nil {
+	if err = finishVDOCSNavigation(ctx, opened, doc, intent.Unresolved); err != nil {
 		return nil, err
 	}
-	if err = restoreColleafEvidence(doc, intent.Evidence); err != nil {
+	if err = restoreVDOCSEvidence(doc, intent.Evidence); err != nil {
 		return nil, err
 	}
-	if err = restoreColleafRunOrigins(doc, intent.Evidence); err != nil {
+	if err = restoreVDOCSRunOrigins(doc, intent.Evidence); err != nil {
 		return nil, err
 	}
-	if err = restoreColleafOrigins(doc, intent.Evidence); err != nil {
+	if err = restoreVDOCSOrigins(doc, intent.Evidence); err != nil {
 		return nil, err
 	}
-	if err = restoreColleafNoteOrigins(doc, intent.Evidence, opened, identities); err != nil {
+	if err = restoreVDOCSNoteOrigins(doc, intent.Evidence, opened, identities); err != nil {
 		return nil, err
 	}
-	if err = restoreColleafAnchorOrigins(doc, intent.Evidence, opened); err != nil {
+	if err = restoreVDOCSAnchorOrigins(doc, intent.Evidence, opened); err != nil {
 		return nil, err
 	}
-	if err = restoreColleafListOrigins(doc, intent.Evidence, opened); err != nil {
+	if err = restoreVDOCSListOrigins(doc, intent.Evidence, opened); err != nil {
 		return nil, err
 	}
-	if err = restoreColleafImageOrigins(doc, intent.Evidence, opened); err != nil {
+	if err = restoreVDOCSImageOrigins(doc, intent.Evidence, opened); err != nil {
 		return nil, err
 	}
-	if err = restoreColleafTableOrigins(doc, intent.Evidence, opened); err != nil {
+	if err = restoreVDOCSTableOrigins(doc, intent.Evidence, opened); err != nil {
 		return nil, err
 	}
-	if err = restoreColleafFlowOrigins(doc, intent.Evidence, opened); err != nil {
+	if err = restoreVDOCSFlowOrigins(doc, intent.Evidence, opened); err != nil {
 		return nil, err
 	}
 	if err = doc.Validate(); err != nil {
@@ -1729,7 +1729,7 @@ func (r *vdocsBodyReader) breakParagraph(start, end int, p vdocsParagraphRecord)
 		if err != nil {
 			return nil, err
 		}
-		flowOrigin, err = readColleafOriginProfile(props["manydocFlowOrigin"], vdocsFlowOriginProfile)
+		flowOrigin, err = readVDOCSOriginProfile(props["manydocFlowOrigin"], vdocsFlowOriginProfile)
 		if err != nil {
 			return nil, err
 		}
@@ -1759,7 +1759,7 @@ func (r *vdocsBodyReader) breakParagraph(start, end int, p vdocsParagraphRecord)
 			if ids := r.containerPoints[position]; len(ids) > 0 {
 				blocks = append(blocks, Block{Kind: AnchorPoint, Anchors: ids})
 			}
-			r.doc.warn("colleaf_soft_page_break", "Native rendered soft page boundary omitted from logical flow; literal content is retained")
+			r.doc.warn("vdocs_soft_page_break", "Native rendered soft page boundary omitted from logical flow; literal content is retained")
 			join = true
 		} else {
 			blocks = append(blocks, Block{Kind: PageBreak, Anchors: r.containerPoints[position], vdocsFlowOrigin: flowOrigin})
@@ -1843,13 +1843,13 @@ func (w *vdocsBodyWriter) id(prefix string) string {
 func (w *vdocsBodyWriter) paragraph(block Block) error {
 	sourceBlock := block
 	block.Source = nil
-	fragment, err := encodeColleafTextBodyWithNotes(w.ctx, []Block{block}, w.noteIDs, w.citationProjection)
+	fragment, err := encodeVDOCSTextBodyWithNotes(w.ctx, []Block{block}, w.noteIDs, w.citationProjection)
 	if err != nil {
 		return err
 	}
 	origin := sourceBlock.vdocsOrigin
 	if origin == nil {
-		origin, err = newColleafOrigin(sourceBlock)
+		origin, err = newVDOCSOrigin(sourceBlock)
 		if err != nil {
 			return err
 		}
@@ -1910,10 +1910,10 @@ func (w *vdocsBodyWriter) paragraph(block Block) error {
 		if r.Type != 3 {
 			r.ID = w.id("link")
 		}
-		if err := rebindColleafBookmark(&r, paragraphIDs); err != nil {
+		if err := rebindVDOCSBookmark(&r, paragraphIDs); err != nil {
 			return err
 		}
-		nameColleafCitationRange(&r)
+		nameVDOCSCitationRange(&r)
 		w.body.CustomRanges = append(w.body.CustomRanges, r)
 	}
 	for _, atom := range fragment.CustomBlocks {
@@ -1951,7 +1951,7 @@ func (w *vdocsBodyWriter) blocks(blocks []Block, depth int) error {
 			if a.Type != 3 {
 				continue
 			}
-			p, err := readColleafBookmark(*a)
+			p, err := readVDOCSBookmark(*a)
 			if err != nil {
 				return err
 			}
@@ -1962,7 +1962,7 @@ func (w *vdocsBodyWriter) blocks(blocks []Block, depth int) error {
 		}
 	}
 	sectionID := w.id("s")
-	if err := rebindColleafPointScope(&w.body, scope, sectionID, firstRange); err != nil {
+	if err := rebindVDOCSPointScope(&w.body, scope, sectionID, firstRange); err != nil {
 		return err
 	}
 	w.body.SectionBreaks = append(w.body.SectionBreaks, vdocsSectionRecord{StartIndex: w.offset, ID: sectionID})
@@ -1986,7 +1986,7 @@ func (w *vdocsBodyWriter) flow(blocks []Block, depth int) error {
 				return err
 			}
 			w.text("\f")
-			origin, err := newColleafFlowOrigin(b)
+			origin, err := newVDOCSFlowOrigin(b)
 			if err != nil {
 				return err
 			}
@@ -2063,7 +2063,7 @@ func (w *vdocsBodyWriter) table(block Block, depth int) error {
 					if err != nil {
 						return err
 					}
-					sourceOrigin, err = newColleafSourceOrigin(cell.Source, hash, vdocsCellOriginProfile)
+					sourceOrigin, err = newVDOCSSourceOrigin(cell.Source, hash, vdocsCellOriginProfile)
 					if err != nil {
 						return err
 					}
@@ -2120,7 +2120,7 @@ func (w *vdocsBodyWriter) table(block Block, depth int) error {
 		if err != nil {
 			return err
 		}
-		sourceOrigin, err := newColleafSourceOrigin(block.Source, hash, vdocsTableOriginProfile)
+		sourceOrigin, err := newVDOCSSourceOrigin(block.Source, hash, vdocsTableOriginProfile)
 		if err != nil {
 			return err
 		}
@@ -2132,11 +2132,11 @@ func (w *vdocsBodyWriter) table(block Block, depth int) error {
 	w.text("\r")
 	return nil
 }
-func encodeColleafBody(ctx context.Context, blocks []Block) (vdocsBody, map[string]json.RawMessage, error) {
-	return encodeColleafBodyWithNotes(ctx, blocks, nil)
+func encodeVDOCSBody(ctx context.Context, blocks []Block) (vdocsBody, map[string]json.RawMessage, error) {
+	return encodeVDOCSBodyWithNotes(ctx, blocks, nil)
 }
-func encodeColleafBodyWithNotes(ctx context.Context, blocks []Block, noteIDs map[noteKey]string) (vdocsBody, map[string]json.RawMessage, error) {
-	body, tables, lists, bindings, err := encodeColleafListBody(ctx, blocks, noteIDs)
+func encodeVDOCSBodyWithNotes(ctx context.Context, blocks []Block, noteIDs map[noteKey]string) (vdocsBody, map[string]json.RawMessage, error) {
+	body, tables, lists, bindings, err := encodeVDOCSListBody(ctx, blocks, noteIDs)
 	if err != nil {
 		return vdocsBody{}, nil, err
 	}
@@ -2146,8 +2146,8 @@ func encodeColleafBodyWithNotes(ctx context.Context, blocks []Block, noteIDs map
 	return body, tables, nil
 }
 
-func encodeColleafListBody(ctx context.Context, blocks []Block, noteIDs map[noteKey]string) (vdocsBody, map[string]json.RawMessage, map[string]json.RawMessage, []vdocsListBinding, error) {
-	encoded, err := encodeColleafAssetBody(ctx, blocks, noteIDs, "manydoc", "", nil)
+func encodeVDOCSListBody(ctx context.Context, blocks []Block, noteIDs map[noteKey]string) (vdocsBody, map[string]json.RawMessage, map[string]json.RawMessage, []vdocsListBinding, error) {
+	encoded, err := encodeVDOCSAssetBody(ctx, blocks, noteIDs, "manydoc", "", nil)
 	if err != nil {
 		return vdocsBody{}, nil, nil, nil, err
 	}
@@ -2204,7 +2204,7 @@ func (r *vdocsBodyReader) paragraphFragment(start, end int, p vdocsParagraphReco
 		if r.bookmarkUsed[a.ID] {
 			continue
 		}
-		bp, err := readColleafBookmark(a)
+		bp, err := readVDOCSBookmark(a)
 		if err != nil {
 			return out, err
 		}
@@ -2217,10 +2217,10 @@ func (r *vdocsBodyReader) paragraphFragment(start, end int, p vdocsParagraphReco
 			}
 			fields["manydocNavigation"] = sfAttrs(hint)
 			a.Properties = sfAttrs(fields)
-			r.doc.warn("colleaf_stale_bookmark_placement", "Edited native bookmark position is retained as a current inline point rather than old block placement")
+			r.doc.warn("vdocs_stale_bookmark_placement", "Edited native bookmark position is retained as a current inline point rather than old block placement")
 		}
 		if a.EndIndex != a.StartIndex {
-			r.doc.warn("colleaf_bookmark_span", "Native bookmark range editing extent becomes an SF point at its current start")
+			r.doc.warn("vdocs_bookmark_span", "Native bookmark range editing extent becomes an SF point at its current start")
 		}
 		a.StartIndex -= start
 		a.EndIndex = a.StartIndex
@@ -2309,7 +2309,7 @@ func (r *vdocsBodyReader) textParagraph(start, end int, p vdocsParagraphRecord) 
 	if err != nil {
 		return nil, err
 	}
-	doc, err := decodeColleafTextBody(r.ctx, fragment, r.settings)
+	doc, err := decodeVDOCSTextBody(r.ctx, fragment, r.settings)
 	if err != nil {
 		return nil, err
 	}
@@ -2408,7 +2408,7 @@ func (r *vdocsBodyReader) sections(sections []vdocsStreamNode, depth int) ([]Blo
 			mixed = true
 		}
 		if mixed {
-			r.doc.warn("colleaf_table_paragraph", "Native table and text sharing one paragraph become ordered SF blocks; visible content and supported paragraph styles are retained")
+			r.doc.warn("vdocs_table_paragraph", "Native table and text sharing one paragraph become ordered SF blocks; visible content and supported paragraph styles are retained")
 		}
 	}
 	blocks, err := r.groupLists(flow, depth, r.sectionIDs[sections[0].end-1], sections[0].start, sections[0].end-1)
@@ -2425,7 +2425,7 @@ func (r *vdocsBodyReader) sections(sections []vdocsStreamNode, depth int) ([]Blo
 	for _, p := range r.pointsAt[sections[0].end-1] {
 		if !represented[p.id] && (p.scope != "section" || p.owner != scope) {
 			blocks = append(blocks, Block{Kind: AnchorPoint, Anchors: []string{p.id}})
-			r.doc.warn("colleaf_stale_point_ownership", "Standalone point retains its current native location because its owning flow or boundary changed")
+			r.doc.warn("vdocs_stale_point_ownership", "Standalone point retains its current native location because its owning flow or boundary changed")
 		}
 	}
 	terminal, err := r.cursorBlocks(sections[0].end-1, "end of current section flow", false)
@@ -2476,7 +2476,7 @@ func (r *vdocsBodyReader) table(node vdocsStreamNode, depth int) (Block, error) 
 		}
 		block.vdocsLiteral = table.Literal
 	}
-	block.vdocsTableOrigin, err = readColleafOriginProfile(table.Origin, vdocsTableOriginProfile)
+	block.vdocsTableOrigin, err = readVDOCSOriginProfile(table.Origin, vdocsTableOriginProfile)
 	if err != nil {
 		return block, err
 	}
@@ -2513,7 +2513,7 @@ func (r *vdocsBodyReader) table(node vdocsStreamNode, depth int) (Block, error) 
 		}
 		if !explicit {
 			block.ColumnWidths = nil
-			r.doc.warn("colleaf_table_width", "Native unspecified zero widths become SF equal available widths; content and grid are retained")
+			r.doc.warn("vdocs_table_width", "Native unspecified zero widths become SF equal available widths; content and grid are retained")
 		} else {
 			for _, width := range block.ColumnWidths {
 				if width == 0 {
@@ -2570,7 +2570,7 @@ func (r *vdocsBodyReader) table(node vdocsStreamNode, depth int) (Block, error) 
 			if !hasCS {
 				cs = 1
 			}
-			r.presentationLosses(cellRaw, []string{"rowSpan", "columnSpan", "manydocOrigin"}, "colleaf_cell_presentation")
+			r.presentationLosses(cellRaw, []string{"rowSpan", "columnSpan", "manydocOrigin"}, "vdocs_cell_presentation")
 			if rs < 0 || cs < 0 || rs > len(table.Rows)-ri || cs > columns {
 				return block, fmt.Errorf("invalid native cell span")
 			}
@@ -2644,7 +2644,7 @@ func (r *vdocsBodyReader) table(node vdocsStreamNode, depth int) (Block, error) 
 				cursorProjections = append(cursorProjections, projection)
 			}
 			previousOrigin = origin
-			cellOrigin, err := readColleafOriginProfile(properties["manydocOrigin"], vdocsCellOriginProfile)
+			cellOrigin, err := readVDOCSOriginProfile(properties["manydocOrigin"], vdocsCellOriginProfile)
 			if err != nil {
 				return block, err
 			}
@@ -2662,7 +2662,7 @@ func (r *vdocsBodyReader) table(node vdocsStreamNode, depth int) (Block, error) 
 		if col != columns {
 			return block, fmt.Errorf("native table row does not cover its declared grid")
 		}
-		r.presentationLosses(rowRaw, []string{"tableCells", "repeatHeaderRow", "gridBefore", "gridAfter", "trHeight"}, "colleaf_row_presentation")
+		r.presentationLosses(rowRaw, []string{"tableCells", "repeatHeaderRow", "gridBefore", "gridAfter", "trHeight"}, "vdocs_row_presentation")
 		var props map[string]json.RawMessage
 		_ = json.Unmarshal(rowRaw, &props)
 		if height := props["trHeight"]; len(height) > 0 {
@@ -2674,7 +2674,7 @@ func (r *vdocsBodyReader) table(node vdocsStreamNode, depth int) (Block, error) 
 				return block, err
 			}
 			if h.Val.Value != 0 || h.Rule != 0 {
-				r.doc.warn("colleaf_row_height", "Native authored row height is not represented; row content and merge ownership are retained")
+				r.doc.warn("vdocs_row_height", "Native authored row height is not represented; row content and merge ownership are retained")
 			}
 		}
 		block.Rows = append(block.Rows, outRow)
@@ -2733,7 +2733,7 @@ func (r *vdocsBodyReader) table(node vdocsStreamNode, depth int) (Block, error) 
 			allowed = append(allowed, key)
 		}
 	}
-	r.presentationLosses(raw, allowed, "colleaf_table_presentation")
+	r.presentationLosses(raw, allowed, "vdocs_table_presentation")
 	return block, nil
 }
 func (r *vdocsBodyReader) presentationLosses(raw json.RawMessage, allowed []string, code string) {
@@ -2759,8 +2759,8 @@ func (r *vdocsBodyReader) presentationLosses(raw json.RawMessage, allowed []stri
 		r.doc.warn(code, "Native property "+key+" is not represented in SF; table content and supported geometry are retained")
 	}
 }
-func newColleafBodyReader(ctx context.Context, body vdocsBody, settings vdocsTextContext, tables map[string]json.RawMessage) (*vdocsBodyReader, error) {
-	index, err := indexColleafBody(ctx, body)
+func newVDOCSBodyReader(ctx context.Context, body vdocsBody, settings vdocsTextContext, tables map[string]json.RawMessage) (*vdocsBodyReader, error) {
+	index, err := indexVDOCSBody(ctx, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2840,7 +2840,7 @@ func newColleafBodyReader(ctx context.Context, body vdocsBody, settings vdocsTex
 	r.paragraphStarts = vdocsParagraphStarts(index)
 	for _, a := range body.CustomRanges {
 		if a.Type == 3 {
-			p, err := readColleafBookmark(a)
+			p, err := readVDOCSBookmark(a)
 			if err != nil {
 				return nil, err
 			}
@@ -2912,10 +2912,10 @@ func newColleafBodyReader(ctx context.Context, body vdocsBody, settings vdocsTex
 		staleProjection = staleProjection || info.StaleProjection
 	}
 	if policyLoss {
-		r.doc.warn("colleaf_numbering_policy", "Native zero/legal marker presentation is retained with explicit SF templates/formats; live native numbering policy is not retained")
+		r.doc.warn("vdocs_numbering_policy", "Native zero/legal marker presentation is retained with explicit SF templates/formats; live native numbering policy is not retained")
 	}
 	if staleProjection {
-		r.doc.warn("colleaf_stale_numbering_projection", "Changed native numbering projection retained; old source format intent was not applied")
+		r.doc.warn("vdocs_stale_numbering_projection", "Changed native numbering projection retained; old source format intent was not applied")
 	}
 
 	for _, p := range body.Paragraphs {
@@ -2924,8 +2924,8 @@ func newColleafBodyReader(ctx context.Context, body vdocsBody, settings vdocsTex
 	return &r, nil
 }
 
-func decodeColleafBody(ctx context.Context, body vdocsBody, settings vdocsTextContext, tables map[string]json.RawMessage) (*Document, error) {
-	r, err := newColleafBodyReader(ctx, body, settings, tables)
+func decodeVDOCSBody(ctx context.Context, body vdocsBody, settings vdocsTextContext, tables map[string]json.RawMessage) (*Document, error) {
+	r, err := newVDOCSBodyReader(ctx, body, settings, tables)
 	if err != nil {
 		return nil, err
 	}

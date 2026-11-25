@@ -93,5 +93,5 @@ GOWORK=off go test -race -run 'TestDOCXFractional|TestDOCXSize|TestDOCXSectioned
 Raw guide downloads, outputs and QA environments stay ignored. Python/Node/
 LibreOffice are independent development readers, never runtime requirements.
 The full goal remains incomplete: heterogeneous/mixed-direction note labels,
-nested/enclosing-ActualText and broader untagged graphs, the actual Colleaf native
+nested/enclosing-ActualText and broader untagged graphs, the actual VDOCS native
 adapter, broader original DOCX corpus and final acceptance remain required.

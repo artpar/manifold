@@ -34,12 +34,12 @@ func vdocsContainerNavigationExample(t testing.TB) *Document {
 func TestVDOCSContainerNavigationRoundTrip(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsContainerNavigationExample(t)
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
 	before, _ := json.Marshal(wire)
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,11 +60,11 @@ func TestVDOCSContainerNavigationRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	again, err := encodeColleafDocument(ctx, model)
+	again, err := encodeVDOCSDocument(ctx, model)
 	if err != nil {
 		t.Fatal(err)
 	}
-	recovered, err := decodeColleafDocument(ctx, again)
+	recovered, err := decodeVDOCSDocument(ctx, again)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +75,7 @@ func TestVDOCSContainerNavigationRoundTrip(t *testing.T) {
 	if !reflect.DeepEqual(sf, sfAgain) {
 		t.Fatal("SF container structure/assets/relationships changed")
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_CONTAINER_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_CONTAINER_QA"); file != "" {
 		if err = os.WriteFile(file, before, 0600); err != nil {
 			t.Fatal(err)
 		}
@@ -83,7 +83,7 @@ func TestVDOCSContainerNavigationRoundTrip(t *testing.T) {
 	for _, spec := range []struct {
 		env    string
 		edited bool
-	}{{"MANYDOC_COLLEAF_CONTAINER_SAVED", false}, {"MANYDOC_COLLEAF_CONTAINER_EDITED", true}} {
+	}{{"MANYDOC_VDOCS_CONTAINER_SAVED", false}, {"MANYDOC_VDOCS_CONTAINER_EDITED", true}} {
 		file := os.Getenv(spec.env)
 		if file == "" {
 			continue
@@ -100,7 +100,7 @@ func TestVDOCSContainerNavigationRoundTrip(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+		actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -129,7 +129,7 @@ func TestVDOCSContainerNavigationRoundTrip(t *testing.T) {
 }
 func TestVDOCSContainerNavigationCurrentNativePosition(t *testing.T) {
 	ctx := context.Background()
-	wire, err := encodeColleafDocument(ctx, vdocsContainerNavigationExample(t))
+	wire, err := encodeVDOCSDocument(ctx, vdocsContainerNavigationExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +154,7 @@ func TestVDOCSContainerNavigationCurrentNativePosition(t *testing.T) {
 		if a.Type != 3 {
 			continue
 		}
-		p, err := readColleafBookmark(a)
+		p, err := readVDOCSBookmark(a)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -164,7 +164,7 @@ func TestVDOCSContainerNavigationCurrentNativePosition(t *testing.T) {
 			break
 		}
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,7 +173,7 @@ func TestVDOCSContainerNavigationCurrentNativePosition(t *testing.T) {
 	}
 	found := false
 	for _, d := range got.Diagnostics {
-		found = found || d.Code == "colleaf_stale_bookmark_placement"
+		found = found || d.Code == "vdocs_stale_bookmark_placement"
 	}
 	if !found {
 		t.Fatal("stale placement not diagnosed")
@@ -182,14 +182,14 @@ func TestVDOCSContainerNavigationCurrentNativePosition(t *testing.T) {
 func TestVDOCSContainerNavigationMetadataAndBindings(t *testing.T) {
 	for _, role := range []string{"table", "picture"} {
 		for _, hint := range []map[string]any{{"version": 1, "role": role}, {"version": 1, "role": role, "ownerId": "o", "paragraphId": "p"}, {"version": 1, "role": role, "OwnerId": "o"}} {
-			_, err := readColleafBookmark(vdocsRangeRecord{ID: "a", Properties: sfAttrs(map[string]any{"bookmarkId": "a", "manydocNavigation": hint})})
+			_, err := readVDOCSBookmark(vdocsRangeRecord{ID: "a", Properties: sfAttrs(map[string]any{"bookmarkId": "a", "manydocNavigation": hint})})
 			if err == nil {
 				t.Fatal("malformed owner accepted", hint)
 			}
 		}
 	}
 	ctx := context.Background()
-	wire, err := encodeColleafDocument(ctx, vdocsContainerNavigationExample(t))
+	wire, err := encodeVDOCSDocument(ctx, vdocsContainerNavigationExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,7 +197,7 @@ func TestVDOCSContainerNavigationMetadataAndBindings(t *testing.T) {
 		if a.Type != 3 {
 			continue
 		}
-		p, err := readColleafBookmark(a)
+		p, err := readVDOCSBookmark(a)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -209,14 +209,14 @@ func TestVDOCSContainerNavigationMetadataAndBindings(t *testing.T) {
 			break
 		}
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(got.Blocks[1].Anchors, []string{"table", "table-alias"}) {
 		t.Fatal("current container point lost")
 	}
-	for _, code := range []string{"colleaf_stale_bookmark_placement", "colleaf_bookmark_metadata", "colleaf_bookmark_span"} {
+	for _, code := range []string{"vdocs_stale_bookmark_placement", "vdocs_bookmark_metadata", "vdocs_bookmark_span"} {
 		found := false
 		for _, d := range got.Diagnostics {
 			found = found || d.Code == code
@@ -263,7 +263,7 @@ func TestVDOCSPublicDrawingRegistration(t *testing.T) {
 			}
 		}
 	}
-	if err := checkColleafDrawingMirror(wire, vdocsResource{Name: "DOC_DRAWING_PLUGIN", Data: string(sfAttrs(mirror))}); err != nil {
+	if err := checkVDOCSDrawingMirror(wire, vdocsResource{Name: "DOC_DRAWING_PLUGIN", Data: string(sfAttrs(mirror))}); err != nil {
 		t.Fatal(err)
 	}
 	got, err := ReadVDOCS(ctx, bytes.NewReader(output.Bytes()))
@@ -276,7 +276,7 @@ func TestVDOCSPublicDrawingRegistration(t *testing.T) {
 
 	delete(mirror.Data, mirror.Order[0])
 	wire.Resources = vdocsReplaceResource(wire.Resources, "DOC_DRAWING_PLUGIN", mirror)
-	if _, err = decodeColleafDocument(ctx, wire); err == nil {
+	if _, err = decodeVDOCSDocument(ctx, wire); err == nil {
 		t.Fatal("mirror order without its source accepted")
 	}
 }
@@ -299,12 +299,12 @@ func vdocsFlowNavigationExample() *Document {
 func TestVDOCSFlowNavigationRoundTrip(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsFlowNavigationExample()
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
 	before, _ := json.Marshal(wire)
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -325,11 +325,11 @@ func TestVDOCSFlowNavigationRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	again, err := encodeColleafDocument(ctx, model)
+	again, err := encodeVDOCSDocument(ctx, model)
 	if err != nil {
 		t.Fatal(err)
 	}
-	round, err := decodeColleafDocument(ctx, again)
+	round, err := decodeVDOCSDocument(ctx, again)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -340,7 +340,7 @@ func TestVDOCSFlowNavigationRoundTrip(t *testing.T) {
 	if !reflect.DeepEqual(sf, roundSF) {
 		t.Fatal("SF graph changed")
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_FLOW_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_FLOW_QA"); file != "" {
 		if err = os.WriteFile(file, before, 0600); err != nil {
 			t.Fatal(err)
 		}
@@ -348,7 +348,7 @@ func TestVDOCSFlowNavigationRoundTrip(t *testing.T) {
 	for _, spec := range []struct {
 		env    string
 		edited bool
-	}{{"MANYDOC_COLLEAF_FLOW_SAVED", false}, {"MANYDOC_COLLEAF_FLOW_EDITED", true}} {
+	}{{"MANYDOC_VDOCS_FLOW_SAVED", false}, {"MANYDOC_VDOCS_FLOW_EDITED", true}} {
 		file := os.Getenv(spec.env)
 		if file == "" {
 			continue
@@ -365,7 +365,7 @@ func TestVDOCSFlowNavigationRoundTrip(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		actual, err := readColleaf(ctx, bytes.NewReader(envelope))
+		actual, err := readVDOCS(ctx, bytes.NewReader(envelope))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -380,7 +380,7 @@ func TestVDOCSFlowNavigationRoundTrip(t *testing.T) {
 		if spec.edited {
 			expected.Blocks[0].Anchors = nil
 			expected.Blocks[0].Section.Blocks[0].Runs = append([]Run{{Text: "Q"}, {Anchor: "section-1"}}, expected.Blocks[0].Section.Blocks[0].Runs[1:]...)
-			expected.Diagnostics = []Diagnostic{{Code: "colleaf_stale_bookmark_placement", Message: "Edited native bookmark position is retained as a current inline point rather than old block placement"}}
+			expected.Diagnostics = []Diagnostic{{Code: "vdocs_stale_bookmark_placement", Message: "Edited native bookmark position is retained as a current inline point rather than old block placement"}}
 		}
 		expectedSF, err := ToStructured(expected)
 		if err != nil {
@@ -398,7 +398,7 @@ func TestVDOCSFlowNavigationRoundTrip(t *testing.T) {
 		if spec.edited {
 			found := false
 			for _, d := range actual.Diagnostics {
-				found = found || d.Code == "colleaf_stale_bookmark_placement"
+				found = found || d.Code == "vdocs_stale_bookmark_placement"
 			}
 			if !found {
 				t.Fatal("moved section ownership not disclosed")
@@ -408,7 +408,7 @@ func TestVDOCSFlowNavigationRoundTrip(t *testing.T) {
 }
 func TestVDOCSFlowNavigationMovedListPoint(t *testing.T) {
 	ctx := context.Background()
-	wire, err := encodeColleafDocument(ctx, vdocsFlowNavigationExample())
+	wire, err := encodeVDOCSDocument(ctx, vdocsFlowNavigationExample())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -416,7 +416,7 @@ func TestVDOCSFlowNavigationMovedListPoint(t *testing.T) {
 		if a.Type != 3 {
 			continue
 		}
-		p, err := readColleafBookmark(a)
+		p, err := readVDOCSBookmark(a)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -426,7 +426,7 @@ func TestVDOCSFlowNavigationMovedListPoint(t *testing.T) {
 			break
 		}
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -436,7 +436,7 @@ func TestVDOCSFlowNavigationMovedListPoint(t *testing.T) {
 	}
 	found := false
 	for _, d := range got.Diagnostics {
-		found = found || d.Code == "colleaf_stale_bookmark_placement"
+		found = found || d.Code == "vdocs_stale_bookmark_placement"
 	}
 	if !found {
 		t.Fatal("list ownership loss not disclosed")
@@ -445,7 +445,7 @@ func TestVDOCSFlowNavigationMovedListPoint(t *testing.T) {
 
 func TestVDOCSFlowNavigationSoftBreakKeepsPoint(t *testing.T) {
 	ctx := context.Background()
-	wire, err := encodeColleafDocument(ctx, vdocsFlowNavigationExample())
+	wire, err := encodeVDOCSDocument(ctx, vdocsFlowNavigationExample())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -453,7 +453,7 @@ func TestVDOCSFlowNavigationSoftBreakKeepsPoint(t *testing.T) {
 		if a.Type != 3 {
 			continue
 		}
-		p, err := readColleafBookmark(a)
+		p, err := readVDOCSBookmark(a)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -462,7 +462,7 @@ func TestVDOCSFlowNavigationSoftBreakKeepsPoint(t *testing.T) {
 			break
 		}
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -472,7 +472,7 @@ func TestVDOCSFlowNavigationSoftBreakKeepsPoint(t *testing.T) {
 	}
 	found := false
 	for _, d := range got.Diagnostics {
-		found = found || d.Code == "colleaf_soft_page_break"
+		found = found || d.Code == "vdocs_soft_page_break"
 	}
 	if !found {
 		t.Fatal("soft boundary loss not disclosed")
@@ -493,7 +493,7 @@ func compressedIntentForTest(t *testing.T, raw string) vdocsIntentCarrier {
 func TestVDOCSIntentCompressionAndValidation(t *testing.T) {
 	ctx := context.Background()
 	records := []vdocsResource{{Name: vdocsDocumentResource, Data: strings.Repeat("source 😀", 10000)}}
-	carrier, err := makeColleafIntentCarrier(records)
+	carrier, err := makeVDOCSIntentCarrier(records)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -504,7 +504,7 @@ func TestVDOCSIntentCompressionAndValidation(t *testing.T) {
 	if err != nil || !reflect.DeepEqual(records, got) {
 		t.Fatal("metadata changed", err)
 	}
-	again, err := makeColleafIntentCarrier(records)
+	again, err := makeVDOCSIntentCarrier(records)
 	if err != nil || !reflect.DeepEqual(carrier, again) {
 		t.Fatal("nondeterministic compression", err)
 	}
@@ -515,7 +515,7 @@ func TestVDOCSIntentCompressionAndValidation(t *testing.T) {
 		"multistream": func(c *vdocsIntentCarrier) { c.GzipRecords = append(c.GzipRecords, c.GzipRecords...) },
 		"short":       func(c *vdocsIntentCarrier) { c.RecordsBytes-- },
 		"long":        func(c *vdocsIntentCarrier) { c.RecordsBytes++ },
-		"bound":       func(c *vdocsIntentCarrier) { c.RecordsBytes = maxColleafIntentBytes + 1 },
+		"bound":       func(c *vdocsIntentCarrier) { c.RecordsBytes = maxVDOCSIntentBytes + 1 },
 		"mixed":       func(c *vdocsIntentCarrier) { c.Records = records },
 		"profile":     func(c *vdocsIntentCarrier) { c.Profile = "other" },
 		"version":     func(c *vdocsIntentCarrier) { c.Version = 3 },
@@ -547,12 +547,12 @@ func TestVDOCSIntentCompressionAndValidation(t *testing.T) {
 
 	c := compressedIntentForTest(t, `[{"name":"`+vdocsDocumentResource+`","data":"{\"version\":1,\"version\":1}"}]`)
 	native := vdocsNoteSnapshot{Body: vdocsBody{CustomRanges: []vdocsRangeRecord{{Properties: sfAttrs(c)}}}}
-	if err := checkColleafResourceJSON(ctx, native); err == nil {
+	if err := checkVDOCSResourceJSON(ctx, native); err == nil {
 		t.Fatal("duplicate resource JSON hidden by compression")
 	}
 }
 
-func FuzzColleafCompressedIntent(f *testing.F) {
+func FuzzVDOCSCompressedIntent(f *testing.F) {
 	f.Add([]byte("not gzip"), 100)
 	c := compressedIntentForTestForFuzz()
 	f.Add(c.GzipRecords, c.RecordsBytes)
@@ -598,7 +598,7 @@ func TestVDOCSPublishedPDFSourceGraph(t *testing.T) {
 	}
 	current := want
 	for pass := 0; pass < 2; pass++ {
-		native, err := encodeColleafDocument(ctx, current)
+		native, err := encodeVDOCSDocument(ctx, current)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -607,13 +607,13 @@ func TestVDOCSPublishedPDFSourceGraph(t *testing.T) {
 			t.Fatal(err)
 		}
 		if pass == 0 {
-			if file := os.Getenv("MANYDOC_COLLEAF_REAL_QA"); file != "" {
+			if file := os.Getenv("MANYDOC_VDOCS_REAL_QA"); file != "" {
 				if err := os.WriteFile(file, wire, 0600); err != nil {
 					t.Fatal(err)
 				}
 			}
 		}
-		got, err := decodeColleafDocument(ctx, native)
+		got, err := decodeVDOCSDocument(ctx, native)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -628,7 +628,7 @@ func TestVDOCSPublishedPDFSourceGraph(t *testing.T) {
 			t.Fatal("original source document mutated")
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_REAL_SAVED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_REAL_SAVED"); file != "" {
 		wire, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -641,16 +641,16 @@ func TestVDOCSPublishedPDFSourceGraph(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		got, err := readColleaf(ctx, bytes.NewReader(envelope))
+		got, err := readVDOCS(ctx, bytes.NewReader(envelope))
 		if err != nil {
 			t.Fatal(err)
 		}
 		assertEvidenceSF(t, want, got)
-		again, err := encodeColleafDocument(ctx, got)
+		again, err := encodeVDOCSDocument(ctx, got)
 		if err != nil {
 			t.Fatal(err)
 		}
-		reopened, err := decodeColleafDocument(ctx, again)
+		reopened, err := decodeVDOCSDocument(ctx, again)
 		if err != nil {
 			t.Fatal(err)
 		}

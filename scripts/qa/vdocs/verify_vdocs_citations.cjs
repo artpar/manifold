@@ -1,6 +1,6 @@
 /* Optional actual pinned literal/rich citation, markerless anchor and facade QA. */
-const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{createRequire,stripTypeScriptTypes}=require('node:module');
-const qa=path.resolve(__dirname,'../../../output/colleaf-qa'),req=createRequire(path.join(qa,'package.json'));
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{createRequire}=require('node:module');
+const qa=path.resolve(__dirname,'../../../output/vdocs-qa'),req=createRequire(path.join(qa,'package.json'));
 const c=req('@univerjs/core'),e=req('@univerjs/engine-render'),docs=req('@univerjs/docs'),drawing=req('@univerjs/drawing'),dd=req('@univerjs/docs-drawing'),{FUniver}=req('@univerjs/core/facade');req('@univerjs/docs/facade');
 for(const n of ['core','engine-render','docs','drawing','docs-drawing'])assert.equal(JSON.parse(fs.readFileSync(path.join(qa,'node_modules/@univerjs',n,'package.json'))).version,'1.0.4');
 function inspect(data,edited=false){
@@ -23,14 +23,14 @@ function inspect(data,edited=false){
 }
 function save(data){const u=new c.Univer();try{for(const p of [docs.UniverDocsPlugin,drawing.UniverDrawingPlugin,dd.UniverDocsDrawingPlugin])u.registerPlugin(p);return JSON.parse(JSON.stringify(FUniver.newAPI(u).createDocument(structuredClone(data)).save()))}finally{u.dispose()}}
 async function main(){
- const data=JSON.parse(fs.readFileSync(path.join(qa,'citations.json'))),code=fs.readFileSync(path.resolve(__dirname,'../../../output/codec/colleaf-format-0.txt'),'utf8');assert.equal(crypto.createHash('sha256').update(code).digest('hex'),'c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0');const app=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(code)).toString('base64'));
- const valid=document=>app.validateDocument({type:'vibedada-document',version:3,engine:'univer',engineVersion:'1.0.4',document});
- valid(data);inspect(data);const saved=save(save(data));valid(saved);inspect(saved);fs.writeFileSync(path.join(qa,'citations-saved.json'),JSON.stringify(saved,null,2));
+ const data=JSON.parse(fs.readFileSync(path.join(qa,'citations.json')));
+
+ inspect(data);const saved=save(save(data));inspect(saved);fs.writeFileSync(path.join(qa,'citations-saved.json'),JSON.stringify(saved,null,2));
  const edited=structuredClone(saved),owner=edited.body.customRanges.filter(r=>r.properties?.profile==='manydoc.note-citation')[1],at=owner.startIndex+1;
  const style=edited.body.textRuns.find(r=>r.st===at).ts;
  edited.body=c.TextX.apply(edited.body,new c.TextX().retain(at).delete(2).insert(3,{dataStream:'III',textRuns:[{st:0,ed:3,ts:style}]}).serialize());
  for(const r of edited.body.textRuns)if(r.ts.cl?.rgb==='#FF0000'){r.ts.bl=0;r.ts.fs=14}
- const final=save(edited);valid(final);inspect(final,true);fs.writeFileSync(path.join(qa,'citations-edited.json'),JSON.stringify(final,null,2));
+ const final=save(edited);inspect(final,true);fs.writeFileSync(path.join(qa,'citations-edited.json'),JSON.stringify(final,null,2));
  console.log('Pinned seven markerless anchors with literal/rich/default/empty citation glyphs/styles in sections/cells/lists, two real note bodies, TextX/style edits and facade save pass; browser paint/wrapping unqualified');
 }
 main().catch(error=>{console.error(error);process.exitCode=1});

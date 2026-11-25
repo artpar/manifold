@@ -33,7 +33,7 @@ type vdocsHyperlinkResourceEntry struct {
 
 // Actual Univer selects the last matching whole text-run record. A sweep avoids
 // quadratic per-character scans for valid overlapping/unsorted native intervals.
-func applyColleafHyperlinkResource(ctx context.Context, input vdocsNoteSnapshot) (vdocsNoteSnapshot, []Diagnostic, error) {
+func applyVDOCSHyperlinkResource(ctx context.Context, input vdocsNoteSnapshot) (vdocsNoteSnapshot, []Diagnostic, error) {
 	var resource *vdocsResource
 	var remaining []vdocsResource
 	for _, r := range input.Resources {
@@ -159,10 +159,10 @@ func applyColleafHyperlinkResource(ctx context.Context, input vdocsNoteSnapshot)
 	}
 	var diagnostics []Diagnostic
 	if changed {
-		diagnostics = append(diagnostics, Diagnostic{"colleaf_hyperlink_resource_target", "Native hyperlink resource overrides a different body URL; the current editor target is retained"})
+		diagnostics = append(diagnostics, Diagnostic{"vdocs_hyperlink_resource_target", "Native hyperlink resource overrides a different body URL; the current editor target is retained"})
 	}
 	if orphan {
-		diagnostics = append(diagnostics, Diagnostic{"colleaf_hyperlink_resource_orphan", "Native hyperlink resource contains inactive identities; current visible hyperlink ranges are retained"})
+		diagnostics = append(diagnostics, Diagnostic{"vdocs_hyperlink_resource_orphan", "Native hyperlink resource contains inactive identities; current visible hyperlink ranges are retained"})
 	}
 	return out, diagnostics, nil
 }
@@ -176,7 +176,7 @@ type vdocsLanguages struct {
 	ComplexLanguage string `json:"complexLanguage,omitempty"`
 }
 
-func readColleafLanguages(raw json.RawMessage) (*vdocsLanguages, error) {
+func readVDOCSLanguages(raw json.RawMessage) (*vdocsLanguages, error) {
 	if len(raw) == 0 || string(raw) == "null" {
 		return nil, nil
 	}
@@ -284,7 +284,7 @@ func vdocsStyleObject(raw json.RawMessage) (vdocsStyleMap, error) {
 	}
 	return v, nil
 }
-func mergeColleafStyle(a, b vdocsStyleMap) vdocsStyleMap {
+func mergeVDOCSStyle(a, b vdocsStyleMap) vdocsStyleMap {
 	out := vdocsStyleMap{}
 	for k, v := range a {
 		out[k] = v
@@ -333,7 +333,7 @@ func (r *vdocsStyleResolver) resolve(id string, depth int) (vdocsNamedStyle, err
 		if err != nil {
 			return s, err
 		}
-		*pair[1] = sfAttrs(mergeColleafStyle(a, b))
+		*pair[1] = sfAttrs(mergeVDOCSStyle(a, b))
 	}
 	if r.cache == nil {
 		r.cache = map[string]vdocsNamedStyle{}
@@ -363,9 +363,9 @@ func vdocsStyleRun(style vdocsStyleMap, doc *Document) (Run, error) {
 		}
 		switch key {
 		case "manydocOrigin":
-			doc.warn("colleaf_run_origin_context", "Native source properties outside direct text intervals do not assert run ownership")
+			doc.warn("vdocs_run_origin_context", "Native source properties outside direct text intervals do not assert run ownership")
 		case "manydocLanguages":
-			value, err := readColleafLanguages(raw)
+			value, err := readVDOCSLanguages(raw)
 			if err != nil {
 				return out, err
 			}
@@ -387,7 +387,7 @@ func vdocsStyleRun(style vdocsStyleMap, doc *Document) (Run, error) {
 				return out, err
 			}
 			if value != 0 {
-				doc.warn("colleaf_text_presentation", "Native baseline offset is not represented by ordinary SF text; visible text is retained")
+				doc.warn("vdocs_text_presentation", "Native baseline offset is not represented by ordinary SF text; visible text is retained")
 			}
 		case "hidden":
 			var hidden bool
@@ -449,11 +449,11 @@ func vdocsStyleRun(style vdocsStyleMap, doc *Document) (Run, error) {
 			sort.Strings(decorationKeys)
 			for _, field := range decorationKeys {
 				if field != "s" && field != "t" {
-					doc.warn("colleaf_decoration", "Native decoration property "+field+" is not represented; enabled underline/strike and visible text are retained")
+					doc.warn("vdocs_decoration", "Native decoration property "+field+" is not represented; enabled underline/strike and visible text are retained")
 				}
 			}
 			if show && decoration.Type != nil && *decoration.Type != 12 {
-				doc.warn("colleaf_decoration", "Native decoration pattern is normalized to a single line; visible text and enabled underline/strike are retained")
+				doc.warn("vdocs_decoration", "Native decoration pattern is normalized to a single line; visible text and enabled underline/strike are retained")
 			}
 		case "cl":
 			var color struct {
@@ -475,11 +475,11 @@ func vdocsStyleRun(style vdocsStyleMap, doc *Document) (Run, error) {
 				out.Color = "auto"
 			}
 		default:
-			doc.warn("colleaf_text_presentation", "Native text property "+key+" is not represented; supported typography and literal text are retained")
+			doc.warn("vdocs_text_presentation", "Native text property "+key+" is not represented; supported typography and literal text are retained")
 		}
 	}
 	if out.EastAsiaLanguage != "" && !qualifiedAlternate {
-		doc.warn("colleaf_alternate_language_inferred", "Native alternate language is retained in the SF East Asian language slot without an explicit slot binding")
+		doc.warn("vdocs_alternate_language_inferred", "Native alternate language is retained in the SF East Asian language slot without an explicit slot binding")
 	}
 	return out, validateTextStyle(out)
 }
@@ -555,7 +555,7 @@ func vdocsRunStyle(run Run) (json.RawMessage, error) {
 			style["cl"] = map[string]string{"rgb": run.Color}
 		}
 	}
-	origin, err := newColleafRunOrigin(run)
+	origin, err := newVDOCSRunOrigin(run)
 	if err != nil {
 		return nil, err
 	}
@@ -602,10 +602,10 @@ func vdocsUTF16Len(text string) int {
 	return n
 }
 
-func encodeColleafTextBody(ctx context.Context, blocks []Block) (vdocsBody, error) {
-	return encodeColleafTextBodyWithNotes(ctx, blocks, nil)
+func encodeVDOCSTextBody(ctx context.Context, blocks []Block) (vdocsBody, error) {
+	return encodeVDOCSTextBodyWithNotes(ctx, blocks, nil)
 }
-func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs map[noteKey]string, projection ...map[noteKey]string) (vdocsBody, error) {
+func encodeVDOCSTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs map[noteKey]string, projection ...map[noteKey]string) (vdocsBody, error) {
 	body := vdocsBody{TextRuns: []vdocsTextRun{}}
 	var stream strings.Builder
 	offset := 0
@@ -619,7 +619,7 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 			return body, fmt.Errorf("%w: native text worker requires paragraph/heading content without unmapped provenance", ErrUnsupported)
 		}
 		var err error
-		block, err = prepareColleafAnchorOrigins(block)
+		block, err = prepareVDOCSAnchorOrigins(block)
 		if err != nil {
 			return body, err
 		}
@@ -652,7 +652,7 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 			if err := destinationID(id); err != nil {
 				return body, err
 			}
-			body.CustomRanges = append(body.CustomRanges, writeColleafBookmark(id, offset, p.ID, "block"))
+			body.CustomRanges = append(body.CustomRanges, writeVDOCSBookmark(id, offset, p.ID, "block"))
 		}
 		for _, run := range block.Runs {
 			if run.Anchor != "" {
@@ -666,9 +666,9 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 				if !reflect.DeepEqual(copy, Run{}) {
 					return body, fmt.Errorf("%w: annotated native anchor atom", ErrUnsupported)
 				}
-				point := writeColleafBookmark(run.Anchor, offset, p.ID, "run")
+				point := writeVDOCSBookmark(run.Anchor, offset, p.ID, "run")
 				if run.vdocsAnchorOrigin != nil {
-					props, err := readColleafBookmark(point)
+					props, err := readVDOCSBookmark(point)
 					if err != nil {
 						return body, err
 					}
@@ -709,7 +709,7 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 						r.Text = text
 						label = []Run{r}
 					}
-					fragment, err := writeColleafCitation(ctx, run, id, mode, label)
+					fragment, err := writeVDOCSCitation(ctx, run, id, mode, label)
 					if err != nil {
 						return body, err
 					}
@@ -722,7 +722,7 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 						a.StartIndex += offset
 						a.EndIndex += offset
 						a.ID = fmt.Sprintf("citation%d", len(body.CustomRanges))
-						nameColleafCitationRange(&a)
+						nameVDOCSCitationRange(&a)
 						body.CustomRanges = append(body.CustomRanges, a)
 					}
 					appendText(fragment.DataStream)
@@ -785,14 +785,14 @@ func encodeColleafTextBodyWithNotes(ctx context.Context, blocks []Block, noteIDs
 	body.SectionBreaks = []vdocsSectionRecord{{StartIndex: offset, ID: "s0"}}
 	appendText("\n")
 	body.DataStream = stream.String()
-	if _, err := indexColleafBody(ctx, body); err != nil {
+	if _, err := indexVDOCSBody(ctx, body); err != nil {
 		return body, err
 	}
 	return body, nil
 }
 
-func decodeColleafTextBody(ctx context.Context, body vdocsBody, settings vdocsTextContext) (*Document, error) {
-	index, err := indexColleafBody(ctx, body)
+func decodeVDOCSTextBody(ctx context.Context, body vdocsBody, settings vdocsTextContext) (*Document, error) {
+	index, err := indexVDOCSBody(ctx, body)
 	if err != nil {
 		return nil, err
 	}
@@ -876,22 +876,22 @@ func decodeColleafTextBody(ctx context.Context, body vdocsBody, settings vdocsTe
 		if err != nil {
 			return nil, err
 		}
-		properties := mergeColleafStyle(mergeColleafStyle(baseParagraph, namedParagraph), directParagraph)
+		properties := mergeVDOCSStyle(mergeVDOCSStyle(baseParagraph, namedParagraph), directParagraph)
 		block := Block{Kind: Paragraph}
-		origin, err := readColleafOrigin(directParagraph["manydocOrigin"])
+		origin, err := readVDOCSOrigin(directParagraph["manydocOrigin"])
 		if err != nil {
 			return nil, err
 		}
 		block.vdocsOrigin = origin
-		block.vdocsListOrigin, err = readColleafOriginProfile(directParagraph["manydocListOrigin"], vdocsListOriginProfile)
+		block.vdocsListOrigin, err = readVDOCSOriginProfile(directParagraph["manydocListOrigin"], vdocsListOriginProfile)
 		if err != nil {
 			return nil, err
 		}
-		block.vdocsItemOrigin, err = readColleafOriginProfile(directParagraph["manydocItemOrigin"], vdocsItemOriginProfile)
+		block.vdocsItemOrigin, err = readVDOCSOriginProfile(directParagraph["manydocItemOrigin"], vdocsItemOriginProfile)
 		if err != nil {
 			return nil, err
 		}
-		block.vdocsMarkerOrigin, err = readColleafOriginProfile(directParagraph["manydocMarkerOrigin"], vdocsMarkerOriginProfile)
+		block.vdocsMarkerOrigin, err = readVDOCSOriginProfile(directParagraph["manydocMarkerOrigin"], vdocsMarkerOriginProfile)
 		if err != nil {
 			return nil, err
 		}
@@ -939,7 +939,7 @@ func decodeColleafTextBody(ctx context.Context, body vdocsBody, settings vdocsTe
 		if err != nil {
 			return nil, err
 		}
-		defaults := mergeColleafStyle(mergeColleafStyle(baseText, namedText), pText)
+		defaults := mergeVDOCSStyle(mergeVDOCSStyle(baseText, namedText), pText)
 		headingID, err := vdocsNativeHeadingID(p.Style)
 		if err != nil {
 			return nil, err
@@ -960,22 +960,22 @@ func decodeColleafTextBody(ctx context.Context, body vdocsBody, settings vdocsTe
 			}
 			for name := range fields {
 				if name != "bookmarkId" && name != "manydocNavigation" && name != "manydocOrigin" && name != "manydocFlowOrigin" {
-					doc.warn("colleaf_bookmark_metadata", "Native bookmark metadata outside identity and placement is not represented in SF")
+					doc.warn("vdocs_bookmark_metadata", "Native bookmark metadata outside identity and placement is not represented in SF")
 				}
 			}
-			bp, err := readColleafBookmark(a)
+			bp, err := readVDOCSBookmark(a)
 			if err != nil {
 				return nil, err
 			}
 			if a.EndIndex != a.StartIndex {
-				doc.warn("colleaf_bookmark_span", "Native bookmark range editing extent becomes an SF point at its current start")
+				doc.warn("vdocs_bookmark_span", "Native bookmark range editing extent becomes an SF point at its current start")
 			}
 			if bp.Hint != nil && bp.Hint.Role == "block" && a.StartIndex == node.start && bp.Hint.ParagraphID == p.ID {
 				block.Anchors = append(block.Anchors, bp.BookmarkID)
 			} else {
 				points[a.StartIndex] = append(points[a.StartIndex], Run{Anchor: bp.BookmarkID, vdocsAnchorOrigin: bp.Origin})
 				if bp.Hint != nil && bp.Hint.Role != "run" && bp.Hint.Role != "list" && bp.Hint.Role != "point" {
-					doc.warn("colleaf_stale_bookmark_placement", "Edited native bookmark position is retained as a current inline point rather than old block placement")
+					doc.warn("vdocs_stale_bookmark_placement", "Edited native bookmark position is retained as a current inline point rather than old block placement")
 				}
 			}
 		}
@@ -1047,15 +1047,15 @@ func decodeColleafTextBody(ctx context.Context, body vdocsBody, settings vdocsTe
 				if err != nil {
 					return nil, err
 				}
-				runOrigin, err = readColleafOriginProfile(direct["manydocOrigin"], vdocsRunOriginProfile)
+				runOrigin, err = readVDOCSOriginProfile(direct["manydocOrigin"], vdocsRunOriginProfile)
 				if err != nil {
 					return nil, err
 				}
-				style = mergeColleafStyle(mergeColleafStyle(defaults, inherited), direct)
+				style = mergeVDOCSStyle(mergeVDOCSStyle(defaults, inherited), direct)
 			}
 			decodedStyle := style
 			if len(style["manydocOrigin"]) > 0 {
-				decodedStyle = mergeColleafStyle(nil, style)
+				decodedStyle = mergeVDOCSStyle(nil, style)
 				delete(decodedStyle, "manydocOrigin")
 			}
 			run, err := vdocsStyleRun(decodedStyle, doc)
@@ -1064,7 +1064,7 @@ func decodeColleafTextBody(ctx context.Context, body vdocsBody, settings vdocsTe
 			}
 			run.vdocsRunOrigin = runOrigin
 			if runOrigin == nil && len(style["manydocOrigin"]) > 0 {
-				doc.warn("colleaf_run_origin_inheritance", "Inherited native source properties are not treated as direct run ownership")
+				doc.warn("vdocs_run_origin_inheritance", "Inherited native source properties are not treated as direct run ownership")
 			}
 			run.Text = strings.ReplaceAll(text, "\v", "\n")
 			if text == "\b" || (text == "\ufffc" && index.blocks[start].NoteID != "") {
@@ -1136,7 +1136,7 @@ func decodeColleafTextBody(ctx context.Context, body vdocsBody, settings vdocsTe
 					run.Link = ""
 				}
 				if target.Mode != "text" {
-					doc.warn("colleaf_link_presentation", "Native automatic hyperlink presentation may differ; target and authored text style are retained")
+					doc.warn("vdocs_link_presentation", "Native automatic hyperlink presentation may differ; target and authored text style are retained")
 				}
 			}
 			block.Runs = append(block.Runs, run)
@@ -1153,18 +1153,18 @@ func decodeColleafTextBody(ctx context.Context, body vdocsBody, settings vdocsTe
 		for _, key := range keys {
 			switch key {
 			case "manydocFlowOrigin":
-				doc.warn("colleaf_flow_origin_context", "Native flow source metadata outside a current standalone flow owner is not asserted")
+				doc.warn("vdocs_flow_origin_context", "Native flow source metadata outside a current standalone flow owner is not asserted")
 			case "manydocListOrigin", "manydocItemOrigin", "manydocMarkerOrigin":
 				if (key == "manydocListOrigin" && block.vdocsListOrigin == nil) || (key == "manydocItemOrigin" && block.vdocsItemOrigin == nil) {
-					doc.warn("colleaf_list_origin_inheritance", "Inherited native source properties are not treated as direct list/item ownership")
+					doc.warn("vdocs_list_origin_inheritance", "Inherited native source properties are not treated as direct list/item ownership")
 				}
 			case "manydocOrigin":
 				if origin == nil {
-					doc.warn("colleaf_origin_inheritance", "Inherited native source-binding properties are not treated as direct paragraph ownership")
+					doc.warn("vdocs_origin_inheritance", "Inherited native source-binding properties are not treated as direct paragraph ownership")
 				}
 			case "outlineLevel", "namedStyleType", "direction", "pageBreakBefore", "textStyle", "headingId":
 			default:
-				doc.warn("colleaf_paragraph_style", "Native paragraph property "+key+" is not represented; text and supported paragraph semantics are retained")
+				doc.warn("vdocs_paragraph_style", "Native paragraph property "+key+" is not represented; text and supported paragraph semantics are retained")
 			}
 		}
 		doc.Blocks = append(doc.Blocks, block)

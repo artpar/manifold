@@ -56,7 +56,7 @@ Independent Word readers may substitute installed fonts; output is laid out anew
   [raster decoding](reference/PDF_IMAGE_DECODING.md),
   [font-width ambiguity](reference/PDF_FONT_WIDTHS.md)
 - [Optional VDOCS contract](reference/VDOCS_FORMAT.md) and
-  [pinned native browser discrepancy](reference/VDOCS_BROWSER.md)
+  [pinned native browser discrepancy](reference/VDOCS_FORMAT.md#limits)
 
 Known CID overlap, managed CMYK/JPEG interpolation, pinned pypdf LZW and optional
 native browser ordering differences retain their strict recorded oracles. Earlier

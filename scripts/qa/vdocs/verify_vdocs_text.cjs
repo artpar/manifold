@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '../../..');
-const qa = path.join(root, 'output/colleaf-qa');
+const qa = path.join(root, 'output/vdocs-qa');
 const core = require(path.join(qa, 'node_modules/@univerjs/core'));
 const engine = require(path.join(qa, 'node_modules/@univerjs/engine-render'));
 for (const name of ['core', 'engine-render']) {

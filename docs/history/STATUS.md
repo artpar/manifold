@@ -61,17 +61,17 @@ CGO-disabled host/Linux builds pass; Linux was not executed. ParentTree fuzz
 passes 10,000 executions in 9.025s with two workers. Exact scopes are recorded
 in verification.json and FINAL_AUDIT.md.
 
-## Actual Colleaf inspection changes the integration evidence
+## Actual VDOCS inspection changes the integration evidence
 
 The earlier local-only search missed the remotely available application. Read-only
-GitHub inspection now pins artpar/colleaf at
+GitHub inspection now pins retired-host-source at
 5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6 and matching published Univer 1.0.4 types.
 Its .vdocs is a version-3 wrapper around IDocumentData with indexed streams,
 source tables/drawings/stories/notes and plugin resources. SF cannot be renamed
 into that native format. A checked standalone adapter through SF is now public; broader native rendering
 and browser qualification remain open.
-Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
-No Colleaf or Daptin code was modified; app persistence/authorization is not part
+Read VDOCS_FORMAT.md for exact primary sources, comparison and mapping queue.
+No VDOCS or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
 ## Latest progress: long and cross-page inferred notes
@@ -279,7 +279,7 @@ The unchanged optional native note-order checker still FAILS: note2,note3 expect
 actual reversed; no-repeat control passes, range reordering breaks after TextX edit.
 Published1.0.4 code overwrites placement references keyed by shared noteId. No safe
 stable schema repair was established, and no duplicated definitions/static cache or
-vendor/application patch was adopted. COLLEAF_BROWSER.md records exact evidence.
+vendor/application patch was adopted. VDOCS_FORMAT.md#limits records exact evidence.
 Other source/resource and original completion audits continue; no overall blocker
 or goal completion is established. Final normal suite passes (library29.270s;
 CLI cached, earlier fresh0.819s), focused race20.936s and CGO-disabled focus2.308s
@@ -508,7 +508,7 @@ variable/rich custom labels, native settings/browser and final acceptance audits
 
 ## Open native browser failure: repeated-note body order
 
-The full pinned Colleaf/Univer desktop mount now builds in an isolated optional
+The full pinned VDOCS/Univer desktop mount now builds in an isolated optional
 QA harness. The unmodified actual mount/validator are hash-checked and all vendor
 presets are pinned at 1.0.4. Browser readiness reaches lifecycle 3 with a canvas and
 no reported errors. No application or production dependency is changed.
@@ -521,13 +521,13 @@ headless body-order checker both reproduce it. A separate no-repeat control has
 the correct order. The original example and expected first-reference order remain.
 
 ```sh
-node scripts/qa/colleaf/prepare_colleaf_browser.cjs
-python3 -m http.server 8768 --bind 127.0.0.1 --directory output/colleaf-browser
+node scripts/qa/vdocs/prepare_vdocs_browser.cjs
+python3 -m http.server 8768 --bind 127.0.0.1 --directory output/vdocs-browser
 # Current native acceptance failure, not a passing smoke test:
-node scripts/qa/colleaf/verify_colleaf_note_order.cjs
+node scripts/qa/vdocs/verify_vdocs_note_order.cjs
 ```
 
-COLLEAF_BROWSER.md records source pins, controls and remaining work. Native browser
+VDOCS_FORMAT.md#limits records source pins, controls and remaining work. Native browser
 edit/save/reopen/mobile and wider paint/layout remain unqualified. No safe data-level
 ordering fix is established yet; do not patch the applications, weaken the oracle,
 or replace live citations with cached bodies. Other goal work can still progress.
@@ -590,7 +590,7 @@ imports must reject their contradictions. The original real-source SF validates
 
 ```sh
 output/qa-venv/bin/python scripts/qa/pdf/verify_pdf_parent_tree.py testdata/real/copyright-office-circular-1-2021.pdf
-output/qa-venv/bin/python scripts/qa/pdf/verify_pdf_parent_tree.py output/colleaf-tagged/document.pdf --out output/pdf-parent-tree/generated-mutated.pdf
+output/qa-venv/bin/python scripts/qa/pdf/verify_pdf_parent_tree.py output/vdocs-tagged/document.pdf --out output/pdf-parent-tree/generated-mutated.pdf
 GOWORK=off go test -run 'TestPDFParentTree|TestGeneratedPDF|TestPDFTagged' -count=1 .
 ```
 
@@ -690,10 +690,10 @@ Word fidelity or completion of all PDF/native/source/resource acceptance.
 ```sh
 GOWORK=off go test -run '^TestGeneratedPDF|^FuzzGeneratedPDFNoteGraph$' -count=1 .
 GOWORK=off go test -run 'TestCLIVDOCSSemantics/document.sf/pdf|TestCLIPDFPhysicalInspection' -count=1 ./cmd/manifold
-GOWORK=off go run ./examples/colleaf -out output/colleaf-tagged
+GOWORK=off go run ./examples/vdocs -out output/vdocs-tagged
 # Recreate the independent pre-tagging baseline (fresh detached checkout):
 git worktree add --detach output/tagged-baseline-1d13d3c 1d13d3c
-MANYDOC_QA_OUT="$PWD/output/colleaf-baseline-1d13" GOWORK=off sh -c 'go -C output/tagged-baseline-1d13d3c run ./examples/colleaf -out "$MANYDOC_QA_OUT"'
+MANYDOC_QA_OUT="$PWD/output/vdocs-baseline-1d13" GOWORK=off sh -c 'go -C output/tagged-baseline-1d13d3c run ./examples/vdocs -out "$MANYDOC_QA_OUT"'
 git worktree remove output/tagged-baseline-1d13d3c
 output/qa-venv/bin/python scripts/qa/layout/verify_generated_pdf_structure.py
 ```
@@ -710,7 +710,7 @@ untagged recovery, broader source/resource and final acceptance audits stay open
 ## Public native integration evidence to preserve
 
 VDOCS, ReadVDOCS, WriteVDOCS, VDOCSMIME and .vdocs CLI dispatch expose the
-checked offline Colleaf version-3/Univer 1.0.4 profile through SF. Public/external-
+checked offline VDOCS version-3/Univer 1.0.4 profile through SF. Public/external-
 package/CLI/example tests cover rich graphs, assets, source facts, wrong envelopes,
 I/O, cancellation, immutability and atomic failures. Native transport retains
 source/diagnostic history without a lossy-output gate; unsupported mappings reject.
@@ -723,7 +723,7 @@ lossless metadata compression reduces its native envelope from 11 MiB to 3.6 MiB
 passing the unchanged app validator. Five original DOCX language graphs also
 survive actual saves/edits/removal, with 516 ProseMirror nodes over 18 artifacts.
 These are component/offline transport results; native browser behavior and broader
-rendering/settings intent remain unqualified. See COLLEAF_FORMAT.md and the durable
+rendering/settings intent remain unqualified. See VDOCS_FORMAT.md and the durable
 verification milestones. No application code or admission/authorization was changed.
 
 Earlier chronological progress and resolved failures remain in Git history and
@@ -762,7 +762,7 @@ QA only. Historical codec timings are retained in the verification ledger.
 ## Maintenance and next commands
 
 No required original-goal work remains. Read FINAL_AUDIT.md for acceptance evidence
-and COMPATIBILITY.md for delivered limits. Optional Colleaf browser discrepancies,
+and COMPATIBILITY.md for delivered limits. Optional VDOCS browser discrepancies,
 ambiguous source/color cases and the initial parser allocation boundary remain
 explicit qualification limits; they are not hidden completion exceptions.
 
@@ -796,7 +796,7 @@ commit verified milestones. Linux cross-builds do not imply Linux execution.
 | PDF recovery | pdf_read/geometry/images/marked/structure/links/navigation_read/infer/rulings/text_style |
 | Native layout | pdf_write/text/shaping/bidi/glyph/font/notes/lists/cell_layout/table_continue |
 | Source/QA | testdata/real and corpus manifests/oracles, scripts, examples, verification.json |
-| Current contracts | ACCEPTANCE.md, COMPATIBILITY.md, STRUCTURED_FORMAT.md, COLLEAF_FORMAT.md, feature evidence docs |
+| Current contracts | ACCEPTANCE.md, COMPATIBILITY.md, STRUCTURED_FORMAT.md, VDOCS_FORMAT.md, feature evidence docs |
 
 ```sh
 GOWORK=off go test ./... -count=1

@@ -28,7 +28,7 @@ Exact scopes are in verification.json and FINAL_AUDIT.md.
 Known limits are explicit in COMPATIBILITY.md and FINAL_AUDIT.md. They include
 unsupported scripts/codecs/graphics/editing semantics, uncertainty in ambiguous
 PDFs and no universal initial-parser memory cap. Retained CID/color/reader and
-optional Colleaf browser discrepancies remain documented and reproducible; none
+optional VDOCS browser discrepancies remain documented and reproducible; none
 is substituted for a missing required conversion capability. Complete browser
 parity and Word-equivalent pagination are not original acceptance gates.
 

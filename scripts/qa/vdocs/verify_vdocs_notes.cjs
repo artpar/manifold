@@ -1,21 +1,19 @@
-/* Optional pinned actual app/native reader/mutation QA; no runtime JS. */
+/* Optional pinned native reader/mutation QA; no runtime JS. */
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
 const {stripTypeScriptTypes}=require('node:module');
 const root=path.resolve(__dirname,'../../..');
-const qa=path.join(root,'output/colleaf-qa');
+const qa=path.join(root,'output/vdocs-qa');
 const core=require(path.join(qa,'node_modules/@univerjs/core'));
 const engine=require(path.join(qa,'node_modules/@univerjs/engine-render'));
 for(const name of ['core','engine-render'])assert.equal(JSON.parse(fs.readFileSync(path.join(qa,'node_modules/@univerjs',name,'package.json'))).version,'1.0.4');
 async function main(){
  const snapshot={id:'manydoc-notes-qa',title:'Native note authority',documentStyle:{documentFlavor:1,pageSize:{width:800,height:1000}},...JSON.parse(fs.readFileSync(path.join(qa,'notes.json')))};
- const source=fs.readFileSync(path.join(root,'output/codec/colleaf-format-0.txt'),'utf8');
- assert.equal(crypto.createHash('sha256').update(source).digest('hex'),'c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0');
- const app=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(source)).toString('base64'));
- const envelope=document=>({type:'vibedada-document',version:3,engine:'univer',engineVersion:'1.0.4',document});
- app.validateDocument(envelope(snapshot));
+
+ const envelope=document=>({type:'manifold-document',version:3,engine:'univer',engineVersion:'1.0.4',document});
+
  const model=new core.DocumentDataModel(snapshot);
  let view=new engine.DocumentViewModel(model);
  const noteViews=view.getNoteTreeMap();
@@ -56,9 +54,9 @@ async function main(){
  view=new engine.DocumentViewModel(model);
  assert.ok(view.getNoteTreeMap().get('manydoc-note-2').getBody().dataStream.startsWith('Edit body\r'));
  assert.deepEqual(model.getSnapshot().resources,snapshot.resources);
- app.validateDocument(envelope(model.getSnapshot()));
+
  fs.writeFileSync(path.join(qa,'notes-edited.json'),JSON.stringify(model.getSnapshot(),null,2));
  view.dispose();model.dispose();
- console.log('Pinned app validator, native foot/endnote identities/references/bodies/tables and TextX note edit/save passed; actual note ranges/glyphs/body placement pass; browser font/paint not qualified');
+ console.log('Native foot/endnote identities/references/bodies/tables and TextX note edit/save passed; actual note ranges/glyphs/body placement pass; browser font/paint not qualified');
 }
 main().catch(error=>{console.error(error);process.exitCode=1});

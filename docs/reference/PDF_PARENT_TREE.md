@@ -60,7 +60,7 @@ This is graph evidence, with no new output-layout or visual fidelity claim.
 GOWORK=off go test -run 'TestPDFParentTree|TestPDFTagged|TestGeneratedPDF' -count=1 ./internal/engine
 GOWORK=off go test -run '^$' -fuzz '^FuzzPDFParentTree$' -fuzztime=10s -parallel=2 ./internal/engine
 output/qa-venv/bin/python scripts/qa/pdf/verify_pdf_parent_tree.py testdata/real/copyright-office-circular-1-2021.pdf
-output/qa-venv/bin/python scripts/qa/pdf/verify_pdf_parent_tree.py output/colleaf-tagged/document.pdf --out output/pdf-parent-tree/generated-mutated.pdf
+output/qa-venv/bin/python scripts/qa/pdf/verify_pdf_parent_tree.py output/vdocs-tagged/document.pdf --out output/pdf-parent-tree/generated-mutated.pdf
 CGO_ENABLED=0 GOWORK=off go build -o output/manydoc-parent-tree ./cmd/manifold
 # Expected failure, with ParentTree/forward-owner contradiction:
 output/manydoc-parent-tree extract -format sf -o output/pdf-parent-tree/rejected.sf output/pdf-parent-tree/mutated.pdf

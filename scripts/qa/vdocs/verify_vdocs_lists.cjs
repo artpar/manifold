@@ -1,7 +1,7 @@
 /* Optional pinned native list marker/reader/edit/save QA. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {stripTypeScriptTypes}=require('node:module');
-const root=path.resolve(__dirname,'../../..'),qa=path.join(root,'output/colleaf-qa');
+const root=path.resolve(__dirname,'../../..'),qa=path.join(root,'output/vdocs-qa');
 const core=require(path.join(qa,'node_modules/@univerjs/core')),engine=require(path.join(qa,'node_modules/@univerjs/engine-render'));
 for(const name of ['core','engine-render'])assert.equal(JSON.parse(fs.readFileSync(path.join(qa,'node_modules/@univerjs',name,'package.json'))).version,'1.0.4');
 function markerMap(snapshot){
@@ -14,9 +14,8 @@ function markerMap(snapshot){
 }
 async function main(){
  const snapshot={id:'manydoc-lists-qa',title:'Native list ownership',documentStyle:{documentFlavor:1,pageSize:{width:800,height:1000}},...JSON.parse(fs.readFileSync(path.join(qa,'lists.json')))};
- const source=fs.readFileSync(path.join(root,'output/codec/colleaf-format-0.txt'),'utf8');assert.equal(crypto.createHash('sha256').update(source).digest('hex'),'c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0');
- const app=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(source)).toString('base64'));
- const envelope=document=>({type:'vibedada-document',version:3,engine:'univer',engineVersion:'1.0.4',document});app.validateDocument(envelope(snapshot));
+
+ const envelope=document=>({type:'manifold-document',version:3,engine:'univer',engineVersion:'1.0.4',document});
  const expected=['Appendix AA.','AA.iv)','AA.v)','Appendix BB.','8.1','2.','3.','•','0.'];
  const marked=snapshot.body.paragraphs.filter(p=>p.bullet);
  const labels=markerMap(snapshot);
@@ -38,8 +37,8 @@ async function main(){
  assert.deepEqual(model.getBody().paragraphs.map(p=>p.paragraphId),originalIds);
  assert.deepEqual(model.getSnapshot().resources,snapshot.resources);
  const editedLabels=markerMap(model.getSnapshot());assert.deepEqual(marked.map(p=>editedLabels.get(p.startIndex)),expected);
- app.validateDocument(envelope(model.getSnapshot()));fs.writeFileSync(path.join(qa,'lists-edited.json'),JSON.stringify(model.getSnapshot(),null,2));
+ fs.writeFileSync(path.join(qa,'lists-edited.json'),JSON.stringify(model.getSnapshot(),null,2));
  view.dispose();model.dispose();
- console.log('Pinned native compound/independent/restarted/zero/bullet markers, app validator and TextX save passed; full browser/resource persistence and visual layout remain unqualified');
+ console.log('Pinned native compound/independent/restarted/zero/bullet markers, TextX save passed; full browser/resource persistence and visual layout remain unqualified');
 }
 main().catch(error=>{console.error(error);process.exitCode=1});

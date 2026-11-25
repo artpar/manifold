@@ -10,7 +10,7 @@ from docx import Document
 from pypdf import PdfReader
 import pymupdf
 
-root=Path('output/colleaf-qa/note-numbering')
+root=Path('output/vdocs-qa/note-numbering')
 Document(root.with_suffix('.docx'))
 ns={'w':'http://schemas.openxmlformats.org/wordprocessingml/2006/main','md':'urn:manydoc:metadata:1'}
 md='{'+ns['md']+'}'

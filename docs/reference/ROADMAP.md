@@ -15,7 +15,7 @@ qualification. These are scoped results, not full goal acceptance.
    audits beyond reciprocal ownership. Preserve original content/asset/provenance
    oracles and independently generated source expectations.
 2. Qualify remaining native rendering/settings/marker appearance and full-preset/
-   browser behavior against pinned Colleaf/Univer APIs. No application writes,
+   browser behavior against pinned VDOCS/Univer APIs. No application writes,
    authorization/quota gates or app transport changes belong in this library.
 3. Complete remaining untagged note/source/reflow, literal/custom list
    representation and note-policy audits using PDF_NOTES.md, NUMBERING.md and

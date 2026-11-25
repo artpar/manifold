@@ -206,7 +206,7 @@ pdftoppm -scale-to 1100 -png output/literal-output/continued.pdf output/literal-
 ```
 
 The native repeated-footnote ordering defect remains separate and unresolved.
-See VDOCS_BROWSER.md. The complete goal stays active; native generation and remaining
+See VDOCS_FORMAT.md#limits. The complete goal stays active; native generation and remaining
 semantic/source/resource/visual acceptance work are not closed by this milestone.
 
 

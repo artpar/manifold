@@ -102,7 +102,7 @@ below. Opaque replacement ranges retain content/graph evidence and uncertainty;
 independently cited nested definitions/Ref wrappers now qualify below; broader
 untagged inference remains required. Do not relabel
 these required follow-ups as a completed note contract. Original rich producer
-inputs, native Colleaf interoperability and final full-goal acceptance remain open.
+inputs, native VDOCS interoperability and final full-goal acceptance remain open.
 
 ## Independent display marks (current extension)
 
@@ -150,7 +150,7 @@ automatic intent round-trips in checked metadata, but Word's own subsequent edit
 will not recompute those literal labels. Ordinary notes without variants keep the
 previous standard automatic-reference/NOTEREF representation. PDF source reflow
 already retains its existing AllowLossy requirement. Daptin access/admission and
-Colleaf save/quotas remain outside the library.
+VDOCS save/quotas remain outside the library.
 
 ### Additional reproduction and evidence
 
@@ -254,7 +254,7 @@ GOWORK=off go test -race -run 'TestPDFAdjacent|TestPDFPhysicalLinkNoteInference|
 ```
 
 No required runtime component, module dependency, app integration or quota/access
-boundary changed. General untagged note recognition, Colleaf snapshot integration and remaining
+boundary changed. General untagged note recognition, VDOCS snapshot integration and remaining
 original DOCX corpus/visual qualification are still open.
 
 
@@ -372,7 +372,7 @@ GOWORK=off go test -race -run 'TestPDFNoteAligned|TestPDFNoteActualText' -count=
 Full/final focused checks and their timing are in verification.json; ignored QA
 is output/note-actual. Runtime remains pure Go; optional QA readers are not runtime
 dependencies. Nested-definition/redundant-wrapper cases now qualify below. Next:
-actual Colleaf integration and broader untagged recovery. Full goal remains incomplete.
+actual VDOCS integration and broader untagged recovery. Full goal remains incomplete.
 
 ## Nested definitions and redundant ownership wrappers
 
@@ -421,7 +421,7 @@ The Go tests additionally qualify multi-level aliases, conflicting targets,
 extra-content and opaque wrappers, source self-parent rejection, all source codecs
 and Word identity/order. The original source bytes/expectations are unchanged;
 these targeted fixtures qualify the concrete rules, not arbitrary recursive or
-untagged note graphs. Broader untagged recovery, actual Colleaf integration and the
+untagged note graphs. Broader untagged recovery, actual VDOCS integration and the
 final source consistency/resource/API/acceptance audit remain open.
 
 ```sh

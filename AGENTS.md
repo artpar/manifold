@@ -7,7 +7,7 @@ you change behavior or leave work for another contributor.
 ## Product contract
 
 manifold is an independent, pure-Go document processing library and CLI for
-embedding in Daptin and applications such as Colleaf. Initial scope: DOCX and
+embedding in Go applications. Initial scope: DOCX and
 PDF extraction/generation, plus JSON/text interchange. It is not currently a
 drop-in replacement for UniOffice/UniPDF or a Word-compatible layout engine.
 

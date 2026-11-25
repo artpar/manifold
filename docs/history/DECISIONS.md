@@ -3,7 +3,7 @@
 ## 2026-11-23 Project creation
 
 The user requested a new project at `~/workspace/code/github.com/artpar/manydoc`
-after discussing native Go document performers in Daptin for Colleaf. The user
+after discussing native Go document performers in Daptin for VDOCS. The user
 explicitly requires durable knowledge transfer so another agent/human can
 recover progress without the original conversation.
 
@@ -73,7 +73,7 @@ broader feature set than the initial implementation. Select ProseMirror JSON
 with an explicit versioned profile (`manydoc-prosemirror/1`); the rationale,
 compared alternatives, primary sources, wire mapping and unimplemented features
 are in STRUCTURED_FORMAT.md. The executable schema declaration is
-`schema/prosemirror-v1.json`. No Colleaf schema has been verified yet.
+`schema/prosemirror-v1.json`. No VDOCS schema has been verified yet.
 
 Keep the existing Document conversion engine and legacy JSON API temporarily,
 with checked bridges to/from the selected SF. Preserve assets, relationships,
@@ -1374,7 +1374,7 @@ output buffer. Independent normalized JSON hashes and all 205,918 ProseMirror no
 prove retention. Full-tree allocation/editor costs remain explicit and must be
 considered in the remaining acceptance audit. See SF_CODEC.md.
 
-## 2026-11-24 Correct the Colleaf availability assumption and current audit
+## 2026-11-24 Correct the VDOCS availability assumption and current audit
 
 The initial local-only search did not inspect the remotely available application.
 Read-only pinned GitHub inspection now establishes the actual .vdocs version-3
@@ -1382,7 +1382,7 @@ Univer 1.0.4 snapshot contract, with matching published schema examined. Keep th
 logical ProseMirror SF and qualify a checked native snapshot adapter as the
 application boundary; do not claim raw SF compatibility. Document rich source/range
 and plugin-resource mappings, and keep application quotas/access/save guards out
-of the library. See COLLEAF_FORMAT.md; no app/backend source was modified.
+of the library. See VDOCS_FORMAT.md; no app/backend source was modified.
 
 Current audit probes show explicit Note/Ref relationships and Header pagination
 properties still flatten rather than recover into corresponding semantics. Keep
@@ -1602,7 +1602,7 @@ enum/parser establishes0x0E/0x0F, with0x1E/0x1F reserved for annotation controls
 Cells require CR/LF and tree ends differ from exclusive table metadata. Native
 geometry and fs also have different units; preserve these distinctions explicitly.
 
-Use independently hand-authored native records and actual Colleaf validator/core/
+Use independently hand-authored native records and native SDK/core/
 view/tree APIs to qualify offsets/styles/links/note references/tables. Do not copy
 implementation code or embed SF as a second authoritative text payload. Actual
 rich mapping/edit/save qualification remains required; current internal token and
@@ -1837,7 +1837,7 @@ wrapping, selection/click/navigation behavior or full native adapter completion.
 
 ## 2026-11-24 Validate native JSON before decoding changes its meaning
 
-The actual native file boundary uses Colleaf's exact v3 envelope and pinned engine
+The actual native file boundary uses VDOCS's exact v3 envelope and pinned engine
 identity. Keep it private until remaining mappings and interaction are qualified.
 Do not rely on encoding/json alone: it accepts duplicate keys, malformed Unicode,
 case aliases for struct tags and null scalar values. Scan original bytes first,
@@ -1848,7 +1848,7 @@ resource payloads independently, including sparse carrier records. Do not parse
 application permission resources as library admission policy.
 
 Scan large string values in place; bound parser depth for stack protection, without
-copying Colleaf's application byte/image budgets into the library. The whole input
+copying VDOCS's application byte/image budgets into the library. The whole input
 is currently buffered, so broader resource auditing remains required. Actual
 facade save adds settings even when omitted by the producer. Accept the documented
 empty/positive zoom settings, disclose lost UI view/locale state and reject unknown
@@ -2203,13 +2203,13 @@ Keep production pure Go and the broader native/source/API/UI acceptance queue op
 ## 2026-11-24 Compress large native metadata without discarding evidence
 
 The original Copyright Office PDF exposed an 11 MiB native snapshot rejected by the
-actual 5 MiB Colleaf validator. Keep the validator, original source and SF oracle
+actual 5 MiB native SDK. Keep the validator, original source and SF oracle
 unchanged. Use deterministic standard gzip/base64 for large private metadata,
 version its carrier and retain legacy reads. Bound expansion and verify size,
 checksum, single-stream framing and strict resource JSON. This reduces the
 publication snapshot to 3.6 MiB while preserving its complete SF/source graph after
 actual registered-plugin saves. Compression does not guarantee that arbitrary
-documents fit Colleaf limits and does not introduce a library authorization gate.
+documents fit VDOCS limits and does not introduce a library authorization gate.
 DOCX nonvisual run intent and full native/UI/API acceptance remain open.
 
 
@@ -2301,7 +2301,7 @@ This parser work limit is not application quota or exhaustive PDF safety.
 
 ## 2026-11-24 Keep the actual browser ordering failure visible
 
-Build the pinned actual Colleaf mount/validator as optional isolated browser QA;
+Build the pinned actual retired host mount/validator as optional isolated browser QA;
 readiness and preserved note sets are insufficient placement evidence. Keep the
 unchanged public example and first-reference-order oracle when the actual renderer
 reverses repeated footnotes. Separate the no-repeat control from the acceptance

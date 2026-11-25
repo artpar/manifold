@@ -37,7 +37,7 @@ type vdocsCitationState struct {
 	Diagnostics  []Diagnostic
 }
 
-func openColleafCitations(ctx context.Context, input vdocsNoteSnapshot) (vdocsNoteSnapshot, *vdocsCitationState, error) {
+func openVDOCSCitations(ctx context.Context, input vdocsNoteSnapshot) (vdocsNoteSnapshot, *vdocsCitationState, error) {
 	state := &vdocsCitationState{Scopes: map[string]vdocsCitationScope{}, Pending: map[*NoteReference]vdocsCitationPending{}, Definitions: map[string]string{}, BodyDefaults: map[noteKey]bool{}}
 	var err error
 	var identities vdocsNoteIdentities
@@ -53,11 +53,11 @@ func openColleafCitations(ctx context.Context, input vdocsNoteSnapshot) (vdocsNo
 	}
 	// Validate original fragment identities/bounds before combining them, so
 	// normalization cannot conceal a malformed individual native record.
-	index, err := indexColleafBody(ctx, input.Body)
+	index, err := indexVDOCSBody(ctx, input.Body)
 	if err != nil {
 		return input, nil, err
 	}
-	input.Body, err = joinColleafCitationFragments(input.Body)
+	input.Body, err = joinVDOCSCitationFragments(input.Body)
 	if err != nil {
 		return input, nil, err
 	}
@@ -97,7 +97,7 @@ func openColleafCitations(ctx context.Context, input vdocsNoteSnapshot) (vdocsNo
 		atom, ok := index.blocks[a.StartIndex]
 		n, hasNote := input.Notes[hint.NoteID]
 		if !ok || !hasNote || atom.NoteID != hint.NoteID || n.Mark == nil || *n.Mark != "" || !strings.HasPrefix(text, "\ufffc") || !strings.HasSuffix(text, vdocsCitationEnd) || strings.ContainsAny(text, "\r\n\t\b\f\v") {
-			state.Diagnostics = append(state.Diagnostics, Diagnostic{Code: "colleaf_stale_citation", Message: "Stale native citation ownership ignored; actual note anchor and visible label text are retained"})
+			state.Diagnostics = append(state.Diagnostics, Diagnostic{Code: "vdocs_stale_citation", Message: "Stale native citation ownership ignored; actual note anchor and visible label text are retained"})
 			continue
 		}
 		if _, exists := state.Scopes[atom.ID]; exists {
@@ -127,7 +127,7 @@ func openColleafCitations(ctx context.Context, input vdocsNoteSnapshot) (vdocsNo
 			}
 		}
 		if !valid {
-			state.Diagnostics = append(state.Diagnostics, Diagnostic{Code: "colleaf_stale_citation", Message: "Edited native citation baseline is retained as visible story text rather than hidden by stale ownership"})
+			state.Diagnostics = append(state.Diagnostics, Diagnostic{Code: "vdocs_stale_citation", Message: "Edited native citation baseline is retained as visible story text rather than hidden by stale ownership"})
 			continue
 		}
 		for _, span := range spans[first:] {
@@ -147,7 +147,7 @@ func openColleafCitations(ctx context.Context, input vdocsNoteSnapshot) (vdocsNo
 	for _, atom := range index.blocks {
 		if _, projected := state.Definitions[atom.NoteID]; projected {
 			if _, owned := state.Scopes[atom.ID]; !owned {
-				state.Diagnostics = append(state.Diagnostics, Diagnostic{Code: "colleaf_stale_citation", Message: "Expected native citation ownership is absent or stale; actual note anchor and visible label text are retained"})
+				state.Diagnostics = append(state.Diagnostics, Diagnostic{Code: "vdocs_stale_citation", Message: "Expected native citation ownership is absent or stale; actual note anchor and visible label text are retained"})
 			}
 		}
 	}
@@ -161,7 +161,7 @@ func (s *vdocsCitationState) adaptPlan(plan *vdocsNoteNumberPlan) {
 	if len(plan.Marks) == 0 {
 		var keep []Diagnostic
 		for _, d := range plan.Diagnostics {
-			if d.Code != "colleaf_note_numbering" {
+			if d.Code != "vdocs_note_numbering" {
 				keep = append(keep, d)
 			}
 		}
@@ -193,7 +193,7 @@ func (s *vdocsCitationState) collapse(ctx context.Context, doc *Document) error 
 					out = append(out, run)
 					continue
 				}
-				label, next, tail, err := takeColleafCitationRuns(ctx, working, i+1, pending.Scope.Take)
+				label, next, tail, err := takeVDOCSCitationRuns(ctx, working, i+1, pending.Scope.Take)
 				if err != nil {
 					return err
 				}
@@ -201,7 +201,7 @@ func (s *vdocsCitationState) collapse(ctx context.Context, doc *Document) error 
 				if !strings.HasSuffix(text, vdocsCitationEnd) {
 					return fmt.Errorf("native citation extent lost its owned delimiter")
 				}
-				label, _, err = splitColleafRuns(ctx, label, vdocsUTF16Len(text)-1)
+				label, _, err = splitVDOCSRuns(ctx, label, vdocsUTF16Len(text)-1)
 				if err != nil {
 					return err
 				}
@@ -211,7 +211,7 @@ func (s *vdocsCitationState) collapse(ctx context.Context, doc *Document) error 
 					valid = valid && r.Note == nil && r.Link == "" && r.Destination == "" && r.Anchor == ""
 				}
 				if !valid {
-					doc.warn("colleaf_stale_citation", "Edited native citation text is retained in story flow because it is no longer a supported single-line mark")
+					doc.warn("vdocs_stale_citation", "Edited native citation text is retained in story flow because it is no longer a supported single-line mark")
 					out = append(out, run)
 					continue
 				}
@@ -223,7 +223,7 @@ func (s *vdocsCitationState) collapse(ctx context.Context, doc *Document) error 
 					if text == "" {
 						empty := ""
 						ref.Label = &empty
-						doc.warn("colleaf_citation_edit", "Empty edited rich citation retained as markerless")
+						doc.warn("vdocs_citation_edit", "Empty edited rich citation retained as markerless")
 					} else {
 						ref.LabelContent = label
 					}
@@ -243,7 +243,7 @@ func (s *vdocsCitationState) collapse(ctx context.Context, doc *Document) error 
 						ref.Label = &value
 					} else {
 						ref.LabelContent = label
-						doc.warn("colleaf_citation_edit", "Edited native citation formatting retained as rich label content")
+						doc.warn("vdocs_citation_edit", "Edited native citation formatting retained as rich label content")
 					}
 				}
 				out = append(out, run)
@@ -294,7 +294,7 @@ func (s *vdocsCitationState) collapse(ctx context.Context, doc *Document) error 
 			if *ref.Label == catalog.labels[referenceKey(ref)] {
 				ref.Label = nil
 			} else {
-				doc.warn("colleaf_citation_default_edit", "Actual citation mark retained literally because the current shared default no longer agrees")
+				doc.warn("vdocs_citation_default_edit", "Actual citation mark retained literally because the current shared default no longer agrees")
 			}
 		}
 	}
@@ -304,7 +304,7 @@ func (s *vdocsCitationState) collapse(ctx context.Context, doc *Document) error 
 			if *n.BodyLabel == catalog.labels[noteIdentity(*n)] {
 				n.BodyLabel = nil
 			} else {
-				doc.warn("colleaf_citation_default_edit", "Actual body mark retained literally because the current shared default no longer agrees")
+				doc.warn("vdocs_citation_default_edit", "Actual body mark retained literally because the current shared default no longer agrees")
 			}
 		}
 	}
@@ -325,8 +325,8 @@ func vdocsCitationProjection(d *Document, catalog *noteCatalog) map[noteKey]stri
 	return out
 }
 
-func writeColleafCitation(ctx context.Context, run Run, id, mode string, label []Run) (vdocsBody, error) {
-	fragment, err := encodeColleafTextBodyWithNotes(ctx, []Block{{Kind: Paragraph, Runs: label}}, nil)
+func writeVDOCSCitation(ctx context.Context, run Run, id, mode string, label []Run) (vdocsBody, error) {
+	fragment, err := encodeVDOCSTextBodyWithNotes(ctx, []Block{{Kind: Paragraph, Runs: label}}, nil)
 	if err != nil {
 		return fragment, err
 	}
@@ -367,7 +367,7 @@ func writeColleafCitation(ctx context.Context, run Run, id, mode string, label [
 
 // Walk each paragraph once; do not repeatedly copy the whole remainder for every
 // citation in a long paragraph. A partial last run is committed only on success.
-func takeColleafCitationRuns(ctx context.Context, runs []Run, start, count int) ([]Run, int, *Run, error) {
+func takeVDOCSCitationRuns(ctx context.Context, runs []Run, start, count int) ([]Run, int, *Run, error) {
 	var label []Run
 	for i := start; i < len(runs); i++ {
 		if count == 0 {
@@ -383,7 +383,7 @@ func takeColleafCitationRuns(ctx context.Context, runs []Run, start, count int) 
 			count -= size
 			continue
 		}
-		index, err := newColleafTextIndex(ctx, r.Text)
+		index, err := newVDOCSTextIndex(ctx, r.Text)
 		if err != nil {
 			return nil, 0, nil, err
 		}
@@ -405,7 +405,7 @@ func takeColleafCitationRuns(ctx context.Context, runs []Run, start, count int) 
 	return label, len(runs), nil, nil
 }
 
-func nameColleafCitationRange(a *vdocsRangeRecord) {
+func nameVDOCSCitationRange(a *vdocsRangeRecord) {
 	var hint vdocsCitationMark
 	if a.Type == 5 && json.Unmarshal(a.Properties, &hint) == nil && hint.Profile == vdocsCitationProfile {
 		hint.Token = a.ID
@@ -447,7 +447,7 @@ func nameColleafCitationRange(a *vdocsRangeRecord) {
 // The schema permits the matching body-number atom at offset zero.
 // It is the note's body marker, not a recursive citation to itself.
 
-func joinColleafCitationFragments(body vdocsBody) (vdocsBody, error) {
+func joinVDOCSCitationFragments(body vdocsBody) (vdocsBody, error) {
 	var out []vdocsRangeRecord
 	groups := map[string]int{}
 	for _, a := range body.CustomRanges {
@@ -496,7 +496,7 @@ type vdocsBodyMarkScope struct {
 	Restored   bool
 }
 
-func prepareColleafBodyMark(n Note, catalog *noteCatalog) ([]Block, *vdocsBodyMark, int, error) {
+func prepareVDOCSBodyMark(n Note, catalog *noteCatalog) ([]Block, *vdocsBodyMark, int, error) {
 	if n.BodyLabel == nil && n.BodyLabelContent == nil && n.BodyLabelStyle == nil {
 		return n.Blocks, nil, 0, nil
 	}
@@ -529,13 +529,13 @@ func prepareColleafBodyMark(n Note, catalog *noteCatalog) ([]Block, *vdocsBodyMa
 	prefix = append(prefix, Run{Text: "\t"})
 	if len(blocks) > 0 && (blocks[0].Kind == Paragraph || blocks[0].Kind == Heading) {
 		if blocks[0].Source != nil {
-			origin, err := newColleafOrigin(blocks[0])
+			origin, err := newVDOCSOrigin(blocks[0])
 			if err != nil {
 				return nil, nil, 0, err
 			}
 			blocks[0].vdocsOrigin = origin
 		}
-		prepared, err := prepareColleafAnchorOrigins(blocks[0])
+		prepared, err := prepareVDOCSAnchorOrigins(blocks[0])
 		if err != nil {
 			return nil, nil, 0, err
 		}
@@ -547,7 +547,7 @@ func prepareColleafBodyMark(n Note, catalog *noteCatalog) ([]Block, *vdocsBodyMa
 	}
 	return blocks, hint, vdocsUTF16Len(text) + 1, nil
 }
-func sealColleafBodyMark(n *vdocsNativeNote, hint vdocsBodyMark, length int) error {
+func sealVDOCSBodyMark(n *vdocsNativeNote, hint vdocsBodyMark, length int) error {
 	hint.NoteID = n.ID
 	start, end := 0, length-1
 	if hint.Empty {
@@ -565,7 +565,7 @@ func sealColleafBodyMark(n *vdocsNativeNote, hint vdocsBodyMark, length int) err
 	n.ShowBodyReference = &hidden
 	return nil
 }
-func openColleafBodyMark(ctx context.Context, n vdocsNativeNote) (vdocsNativeNote, *vdocsBodyMarkScope, error) {
+func openVDOCSBodyMark(ctx context.Context, n vdocsNativeNote) (vdocsNativeNote, *vdocsBodyMarkScope, error) {
 	var scope *vdocsBodyMarkScope
 	var ranges []vdocsRangeRecord
 	for _, a := range n.Body.CustomRanges {
@@ -590,7 +590,7 @@ func openColleafBodyMark(ctx context.Context, n vdocsNativeNote) (vdocsNativeNot
 		if a.Active == nil || *a.Active || hint.TextColorMode != "text" {
 			return n, nil, fmt.Errorf("%w: native body-mark ownership appearance is no longer neutral", ErrUnsupported)
 		}
-		index, err := newColleafTextIndex(ctx, n.Body.DataStream)
+		index, err := newVDOCSTextIndex(ctx, n.Body.DataStream)
 		if err != nil {
 			return n, nil, err
 		}
@@ -602,7 +602,7 @@ func openColleafBodyMark(ctx context.Context, n vdocsNativeNote) (vdocsNativeNot
 	n.Body.CustomRanges = ranges
 	return n, scope, nil
 }
-func splitColleafRuns(ctx context.Context, runs []Run, cut int) ([]Run, []Run, error) {
+func splitVDOCSRuns(ctx context.Context, runs []Run, cut int) ([]Run, []Run, error) {
 	var before, after []Run
 	for _, r := range runs {
 		if cut <= 0 {
@@ -618,7 +618,7 @@ func splitColleafRuns(ctx context.Context, runs []Run, cut int) ([]Run, []Run, e
 			cut -= size
 			continue
 		}
-		index, err := newColleafTextIndex(ctx, r.Text)
+		index, err := newVDOCSTextIndex(ctx, r.Text)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -640,12 +640,12 @@ func splitColleafRuns(ctx context.Context, runs []Run, cut int) ([]Run, []Run, e
 	}
 	return before, after, nil
 }
-func restoreColleafBodyMark(ctx context.Context, n vdocsNativeNote, scope *vdocsBodyMarkScope, note *Note, doc *Document) error {
+func restoreVDOCSBodyMark(ctx context.Context, n vdocsNativeNote, scope *vdocsBodyMarkScope, note *Note, doc *Document) error {
 	if scope == nil {
 		return nil
 	}
 	stale := func() {
-		doc.warn("colleaf_stale_note_body_mark", "Stale native body-mark ownership ignored; actual visible story text and generated marker state are retained")
+		doc.warn("vdocs_stale_note_body_mark", "Stale native body-mark ownership ignored; actual visible story text and generated marker state are retained")
 	}
 	if scope.NoteID != n.ID || n.ShowBodyReference == nil || *n.ShowBodyReference {
 		stale()
@@ -667,7 +667,7 @@ func restoreColleafBodyMark(ctx context.Context, n vdocsNativeNote, scope *vdocs
 		return nil
 	}
 
-	runs, remaining, err := splitColleafRuns(ctx, note.Blocks[0].Runs, scope.End+1)
+	runs, remaining, err := splitVDOCSRuns(ctx, note.Blocks[0].Runs, scope.End+1)
 	if err != nil {
 		return err
 	}
@@ -676,7 +676,7 @@ func restoreColleafBodyMark(ctx context.Context, n vdocsNativeNote, scope *vdocs
 		stale()
 		return nil
 	}
-	runs, _, err = splitColleafRuns(ctx, runs, vdocsUTF16Len(text)-1)
+	runs, _, err = splitVDOCSRuns(ctx, runs, vdocsUTF16Len(text)-1)
 	if err != nil {
 		return err
 	}
@@ -722,7 +722,7 @@ func restoreColleafBodyMark(ctx context.Context, n vdocsNativeNote, scope *vdocs
 		return nil
 	}
 	note.BodyLabelContent = runs
-	doc.warn("colleaf_note_body_mark_edit", "Native body-mark formatting is retained as rich label content after editing its original representation")
+	doc.warn("vdocs_note_body_mark_edit", "Native body-mark formatting is retained as rich label content after editing its original representation")
 	return nil
 }
 
@@ -747,7 +747,7 @@ type vdocsNoteNumberPlan struct {
 	Diagnostics []Diagnostic
 }
 
-func readColleafNoteSettings(raw json.RawMessage) (vdocsNoteSettings, error) {
+func readVDOCSNoteSettings(raw json.RawMessage) (vdocsNoteSettings, error) {
 	var settings vdocsNoteSettings
 	if len(raw) == 0 {
 		return settings, nil
@@ -798,7 +798,7 @@ func vdocsHasNoteSettings(s vdocsNoteSettings) bool {
 	}
 	return false
 }
-func mergeColleafNoteProperties(base, local vdocsNoteProperties) vdocsNoteProperties {
+func mergeVDOCSNoteProperties(base, local vdocsNoteProperties) vdocsNoteProperties {
 	if local.Format != nil {
 		base.Format = local.Format
 	}
@@ -890,13 +890,13 @@ func vdocsNoteNumber(format string, value int) (string, error) {
 	return "", fmt.Errorf("%w: native note number format %q needs mapping", ErrUnsupported, format)
 }
 
-func planColleafNoteNumbers(ctx context.Context, input vdocsNoteSnapshot) (vdocsNoteNumberPlan, error) {
+func planVDOCSNoteNumbers(ctx context.Context, input vdocsNoteSnapshot) (vdocsNoteNumberPlan, error) {
 	plan := vdocsNoteNumberPlan{Overrides: map[string]string{}, Marks: map[string]vdocsNativeNoteMarks{}}
-	settings, err := readColleafNoteSettings(input.NoteSettings)
+	settings, err := readVDOCSNoteSettings(input.NoteSettings)
 	if err != nil {
 		return plan, err
 	}
-	index, err := indexColleafBody(ctx, input.Body)
+	index, err := indexVDOCSBody(ctx, input.Body)
 	if err != nil {
 		return plan, err
 	}
@@ -908,7 +908,7 @@ func planColleafNoteNumbers(ctx context.Context, input vdocsNoteSnapshot) (vdocs
 	settingsPresent := vdocsHasNoteSettings(settings)
 	for i, node := range index.sections {
 		raw := records[node.end-1].Extra["noteProperties"]
-		sectionSettings[i], err = readColleafNoteSettings(raw)
+		sectionSettings[i], err = readVDOCSNoteSettings(raw)
 		if err != nil {
 			return plan, err
 		}
@@ -942,10 +942,10 @@ func planColleafNoteNumbers(ctx context.Context, input vdocsNoteSnapshot) (vdocs
 		for section < len(index.sections)-1 && a.StartIndex >= index.sections[section].end {
 			section++
 		}
-		props := mergeColleafNoteProperties(settings.Footnote, sectionSettings[section].Footnote)
+		props := mergeVDOCSNoteProperties(settings.Footnote, sectionSettings[section].Footnote)
 		format := "decimal"
 		if note.Kind == Endnote {
-			props = mergeColleafNoteProperties(settings.Endnote, sectionSettings[section].Endnote)
+			props = mergeVDOCSNoteProperties(settings.Endnote, sectionSettings[section].Endnote)
 			format = "lowerRoman"
 		}
 		if props.Format != nil {
@@ -996,14 +996,14 @@ func planColleafNoteNumbers(ctx context.Context, input vdocsNoteSnapshot) (vdocs
 		}
 	}
 	if len(plan.Marks) > 0 {
-		plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: "colleaf_note_numbering", Message: "Native automatic or markerless note marks are fixed to their current literal values; repeated citations and body marks are retained, while live counter behavior is not represented"})
+		plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: "vdocs_note_numbering", Message: "Native automatic or markerless note marks are fixed to their current literal values; repeated citations and body marks are retained, while live counter behavior is not represented"})
 	}
 	if settingsPresent {
-		plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: "colleaf_note_settings", Message: "Native note numbering, placement and column policies are normalized to current marks and SF foot/endnote kinds; live restart and placement settings are not represented"})
+		plan.Diagnostics = append(plan.Diagnostics, Diagnostic{Code: "vdocs_note_settings", Message: "Native note numbering, placement and column policies are normalized to current marks and SF foot/endnote kinds; live restart and placement settings are not represented"})
 	}
 	return plan, nil
 }
-func applyColleafNoteNumbers(doc *Document, plan vdocsNoteNumberPlan, ids map[string]noteKey) {
+func applyVDOCSNoteNumbers(doc *Document, plan vdocsNoteNumberPlan, ids map[string]noteKey) {
 	notes := map[noteKey]*Note{}
 	for i := range doc.Notes {
 		notes[noteIdentity(doc.Notes[i])] = &doc.Notes[i]
@@ -1089,7 +1089,7 @@ func vdocsNoteFingerprints(n StructuredNote) (string, string, error) {
 	label, err := vdocsSourceFreeHash(StructuredNote{Label: n.Label, BodyLabel: n.BodyLabel, BodyLabelMarks: n.BodyLabelMarks, BodyLabelContent: n.BodyLabelContent})
 	return body, label, err
 }
-func collectColleafNoteOrigins(d *Document, e **vdocsDocumentEvidence) error {
+func collectVDOCSNoteOrigins(d *Document, e **vdocsDocumentEvidence) error {
 	var sf *StructuredDocument
 	for i, n := range d.Notes {
 		if n.Source == nil && n.LabelSource == nil && !n.KindInferred {
@@ -1139,7 +1139,7 @@ func (o vdocsNoteOrigin) validate(pages []PDFPage) error {
 	}
 	return nil
 }
-func restoreColleafNoteOrigins(d *Document, e *vdocsDocumentEvidence, input vdocsNoteSnapshot, ids vdocsNoteIdentities) error {
+func restoreVDOCSNoteOrigins(d *Document, e *vdocsDocumentEvidence, input vdocsNoteSnapshot, ids vdocsNoteIdentities) error {
 	if e == nil || len(e.NoteOrigins) == 0 {
 		return nil
 	}
@@ -1178,9 +1178,9 @@ func restoreColleafNoteOrigins(d *Document, e *vdocsDocumentEvidence, input vdoc
 					archive[raw] = true
 				}
 			}
-			d.warn("colleaf_note_source_unbound", fmt.Sprintf("Original %s %q source facts are retained unbound after its native identity binding disappeared", o.Kind, o.ID))
+			d.warn("vdocs_note_source_unbound", fmt.Sprintf("Original %s %q source facts are retained unbound after its native identity binding disappeared", o.Kind, o.ID))
 			if o.KindInferred {
-				d.warn("colleaf_note_kind_history", fmt.Sprintf("Original %s %q placement was inferred; no current note-kind assertion is made", o.Kind, o.ID))
+				d.warn("vdocs_note_kind_history", fmt.Sprintf("Original %s %q placement was inferred; no current note-kind assertion is made", o.Kind, o.ID))
 			}
 			continue
 		}
@@ -1194,11 +1194,11 @@ func restoreColleafNoteOrigins(d *Document, e *vdocsDocumentEvidence, input vdoc
 		n.KindInferred = o.KindInferred
 		if n.Source != nil && (body != o.BodyFingerprint || label != o.LabelFingerprint) {
 			n.Source.Historical = true
-			d.warn("colleaf_note_source_historical", "Original note source facts are retained as historical after current body or marker semantics changed")
+			d.warn("vdocs_note_source_historical", "Original note source facts are retained as historical after current body or marker semantics changed")
 		}
 		if n.LabelSource != nil && label != o.LabelFingerprint {
 			n.LabelSource.Historical = true
-			d.warn("colleaf_note_label_source_historical", "Original note-label source facts are retained as historical after current marker semantics changed")
+			d.warn("vdocs_note_label_source_historical", "Original note-label source facts are retained as historical after current marker semantics changed")
 		}
 	}
 	return nil
@@ -1253,10 +1253,10 @@ type vdocsNoteSnapshot struct {
 	NoteSettings             json.RawMessage              `json:"noteSettings,omitempty"`
 }
 
-func encodeColleafNotes(ctx context.Context, d *Document) (vdocsNoteSnapshot, error) {
-	return encodeColleafNotesWithCatalog(ctx, d, nil)
+func encodeVDOCSNotes(ctx context.Context, d *Document) (vdocsNoteSnapshot, error) {
+	return encodeVDOCSNotesWithCatalog(ctx, d, nil)
 }
-func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *noteCatalog, projection ...map[noteKey]string) (vdocsNoteSnapshot, error) {
+func encodeVDOCSNotesWithCatalog(ctx context.Context, d *Document, catalog *noteCatalog, projection ...map[noteKey]string) (vdocsNoteSnapshot, error) {
 	out := vdocsNoteSnapshot{ID: "manydoc"}
 	if err := d.Validate(); err != nil {
 		return out, err
@@ -1304,7 +1304,7 @@ func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *no
 				bodyInput.BodyLabel = &actual
 			}
 		}
-		blocks, bodyMark, markLength, err := prepareColleafBodyMark(bodyInput, catalog)
+		blocks, bodyMark, markLength, err := prepareVDOCSBodyMark(bodyInput, catalog)
 		if bodyMark != nil && binding.LiteralCitations != nil && n.BodyLabel == nil && n.BodyLabelContent == nil {
 			bodyMark.UseDefault = true
 		}
@@ -1315,7 +1315,7 @@ func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *no
 			binding.BodyMarkRange = "manydoc-body-mark-" + id
 		}
 		bindings.Bindings = append(bindings.Bindings, binding)
-		encoded, err := encodeColleafAssetBody(ctx, blocks, nil, out.ID, id, imageCache)
+		encoded, err := encodeVDOCSAssetBody(ctx, blocks, nil, out.ID, id, imageCache)
 		if err != nil {
 			return out, err
 		}
@@ -1345,7 +1345,7 @@ func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *no
 				}
 				note.ReferenceStyle = style
 			}
-			if err := sealColleafBodyMark(&note, *bodyMark, markLength); err != nil {
+			if err := sealVDOCSBodyMark(&note, *bodyMark, markLength); err != nil {
 				return out, err
 			}
 		}
@@ -1355,7 +1355,7 @@ func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *no
 		}
 		out.Notes[id] = note
 	}
-	encoded, err := encodeColleafAssetBody(ctx, d.Blocks, ids, out.ID, "", imageCache, citationProjection)
+	encoded, err := encodeVDOCSAssetBody(ctx, d.Blocks, ids, out.ID, "", imageCache, citationProjection)
 	if err != nil {
 		return out, err
 	}
@@ -1391,19 +1391,19 @@ func encodeColleafNotesWithCatalog(ctx context.Context, d *Document, catalog *no
 		}
 		out.Resources = append(out.Resources, vdocsResource{Name: vdocsImageResource, Data: string(data)})
 	}
-	if err := sealColleafIntent(&out); err != nil {
+	if err := sealVDOCSIntent(&out); err != nil {
 		return vdocsNoteSnapshot{}, err
 	}
 	return out, nil
 }
 
-func decodeColleafNotes(ctx context.Context, input vdocsNoteSnapshot, settings vdocsTextContext) (*Document, error) {
+func decodeVDOCSNotes(ctx context.Context, input vdocsNoteSnapshot, settings vdocsTextContext) (*Document, error) {
 	var err error
-	input, err = openColleafIntent(ctx, input)
+	input, err = openVDOCSIntent(ctx, input)
 	if err != nil {
 		return nil, err
 	}
-	input, hyperlinkDiagnostics, err := applyColleafHyperlinkResource(ctx, input)
+	input, hyperlinkDiagnostics, err := applyVDOCSHyperlinkResource(ctx, input)
 	if err != nil {
 		return nil, err
 	}
@@ -1414,14 +1414,14 @@ func decodeColleafNotes(ctx context.Context, input vdocsNoteSnapshot, settings v
 		}
 	}
 	if settings.Citations == nil {
-		input, settings.Citations, err = openColleafCitations(ctx, input)
+		input, settings.Citations, err = openVDOCSCitations(ctx, input)
 		if err != nil {
 			return nil, err
 		}
 	}
 	var numberPlan vdocsNoteNumberPlan
 	if !settings.DeferNoteNumbering {
-		numberPlan, err = planColleafNoteNumbers(ctx, input)
+		numberPlan, err = planVDOCSNoteNumbers(ctx, input)
 		if err != nil {
 			return nil, err
 		}
@@ -1462,12 +1462,12 @@ func decodeColleafNotes(ctx context.Context, input vdocsNoteSnapshot, settings v
 			continue
 		}
 		if resource.Name == "DOC_DRAWING_PLUGIN" {
-			if err := checkColleafDrawingMirror(input, resource); err != nil {
+			if err := checkVDOCSDrawingMirror(input, resource); err != nil {
 				return nil, err
 			}
 			continue
 		}
-		if emptyColleafBuiltinResource(resource) {
+		if emptyVDOCSBuiltinResource(resource) {
 			continue
 		}
 		if resource.Name == vdocsImageResource {
@@ -1491,7 +1491,7 @@ func decodeColleafNotes(ctx context.Context, input vdocsNoteSnapshot, settings v
 			continue
 		}
 		if resource.Name != vdocsNoteIdentityResource {
-			doc.warn("colleaf_resource", "Native plugin resource "+resource.Name+" is not represented; supported visible content is retained")
+			doc.warn("vdocs_resource", "Native plugin resource "+resource.Name+" is not represented; supported visible content is retained")
 			continue
 		}
 		if seenResource {
@@ -1516,7 +1516,7 @@ func decodeColleafNotes(ctx context.Context, input vdocsNoteSnapshot, settings v
 			}
 			n, ok := input.Notes[binding.NativeID]
 			if !ok || n.ID != binding.NativeID || n.Kind != binding.Kind {
-				doc.warn("colleaf_stale_note_identity", "Stale note identity metadata ignored; actual native note identity/kind is retained")
+				doc.warn("vdocs_stale_note_identity", "Stale note identity metadata ignored; actual native note identity/kind is retained")
 				continue
 			}
 			ids[binding.NativeID] = noteKey{binding.Kind, binding.ID}
@@ -1542,12 +1542,12 @@ func decodeColleafNotes(ctx context.Context, input vdocsNoteSnapshot, settings v
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		n, bodyMarkScope, err := openColleafBodyMark(ctx, input.Notes[id])
+		n, bodyMarkScope, err := openVDOCSBodyMark(ctx, input.Notes[id])
 		if err != nil {
 			return nil, err
 		}
 		if expected := expectedBodyMarks[id]; expected != "" && (bodyMarkScope == nil || bodyMarkScope.RangeID != expected) {
-			doc.warn("colleaf_stale_note_body_mark", "Expected native body-mark ownership is absent or changed; actual visible story text is retained")
+			doc.warn("vdocs_stale_note_body_mark", "Expected native body-mark ownership is absent or changed; actual visible story text is retained")
 			bodyMarkScope = nil
 		}
 		key := ids[id]
@@ -1565,7 +1565,7 @@ func decodeColleafNotes(ctx context.Context, input vdocsNoteSnapshot, settings v
 		bodySettings.Drawings = n.Drawings
 		bodySettings.DrawingOrder = n.DrawingOrder
 		bodySettings.ImageBindings = imageGeometry.Stories[id]
-		body, err := decodeColleafBody(ctx, n.Body, bodySettings, n.Tables)
+		body, err := decodeVDOCSBody(ctx, n.Body, bodySettings, n.Tables)
 		if err != nil {
 			return nil, err
 		}
@@ -1623,13 +1623,13 @@ func decodeColleafNotes(ctx context.Context, input vdocsNoteSnapshot, settings v
 			}
 			note.BodyLabelStyle = &run
 			if bodyMarkScope == nil {
-				doc.warn("colleaf_note_marker_style", "Native generated marker style is retained on the note body; citation style comes from its native text interval")
+				doc.warn("vdocs_note_marker_style", "Native generated marker style is retained on the note body; citation style comes from its native text interval")
 			}
 		}
 		if bodyMarker != nil {
 			note.BodyLabelStyle = bodyMarker
 		}
-		if err = restoreColleafBodyMark(ctx, n, bodyMarkScope, &note, doc); err != nil {
+		if err = restoreVDOCSBodyMark(ctx, n, bodyMarkScope, &note, doc); err != nil {
 			return nil, err
 		}
 		if bodyMarkScope != nil && bodyMarkScope.UseDefault && bodyMarkScope.Restored {
@@ -1647,20 +1647,20 @@ func decodeColleafNotes(ctx context.Context, input vdocsNoteSnapshot, settings v
 	for story := range ownership.Stories {
 		if story != "" {
 			if _, ok := input.Notes[story]; !ok {
-				doc.warn("colleaf_stale_list_ownership", "List ownership for an absent native story ignored; actual native content is retained")
+				doc.warn("vdocs_stale_list_ownership", "List ownership for an absent native story ignored; actual native content is retained")
 			}
 		}
 	}
-	body, err := decodeColleafBody(ctx, input.Body, settings, input.Tables)
+	body, err := decodeVDOCSBody(ctx, input.Body, settings, input.Tables)
 	if err != nil {
 		return nil, err
 	}
 	doc.Blocks = body.Blocks
 	doc.Diagnostics = append(doc.Diagnostics, body.Diagnostics...)
 	if !settings.DeferNoteNumbering {
-		applyColleafNoteNumbers(doc, numberPlan, ids)
+		applyVDOCSNoteNumbers(doc, numberPlan, ids)
 		settings.Citations.restoreDefinitions(doc, ids)
-		if err = finishColleafNoteNumbering(doc, autoLabels); err != nil {
+		if err = finishVDOCSNoteNumbering(doc, autoLabels); err != nil {
 			return nil, err
 		}
 	}
@@ -1670,7 +1670,7 @@ func decodeColleafNotes(ctx context.Context, input vdocsNoteSnapshot, settings v
 		}
 	}
 	if !settings.DeferNoteNumbering {
-		if err = finishColleafNavigation(ctx, input, doc, nil); err != nil {
+		if err = finishVDOCSNavigation(ctx, input, doc, nil); err != nil {
 			return nil, err
 		}
 	}
@@ -1680,7 +1680,7 @@ func decodeColleafNotes(ctx context.Context, input vdocsNoteSnapshot, settings v
 	return doc, nil
 }
 
-func finishColleafNoteNumbering(doc *Document, autoLabels map[noteKey]string) error {
+func finishVDOCSNoteNumbering(doc *Document, autoLabels map[noteKey]string) error {
 	if len(autoLabels) > 0 {
 		actual, err := catalogNotes(doc, false)
 		if err != nil {
@@ -1689,7 +1689,7 @@ func finishColleafNoteNumbering(doc *Document, autoLabels map[noteKey]string) er
 		for i, n := range doc.Notes {
 			if label, ok := autoLabels[noteIdentity(n)]; ok && actual.labels[noteIdentity(n)] != label {
 				doc.Notes[i].Label = label
-				doc.warn("colleaf_stale_note_numbering", "Native custom mark retained because current citation order no longer matches original automatic numbering")
+				doc.warn("vdocs_stale_note_numbering", "Native custom mark retained because current citation order no longer matches original automatic numbering")
 			}
 		}
 	}

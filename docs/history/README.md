@@ -10,10 +10,16 @@ original version; use its commit when reproducing an old baseline.
 - STATUS.md — previous implementation/recovery chronology
 - TESTING.md — accumulated qualification commands and scoped results
 - COMPATIBILITY.md — previous cumulative compatibility notes
-- verification.json — complete former cumulative evidence ledger
+- verification.json — retained cumulative evidence ledger
 - source-file-map.json — old root Go filename to current engine module
 
 Current entry points are [status](../STATUS.md), [architecture](../ARCHITECTURE.md),
 [testing](../TESTING.md) and [current evidence](../verification.json). Detailed
 contracts live in [reference](../reference), qualification reports in
 [verification](../verification).
+
+
+On the user's request, application-specific names/source links were removed from
+these retained narratives. Retired host-validator/browser observations are legacy
+records, not qualification of the current Manifold VDOCS container. The current
+native contract is based on the published Univer SDK; see its current report.

@@ -3,9 +3,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { createRequire, stripTypeScriptTypes } = require('node:module');
+const { createRequire } = require('node:module');
 const root = path.resolve(__dirname, '../../..');
-const qa = path.join(root, 'output/colleaf-qa');
+const qa = path.join(root, 'output/vdocs-qa');
 const req = createRequire(path.join(qa, 'package.json'));
 const core = req('@univerjs/core'), render = req('@univerjs/engine-render');
 const docs = req('@univerjs/docs'), drawing = req('@univerjs/drawing');
@@ -63,18 +63,15 @@ function inspectGlyph(data) {
   } finally { skeleton.dispose(); view.dispose(); model.dispose(); }
 }
 async function main() {
-  const source = fs.readFileSync(path.join(root, 'output/codec/colleaf-format-0.txt'), 'utf8');
-  assert.equal(crypto.createHash('sha256').update(source).digest('hex'), 'c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0');
-  const app = await import('data:text/javascript;base64,' + Buffer.from(stripTypeScriptTypes(source)).toString('base64'));
-  const validate = document => app.validateDocument({ type: 'vibedada-document', version: 3, engine: 'univer', engineVersion: '1.0.4', document });
+
   const input = JSON.parse(fs.readFileSync(path.join(qa, 'languages.json')));
   assert.equal(Object.keys(input).length, 6);
   const saved = {};
   const counts = {};
   for (const [name, data] of Object.entries(input)) {
-    validate(data);
+
     saved[name] = save(save(data));
-    validate(saved[name]);
+
     counts[name] = checkStyles(data, saved[name]);
   }
   inspectGlyph(saved.synthetic);
@@ -83,14 +80,14 @@ async function main() {
   edited.synthetic.body.textRuns[0].ts.altLang = 'zh-Hant';
   edited.synthetic.body.textRuns[0].ts.manydocLanguages.complexLanguage = 'he-IL';
   edited.synthetic = save(edited.synthetic);
-  validate(edited.synthetic);
+
   fs.writeFileSync(path.join(qa, 'languages-edited.json'), JSON.stringify(edited));
   const cleared = structuredClone(saved);
   delete cleared.synthetic.body.textRuns[0].ts.altLang;
   cleared.synthetic = save(cleared.synthetic);
-  validate(cleared.synthetic);
+
   assert.equal(cleared.synthetic.body.textRuns[0].ts.altLang, undefined);
   fs.writeFileSync(path.join(qa, 'languages-cleared.json'), JSON.stringify(cleared));
-  console.log(JSON.stringify({ languageRuns: counts, saves: 2, edits: ['native alternate language', 'separate complex language', 'alternate language removal'], scope: 'Actual validator/plugins/save and glyph-style propagation; browser paint and separate complex-language shaping are not qualified.' }));
+  console.log(JSON.stringify({ languageRuns: counts, saves: 2, edits: ['native alternate language', 'separate complex language', 'alternate language removal'], scope: 'Actual SDK plugins/save and glyph-style propagation; browser paint and separate complex-language shaping are not qualified.' }));
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

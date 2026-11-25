@@ -2282,7 +2282,7 @@ multiple contributors, strict SF and DOCX, equivalent href spelling and mixed
 URI/internal ownership. Semantic-audit probes independently encode Note/Reference/
 Ref and a typed Header artifact; current text survives but typed note/story
 recovery is missing. They are gap evidence, not passing semantic acceptance tests.
-Actual Colleaf source/declaration inspection is pinned in VDOCS_FORMAT.md and
+Actual VDOCS source/declaration inspection is pinned in VDOCS_FORMAT.md and
 verification.json. No remote project code or customer documents are copied into
 this repository; optional retrieved source remains ignored under output/codec.
 
@@ -2407,12 +2407,12 @@ attributes. Optional readers remain QA only. Untagged recovery/native integratio
 and the final acceptance audit remain open.
 
 
-## Internal Colleaf UTF-16/token prerequisites
+## Internal VDOCS UTF-16/token prerequisites
 
-colleaf_stream_test.go and testdata/colleaf/native-stream.json qualify scalar-safe
+vdocs_stream_test.go and testdata/univer/native-stream.json qualify scalar-safe
 UTF-16 ranges, control/metadata bounds, astral/combining text, nested-table grammar,
 annotation endpoints, soft-break positions, malformed cases and cancellation.
-MANYDOC_COLLEAF_QA_TREE emits an optional private tree for the independent actual
+MANYDOC_VDOCS_QA_TREE emits an optional private tree for the independent actual
 Univer parser comparison. VDOCS_FORMAT.md contains the full pinned install/source
 and reader commands. These are foundation checks; no public native conversion or
 complete SF/native mapping is claimed yet.
@@ -2444,7 +2444,7 @@ Actual desktop preset browser qualification now has a reproducible repeated-note
 placement failure. The unchanged public notes example places label 2 above label 1;
 the pinned renderer uses the later repeated citation index for the first note.
 The source identity/content graph still persists, but that does not prove correct
-body order. VDOCS_BROWSER.md and scripts/qa/vdocs/verify_vdocs_note_order.cjs preserve
+body order. VDOCS_FORMAT.md#limits and scripts/qa/vdocs/verify_vdocs_note_order.cjs preserve
 the original first-reference-order oracle and passing no-repeat control. Ordinary
 Go tests do not run this optional native-reader check, which currently FAILS.
 No application/vendor/production change or full browser/fidelity claim is made.
@@ -2489,7 +2489,7 @@ advances, source identities and SF. `FuzzPDFXObjectGraph` checks bounded depth/f
 page combinations. `scripts/qa/pdf/verify_pdf_xobject_budget.py` independently parses Do
 operators with pypdf and verifies graph counts plus public CLI atomic rejection.
 Commands/evidence scope are in PDF_RESOURCES.md; native repeated-note order remains
-a separate deliberately failing optional check in VDOCS_BROWSER.md.
+a separate deliberately failing optional check in VDOCS_FORMAT.md#limits.
 
 CID resource/source audit: TestPDFCID* covers ranges, shared indirect arrays, all
 65,536 final CID values, actual public text/baselines/page/stream/SF, overwritten

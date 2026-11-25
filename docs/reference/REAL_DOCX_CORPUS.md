@@ -121,5 +121,5 @@ Exact commands/results are recorded in verification.json. Original images/merged
 cells/full tables remain qualified by MQTT and the fixed rich targeted corpus;
 these eight small files specifically broaden note/story/review/field/producer
 coverage. Remaining goal work includes broader note graph recovery, the actual
-Colleaf native adapter and final consistency/resource/public-API/acceptance audit.
+VDOCS native adapter and final consistency/resource/public-API/acceptance audit.
 There is no external blocker, and the full goal remains active/incomplete.

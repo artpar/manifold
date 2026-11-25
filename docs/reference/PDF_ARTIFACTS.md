@@ -18,7 +18,7 @@ Document.Headers/Footers remain that separate authoring model; no single observe
 page is silently promoted into a repeated template.
 
 This closes the audit's concrete lost Type/Subtype/BBox/Attached and membership
-facts. It does not complete explicit Note/Reference recovery, native Colleaf
+facts. It does not complete explicit Note/Reference recovery, native VDOCS
 interoperability or the full original acceptance criteria.
 
 ## Published semantics and coordinates

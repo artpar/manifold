@@ -21,18 +21,18 @@ func TestVDOCSLiteralTemplateProjection(t *testing.T) {
 		{"50% literal", "%10", "50% literal"}, {"%9%%1.", "%10%1.", "%"}, {"%1%90", "%1%10", "0"},
 	} {
 		source := vdocsNativeList{Levels: []vdocsListLevel{{Glyph: vdocsInt(2)}}}
-		format := projectColleafListTemplate(tc.input, 0, &source)
+		format := projectVDOCSListTemplate(tc.input, 0, &source)
 		source.Levels[0].Format = format
 		if format != tc.format || len(source.Levels) != 10 || source.Levels[9].Symbol != tc.symbol {
 			t.Fatalf("%q: %q %+v", tc.input, format, source.Levels)
 		}
 		binding := vdocsListBinding{OriginalTemplate: &tc.input}
-		got, err := readColleafListTemplate(source, 0, binding)
+		got, err := readVDOCSListTemplate(source, 0, binding)
 		if err != nil || got != tc.input {
 			t.Fatal(got, err)
 		}
 		// Lost intent can still derive the actually represented logical template.
-		got, err = readColleafListTemplate(source, 0, vdocsListBinding{})
+		got, err = readVDOCSListTemplate(source, 0, vdocsListBinding{})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -44,11 +44,11 @@ func TestVDOCSLiteralTemplateProjection(t *testing.T) {
 	// a false active placeholder. Only checked original intent expresses this case.
 	original := "%%91"
 	source := vdocsNativeList{Levels: []vdocsListLevel{{Glyph: vdocsInt(2)}}}
-	source.Levels[0].Format = projectColleafListTemplate(original, 0, &source)
-	if got, err := readColleafListTemplate(source, 0, vdocsListBinding{OriginalTemplate: &original}); err != nil || got != original {
+	source.Levels[0].Format = projectVDOCSListTemplate(original, 0, &source)
+	if got, err := readVDOCSListTemplate(source, 0, vdocsListBinding{OriginalTemplate: &original}); err != nil || got != original {
 		t.Fatal(got, err)
 	}
-	if _, err := readColleafListTemplate(source, 0, vdocsListBinding{}); err == nil {
+	if _, err := readVDOCSListTemplate(source, 0, vdocsListBinding{}); err == nil {
 		t.Fatal("ambiguous literal percent-digit silently became a counter")
 	}
 }
@@ -70,11 +70,11 @@ func vdocsLiteralListExample(t testing.TB) *Document {
 func TestVDOCSLiteralListsSFAndActualSave(t *testing.T) {
 	ctx := context.Background()
 	want := resolveNumberingDocument(vdocsLiteralListExample(t))
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -91,14 +91,14 @@ func TestVDOCSLiteralListsSFAndActualSave(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	again, err := encodeColleafDocument(ctx, model)
+	again, err := encodeVDOCSDocument(ctx, model)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(again, wire) {
 		t.Fatal("SF changed native helper/ownership/asset semantics")
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_LITERAL_LIST_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_LITERAL_LIST_QA"); file != "" {
 		data, err := json.Marshal(wire)
 		if err != nil {
 			t.Fatal(err)
@@ -107,7 +107,7 @@ func TestVDOCSLiteralListsSFAndActualSave(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_LITERAL_LIST_SAVED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_LITERAL_LIST_SAVED"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -116,7 +116,7 @@ func TestVDOCSLiteralListsSFAndActualSave(t *testing.T) {
 		if err = json.Unmarshal(data, &saved); err != nil {
 			t.Fatal(err)
 		}
-		got, err = decodeColleafDocument(ctx, saved)
+		got, err = decodeVDOCSDocument(ctx, saved)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -124,7 +124,7 @@ func TestVDOCSLiteralListsSFAndActualSave(t *testing.T) {
 			t.Fatal("actual facade changed literal list semantics", got.Diagnostics)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_LITERAL_LIST_EDITED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_LITERAL_LIST_EDITED"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -133,7 +133,7 @@ func TestVDOCSLiteralListsSFAndActualSave(t *testing.T) {
 		if err = json.Unmarshal(data, &edited); err != nil {
 			t.Fatal(err)
 		}
-		got, err = decodeColleafDocument(ctx, edited)
+		got, err = decodeVDOCSDocument(ctx, edited)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -165,7 +165,7 @@ func TestVDOCSNativeHelperEditsAndContradictions(
 	ctx := context.Background()
 	d := vdocsLiteralListExample(t)
 	for _, mode := range []string{"symbol", "missing", "badref", "activehelper", "constant"} {
-		wire, err := encodeColleafDocument(ctx, d)
+		wire, err := encodeVDOCSDocument(ctx, d)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -187,7 +187,7 @@ func TestVDOCSNativeHelperEditsAndContradictions(
 			source.Levels[0].Symbol = "Fixed"
 		}
 		wire.Lists[bullet.Type] = sfAttrs(source)
-		got, err := decodeColleafDocument(ctx, wire)
+		got, err := decodeVDOCSDocument(ctx, wire)
 		if mode == "symbol" {
 			if err != nil || got.Blocks[0].Numbering.Template != "‰%1‰" {
 				t.Fatal(mode, err)
@@ -201,7 +201,7 @@ func TestVDOCSNativeHelperEditsAndContradictions(
 		}
 	}
 }
-func FuzzColleafListTemplate(f *testing.F) {
+func FuzzVDOCSListTemplate(f *testing.F) {
 	for _, s := range []string{"%%1%", "%10", "%9%%1", "%%91", strings.Repeat("%1a%", 40)} {
 		f.Add(s, uint8(0))
 	}
@@ -214,8 +214,8 @@ func FuzzColleafListTemplate(f *testing.F) {
 		for range level + 1 {
 			source.Levels = append(source.Levels, vdocsListLevel{Glyph: vdocsInt(2)})
 		}
-		source.Levels[level].Format = projectColleafListTemplate(template, level, &source)
-		got, err := readColleafListTemplate(source, level, vdocsListBinding{OriginalTemplate: &template})
+		source.Levels[level].Format = projectVDOCSListTemplate(template, level, &source)
+		got, err := readVDOCSListTemplate(source, level, vdocsListBinding{OriginalTemplate: &template})
 		if err != nil || got != template {
 			t.Fatal(got, err)
 		}
@@ -240,11 +240,11 @@ func TestVDOCSRichListOwnershipNumberingAndSF(t *testing.T) {
 	ctx := context.Background()
 	original := vdocsListExample()
 	want := resolveNumberingDocument(original)
-	wire, err := encodeColleafNotes(ctx, want)
+	wire, err := encodeVDOCSNotes(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafNotes(ctx, wire, vdocsTextContext{})
+	got, err := decodeVDOCSNotes(ctx, wire, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -261,7 +261,7 @@ func TestVDOCSRichListOwnershipNumberingAndSF(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	wire2, err := encodeColleafNotes(ctx, model)
+	wire2, err := encodeVDOCSNotes(ctx, model)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -271,7 +271,7 @@ func TestVDOCSRichListOwnershipNumberingAndSF(t *testing.T) {
 	if !reflect.DeepEqual(wire, wire2) {
 		t.Fatal("SF changed native list source/ownership records")
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_LIST_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_LIST_QA"); file != "" {
 		data, err := json.MarshalIndent(wire, "", "  ")
 		if err != nil {
 			t.Fatal(err)
@@ -280,7 +280,7 @@ func TestVDOCSRichListOwnershipNumberingAndSF(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_LIST_EDIT"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_LIST_EDIT"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -289,7 +289,7 @@ func TestVDOCSRichListOwnershipNumberingAndSF(t *testing.T) {
 		if err = json.Unmarshal(data, &edited); err != nil {
 			t.Fatal(err)
 		}
-		doc, err := decodeColleafNotes(ctx, edited, vdocsTextContext{})
+		doc, err := decodeVDOCSNotes(ctx, edited, vdocsTextContext{})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -305,7 +305,7 @@ func TestVDOCSRichListOwnershipNumberingAndSF(t *testing.T) {
 func TestVDOCSCustomListIndentStillReportsPresentationLoss(t *testing.T) {
 	ctx := context.Background()
 	want := resolveNumberingDocument(vdocsListExample())
-	wire, err := encodeColleafNotes(ctx, want)
+	wire, err := encodeVDOCSNotes(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -320,13 +320,13 @@ func TestVDOCSCustomListIndentStillReportsPresentationLoss(t *testing.T) {
 		}
 		wire.Lists[id] = sfAttrs(list)
 	}
-	got, err := decodeColleafNotes(ctx, wire, vdocsTextContext{})
+	got, err := decodeVDOCSNotes(ctx, wire, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	found := false
 	for _, d := range got.Diagnostics {
-		found = found || d.Code == "colleaf_list_presentation"
+		found = found || d.Code == "vdocs_list_presentation"
 	}
 	if !found {
 		t.Fatal("custom list indentation loss was silent")
@@ -338,11 +338,11 @@ func TestVDOCSCustomListIndentStillReportsPresentationLoss(t *testing.T) {
 }
 func TestVDOCSNativeListsWithoutOwnershipKeepActualBullets(t *testing.T) {
 	ctx := context.Background()
-	wire, err := encodeColleafNotes(ctx, vdocsListExample())
+	wire, err := encodeVDOCSNotes(ctx, vdocsListExample())
 	if err != nil {
 		t.Fatal(err)
 	}
-	wire, err = openColleafIntent(ctx, wire)
+	wire, err = openVDOCSIntent(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -353,7 +353,7 @@ func TestVDOCSNativeListsWithoutOwnershipKeepActualBullets(t *testing.T) {
 		}
 	}
 	wire.Resources = keep
-	doc, err := decodeColleafNotes(ctx, wire, vdocsTextContext{})
+	doc, err := decodeVDOCSNotes(ctx, wire, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -362,7 +362,7 @@ func TestVDOCSNativeListsWithoutOwnershipKeepActualBullets(t *testing.T) {
 	}
 	found := false
 	for _, d := range doc.Diagnostics {
-		if d.Code == "colleaf_list_ownership" {
+		if d.Code == "vdocs_list_ownership" {
 			found = true
 		}
 	}
@@ -371,7 +371,7 @@ func TestVDOCSNativeListsWithoutOwnershipKeepActualBullets(t *testing.T) {
 	}
 }
 func TestVDOCSStaleOwnershipDoesNotOverrideNativeRestart(t *testing.T) {
-	wire, err := encodeColleafNotes(context.Background(), vdocsListExample())
+	wire, err := encodeVDOCSNotes(context.Background(), vdocsListExample())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -391,7 +391,7 @@ func TestVDOCSStaleOwnershipDoesNotOverrideNativeRestart(t *testing.T) {
 			break
 		}
 	}
-	doc, err := decodeColleafNotes(context.Background(), wire, vdocsTextContext{})
+	doc, err := decodeVDOCSNotes(context.Background(), wire, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -402,7 +402,7 @@ func TestVDOCSStaleOwnershipDoesNotOverrideNativeRestart(t *testing.T) {
 		}
 	}
 	for _, d := range doc.Diagnostics {
-		if d.Code == "colleaf_stale_list_ownership" {
+		if d.Code == "vdocs_stale_list_ownership" {
 			foundLoss = true
 		}
 	}
@@ -413,7 +413,7 @@ func TestVDOCSStaleOwnershipDoesNotOverrideNativeRestart(t *testing.T) {
 
 func TestVDOCSListTokenProjectionAndNativeEdits(t *testing.T) {
 	d := &Document{Blocks: []Block{{Kind: ListBlock, List: "number", Numbering: &ListNumbering{Template: "%1.%9", Formats: []string{"decimal"}}, Items: []ListItem{{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "Kept"}}}}}}}}}
-	wire, err := encodeColleafNotes(context.Background(), d)
+	wire, err := encodeVDOCSNotes(context.Background(), d)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -426,7 +426,7 @@ func TestVDOCSListTokenProjectionAndNativeEdits(t *testing.T) {
 			t.Fatal("absent native level left dereferenceable", source)
 		}
 	}
-	got, err := decodeColleafNotes(context.Background(), wire, vdocsTextContext{})
+	got, err := decodeVDOCSNotes(context.Background(), wire, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -439,7 +439,7 @@ func TestVDOCSListTokenProjectionAndNativeEdits(t *testing.T) {
 		source.Levels[0].Format = "Edited %1"
 		wire.Lists[key] = sfAttrs(source)
 	}
-	got, err = decodeColleafNotes(context.Background(), wire, vdocsTextContext{})
+	got, err = decodeVDOCSNotes(context.Background(), wire, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -447,12 +447,12 @@ func TestVDOCSListTokenProjectionAndNativeEdits(t *testing.T) {
 		t.Fatal("stale intent overrode native edit")
 	}
 	d.Blocks[0].Numbering.Template = "%%1."
-	if _, err = encodeColleafNotes(context.Background(), d); err != nil {
+	if _, err = encodeVDOCSNotes(context.Background(), d); err != nil {
 		t.Fatal("literal percent projection rejected", err)
 	}
 }
-func FuzzColleafLists(f *testing.F) {
-	wire, err := encodeColleafNotes(context.Background(), vdocsListExample())
+func FuzzVDOCSLists(f *testing.F) {
+	wire, err := encodeVDOCSNotes(context.Background(), vdocsListExample())
 	if err != nil {
 		f.Fatal(err)
 	}
@@ -467,7 +467,7 @@ func FuzzColleafLists(f *testing.F) {
 		if json.Unmarshal(data, &input) != nil {
 			return
 		}
-		doc, err := decodeColleafNotes(context.Background(), input, vdocsTextContext{})
+		doc, err := decodeVDOCSNotes(context.Background(), input, vdocsTextContext{})
 		if err == nil {
 			if err = doc.Validate(); err != nil {
 				t.Fatal("accepted invalid list/note graph", err)
@@ -484,11 +484,11 @@ func TestVDOCSNondecimalZeroNeverSilentlyChangesMarker(t *testing.T) {
 		// replacement list or silently dropping its visible labels/relationships.
 
 		listStartPointer(0), Numbering: &ListNumbering{Template: "%1.", Formats: []string{format}}, Items: []ListItem{{Blocks: []Block{{Kind: Paragraph}}}}}}}
-		wire, err := encodeColleafNotes(context.Background(), d)
+		wire, err := encodeVDOCSNotes(context.Background(), d)
 		if err != nil {
 			t.Fatal(err)
 		}
-		got, err := decodeColleafNotes(context.Background(), wire, vdocsTextContext{})
+		got, err := decodeVDOCSNotes(context.Background(), wire, vdocsTextContext{})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -498,7 +498,7 @@ func TestVDOCSNondecimalZeroNeverSilentlyChangesMarker(t *testing.T) {
 		glyph, _ := vdocsNumberGlyph(format)
 		body := vdocsBody{DataStream: "X\r\n", Paragraphs: []vdocsParagraphRecord{{StartIndex: 1, Bullet: sfAttrs(vdocsBullet{Type: "t", ID: "l", Level: 0})}}}
 		lists := map[string]json.RawMessage{"t": sfAttrs(vdocsNativeList{Type: "t", Levels: []vdocsListLevel{{Format: "%1.", Glyph: &glyph, Start: -1, Align: 1}}})}
-		foreign, err := decodeColleafBody(context.Background(), body, vdocsTextContext{Lists: lists}, nil)
+		foreign, err := decodeVDOCSBody(context.Background(), body, vdocsTextContext{Lists: lists}, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -512,7 +512,7 @@ func TestVDOCSNondecimalZeroNeverSilentlyChangesMarker(t *testing.T) {
 		}
 		found := false
 		for _, diag := range foreign.Diagnostics {
-			found = found || diag.Code == "colleaf_numbering_policy"
+			found = found || diag.Code == "vdocs_numbering_policy"
 		}
 		if !found {
 			t.Fatal("native policy normalization not disclosed")
@@ -521,11 +521,11 @@ func TestVDOCSNondecimalZeroNeverSilentlyChangesMarker(t *testing.T) {
 }
 func TestVDOCSLiteralMarkerInternalRoundtrip(t *testing.T) {
 	d := literalMarkerDocument()
-	wire, err := encodeColleafDocument(context.Background(), d)
+	wire, err := encodeVDOCSDocument(context.Background(), d)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(context.Background(), wire)
+	got, err := decodeVDOCSDocument(context.Background(), wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -546,11 +546,11 @@ func TestVDOCSLiteralMarkerSourcesAndAssets(t *testing.T) {
 	d.Blocks[0].Items[0].Source = &SourceInfo{Format: PDF, Role: "LI", Element: "item", ParentElement: "list", Structure: "explicit", Confidence: 1, Evidence: "source_item"}
 	d.Blocks[0].Items[0].Marker.Source = &SourceInfo{Format: PDF, Role: "Lbl", Element: "label", ParentElement: "item", Structure: "explicit", Confidence: 1, Evidence: "source_label"}
 	before := canonicalSF(t, d)
-	wire, err := encodeColleafDocument(context.Background(), d)
+	wire, err := encodeVDOCSDocument(context.Background(), d)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(context.Background(), wire)
+	got, err := decodeVDOCSDocument(context.Background(), wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -564,11 +564,11 @@ func checkNativeLiteral(t *testing.T, name string, d *Document) vdocsNoteSnapsho
 	t.Helper()
 	d = resolveNumberingDocument(d)
 	before := canonicalSF(t, d)
-	wire, err := encodeColleafDocument(context.Background(), d)
+	wire, err := encodeVDOCSDocument(context.Background(), d)
 	if err != nil {
 		t.Fatal(name, err)
 	}
-	got, err := decodeColleafDocument(context.Background(), wire)
+	got, err := decodeVDOCSDocument(context.Background(), wire)
 	if err != nil {
 		t.Fatal(name, err)
 	}
@@ -651,7 +651,7 @@ func TestVDOCSLiteralMarkerActualSavedEdit(t *testing.T) {
 	if err := json.Unmarshal(raw, &wire); err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(context.Background(), wire)
+	got, err := decodeVDOCSDocument(context.Background(), wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -678,7 +678,7 @@ func TestVDOCSLiteralMarkerActualSavedCases(t *testing.T) {
 			if err := json.Unmarshal(raw, &wire); err != nil {
 				t.Fatal(err)
 			}
-			d, err := decodeColleafDocument(context.Background(), wire)
+			d, err := decodeVDOCSDocument(context.Background(), wire)
 			if err != nil {
 				t.Fatal(name, err)
 			}
@@ -721,7 +721,7 @@ func TestVDOCSLiteralMarkerBrowserSaved(t *testing.T) {
 func TestVDOCSLiteralMarkerMalformedAndStaleOwnership(t *testing.T) {
 	ctx := context.Background()
 	original := literalMarkerDocument()
-	base, err := encodeColleafDocument(ctx, original)
+	base, err := encodeVDOCSDocument(ctx, original)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -741,7 +741,7 @@ func TestVDOCSLiteralMarkerMalformedAndStaleOwnership(t *testing.T) {
 		change(meta)
 		props["manydocLiteralItem"] = sfAttrs(meta)
 		wire.Tables[id] = sfAttrs(props)
-		if _, err := decodeColleafDocument(ctx, wire); err == nil {
+		if _, err := decodeVDOCSDocument(ctx, wire); err == nil {
 			t.Fatal("malformed private literal intent accepted")
 		}
 	}
@@ -753,11 +753,11 @@ func TestVDOCSLiteralMarkerMalformedAndStaleOwnership(t *testing.T) {
 	props, _ := vdocsStyleObject(wire.Tables[id])
 	delete(props, "manydocLiteralItem")
 	wire.Tables[id] = sfAttrs(props)
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Blocks[0].Kind != Table || !hasDiagnostic(got, "colleaf_stale_literal_ownership") {
+	if got.Blocks[0].Kind != Table || !hasDiagnostic(got, "vdocs_stale_literal_ownership") {
 		t.Fatal("stale ownership did not retain actual table")
 	}
 	for _, token := range []string{"α)", "β)", "FIRST", "SECOND", "EMPTY", "Marker note"} {
@@ -794,11 +794,11 @@ func vdocsZeroExample(t testing.TB) *Document {
 func TestVDOCSZeroLegalSFAndActualSave(t *testing.T) {
 	ctx := context.Background()
 	want := resolveNumberingDocument(vdocsZeroExample(t))
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -815,14 +815,14 @@ func TestVDOCSZeroLegalSFAndActualSave(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	again, err := encodeColleafDocument(ctx, model)
+	again, err := encodeVDOCSDocument(ctx, model)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(again, wire) {
 		t.Fatal("SF changed native projection/types/ownership")
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_ZERO_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_ZERO_QA"); file != "" {
 		data, err := json.Marshal(wire)
 		if err != nil {
 			t.Fatal(err)
@@ -831,7 +831,7 @@ func TestVDOCSZeroLegalSFAndActualSave(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_ZERO_SAVED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_ZERO_SAVED"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -840,7 +840,7 @@ func TestVDOCSZeroLegalSFAndActualSave(t *testing.T) {
 		if err = json.Unmarshal(data, &saved); err != nil {
 			t.Fatal(err)
 		}
-		got, err = decodeColleafDocument(ctx, saved)
+		got, err = decodeVDOCSDocument(ctx, saved)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -848,7 +848,7 @@ func TestVDOCSZeroLegalSFAndActualSave(t *testing.T) {
 			t.Fatal("actual facade changed zero/legal semantics", got.Diagnostics)
 		}
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_ZERO_EDITED"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_ZERO_EDITED"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -857,7 +857,7 @@ func TestVDOCSZeroLegalSFAndActualSave(t *testing.T) {
 		if err = json.Unmarshal(data, &edited); err != nil {
 			t.Fatal(err)
 		}
-		got, err = decodeColleafDocument(ctx, edited)
+		got, err = decodeVDOCSDocument(ctx, edited)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -879,7 +879,7 @@ func TestVDOCSZeroLegalSFAndActualSave(t *testing.T) {
 		}
 		found := false
 		for _, diag := range got.Diagnostics {
-			found = found || diag.Code == "colleaf_stale_numbering_projection"
+			found = found || diag.Code == "vdocs_stale_numbering_projection"
 		}
 		if !found {
 			t.Fatal("stale zero projection not diagnosed")
@@ -895,7 +895,7 @@ func TestVDOCSForeignZeroAndLegalPreserveMarkers(t *testing.T) {
 			for i := range body.Paragraphs {
 				body.Paragraphs[i].Bullet = sfAttrs(vdocsBullet{Type: "t", ID: "l"})
 			}
-			d, err := decodeColleafBody(context.Background(), body, vdocsTextContext{Lists: map[string]json.RawMessage{"t": sfAttrs(source)}}, nil)
+			d, err := decodeVDOCSBody(context.Background(), body, vdocsTextContext{Lists: map[string]json.RawMessage{"t": sfAttrs(source)}}, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -941,7 +941,7 @@ func TestVDOCSMalformedNumberingIntent(t *testing.T) {
 		{Formats: map[int]string{0: "upperRoman"}, Legal: true},
 		{Formats: map[int]string{0: "decimalZero"}, ZeroLevels: []int{0}, Legal: true},
 	} {
-		if err := validateColleafNumberProjection(p, 0); err == nil {
+		if err := validateVDOCSNumberProjection(p, 0); err == nil {
 			t.Fatal("malformed projection accepted", p)
 		}
 	}
@@ -983,11 +983,11 @@ func vdocsNumberLabels(t testing.TB, blocks []Block) []string {
 func TestVDOCSNumberProjectionEmbeddedContradictions(t *testing.T) {
 	for _, mode := range []string{"negative", "unowned", "collision"} {
 		ctx := context.Background()
-		wire, err := encodeColleafDocument(ctx, vdocsZeroExample(t))
+		wire, err := encodeVDOCSDocument(ctx, vdocsZeroExample(t))
 		if err != nil {
 			t.Fatal(err)
 		}
-		wire, err = openColleafIntent(ctx, wire)
+		wire, err = openVDOCSIntent(ctx, wire)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1006,15 +1006,15 @@ func TestVDOCSNumberProjectionEmbeddedContradictions(t *testing.T) {
 			b.Items[0].Type = ownership.Stories[""][1].Type
 		}
 		wire.Resources = vdocsReplaceResource(wire.Resources, vdocsListResource, ownership)
-		if err = sealColleafIntent(&wire); err != nil {
+		if err = sealVDOCSIntent(&wire); err != nil {
 			t.Fatal(err)
 		}
-		if _, err = decodeColleafDocument(ctx, wire); err == nil {
+		if _, err = decodeVDOCSDocument(ctx, wire); err == nil {
 			t.Fatal("malformed native intent accepted", mode)
 		}
 	}
 }
-func FuzzColleafNumberProjection(f *testing.F) {
+func FuzzVDOCSNumberProjection(f *testing.F) {
 	f.Add(uint8(0), uint8(0), uint8(0), false)
 	f.Add(uint8(5), uint8(8), uint8(0), true)
 	f.Fuzz(func(t *testing.T, format, rawLevel, rawValue uint8, legal bool) {
@@ -1031,11 +1031,11 @@ func FuzzColleafNumberProjection(f *testing.F) {
 			}
 		}
 		source.Levels[level].Legal = legal
-		projected, p := projectColleafNumbering(source, n, value)
+		projected, p := projectVDOCSNumbering(source, n, value)
 		if p == nil {
 			return
 		}
-		if err := validateColleafNumberProjection(*p, level); err != nil {
+		if err := validateVDOCSNumberProjection(*p, level); err != nil {
 			t.Fatal(err)
 		}
 		imported := *n
@@ -1043,7 +1043,7 @@ func FuzzColleafNumberProjection(f *testing.F) {
 		for _, spec := range projected.Levels {
 			imported.Formats = append(imported.Formats, vdocsNumberFormats[*spec.Glyph-2])
 		}
-		if !restoreColleafNumberProjection(&imported, *p, value, n.Ancestors, projected) || !reflect.DeepEqual(&imported, n) {
+		if !restoreVDOCSNumberProjection(&imported, *p, value, n.Ancestors, projected) || !reflect.DeepEqual(&imported, n) {
 			t.Fatal("format projection failed to retain source semantics")
 		}
 	})

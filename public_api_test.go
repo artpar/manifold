@@ -52,7 +52,7 @@ func TestVDOCSPublicGraphAndHistory(t *testing.T) {
 			if err = json.Unmarshal(native.Bytes(), &envelope); err != nil {
 				t.Fatal(err)
 			}
-			if envelope.Type != "vibedada-document" || envelope.Version != 3 || envelope.Engine != "univer" || envelope.EngineVersion != "1.0.4" {
+			if envelope.Type != "manifold-document" || envelope.Version != 3 || envelope.Engine != "univer" || envelope.EngineVersion != "1.0.4" {
 				t.Fatal("incorrect envelope", envelope)
 			}
 			got, err := manifold.ReadVDOCS(ctx, bytes.NewReader(native.Bytes()))
@@ -95,7 +95,7 @@ func (nativeFailIO) Write([]byte) (int, error) { return 0, nativeIOFailure }
 
 func TestVDOCSPublicBoundaries(t *testing.T) {
 	ctx := context.Background()
-	if manifold.VDOCSMIME != "application/vnd.vibedada.docs+json;version=3" {
+	if manifold.VDOCSMIME != "application/vnd.manifold.docs+json;version=3" {
 		t.Fatal("incorrect native MIME")
 	}
 	for _, name := range []string{"document.vdocs", "DOCUMENT.VDOCS"} {
@@ -111,7 +111,7 @@ func TestVDOCSPublicBoundaries(t *testing.T) {
 			t.Fatal("extension dispatch", format, err)
 		}
 	}
-	if manifold.VDOCSMIME != "application/vnd.vibedada.docs+json;version=3" {
+	if manifold.VDOCSMIME != "application/vnd.manifold.docs+json;version=3" {
 		t.Fatal("incorrect application MIME")
 	}
 	if _, err := manifold.ReadVDOCS(ctx, nil); err == nil {
@@ -137,7 +137,7 @@ func TestVDOCSPublicBoundaries(t *testing.T) {
 	if err := manifold.WriteVDOCS(ctx, nativeFailIO{}, d); !errors.Is(err, nativeIOFailure) {
 		t.Fatal("writer error lost", err)
 	}
-	for _, raw := range []string{`{}`, `{"body":{"dataStream":"x\r\n"}}`, `{"type":"doc","content":[]}`, `{"type":"vibedada-document","version":2,"engine":"univer","engineVersion":"1.0.4","document":{}}`} {
+	for _, raw := range []string{`{}`, `{"body":{"dataStream":"x\r\n"}}`, `{"type":"doc","content":[]}`, `{"type":"manifold-document","version":2,"engine":"univer","engineVersion":"1.0.4","document":{}}`} {
 		if _, err := manifold.ReadVDOCS(ctx, bytes.NewBufferString(raw)); err == nil {
 			t.Fatal("wrong envelope accepted", raw)
 		}

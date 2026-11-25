@@ -37,18 +37,18 @@ STATUS.md and verification.json.
 
 Future imports and builds should use the new identity. Historical commit commands
 must use the layout at that commit; earlier commits contain cmd/manydoc. No
-repository history is rewritten and no Daptin/Colleaf application is modified.
+repository history is rewritten and no Daptin/VDOCS application is modified.
 
 
 The organization cleanup uses `vdocs` for private adapter identifiers and current
-QA/example paths. References to Colleaf identify the inspected application,
+QA/example paths. References to VDOCS identify the inspected application,
 original fixture provenance, legacy QA environment variables or persisted
-`colleaf_*` diagnostic codes. Those strings do not introduce an application or
+`vdocs_*` diagnostic codes. Those strings do not introduce an application or
 service dependency. Historical cached QA inputs retain their original paths.
 
 
 Private Go adapter identifiers and current example/QA names use `vdocs`. Actual
-Colleaf application references identify inspected upstream sources and historical
-fixtures. Existing `colleaf_*` diagnostic strings and `MANYDOC_*` QA environment
-names remain compatibility identifiers; there is no required Colleaf service or
+VDOCS application references identify inspected upstream sources and historical
+fixtures. Existing `vdocs_*` diagnostic strings and `MANYDOC_*` QA environment
+names remain compatibility identifiers; there is no required VDOCS service or
 runtime dependency.

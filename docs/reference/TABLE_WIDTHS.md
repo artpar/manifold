@@ -15,7 +15,7 @@ uses per-cell `colwidth` arrays in CSS pixels for interactive resizing. A single
 physical grid avoids conflicting cell declarations and preserves subpixel/twip
 columns without integer pixel rounding. An editor adapter must convert points to
 CSS pixels (96/72) and distribute these widths over cell spans; direct stock
-column-resizer mutation is not an established integration. Colleaf integration
+column-resizer mutation is not an established integration. VDOCS integration
 still needs its actual schema.
 
 ## Import and export

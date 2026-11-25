@@ -75,12 +75,12 @@ type vdocsBodyIndex struct {
 	blocks   map[int]vdocsBlockRecord
 }
 
-func indexColleafBody(ctx context.Context, body vdocsBody) (*vdocsBodyIndex, error) {
-	text, err := newColleafTextIndex(ctx, body.DataStream)
+func indexVDOCSBody(ctx context.Context, body vdocsBody) (*vdocsBodyIndex, error) {
+	text, err := newVDOCSTextIndex(ctx, body.DataStream)
 	if err != nil {
 		return nil, err
 	}
-	sections, err := parseColleafIndexedStream(ctx, text)
+	sections, err := parseVDOCSIndexedStream(ctx, text)
 	if err != nil {
 		return nil, err
 	}
@@ -261,14 +261,14 @@ func (s *vdocsSectionRecord) UnmarshalJSON(data []byte) error {
 // Keep uncaptured native section properties when transporting a parsed snapshot
 // to an independent reader. Semantic import still diagnoses or rejects them.
 
-// VDOCSMIME is the MIME type required for Colleaf version-3 native documents.
+// VDOCSMIME is the MIME type required for VDOCS version-3 native documents.
 
-// ReadVDOCS reads a Colleaf version-3 envelope for Univer 1.0.4. It validates
+// ReadVDOCS reads a VDOCS version-3 envelope for Univer 1.0.4. It validates
 // native structure, relationships and interpreted metadata before returning a
 // logical document. Unknown or unrepresentable constructs reject or produce
 // explicit diagnostics. Bare editor snapshots and renamed SF are not accepted.
 
-// WriteVDOCS writes a Colleaf version-3 envelope for Univer 1.0.4. It preserves
+// WriteVDOCS writes a VDOCS version-3 envelope for Univer 1.0.4. It preserves
 // supported logical content, assets, diagnostic history and source facts. It
 // rejects unsupported mappings; it does not validate application admission limits
 // or guarantee native browser rendering. See docs/VDOCS_FORMAT.md for scope.
@@ -338,9 +338,9 @@ func (s vdocsSectionRecord) MarshalJSON() ([]byte, error) {
 	return json.Marshal(fields)
 }
 
-const VDOCSMIME = "application/vnd.vibedada.docs+json;version=3"
+const VDOCSMIME = "application/vnd.manifold.docs+json;version=3"
 
-const vdocsEnvelopeType = "vibedada-document"
+const vdocsEnvelopeType = "manifold-document"
 const vdocsEngineVersion = "1.0.4"
 
 type vdocsEnvelope struct {
@@ -352,14 +352,14 @@ type vdocsEnvelope struct {
 }
 
 func ReadVDOCS(ctx context.Context, r io.Reader) (*Document, error) {
-	return readColleaf(ctx, r)
+	return readVDOCS(ctx, r)
 }
 
 func WriteVDOCS(ctx context.Context, w io.Writer, d *Document) error {
 	return Write(ctx, w, d, VDOCS, WriteOptions{})
 }
 
-func readColleaf(ctx context.Context, r io.Reader) (*Document, error) {
+func readVDOCS(ctx context.Context, r io.Reader) (*Document, error) {
 	if r == nil {
 		return nil, fmt.Errorf("nil native document reader")
 	}
@@ -370,7 +370,7 @@ func readColleaf(ctx context.Context, r io.Reader) (*Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err = validateColleafJSON(ctx, data); err != nil {
+	if err = validateVDOCSJSON(ctx, data); err != nil {
 		return nil, fmt.Errorf("native JSON: %w", err)
 	}
 	var wire vdocsEnvelope
@@ -385,7 +385,7 @@ func readColleaf(ctx context.Context, r io.Reader) (*Document, error) {
 	if wire.Document.ID == "" || wire.Document.Body.TextRuns == nil || !bytes.HasPrefix(bytes.TrimSpace(wire.Document.DocumentStyle), []byte("{")) {
 		return nil, fmt.Errorf("native snapshot requires id, textRuns array and documentStyle object")
 	}
-	if err = checkColleafResourceJSON(ctx, wire.Document); err != nil {
+	if err = checkVDOCSResourceJSON(ctx, wire.Document); err != nil {
 		return nil, err
 	}
 	var settings struct {
@@ -399,26 +399,26 @@ func readColleaf(ctx context.Context, r io.Reader) (*Document, error) {
 			return nil, fmt.Errorf("native zoomRatio must be finite and positive")
 		}
 	}
-	doc, err := decodeColleafDocument(ctx, wire.Document)
+	doc, err := decodeVDOCSDocument(ctx, wire.Document)
 	if err != nil {
 		return nil, err
 	}
 	if settings.Zoom != nil {
-		doc.warn("colleaf_view_zoom", "Native editor view zoom is not represented in logical SF; document geometry and content are retained")
+		doc.warn("vdocs_view_zoom", "Native editor view zoom is not represented in logical SF; document geometry and content are retained")
 	}
 	if wire.Document.Locale != "" && wire.Document.Locale != "enUS" {
-		doc.warn("colleaf_editor_locale", "Native editor locale is not represented in logical SF; explicit source language and content are retained")
+		doc.warn("vdocs_editor_locale", "Native editor locale is not represented in logical SF; explicit source language and content are retained")
 	}
 	return doc, nil
 }
-func writeColleaf(ctx context.Context, w io.Writer, d *Document) error {
+func writeVDOCS(ctx context.Context, w io.Writer, d *Document) error {
 	if w == nil {
 		return fmt.Errorf("nil native document writer")
 	}
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	native, err := encodeColleafDocument(ctx, d)
+	native, err := encodeVDOCSDocument(ctx, d)
 	if err != nil {
 		return err
 	}
@@ -427,7 +427,7 @@ func writeColleaf(ctx context.Context, w io.Writer, d *Document) error {
 	return json.NewEncoder(contextWriter{ctx, w}).Encode(wire)
 }
 
-func checkColleafResourceJSON(ctx context.Context, native vdocsNoteSnapshot) error {
+func checkVDOCSResourceJSON(ctx context.Context, native vdocsNoteSnapshot) error {
 	records := append([]vdocsResource(nil), native.Resources...)
 	for _, r := range native.Body.CustomRanges {
 		if len(r.Properties) == 0 {
@@ -512,32 +512,32 @@ func (e *vdocsDocumentEvidence) validate() error {
 		}
 	}
 	for _, o := range e.FlowOrigins {
-		if err := validateColleafOriginProfile(o, e.Pages, vdocsFlowOriginProfile); err != nil {
+		if err := validateVDOCSOriginProfile(o, e.Pages, vdocsFlowOriginProfile); err != nil {
 			return err
 		}
 	}
 	for _, o := range e.AnchorOrigins {
-		if err := validateColleafOriginProfile(o, e.Pages, vdocsAnchorOriginProfile); err != nil {
+		if err := validateVDOCSOriginProfile(o, e.Pages, vdocsAnchorOriginProfile); err != nil {
 			return err
 		}
 	}
 	for _, o := range e.ListOrigins {
-		if err := validateColleafListOrigin(o, e.Pages); err != nil {
+		if err := validateVDOCSListOrigin(o, e.Pages); err != nil {
 			return err
 		}
 	}
 	for _, o := range e.ImageOrigins {
-		if err := validateColleafOriginProfile(o, e.Pages, vdocsImageOriginProfile); err != nil {
+		if err := validateVDOCSOriginProfile(o, e.Pages, vdocsImageOriginProfile); err != nil {
 			return err
 		}
 	}
 	for _, o := range e.TableOrigins {
-		if err := validateColleafTableOrigin(o, e.Pages); err != nil {
+		if err := validateVDOCSTableOrigin(o, e.Pages); err != nil {
 			return err
 		}
 	}
 	for _, o := range e.RunOrigins {
-		if err := validateColleafOriginProfile(o, e.Pages, vdocsRunOriginProfile); err != nil {
+		if err := validateVDOCSOriginProfile(o, e.Pages, vdocsRunOriginProfile); err != nil {
 			return err
 		}
 	}
@@ -552,13 +552,13 @@ func (e *vdocsDocumentEvidence) validate() error {
 		seenNotes[o.NativeID] = true
 	}
 	for _, o := range e.Origins {
-		if err := validateColleafOrigin(o, e.Pages); err != nil {
+		if err := validateVDOCSOrigin(o, e.Pages); err != nil {
 			return err
 		}
 	}
 	return e.PDFNavigation.validate(&Document{Pages: e.Pages}, nil)
 }
-func restoreColleafEvidence(d *Document, e *vdocsDocumentEvidence) error {
+func restoreVDOCSEvidence(d *Document, e *vdocsDocumentEvidence) error {
 	if e == nil {
 		return nil
 	}
@@ -594,7 +594,7 @@ func restoreColleafEvidence(d *Document, e *vdocsDocumentEvidence) error {
 		detached := !view.Unresolved && !graph.anchors[view.ID] || view.Unresolved && !graph.missing[view.ID]
 		if detached && view.FlowBinding != "unbound" {
 			view.FlowBinding = "unbound"
-			warning := Diagnostic{Code: "colleaf_pdf_flow_binding", Message: "Original PDF navigation evidence for " + view.ID + " is retained unbound after the editable destination graph changed"}
+			warning := Diagnostic{Code: "vdocs_pdf_flow_binding", Message: "Original PDF navigation evidence for " + view.ID + " is retained unbound after the editable destination graph changed"}
 			if !seen[warning] {
 				d.Diagnostics = append(d.Diagnostics, warning)
 				seen[warning] = true
@@ -623,7 +623,7 @@ func vdocsOwnIntent(name string) bool {
 	return false
 }
 
-func sealColleafIntent(snapshot *vdocsNoteSnapshot) error {
+func sealVDOCSIntent(snapshot *vdocsNoteSnapshot) error {
 	var records, remaining []vdocsResource
 	for _, resource := range snapshot.Resources {
 		if vdocsOwnIntent(resource.Name) {
@@ -644,7 +644,7 @@ func sealColleafIntent(snapshot *vdocsNoteSnapshot) error {
 			return fmt.Errorf("native intent carrier identity collision")
 		}
 	}
-	carrier, err := makeColleafIntentCarrier(records)
+	carrier, err := makeVDOCSIntentCarrier(records)
 	if err != nil {
 		return err
 	}
@@ -652,7 +652,7 @@ func sealColleafIntent(snapshot *vdocsNoteSnapshot) error {
 	snapshot.Resources = remaining
 	return nil
 }
-func openColleafIntent(ctx context.Context, snapshot vdocsNoteSnapshot) (vdocsNoteSnapshot, error) {
+func openVDOCSIntent(ctx context.Context, snapshot vdocsNoteSnapshot) (vdocsNoteSnapshot, error) {
 
 	snapshot.Resources = append([]vdocsResource(nil), snapshot.Resources...)
 	var ranges []vdocsRangeRecord
@@ -678,7 +678,7 @@ func openColleafIntent(ctx context.Context, snapshot vdocsNoteSnapshot) (vdocsNo
 		if err != nil {
 			return snapshot, err
 		}
-		index, err := newColleafTextIndex(ctx, snapshot.Body.DataStream)
+		index, err := newVDOCSTextIndex(ctx, snapshot.Body.DataStream)
 		if err != nil {
 			return snapshot, err
 		}
@@ -696,7 +696,7 @@ func openColleafIntent(ctx context.Context, snapshot vdocsNoteSnapshot) (vdocsNo
 	snapshot.Body.CustomRanges = ranges
 	return snapshot, nil
 }
-func emptyColleafBuiltinResource(resource vdocsResource) bool {
+func emptyVDOCSBuiltinResource(resource vdocsResource) bool {
 	switch resource.Name {
 	case "DOC_OBJECT_PERMISSION_PLUGIN", "DOC_WORD_STYLES_PLUGIN", "DOC_NOTE_PLUGIN":
 		value := strings.TrimSpace(resource.Data)
@@ -705,7 +705,7 @@ func emptyColleafBuiltinResource(resource vdocsResource) bool {
 	return false
 }
 
-func checkColleafDrawingMirror(snapshot vdocsNoteSnapshot, resource vdocsResource) error {
+func checkVDOCSDrawingMirror(snapshot vdocsNoteSnapshot, resource vdocsResource) error {
 	var mirror struct {
 		Data  map[string]json.RawMessage `json:"data"`
 		Order []string                   `json:"order"`
@@ -770,15 +770,15 @@ func checkColleafDrawingMirror(snapshot vdocsNoteSnapshot, resource vdocsResourc
 	return nil
 }
 
-const maxColleafIntentBytes = 128 << 20
+const maxVDOCSIntentBytes = 128 << 20
 
-func makeColleafIntentCarrier(records []vdocsResource) (vdocsIntentCarrier, error) {
+func makeVDOCSIntentCarrier(records []vdocsResource) (vdocsIntentCarrier, error) {
 	out := vdocsIntentCarrier{Profile: vdocsIntentProfile, Version: 1, Records: records}
 	raw, err := json.Marshal(records)
 	if err != nil {
 		return out, err
 	}
-	if len(raw) > maxColleafIntentBytes {
+	if len(raw) > maxVDOCSIntentBytes {
 		return out, fmt.Errorf("%w: native intent exceeds parser expansion bound", ErrUnsupported)
 	}
 	if len(raw) < 64<<10 {
@@ -814,7 +814,7 @@ func (c vdocsIntentCarrier) records(ctx context.Context) ([]vdocsResource, error
 		}
 		return c.Records, nil
 	case 2:
-		if c.Records != nil || len(c.GzipRecords) == 0 || c.RecordsBytes <= 0 || c.RecordsBytes > maxColleafIntentBytes {
+		if c.Records != nil || len(c.GzipRecords) == 0 || c.RecordsBytes <= 0 || c.RecordsBytes > maxVDOCSIntentBytes {
 			return nil, fmt.Errorf("invalid compressed native intent size/encoding")
 		}
 	default:
@@ -854,7 +854,7 @@ type vdocsTextIndex struct {
 	byteAt []int
 }
 
-func newColleafTextIndex(ctx context.Context, text string) (vdocsTextIndex, error) {
+func newVDOCSTextIndex(ctx context.Context, text string) (vdocsTextIndex, error) {
 	if err := ctx.Err(); err != nil {
 		return vdocsTextIndex{}, err
 	}
@@ -926,14 +926,14 @@ type vdocsStreamNode struct {
 	children   []vdocsStreamNode
 }
 
-func parseColleafStream(ctx context.Context, text string) ([]vdocsStreamNode, error) {
-	index, err := newColleafTextIndex(ctx, text)
+func parseVDOCSStream(ctx context.Context, text string) ([]vdocsStreamNode, error) {
+	index, err := newVDOCSTextIndex(ctx, text)
 	if err != nil {
 		return nil, err
 	}
-	return parseColleafIndexedStream(ctx, index)
+	return parseVDOCSIndexedStream(ctx, index)
 }
-func parseColleafIndexedStream(ctx context.Context, index vdocsTextIndex) ([]vdocsStreamNode, error) {
+func parseVDOCSIndexedStream(ctx context.Context, index vdocsTextIndex) ([]vdocsStreamNode, error) {
 	p := vdocsStreamParser{index: index, ctx: ctx}
 	nodes, err := p.sections(false, 0)
 	if err != nil {

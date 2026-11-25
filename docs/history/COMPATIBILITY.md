@@ -12,7 +12,7 @@ explicit graphs, reciprocal untagged inference, rich continuation and qualified
 cross-page ownership. Original Word/Mac Word/LibreOffice exports and independent
 rendering qualify the declared DOCX contract; they do not establish Word-equivalent
 pagination. PDF_NOTE_KIND.md records the current tagged placement policy and
-original-source ParentTree compatibility check. Optional Colleaf browser reader
+original-source ParentTree compatibility check. Optional VDOCS browser reader
 discrepancies are separate from the four required conversion paths.
 
 ## Format support
@@ -24,7 +24,7 @@ discrepancies are separate from the four required conversion paths.
 | PDF read | Positioned text/raster assets, page boxes/rotation/UserUnit, ToUnicode/common encodings, Form/annotation transforms, ActualText/MCID provenance | Tagged forward logical trees recover common paragraphs/headings/lists/tables/merges/images/URI links; untagged geometric inference also recovers common paragraphs/headings/lists/numeric or ruled tables/merges/empty cells; explicit typed notes/reciprocal citations recover; ambiguous geometry stays literal with diagnostics; OCR is not provided; unsupported codecs/encodings/operators reject |
 | PDF write | Flowing text/headings/lists, run formatting/links, merged/nested tables with rich cells, PNG/JPEG images, page breaks, per-section body margins/paper settings, metadata, rich measured headers/footers, linked rich footnotes/endnotes with continuation | Built-in Go coverage plus explicit supplied TTFs; qualified Hebrew/Arabic bidi below, unsupported scripts reject explicitly; body/nested/footnote row groups continue recursively; explicit cell/note breaks propagate through nested tables and retain blank pages; images fit full width/height containers; malformed, excessive or unrepresentable rasters reject |
 | SF / ProseMirror JSON | Versioned profile with body, marks/links, nested lists with starts and multi-block items, nested tables/row and column spans, embedded assets, metadata/layout, headers/footers, notes and diagnostics | See STRUCTURED_FORMAT.md; bridge rejects unrepresented semantics; revisions/comments/fields follow the explicit policies below |
-| Legacy JSON | Public model with base64 image data and diagnostics | Unknown JSON fields rejected; this is manifold's model, not Colleaf's .vdocs schema |
+| Legacy JSON | Public model with base64 image data and diagnostics | Unknown JSON fields rejected; this is manifold's model, not VDOCS's .vdocs schema |
 | Text | Body/table/note text; form feeds represent page breaks | Formatting and binary image data are not represented |
 
 PDF input was tested with RC4-40, RC4-128, AES-128 and AES-256 passwords, object
@@ -121,10 +121,10 @@ also require acknowledgement if diagnostics were removed, since writers reflow
 and omit that provenance. The option does not suppress
 unsupported-feature or missing-glyph errors.
 
-Applications such as Daptin/Colleaf retain authority over identity, permission,
+Applications such as Daptin/VDOCS retain authority over identity, permission,
 storage, actions and quotas. No Daptin integration is included. A public offline .vdocs adapter maps the
-qualified Colleaf/Univer profile through SF; native browser behavior remains
-unqualified. See COLLEAF_FORMAT.md.
+qualified VDOCS/Univer profile through SF; native browser behavior remains
+unqualified. See VDOCS_FORMAT.md.
 
 ## Merged table cells
 
@@ -362,7 +362,7 @@ default) and #RRGGBB/auto (empty means default). SF textStyle carries the same
 semantics. RGB hex spelling canonicalizes; actual scalar values persist. This
 profile uses numeric points, not arbitrary Tiptap CSS strings. Imported PDF
 Source.Font/FontSize remain physical provenance; editable family/size/device-color
-recovery now also exists with evidence and explicit approximation diagnostics. No Colleaf/Tiptap drop-in schema compatibility is asserted.
+recovery now also exists with evidence and explicit approximation diagnostics. No VDOCS/Tiptap drop-in schema compatibility is asserted.
 
 DOCX resolves docDefaults, paragraph/character basedOn chains and direct fields.
 Bold/italic/strike in style definitions toggle, whereas direct values are absolute.
@@ -926,10 +926,10 @@ relationships and Pagination/Header artifact properties still require semantic
 recovery; content remains visible, which alone is insufficient for that goal.
 ACCEPTANCE.md and scripts/qa/pdf/generate_pdf_semantic_audit.py record current evidence.
 
-Colleaf's actual .vdocs snapshot is pinned Univer 1.0.4 inside a version-3 app
+VDOCS's actual .vdocs snapshot is pinned Univer 1.0.4 inside a version-3 app
 envelope. This library's SF is not that format. Native adapter/real-reader
 qualification remains open; no .vdocs read/write, app upload or native-save
-compatibility is claimed. See COLLEAF_FORMAT.md for inspected source facts.
+compatibility is claimed. See VDOCS_FORMAT.md for inspected source facts.
 
 ## Explicit artifact page roles
 
@@ -1157,7 +1157,7 @@ continue to normalize away. Source ownership is never invented during conversion
 
 Private native transport now losslessly compresses large sparse intent/source
 metadata using a checked version 2 carrier. The original ten-page InDesign PDF
-passes full-graph Go/SF and actual validator/plugin save checks (COLLEAF_FORMAT.md).
+passes full-graph Go/SF and actual validator/plugin save checks (VDOCS_FORMAT.md).
 The unchanged app 5 MiB limit still applies; this does not qualify arbitrary native
 sizes, browser layout or exported DOCX nonvisual run annotations. Expanded metadata
 has a 128 MiB parser bound with explicit rejection, separate from app admission.
@@ -1169,13 +1169,13 @@ story graphs and a multi-context synthetic fixture qualify persistence. Native
 altLang is authoritative for the East Asian slot; unmarked foreign slot inference
 is diagnosed. ComplexLanguage survives as typed authored style metadata; its use
 for native shaping is unproven. Forced complex-script and run-direction output
-still reject. See COLLEAF_FORMAT.md for exact scope and remaining native work.
+still reject. See VDOCS_FORMAT.md for exact scope and remaining native work.
 
 
 The checked native envelope profile is public through VDOCS/ReadVDOCS/WriteVDOCS
 and CLI .vdocs input/output. It preserves supported SF content/assets/history;
 unsupported native mappings still reject even with AllowLossy. No app size/quota/
-authorization gate is added. See COLLEAF_FORMAT.md for pinned version and scope.
+authorization gate is added. See VDOCS_FORMAT.md for pinned version and scope.
 Browser interaction/rendering remain unqualified. The subsequently implemented
 painted PDF structure below fixes the three-note recovery failure; its unchanged
 acceptance oracle now runs unconditionally.
@@ -1216,7 +1216,7 @@ Actual desktop preset browser qualification now has a reproducible repeated-note
 placement failure. The unchanged public notes example places label 2 above label 1;
 the pinned renderer uses the later repeated citation index for the first note.
 The source identity/content graph still persists, but that does not prove correct
-body order. COLLEAF_BROWSER.md and scripts/qa/colleaf/verify_colleaf_note_order.cjs preserve
+body order. VDOCS_FORMAT.md#limits and scripts/qa/vdocs/verify_vdocs_note_order.cjs preserve
 the original first-reference-order oracle and passing no-repeat control. Ordinary
 Go tests do not run this optional native-reader check, which currently FAILS.
 No application/vendor/production change or full browser/fidelity claim is made.

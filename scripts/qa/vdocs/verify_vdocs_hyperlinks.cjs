@@ -1,6 +1,6 @@
 /* Optional pinned hyperlink plugin/resource and unmodified external command QA. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),vm=require('node:vm');
-const {createRequire,stripTypeScriptTypes}=require('node:module'),root=path.resolve(__dirname,'../../..'),qa=path.join(root,'output/colleaf-qa'),req=createRequire(path.join(qa,'package.json'));
+const {createRequire}=require('node:module'),root=path.resolve(__dirname,'../../..'),qa=path.join(root,'output/vdocs-qa'),req=createRequire(path.join(qa,'package.json'));
 const c=req('@univerjs/core'),e=req('@univerjs/engine-render'),docs=req('@univerjs/docs'),drawing=req('@univerjs/drawing'),dd=req('@univerjs/docs-drawing'),hyper=req('@univerjs/docs-hyper-link'),{FUniver}=req('@univerjs/core/facade');req('@univerjs/docs/facade');
 for(const n of ['core','engine-render','docs','drawing','docs-drawing','docs-hyper-link'])assert.equal(JSON.parse(fs.readFileSync(path.join(qa,'node_modules/@univerjs',n,'package.json'))).version,'1.0.4');
 function pinned(file,hash){const source=fs.readFileSync(file,'utf8');assert.equal(crypto.createHash('sha256').update(source).digest('hex'),hash);return source}
@@ -27,13 +27,13 @@ function inspectLoaded(u,f,edited){
  return data;
 }
 async function main(){
- const source=pinned(path.join(root,'output/codec/colleaf-format-0.txt'),'c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0'),app=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(source)).toString('base64'));
- const valid=document=>app.validateDocument({type:'vibedada-document',version:3,engine:'univer',engineVersion:'1.0.4',document}),data=JSON.parse(fs.readFileSync(path.join(qa,'hyperlinks.json')));valid(data);
- const first=withDocument(data,(u,f)=>inspectLoaded(u,f,false));valid(first);
- const saved=withDocument(first,(u,f)=>inspectLoaded(u,f,false));valid(saved);fs.writeFileSync(path.join(qa,'hyperlinks-saved.json'),JSON.stringify(saved));
+
+ const data=JSON.parse(fs.readFileSync(path.join(qa,'hyperlinks.json')));
+ const first=withDocument(data,(u,f)=>inspectLoaded(u,f,false));
+ const saved=withDocument(first,(u,f)=>inspectLoaded(u,f,false));fs.writeFileSync(path.join(qa,'hyperlinks-saved.json'),JSON.stringify(saved));
  const resourceEdited=structuredClone(saved),header=links(resourceEdited).find(x=>x.label==='Header'),resource=resourceEdited.resources.find(r=>r.name==='DOC_HYPER_LINK_PLUGIN'),payload=JSON.parse(resource.data);payload.links.find(e=>e.id===header.r.rangeId).payload='https://example.org/header-edited';resource.data=JSON.stringify(payload);
  assert.equal(header.r.properties.url,'https://example.org/header');fs.writeFileSync(path.join(qa,'hyperlinks-resource-edited.json'),JSON.stringify(resourceEdited));
- const editedSaved=withDocument(resourceEdited,(u,f)=>inspectLoaded(u,f,true));valid(editedSaved);fs.writeFileSync(path.join(qa,'hyperlinks-edited-saved.json'),JSON.stringify(editedSaved));
+ const editedSaved=withDocument(resourceEdited,(u,f)=>inspectLoaded(u,f,true));fs.writeFileSync(path.join(qa,'hyperlinks-edited-saved.json'),JSON.stringify(editedSaved));
  console.log('Pinned five main/cell/list/header/footer links, note-local URL, authored glyph style, actual hyperlink resource save/reopen/URL-only edit and unmodified external handler targets pass; window.open is stubbed, browser/UI/internal navigation unqualified');
 }
 main().catch(error=>{console.error(error);process.exitCode=1});

@@ -22,7 +22,7 @@ type vdocsListPart struct {
 	Dynamic bool
 }
 
-func appendColleafListLiteral(parts []vdocsListPart, text string) []vdocsListPart {
+func appendVDOCSListLiteral(parts []vdocsListPart, text string) []vdocsListPart {
 	if text == "" {
 		return parts
 	}
@@ -42,12 +42,12 @@ func vdocsSFListParts(template string, level int) []vdocsListPart {
 				parts = append(parts, vdocsListPart{Level: n, Dynamic: true})
 			}
 		} else {
-			parts = appendColleafListLiteral(parts, template[i:i+1])
+			parts = appendVDOCSListLiteral(parts, template[i:i+1])
 		}
 	}
 	return parts
 }
-func projectColleafListTemplate(template string, level int, source *vdocsNativeList) string {
+func projectVDOCSListTemplate(template string, level int, source *vdocsNativeList) string {
 	var out strings.Builder
 	helpers := map[string]int{}
 	for _, part := range vdocsSFListParts(template, level) {
@@ -95,7 +95,7 @@ func vdocsTemplateMatchesOriginal(template string, level int, source vdocsNative
 	// hanging marker sits outside a clipped cell. Custom indents still diagnose.
 
 	projected := vdocsNativeList{Levels: append([]vdocsListLevel(nil), source.Levels[:level+1]...)}
-	format := projectColleafListTemplate(template, level, &projected)
+	format := projectVDOCSListTemplate(template, level, &projected)
 	if format != source.Levels[level].Format || source.Levels[level].Symbol != "" {
 		return false
 	}
@@ -106,7 +106,7 @@ func vdocsTemplateMatchesOriginal(template string, level int, source vdocsNative
 	}
 	return true
 }
-func readColleafListTemplate(
+func readVDOCSListTemplate(
 
 	// Existing native documents may omit preset layout properties.
 
@@ -121,7 +121,7 @@ func readColleafListTemplate(
 			return fmt.Errorf("%w: native list template exceeds SF representation", ErrUnsupported)
 		}
 		logicalBytes += len(text)
-		parts = appendColleafListLiteral(parts, text)
+		parts = appendVDOCSListLiteral(parts, text)
 		return nil
 	}
 	if source.Levels[level].Symbol != "" {
@@ -265,7 +265,7 @@ func vdocsListLayout(level int) json.RawMessage {
 	return sfAttrs(map[string]any{"hanging": map[string]int{"v": 0}, "indentStart": map[string]int{"v": 21 * (level + 1)}})
 }
 
-func standardColleafListLayout(raw json.RawMessage, level int) bool {
+func standardVDOCSListLayout(raw json.RawMessage, level int) bool {
 	if len(raw) == 0 {
 		return true
 	}
@@ -349,7 +349,7 @@ func (w *vdocsBodyWriter) list(block Block, depth int) error {
 		source.Levels = append(source.Levels, entry)
 	}
 	if block.List == "number" && block.Numbering != nil {
-		format := projectColleafListTemplate(block.Numbering.Template, level, &source)
+		format := projectVDOCSListTemplate(block.Numbering.Template, level, &source)
 		source.Levels[level].Format = format
 	}
 	unprojected := source
@@ -357,8 +357,8 @@ func (w *vdocsBodyWriter) list(block Block, depth int) error {
 	if normalValue == 0 {
 		normalValue = 1
 	}
-	source, normalProjection := projectColleafNumbering(unprojected, block.Numbering, normalValue)
-	firstSource, firstProjection := projectColleafNumbering(unprojected, block.Numbering, listStart(block))
+	source, normalProjection := projectVDOCSNumbering(unprojected, block.Numbering, normalValue)
+	firstSource, firstProjection := projectVDOCSNumbering(unprojected, block.Numbering, listStart(block))
 	firstType := typeID
 	if !reflect.DeepEqual(firstSource.Levels, source.Levels) {
 		firstType = w.id("list-zero-type")
@@ -406,7 +406,7 @@ func (w *vdocsBodyWriter) list(block Block, depth int) error {
 			if err != nil {
 				return err
 			}
-			origin, err := newColleafSourceOrigin(block.Source, hash, vdocsListOriginProfile)
+			origin, err := newVDOCSSourceOrigin(block.Source, hash, vdocsListOriginProfile)
 			if err != nil {
 				return err
 			}
@@ -417,7 +417,7 @@ func (w *vdocsBodyWriter) list(block Block, depth int) error {
 			if err != nil {
 				return err
 			}
-			origin, err := newColleafSourceOrigin(item.Source, hash, vdocsItemOriginProfile)
+			origin, err := newVDOCSSourceOrigin(item.Source, hash, vdocsItemOriginProfile)
 			if err != nil {
 				return err
 			}
@@ -472,7 +472,7 @@ func vdocsListParagraphs(ctx context.Context, body vdocsBody, lists map[string]j
 			if !ok {
 				return nil, fmt.Errorf("native numbering intent lacks its source type")
 			}
-			if err := validateColleafNumberProjection(p, min(8, len(source.Levels)-1)); err != nil {
+			if err := validateVDOCSNumberProjection(p, min(8, len(source.Levels)-1)); err != nil {
 				return nil, err
 			}
 		}
@@ -535,7 +535,7 @@ func vdocsListParagraphs(ctx context.Context, body vdocsBody, lists map[string]j
 			return nil, fmt.Errorf("%w: native glyph type%d", ErrUnsupported, *level.Glyph)
 		}
 		if info.Kind == "number" {
-			template, err := readColleafListTemplate(source, bullet.Level, bindings[bullet.Type])
+			template, err := readVDOCSListTemplate(source, bullet.Level, bindings[bullet.Type])
 			if err != nil {
 				return nil, err
 			}
@@ -565,15 +565,15 @@ func vdocsListParagraphs(ctx context.Context, body vdocsBody, lists map[string]j
 			binding := bindings[bullet.Type]
 			restored := false
 			if p, ok := binding.Projections[bullet.Type]; ok {
-				if err := validateColleafNumberProjection(p, bullet.Level); err != nil {
+				if err := validateVDOCSNumberProjection(p, bullet.Level); err != nil {
 					return nil, err
 				}
-				restored = restoreColleafNumberProjection(n, p, value, info.ActiveAncestors, source)
+				restored = restoreVDOCSNumberProjection(n, p, value, info.ActiveAncestors, source)
 				info.StaleProjection = !restored
 			}
 			if !restored {
 				var err error
-				info.PolicyLoss, err = normalizeColleafNativeNumbering(n, value, info.ActiveAncestors)
+				info.PolicyLoss, err = normalizeVDOCSNativeNumbering(n, value, info.ActiveAncestors)
 				if err != nil {
 					return nil, err
 				}
@@ -581,7 +581,7 @@ func vdocsListParagraphs(ctx context.Context, body vdocsBody, lists map[string]j
 
 			info.Numbering = n
 		}
-		info.Loss = info.Loss || len(level.Style) > 0 || !standardColleafListLayout(level.Properties, bullet.Level) || len(bullet.Style) > 0 || level.Align != 1
+		info.Loss = info.Loss || len(level.Style) > 0 || !standardVDOCSListLayout(level.Properties, bullet.Level) || len(bullet.Style) > 0 || level.Align != 1
 		result[p.StartIndex] = info
 		state.values[bullet.Level] = value
 		state.seen[bullet.Level] = true
@@ -657,7 +657,7 @@ func (r *vdocsBodyReader) groupLists(flow []vdocsFlowBlock, depth int, sectionID
 			out = append(out, block)
 			i = next
 			if info.Loss {
-				r.doc.warn("colleaf_list_presentation", "Native marker presentation is normalized; supported numbering and item text are retained")
+				r.doc.warn("vdocs_list_presentation", "Native marker presentation is normalized; supported numbering and item text are retained")
 			}
 		}
 		if !seen[upper] {
@@ -710,7 +710,7 @@ func (r *vdocsBodyReader) groupLists(flow []vdocsFlowBlock, depth int, sectionID
 					// Authored restarts/changed counters must become native-derived groups,
 					// rather than being hidden inside a stale old list container.
 					current := r.listParagraphs[flow[item.start].Position]
-					if !sameColleafNumbering(info, current) || info.Kind == "number" && current.Value != info.Value+itemIndex {
+					if !sameVDOCSNumbering(info, current) || info.Kind == "number" && current.Value != info.Value+itemIndex {
 						valid = false
 						break
 					}
@@ -726,7 +726,7 @@ func (r *vdocsBodyReader) groupLists(flow []vdocsFlowBlock, depth int, sectionID
 					return block, end + 1, nil
 				}
 			}
-			r.doc.warn("colleaf_stale_list_ownership", "Stale list ownership metadata ignored; actual native bullets and visible block order are retained")
+			r.doc.warn("vdocs_stale_list_ownership", "Stale list ownership metadata ignored; actual native bullets and visible block order are retained")
 		}
 		// Foreign/unbound native lists have explicit bullets but no continuation
 		// ownership. Infer only consecutive marked paragraphs and deeper marked runs.
@@ -734,7 +734,7 @@ func (r *vdocsBodyReader) groupLists(flow []vdocsFlowBlock, depth int, sectionID
 		cursor := start
 		for cursor < len(flow) {
 			current, ok := r.listParagraphs[flow[cursor].Position]
-			if !ok || len(flow[cursor].Bullet) == 0 || current.Bullet.Level != info.Bullet.Level || current.Bullet.ID != info.Bullet.ID || current.Bullet.Type != info.Bullet.Type || !sameColleafNumbering(info, current) || (info.Kind == "number" && current.Value != info.Value+len(block.Items)) {
+			if !ok || len(flow[cursor].Bullet) == 0 || current.Bullet.Level != info.Bullet.Level || current.Bullet.ID != info.Bullet.ID || current.Bullet.Type != info.Bullet.Type || !sameVDOCSNumbering(info, current) || (info.Kind == "number" && current.Value != info.Value+len(block.Items)) {
 				break
 			}
 			item := ListItem{Blocks: append([]Block{flow[cursor].Block}, flow[cursor].After...)}
@@ -777,7 +777,7 @@ func (r *vdocsBodyReader) groupLists(flow []vdocsFlowBlock, depth int, sectionID
 			}
 			block.Items = append(block.Items, item)
 		}
-		r.doc.warn("colleaf_list_ownership", "Native bullet records infer list containers; unmarked continuation ownership is not explicit")
+		r.doc.warn("vdocs_list_ownership", "Native bullet records infer list containers; unmarked continuation ownership is not explicit")
 		r.promoteListPoints(&block, flow[start].ID, flow[start].Position)
 		return block, cursor, nil
 	}
@@ -841,7 +841,7 @@ func (w *vdocsBodyWriter) literalList(block Block, depth int) error {
 			if err != nil {
 				return err
 			}
-			p.vdocsListOrigin, err = newColleafSourceOrigin(block.Source, hash, vdocsListOriginProfile)
+			p.vdocsListOrigin, err = newVDOCSSourceOrigin(block.Source, hash, vdocsListOriginProfile)
 			if err != nil {
 				return err
 			}
@@ -851,7 +851,7 @@ func (w *vdocsBodyWriter) literalList(block Block, depth int) error {
 			if err != nil {
 				return err
 			}
-			p.vdocsItemOrigin, err = newColleafSourceOrigin(item.Source, hash, vdocsItemOriginProfile)
+			p.vdocsItemOrigin, err = newVDOCSSourceOrigin(item.Source, hash, vdocsItemOriginProfile)
 			if err != nil {
 				return err
 			}
@@ -861,7 +861,7 @@ func (w *vdocsBodyWriter) literalList(block Block, depth int) error {
 			if err != nil {
 				return err
 			}
-			p.vdocsMarkerOrigin, err = newColleafSourceOrigin(item.Marker.Source, hash, vdocsMarkerOriginProfile)
+			p.vdocsMarkerOrigin, err = newVDOCSSourceOrigin(item.Marker.Source, hash, vdocsMarkerOriginProfile)
 			if err != nil {
 				return err
 			}
@@ -972,7 +972,7 @@ func (r *vdocsBodyReader) literalLists(bs []Block, depth int) ([]Block, error) {
 			i += m.Count
 			continue
 		}
-		r.doc.warn("colleaf_stale_literal_ownership", "Stale literal list ownership ignored; actual native label/body table content is retained")
+		r.doc.warn("vdocs_stale_literal_ownership", "Stale literal list ownership ignored; actual native label/body table content is retained")
 		bs[i].vdocsLiteral = nil
 		out = append(out, bs[i])
 		i++
@@ -997,7 +997,7 @@ func vdocsLiteralTable(block Block, item ListItem, index int) Block {
 	}
 	return Block{Kind: Table, Rows: []Row{{Cells: cells}}}
 }
-func hasColleafLiteralItems(b Block) bool {
+func hasVDOCSLiteralItems(b Block) bool {
 	for _, item := range b.Items {
 		if item.Marker != nil {
 			return true
@@ -1041,7 +1041,7 @@ func (f *vdocsProjectedFormats) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func projectColleafNumbering(source vdocsNativeList, n *ListNumbering, value int) (vdocsNativeList, *vdocsNumberProjection) {
+func projectVDOCSNumbering(source vdocsNativeList, n *ListNumbering, value int) (vdocsNativeList, *vdocsNumberProjection) {
 	if n == nil {
 		return source, nil
 	}
@@ -1066,7 +1066,7 @@ func projectColleafNumbering(source vdocsNativeList, n *ListNumbering, value int
 	}
 	return source, p
 }
-func validateColleafNumberProjection(p vdocsNumberProjection, level int) error {
+func validateVDOCSNumberProjection(p vdocsNumberProjection, level int) error {
 	if len(p.Formats) == 0 || len(p.Formats) > 9 || len(p.ZeroLevels) > 9 {
 		return fmt.Errorf("invalid native numbering projection")
 	}
@@ -1084,7 +1084,7 @@ func validateColleafNumberProjection(p vdocsNumberProjection, level int) error {
 	}
 	return nil
 }
-func restoreColleafNumberProjection(n *ListNumbering, p vdocsNumberProjection, value int, ancestors []int, source vdocsNativeList) bool {
+func restoreVDOCSNumberProjection(n *ListNumbering, p vdocsNumberProjection, value int, ancestors []int, source vdocsNativeList) bool {
 	if n.Legal != p.Legal || source.Levels[n.Level].Symbol != "" {
 		return false
 	}
@@ -1108,7 +1108,7 @@ func restoreColleafNumberProjection(n *ListNumbering, p vdocsNumberProjection, v
 	return true
 }
 
-func normalizeColleafNativeNumbering(n *ListNumbering, value int, ancestors []int) (bool, error) {
+func normalizeVDOCSNativeNumbering(n *ListNumbering, value int, ancestors []int) (bool, error) {
 	loss := false
 	if n.Legal {
 		padded := false
@@ -1141,13 +1141,13 @@ func normalizeColleafNativeNumbering(n *ListNumbering, value int, ancestors []in
 				if n.Formats[part.Level] == "decimalZero" {
 					zero = "00"
 				}
-				actual = appendColleafListLiteral(actual, zero)
+				actual = appendVDOCSListLiteral(actual, zero)
 				loss = true
 				continue
 			}
 			actual = append(actual, part)
 		} else {
-			actual = appendColleafListLiteral(actual, part.Literal)
+			actual = appendVDOCSListLiteral(actual, part.Literal)
 		}
 	}
 	if !loss {
@@ -1171,7 +1171,7 @@ func vdocsListPartsText(parts []vdocsListPart) string {
 	}
 	return out
 }
-func sameColleafNumbering(a, b vdocsListParagraph) bool {
+func sameVDOCSNumbering(a, b vdocsListParagraph) bool {
 	return a.Kind == b.Kind && reflect.DeepEqual(a.Numbering, b.Numbering)
 }
 func vdocsListBindingTypes(b vdocsListBinding) ([]string, error) {

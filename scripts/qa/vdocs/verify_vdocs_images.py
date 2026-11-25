@@ -7,7 +7,7 @@ from pathlib import Path
 from PIL import Image
 
 root = Path(__file__).resolve().parents[3]
-snapshot = json.loads((root / "output/colleaf-qa/images.json").read_text())
+snapshot = json.loads((root / "output/vdocs-qa/images.json").read_text())
 images = list(snapshot["drawings"].values())
 for note in snapshot["notes"].values():
     images.extend(note.get("drawings", {}).values())

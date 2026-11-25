@@ -141,7 +141,7 @@ func ReadStructured(ctx context.Context, r io.Reader) (*StructuredDocument, erro
 	return engine.ReadStructured(ctx, r)
 }
 
-// ReadVDOCS decodes the supported Colleaf native document envelope.
+// ReadVDOCS decodes the supported VDOCS native document envelope.
 func ReadVDOCS(ctx context.Context, r io.Reader) (*Document, error) { return engine.ReadVDOCS(ctx, r) }
 
 type Row = engine.Row
@@ -237,7 +237,7 @@ func WriteStructured(ctx context.Context, w io.Writer, s *StructuredDocument) er
 	return engine.WriteStructured(ctx, w, s)
 }
 
-// WriteVDOCS encodes the supported Colleaf native document envelope.
+// WriteVDOCS encodes the supported VDOCS native document envelope.
 func WriteVDOCS(ctx context.Context, w io.Writer, d *Document) error {
 	return engine.WriteVDOCS(ctx, w, d)
 }

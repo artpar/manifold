@@ -47,3 +47,10 @@ native profile strings for persisted compatibility. See [rename](reference/RENAM
 [SF](reference/STRUCTURED_FORMAT.md), [compatibility](COMPATIBILITY.md) and
 [testing](TESTING.md). Historical implementation details and the old-to-new file
 map are in [history](history/README.md).
+
+
+The native container is Manifold-owned (`manifold-document`, version3) around a
+pinned Univer snapshot. It is optional interchange with the same SF/model, not a
+second canonical representation. Application-specific validators/browser mounts
+are no longer part of QA; remaining optional SDK checks inspect actual native
+models, glyphs, plugins, edits and facade saves. See VDOCS_FORMAT.md for migration.

@@ -35,7 +35,7 @@ func vdocsHyperlinkRecord(t testing.TB, body *vdocsBody) *vdocsRangeRecord {
 func TestVDOCSHyperlinkPluginSaveAndSF(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsHyperlinkExample(t)
-	wire, err := encodeColleafDocument(ctx, want)
+	wire, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +60,7 @@ func TestVDOCSHyperlinkPluginSaveAndSF(t *testing.T) {
 	if len(seen) != 5 {
 		t.Fatal("missing hyperlink relationships", seen)
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_HYPERLINK_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_HYPERLINK_QA"); file != "" {
 		raw, err := json.Marshal(wire)
 		if err != nil {
 			t.Fatal(err)
@@ -73,7 +73,7 @@ func TestVDOCSHyperlinkPluginSaveAndSF(t *testing.T) {
 		env        string
 		edited     bool
 		diagnostic bool
-	}{{"MANYDOC_COLLEAF_HYPERLINK_SAVED", false, false}, {"MANYDOC_COLLEAF_HYPERLINK_RESOURCE_EDITED", true, true}, {"MANYDOC_COLLEAF_HYPERLINK_EDITED_SAVED", true, false}} {
+	}{{"MANYDOC_VDOCS_HYPERLINK_SAVED", false, false}, {"MANYDOC_VDOCS_HYPERLINK_RESOURCE_EDITED", true, true}, {"MANYDOC_VDOCS_HYPERLINK_EDITED_SAVED", true, false}} {
 		file := os.Getenv(spec.env)
 		if file == "" {
 			continue
@@ -87,7 +87,7 @@ func TestVDOCSHyperlinkPluginSaveAndSF(t *testing.T) {
 			t.Fatal(err)
 		}
 		before, _ := json.Marshal(native)
-		got, err := decodeColleafDocument(ctx, native)
+		got, err := decodeVDOCSDocument(ctx, native)
 		if err != nil {
 			t.Fatal(spec.env, err)
 		}
@@ -95,7 +95,7 @@ func TestVDOCSHyperlinkPluginSaveAndSF(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		fromBytes, err := readColleaf(ctx, bytes.NewReader(envelope))
+		fromBytes, err := readVDOCS(ctx, bytes.NewReader(envelope))
 		if err != nil {
 			t.Fatal(spec.env, "native file boundary", err)
 		}
@@ -111,7 +111,7 @@ func TestVDOCSHyperlinkPluginSaveAndSF(t *testing.T) {
 			expected.Headers[0].Runs[0].Link = "https://example.org/header-edited"
 		}
 		if spec.diagnostic {
-			if len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "colleaf_hyperlink_resource_target" {
+			if len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "vdocs_hyperlink_resource_target" {
 				t.Fatal("resource precedence not disclosed", got.Diagnostics)
 			}
 			expected.Diagnostics = got.Diagnostics
@@ -142,7 +142,7 @@ func TestVDOCSHyperlinkPluginSaveAndSF(t *testing.T) {
 func TestVDOCSHyperlinkResourceScopePrecedenceAndImmutability(t *testing.T) {
 	ctx := context.Background()
 	original := vdocsHyperlinkExample(t)
-	wire, err := encodeColleafDocument(ctx, original)
+	wire, err := encodeVDOCSDocument(ctx, original)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,7 +152,7 @@ func TestVDOCSHyperlinkResourceScopePrecedenceAndImmutability(t *testing.T) {
 	}
 	wire.Resources = append(wire.Resources, vdocsResource{Name: vdocsHyperlinkResource, Data: string(sfAttrs(map[string]any{"links": []any{map[string]string{"id": headerID, "payload": "https://example.org/header-edited"}}}))})
 	before, _ := json.Marshal(wire)
-	got, err := decodeColleafDocument(ctx, wire)
+	got, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,7 +163,7 @@ func TestVDOCSHyperlinkResourceScopePrecedenceAndImmutability(t *testing.T) {
 	if got.Headers[0].Runs[0].Link != "https://example.org/header-edited" || got.Blocks[0].Runs[0].Link != original.Blocks[0].Runs[0].Link || got.Notes[0].Blocks[0].Runs[0].Link != original.Notes[0].Blocks[0].Runs[0].Link {
 		t.Fatal("resource updated the wrong story")
 	}
-	if len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "colleaf_hyperlink_resource_target" {
+	if len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "vdocs_hyperlink_resource_target" {
 		t.Fatal(got.Diagnostics)
 	}
 	// A resource-only URL is a real load input, not merely a redundant mirror.
@@ -177,7 +177,7 @@ func TestVDOCSHyperlinkResourceScopePrecedenceAndImmutability(t *testing.T) {
 	main := vdocsHyperlinkRecord(t, &wire.Body)
 	main.Properties = sfAttrs(map[string]string{"textStyleMode": "text"})
 	wire.Resources[len(wire.Resources)-1].Data = string(sfAttrs(map[string]any{"links": []any{map[string]string{"id": main.ID, "payload": "https://example.org/recovered"}}}))
-	recovered, err := decodeColleafDocument(ctx, wire)
+	recovered, err := decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -186,32 +186,32 @@ func TestVDOCSHyperlinkResourceScopePrecedenceAndImmutability(t *testing.T) {
 	}
 	main.Properties = sfAttrs(map[string]string{"url": "https://example.org/main", "textStyleMode": "text"})
 	wire.Resources[len(wire.Resources)-1].Data = `{"links":[{"id":"deleted","payload":"https://example.org/deleted"}]}`
-	got, err = decodeColleafDocument(ctx, wire)
+	got, err = decodeVDOCSDocument(ctx, wire)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Blocks[0].Runs[0].Link != original.Blocks[0].Runs[0].Link || len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "colleaf_hyperlink_resource_orphan" {
+	if got.Blocks[0].Runs[0].Link != original.Blocks[0].Runs[0].Link || len(got.Diagnostics) != 1 || got.Diagnostics[0].Code != "vdocs_hyperlink_resource_orphan" {
 		t.Fatal("inactive resource lost visible links", got.Diagnostics)
 	}
 }
 func TestVDOCSHyperlinkResourceMalformedAndConflicting(t *testing.T) {
 	ctx := context.Background()
 	for _, data := range []string{``, `null`, `{}`, `{"links":null}`, `{"links":[null]}`, `{"links":[{"id":"x"}]}`, `{"links":[{"id":"","payload":""}]}`, `{"Links":[]}`, `{"links":[{"ID":"x","payload":""}]}`, `{"links":[{"id":"x","payload":3}]}`, `{"links":[{"id":"x","payload":"\ud800"}]}`, `{"links":[{"id":"x","payload":"a","\u0070ayload":"b"}]}`, `{"links":[{"id":"x","payload":"a"},{"id":"x","payload":"b"}]}`} {
-		wire, err := encodeColleafDocument(ctx, vdocsHyperlinkExample(t))
+		wire, err := encodeVDOCSDocument(ctx, vdocsHyperlinkExample(t))
 		if err != nil {
 			t.Fatal(err)
 		}
 		wire.Resources = append(wire.Resources, vdocsResource{Name: vdocsHyperlinkResource, Data: data})
-		if _, err = decodeColleafDocument(ctx, wire); err == nil {
+		if _, err = decodeVDOCSDocument(ctx, wire); err == nil {
 			t.Fatal("malformed native hyperlink resource accepted", data)
 		}
 	}
-	wire, err := encodeColleafDocument(ctx, vdocsHyperlinkExample(t))
+	wire, err := encodeVDOCSDocument(ctx, vdocsHyperlinkExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	wire.Resources = append(wire.Resources, vdocsResource{Name: vdocsHyperlinkResource, Data: `{"links":[]}`}, vdocsResource{Name: vdocsHyperlinkResource, Data: `{"links":[]}`})
-	if _, err = decodeColleafDocument(ctx, wire); err == nil {
+	if _, err = decodeVDOCSDocument(ctx, wire); err == nil {
 		t.Fatal("duplicate native resource accepted")
 	}
 	wire.Resources = wire.Resources[:len(wire.Resources)-1]
@@ -220,42 +220,42 @@ func TestVDOCSHyperlinkResourceMalformedAndConflicting(t *testing.T) {
 		vdocsHyperlinkRecord(t, &s.Body).ID = main.ID
 		wire.Headers[id] = s
 	}
-	if _, err = decodeColleafDocument(ctx, wire); err == nil {
+	if _, err = decodeVDOCSDocument(ctx, wire); err == nil {
 		t.Fatal("ambiguous cross-story link ID accepted")
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	cancel()
-	if _, _, err = applyColleafHyperlinkResource(ctx, wire); !errors.Is(err, context.Canceled) {
+	if _, _, err = applyVDOCSHyperlinkResource(ctx, wire); !errors.Is(err, context.Canceled) {
 		t.Fatal(err)
 	}
 }
 func TestVDOCSHyperlinkResourceInternalPlaceholder(t *testing.T) {
-	wire, err := encodeColleafDocument(context.Background(), vdocsHyperlinkExample(t))
+	wire, err := encodeVDOCSDocument(context.Background(), vdocsHyperlinkExample(t))
 	if err != nil {
 		t.Fatal(err)
 	}
 	a := vdocsHyperlinkRecord(t, &wire.Body)
 	a.Properties = sfAttrs(map[string]string{"bookmarkId": "target", "textStyleMode": "text"})
 	wire.Resources = append(wire.Resources, vdocsResource{Name: vdocsHyperlinkResource, Data: string(sfAttrs(map[string]any{"links": []any{map[string]string{"id": a.ID, "payload": ""}}}))})
-	if _, _, err = applyColleafHyperlinkResource(context.Background(), wire); err != nil {
+	if _, _, err = applyVDOCSHyperlinkResource(context.Background(), wire); err != nil {
 		t.Fatal(err)
 	}
 	wire.Resources[len(wire.Resources)-1].Data = string(sfAttrs(map[string]any{"links": []any{map[string]string{"id": a.ID, "payload": "https://example.org/conflict"}}}))
-	if _, _, err = applyColleafHyperlinkResource(context.Background(), wire); !errors.Is(err, ErrUnsupported) {
+	if _, _, err = applyVDOCSHyperlinkResource(context.Background(), wire); !errors.Is(err, ErrUnsupported) {
 		t.Fatal("conflicting internal/external targets accepted", err)
 	}
 }
-func FuzzColleafHyperlinkResource(f *testing.F) {
+func FuzzVDOCSHyperlinkResource(f *testing.F) {
 	for _, data := range []string{`{"links":[]}`, `{"links":[{"id":"missing","payload":"https://example.org/"}]}`, `{"links":[{"id":"missing","payload":"\ud800"}]}`} {
 		f.Add(data)
 	}
 	f.Fuzz(func(t *testing.T, data string) {
-		wire, err := encodeColleafDocument(context.Background(), vdocsHyperlinkExample(t))
+		wire, err := encodeVDOCSDocument(context.Background(), vdocsHyperlinkExample(t))
 		if err != nil {
 			t.Fatal(err)
 		}
 		wire.Resources = append(wire.Resources, vdocsResource{Name: vdocsHyperlinkResource, Data: data})
-		got, err := decodeColleafDocument(context.Background(), wire)
+		got, err := decodeVDOCSDocument(context.Background(), wire)
 		if err != nil {
 			return
 		}
@@ -281,11 +281,11 @@ func TestVDOCSRealDOCXLanguageRoundTrips(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			native, err := encodeColleafDocument(ctx, want)
+			native, err := encodeVDOCSDocument(ctx, want)
 			if err != nil {
 				t.Fatal(err)
 			}
-			got, err := decodeColleafDocument(ctx, native)
+			got, err := decodeVDOCSDocument(ctx, native)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -295,17 +295,17 @@ func TestVDOCSRealDOCXLanguageRoundTrips(t *testing.T) {
 		})
 	}
 	originals["synthetic"] = vdocsLanguageExample(t)
-	synthetic, err := encodeColleafDocument(ctx, originals["synthetic"])
+	synthetic, err := encodeVDOCSDocument(ctx, originals["synthetic"])
 	if err != nil {
 		t.Fatal(err)
 	}
 	snapshots["synthetic"] = synthetic
-	got, err := decodeColleafDocument(ctx, synthetic)
+	got, err := decodeVDOCSDocument(ctx, synthetic)
 	if err != nil {
 		t.Fatal(err)
 	}
 	assertEvidenceSF(t, originals["synthetic"], got)
-	for _, spec := range []struct{ env, mode string }{{"MANYDOC_COLLEAF_LANGUAGES_SAVED", "saved"}, {"MANYDOC_COLLEAF_LANGUAGES_EDITED", "edited"}, {"MANYDOC_COLLEAF_LANGUAGES_CLEARED", "cleared"}} {
+	for _, spec := range []struct{ env, mode string }{{"MANYDOC_VDOCS_LANGUAGES_SAVED", "saved"}, {"MANYDOC_VDOCS_LANGUAGES_EDITED", "edited"}, {"MANYDOC_VDOCS_LANGUAGES_CLEARED", "cleared"}} {
 		if file := os.Getenv(spec.env); file != "" {
 			raw, err := os.ReadFile(file)
 			if err != nil {
@@ -337,16 +337,16 @@ func TestVDOCSRealDOCXLanguageRoundTrips(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				got, err := readColleaf(ctx, bytes.NewReader(envelope))
+				got, err := readVDOCS(ctx, bytes.NewReader(envelope))
 				if err != nil {
 					t.Fatalf("%s/%s: %v", spec.mode, name, err)
 				}
 				assertEvidenceSF(t, want, got)
-				next, err := encodeColleafDocument(ctx, got)
+				next, err := encodeVDOCSDocument(ctx, got)
 				if err != nil {
 					t.Fatal(err)
 				}
-				again, err := decodeColleafDocument(ctx, next)
+				again, err := decodeVDOCSDocument(ctx, next)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -366,7 +366,7 @@ func TestVDOCSRealDOCXLanguageRoundTrips(t *testing.T) {
 		}
 	}
 
-	if file := os.Getenv("MANYDOC_COLLEAF_LANGUAGES_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_LANGUAGES_QA"); file != "" {
 		raw, err := json.Marshal(snapshots)
 		if err != nil {
 			t.Fatal(err)
@@ -380,11 +380,11 @@ func TestVDOCSRealDOCXLanguageRoundTrips(t *testing.T) {
 func TestVDOCSLanguageStyles(t *testing.T) {
 	ctx := context.Background()
 	want := &Document{Blocks: []Block{{Kind: Paragraph, Runs: []Run{{Text: "日本語", Language: "en-US", EastAsiaLanguage: "ja-JP", ComplexLanguage: "ar-SA"}}}}}
-	native, err := encodeColleafDocument(ctx, want)
+	native, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(ctx, native)
+	got, err := decodeVDOCSDocument(ctx, native)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -450,7 +450,7 @@ func TestVDOCSLanguageInheritanceAndValidation(t *testing.T) {
 	marker := sfAttrs(vdocsLanguages{Profile: vdocsLanguageProfile, Version: 1, AlternateKind: "eastAsia", ComplexLanguage: "ar-SA"})
 	body := vdocsBody{DataStream: "ab\r\n", TextRuns: []vdocsTextRun{{St: 0, Ed: 1, StyleID: "child"}, {St: 1, Ed: 2, StyleID: "child", TS: sfAttrs(map[string]any{"altLang": "zh-Hant", "manydocLanguages": nil})}}}
 	settings := vdocsTextContext{DefaultText: sfAttrs(map[string]any{"lang": "en-US"}), Styles: map[string]vdocsNamedStyle{"parent": {TextStyle: sfAttrs(map[string]any{"altLang": "ja-JP", "manydocLanguages": marker})}, "child": {BasedOn: "parent"}}}
-	doc, err := decodeColleafTextBody(ctx, body, settings)
+	doc, err := decodeVDOCSTextBody(ctx, body, settings)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -458,7 +458,7 @@ func TestVDOCSLanguageInheritanceAndValidation(t *testing.T) {
 	if len(runs) != 2 || runs[0].Language != "en-US" || runs[0].EastAsiaLanguage != "ja-JP" || runs[0].ComplexLanguage != "ar-SA" || runs[1].EastAsiaLanguage != "zh-Hant" || runs[1].ComplexLanguage != "" {
 		t.Fatalf("language inheritance/clearing: %+v", runs)
 	}
-	if !hasDiagnostic(doc, "colleaf_alternate_language_inferred") {
+	if !hasDiagnostic(doc, "vdocs_alternate_language_inferred") {
 		t.Fatal("foreign slot inference not reported")
 	}
 	for _, raw := range []string{
@@ -486,11 +486,11 @@ func TestVDOCSLanguageEditsQualifySources(t *testing.T) {
 	ctx := context.Background()
 	base := vdocsOriginExample(t)
 	want := &Document{Pages: base.Pages, Blocks: []Block{{Kind: Paragraph, Source: cloneSourceInfo(base.Blocks[0].Source), Runs: []Run{{Text: "日本語", EastAsiaLanguage: "ja-JP", ComplexLanguage: "ar-SA", Source: cloneSourceInfo(base.Blocks[0].Source)}}}}}
-	native, err := encodeColleafDocument(ctx, want)
+	native, err := encodeVDOCSDocument(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := decodeColleafDocument(ctx, native)
+	got, err := decodeVDOCSDocument(ctx, native)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -501,7 +501,7 @@ func TestVDOCSLanguageEditsQualifySources(t *testing.T) {
 	}
 	props["altLang"] = sfAttrs("zh-Hant")
 	native.Body.TextRuns[0].TS = sfAttrs(props)
-	got, err = decodeColleafDocument(ctx, native)
+	got, err = decodeVDOCSDocument(ctx, native)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -509,19 +509,19 @@ func TestVDOCSLanguageEditsQualifySources(t *testing.T) {
 	if b.Source == nil || !b.Source.Historical || b.Runs[0].Source == nil || !b.Runs[0].Source.Historical || b.Runs[0].EastAsiaLanguage != "zh-Hant" || b.Runs[0].ComplexLanguage != "ar-SA" {
 		t.Fatal("edited language/source authority lost")
 	}
-	if !hasDiagnostic(got, "colleaf_run_source_historical") || !hasDiagnostic(got, "colleaf_source_historical") {
+	if !hasDiagnostic(got, "vdocs_run_source_historical") || !hasDiagnostic(got, "vdocs_source_historical") {
 		t.Fatal("source uncertainty omitted", got.Diagnostics)
 	}
 }
 
-func FuzzColleafRunLanguages(f *testing.F) {
+func FuzzVDOCSRunLanguages(f *testing.F) {
 	f.Add([]byte(`{"profile":"manydoc.run-languages","version":1,"alternateKind":"eastAsia","complexLanguage":"ar-SA"}`))
 	f.Add([]byte(`null`))
 	f.Fuzz(func(t *testing.T, raw []byte) {
 		if len(raw) > 65536 {
 			return
 		}
-		value, err := readColleafLanguages(raw)
+		value, err := readVDOCSLanguages(raw)
 		if err == nil && value != nil {
 			if err := validateLanguage(value.ComplexLanguage); err != nil {
 				t.Fatal(err)
@@ -531,7 +531,7 @@ func FuzzColleafRunLanguages(f *testing.F) {
 }
 func TestVDOCSStyleSweepMatchesLastWholeRecord(t *testing.T) {
 	ctx := context.Background()
-	index, err := newColleafTextIndex(ctx, "abcdefghij\r\n")
+	index, err := newVDOCSTextIndex(ctx, "abcdefghij\r\n")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -583,11 +583,11 @@ func vdocsTextExample() []Block {
 func TestVDOCSTextSemanticRoundTripAndNativeEdits(t *testing.T) {
 	ctx := context.Background()
 	want := vdocsTextExample()
-	body, err := encodeColleafTextBody(ctx, want)
+	body, err := encodeVDOCSTextBody(ctx, want)
 	if err != nil {
 		t.Fatal(err)
 	}
-	doc, err := decodeColleafTextBody(ctx, body, vdocsTextContext{})
+	doc, err := decodeVDOCSTextBody(ctx, body, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -604,7 +604,7 @@ func TestVDOCSTextSemanticRoundTripAndNativeEdits(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sfBody, err := encodeColleafTextBody(ctx, throughSF.Blocks)
+	sfBody, err := encodeVDOCSTextBody(ctx, throughSF.Blocks)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -617,7 +617,7 @@ func TestVDOCSTextSemanticRoundTripAndNativeEdits(t *testing.T) {
 	if body.TextRuns[0].Ed != 8 || body.CustomRanges[0].EndIndex-body.CustomRanges[0].StartIndex != 6 {
 		t.Fatal("UTF-16 extents", body)
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_TEXT_QA"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_TEXT_QA"); file != "" {
 		data, err := json.MarshalIndent(map[string]any{"id": "manydoc-text-qa", "title": "Native text authority", "body": body, "documentStyle": map[string]any{"documentFlavor": 1}}, "", "  ")
 		if err != nil {
 			t.Fatal(err)
@@ -629,14 +629,14 @@ func TestVDOCSTextSemanticRoundTripAndNativeEdits(t *testing.T) {
 
 	body.DataStream = "Edited😀" + body.DataStream[len("Title 😀"):]
 	body.TextRuns = append(body.TextRuns, vdocsTextRun{St: 0, Ed: 8, TS: sfAttrs(map[string]any{"it": 1})})
-	doc, err = decodeColleafTextBody(ctx, body, vdocsTextContext{})
+	doc, err = decodeVDOCSTextBody(ctx, body, vdocsTextContext{})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if got := doc.Blocks[0].Runs[0]; got.Text != "Edited😀" || !got.Italic || got.Bold || got.FontSize != 0 || got.Language != "" {
 		t.Fatalf("stale text/style authority %+v", got)
 	}
-	if file := os.Getenv("MANYDOC_COLLEAF_TEXT_EDIT"); file != "" {
+	if file := os.Getenv("MANYDOC_VDOCS_TEXT_EDIT"); file != "" {
 		data, err := os.ReadFile(file)
 		if err != nil {
 			t.Fatal(err)
@@ -647,7 +647,7 @@ func TestVDOCSTextSemanticRoundTripAndNativeEdits(t *testing.T) {
 		if err = json.Unmarshal(data, &snapshot); err != nil {
 			t.Fatal(err)
 		}
-		doc, err = decodeColleafTextBody(ctx, snapshot.Body, vdocsTextContext{})
+		doc, err = decodeVDOCSTextBody(ctx, snapshot.Body, vdocsTextContext{})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -665,11 +665,11 @@ func TestVDOCSInheritedStylesAndLossDiagnostics(t *testing.T) {
 		"character": {TextStyle: sfAttrs(map[string]int{"st": 1})},
 	}}
 
-	if _, err := decodeColleafTextBody(context.Background(), body, settings); err == nil {
+	if _, err := decodeVDOCSTextBody(context.Background(), body, settings); err == nil {
 		t.Fatal("invalid decoration accepted")
 	}
 	settings.Styles["character"] = vdocsNamedStyle{TextStyle: sfAttrs(map[string]any{"st": map[string]int{"s": 1}})}
-	doc, err := decodeColleafTextBody(context.Background(), body, settings)
+	doc, err := decodeVDOCSTextBody(context.Background(), body, settings)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -680,7 +680,7 @@ func TestVDOCSInheritedStylesAndLossDiagnostics(t *testing.T) {
 	if a, b := block.Runs[0], block.Runs[1]; a.Text != "ABC" || a.Bold || a.Italic || !a.Strike || a.FontFamily != "Go" || a.FontSize != 11 || a.Color != "#0102FF" || b.Text != "D" || !b.Bold || b.Strike {
 		t.Fatalf("inheritance/winner %+v", block.Runs)
 	}
-	if len(doc.Diagnostics) != 1 || doc.Diagnostics[0].Code != "colleaf_paragraph_style" {
+	if len(doc.Diagnostics) != 1 || doc.Diagnostics[0].Code != "vdocs_paragraph_style" {
 		t.Fatal(doc.Diagnostics)
 	}
 	resolver := vdocsStyleResolver{named: map[string]vdocsNamedStyle{"a": {BasedOn: "b"}, "b": {BasedOn: "a"}}}
@@ -709,7 +709,7 @@ func TestVDOCSTextRejectsUnmappedAndMalformedContent(t *testing.T) {
 		}
 	}
 	for _, blocks := range [][]Block{{{Kind: Table}}, {{Kind: Paragraph, Runs: []Run{{Text: "A", Note: &NoteReference{}}}}}, {{Kind: Paragraph, Runs: []Run{{Text: "A\rB"}}}}} {
-		if _, err := encodeColleafTextBody(ctx, blocks); !errors.Is(err, ErrUnsupported) {
+		if _, err := encodeVDOCSTextBody(ctx, blocks); !errors.Is(err, ErrUnsupported) {
 			t.Fatal("partial encoding", err)
 		}
 	}
@@ -719,13 +719,13 @@ func TestVDOCSTextRejectsUnmappedAndMalformedContent(t *testing.T) {
 		{DataStream: "A\r\n", CustomRanges: []vdocsRangeRecord{{StartIndex: 0, EndIndex: 0, ID: "a", Type: 4}}},
 		{DataStream: "A\r\n", CustomRanges: []vdocsRangeRecord{{StartIndex: 0, EndIndex: 0, ID: "a"}, {StartIndex: 0, EndIndex: 0, ID: "b"}}},
 	} {
-		if _, err := decodeColleafTextBody(ctx, body, vdocsTextContext{}); err == nil {
+		if _, err := decodeVDOCSTextBody(ctx, body, vdocsTextContext{}); err == nil {
 			t.Fatal("partial/malformed decoding", body)
 		}
 	}
 	canceled, cancel := context.WithCancel(ctx)
 	cancel()
-	if _, err := encodeColleafTextBody(canceled, vdocsTextExample()); !errors.Is(err, context.Canceled) {
+	if _, err := encodeVDOCSTextBody(canceled, vdocsTextExample()); !errors.Is(err, context.Canceled) {
 		t.Fatal(err)
 	}
 }

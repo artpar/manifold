@@ -1,7 +1,7 @@
 /* Optional pinned section/page/story reader and actual facade-save QA. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
-const {createRequire,stripTypeScriptTypes}=require('node:module');
-const root=path.resolve(__dirname,'../../..'),qa=path.join(root,'output/colleaf-qa'),req=createRequire(path.join(qa,'package.json'));
+const {createRequire}=require('node:module');
+const root=path.resolve(__dirname,'../../..'),qa=path.join(root,'output/vdocs-qa'),req=createRequire(path.join(qa,'package.json'));
 const core=req('@univerjs/core'),engine=req('@univerjs/engine-render'),docs=req('@univerjs/docs'),drawing=req('@univerjs/drawing'),docDrawing=req('@univerjs/docs-drawing'),{FUniver}=req('@univerjs/core/facade');req('@univerjs/docs/facade');
 for(const name of ['core','engine-render','docs','drawing','docs-drawing'])assert.equal(JSON.parse(fs.readFileSync(path.join(qa,'node_modules/@univerjs',name,'package.json'))).version,'1.0.4');
 function inspect(data){
@@ -30,8 +30,8 @@ function inspect(data){
 function save(data){const univer=new core.Univer();try{for(const plugin of[docs.UniverDocsPlugin,drawing.UniverDrawingPlugin,docDrawing.UniverDocsDrawingPlugin])univer.registerPlugin(plugin);return JSON.parse(JSON.stringify(FUniver.newAPI(univer).createDocument(structuredClone(data)).save()))}finally{univer.dispose()}}
 async function main(){
  const data=JSON.parse(fs.readFileSync(path.join(qa,'sections.json')));inspect(data);
- const source=fs.readFileSync(path.join(root,'output/codec/colleaf-format-0.txt'),'utf8');assert.equal(crypto.createHash('sha256').update(source).digest('hex'),'c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0');const app=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(source)).toString('base64'));
- const saved=save(save(data));inspect(saved);app.validateDocument({type:'vibedada-document',version:3,engine:'univer',engineVersion:'1.0.4',document:saved});fs.writeFileSync(path.join(qa,'sections-saved.json'),JSON.stringify(saved,null,2));
+
+ const saved=save(save(data));inspect(saved);fs.writeFileSync(path.join(qa,'sections-saved.json'),JSON.stringify(saved,null,2));
  console.log('Pinned seven-page section geometry, first/even/default/inherited/empty stories, header table/list/image and actual facade save/reopen pass; font metrics/browser paint unqualified');
 }
 main().catch(error=>{console.error(error);process.exitCode=1});

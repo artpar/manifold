@@ -19,7 +19,7 @@ func vdocsAnchorFingerprint(paragraphHash, name string) (string, error) {
 		Anchor    string
 	}{paragraphHash, name})
 }
-func prepareColleafAnchorOrigins(b Block) (Block, error) {
+func prepareVDOCSAnchorOrigins(b Block) (Block, error) {
 	hash := ""
 	var err error
 	copied := false
@@ -41,7 +41,7 @@ func prepareColleafAnchorOrigins(b Block) (Block, error) {
 		if err != nil {
 			return b, err
 		}
-		origin, err := newColleafSourceOrigin(r.Source, fingerprint, vdocsAnchorOriginProfile)
+		origin, err := newVDOCSSourceOrigin(r.Source, fingerprint, vdocsAnchorOriginProfile)
 		if err != nil {
 			return b, err
 		}
@@ -49,14 +49,14 @@ func prepareColleafAnchorOrigins(b Block) (Block, error) {
 	}
 	return b, nil
 }
-func visitColleafAnchorOrigins(snapshot *vdocsNoteSnapshot, update bool, visit func(*vdocsOrigin) error) error {
+func visitVDOCSAnchorOrigins(snapshot *vdocsNoteSnapshot, update bool, visit func(*vdocsOrigin) error) error {
 	body := func(b *vdocsBody) error {
 		for i := range b.CustomRanges {
 			a := &b.CustomRanges[i]
 			if a.Type != 3 {
 				continue
 			}
-			p, err := readColleafBookmark(*a)
+			p, err := readVDOCSBookmark(*a)
 			if err != nil {
 				return err
 			}
@@ -95,9 +95,9 @@ func visitColleafAnchorOrigins(snapshot *vdocsNoteSnapshot, update bool, visit f
 	}
 	return nil
 }
-func collectColleafAnchorOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
+func collectVDOCSAnchorOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
 	pool := map[string]vdocsOrigin{}
-	err := visitColleafAnchorOrigins(out, true, func(o *vdocsOrigin) error {
+	err := visitVDOCSAnchorOrigins(out, true, func(o *vdocsOrigin) error {
 		if o.Source == nil {
 			return fmt.Errorf("native output anchor origin lacks source")
 		}
@@ -128,11 +128,11 @@ func collectColleafAnchorOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEviden
 	}
 	return nil
 }
-func restoreColleafAnchorOrigins(d *Document, e *vdocsDocumentEvidence, input vdocsNoteSnapshot) error {
+func restoreVDOCSAnchorOrigins(d *Document, e *vdocsDocumentEvidence, input vdocsNoteSnapshot) error {
 	pool := map[string]vdocsOrigin{}
 	if e != nil {
 		for _, o := range e.AnchorOrigins {
-			if err := validateColleafOriginProfile(o, d.Pages, vdocsAnchorOriginProfile); err != nil {
+			if err := validateVDOCSOriginProfile(o, d.Pages, vdocsAnchorOriginProfile); err != nil {
 				return err
 			}
 			if _, ok := pool[o.Ref]; ok {
@@ -151,7 +151,7 @@ func restoreColleafAnchorOrigins(d *Document, e *vdocsDocumentEvidence, input vd
 		}
 		return record, nil
 	}
-	if err := visitColleafAnchorOrigins(&input, false, func(o *vdocsOrigin) error { _, err := lookup(o); return err }); err != nil {
+	if err := visitVDOCSAnchorOrigins(&input, false, func(o *vdocsOrigin) error { _, err := lookup(o); return err }); err != nil {
 		return err
 	}
 	used := map[string]bool{}
@@ -188,7 +188,7 @@ func restoreColleafAnchorOrigins(d *Document, e *vdocsDocumentEvidence, input vd
 				used[o.Ref] = true
 				if current != record.Fingerprint {
 					r.Source.Historical = true
-					d.warn("colleaf_anchor_source_historical", "Original anchor source facts are retained as historical after current point identity or paragraph context changed")
+					d.warn("vdocs_anchor_source_historical", "Original anchor source facts are retained as historical after current point identity or paragraph context changed")
 				}
 			}
 			for j := range b.Items {
@@ -257,7 +257,7 @@ func restoreColleafAnchorOrigins(d *Document, e *vdocsDocumentEvidence, input vd
 			d.UnboundSources = append(d.UnboundSources, *cloneSourceInfo(source))
 			archived[key] = true
 		}
-		d.warn("colleaf_anchor_source_unbound", "Original anchor source facts are retained unbound after their native point ownership disappeared")
+		d.warn("vdocs_anchor_source_unbound", "Original anchor source facts are retained unbound after their native point ownership disappeared")
 	}
 	return nil
 }
@@ -271,7 +271,7 @@ func vdocsFlowFingerprint(b Block) (string, error) {
 	}
 	return vdocsSourceFreeHash(nodes)
 }
-func newColleafFlowOrigin(b Block) (*vdocsOrigin, error) {
+func newVDOCSFlowOrigin(b Block) (*vdocsOrigin, error) {
 	if b.Source == nil {
 		return nil, nil
 	}
@@ -279,13 +279,13 @@ func newColleafFlowOrigin(b Block) (*vdocsOrigin, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newColleafSourceOrigin(b.Source, hash, vdocsFlowOriginProfile)
+	return newVDOCSSourceOrigin(b.Source, hash, vdocsFlowOriginProfile)
 }
-func visitColleafFlowOrigins(snapshot *vdocsNoteSnapshot, update bool, visit func(*vdocsOrigin) error) error {
+func visitVDOCSFlowOrigins(snapshot *vdocsNoteSnapshot, update bool, visit func(*vdocsOrigin) error) error {
 	body := func(b *vdocsBody) error {
 		for i := range b.SectionBreaks {
 			s := &b.SectionBreaks[i]
-			o, err := readColleafOriginProfile(s.Extra["manydocFlowOrigin"], vdocsFlowOriginProfile)
+			o, err := readVDOCSOriginProfile(s.Extra["manydocFlowOrigin"], vdocsFlowOriginProfile)
 			if err != nil {
 				return err
 			}
@@ -304,7 +304,7 @@ func visitColleafFlowOrigins(snapshot *vdocsNoteSnapshot, update bool, visit fun
 			if err != nil {
 				return err
 			}
-			o, err := readColleafOriginProfile(props["manydocFlowOrigin"], vdocsFlowOriginProfile)
+			o, err := readVDOCSOriginProfile(props["manydocFlowOrigin"], vdocsFlowOriginProfile)
 			if err != nil {
 				return err
 			}
@@ -323,7 +323,7 @@ func visitColleafFlowOrigins(snapshot *vdocsNoteSnapshot, update bool, visit fun
 			if a.Type != 3 {
 				continue
 			}
-			p, err := readColleafBookmark(*a)
+			p, err := readVDOCSBookmark(*a)
 			if err != nil {
 				return err
 			}
@@ -361,9 +361,9 @@ func visitColleafFlowOrigins(snapshot *vdocsNoteSnapshot, update bool, visit fun
 	}
 	return nil
 }
-func collectColleafFlowOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
+func collectVDOCSFlowOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
 	pool := map[string]vdocsOrigin{}
-	err := visitColleafFlowOrigins(out, true, func(o *vdocsOrigin) error {
+	err := visitVDOCSFlowOrigins(out, true, func(o *vdocsOrigin) error {
 		if o.Source == nil {
 			return fmt.Errorf("native output flow origin lacks source")
 		}
@@ -394,11 +394,11 @@ func collectColleafFlowOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence
 	}
 	return nil
 }
-func restoreColleafFlowOrigins(d *Document, e *vdocsDocumentEvidence, input vdocsNoteSnapshot) error {
+func restoreVDOCSFlowOrigins(d *Document, e *vdocsDocumentEvidence, input vdocsNoteSnapshot) error {
 	pool := map[string]vdocsOrigin{}
 	if e != nil {
 		for _, o := range e.FlowOrigins {
-			if err := validateColleafOriginProfile(o, d.Pages, vdocsFlowOriginProfile); err != nil {
+			if err := validateVDOCSOriginProfile(o, d.Pages, vdocsFlowOriginProfile); err != nil {
 				return err
 			}
 			if _, ok := pool[o.Ref]; ok {
@@ -417,7 +417,7 @@ func restoreColleafFlowOrigins(d *Document, e *vdocsDocumentEvidence, input vdoc
 		}
 		return record, nil
 	}
-	if err := visitColleafFlowOrigins(&input, false, func(o *vdocsOrigin) error { _, err := lookup(o); return err }); err != nil {
+	if err := visitVDOCSFlowOrigins(&input, false, func(o *vdocsOrigin) error { _, err := lookup(o); return err }); err != nil {
 		return err
 	}
 	used := map[string]bool{}
@@ -439,7 +439,7 @@ func restoreColleafFlowOrigins(d *Document, e *vdocsDocumentEvidence, input vdoc
 				used[o.Ref] = true
 				if hash != record.Fingerprint {
 					b.Source.Historical = true
-					d.warn("colleaf_flow_source_historical", "Original section, break or point source facts are retained as historical after current semantics changed")
+					d.warn("vdocs_flow_source_historical", "Original section, break or point source facts are retained as historical after current semantics changed")
 				}
 			}
 			for j := range b.Items {
@@ -503,7 +503,7 @@ func restoreColleafFlowOrigins(d *Document, e *vdocsDocumentEvidence, input vdoc
 			d.UnboundSources = append(d.UnboundSources, *cloneSourceInfo(source))
 			archived[key] = true
 		}
-		d.warn("colleaf_flow_source_unbound", "Original section, break or point source facts are retained unbound after native ownership disappeared")
+		d.warn("vdocs_flow_source_unbound", "Original section, break or point source facts are retained unbound after native ownership disappeared")
 	}
 	return nil
 }
@@ -517,14 +517,14 @@ func vdocsImageFingerprint(b Block) (string, error) {
 	}
 	return vdocsSourceFreeHash(nodes)
 }
-func visitColleafImageOrigins(snapshot *vdocsNoteSnapshot, update bool, visit func(*vdocsOrigin) error) error {
+func visitVDOCSImageOrigins(snapshot *vdocsNoteSnapshot, update bool, visit func(*vdocsOrigin) error) error {
 	drawings := func(items map[string]json.RawMessage) error {
 		for id, raw := range items {
 			props, err := vdocsStyleObject(raw)
 			if err != nil {
 				return err
 			}
-			o, err := readColleafOriginProfile(props["manydocOrigin"], vdocsImageOriginProfile)
+			o, err := readVDOCSOriginProfile(props["manydocOrigin"], vdocsImageOriginProfile)
 			if err != nil {
 				return err
 			}
@@ -558,9 +558,9 @@ func visitColleafImageOrigins(snapshot *vdocsNoteSnapshot, update bool, visit fu
 	}
 	return nil
 }
-func collectColleafImageOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
+func collectVDOCSImageOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
 	pool := map[string]vdocsOrigin{}
-	err := visitColleafImageOrigins(out, true, func(o *vdocsOrigin) error {
+	err := visitVDOCSImageOrigins(out, true, func(o *vdocsOrigin) error {
 		if o.Source == nil {
 			return fmt.Errorf("native output image origin lacks source")
 		}
@@ -591,11 +591,11 @@ func collectColleafImageOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidenc
 	}
 	return nil
 }
-func restoreColleafImageOrigins(d *Document, e *vdocsDocumentEvidence, input vdocsNoteSnapshot) error {
+func restoreVDOCSImageOrigins(d *Document, e *vdocsDocumentEvidence, input vdocsNoteSnapshot) error {
 	pool := map[string]vdocsOrigin{}
 	if e != nil {
 		for _, o := range e.ImageOrigins {
-			if err := validateColleafOriginProfile(o, d.Pages, vdocsImageOriginProfile); err != nil {
+			if err := validateVDOCSOriginProfile(o, d.Pages, vdocsImageOriginProfile); err != nil {
 				return err
 			}
 			if _, ok := pool[o.Ref]; ok {
@@ -614,7 +614,7 @@ func restoreColleafImageOrigins(d *Document, e *vdocsDocumentEvidence, input vdo
 		}
 		return record, nil
 	}
-	if err := visitColleafImageOrigins(&input, false, func(o *vdocsOrigin) error { _, err := lookup(o); return err }); err != nil {
+	if err := visitVDOCSImageOrigins(&input, false, func(o *vdocsOrigin) error { _, err := lookup(o); return err }); err != nil {
 		return err
 	}
 	used := map[string]bool{}
@@ -636,7 +636,7 @@ func restoreColleafImageOrigins(d *Document, e *vdocsDocumentEvidence, input vdo
 				used[o.Ref] = true
 				if hash != record.Fingerprint {
 					b.Source.Historical = true
-					d.warn("colleaf_image_source_historical", "Original image source facts are retained as historical after current asset, description or presentation changed")
+					d.warn("vdocs_image_source_historical", "Original image source facts are retained as historical after current asset, description or presentation changed")
 				}
 			}
 			for j := range b.Rows {
@@ -700,7 +700,7 @@ func restoreColleafImageOrigins(d *Document, e *vdocsDocumentEvidence, input vdo
 			d.UnboundSources = append(d.UnboundSources, *cloneSourceInfo(source))
 			archived[key] = true
 		}
-		d.warn("colleaf_image_source_unbound", "Original image source facts are retained unbound after their native ownership disappeared")
+		d.warn("vdocs_image_source_unbound", "Original image source facts are retained unbound after their native ownership disappeared")
 	}
 	return nil
 }
@@ -744,7 +744,7 @@ func vdocsItemFingerprint(b Block, i int) (string, error) {
 		Item  StructuredNode  `json:"item"`
 	}{nodes[0].Type, nodes[0].Attrs, i, nodes[0].Content[0]})
 }
-func visitColleafListOrigins(snapshot *vdocsNoteSnapshot, update bool, visit func(*vdocsOrigin) error) error {
+func visitVDOCSListOrigins(snapshot *vdocsNoteSnapshot, update bool, visit func(*vdocsOrigin) error) error {
 	body := func(b *vdocsBody) error {
 		for i := range b.Paragraphs {
 			p := &b.Paragraphs[i]
@@ -754,7 +754,7 @@ func visitColleafListOrigins(snapshot *vdocsNoteSnapshot, update bool, visit fun
 			}
 			changed := false
 			for key, profile := range map[string]string{"manydocListOrigin": vdocsListOriginProfile, "manydocItemOrigin": vdocsItemOriginProfile, "manydocMarkerOrigin": vdocsMarkerOriginProfile} {
-				o, err := readColleafOriginProfile(props[key], profile)
+				o, err := readVDOCSOriginProfile(props[key], profile)
 				if err != nil {
 					return err
 				}
@@ -798,9 +798,9 @@ func visitColleafListOrigins(snapshot *vdocsNoteSnapshot, update bool, visit fun
 	}
 	return nil
 }
-func collectColleafListOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
+func collectVDOCSListOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
 	pool := map[string]vdocsOrigin{}
-	err := visitColleafListOrigins(out, true, func(o *vdocsOrigin) error {
+	err := visitVDOCSListOrigins(out, true, func(o *vdocsOrigin) error {
 		if o.Source == nil {
 			return fmt.Errorf("native output list/item source lacks facts")
 		}
@@ -831,17 +831,17 @@ func collectColleafListOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence
 	}
 	return nil
 }
-func validateColleafListOrigin(o vdocsOrigin, pages []PDFPage) error {
+func validateVDOCSListOrigin(o vdocsOrigin, pages []PDFPage) error {
 	if o.Profile != vdocsListOriginProfile && o.Profile != vdocsItemOriginProfile && o.Profile != vdocsMarkerOriginProfile {
 		return fmt.Errorf("invalid native list/item source profile")
 	}
-	return validateColleafOriginProfile(o, pages, o.Profile)
+	return validateVDOCSOriginProfile(o, pages, o.Profile)
 }
-func restoreColleafListOrigins(d *Document, e *vdocsDocumentEvidence, input vdocsNoteSnapshot) error {
+func restoreVDOCSListOrigins(d *Document, e *vdocsDocumentEvidence, input vdocsNoteSnapshot) error {
 	pool := map[string]vdocsOrigin{}
 	if e != nil {
 		for _, o := range e.ListOrigins {
-			if err := validateColleafListOrigin(o, d.Pages); err != nil {
+			if err := validateVDOCSListOrigin(o, d.Pages); err != nil {
 				return err
 			}
 			if _, ok := pool[o.Ref]; ok {
@@ -860,7 +860,7 @@ func restoreColleafListOrigins(d *Document, e *vdocsDocumentEvidence, input vdoc
 		}
 		return record, nil
 	}
-	if err := visitColleafListOrigins(&input, false, func(o *vdocsOrigin) error { _, err := lookup(o); return err }); err != nil {
+	if err := visitVDOCSListOrigins(&input, false, func(o *vdocsOrigin) error { _, err := lookup(o); return err }); err != nil {
 		return err
 	}
 	used := map[string]bool{}
@@ -873,7 +873,7 @@ func restoreColleafListOrigins(d *Document, e *vdocsDocumentEvidence, input vdoc
 		s := cloneSourceInfo(record.Source)
 		if hash != record.Fingerprint {
 			s.Historical = true
-			d.warn("colleaf_list_source_historical", "Original list or item source facts are retained as historical after current content, numbering or ownership changed")
+			d.warn("vdocs_list_source_historical", "Original list or item source facts are retained as historical after current content, numbering or ownership changed")
 		}
 		return s, nil
 	}
@@ -992,7 +992,7 @@ func restoreColleafListOrigins(d *Document, e *vdocsDocumentEvidence, input vdoc
 			// inventing a destination. Heading identities use a separate scoped namespace.
 
 		}
-		d.warn("colleaf_list_source_unbound", "Original list or item source facts are retained unbound after their native list ownership disappeared")
+		d.warn("vdocs_list_source_unbound", "Original list or item source facts are retained unbound after their native list ownership disappeared")
 	}
 	return nil
 }
@@ -1014,7 +1014,7 @@ type vdocsBookmarkProperties struct {
 	Hint       *vdocsBookmarkHint `json:"manydocNavigation,omitempty"`
 }
 
-func readColleafBookmark(a vdocsRangeRecord) (vdocsBookmarkProperties, error) {
+func readVDOCSBookmark(a vdocsRangeRecord) (vdocsBookmarkProperties, error) {
 	var p vdocsBookmarkProperties
 	if len(a.Properties) > 0 {
 		if err := validateTypedJSON(context.Background(), a.Properties, reflect.TypeFor[vdocsBookmarkProperties]()); err != nil {
@@ -1027,12 +1027,12 @@ func readColleafBookmark(a vdocsRangeRecord) (vdocsBookmarkProperties, error) {
 		}
 	}
 	if p.FlowOrigin != nil {
-		if _, err := readColleafOriginProfile(sfAttrs(p.FlowOrigin), vdocsFlowOriginProfile); err != nil {
+		if _, err := readVDOCSOriginProfile(sfAttrs(p.FlowOrigin), vdocsFlowOriginProfile); err != nil {
 			return p, err
 		}
 	}
 	if p.Origin != nil {
-		if _, err := readColleafOriginProfile(sfAttrs(p.Origin), vdocsAnchorOriginProfile); err != nil {
+		if _, err := readVDOCSOriginProfile(sfAttrs(p.Origin), vdocsAnchorOriginProfile); err != nil {
 			return p, err
 		}
 	}
@@ -1068,7 +1068,7 @@ func readColleafBookmark(a vdocsRangeRecord) (vdocsBookmarkProperties, error) {
 	}
 	return p, nil
 }
-func writeColleafBookmark(id string, offset int, pid, role string) vdocsRangeRecord {
+func writeVDOCSBookmark(id string, offset int, pid, role string) vdocsRangeRecord {
 	sum := sha256.Sum256([]byte(id))
 	return vdocsRangeRecord{ID: fmt.Sprintf("manydoc-bookmark-%x", sum), Type: 3, StartIndex: offset, EndIndex: offset, Properties: sfAttrs(vdocsBookmarkProperties{BookmarkID: id, Hint: &vdocsBookmarkHint{Version: 1, Role: role, ParagraphID: pid}})}
 }
@@ -1098,11 +1098,11 @@ func vdocsNativeHeadingID(raw json.RawMessage) (string, error) {
 	}
 	return *id, nil
 }
-func rebindColleafBookmark(a *vdocsRangeRecord, names map[string]string) error {
+func rebindVDOCSBookmark(a *vdocsRangeRecord, names map[string]string) error {
 	if a.Type != 3 {
 		return nil
 	}
-	p, err := readColleafBookmark(*a)
+	p, err := readVDOCSBookmark(*a)
 	if err != nil {
 		return err
 	}
@@ -1145,7 +1145,7 @@ func vdocsBookmarkAliases(body vdocsBody) (map[string]string, error) {
 		if a.Type != 3 {
 			continue
 		}
-		p, err := readColleafBookmark(a)
+		p, err := readVDOCSBookmark(a)
 		if err != nil {
 			return nil, err
 		}
@@ -1159,7 +1159,7 @@ func vdocsBookmarkAliases(body vdocsBody) (map[string]string, error) {
 	return aliases, nil
 }
 
-func scopeColleafBookmarkIDs(ctx context.Context, out *vdocsNoteSnapshot, d *Document) error {
+func scopeVDOCSBookmarkIDs(ctx context.Context, out *vdocsNoteSnapshot, d *Document) error {
 	catalog, err := catalogDestinations(d, true)
 	if err != nil {
 		return err
@@ -1224,7 +1224,7 @@ func scopeColleafBookmarkIDs(ctx context.Context, out *vdocsNoteSnapshot, d *Doc
 			if a.Type != 3 {
 				continue
 			}
-			p, err := readColleafBookmark(*a)
+			p, err := readVDOCSBookmark(*a)
 			if err != nil {
 				return err
 			}
@@ -1252,7 +1252,7 @@ func scopeColleafBookmarkIDs(ctx context.Context, out *vdocsNoteSnapshot, d *Doc
 	return nil
 }
 
-func finishColleafNavigation(ctx context.Context, input vdocsNoteSnapshot, d *Document, declared []string) error {
+func finishVDOCSNavigation(ctx context.Context, input vdocsNoteSnapshot, d *Document, declared []string) error {
 	c, err := catalogDestinations(d, false)
 	if err != nil {
 		return err
@@ -1267,7 +1267,7 @@ func finishColleafNavigation(ctx context.Context, input vdocsNoteSnapshot, d *Do
 			if a.Type != 3 {
 				continue
 			}
-			p, err := readColleafBookmark(a)
+			p, err := readVDOCSBookmark(a)
 			if err != nil {
 				return err
 			}
@@ -1322,7 +1322,7 @@ func finishColleafNavigation(ctx context.Context, input vdocsNoteSnapshot, d *Do
 		}
 	}
 	if heading {
-		d.warn("colleaf_heading_navigation", "Native heading identities become scoped SF navigation points; current internal targets are retained")
+		d.warn("vdocs_heading_navigation", "Native heading identities become scoped SF navigation points; current internal targets are retained")
 	}
 	known := map[string]bool{}
 	for _, id := range declared {
@@ -1349,10 +1349,10 @@ func finishColleafNavigation(ctx context.Context, input vdocsNoteSnapshot, d *Do
 		}
 	}
 	if nonmain {
-		d.warn("colleaf_nonmain_navigation", "Native internal lookup targets the main story only; nonmain point identities and link data are retained in SF")
+		d.warn("vdocs_nonmain_navigation", "Native internal lookup targets the main story only; nonmain point identities and link data are retained in SF")
 	}
 	if newMissing {
-		d.warn("colleaf_unresolved_navigation", "Native internal link has no current target; its explicit unresolved identity is retained")
+		d.warn("vdocs_unresolved_navigation", "Native internal link has no current target; its explicit unresolved identity is retained")
 	}
 
 	d.UnresolvedDestinations = nil
@@ -1370,7 +1370,7 @@ func (w *vdocsBodyWriter) containerAnchors(ids []string, offset int, role, owner
 		if err := destinationID(id); err != nil {
 			return err
 		}
-		a := writeColleafBookmark(id, offset, "", role)
+		a := writeVDOCSBookmark(id, offset, "", role)
 		a.Properties = sfAttrs(vdocsBookmarkProperties{BookmarkID: id, Hint: &vdocsBookmarkHint{Version: 1, Role: role, OwnerID: owner}})
 		w.body.CustomRanges = append(w.body.CustomRanges, a)
 	}
@@ -1383,11 +1383,11 @@ func vdocsBookmarkLosses(doc *Document, a vdocsRangeRecord) error {
 	}
 	for name := range fields {
 		if name != "bookmarkId" && name != "manydocNavigation" && name != "manydocOrigin" && name != "manydocFlowOrigin" {
-			doc.warn("colleaf_bookmark_metadata", "Native bookmark metadata outside identity and placement is not represented in SF")
+			doc.warn("vdocs_bookmark_metadata", "Native bookmark metadata outside identity and placement is not represented in SF")
 		}
 	}
 	if a.StartIndex != a.EndIndex {
-		doc.warn("colleaf_bookmark_span", "Native bookmark range editing extent becomes an SF point at its current start")
+		doc.warn("vdocs_bookmark_span", "Native bookmark range editing extent becomes an SF point at its current start")
 	}
 	return nil
 }
@@ -1407,7 +1407,7 @@ func (r *vdocsBodyReader) containerBookmark(a vdocsRangeRecord) (bool, error) {
 	if role == "" {
 		return false, nil
 	}
-	p, err := readColleafBookmark(a)
+	p, err := readVDOCSBookmark(a)
 	if err != nil {
 		return false, err
 	}
@@ -1415,7 +1415,7 @@ func (r *vdocsBodyReader) containerBookmark(a vdocsRangeRecord) (bool, error) {
 		return false, err
 	}
 	if p.Hint != nil && p.Hint.Role != "point" && (p.Hint.Role != role || p.Hint.OwnerID != owner) {
-		r.doc.warn("colleaf_stale_bookmark_placement", "Edited native bookmark position binds to its current container rather than stale placement intent")
+		r.doc.warn("vdocs_stale_bookmark_placement", "Edited native bookmark position binds to its current container rather than stale placement intent")
 	}
 	r.containerPoints[a.StartIndex] = append(r.containerPoints[a.StartIndex], p.BookmarkID)
 	return true, nil
@@ -1470,7 +1470,7 @@ func (r *vdocsBodyReader) promoteListPoints(block *Block, firstID string, positi
 func (r *vdocsBodyReader) finishListPoints() {
 	for id := range r.listPointOwners {
 		if !r.promotedListPoints[id] {
-			r.doc.warn("colleaf_stale_bookmark_placement", "Native list point retains its current inline position because current list ownership differs")
+			r.doc.warn("vdocs_stale_bookmark_placement", "Native list point retains its current inline position because current list ownership differs")
 			return
 		}
 	}
@@ -1503,7 +1503,7 @@ func paragraphFingerprint(b Block) (string, error) {
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:]), nil
 }
-func newColleafOrigin(b Block) (*vdocsOrigin, error) {
+func newVDOCSOrigin(b Block) (*vdocsOrigin, error) {
 	if b.Source == nil {
 		return nil, nil
 	}
@@ -1521,10 +1521,10 @@ func newColleafOrigin(b Block) (*vdocsOrigin, error) {
 	sum := sha256.Sum256(raw)
 	return &vdocsOrigin{Profile: vdocsOriginProfile, Version: 1, Ref: hex.EncodeToString(sum[:]), Fingerprint: fingerprint, Source: cloneSourceInfo(b.Source)}, nil
 }
-func readColleafOrigin(raw json.RawMessage) (*vdocsOrigin, error) {
-	return readColleafOriginProfile(raw, vdocsOriginProfile)
+func readVDOCSOrigin(raw json.RawMessage) (*vdocsOrigin, error) {
+	return readVDOCSOriginProfile(raw, vdocsOriginProfile)
 }
-func readColleafOriginProfile(raw json.RawMessage, profile string) (*vdocsOrigin, error) {
+func readVDOCSOriginProfile(raw json.RawMessage, profile string) (*vdocsOrigin, error) {
 	if len(raw) == 0 {
 		return nil, nil
 	}
@@ -1544,7 +1544,7 @@ func readColleafOriginProfile(raw json.RawMessage, profile string) (*vdocsOrigin
 	return &o, nil
 }
 
-func collectColleafOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
+func collectVDOCSOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
 	pool := map[string]vdocsOrigin{}
 	process := func(body *vdocsBody) error {
 		for i := range body.Paragraphs {
@@ -1553,7 +1553,7 @@ func collectColleafOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) er
 			if err != nil {
 				return err
 			}
-			o, err := readColleafOrigin(props["manydocOrigin"])
+			o, err := readVDOCSOrigin(props["manydocOrigin"])
 			if err != nil {
 				return err
 			}
@@ -1611,11 +1611,11 @@ func collectColleafOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) er
 	}
 	return nil
 }
-func validateColleafOrigin(o vdocsOrigin, pages []PDFPage) error {
-	return validateColleafOriginProfile(o, pages, vdocsOriginProfile)
+func validateVDOCSOrigin(o vdocsOrigin, pages []PDFPage) error {
+	return validateVDOCSOriginProfile(o, pages, vdocsOriginProfile)
 }
-func validateColleafOriginProfile(o vdocsOrigin, pages []PDFPage, profile string) error {
-	checked, err := readColleafOriginProfile(sfAttrs(o), profile)
+func validateVDOCSOriginProfile(o vdocsOrigin, pages []PDFPage, profile string) error {
+	checked, err := readVDOCSOriginProfile(sfAttrs(o), profile)
 	if err != nil {
 		return err
 	}
@@ -1641,11 +1641,11 @@ func validateColleafOriginProfile(o vdocsOrigin, pages []PDFPage, profile string
 	}
 	return nil
 }
-func restoreColleafOrigins(d *Document, e *vdocsDocumentEvidence) error {
+func restoreVDOCSOrigins(d *Document, e *vdocsDocumentEvidence) error {
 	pool := map[string]vdocsOrigin{}
 	if e != nil {
 		for _, o := range e.Origins {
-			if err := validateColleafOrigin(o, d.Pages); err != nil {
+			if err := validateVDOCSOrigin(o, d.Pages); err != nil {
 				return err
 			}
 			if _, exists := pool[o.Ref]; exists {
@@ -1676,7 +1676,7 @@ func restoreColleafOrigins(d *Document, e *vdocsDocumentEvidence) error {
 				used[o.Ref] = true
 				if hash != record.Fingerprint {
 					b.Source.Historical = true
-					d.warn("colleaf_source_historical", "Original PDF source facts are retained as historical after current paragraph content or presentation changed")
+					d.warn("vdocs_source_historical", "Original PDF source facts are retained as historical after current paragraph content or presentation changed")
 				}
 			}
 			if b.Section != nil {
@@ -1738,13 +1738,13 @@ func restoreColleafOrigins(d *Document, e *vdocsDocumentEvidence) error {
 				d.UnboundSources = append(d.UnboundSources, *cloneSourceInfo(source))
 				seen[key] = true
 			}
-			d.warn("colleaf_source_unbound", "Original PDF source facts are retained unbound after their native paragraph binding disappeared")
+			d.warn("vdocs_source_unbound", "Original PDF source facts are retained unbound after their native paragraph binding disappeared")
 		}
 	}
 	return nil
 }
 
-func newColleafSourceOrigin(source *SourceInfo, hash, profile string) (*vdocsOrigin, error) {
+func newVDOCSSourceOrigin(source *SourceInfo, hash, profile string) (*vdocsOrigin, error) {
 	if source == nil {
 		return nil, nil
 	}
@@ -1781,7 +1781,7 @@ func vdocsRunFingerprint(r Run) (string, error) {
 	}
 	return vdocsSourceFreeHash(nodes)
 }
-func newColleafRunOrigin(r Run) (*vdocsOrigin, error) {
+func newVDOCSRunOrigin(r Run) (*vdocsOrigin, error) {
 	if r.Source == nil {
 		return nil, nil
 	}
@@ -1799,14 +1799,14 @@ func newColleafRunOrigin(r Run) (*vdocsOrigin, error) {
 	sum := sha256.Sum256(raw)
 	return &vdocsOrigin{Profile: vdocsRunOriginProfile, Version: 1, Ref: hex.EncodeToString(sum[:]), Fingerprint: hash, Source: cloneSourceInfo(r.Source)}, nil
 }
-func collectColleafRunOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
+func collectVDOCSRunOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
 	pool := map[string]vdocsOrigin{}
 	style := func(raw *json.RawMessage) error {
 		props, err := vdocsStyleObject(*raw)
 		if err != nil {
 			return err
 		}
-		o, err := readColleafOriginProfile(props["manydocOrigin"], vdocsRunOriginProfile)
+		o, err := readVDOCSOriginProfile(props["manydocOrigin"], vdocsRunOriginProfile)
 		if err != nil {
 			return err
 		}
@@ -1868,11 +1868,11 @@ func collectColleafRunOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence)
 	}
 	return nil
 }
-func restoreColleafRunOrigins(d *Document, e *vdocsDocumentEvidence) error {
+func restoreVDOCSRunOrigins(d *Document, e *vdocsDocumentEvidence) error {
 	pool := map[string]vdocsOrigin{}
 	if e != nil {
 		for _, o := range e.RunOrigins {
-			if err := validateColleafOriginProfile(o, d.Pages, vdocsRunOriginProfile); err != nil {
+			if err := validateVDOCSOriginProfile(o, d.Pages, vdocsRunOriginProfile); err != nil {
 				return err
 			}
 			if _, ok := pool[o.Ref]; ok {
@@ -1908,7 +1908,7 @@ func restoreColleafRunOrigins(d *Document, e *vdocsDocumentEvidence) error {
 				used[o.Ref] = true
 				if hash != record.Fingerprint {
 					r.Source.Historical = true
-					d.warn("colleaf_run_source_historical", "Original PDF source facts are retained as historical after current run content or presentation changed")
+					d.warn("vdocs_run_source_historical", "Original PDF source facts are retained as historical after current run content or presentation changed")
 				}
 			}
 		}
@@ -1985,7 +1985,7 @@ func restoreColleafRunOrigins(d *Document, e *vdocsDocumentEvidence) error {
 				d.UnboundSources = append(d.UnboundSources, *cloneSourceInfo(s))
 				archive[key] = true
 			}
-			d.warn("colleaf_run_source_unbound", "Original PDF source facts are retained unbound after their native run binding disappeared")
+			d.warn("vdocs_run_source_unbound", "Original PDF source facts are retained unbound after their native run binding disappeared")
 		}
 	}
 	return nil
@@ -2007,7 +2007,7 @@ func (w *vdocsBodyWriter) standalonePoint(b Block) error {
 	if !reflect.DeepEqual(copy, Block{Kind: AnchorPoint}) || len(b.Anchors) == 0 {
 		return fmt.Errorf("invalid standalone native point")
 	}
-	origin, err := newColleafFlowOrigin(b)
+	origin, err := newVDOCSFlowOrigin(b)
 	if err != nil {
 		return err
 	}
@@ -2016,10 +2016,10 @@ func (w *vdocsBodyWriter) standalonePoint(b Block) error {
 		if err := destinationID(id); err != nil {
 			return err
 		}
-		a := writeColleafBookmark(id, w.offset, "", "point")
+		a := writeVDOCSBookmark(id, w.offset, "", "point")
 		a.Properties = sfAttrs(vdocsBookmarkProperties{BookmarkID: id, Hint: &vdocsBookmarkHint{Version: 1, Role: "point", OwnerID: w.pointOwner, PointScope: w.pointScope, PointOrder: w.pointSerial, PointIndex: i}})
 		if i == 0 && origin != nil {
-			props, err := readColleafBookmark(a)
+			props, err := readVDOCSBookmark(a)
 			if err != nil {
 				return err
 			}
@@ -2030,13 +2030,13 @@ func (w *vdocsBodyWriter) standalonePoint(b Block) error {
 	}
 	return nil
 }
-func rebindColleafPointScope(body *vdocsBody, from, to string, first int) error {
+func rebindVDOCSPointScope(body *vdocsBody, from, to string, first int) error {
 	for i := first; i < len(body.CustomRanges); i++ {
 		a := &body.CustomRanges[i]
 		if a.Type != 3 {
 			continue
 		}
-		p, err := readColleafBookmark(*a)
+		p, err := readVDOCSBookmark(*a)
 		if err != nil {
 			return err
 		}
@@ -2156,7 +2156,7 @@ func (r *vdocsBodyReader) finishStandalone(blocks []Block) {
 	})
 	for _, p := range r.standalone {
 		if !promoted[p.id] {
-			r.doc.warn("colleaf_stale_point_ownership", "Standalone point retains its current native location because its owning flow or boundary changed")
+			r.doc.warn("vdocs_stale_point_ownership", "Standalone point retains its current native location because its owning flow or boundary changed")
 			break
 		}
 	}
@@ -2181,7 +2181,7 @@ func (r *vdocsBodyReader) emptyPointCarrier(p vdocsParagraphRecord, start, end i
 		valid = valid && reflect.DeepEqual(copy, Block{Kind: Paragraph})
 	}
 	if !valid {
-		r.doc.warn("colleaf_stale_point_carrier", "Edited native point carrier is retained as current visible content and presentation")
+		r.doc.warn("vdocs_stale_point_carrier", "Edited native point carrier is retained as current visible content and presentation")
 	}
 	return valid
 }
@@ -2278,7 +2278,7 @@ func (r *vdocsBodyReader) cursorBlocks(position int, boundary string, ordinary b
 	}
 	var blocks []Block
 	for _, a := range records {
-		p, err := readColleafBookmark(a)
+		p, err := readVDOCSBookmark(a)
 		if err != nil {
 			return nil, err
 		}
@@ -2297,9 +2297,9 @@ func (r *vdocsBodyReader) cursorBlocks(position int, boundary string, ordinary b
 		if r.settings.NavigationScope != "" {
 			location += fmt.Sprintf(" in story %q", r.settings.NavigationScope)
 		}
-		r.cursorWarn("colleaf_structural_cursor", fmt.Sprintf("Native bookmark at %s projects to %s; exact native control cursor identity is not retained", location, boundary))
+		r.cursorWarn("vdocs_structural_cursor", fmt.Sprintf("Native bookmark at %s projects to %s; exact native control cursor identity is not retained", location, boundary))
 		if p.Hint != nil {
-			r.cursorWarn("colleaf_stale_bookmark_placement", "Native bookmark placement intent is normalized at its current structural boundary")
+			r.cursorWarn("vdocs_stale_bookmark_placement", "Native bookmark placement intent is normalized at its current structural boundary")
 		}
 		blocks = append(blocks, Block{Kind: AnchorPoint, Anchors: []string{p.BookmarkID}})
 	}
@@ -2388,9 +2388,9 @@ func vdocsCellFingerprint(c Cell) (string, error) {
 	return vdocsSourceFreeHash(nodes[0].Content[0].Content[0])
 }
 
-func visitColleafTableOrigins(snapshot *vdocsNoteSnapshot, update bool, visit func(*vdocsOrigin) error) error {
+func visitVDOCSTableOrigins(snapshot *vdocsNoteSnapshot, update bool, visit func(*vdocsOrigin) error) error {
 	marker := func(props vdocsStyleMap, profile string) error {
-		o, err := readColleafOriginProfile(props["manydocOrigin"], profile)
+		o, err := readVDOCSOriginProfile(props["manydocOrigin"], profile)
 		if err != nil {
 			return err
 		}
@@ -2468,9 +2468,9 @@ func visitColleafTableOrigins(snapshot *vdocsNoteSnapshot, update bool, visit fu
 	}
 	return nil
 }
-func collectColleafTableOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
+func collectVDOCSTableOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidence) error {
 	pool := map[string]vdocsOrigin{}
-	err := visitColleafTableOrigins(out, true, func(o *vdocsOrigin) error {
+	err := visitVDOCSTableOrigins(out, true, func(o *vdocsOrigin) error {
 		if o.Source == nil {
 			return fmt.Errorf("native output table/cell origin lacks source")
 		}
@@ -2501,17 +2501,17 @@ func collectColleafTableOrigins(out *vdocsNoteSnapshot, e **vdocsDocumentEvidenc
 	}
 	return nil
 }
-func validateColleafTableOrigin(o vdocsOrigin, pages []PDFPage) error {
+func validateVDOCSTableOrigin(o vdocsOrigin, pages []PDFPage) error {
 	if o.Profile != vdocsTableOriginProfile && o.Profile != vdocsCellOriginProfile {
 		return fmt.Errorf("invalid native table/cell source profile")
 	}
-	return validateColleafOriginProfile(o, pages, o.Profile)
+	return validateVDOCSOriginProfile(o, pages, o.Profile)
 }
-func restoreColleafTableOrigins(d *Document, e *vdocsDocumentEvidence, input vdocsNoteSnapshot) error {
+func restoreVDOCSTableOrigins(d *Document, e *vdocsDocumentEvidence, input vdocsNoteSnapshot) error {
 	pool := map[string]vdocsOrigin{}
 	if e != nil {
 		for _, o := range e.TableOrigins {
-			if err := validateColleafTableOrigin(o, d.Pages); err != nil {
+			if err := validateVDOCSTableOrigin(o, d.Pages); err != nil {
 				return err
 			}
 			if _, ok := pool[o.Ref]; ok {
@@ -2530,7 +2530,7 @@ func restoreColleafTableOrigins(d *Document, e *vdocsDocumentEvidence, input vdo
 		}
 		return record, nil
 	}
-	if err := visitColleafTableOrigins(&input, false, func(o *vdocsOrigin) error { _, err := lookup(o); return err }); err != nil {
+	if err := visitVDOCSTableOrigins(&input, false, func(o *vdocsOrigin) error { _, err := lookup(o); return err }); err != nil {
 		return err
 	}
 	used := map[string]bool{}
@@ -2543,7 +2543,7 @@ func restoreColleafTableOrigins(d *Document, e *vdocsDocumentEvidence, input vdo
 		source := cloneSourceInfo(record.Source)
 		if hash != record.Fingerprint {
 			source.Historical = true
-			d.warn("colleaf_table_source_historical", "Original table or cell source facts are retained as historical after current content, grid or presentation changed")
+			d.warn("vdocs_table_source_historical", "Original table or cell source facts are retained as historical after current content, grid or presentation changed")
 		}
 		return source, nil
 	}
@@ -2635,7 +2635,7 @@ func restoreColleafTableOrigins(d *Document, e *vdocsDocumentEvidence, input vdo
 			d.UnboundSources = append(d.UnboundSources, *cloneSourceInfo(source))
 			archived[key] = true
 		}
-		d.warn("colleaf_table_source_unbound", "Original table or cell source facts are retained unbound after their native ownership disappeared")
+		d.warn("vdocs_table_source_unbound", "Original table or cell source facts are retained unbound after their native ownership disappeared")
 	}
 	return nil
 }

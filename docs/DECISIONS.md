@@ -22,9 +22,8 @@
    separate QA by concern and current documentation from historical evidence.
    Do not introduce cyclic codec packages or mutable public function aliases.
 7. **Optional native adapter.** VDOCS is an additional snapshot interchange path.
-   Colleaf is the inspected source application, not a core runtime dependency or
-   Manifold's identity. Keep application provenance accurate and adapter internals
-   named for VDOCS. Existing serialized diagnostic/profile strings stay compatible.
+   The adapter targets a pinned Univer snapshot profile and is named for VDOCS.
+   It introduces no required editor service or host application dependency.
 8. **Committed knowledge transfer.** Record actual check scopes, failures and
    limits with implementation milestones. Keep original source bytes and expected
    behavior; generated output and QA environments stay ignored.
@@ -32,3 +31,11 @@
 The [acceptance audit](verification/FINAL_AUDIT.md) records original-goal evidence.
 The complete chronological rationale is preserved in [history](history/DECISIONS.md),
 with the former implementation maps and qualification ledger.
+
+
+9. **Application-independent native format.** The user requested removal of host
+   application references, then explicitly confirmed keeping VDOCS. Retain SF as
+   the canonical hub for DOCX/PDF/VDOCS conversions. Use a Manifold-owned VDOCS
+   envelope/MIME and native diagnostic namespace; remove host validators and their
+   browser harness. Keep SDK reader/edit/save checks and the unchanged native
+   document payload. Retired branded envelopes require explicit header migration.

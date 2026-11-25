@@ -1,5 +1,5 @@
 // Run from the repository root:
-// GOWORK=off go run ./examples/vdocs -out output/colleaf-example
+// GOWORK=off go run ./examples/vdocs -out output/vdocs-example
 package main
 
 import (
@@ -17,7 +17,7 @@ import (
 
 func main() {
 	input := flag.String("in", "examples/notes/document.sf", "input SF or other supported document")
-	output := flag.String("out", "output/colleaf-example", "output directory")
+	output := flag.String("out", "output/vdocs-example", "output directory")
 	lossy := flag.Bool("allow-lossy", false, "acknowledge imported diagnostics for DOCX/PDF reflow")
 	flag.Parse()
 	ctx := context.Background()

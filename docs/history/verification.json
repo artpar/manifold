@@ -69,7 +69,7 @@
     "Short fuzz campaigns are not exhaustive",
     "Mostly synthetic corpus",
     "Word/LibreOffice visual acceptance not completed",
-    "No Daptin or Colleaf adapter integration tested"
+    "No Daptin or VDOCS adapter integration tested"
   ],
   "raw_logs": "output/ (ignored, regenerable; see docs/TESTING.md)",
   "scope": "Original initial-implementation baseline. Fields above structured_format_milestone are historical, not coverage/build claims for the new SF code.",
@@ -5025,7 +5025,7 @@
     "retained_costs": "complete parse/model/bridge tree remains materialized; root attributes and inline asset/node values still marshaled; high-fidelity glyph tree has substantial memory/editor cost",
     "next": "bounded current-state acceptance/source/corpus/visual/resource audit; no completion claim based on transport optimization"
   },
-  "current_acceptance_actualtext_colleaf_audit": {
+  "current_acceptance_actualtext_vdocs_audit": {
     "status": "verified code correction and source audit; original full goal remains incomplete",
     "baseline": "f804210",
     "code_fix": {
@@ -5038,12 +5038,12 @@
         "CGO-disabled focused execution"
       ]
     },
-    "colleaf": {
-      "repository": "artpar/colleaf",
+    "vdocs": {
+      "repository": "retired-host-source",
       "commit": "5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6",
       "access": "read-only GitHub; prior local-only unavailable-schema claim corrected",
-      "format": "vibedada-document version 3, engine univer 1.0.4, IDocumentData snapshot, .vdocs",
-      "mime": "application/vnd.vibedada.docs+json;version=3",
+      "format": "retired-application-envelope version 3, engine univer 1.0.4, IDocumentData snapshot, .vdocs",
+      "mime": "retired-application-mime",
       "inspected": [
         "src/shared/files/docsFormat.ts",
         "src/shared/files/nativeDocument.ts",
@@ -5063,7 +5063,7 @@
         "declaration_sha256": "1bc2354b7aa5114ccf6b5df90a22aca743ba9f034d4aef5f3e5aac11f2299be5"
       },
       "conclusion": "actual source inspection done; native snapshot adapter and actual reader qualification remain missing",
-      "application_boundary": "No Daptin/Colleaf modifications, service/customer uploads or app writes; application access, quotas and persistence stay outside library"
+      "application_boundary": "No Daptin/VDOCS modifications, service/customer uploads or app writes; application access, quotas and persistence stay outside library"
     },
     "gap_probes": {
       "generator": "scripts/generate_pdf_semantic_audit.py",
@@ -5071,7 +5071,7 @@
       "pagination_artifact": "independent Header subtype/BBox/Attached source retains HEADER text in body, creates zero running stories and loses explicit properties",
       "interpretation": "concrete recoverable-semantic gaps; diagnostics/plain-text retention do not fulfill complete goal"
     },
-    "docs": "ACCEPTANCE/ROADMAP/STATUS rewritten as current queue; historical evidence remains in Git history/verification.json; COLLEAF_FORMAT records pinned source comparison and mappings",
+    "docs": "ACCEPTANCE/ROADMAP/STATUS rewritten as current queue; historical evidence remains in Git history/verification.json; VDOCS_FORMAT records pinned source comparison and mappings",
     "checks": {
       "full_test": "library 14.736s; CLI 0.686s; all packages pass",
       "full_race": "library 175.468s; CLI 2.199s; all packages pass",
@@ -5081,7 +5081,7 @@
       "diff_check": "pass"
     },
     "evidence": "output/audit and output/codec (ignored); no remote implementation source copied into production",
-    "next": "explicit PDF note/reference and pagination semantics; checked rich Colleaf snapshot adapter; representative original DOCX/corpus/visual and final requirement audit"
+    "next": "explicit PDF note/reference and pagination semantics; checked rich VDOCS snapshot adapter; representative original DOCX/corpus/visual and final requirement audit"
   },
   "pdf_artifact_structure_milestone": {
     "status": "explicit physical artifact structure qualified; full goal remains incomplete",
@@ -5187,7 +5187,7 @@
       "diff_check": "pass"
     },
     "evidence": "output/note-labels ignored; scripts/verify_note_labels.py; examples/notes -custom-labels; docs/TESTING.md",
-    "next": "recover explicit PDF Note/Reference/Ref graph and rich bodies with kind/placement uncertainty; native Colleaf adapter and original DOCX corpus/visual acceptance remain open",
+    "next": "recover explicit PDF Note/Reference/Ref graph and rich bodies with kind/placement uncertainty; native VDOCS adapter and original DOCX corpus/visual acceptance remain open",
     "production_dependencies": "unchanged; pure Go; no app/backend edits"
   },
   "explicit_pdf_note_graph": {
@@ -5231,7 +5231,7 @@
     },
     "evidence": "docs/PDF_NOTES.md; scripts/generate_pdf_semantic_audit.py; scripts/verify_pdf_notes.py; ignored output/audit/notes-* and output/note-labels",
     "production_dependencies": "unchanged; pure Go, no services/executables/CGO/uploads or app/backend changes",
-    "remaining_required": "differing citation/body marks, differently labelled/complex/markerless references, nested/enclosing ActualText editable graphs and identified non-Ref adjacency/geometric inference; native Colleaf snapshot adapter, broader original DOCX corpus/visual evidence and final acceptance",
+    "remaining_required": "differing citation/body marks, differently labelled/complex/markerless references, nested/enclosing ActualText editable graphs and identified non-Ref adjacency/geometric inference; native VDOCS snapshot adapter, broader original DOCX corpus/visual evidence and final acceptance",
     "goal": "active/incomplete; unambiguous explicit recovery milestone only"
   },
   "independent_note_display": {
@@ -5260,9 +5260,9 @@
       "diff_check": "pass"
     },
     "evidence": "docs/PDF_NOTES.md; examples/notes -variant-labels; scripts/verify_note_variants.py; ignored output/note-variants",
-    "production_dependencies": "unchanged, pure Go; no services/uploads/executables/CGO or Daptin/Colleaf edits",
+    "production_dependencies": "unchanged, pure Go; no services/uploads/executables/CGO or Daptin/VDOCS edits",
     "oracles": "original publisher fixture/oracle bytes intact; prior differing-label conservative fallback expectation now requires the newly supported explicit per-site typed behavior using the same source paint; malformed/uncertainty expectations retained",
-    "remaining": "rich multi-node/internal mixed-direction labels, nested/enclosing-ActualText graphs and identified non-Ref adjacency/geometric inference; native Colleaf snapshot adapter; broader original DOCX producer/corpus/visual qualification; final full-goal audit",
+    "remaining": "rich multi-node/internal mixed-direction labels, nested/enclosing-ActualText graphs and identified non-Ref adjacency/geometric inference; native VDOCS snapshot adapter; broader original DOCX producer/corpus/visual qualification; final full-goal audit",
     "goal": "active/incomplete"
   },
   "identified_note_relationship_inference": {
@@ -5303,8 +5303,8 @@
       "diff_check": "pass"
     },
     "evidence": "docs/PDF_NOTES.md; scripts/verify_note_inference.py; pdf_note_inference_test.go; ignored output/note-inference",
-    "production_boundary": "modules unchanged; pureGo, no CGO/executables/services/uploads or Daptin/Colleaf modifications",
-    "remaining": "rich/mixed-direction labels and editable backlinks, nested/enclosing-ActualText graphs, broader untagged recovery, native Colleaf snapshot adapter, broader original DOCX producer/corpus/visual qualification and final acceptance",
+    "production_boundary": "modules unchanged; pureGo, no CGO/executables/services/uploads or Daptin/VDOCS modifications",
+    "remaining": "rich/mixed-direction labels and editable backlinks, nested/enclosing-ActualText graphs, broader untagged recovery, native VDOCS snapshot adapter, broader original DOCX producer/corpus/visual qualification and final acceptance",
     "goal": "active/incomplete"
   },
   "editable_note_body_styles_and_backlinks": {
@@ -5332,9 +5332,9 @@
       "diff_check": "pass"
     },
     "evidence": "docs/PDF_NOTES.md; note_label_style_test.go; scripts/verify_note_styles.py, verify_note_inference.py and verify_structured.cjs; examples/notes -styled-labels; ignored output/note-styles and output/note-inference",
-    "remaining": "acknowledged checked fractional DOCX text-size policy; heterogeneous/mixed-direction labels; nested/enclosing-ActualText and broader untagged graphs; actual native Colleaf adapter; broader original DOCX producer/rich-feature corpus/visual checks; final acceptance audit",
+    "remaining": "acknowledged checked fractional DOCX text-size policy; heterogeneous/mixed-direction labels; nested/enclosing-ActualText and broader untagged graphs; actual native VDOCS adapter; broader original DOCX producer/rich-feature corpus/visual checks; final acceptance audit",
     "next_commands": "rg -n 'docxTextStyle|writeDOCX|writeSectionedDOCX|textImplicit' docx*.go; GOWORK=off go run ./examples/notes -variant-labels -styled-labels -out output/note-styles; output/qa-venv/bin/python scripts/verify_note_styles.py",
-    "production_boundary": "pure Go; no new modules/required executables/CGO/services/uploads; no Daptin/Colleaf changes or access/quota gates",
+    "production_boundary": "pure Go; no new modules/required executables/CGO/services/uploads; no Daptin/VDOCS changes or access/quota gates",
     "goal": "active/incomplete"
   },
   "docx_font_size_precision_and_sectioned_notes": {
@@ -5364,7 +5364,7 @@
     },
     "evidence": "docs/DOCX_PRECISION.md; docx_precision_test.go; scripts/verify_docx_precision.py; examples/notes -fractional-sizes -sectioned; ignored output/note-precision",
     "runtime_boundary": "Pure Go and unchanged modules; optional Python/Node/LibreOffice QA only; no CGO/executables/services/uploads/app modifications or performer-level access/quota gates",
-    "remaining": "heterogeneous/internal mixed-direction note labels; nested/enclosing-ActualText and broader untagged graphs; actual native Colleaf adapter; broader original DOCX corpus/visual qualification; final acceptance",
+    "remaining": "heterogeneous/internal mixed-direction note labels; nested/enclosing-ActualText and broader untagged graphs; actual native VDOCS adapter; broader original DOCX corpus/visual qualification; final acceptance",
     "next_commands": "rg -n 'pdfNoteMark|recoverNote|structureReplacement|ActualText' pdf_structure_notes.go pdf_structure*.go; GOWORK=off go test -race -run 'TestDOCXFractional|TestDOCXSize|TestDOCXSectionedStyledNote|TestXMLDuplicate' -count=1 .",
     "goal": "active/incomplete"
   },
@@ -5394,7 +5394,7 @@
     },
     "evidence": "docs/RICH_NOTE_LABELS.md; note_rich_body_test.go; scripts/generate_pdf_semantic_audit.py and verify_rich_note_labels.py; actual PM verify_structured.cjs; examples/notes -rich-body-labels; ignored output/rich-note-labels",
     "runtime_boundary": "pure Go, unchanged go.mod/go.sum/THIRD_PARTY, no required executables/CGO/services/uploads/app changes or performer permission/quota gates; QA readers optional",
-    "remaining": "heterogeneous/internal mixed-direction citation atoms; nested/enclosing-ActualText and broader untagged note graphs; actual Colleaf adapter; broader original DOCX note/story/revision/field corpus and producer qualification; final acceptance audit",
+    "remaining": "heterogeneous/internal mixed-direction citation atoms; nested/enclosing-ActualText and broader untagged note graphs; actual VDOCS adapter; broader original DOCX note/story/revision/field corpus and producer qualification; final acceptance audit",
     "next_commands": "rg -n 'noteMarkLevel|structureReplacement|citation|run.Note' pdf_structure_notes.go pdf_text.go pdf_bidi.go; GOWORK=off go test -race -run 'TestRichBodyLabel|TestPDFRichBodyLabel' -count=1 .",
     "goal": "active/incomplete"
   },
@@ -5416,7 +5416,7 @@
     },
     "evidence": "RICH_CITATIONS.md; note_citation_content_test.go; generate_pdf_semantic_audit.py, verify_rich_citations.py, verify_structured.cjs; examples/notes -rich-citations -rich-body-labels -sectioned; ignored output/rich-citations",
     "runtime": "pure Go; no new modules/CGO/required executables/services/uploads/application changes/permission or quota gates",
-    "remaining": "nested/enclosing-ActualText and broader untagged note graphs; actual Colleaf native adapter; broader original DOCX note/story/revision/field corpus and producer qualification; final source/resource/API/acceptance audit",
+    "remaining": "nested/enclosing-ActualText and broader untagged note graphs; actual VDOCS native adapter; broader original DOCX note/story/revision/field corpus and producer qualification; final source/resource/API/acceptance audit",
     "next_commands": "rg -n 'ActualText|nested|note' pdf_structure_notes.go pdf_structure_blocks.go pdf_marked.go; GOWORK=off go test -run 'TestPDFNoteInlineAndEnclosingActualText|TestPDFAdjacentNotesConservativeBoundaries' -count=1 ."
   },
   "structural_actualtext_note_correspondence_2026_11_24": {
@@ -5437,7 +5437,7 @@
     },
     "evidence": "PDF_NOTES.md exact enclosing/nested structural ActualText section; pdf_note_actual_aligned_test.go; generate_pdf_semantic_audit.py and verify_note_actual.py; ignored output/note-actual",
     "runtime": "pure Go; no CGO/required executables/services/uploads/app changes/permission or quota gates; QA readers optional",
-    "remaining": "nested-definition/redundant-wrapper and broader untagged note graphs; actual Colleaf adapter; broader original DOCX note/story/revision/field corpus and producer qualification; final source/resource/API/acceptance audit",
+    "remaining": "nested-definition/redundant-wrapper and broader untagged note graphs; actual VDOCS adapter; broader original DOCX note/story/revision/field corpus and producer qualification; final source/resource/API/acceptance audit",
     "next_commands": "rg -n 'inNote|hasInner|grouped|recoverNote' pdf_structure_notes.go; GOWORK=off go test -run 'TestPDFNoteAligned|TestPDFNoteActualText' -count=1 ."
   },
   "original_poi_docx_corpus_2026_11_24": {
@@ -5461,8 +5461,8 @@
     },
     "evidence": "REAL_DOCX_CORPUS.md; real_poi_docx_test.go, docx_positional_tab_test.go; scripts/audit_poi_sources.py, generate_poi_qa.py, verify_poi_corpus.py; original oracle/manifest/notices; ignored output/real-docx-audit",
     "runtime": "pure Go, no CGO/required executables/services/uploads/app modifications/permission/quota gates; optional independent QA readers/fonts only",
-    "remaining": "broader nested/untagged note graphs; actual Colleaf native adapter; final source consistency/resource/public-API/acceptance audit with measured producer/review/field/font limits",
-    "next_commands": "GOWORK=off go test -race -run 'TestRealPOI|TestDOCXPositionalTab' -count=1 .; rg -n 'inNote|hasInner|grouped|recoverNote' pdf_structure_notes.go; see COLLEAF_FORMAT.md mapping queue"
+    "remaining": "broader nested/untagged note graphs; actual VDOCS native adapter; final source consistency/resource/public-API/acceptance audit with measured producer/review/field/font limits",
+    "next_commands": "GOWORK=off go test -race -run 'TestRealPOI|TestDOCXPositionalTab' -count=1 .; rg -n 'inNote|hasInner|grouped|recoverNote' pdf_structure_notes.go; see VDOCS_FORMAT.md mapping queue"
   },
   "nested_note_source_graphs_2026_11_24": {
     "goal": "active/incomplete",
@@ -5482,17 +5482,17 @@
     },
     "evidence": "PDF_NOTES.md nested definitions/wrappers section; pdf_nested_notes_test.go, pdf_note_wrappers.go; scripts/generate_pdf_semantic_audit.py and verify_nested_notes.py; schema source parent_element; ignored output/nested-notes",
     "runtime": "pure Go, unchanged dependencies; no required executables/CGO/services/uploads/app modifications/permission or quota gates; independent QA readers optional",
-    "remaining": "actual Colleaf native snapshot adapter; broader untagged note recovery and inverse source consistency/resource/public API/final acceptance audit; preserve original editor corpus and measured review/field/producer limits",
-    "next_commands": "cat docs/COLLEAF_FORMAT.md; rg -n 'IDocumentData|dataStream|customRanges|tableSource' output/codec; GOWORK=off go test -race -run 'TestPDFNested|TestPDFRedundantNote|TestPDFNoteWrapper' -count=1 ."
+    "remaining": "actual VDOCS native snapshot adapter; broader untagged note recovery and inverse source consistency/resource/public API/final acceptance audit; preserve original editor corpus and measured review/field/producer limits",
+    "next_commands": "cat docs/VDOCS_FORMAT.md; rg -n 'IDocumentData|dataStream|customRanges|tableSource' output/codec; GOWORK=off go test -race -run 'TestPDFNested|TestPDFRedundantNote|TestPDFNoteWrapper' -count=1 ."
   },
-  "colleaf_native_stream_foundation_2026_11_24": {
+  "vdocs_native_stream_foundation_2026_11_24": {
     "goal": "active/incomplete; semantic native adapter/public format NOT complete or exposed",
     "implementation": "Private UTF-16\u2192UTF-8 scalar boundary index reused for actual paragraph/section/nested-table grammar and style/range/table/custom-block/soft-break metadata checks. Astral and combining input remains unnormalized; invalid halves/bounds/grammar/ownership reject; cancellation and existing nesting bounds apply. No app snapshot/image quota gates.",
     "actual_reader_findings": "Pinned1.0.4 runtime enum/parser table row/end tokens0x0E/0x0F contradict stale declaration prose0x1E/0x1F (annotation controls). Each cell needsCR/LF. Table metadata exclusive end differs from inclusive runtime tree end. Paragraph/section metadata point atCR/LF. Geometrypx vs fspt confirmed72pt\u219296px APIs. Actual reader accepts unsorted/overlapping/empty text intervals: last matching whole record wins, not union; validator preserves these valid inputs.",
-    "independent": "Unmodified pinned Colleaf validateDocument accepts hand-authored native-stream.json. Actual @univerjs/core DocumentDataModel and @univerjs/engine-render DocumentViewModel/parseDataStreamToTree match Go tree kinds/UTF-16 bounds for nested tables and confirm styled astral text, inclusive hyperlink, note anchor/body, table source lookups/cell counts and unchanged stream. Actual overlapping-style probes qualified separately. This is offset/container evidence, NOT rich SF mapping/renderer/edit-save completion.",
+    "independent": "Unmodified pinned VDOCS validateDocument accepts hand-authored native-stream.json. Actual @univerjs/core DocumentDataModel and @univerjs/engine-render DocumentViewModel/parseDataStreamToTree match Go tree kinds/UTF-16 bounds for nested tables and confirm styled astral text, inclusive hyperlink, note anchor/body, table source lookups/cell counts and unchanged stream. Actual overlapping-style probes qualified separately. This is offset/container evidence, NOT rich SF mapping/renderer/edit-save completion.",
     "pins": {
-      "core_docs_engine_render": "1.0.4, optional ignored npm QA installation; pinned core tarball integrity/declaration hash already in COLLEAF_FORMAT.md",
-      "colleaf_source_commit": "5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6",
+      "core_docs_engine_render": "1.0.4, optional ignored npm QA installation; pinned core tarball integrity/declaration hash already in VDOCS_FORMAT.md",
+      "vdocs_source_commit": "5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6",
       "validator_sha256": "c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0",
       "native_reference_sha256": "773e57d81ac69c32bdaacb165fb565e4405d488e4dcface73e2d8f35f5e9ae2f",
       "ignored_qa_lock_sha256": "5defa3bf7b1d1d50aa855a3af32c591e35d45677949f620a72a99c282418b535"
@@ -5505,16 +5505,16 @@
       "modules": "all modules verified; go.mod/go.sum unchanged",
       "cgo_disabled": "host CLI build and focused execution0.376s pass; Linux amd64/arm64 cross-builds pass (not execution evidence)",
       "fuzz": "New native-stream campaign10s/two workers requested,19398 executions11.432s pass;34 new interesting cases. Parser unchanged by later metadata-overlap acceptance correction. Short campaign not exhaustive.",
-      "independent": "verify_colleaf_stream.cjs pass; expected Node experimental TypeScript-stripping warning",
+      "independent": "verify_vdocs_stream.cjs pass; expected Node experimental TypeScript-stripping warning",
       "diff_check": "pass"
     },
-    "evidence": "COLLEAF_FORMAT.md executable reader/foundation section; colleaf_stream.go, colleaf_body.go, colleaf_stream_test.go, testdata/colleaf/native-stream.json; verify_colleaf_stream.cjs; ignored output/colleaf-qa/checks",
+    "evidence": "VDOCS_FORMAT.md executable reader/foundation section; vdocs_stream.go, vdocs_body.go, vdocs_stream_test.go, testdata/univer/native-stream.json; verify_vdocs_stream.cjs; ignored output/vdocs-qa/checks",
     "investigation_limits": "An optional @univerjs/docs-exchange1.0.4 lookup returned404; not a dependency/blocker. An initial QA invocation preceded its Go tree artifact; rerun after Go completion passed. SDK/source are QA references only; no implementation code copied/translated or native renderer completion claim.",
     "runtime": "Pure Go; public API/CLI and four existing conversion paths unchanged. Optional Node/SDK/app-validator QA only; no CGO/required services/executables/uploads/app changes/permission or quota gates introduced.",
     "remaining": "Implement both semantic native\u2194SF mappings, strict envelope/JSON/escaped-Unicode handling, defaults/style winning intervals, lists/table merges/assets/resources/sections/stories/notes and actual native edit/save checks. Do not wrap SF as an opaque second text authority. Broader untagged recovery and final consistency/resource/API/acceptance audit remain.",
-    "next_commands": "cat docs/COLLEAF_FORMAT.md; sed -n '790,1405p' output/codec/univer-document-types.txt; MANYDOC_COLLEAF_QA_TREE=output/colleaf-qa/go-tree.json GOWORK=off go test -run TestColleaf -count=1 .; node scripts/verify_colleaf_stream.cjs"
+    "next_commands": "cat docs/VDOCS_FORMAT.md; sed -n '790,1405p' output/codec/univer-document-types.txt; MANYDOC_VDOCS_QA_TREE=output/vdocs-qa/go-tree.json GOWORK=off go test -run TestVDOCS -count=1 .; node scripts/verify_vdocs_stream.cjs"
   },
-  "colleaf_text_semantics_2026_11_24": {
+  "vdocs_text_semantics_2026_11_24": {
     "scope": "Private native paragraph/heading/style/link/language/soft-break workers through canonical SF. No public native format/API/CLI; rich adapter incomplete.",
     "tests": [
       "300 seeded interval sets compared to naive last-whole-record oracle",
@@ -5526,7 +5526,7 @@
     ],
     "independent_reader": {
       "packages": "@univerjs/core and @univerjs/engine-render1.0.4; ignored QA environment from prior foundation",
-      "script": "scripts/verify_colleaf_text.cjs",
+      "script": "scripts/verify_vdocs_text.cjs",
       "script_sha256": "f4d6753432ffe1ae63cb4cecbbce88b8d09a756826265103d30424d175c0bc00",
       "result": "Generated text/style/link records read, TextX replaced astral heading with Edited\ud83d\ude00/italic, saved native snapshot, Go re-imported edit; pass",
       "limitations": "No browser/native rendered layout or renderer-effective inheritance qualification. An initial QA assertion overlooked the adjacent internal-link range at16; corrected assertion matches the authored fixture; no input/oracle changed."
@@ -5542,13 +5542,13 @@
     "runtime": "Pure Go; no new production dependency/executable/service/CGO/upload/application changes or authorization/quota gates.",
     "remaining": "Strict native envelope/JSON/escaped-surrogate handling; rich lists/merged tables/images/resources/notes/sections/stories/provenance and intent mappings; actual rich native edit/render qualification; broader untagged PDF recovery and final consistency/resource/API/acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_TEXT_QA=output/colleaf-qa/text.json GOWORK=off go test -run TestColleafTextSemanticRoundTripAndNativeEdits -count=1 .",
-      "node scripts/verify_colleaf_text.cjs",
-      "MANYDOC_COLLEAF_TEXT_EDIT=output/colleaf-qa/text-edited.json GOWORK=off go test -run TestColleaf -count=1 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_TEXT_QA=output/vdocs-qa/text.json GOWORK=off go test -run TestVDOCSTextSemanticRoundTripAndNativeEdits -count=1 .",
+      "node scripts/verify_vdocs_text.cjs",
+      "MANYDOC_VDOCS_TEXT_EDIT=output/vdocs-qa/text-edited.json GOWORK=off go test -run TestVDOCS -count=1 ."
     ]
   },
-  "colleaf_table_semantics_2026_11_24": {
+  "vdocs_table_semantics_2026_11_24": {
     "scope": "Private actual native stream/source table mappings through SF; rich native adapter and full goal remain incomplete.",
     "tests": [
       "Canonical native->SF->native record equality for combined2x2 merges, nested cells/tables, fixed/default widths, repeated headers and astral text",
@@ -5560,9 +5560,9 @@
     ],
     "independent_reader": {
       "packages": "Pinned @univerjs/core and @univerjs/engine-render1.0.4, optional ignored QA install only",
-      "script": "scripts/verify_colleaf_tables.cjs",
+      "script": "scripts/verify_vdocs_tables.cjs",
       "script_sha256": "9bbbe25c24e2517442643762990e5e33c687be46c35bae914b00cdf1fd271655",
-      "result": "All source/stream row/cell counts/exclusive extents, combined merges, nested skeTables, outer432px width, following-cell x240px, visible full-width default percentages, legacy unit0 geometry, TextX C->Z edit/save pass; Go re-import0.367s pass; pinned unmodified Colleaf validator accepts both generated and edited snapshots/envelopes (source hash asserted)",
+      "result": "All source/stream row/cell counts/exclusive extents, combined merges, nested skeTables, outer432px width, following-cell x240px, visible full-width default percentages, legacy unit0 geometry, TextX C->Z edit/save pass; Go re-import0.367s pass; pinned unmodified retired host validator accepts both generated and edited snapshots/envelopes (source hash asserted)",
       "corrections": "Omitting vertical continuation shifted following cell to x0. Native zero auto widths yielded invisible geometry, fixed with real percentages. Legacy POINT0 numeric table dimensions behaved as pixels. Earlier plain JSON of skeTables Map hid its actual entries. Initial QA treated table metadata as AST; corrected to parseDataStreamToTree tree cache. No source/oracle changed to obtain a pass.",
       "limits": "Headless SDK table geometry/mutation qualification only. Zero font metrics without canvas; browser/font/visual layout not qualified."
     },
@@ -5572,20 +5572,20 @@
       "vet": "pass",
       "modules": "all modules verified; go.mod/go.sum unchanged",
       "cgo_disabled": "native focus0.375s pass; host CLI build/--help execution and Linux amd64/arm64 cross-builds pass",
-      "malformed_input_fuzz": "FuzzColleafTables14815 executions/11.440s pass, two workers; corrected an initial misspelled pattern that ran no fuzz tests",
+      "malformed_input_fuzz": "FuzzVDOCSTables14815 executions/11.440s pass, two workers; corrected an initial misspelled pattern that ran no fuzz tests",
       "diff_check": "pass before commit"
     },
     "runtime": "Pure Go; no production dependency, public API/CLI or app/backend/authorization/quota change. SDK is QA only; no implementation code copied/translated.",
     "remaining": "Lists, notes, embedded drawings/assets/resources, section/story/settings/provenance/nonvisual intent, full layout-context relative sizing/ragged missing slots and strict envelope/JSON/surrogate mapping; broad native editing/rendering qualification; broader untagged PDF recovery and final consistency/resource/API/acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_TABLE_QA=output/colleaf-qa/tables.json GOWORK=off go test -run TestColleafMergedNestedTableSFRoundTrip -count=1 .",
-      "node scripts/verify_colleaf_tables.cjs",
-      "MANYDOC_COLLEAF_TABLE_EDIT=output/colleaf-qa/tables-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafTables$\" -fuzztime=10s -parallel=2 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_TABLE_QA=output/vdocs-qa/tables.json GOWORK=off go test -run TestVDOCSMergedNestedTableSFRoundTrip -count=1 .",
+      "node scripts/verify_vdocs_tables.cjs",
+      "MANYDOC_VDOCS_TABLE_EDIT=output/vdocs-qa/tables-edited.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzVDOCSTables$\" -fuzztime=10s -parallel=2 ."
     ]
   },
-  "colleaf_note_graph_2026_11_24": {
+  "vdocs_note_graph_2026_11_24": {
     "scope": "Private real native foot/endnote graph composition through SF, building on shared text/table mappings. No public native format/API/CLI; rich adapter incomplete.",
     "semantics": [
       "UTF-16 styled note atoms, foot/endnote kind, repeated references and table-cell citations",
@@ -5597,9 +5597,9 @@
     ],
     "independent_reader": {
       "packages": "@univerjs/core and @univerjs/engine-render1.0.4, optional ignored QA only",
-      "script": "scripts/verify_colleaf_notes.cjs",
+      "script": "scripts/verify_vdocs_notes.cjs",
       "script_sha256": "4b2a6c51ad0a3fe87471eda775a99252c4f6a20b1ace2620b5723506a9984afa",
-      "result": "Hash-checked unmodified pinned Colleaf validator accepts generated/saved envelopes; actual view reads four references/three definitions, citation style/font points/lang and merged note table; TextX Foot body->Edit body plus custom \u00a7->\u2020 save re-imports in Go0.348s",
+      "result": "Hash-checked unmodified pinned retired host validator accepts generated/saved envelopes; actual view reads four references/three definitions, citation style/font points/lang and merged note table; TextX Foot body->Edit body plus custom \u00a7->\u2020 save re-imports in Go0.348s",
       "correction": "Initial edit assertion incorrectly expected one original text run after TextX insertion. Correct check retains native interval boundaries and compares combined edited text plus unchanged graph/marks; no source/oracle changed.",
       "limits": "Bare headless skeleton probe produced no generated note-placement/marker glyph evidence. Actual browser/plugin/font/layout behavior and unknown-resource persistence through full editor save remain unqualified."
     },
@@ -5609,20 +5609,20 @@
       "vet": "pass",
       "modules": "all modules verified; no go.mod/go.sum change",
       "cgo_disabled": "native focus0.384s pass, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass",
-      "malformed_input_fuzz": "FuzzColleafNotes840 executions/11.806s, two workers; pass",
+      "malformed_input_fuzz": "FuzzVDOCSNotes840 executions/11.806s, two workers; pass",
       "diff_check": "pass before commit"
     },
     "runtime": "Pure Go with no new dependencies, CGO, required external executables/services, uploads or application/authorization/quota changes. Native SDK references are QA only; no implementation code copied/translated.",
     "remaining": "Independent/rich citation/body marks and styles, native explicit empty custom marks, marker default inheritance, navigation/inferred/provenance intent, note numbering/placement settings, lists/drawings/assets; section/story settings and strict envelope/JSON/surrogate handling; actual browser native rich editing/rendering; broader untagged PDF recovery and final consistency/resource/API/acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_NOTE_QA=output/colleaf-qa/notes.json GOWORK=off go test -run TestColleafNoteIdentityReferenceBodyAndSFRoundTrip -count=1 .",
-      "node scripts/verify_colleaf_notes.cjs",
-      "MANYDOC_COLLEAF_NOTE_EDIT=output/colleaf-qa/notes-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafNotes$\" -fuzztime=10s -parallel=2 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_NOTE_QA=output/vdocs-qa/notes.json GOWORK=off go test -run TestVDOCSNoteIdentityReferenceBodyAndSFRoundTrip -count=1 .",
+      "node scripts/verify_vdocs_notes.cjs",
+      "MANYDOC_VDOCS_NOTE_EDIT=output/vdocs-qa/notes-edited.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzVDOCSNotes$\" -fuzztime=10s -parallel=2 ."
     ]
   },
-  "colleaf_list_ownership_2026_11_24": {
+  "vdocs_list_ownership_2026_11_24": {
     "scope": "Private real native list sources/bullets/counters and checked list/item ownership through SF, main/note/cell bodies. No public native adapter API/CLI; full goal incomplete.",
     "semantics": [
       "Native zero-based starts map to actual SF starts; nested/shared and independent counter families",
@@ -5635,9 +5635,9 @@
     ],
     "independent_reader": {
       "packages": "Pinned @univerjs/core and @univerjs/engine-render1.0.4 optional ignored QA only",
-      "script": "scripts/verify_colleaf_lists.cjs",
+      "script": "scripts/verify_vdocs_lists.cjs",
       "script_sha256": "71a7a7218be5e1f9c44a61efb20950bed24af1cf848998bd77636453a8a37303",
-      "result": "Unmodified hash-checked Colleaf app validator accepts generated/saved envelopes. Actual renderer LIST glyphs match Appendix AA./BB., AA.iv)/AA.v), independent8.1, restarted2./3., bullet and decimal0., note0./1. TextX Parent->Edited save preserves paragraph IDs/resources/markers and Go continuation/table ownership re-import0.369s passes.; source legal flag edits render27.4)/27.5) as expected",
+      "result": "Unmodified hash-checked VDOCS app validator accepts generated/saved envelopes. Actual renderer LIST glyphs match Appendix AA./BB., AA.iv)/AA.v), independent8.1, restarted2./3., bullet and decimal0., note0./1. TextX Parent->Edited save preserves paragraph IDs/resources/markers and Go continuation/table ownership re-import0.369s passes.; source legal flag edits render27.4)/27.5) as expected",
       "investigation": "Counter history alone omits old nested levels, so actual glyphs establish marker evidence. Native %%1. gave11. rather than SF %1.; %9 at level0 throws. Native decimalZero0 gave00 and letter/Roman0 empty, unlike SF0. Guards/projected inactive placeholders prevent known corrupt/crashing output.",
       "limits": "Headless glyph/text/record/mutation qualification; browser/font/visual layout and unknown-resource persistence through full actual editor save remain unqualified."
     },
@@ -5647,21 +5647,21 @@
       "vet": "pass after final changes",
       "modules": "all modules verified; unchanged go.mod/go.sum",
       "cgo_disabled": "native focus0.405s pass, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass",
-      "malformed_input_fuzz": "Final FuzzColleafLists7628 executions/11.439s, two workers, pass. Earlier rich-only seed campaign completed just3 executions; added independent small native seed to improve exploration. Short campaign not exhaustive.",
+      "malformed_input_fuzz": "Final FuzzVDOCSLists7628 executions/11.439s, two workers, pass. Earlier rich-only seed campaign completed just3 executions; added independent small native seed to improve exploration. Short campaign not exhaustive.",
       "diff_check": "pass before commit",
-      "native_regressions": "Fresh Go artifacts and verify_colleaf_stream/text/tables/notes/lists.cjs all pass after composition refactor; expected Node TypeScript-stripping warning"
+      "native_regressions": "Fresh Go artifacts and verify_vdocs_stream/text/tables/notes/lists.cjs all pass after composition refactor; expected Node TypeScript-stripping warning"
     },
     "runtime": "Pure Go; no new production dependencies/executables/services/CGO/uploads/application changes or authorization/quota gates. Native SDK is optional QA, not runtime; no implementation code copied/translated.",
     "remaining": "Native literal-percent/nondecimal-zero/marker typography/picture-bullet policies, rich note labels and provenance/intent, drawings/assets/resources, sections/stories/page metadata, strict envelope/JSON/surrogates; actual full native browser/edit/resource/render qualification; broader untagged PDF recovery and final consistency/resource/API/acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_LIST_QA=output/colleaf-qa/lists.json GOWORK=off go test -run TestColleafRichListOwnershipNumberingAndSF -count=1 .",
-      "node scripts/verify_colleaf_lists.cjs",
-      "MANYDOC_COLLEAF_LIST_EDIT=output/colleaf-qa/lists-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafLists$\" -fuzztime=10s -parallel=2 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_LIST_QA=output/vdocs-qa/lists.json GOWORK=off go test -run TestVDOCSRichListOwnershipNumberingAndSF -count=1 .",
+      "node scripts/verify_vdocs_lists.cjs",
+      "MANYDOC_VDOCS_LIST_EDIT=output/vdocs-qa/lists-edited.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzVDOCSLists$\" -fuzztime=10s -parallel=2 ."
     ]
   },
-  "colleaf_embedded_images_2026_11_24": {
+  "vdocs_embedded_images_2026_11_24": {
     "scope": "Private embedded PNG/JPEG drawing transport through SF across main/cell/list/note stories; native adapter and full goal incomplete, no public native API/CLI.",
     "semantics": [
       "Real embedded data URI source, drawing atom/source/order, alt text and pixel frame relationships",
@@ -5678,10 +5678,10 @@
       "image_types_sha256": "a28b45bd2a56bea07f6d405133c60e4038eb9112b90ffb8308795b5a5c0da62e",
       "doc_drawing_types_sha256": "148f3a85ee5fee674f3afd18fa4346ec80972283aa2b422b3a856ae4392aab70",
       "ignored_qa_lock_sha256": "91d9e723708bced559d3cd95aec34cdce3c301b65513cc675739221e42d4698f",
-      "script": "scripts/verify_colleaf_images.cjs",
+      "script": "scripts/verify_vdocs_images.cjs",
       "script_sha256": "be726b8f6b12f1a0ebcd51cde32f7b8f92c8cbee864a270b343740cfd7da29cf",
       "result": "Pinned hash-checked app validator accepts generated/edited envelopes; actual collectDocDrawings/findDocDrawing identifies all5 image occurrences and correct note scope; actual skeleton boxes match main/cell/list and isolated-note frames;64x32px resize/description edit saves and Go re-imports48x24pt/Resized PNG with stale-intent diagnostic0.369s",
-      "pixels": "scripts/verify_colleaf_images.py independently uses Pillow to decode3 PNG occurrences with exact32x16 size/RGBA samples (including alpha128) and2 byte-identical original JPEG occurrences; pass",
+      "pixels": "scripts/verify_vdocs_images.py independently uses Pillow to decode3 PNG occurrences with exact32x16 size/RGBA samples (including alpha128) and2 byte-identical original JPEG occurrences; pass",
       "pixels_script_sha256": "05c9d65c65db1fc4e832165029c9fe3affdad7a3fb03f59985b6f96814366918",
       "original_jpeg_sha256": "fe9737d0cb4f905917054c7938fc3ccf4b83f0623df9cd5d62192dbaae26b510",
       "limits": "No browser bitmap painting/full editor unknown-resource persistence or contextual page/cell/note fitting qualification; transforms/floating/linked/other appearance and running stories still need mappings."
@@ -5692,24 +5692,24 @@
       "vet": "pass after final changes",
       "modules": "all modules verified; go.mod/go.sum unchanged",
       "cgo_disabled": "final native focus0.441s pass, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass (cross-builds not execution)",
-      "malformed_input_fuzz": "Final FuzzColleafImages120194 executions/11.450s, two workers; pass after last source/test changes. Earlier image campaign7600 executions passed; short campaigns not exhaustive.",
+      "malformed_input_fuzz": "Final FuzzVDOCSImages120194 executions/11.450s, two workers; pass after last source/test changes. Earlier image campaign7600 executions passed; short campaigns not exhaustive.",
       "diff_check": "pass before commit",
       "native_regressions": "Fresh Go artifacts0.376s and all six pinned stream/text/tables/notes/lists/images reader/edit/save scripts plus independent Pillow pass after final composition changes; expected Node experimental TypeScript-stripping warning"
     },
     "runtime": "Pure Go, no new production dependency/executable/service/CGO/upload/app/backend/authorization/quota gate. New Node drawing packages are optional QA only; no implementation code copied/translated. Existing original source/oracle files unchanged.",
     "remaining": "Native contextual fitting/page/section/story settings, actual browser paint/editor save and resource persistence; rich note label/marker and list-policy/picture-bullet intent, remaining drawing appearance, strict native JSON/envelope/surrogates; broader untagged PDF recovery and final source/resource/API/acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_IMAGE_QA=output/colleaf-qa/images.json GOWORK=off go test -run TestColleafEmbeddedImagesAllStoriesAndSF -count=1 .",
-      "node scripts/verify_colleaf_images.cjs",
-      "output/qa-venv/bin/python scripts/verify_colleaf_images.py",
-      "MANYDOC_COLLEAF_IMAGE_EDIT=output/colleaf-qa/images-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafImages$\" -fuzztime=10s -parallel=2 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_IMAGE_QA=output/vdocs-qa/images.json GOWORK=off go test -run TestVDOCSEmbeddedImagesAllStoriesAndSF -count=1 .",
+      "node scripts/verify_vdocs_images.cjs",
+      "output/qa-venv/bin/python scripts/verify_vdocs_images.py",
+      "MANYDOC_VDOCS_IMAGE_EDIT=output/vdocs-qa/images-edited.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzVDOCSImages$\" -fuzztime=10s -parallel=2 ."
     ]
   },
-  "colleaf_actual_facade_persistence_2026_11_24": {
-    "scope": "Correct private native intent persistence through the actual FDocument.save API used by pinned Colleaf; no public native API/CLI, full goal incomplete.",
-    "discovery": "Actual FUniver.createDocument plus Docs/Drawing model plugins and FDocument.save dropped all unregistered manydoc.* resources, retaining only registered plugin resources. Earlier DocumentDataModel.getSnapshot checks did not establish facade persistence. scripts/verify_colleaf_facade.cjs reproduces the old failure as a regression.",
+  "vdocs_actual_facade_persistence_2026_11_24": {
+    "scope": "Correct private native intent persistence through the actual FDocument.save API used by pinned VDOCS; no public native API/CLI, full goal incomplete.",
+    "discovery": "Actual FUniver.createDocument plus Docs/Drawing model plugins and FDocument.save dropped all unregistered manydoc.* resources, retaining only registered plugin resources. Earlier DocumentDataModel.getSnapshot checks did not establish facade persistence. scripts/verify_vdocs_facade.cjs reproduces the old failure as a regression.",
     "implementation": [
       "Version1 manydoc.native-intent CUSTOM5 annotation on terminal LF carries only existing checked identity/list ownership/image geometry records, not visible text/assets/whole SF",
       "Validate scalar bounds/profile/version/known record names and duplicates, preserve caller input and legacy direct-resource read compatibility",
@@ -5719,12 +5719,12 @@
     ],
     "independent_facade": {
       "packages": "Pinned actual Univer/Docs/Drawing/DocsDrawing1.0.4 and core/docs facades, optional ignored Node QA only",
-      "script": "scripts/verify_colleaf_facade.cjs",
+      "script": "scripts/verify_vdocs_facade.cjs",
       "script_sha256": "bcb0062d2c39a98ad956c394e1e9c2405cc7875b31305e700a1af63779a4363a",
       "result": "Notes/lists/images survive actual createDocument/save/fresh reopen/save with native carrier unchanged and all mapped model semantics equal on Go re-import. TextX prepended X survives facade save/reopen and Go graph/ownership checks; terminal carrier shifts correctly. Pinned hash-checked app validator accepts all saved envelopes.",
       "changed_reader_scripts": {
-        "verify_colleaf_notes.cjs": "f66a225f9be1261a6fa31a334c1756b3ed767fe3d4cd32ab02a0e06e670b77c2",
-        "verify_colleaf_lists.cjs": "9fd98c1e3f5e3872fbc91c51442adb28164086633beb86016eb914f937251594"
+        "verify_vdocs_notes.cjs": "f66a225f9be1261a6fa31a334c1756b3ed767fe3d4cd32ab02a0e06e670b77c2",
+        "verify_vdocs_lists.cjs": "9fd98c1e3f5e3872fbc91c51442adb28164086633beb86016eb914f937251594"
       },
       "regressions": "Fresh artifacts and all7 stream/text/table/note/list/image/facade Node scripts plus Pillow passed; final combined Go re-import0.414s passes. Earlier script hashes remain historical commit-specific evidence, not current checksums.",
       "limits": "Actual facade API save/reopen is now qualified; full browser/preset rendering and UI mutation behavior are not. Additional FDocumentImage.setSize probe needs render-manager service; no mock substituted or mutation/browser qualification claimed."
@@ -5735,20 +5735,20 @@
       "vet": "pass",
       "modules": "all modules verified; go.mod/go.sum unchanged",
       "cgo_disabled": "native focus0.719s pass, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass",
-      "malformed_input_fuzz": "FuzzColleafIntent25364 executions/11.450s, two workers; pass; short campaign not exhaustive",
+      "malformed_input_fuzz": "FuzzVDOCSIntent25364 executions/11.450s, two workers; pass; short campaign not exhaustive",
       "diff_check": "pass before commit"
     },
     "runtime": "Pure Go/std library additions only. No production dependency, required tool/service/CGO/upload/app/backend modification or permission/quota gate. Node SDK/facades remain optional QA.",
     "remaining": "Native page/section/header/footer metadata and contextual image fitting; rich note/marker/list/appearance intent, strict native envelope/JSON/surrogates; full-preset/browser rendering/UI mutations; broader untagged PDF recovery and final source/resource/API/acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_FACADE_QA=output/colleaf-qa/facade-cases.json GOWORK=off go test -run TestColleafFacadeSavedIntentSemantics -count=1 .",
-      "node scripts/verify_colleaf_facade.cjs",
-      "MANYDOC_COLLEAF_FACADE_SAVED=output/colleaf-qa/facade-saved.json MANYDOC_COLLEAF_FACADE_EDITED=output/colleaf-qa/facade-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzColleafIntent$\" -fuzztime=10s -parallel=2 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_FACADE_QA=output/vdocs-qa/facade-cases.json GOWORK=off go test -run TestVDOCSFacadeSavedIntentSemantics -count=1 .",
+      "node scripts/verify_vdocs_facade.cjs",
+      "MANYDOC_VDOCS_FACADE_SAVED=output/vdocs-qa/facade-saved.json MANYDOC_VDOCS_FACADE_EDITED=output/vdocs-qa/facade-edited.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "GOWORK=off go test -run \"^$\" -fuzz \"^FuzzVDOCSIntent$\" -fuzztime=10s -parallel=2 ."
     ]
   },
-  "colleaf_sections_and_running_stories_2026_11_24": {
+  "vdocs_sections_and_running_stories_2026_11_24": {
     "scope": "Private native document/page/section/running-story composition through shared SF; full adapter/goal remain incomplete; no public native API/CLI.",
     "implementation": [
       "One UTF-16 main body across sections; separate running/note body indexes and relationship-selected catalogs",
@@ -5759,8 +5759,8 @@
       "Reject invalid/missing story references, local/global visible source orphans and unfinished contradictory settings; diagnose unmapped layout properties"
     ],
     "independent_reader": {
-      "packages": "Pinned Univer1.0.4, hash-pinned unmodified Colleaf app validator; ignored optional Node QA only",
-      "script": "scripts/verify_colleaf_sections.cjs",
+      "packages": "Pinned Univer1.0.4, hash-pinned unmodified VDOCS app validator; ignored optional Node QA only",
+      "script": "scripts/verify_vdocs_sections.cjs",
       "script_sha256": "b92f57874a1a627c5357a8621f9aa3da82d76343b1f23c5429a863815601eb65",
       "result": "Seven-page skeleton validates odd-page blank insertion, page sizes/margins, exact first/even/default/inherited/empty header/footer IDs, merged header table, bullet glyph and32x16px image. Actual FDocument.save/fresh reopen/save plus Go import preserves full model semantics.",
       "regressions": "Fresh Go artifacts and all8 stream/text/table/note/list/image/facade/section Node scripts plus independent Pillow passed. Final combined Go edited/saved re-import0.461s passes.",
@@ -5771,21 +5771,21 @@
       "vet": "Final pass",
       "modules": "all modules verified; go.mod/go.sum unchanged",
       "cgo_disabled": "Final native focus0.956s pass, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass (cross-builds not execution)",
-      "malformed_input_fuzz": "Final FuzzColleafDocument2854 executions/11.451s, two workers; pass. Earlier campaign20360 executions passed; short campaigns not exhaustive.",
+      "malformed_input_fuzz": "Final FuzzVDOCSDocument2854 executions/11.451s, two workers; pass. Earlier campaign20360 executions passed; short campaigns not exhaustive.",
       "full_race": "Final go test -race ./... pass after final source/test changes; library174.270s/CLI1.773s/internal14.209s",
       "diff_check": "pass before commit"
     },
     "runtime": "Pure Go; no production dependency, executable/service/CGO/upload, application/backend modification or permission/quota gate. Original corpus sources/oracles unchanged.",
     "remaining": "Contextual image fitting, advanced note/marker/list/appearance/provenance policies, strict native JSON/envelope/surrogates and public adapter; actual full-preset/browser rendering and UI mutations; broader untagged PDF note recovery and final source/resource/API/acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_SECTION_QA=output/colleaf-qa/sections.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "node scripts/verify_colleaf_sections.cjs",
-      "MANYDOC_COLLEAF_SECTION_SAVED=output/colleaf-qa/sections-saved.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "GOWORK=off go test -run '^$' -fuzz '^FuzzColleafDocument$' -fuzztime=10s -parallel=2 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_SECTION_QA=output/vdocs-qa/sections.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "node scripts/verify_vdocs_sections.cjs",
+      "MANYDOC_VDOCS_SECTION_SAVED=output/vdocs-qa/sections-saved.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzVDOCSDocument$' -fuzztime=10s -parallel=2 ."
     ]
   },
-  "colleaf_frame_bounds_and_real_note_placement_2026_11_24": {
+  "vdocs_frame_bounds_and_real_note_placement_2026_11_24": {
     "scope": "Private native individual image frame bounds plus actual note range/glyph/body placement correction. Native public API/CLI and full goal remain incomplete.",
     "discovery": [
       "Actual native renderer kept a1000x2000px frame on320px body/600px page; source box equality did not establish fitting",
@@ -5798,10 +5798,10 @@
       "Real native customMark stabilizes shared automatic SF decimal labels across repeated references and native Roman endnote defaults; checked autoLabel intent restores omission only when actual mark/current citation order agree. Complete-document catalog includes notes first cited in later sections."
     ],
     "independent_reader": {
-      "packages": "Pinned actual Univer1.0.4 and hash-pinned unmodified Colleaf validator; optional ignored Node QA only",
+      "packages": "Pinned actual Univer1.0.4 and hash-pinned unmodified retired host validator; optional ignored Node QA only",
       "scripts": {
-        "scripts/verify_colleaf_notes.cjs": "6d48619a30200d9b2cb5b432f504f01aca29c6c6f9b2a0595be741af2d0e1a5f",
-        "scripts/verify_colleaf_image_fit.cjs": "9a2483b3bd8499365c5e54f934856da0a7e9631313834745588a3131cd9507e3"
+        "scripts/verify_vdocs_notes.cjs": "6d48619a30200d9b2cb5b432f504f01aca29c6c6f9b2a0595be741af2d0e1a5f",
+        "scripts/verify_vdocs_image_fit.cjs": "9a2483b3bd8499365c5e54f934856da0a7e9631313834745588a3131cd9507e3"
       },
       "results": [
         "Actual note skeleton citation glyphs are shared footnote1/endnote1/repeated footnote1/custom section mark, and all three note bodies are placed including a cell citation. TextX note edits/save and Go semantic re-import pass.",
@@ -5816,21 +5816,21 @@
       "vet": "Final pass",
       "modules": "all modules verified; production dependencies unchanged",
       "cgo_disabled": "Final focused native tests0.518s, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass (cross-builds not execution)",
-      "malformed_input_fuzz": "Final FuzzColleafDocument15990 executions/11.469s and FuzzColleafNotes737 executions/11.864s pass, each two workers; short campaigns not exhaustive",
+      "malformed_input_fuzz": "Final FuzzVDOCSDocument15990 executions/11.469s and FuzzVDOCSNotes737 executions/11.864s pass, each two workers; short campaigns not exhaustive",
       "full_race": "Final go test -race ./... pass after last production/test changes; library168.843s/CLI2.995s/internal15.225s",
       "diff_check": "pass before commit"
     },
     "runtime": "Pure Go/std library changes and shared existing helpers only. No required tool/service/CGO/upload/application/backend changes or permission/quota gates. Original source/oracle files unchanged.",
     "remaining": "Foreign note numbering/settings, rich citation/body-marker/provenance intent, remaining list/appearance and strict native envelope/JSON/surrogates; native public adapter; browser/full-preset paint/text/total-story fit qualification; broader untagged PDF recovery and final source/resource/API/acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_NOTE_QA=output/colleaf-qa/notes.json MANYDOC_COLLEAF_FIT_QA=output/colleaf-qa/fitted-images.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "node scripts/verify_colleaf_notes.cjs",
-      "node scripts/verify_colleaf_image_fit.cjs",
-      "MANYDOC_COLLEAF_FIT_SAVED=output/colleaf-qa/fitted-images-saved.json GOWORK=off go test -run TestColleaf -count=1 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_NOTE_QA=output/vdocs-qa/notes.json MANYDOC_VDOCS_FIT_QA=output/vdocs-qa/fitted-images.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "node scripts/verify_vdocs_notes.cjs",
+      "node scripts/verify_vdocs_image_fit.cjs",
+      "MANYDOC_VDOCS_FIT_SAVED=output/vdocs-qa/fitted-images-saved.json GOWORK=off go test -run TestVDOCS -count=1 ."
     ]
   },
-  "colleaf_foreign_note_numbering_2026_11_24": {
+  "vdocs_foreign_note_numbering_2026_11_24": {
     "scope": "Private native foreign automatic note-numbering import through shared SF, including current literal citation/body marks. Full adapter/public native API/CLI/goal remain incomplete.",
     "implementation": [
       "Root and root-section native settings resolved with independent per-kind counters, starts/continuous/eachSect behavior and custom marks not advancing counters",
@@ -5842,13 +5842,13 @@
     ],
     "independent": {
       "scripts": {
-        "scripts/verify_colleaf_note_numbering.cjs": "a0bbbc27500ef3192b4711d33347e16d9d3d8231a06ad04002e6bddb3af07b63",
-        "scripts/verify_colleaf_note_outputs.py": "ef8142b0fec5f1c018cdc4dfcd9ac1c75c8fc057ab92220b73a6d4c630a3e812"
+        "scripts/verify_vdocs_note_numbering.cjs": "a0bbbc27500ef3192b4711d33347e16d9d3d8231a06ad04002e6bddb3af07b63",
+        "scripts/verify_vdocs_note_outputs.py": "ef8142b0fec5f1c018cdc4dfcd9ac1c75c8fc057ab92220b73a6d4c630a3e812"
       },
       "native": "Pinned actual Univer1.0.4 skeleton plus hash-pinned unmodified app validator confirms ten citations III/AA/IV/V/section-sign/VI/00/BB/01/empty and eight placed note bodies. Shared body mark01; fifteen format outcomes including zero and symbol boundaries, named ideographEnclosedCircle actual parenthesized output. Native constructor distances30px. Real FDocument.save/fresh reopen/save and exact Go SF semantics pass.",
       "outputs": "Shared SF to DOCX/PDF with explicit AllowLossy, and actual regular/bold DejaVu faces for unchanged emoji. python-docx/XML verifies eight bodies and variant/markerless anchor/reference graph. pypdf/MuPDF verifies nine visible citation/link boxes, shared body destinations, distinct endnote targets, Unicode and markerless body. Go verifies all ten Word citation labels.",
       "regressions": "Fresh artifacts, all10 stream/text/tables/notes/lists/images/facade/sections/image_fit/note_numbering scripts, Pillow and note-output Python checks pass; final combined edited/saved Go re-import0.480s passes.",
-      "visual": "Four final native PDF pages rendered using Poppler100DPI and each inspected: legible marks/bodies, no clipping/overlap/missing glyphs. Sparse synthetic targeted case; no Word/Colleaf browser/full-preset fidelity claim.",
+      "visual": "Four final native PDF pages rendered using Poppler100DPI and each inspected: legible marks/bodies, no clipping/overlap/missing glyphs. Sparse synthetic targeted case; no Word/VDOCS browser/full-preset fidelity claim.",
       "visual_pdf_sha256": "a11c9c4552fd7b8c8c3cc1c40814e5d441b1e7c59b5ff776e60937638a851d80",
       "visual_png_sha256": [
         "73e4c6688204934f264dadeadca20a082242a39be2f749c8c31cdea58d8d72a8",
@@ -5862,21 +5862,21 @@
       "vet": "pass",
       "modules": "all modules verified; production dependencies unchanged",
       "cgo_disabled": "Native focused tests0.519s, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass (cross-builds not execution)",
-      "fuzz": "FuzzColleafDocument22371 executions/11.452s and FuzzColleafNotes2551 executions/11.855s pass, each two workers; short campaigns not exhaustive",
+      "fuzz": "FuzzVDOCSDocument22371 executions/11.452s and FuzzVDOCSNotes2551 executions/11.855s pass, each two workers; short campaigns not exhaustive",
       "full_race": "Final go test -race ./... pass; library167.481s/CLI2.265s/internal14.193s",
       "diff_check": "pass before commit"
     },
     "runtime": "Pure-Go standard-library mapping/shared existing number helpers only. Node/Python/Poppler remain optional ignored QA; no required executable/service/CGO/customer upload/app/backend modification. Original corpus/oracles unchanged.",
     "remaining": "Native literal/rich citation and independent body-mark output; remaining formats/per-page/decorated policies and list/appearance/provenance intent; strict native envelope/JSON/surrogates and public API/CLI; full browser/preset text/paint/total-story layout; broader untagged PDF recovery and final source/resource/API/acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_NUMBER_QA=output/colleaf-qa/note-numbering.json MANYDOC_COLLEAF_NUMBER_OUTPUT=output/colleaf-qa/note-numbering GOWORK=off go test -run TestColleaf -count=1 .",
-      "node scripts/verify_colleaf_note_numbering.cjs",
-      "MANYDOC_COLLEAF_NUMBER_SAVED=output/colleaf-qa/note-numbering-saved.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "output/qa-venv/bin/python scripts/verify_colleaf_note_outputs.py"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_NUMBER_QA=output/vdocs-qa/note-numbering.json MANYDOC_VDOCS_NUMBER_OUTPUT=output/vdocs-qa/note-numbering GOWORK=off go test -run TestVDOCS -count=1 .",
+      "node scripts/verify_vdocs_note_numbering.cjs",
+      "MANYDOC_VDOCS_NUMBER_SAVED=output/vdocs-qa/note-numbering-saved.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "output/qa-venv/bin/python scripts/verify_vdocs_note_outputs.py"
     ]
   },
-  "colleaf_editable_body_marks_2026_11_24": {
+  "vdocs_editable_body_marks_2026_11_24": {
     "scope": "Private native independent literal/rich/styled body-mark output and exact semantic recovery. Per-citation rich output/native public API/CLI/full goal remain incomplete.",
     "implementation": [
       "Real editable runs/styles/hyperlinks before owned tab, inline in first paragraph/heading or separate before nonparagraph/empty content. showBodyReference=false prevents duplicate generated markers.",
@@ -5887,7 +5887,7 @@
     ],
     "independent_reader": {
       "packages": "Pinned actual Univer1.0.4 and hash-pinned unmodified app validator, optional ignored Node QA",
-      "script": "scripts/verify_colleaf_body_marks.cjs",
+      "script": "scripts/verify_vdocs_body_marks.cjs",
       "script_sha256": "9c2945fb0920a1e0873084ce2573f46f74a6ddd4151fafc2a2b75027263adb98",
       "results": [
         "Six native citations1..6 and six actual placed bodies; independent9, rich *2 with red12pt bold/8pt italic link, green10pt bold/underline default3, table-first9, otherwise-empty9, empty styled intent",
@@ -5903,20 +5903,20 @@
       "vet": "pass",
       "modules": "all modules verified; production dependencies unchanged",
       "cgo_disabled": "Focused native tests0.522s, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass (cross-builds not execution)",
-      "fuzz": "FuzzColleafBodyMarks1000 executions/0.618s pass after an initial short9-execution/11.841s pass; FuzzColleafDocument51866 executions/11.479s pass. Two workers each; short campaigns not exhaustive.",
+      "fuzz": "FuzzVDOCSBodyMarks1000 executions/0.618s pass after an initial short9-execution/11.841s pass; FuzzVDOCSDocument51866 executions/11.479s pass. Two workers each; short campaigns not exhaustive.",
       "diff_check": "pass before commit"
     },
     "runtime": "Pure Go/std library and shared existing workers only; no new dependency, required tool/service/CGO/customer upload/application/backend edit or authorization/quota gate. Original source/oracle files unchanged.",
     "remaining": "Native literal/rich per-citation output and broader nonvisual/provenance/list/appearance/navigation intent; remaining per-page/decorated policies and strict envelope/JSON/surrogates/public API/CLI; full browser/preset qualification, broader untagged PDF recovery and final source/resource/API/acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_BODY_MARK_QA=output/colleaf-qa/body-marks.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "node scripts/verify_colleaf_body_marks.cjs",
-      "MANYDOC_COLLEAF_BODY_MARK_SAVED=output/colleaf-qa/body-marks-saved.json MANYDOC_COLLEAF_BODY_MARK_EDITED=output/colleaf-qa/body-marks-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "GOWORK=off go test -run '^$' -fuzz '^FuzzColleafBodyMarks$' -fuzztime=1000x -parallel=2 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_BODY_MARK_QA=output/vdocs-qa/body-marks.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "node scripts/verify_vdocs_body_marks.cjs",
+      "MANYDOC_VDOCS_BODY_MARK_SAVED=output/vdocs-qa/body-marks-saved.json MANYDOC_VDOCS_BODY_MARK_EDITED=output/vdocs-qa/body-marks-edited.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzVDOCSBodyMarks$' -fuzztime=1000x -parallel=2 ."
     ]
   },
-  "colleaf_per_citation_marks_2026_11_24": {
+  "vdocs_per_citation_marks_2026_11_24": {
     "scope": "Private native literal/rich/default/empty per-citation output and inferred flag recovery; full adapter/public API/CLI/goal remain incomplete.",
     "implementation": [
       "Real markerless U+FFFC note anchors, editable superscript label runs and U+2060 delimiters preserve different labels while sharing one note definition/body",
@@ -5927,7 +5927,7 @@
     ],
     "independent_reader": {
       "packages": "Pinned actual Univer1.0.4 and hash-pinned unmodified application validator; optional ignored Node QA only",
-      "script": "scripts/verify_colleaf_citations.cjs",
+      "script": "scripts/verify_vdocs_citations.cjs",
       "script_sha256": "ceb84815a99fe5adf11f42f37fb0ca5f97d95c52d1e13c83d779bcaea0c1359b",
       "results": [
         "Seven real markerless note anchors and visible default1/literalII/rich*A/empty/table-rich*A/list-II/end-default1 labels across sections/cells/lists; red12pt bold and green8pt italic superscript glyph fields, two placed note bodies with real9/1 body marks",
@@ -5942,32 +5942,32 @@
       "vet": "pass",
       "modules": "all modules verified; production dependencies unchanged",
       "cgo_disabled": "Native focused tests0.925s, host CLI build/--help execution and Linux amd64/arm64 cross-builds pass (cross-builds not execution)",
-      "fuzz": "FuzzColleafCitations1000 executions/0.728s and FuzzColleafDocument50749 executions/11.883s pass, two workers each; short campaigns not exhaustive",
+      "fuzz": "FuzzVDOCSCitations1000 executions/0.728s and FuzzVDOCSDocument50749 executions/11.883s pass, two workers each; short campaigns not exhaustive",
       "full_race": "go test -race ./... pass after final source/test changes; library167.692s/CLI2.133s/internal13.776s",
       "diff_check": "pass before commit"
     },
     "runtime": "Pure Go/std library and shared existing workers only; no new production dependency, external runtime tool/service/CGO/upload/app/backend/authorization/quota gate. Original corpus/oracle files unchanged.",
     "remaining": "Native list/appearance/navigation/nonvisual/provenance intent and remaining per-page/decorated policies, strict envelope/JSON/surrogates and public API/CLI; actual browser/preset qualification; broader untagged PDF recovery and final source/resource/API/acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_CITATION_QA=output/colleaf-qa/citations.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "node scripts/verify_colleaf_citations.cjs",
-      "MANYDOC_COLLEAF_CITATION_SAVED=output/colleaf-qa/citations-saved.json MANYDOC_COLLEAF_CITATION_EDITED=output/colleaf-qa/citations-edited.json GOWORK=off go test -run TestColleaf -count=1 .",
-      "GOWORK=off go test -run '^$' -fuzz '^FuzzColleafCitations$' -fuzztime=1000x -parallel=2 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_CITATION_QA=output/vdocs-qa/citations.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "node scripts/verify_vdocs_citations.cjs",
+      "MANYDOC_VDOCS_CITATION_SAVED=output/vdocs-qa/citations-saved.json MANYDOC_VDOCS_CITATION_EDITED=output/vdocs-qa/citations-edited.json GOWORK=off go test -run TestVDOCS -count=1 .",
+      "GOWORK=off go test -run '^$' -fuzz '^FuzzVDOCSCitations$' -fuzztime=1000x -parallel=2 ."
     ]
   },
-  "colleaf_native_envelope_2026_11_24": {
+  "vdocs_native_envelope_2026_11_24": {
     "scope": "Private exact v3 .vdocs codec through existing rich native projection and shared SF. Public native API/CLI and complete goal remain unfinished.",
     "implementation": [
-      "Exact vibedada-document/version3/univer/1.0.4 identity, required snapshot id/textRuns/documentStyle, typed unknown-field rejection; bare snapshots/renamed SF reject.",
+      "Exact retired-application-envelope/version3/univer/1.0.4 identity, required snapshot id/textRuns/documentStyle, typed unknown-field rejection; bare snapshots/renamed SF reject.",
       "Original-byte JSON scanner rejects decoded duplicate keys, malformed UTF-8, unpaired surrogate escapes, typed record case aliases/null scalar offsets and depth over128. Valid pairs and intentional U+FFFD retain exact text.",
       "Interpreted JSON resource strings, including sparse intent carrier records, are checked before map decoding. Permission resources remain outside library admission policy.",
       "Large string values scan without copying/allocations (1MiB string regression); decoded object key sets and typed schema maps allocate. Whole-envelope buffering and broader resource auditing remain unfinished.",
       "Actual facade save adds settings:{}; documented empty/positive zoom settings accepted, view zoom and nondefault locale losses diagnosed; unknown settings reject. No application byte/image quota or permission gate introduced."
     ],
     "independent_reader": {
-      "packages": "Pinned actual Univer1.0.4 core/docs/drawing/docs-drawing facade and hash-pinned unmodified Colleaf validator; optional ignored Node QA only",
-      "script": "scripts/verify_colleaf_envelope.cjs",
+      "packages": "Pinned actual Univer1.0.4 core/docs/drawing/docs-drawing facade and hash-pinned unmodified retired host validator; optional ignored Node QA only",
+      "script": "scripts/verify_vdocs_envelope.cjs",
       "script_sha256": "390054672b9a513b1f0074c4aadf9659b408c819c5bb1da8f4aaf031da814198",
       "app_source_sha256": "c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0",
       "results": [
@@ -5991,15 +5991,15 @@
     "runtime": "Pure Go/std library additions only. No new production dependency, external runtime executable/CGO/service/upload/app/backend/authorization/quota gate. Original corpus/oracle files unchanged.",
     "remaining": "Native list/appearance/navigation/nonvisual/provenance intent and per-page/decorated note policies; public API/CLI and actual full-preset/browser qualification; broader PDF/source/resource/final acceptance audit. No external blocker.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_ENVELOPE_QA=output/colleaf-qa/sections.vdocs GOWORK=off go test -run 'TestColleafEnvelope|TestStrictJSON' -count=1 .",
-      "node scripts/verify_colleaf_envelope.cjs",
-      "MANYDOC_COLLEAF_ENVELOPE_SAVED=output/colleaf-qa/sections-saved.vdocs GOWORK=off go test -run 'TestColleafEnvelope|TestStrictJSON' -count=1 .",
-      "rg -n 'literal percent|colleafCheckZeroNumbering|OriginalTemplate' colleaf_lists.go",
-      "GOWORK=off go test -run TestColleafList -count=1 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_ENVELOPE_QA=output/vdocs-qa/sections.vdocs GOWORK=off go test -run 'TestVDOCSEnvelope|TestStrictJSON' -count=1 .",
+      "node scripts/verify_vdocs_envelope.cjs",
+      "MANYDOC_VDOCS_ENVELOPE_SAVED=output/vdocs-qa/sections-saved.vdocs GOWORK=off go test -run 'TestVDOCSEnvelope|TestStrictJSON' -count=1 .",
+      "rg -n 'literal percent|vdocsCheckZeroNumbering|OriginalTemplate' vdocs_lists.go",
+      "GOWORK=off go test -run TestVDOCSList -count=1 ."
     ]
   },
-  "colleaf_literal_list_templates_2026_11_24": {
+  "vdocs_literal_list_templates_2026_11_24": {
     "scope": "Private native dynamic literal-percent/digit-suffix template projection and current native helper/counter edit recovery through shared SF; full adapter/public API/CLI and goal incomplete.",
     "implementation": [
       "SF/OOXML single-digit placeholders compile to native whole-index placeholders. Non-active fixed-symbol entries at index9+ carry literal percent and digit suffixes; real paragraph levels stay0..8 and native counters remain automatic.",
@@ -6009,9 +6009,9 @@
       "Existing SF512-byte representation bounds template/helper expansions. No app snapshot/image quota or permission policy introduced; no per-item frozen label/whole-document cache or new SF schema."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_literal_lists.cjs",
+      "script": "scripts/verify_vdocs_literal_lists.cjs",
       "script_sha256": "df2fd309a149e85422cd138bf524ac580a4046e0b837ddc6830c14f42311f4bd",
-      "packages": "Actual pinned Univer1.0.4 core/engine-render/docs/drawing/docs-drawing and FDocument.save; unchanged hash-pinned Colleaf source validator. Optional ignored Node QA only.",
+      "packages": "Actual pinned Univer1.0.4 core/engine-render/docs/drawing/docs-drawing and FDocument.save; unchanged hash-pinned VDOCS source validator. Optional ignored Node QA only.",
       "expected_markers": [
         "%2%",
         "2/iv%0",
@@ -6052,15 +6052,15 @@
     "runtime": "Pure-Go/std-library addition and existing shared workers only. No new production dependency, CGO/external runtime executable/service/upload/app/backend/authorization/quota gate. Existing SF schema and source corpus/oracles unchanged.",
     "remaining": "Nondecimal zero/legal-decimalZero and marker appearance mapping; navigation/nonvisual/provenance intent, automatic per-page/decorated notes, public API/CLI and actual browser/preset qualification; broader PDF/source/resource/final acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_LITERAL_LIST_QA=output/colleaf-qa/literal-lists.json GOWORK=off go test -run TestColleafLiteral -count=1 .",
-      "node scripts/verify_colleaf_literal_lists.cjs",
-      "MANYDOC_COLLEAF_LITERAL_LIST_SAVED=output/colleaf-qa/literal-lists-saved.json MANYDOC_COLLEAF_LITERAL_LIST_EDITED=output/colleaf-qa/literal-lists-edited.json GOWORK=off go test -run TestColleafLiteral -count=1 .",
-      "rg -n 'colleafCheckZeroNumbering|Legal|decimalZero' colleaf_lists.go numbering.go",
-      "GOWORK=off go test -run TestColleafNondecimalZero -count=1 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_LITERAL_LIST_QA=output/vdocs-qa/literal-lists.json GOWORK=off go test -run TestVDOCSLiteral -count=1 .",
+      "node scripts/verify_vdocs_literal_lists.cjs",
+      "MANYDOC_VDOCS_LITERAL_LIST_SAVED=output/vdocs-qa/literal-lists-saved.json MANYDOC_VDOCS_LITERAL_LIST_EDITED=output/vdocs-qa/literal-lists-edited.json GOWORK=off go test -run TestVDOCSLiteral -count=1 .",
+      "rg -n 'vdocsCheckZeroNumbering|Legal|decimalZero' vdocs_lists.go numbering.go",
+      "GOWORK=off go test -run TestVDOCSNondecimalZero -count=1 ."
     ]
   },
-  "colleaf_zero_legal_numbering_2026_11_24": {
+  "vdocs_zero_legal_numbering_2026_11_24": {
     "scope": "Private native first/ancestor zero and legal-decimalZero projection plus current foreign zero/legal recovery through shared SF. Overall goal/native public API/CLI remain incomplete.",
     "implementation": [
       "Preserve existing SF nondecimal-zero0 and fully decimal Legal semantics using a decimal first-zero type followed by the normal type in one actual native counter group. Zero ancestor fields and legal-decimalZero glyphs project similarly; labels remain automatic.",
@@ -6070,9 +6070,9 @@
       "Canonical sparse integer member names prevent 01/1 map-key aliasing; malformed bounded indices/format conditions, unowned projections and duplicate binding aliases reject. Stable aggregate diagnostics and primary-binding deduplication avoid nondeterminism/alias-driven quadratic checks."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_zero_lists.cjs",
+      "script": "scripts/verify_vdocs_zero_lists.cjs",
       "script_sha256": "8122a785add48e1389b5525a400a1d2386b47966a3b03d835fddb308d4e78b51",
-      "packages": "Actual pinned Univer1.0.4 renderer/core/docs/drawing/docs-drawing FDocument.save and unchanged hash-pinned Colleaf validator; optional ignored Node QA only.",
+      "packages": "Actual pinned Univer1.0.4 renderer/core/docs/drawing/docs-drawing FDocument.save and unchanged hash-pinned retired host validator; optional ignored Node QA only.",
       "normal_main_cell_markers": [
         "0%",
         "01%",
@@ -6159,15 +6159,15 @@
     "runtime": "Pure Go/std library addition and existing shared workers only. No new production dependency, CGO/external runtime tool/service/upload/app/backend/permission/quota gate. Original source corpus/oracles and SF schema unchanged.",
     "remaining": "Marker appearance/navigation and nonvisual/provenance intent; public API/CLI and actual browser/preset qualification; automatic per-page/decorated notes, broader PDF/source/resource/final acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_ZERO_QA=output/colleaf-qa/zero-lists.json GOWORK=off go test -run TestColleafZero -count=1 .",
-      "node scripts/verify_colleaf_zero_lists.cjs",
-      "MANYDOC_COLLEAF_ZERO_SAVED=output/colleaf-qa/zero-lists-saved.json MANYDOC_COLLEAF_ZERO_EDITED=output/colleaf-qa/zero-lists-edited.json GOWORK=off go test -run TestColleafZero -count=1 .",
-      "rg -n 'unmapped|requires.*mapping|provenance|Anchor' colleaf_styles.go colleaf_text.go colleaf_lists.go colleaf_sections.go",
-      "GOWORK=off go test -run TestColleaf -count=1 ."
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_ZERO_QA=output/vdocs-qa/zero-lists.json GOWORK=off go test -run TestVDOCSZero -count=1 .",
+      "node scripts/verify_vdocs_zero_lists.cjs",
+      "MANYDOC_VDOCS_ZERO_SAVED=output/vdocs-qa/zero-lists-saved.json MANYDOC_VDOCS_ZERO_EDITED=output/vdocs-qa/zero-lists-edited.json GOWORK=off go test -run TestVDOCSZero -count=1 .",
+      "rg -n 'unmapped|requires.*mapping|provenance|Anchor' vdocs_styles.go vdocs_text.go vdocs_lists.go vdocs_sections.go",
+      "GOWORK=off go test -run TestVDOCS -count=1 ."
     ]
   },
-  "colleaf_registered_hyperlinks_2026_11_24": {
+  "vdocs_registered_hyperlinks_2026_11_24": {
     "scope": "Private registered hyperlink URL-resource precedence and globally scoped main/running identities; core four paths remain intact. Native public API/CLI and full goal remain incomplete.",
     "implementation": [
       "Interpret DOC_HYPER_LINK_PLUGIN before native text, matching pinned main/header/footer rangeId scope and resource URL precedence; direct note URLs remain separate.",
@@ -6176,9 +6176,9 @@
       "Shared typed strict-JSON entry point validates interpreted resource strings before decoder key/Unicode normalization. Permission resources retain application-owned handling."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_hyperlinks.cjs",
+      "script": "scripts/verify_vdocs_hyperlinks.cjs",
       "script_sha256": "1a571257a2c14bbbbe4afeb1710d332b3f230a0057b1dd35c46ad30577dafb88",
-      "packages": "Actual pinned Univer1.0.4 core/renderer/docs/drawing/docs-drawing plus registered docs-hyper-link, hash-pinned published docs-hyper-link-ui handler source and unmodified Colleaf validator.",
+      "packages": "Actual pinned Univer1.0.4 core/renderer/docs/drawing/docs-drawing plus registered docs-hyper-link, hash-pinned published docs-hyper-link-ui handler source and unmodified retired host validator.",
       "model_source_sha256": "28566260eb368abfc45fad97045943dc23bbaa54654cd9f955e51926168a4da4",
       "ui_source_sha256": "a5055ae57c52a0f593e2e10e10b3ae39612f9df3bcf84ae4c9f8fc77ba7ac6fb",
       "results": [
@@ -6202,15 +6202,15 @@
     "runtime": "Pure-Go/std-library production changes only; no new Go dependencies, CGO/external runtime executable/service/license server/upload, app/backend edits or library permission/quota gates. New packages/source are optional ignored QA only, attributed in THIRD_PARTY.md.",
     "remaining": "Actual bookmark/heading point and typed internal-navigation mapping; marker appearance/nonvisual/provenance intent; public native API/CLI and real full-preset/browser qualification; per-page/decorated notes and broader PDF/source/resource/final acceptance audits. No external blocker.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_HYPERLINK_QA=output/colleaf-qa/hyperlinks.json GOWORK=off go test -run TestColleafHyperlink -count=1 .",
-      "node scripts/verify_colleaf_hyperlinks.cjs",
-      "MANYDOC_COLLEAF_HYPERLINK_SAVED=output/colleaf-qa/hyperlinks-saved.json MANYDOC_COLLEAF_HYPERLINK_RESOURCE_EDITED=output/colleaf-qa/hyperlinks-resource-edited.json MANYDOC_COLLEAF_HYPERLINK_EDITED_SAVED=output/colleaf-qa/hyperlinks-edited-saved.json GOWORK=off go test -run TestColleafHyperlink -count=1 .",
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_HYPERLINK_QA=output/vdocs-qa/hyperlinks.json GOWORK=off go test -run TestVDOCSHyperlink -count=1 .",
+      "node scripts/verify_vdocs_hyperlinks.cjs",
+      "MANYDOC_VDOCS_HYPERLINK_SAVED=output/vdocs-qa/hyperlinks-saved.json MANYDOC_VDOCS_HYPERLINK_RESOURCE_EDITED=output/vdocs-qa/hyperlinks-resource-edited.json MANYDOC_VDOCS_HYPERLINK_EDITED_SAVED=output/vdocs-qa/hyperlinks-edited-saved.json GOWORK=off go test -run TestVDOCSHyperlink -count=1 .",
       "rg -n 'findInternalLinkTarget|BOOKMARK|headingId' output/codec/docs-hyper-link-ui-1.0.4/package/lib/cjs/index.js",
-      "rg -n 'Anchor|Destination|annotation.Type' colleaf_text.go colleaf_tables.go colleaf_body.go destinations.go"
+      "rg -n 'Anchor|Destination|annotation.Type' vdocs_text.go vdocs_tables.go vdocs_body.go destinations.go"
     ]
   },
-  "colleaf_point_navigation_2026_11_24": {
+  "vdocs_point_navigation_2026_11_24": {
     "scope": "Private native paragraph/heading and inline bookmark points, current typed internal targets and unresolved graph through existing SF. Full adapter/public API/CLI/goal remain incomplete.",
     "implementation": [
       "Real BOOKMARK3 zero-width annotations at scalar UTF16 boundaries, distinct from inclusive text-formatting range validation; no extra text characters.",
@@ -6221,9 +6221,9 @@
       "All source points must occur in the decoded graph. Malformed/surrogate-split/ambiguous/unrepresented structural points reject explicitly; no new production dependency or app permission/quota policy."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_navigation.cjs",
+      "script": "scripts/verify_vdocs_navigation.cjs",
       "script_sha256": "7c54b57bd0f5ebbfa8727d5b569ed227a263b460961902be8e63e5cd3c6b371c",
-      "packages": "Pinned actual Univer1.0.4 core/renderer/docs/drawing/docs-drawing/hyperlink plugins and actual DocSelectionManagerService; unchanged hash-pinned Colleaf validator and unmodified UI handler/helper source from prior milestone.",
+      "packages": "Pinned actual Univer1.0.4 core/renderer/docs/drawing/docs-drawing/hyperlink plugins and actual DocSelectionManagerService; unchanged hash-pinned retired host validator and unmodified UI handler/helper source from prior milestone.",
       "ui_source_sha256": "a5055ae57c52a0f593e2e10e10b3ae39612f9df3bcf84ae4c9f8fc77ba7ac6fb",
       "normal_main_offsets": {
         "paragraph": 0,
@@ -6260,14 +6260,14 @@
     "runtime": "Pure-Go/std-library production changes only; no new runtime tool/service/CGO/license server/upload, app/backend edits, Daptin performer/permission/quota gates. Optional pinned Node QA and ignored generated artifacts only. Source corpus/oracles and SF schema unchanged.",
     "remaining": "Standalone AnchorPoint/container/image/section anchors and structural cursor projection; main-only editor target lookup limitation, marker appearance/nonvisual/provenance intent; public native API/CLI and real full-preset/browser caret/scroll interaction; per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_NAVIGATION_QA=output/colleaf-qa/navigation.json GOWORK=off go test -run TestColleafNavigation -count=1 .",
-      "node scripts/verify_colleaf_navigation.cjs",
-      "MANYDOC_COLLEAF_NAVIGATION_SAVED=output/colleaf-qa/navigation-saved.json MANYDOC_COLLEAF_NAVIGATION_EDITED=output/colleaf-qa/navigation-edited.json MANYDOC_COLLEAF_NAVIGATION_HEADING=output/colleaf-qa/navigation-heading.json GOWORK=off go test -run TestColleafNavigation -count=1 .",
-      "rg -n 'AnchorPoint|len\\(.*Anchors|structural cursor' colleaf_tables.go colleaf_lists.go colleaf_images.go colleaf_sections.go colleaf_navigation.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_NAVIGATION_QA=output/vdocs-qa/navigation.json GOWORK=off go test -run TestVDOCSNavigation -count=1 .",
+      "node scripts/verify_vdocs_navigation.cjs",
+      "MANYDOC_VDOCS_NAVIGATION_SAVED=output/vdocs-qa/navigation-saved.json MANYDOC_VDOCS_NAVIGATION_EDITED=output/vdocs-qa/navigation-edited.json MANYDOC_VDOCS_NAVIGATION_HEADING=output/vdocs-qa/navigation-heading.json GOWORK=off go test -run TestVDOCSNavigation -count=1 .",
+      "rg -n 'AnchorPoint|len\\(.*Anchors|structural cursor' vdocs_tables.go vdocs_lists.go vdocs_images.go vdocs_sections.go vdocs_navigation.go"
     ]
   },
-  "colleaf_container_points_2026_11_24": {
+  "vdocs_container_points_2026_11_24": {
     "scope": "Private native table/image Block.Anchors at actual token starts through shared SF. Full adapter/public API/CLI and overall goal remain incomplete.",
     "implementation": [
       "Real BOOKMARK3 points at table-start controls and image atoms; sparse version1 table/picture ownerId bindings, without extra paragraphs/text/assets/body caches.",
@@ -6276,7 +6276,7 @@
       "Unknown metadata and bookmark span editing extent losses remain explicit. Contradictory role/owner/paragraph bindings reject; final graph validation still rejects other unrepresented controls."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_container_navigation.cjs",
+      "script": "scripts/verify_vdocs_container_navigation.cjs",
       "script_sha256": "6f1e9a81f85322933aa7be7c11eac6c109a3d1caddaa792ea7e673f09f4804e2",
       "packages": "Same attributed pinned Univer1.0.4 packages, app validator, hash-pinned unmodified internal UI handler/helper and actual selection manager as prior navigation milestone.",
       "main_offsets": {
@@ -6312,14 +6312,14 @@
     "runtime": "Pure-Go production only; no added production dependency, runtime executable/service/CGO/license server/upload, application/backend modification or permission/quota gate. Generated artifacts and optional QA installations ignored.",
     "remaining": "Standalone AnchorPoint and list/section/page-break anchors, other structural cursor projection, nonmain editor target lookup limits; marker appearance/nonvisual/provenance intent; public native API/CLI and actual full-preset/browser qualification; per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_CONTAINER_QA=output/colleaf-qa/container-navigation.json GOWORK=off go test -run TestColleafContainerNavigation -count=1 .",
-      "node scripts/verify_colleaf_container_navigation.cjs",
-      "MANYDOC_COLLEAF_CONTAINER_SAVED=output/colleaf-qa/container-navigation-saved.json MANYDOC_COLLEAF_CONTAINER_EDITED=output/colleaf-qa/container-navigation-edited.json GOWORK=off go test -run TestColleafContainerNavigation -count=1 .",
-      "rg -n 'AnchorPoint|len\\(.*Anchors' colleaf_tables.go colleaf_lists.go colleaf_sections.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_CONTAINER_QA=output/vdocs-qa/container-navigation.json GOWORK=off go test -run TestVDOCSContainerNavigation -count=1 .",
+      "node scripts/verify_vdocs_container_navigation.cjs",
+      "MANYDOC_VDOCS_CONTAINER_SAVED=output/vdocs-qa/container-navigation-saved.json MANYDOC_VDOCS_CONTAINER_EDITED=output/vdocs-qa/container-navigation-edited.json GOWORK=off go test -run TestVDOCSContainerNavigation -count=1 .",
+      "rg -n 'AnchorPoint|len\\(.*Anchors' vdocs_tables.go vdocs_lists.go vdocs_sections.go"
     ]
   },
-  "colleaf_flow_points_2026_11_24": {
+  "vdocs_flow_points_2026_11_24": {
     "scope": "Private native list/page-break/section anchors through existing SF. Full adapter/native public API/CLI and overall goal remain incomplete.",
     "implementation": [
       "Sparse version1 list/break/section owner hints bind real native first paragraph IDs, form-feed controls and current section-ID/start positions. No extra text or body cache.",
@@ -6329,7 +6329,7 @@
       "Whole input graph validates first. Temporary first-section note composition admits omitted section/root target references internally; final intent retains only original unresolved declarations and final graph validation checks actual complete composition."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_flow_navigation.cjs",
+      "script": "scripts/verify_vdocs_flow_navigation.cjs",
       "script_sha256": "c26b8ab28c1b6731c802667d3cfbc443feaacc58c67204d06e1946fc9cc1eae7",
       "packages": "Same attributed pinned Univer1.0.4 plugins, app validator, hash-pinned unmodified internal UI handler/helper and actual selection manager used by previous navigation probes.",
       "main_offsets": {
@@ -6355,7 +6355,7 @@
     },
     "checks": {
       "tests": "Final post duplicate-lookup cleanup all-package tests with actual saved/edited artifacts pass library16.491s, CLI/internal cached; earlier full run17.117s/CLI0.376s also passes.",
-      "race": "Full all-package race passes library174.130s/CLI1.820s/internal cached before removal of one redundant identical control lookup. Final post-cleanup all Colleaf tests with actual saved/edited flow artifacts pass under race5.077s. Flow-focused race1.500s also passed before adding the soft-break regression.",
+      "race": "Full all-package race passes library174.130s/CLI1.820s/internal cached before removal of one redundant identical control lookup. Final post-cleanup all VDOCS tests with actual saved/edited flow artifacts pass under race5.077s. Flow-focused race1.500s also passed before adding the soft-break regression.",
       "vet": "pass after final duplicate-lookup cleanup",
       "modules": "all modules verified; go.mod/go.sum unchanged",
       "cgo_disabled": "Final post-cleanup host CLI build passes. Focused flow tests0.400s, host CLI --help and Linux amd64/arm64 cross-builds passed before isolated removal of redundant identical control lookup. Cross-builds are not Linux execution evidence.",
@@ -6365,14 +6365,14 @@
     "runtime": "Pure-Go production changes only; no new dependency, runtime executable/service/CGO/license server/upload, app/backend change or permission/quota gate. Optional pinned QA and generated artifacts remain ignored. Original corpus/oracles unchanged.",
     "remaining": "Standalone AnchorPoint native export and other structural cursors; nonmain editor target lookup limits, marker appearance/nonvisual/provenance intent; public native API/CLI and actual full-preset/browser qualification; per-page/decorated notes and broader PDF/source/resource/final acceptance audit.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_FLOW_QA=output/colleaf-qa/flow-navigation.json GOWORK=off go test -run TestColleafFlowNavigation -count=1 .",
-      "node scripts/verify_colleaf_flow_navigation.cjs",
-      "MANYDOC_COLLEAF_FLOW_SAVED=output/colleaf-qa/flow-navigation-saved.json MANYDOC_COLLEAF_FLOW_EDITED=output/colleaf-qa/flow-navigation-edited.json GOWORK=off go test -run TestColleafFlowNavigation -count=1 .",
-      "rg -n 'AnchorPoint|structural cursor' colleaf_tables.go colleaf_navigation.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_FLOW_QA=output/vdocs-qa/flow-navigation.json GOWORK=off go test -run TestVDOCSFlowNavigation -count=1 .",
+      "node scripts/verify_vdocs_flow_navigation.cjs",
+      "MANYDOC_VDOCS_FLOW_SAVED=output/vdocs-qa/flow-navigation-saved.json MANYDOC_VDOCS_FLOW_EDITED=output/vdocs-qa/flow-navigation-edited.json GOWORK=off go test -run TestVDOCSFlowNavigation -count=1 .",
+      "rg -n 'AnchorPoint|structural cursor' vdocs_tables.go vdocs_navigation.go"
     ]
   },
-  "colleaf_standalone_points_2026_11_24": {
+  "vdocs_standalone_points_2026_11_24": {
     "scope": "Private standalone SF AnchorPoint projection through real native bookmarks. Complete adapter/API/CLI and full goal remain incomplete.",
     "implementation": [
       "Sparse version1 pointScope (section/item), ownerId, pointOrder/pointIndex and optional pointCarrier metadata binds actual UTF16 points without text/body/style/asset caches.",
@@ -6382,7 +6382,7 @@
       "Scope rebinding visits only ranges emitted by the current flow, with separate temporary counters to preserve ordinary content IDs. Native item paragraph-first profile is unchanged."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_standalone_points.cjs",
+      "script": "scripts/verify_vdocs_standalone_points.cjs",
       "script_sha256": "e68bbddd820f8dc9ce28404b5627446f302f8bd4dac62c32f31af5a9c2a9a567",
       "packages": "Same attributed pinned Univer1.0.4 plugins, app validator, hash-pinned unmodified internal UI handler/helper and actual selection manager used by previous navigation probes.",
       "main_offsets": {
@@ -6426,24 +6426,24 @@
     "runtime": "Pure-Go production changes; no new dependency, runtime executable/service/CGO/license server/upload, application/backend change or permission/quota gate. Optional QA installations/artifacts ignored. Original source corpus/oracles and SF schema unchanged.",
     "remaining": "Foreign row/cell/section and other structural cursor projection; nonmain editor target lookup limits; marker appearance/nonvisual/provenance intent, public native API/CLI and actual full-preset/browser qualification; per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_STANDALONE_QA=output/colleaf-qa/standalone-points.json GOWORK=off go test -run TestColleafStandalone -count=1 .",
-      "node scripts/verify_colleaf_standalone_points.cjs",
-      "MANYDOC_COLLEAF_STANDALONE_SAVED=output/colleaf-qa/standalone-points-saved.json MANYDOC_COLLEAF_STANDALONE_EDITED=output/colleaf-qa/standalone-points-edited.json GOWORK=off go test -run TestColleafStandalone -count=1 .",
-      "rg -n 'structural cursor|cellNode|rowNode' colleaf_navigation.go colleaf_tables.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_STANDALONE_QA=output/vdocs-qa/standalone-points.json GOWORK=off go test -run TestVDOCSStandalone -count=1 .",
+      "node scripts/verify_vdocs_standalone_points.cjs",
+      "MANYDOC_VDOCS_STANDALONE_SAVED=output/vdocs-qa/standalone-points-saved.json MANYDOC_VDOCS_STANDALONE_EDITED=output/vdocs-qa/standalone-points-edited.json GOWORK=off go test -run TestVDOCSStandalone -count=1 .",
+      "rg -n 'structural cursor|cellNode|rowNode' vdocs_navigation.go vdocs_tables.go"
     ]
   },
-  "colleaf_foreign_control_cursors_2026_11_24": {
+  "vdocs_foreign_control_cursors_2026_11_24": {
     "scope": "Private foreign row/cell/terminator bookmark recovery as disclosed logical SF boundaries. Full native adapter/public API/CLI and overall goal remain incomplete.",
     "implementation": [
       "Validated stream-tree control index; row first/last-cell boundaries, cell start/end and section/table/image/page-break paragraph terminators retain bookmark IDs and link targets in AnchorPoint blocks.",
       "Horizontal/vertical covered cells resolve through the actual occupancy grid to the spanning origin. Deferred projection runs after origins exist; source-order boundary blocks retain identities and visible content/grid/assets.",
       "Flow After data carries boundary-only blocks without manufacturing duplicate paragraph IDs or invalidating valid list-item continuation ownership.",
-      "colleaf_structural_cursor records current source UTF16 position/story and normalized logical target. Exact native control cursor identity is explicitly lost. Existing span/metadata/placement diagnostics remain explicit.",
+      "vdocs_structural_cursor records current source UTF16 position/story and normalized logical target. Exact native control cursor identity is explicitly lost. Existing span/metadata/placement diagnostics remain explicit.",
       "Projection-local warning sets avoid scanning all earlier position-specific diagnostics. Final destination coverage still rejects genuinely unrepresented points rather than silently dropping them."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_structural_cursors.cjs",
+      "script": "scripts/verify_vdocs_structural_cursors.cjs",
       "script_sha256": "4da62b195e04d7cf037218555c347f37e5e97a08c1ab57065488ea6f7cbc5b15",
       "packages": "Same attributed pinned Univer1.0.4 plugins/validator, hash-pinned unmodified handler/helper and actual selection manager used by prior navigation probes.",
       "original_offsets": {
@@ -6507,21 +6507,21 @@
       "race": "Final all-package race with actual saved/edited/normalized artifacts passes library169.965s/CLI2.147s/internal cached. Focused saved/edited/normalized structural race1.566s passed before adding scalar-sweep and page-break-terminator regressions. Superseded full race was stopped after that source/test addition.",
       "vet": "pass after final source/test changes",
       "modules": "all modules verified; go.mod/go.sum unchanged",
-      "cgo_disabled": "Final focused Colleaf tests0.567s, host CLI build/--help and Linux amd64/arm64 cross-builds pass. Cross-builds are not Linux execution evidence.",
+      "cgo_disabled": "Final focused VDOCS tests0.567s, host CLI build/--help and Linux amd64/arm64 cross-builds pass. Cross-builds are not Linux execution evidence.",
       "fuzz": "Final foreign structural property/offset target72173 executions/10.508s,2workers pass; earlier campaign63890 executions passed before break-terminator addition. Short safety campaigns, not exhaustive coverage.",
       "diff_check": "pass before commit"
     },
     "runtime": "Pure-Go/std-library production only. No new dependency, runtime executable/service/CGO/license server/upload, application/backend change or permission/quota gate. Optional QA artifacts ignored; SF schema and original corpus/oracles unchanged.",
     "remaining": "Native marker appearance and nonvisual/provenance intent, including historical diagnostic transport; public native API/CLI and actual full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_CURSOR_QA=output/colleaf-qa/structural-cursors.json MANYDOC_COLLEAF_CURSOR_NORMALIZED_QA=output/colleaf-qa/structural-cursors-normalized.json GOWORK=off go test -run TestColleafForeignStructural -count=1 .",
-      "node scripts/verify_colleaf_structural_cursors.cjs",
-      "MANYDOC_COLLEAF_CURSOR_SAVED=output/colleaf-qa/structural-cursors-saved.json MANYDOC_COLLEAF_CURSOR_EDITED=output/colleaf-qa/structural-cursors-edited.json MANYDOC_COLLEAF_CURSOR_NORMALIZED_SAVED=output/colleaf-qa/structural-cursors-normalized-saved.json GOWORK=off go test -run TestColleafForeignStructural -count=1 .",
-      "rg -n 'Diagnostics|Source|PDFNavigation|KindInferred' colleaf_sections.go colleaf_notes.go colleaf_images.go colleaf_text.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_CURSOR_QA=output/vdocs-qa/structural-cursors.json MANYDOC_VDOCS_CURSOR_NORMALIZED_QA=output/vdocs-qa/structural-cursors-normalized.json GOWORK=off go test -run TestVDOCSForeignStructural -count=1 .",
+      "node scripts/verify_vdocs_structural_cursors.cjs",
+      "MANYDOC_VDOCS_CURSOR_SAVED=output/vdocs-qa/structural-cursors-saved.json MANYDOC_VDOCS_CURSOR_EDITED=output/vdocs-qa/structural-cursors-edited.json MANYDOC_VDOCS_CURSOR_NORMALIZED_SAVED=output/vdocs-qa/structural-cursors-normalized-saved.json GOWORK=off go test -run TestVDOCSForeignStructural -count=1 .",
+      "rg -n 'Diagnostics|Source|PDFNavigation|KindInferred' vdocs_sections.go vdocs_notes.go vdocs_images.go vdocs_text.go"
     ]
   },
-  "colleaf_document_evidence_2026_11_24": {
+  "vdocs_document_evidence_2026_11_24": {
     "scope": "Private native document-level diagnostic/source-page/PDF-navigation history and public SF unbound evidence state. Per-node provenance/full adapter/API/CLI and overall goal remain incomplete.",
     "implementation": [
       "Version1 document evidence in existing checked CUSTOM intent carrier: diagnostic order/duplicates, metadata PageCount, original PDF pages and physical navigation/annotation data. No editable body/text/style cache or native page-count authority.",
@@ -6532,9 +6532,9 @@
       "Native deletion/creation changes only historical binding assertion to unbound with explicit diagnostics, never inventing anchors/pages or resolving the original PDF. Preliminary note composition has no physical navigation authority."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_evidence.cjs",
+      "script": "scripts/verify_vdocs_evidence.cjs",
       "script_sha256": "514d24721c32763f75a34d33c0105cfe14dd54ab0f6bbb2e7c5ed658ebc4cf1f",
-      "packages": "Same attributed pinned Univer1.0.4 core/renderer/docs/drawing/hyperlink packages and hash-pinned Colleaf validator; no new package or UI-handler extraction.",
+      "packages": "Same attributed pinned Univer1.0.4 core/renderer/docs/drawing/hyperlink packages and hash-pinned retired host validator; no new package or UI-handler extraction.",
       "source": "Root physical evidence from existing published-format synthetic PDF recovery fixture; independently authored current body. Two source pages, six physical view/name records including two source-missing identities, supported annotation records and nullable/FitR parameters.",
       "results": [
         "Diagnostic order/duplicates, Unicode/newlines, original page count/pages/navigation retained exactly across two actual registered-plugin saves/reopens. Evidence payload keys exclude body/text trees.",
@@ -6558,14 +6558,14 @@
     "runtime": "Pure-Go/std-library production only; no dependency/runtime executable/service/CGO/license server/upload, app/backend change or permission/quota gate. SF profile keeps existing JSON attribute shape and adds an explicitly documented binding value; original corpus/oracles unchanged. Generated QA artifacts ignored.",
     "remaining": "Native per-block/run/cell/item/note provenance and marker appearance/remaining nonvisual intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md docs/PDF_NAVIGATION.md",
-      "MANYDOC_COLLEAF_EVIDENCE_QA=output/colleaf-qa/document-evidence.json GOWORK=off go test -run TestColleafDocumentEvidence -count=1 .",
-      "node scripts/verify_colleaf_evidence.cjs",
-      "MANYDOC_COLLEAF_EVIDENCE_SAVED=output/colleaf-qa/document-evidence-saved.json MANYDOC_COLLEAF_EVIDENCE_EDITED=output/colleaf-qa/document-evidence-edited.json MANYDOC_COLLEAF_EVIDENCE_DELETED=output/colleaf-qa/document-evidence-deleted.json MANYDOC_COLLEAF_EVIDENCE_CREATED=output/colleaf-qa/document-evidence-created.json GOWORK=off go test -run TestColleafDocumentEvidence -count=1 .",
-      "rg -n 'Source != nil|KindInferred|LabelSource|Source.validate' colleaf_text.go colleaf_tables.go colleaf_lists.go colleaf_notes.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md docs/PDF_NAVIGATION.md",
+      "MANYDOC_VDOCS_EVIDENCE_QA=output/vdocs-qa/document-evidence.json GOWORK=off go test -run TestVDOCSDocumentEvidence -count=1 .",
+      "node scripts/verify_vdocs_evidence.cjs",
+      "MANYDOC_VDOCS_EVIDENCE_SAVED=output/vdocs-qa/document-evidence-saved.json MANYDOC_VDOCS_EVIDENCE_EDITED=output/vdocs-qa/document-evidence-edited.json MANYDOC_VDOCS_EVIDENCE_DELETED=output/vdocs-qa/document-evidence-deleted.json MANYDOC_VDOCS_EVIDENCE_CREATED=output/vdocs-qa/document-evidence-created.json GOWORK=off go test -run TestVDOCSDocumentEvidence -count=1 .",
+      "rg -n 'Source != nil|KindInferred|LabelSource|Source.validate' vdocs_text.go vdocs_tables.go vdocs_lists.go vdocs_notes.go"
     ]
   },
-  "colleaf_paragraph_origins_2026_11_24": {
+  "vdocs_paragraph_origins_2026_11_24": {
     "scope": "Private native paragraph/heading source bindings plus public historical/unbound source states. Full imported-PDF per-node provenance and overall goal remain incomplete.",
     "implementation": [
       "Direct paragraph properties carry only versioned references into a deterministic deduplicated evidence pool of SourceInfo and source-free SF semantic fingerprints; no body cache.",
@@ -6574,9 +6574,9 @@
       "Strict typed payload/version/digest/reference validation rejects contradictions. Unsupported run/container/cell/item/note source slots remain explicit."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_origins.cjs",
+      "script": "scripts/verify_vdocs_origins.cjs",
       "script_sha256": "054819caa456554cac80f45327527168359a5685279b805acbc9a8e4049dbec1",
-      "packages": "Previously attributed pinned Univer1.0.4 plugins/renderer and hash-pinned Colleaf validator; no new dependency.",
+      "packages": "Previously attributed pinned Univer1.0.4 plugins/renderer and hash-pinned retired host validator; no new dependency.",
       "results": [
         "Seven synthetic paragraph sources across main/list/cell/header/footer/note, direct reference-only properties and unchanged source pool across two actual saves/reopens.",
         "Actual skeleton/glyph checks retain whole bold13pt emoji. Actual TextX Q insertion and direct reference removal preserve edits and original evidence; strict Go/SF comparisons verify historical/unbound states and stable repeated round trips.",
@@ -6597,13 +6597,13 @@
     "runtime": "Production pure Go; no dependency/runtime executable/service/CGO/license server/upload or application/backend/permission/quota change. Original corpus/oracles unchanged; generated QA artifacts ignored.",
     "remaining": "Run/citation source ranges; container/cell/item/note provenance; marker appearance and remaining nonvisual intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_ORIGIN_QA=output/colleaf-qa/paragraph-origins.json GOWORK=off go test -run 'TestColleafParagraphOrigins|TestColleafUnbound' -count=1 .",
-      "node scripts/verify_colleaf_origins.cjs",
-      "rg -n 'Source != nil|LabelSource|manydocOrigin' colleaf_styles.go colleaf_notes.go colleaf_tables.go colleaf_lists.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_ORIGIN_QA=output/vdocs-qa/paragraph-origins.json GOWORK=off go test -run 'TestVDOCSParagraphOrigins|TestVDOCSUnbound' -count=1 .",
+      "node scripts/verify_vdocs_origins.cjs",
+      "rg -n 'Source != nil|LabelSource|manydocOrigin' vdocs_styles.go vdocs_notes.go vdocs_tables.go vdocs_lists.go"
     ]
   },
-  "colleaf_note_origins_2026_11_24": {
+  "vdocs_note_origins_2026_11_24": {
     "scope": "Whole-document private native note-definition/label source and kind-inference bindings, plus sourced-paragraph body-mark projection. Overall goal remains active/incomplete.",
     "implementation": [
       "Version1 evidence.noteOrigins records hold native/scoped identities, source facts, kind-inference flags and separate source-free SF body/marker fingerprints; no editable body/label/style cache.",
@@ -6612,9 +6612,9 @@
       "Original sourced paragraph fingerprint is retained before temporary visible body-mark prefix projection, avoiding false historical qualification for unchanged paragraphs. Typed/version/hash-shape/source-page/duplicate validation rejects malformed evidence. Source marks and empty source-only attrs normalize out of semantic hashes, so source-only changes do not stale note content; a dedicated regression also verifies visible edits change both hashes. Source-free hashing removes source marks and empty source-only attribute containers, so provenance-only edits do not stale note content."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_note_origins.cjs",
+      "script": "scripts/verify_vdocs_note_origins.cjs",
       "script_sha256": "4fd0b7469f3d04a80114c8098aa547eab45c4fdae532c6eb05366b1ebad0e940",
-      "packages": "Previously attributed pinned Univer1.0.4 core/renderer/docs/drawing/docs-drawing/hyperlink plugins, hash-pinned Colleaf validator and prosemirror-model1.25.13; no new package.",
+      "packages": "Previously attributed pinned Univer1.0.4 core/renderer/docs/drawing/docs-drawing/hyperlink plugins, hash-pinned retired host validator and prosemirror-model1.25.13; no new package.",
       "results": [
         "Three synthetic source/inference records include separately scoped footnote/endnote n identities and an inference-only record; no text/body/label cache. Original physical pages and source facts remain independent of native layout.",
         "Actual skeleton retains styled emoji and bold13pt rich body mark without ownership decoration. Two actual registered-plugin saves/reopens preserve current streams and original evidence.",
@@ -6636,14 +6636,14 @@
     "runtime": "Pure-Go/std-library production; no dependency/runtime executable/service/CGO/license server/upload, application/backend change or permission/quota gate. Public SF schema and original corpus/oracles unchanged; generated artifacts ignored.",
     "remaining": "Run/citation/table/image/container/cell/item source mappings; marker appearance and remaining nonvisual intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_NOTE_ORIGIN_QA=output/colleaf-qa/note-origins.json GOWORK=off go test -run TestColleafNoteOrigins -count=1 .",
-      "node scripts/verify_colleaf_note_origins.cjs",
-      "MANYDOC_COLLEAF_NOTE_ORIGIN_SAVED=output/colleaf-qa/note-origins-saved.json MANYDOC_COLLEAF_NOTE_ORIGIN_BODY_EDITED=output/colleaf-qa/note-origins-edited.json MANYDOC_COLLEAF_NOTE_ORIGIN_MARK_EDITED=output/colleaf-qa/note-origins-marked.json MANYDOC_COLLEAF_NOTE_ORIGIN_DETACHED=output/colleaf-qa/note-origins-detached.json GOWORK=off go test -run TestColleafNoteOrigins -count=1 .",
-      "rg -n 'Source != nil|manydocOrigin' colleaf_styles.go colleaf_tables.go colleaf_lists.go colleaf_images.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_NOTE_ORIGIN_QA=output/vdocs-qa/note-origins.json GOWORK=off go test -run TestVDOCSNoteOrigins -count=1 .",
+      "node scripts/verify_vdocs_note_origins.cjs",
+      "MANYDOC_VDOCS_NOTE_ORIGIN_SAVED=output/vdocs-qa/note-origins-saved.json MANYDOC_VDOCS_NOTE_ORIGIN_BODY_EDITED=output/vdocs-qa/note-origins-edited.json MANYDOC_VDOCS_NOTE_ORIGIN_MARK_EDITED=output/vdocs-qa/note-origins-marked.json MANYDOC_VDOCS_NOTE_ORIGIN_DETACHED=output/vdocs-qa/note-origins-detached.json GOWORK=off go test -run TestVDOCSNoteOrigins -count=1 .",
+      "rg -n 'Source != nil|manydocOrigin' vdocs_styles.go vdocs_tables.go vdocs_lists.go vdocs_images.go"
     ]
   },
-  "colleaf_run_origins_2026_11_24": {
+  "vdocs_run_origins_2026_11_24": {
     "scope": "Private native nonempty run/link/story/body-mark/citation source bindings plus ProseMirror source-mark declaration completeness. Full native integration and overall goal remain active/incomplete.",
     "implementation": [
       "Direct textRun.ts.manydocOrigin carries only manydoc.run-origin/version1/ref. Deterministic evidence.runOrigins contains deduplicated SourceInfo and source-free SF run fingerprints, no editable body/text/label cache.",
@@ -6653,9 +6653,9 @@
       "The independent ProseMirror reader exposed a missing source-mark historical declaration. Added historical plus existing optional table_widths/table_spans attributes, and a regression checks every public SourceInfo JSON field against the source mark. Go/SF value model stays unchanged."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_run_origins.cjs",
+      "script": "scripts/verify_vdocs_run_origins.cjs",
       "script_sha256": "02ca679d848328bdec1726f2f3c156302a2b10f66f5a9fbb3bc2e9e7cfece8e6",
-      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned Colleaf validator and prosemirror-model1.25.13; no new dependency.",
+      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned retired host validator and prosemirror-model1.25.13; no new dependency.",
       "results": [
         "Eleven synthetic source records across main/list/cell/header/footer/note bodies, link text, rich body mark, rich citation label and rich/default citation atoms. Direct properties contain only references; evidence has no text/body caches.",
         "Actual registered-plugin saves/reopens preserve streams/evidence and whole bold13pt emoji. Actual TextX insertion splits the first source interval around unowned Q; Go verifies both surviving fragments historical, Q source-free, and edited paragraph provenance historical.",
@@ -6678,14 +6678,14 @@
     "runtime": "Pure-Go/std-library production only. No dependency/runtime executable/service/CGO/license server/upload, application/backend/permission/quota change or modified original corpus/oracle. Generated QA artifacts ignored.",
     "remaining": "Zero-width anchor/empty-text source policy and table/image/container/cell/item source bindings; remaining marker appearance/nonvisual run/settings intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_RUN_ORIGIN_QA=output/colleaf-qa/run-origins.json GOWORK=off go test -run TestColleafRunOrigin -count=1 .",
-      "node scripts/verify_colleaf_run_origins.cjs",
-      "MANYDOC_COLLEAF_RUN_ORIGIN_SAVED=output/colleaf-qa/run-origins-saved.json MANYDOC_COLLEAF_RUN_ORIGIN_EDITED=output/colleaf-qa/run-origins-edited.json MANYDOC_COLLEAF_RUN_ORIGIN_CITATION=output/colleaf-qa/run-origins-citation.json MANYDOC_COLLEAF_RUN_ORIGIN_DETACHED=output/colleaf-qa/run-origins-detached.json GOWORK=off go test -run TestColleafRunOrigin -count=1 .",
-      "rg -n 'Source != nil|manydocOrigin' colleaf_navigation.go colleaf_tables.go colleaf_lists.go colleaf_images.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_RUN_ORIGIN_QA=output/vdocs-qa/run-origins.json GOWORK=off go test -run TestVDOCSRunOrigin -count=1 .",
+      "node scripts/verify_vdocs_run_origins.cjs",
+      "MANYDOC_VDOCS_RUN_ORIGIN_SAVED=output/vdocs-qa/run-origins-saved.json MANYDOC_VDOCS_RUN_ORIGIN_EDITED=output/vdocs-qa/run-origins-edited.json MANYDOC_VDOCS_RUN_ORIGIN_CITATION=output/vdocs-qa/run-origins-citation.json MANYDOC_VDOCS_RUN_ORIGIN_DETACHED=output/vdocs-qa/run-origins-detached.json GOWORK=off go test -run TestVDOCSRunOrigin -count=1 .",
+      "rg -n 'Source != nil|manydocOrigin' vdocs_navigation.go vdocs_tables.go vdocs_lists.go vdocs_images.go"
     ]
   },
-  "colleaf_table_origins_2026_11_24": {
+  "vdocs_table_origins_2026_11_24": {
     "scope": "Private native table/cell source bindings, including merged/nested/running/note tables and covered-source-marker reconciliation. Full native integration and overall goal remain active/incomplete.",
     "implementation": [
       "Direct tableSource and tableCells metadata carry manydoc.table-origin or manydoc.cell-origin/version1/ref only. Deterministic evidence.tableOrigins deduplicates original SourceInfo plus source-free SF fingerprints; no text/row/cell/body cache.",
@@ -6695,9 +6695,9 @@
       "Known native origin properties do not generate presentation-loss warnings; private markers clear before public return. Caller snapshots and nested source facts remain isolated. No application/backend/permission/quota change."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_table_origins.cjs",
+      "script": "scripts/verify_vdocs_table_origins.cjs",
       "script_sha256": "94df3cf8d1f633de87babff882b56a252cb62d793d761a820d836e7d48b3f1d5",
-      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned Colleaf validator and prosemirror-model1.25.13; no new dependency.",
+      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned retired host validator and prosemirror-model1.25.13; no new dependency.",
       "results": [
         "Thirteen source facts across five main/nested/header/footer/note tables; explicit original width/span facts, horizontal/vertical merged cells and repeated header semantics. Direct properties contain only source references and pool has no content cache.",
         "Actual table skeleton and whole bold13pt emoji remain valid through two registered-plugin saves/reopens; streams and source pool remain exact.",
@@ -6721,14 +6721,14 @@
     "runtime": "Pure-Go/std-library production only. No dependency/runtime executable/service/CGO/license server/upload, application/backend/permission/quota change or modified original corpus/oracle. SF value/schema unchanged; generated QA artifacts ignored.",
     "remaining": "Image/list/item/other container/anchor sources and explicit zero-width empty-text source policy; remaining marker appearance/nonvisual run/settings intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_TABLE_ORIGIN_QA=output/colleaf-qa/table-origins.json GOWORK=off go test -run TestColleafTableOrigins -count=1 .",
-      "node scripts/verify_colleaf_table_origins.cjs",
-      "MANYDOC_COLLEAF_TABLE_ORIGIN_SAVED=output/colleaf-qa/table-origins-saved.json MANYDOC_COLLEAF_TABLE_ORIGIN_EDITED=output/colleaf-qa/table-origins-edited.json MANYDOC_COLLEAF_TABLE_ORIGIN_DETACHED=output/colleaf-qa/table-origins-detached.json MANYDOC_COLLEAF_TABLE_ORIGIN_COVERED=output/colleaf-qa/table-origins-covered.json GOWORK=off go test -run TestColleafTableOrigins -count=1 .",
-      "rg -n 'Source != nil|manydocOrigin' colleaf_images.go colleaf_lists.go colleaf_navigation.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_TABLE_ORIGIN_QA=output/vdocs-qa/table-origins.json GOWORK=off go test -run TestVDOCSTableOrigins -count=1 .",
+      "node scripts/verify_vdocs_table_origins.cjs",
+      "MANYDOC_VDOCS_TABLE_ORIGIN_SAVED=output/vdocs-qa/table-origins-saved.json MANYDOC_VDOCS_TABLE_ORIGIN_EDITED=output/vdocs-qa/table-origins-edited.json MANYDOC_VDOCS_TABLE_ORIGIN_DETACHED=output/vdocs-qa/table-origins-detached.json MANYDOC_VDOCS_TABLE_ORIGIN_COVERED=output/vdocs-qa/table-origins-covered.json GOWORK=off go test -run TestVDOCSTableOrigins -count=1 .",
+      "rg -n 'Source != nil|manydocOrigin' vdocs_images.go vdocs_lists.go vdocs_navigation.go"
     ]
   },
-  "colleaf_image_origins_2026_11_24": {
+  "vdocs_image_origins_2026_11_24": {
     "scope": "Private native image provenance through drawing descriptors, registered mirrors and current asset/geometry composition. Full native integration and overall goal remain active/incomplete.",
     "implementation": [
       "Direct drawing descriptors carry manydoc.image-origin/version1/ref only. evidence.imageOrigins deduplicates original SourceInfo and source-free SF image fingerprints; no old asset/body cache.",
@@ -6737,9 +6737,9 @@
       "Restoration precedes enclosing table-source qualification. Fitted layout keeps source geometry and authored preferred geometry separate. A shared source-record constructor preserves the existing table record digest contract; SF schema/value model unchanged."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_image_origins.cjs",
+      "script": "scripts/verify_vdocs_image_origins.cjs",
       "script_sha256": "2a25341001b12cd390333dad79be57844b67c0561b1d9a57999712847f1bb665",
-      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned Colleaf validator and prosemirror-model1.25.13; no new dependency.",
+      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned retired host validator and prosemirror-model1.25.13; no new dependency.",
       "results": [
         "Seven synthetic source records across main/cell/list/header/footer/note images. Direct fields contain only references; evidence stores no asset/body/text cache.",
         "Actual registered-plugin saves/reopens retain source pools, streams, descriptor/mirror equality, original JPEG SHA256, main32x16px frame and whole bold13pt emoji.",
@@ -6763,14 +6763,14 @@
     "runtime": "Pure-Go/std-library production only. No dependency/runtime executable/service/CGO/license server/upload, application/backend/permission/quota change or modified original corpus/oracle. Existing attributed JPEG/synthetic PNG fixtures reused; generated QA artifacts ignored.",
     "remaining": "List/item/other container/anchor sources and explicit zero-width empty-text source policy; remaining marker appearance/nonvisual run/settings intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_IMAGE_ORIGIN_QA=output/colleaf-qa/image-origins.json GOWORK=off go test -run TestColleafImageOrigins -count=1 .",
-      "node scripts/verify_colleaf_image_origins.cjs",
-      "MANYDOC_COLLEAF_IMAGE_ORIGIN_SAVED=output/colleaf-qa/image-origins-saved.json MANYDOC_COLLEAF_IMAGE_ORIGIN_RESIZED=output/colleaf-qa/image-origins-resized.json MANYDOC_COLLEAF_IMAGE_ORIGIN_ASSET=output/colleaf-qa/image-origins-asset.json MANYDOC_COLLEAF_IMAGE_ORIGIN_DETACHED=output/colleaf-qa/image-origins-detached.json GOWORK=off go test -run TestColleafImageOrigins -count=1 .",
-      "rg -n 'Source != nil|manydocOrigin' colleaf_lists.go colleaf_navigation.go colleaf_tables.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_IMAGE_ORIGIN_QA=output/vdocs-qa/image-origins.json GOWORK=off go test -run TestVDOCSImageOrigins -count=1 .",
+      "node scripts/verify_vdocs_image_origins.cjs",
+      "MANYDOC_VDOCS_IMAGE_ORIGIN_SAVED=output/vdocs-qa/image-origins-saved.json MANYDOC_VDOCS_IMAGE_ORIGIN_RESIZED=output/vdocs-qa/image-origins-resized.json MANYDOC_VDOCS_IMAGE_ORIGIN_ASSET=output/vdocs-qa/image-origins-asset.json MANYDOC_VDOCS_IMAGE_ORIGIN_DETACHED=output/vdocs-qa/image-origins-detached.json GOWORK=off go test -run TestVDOCSImageOrigins -count=1 .",
+      "rg -n 'Source != nil|manydocOrigin' vdocs_lists.go vdocs_navigation.go vdocs_tables.go"
     ]
   },
-  "colleaf_list_origins_2026_11_24": {
+  "vdocs_list_origins_2026_11_24": {
     "scope": "Private native list/item source ownership and numbering-aware historical qualification. Full native integration and overall goal remain active/incomplete.",
     "implementation": [
       "Direct leading-paragraph properties manydocListOrigin/manydocItemOrigin contain manydoc.list-origin or manydoc.item-origin/version1/ref only. evidence.listOrigins deduplicates original SourceInfo and source-free SF hashes; no list/item body cache.",
@@ -6779,9 +6779,9 @@
       "Every direct native reference validates, including markers not consumed as owners. Missing/version/digest/duplicate/contradictory records reject. Source-only edits do not falsely stale list/item semantics; source physical geometry never becomes current layout authority."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_list_origins.cjs",
+      "script": "scripts/verify_vdocs_list_origins.cjs",
       "script_sha256": "ebfcfacc179c7c011c409d60503a44ee5ad50143a32df10d95a87598b3b8f20d",
-      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned Colleaf validator and prosemirror-model1.25.13; no new dependency.",
+      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned retired host validator and prosemirror-model1.25.13; no new dependency.",
       "results": [
         "24 source facts (10lists/14items) across nested, independent, restarted, bullet, zero, merged-cell, header/footer and note lists. Reference-only properties and evidence have no text/body caches.",
         "Actual registered-plugin saves/reopens preserve source pools/streams and whole bold13pt emoji. Actual TextX Q insertion retains edited content and historical enclosing-list/item facts.",
@@ -6804,14 +6804,14 @@
     "runtime": "Pure-Go/std-library production only. No dependency/runtime executable/service/CGO/license server/upload, application/backend/permission/quota change or modified original corpus/oracle. SF value/schema unchanged; generated QA artifacts ignored.",
     "remaining": "Other container/anchor sources and explicit zero-width empty-text source policy; remaining marker appearance/nonvisual run/settings intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_LIST_ORIGIN_QA=output/colleaf-qa/list-origins.json GOWORK=off go test -run TestColleafListOrigins -count=1 .",
-      "node scripts/verify_colleaf_list_origins.cjs",
-      "MANYDOC_COLLEAF_LIST_ORIGIN_SAVED=output/colleaf-qa/list-origins-saved.json MANYDOC_COLLEAF_LIST_ORIGIN_EDITED=output/colleaf-qa/list-origins-edited.json MANYDOC_COLLEAF_LIST_ORIGIN_RESTARTED=output/colleaf-qa/list-origins-restarted.json MANYDOC_COLLEAF_LIST_ORIGIN_DETACHED=output/colleaf-qa/list-origins-detached.json MANYDOC_COLLEAF_LIST_ORIGIN_ITEM_DETACHED=output/colleaf-qa/list-origins-item-detached.json GOWORK=off go test -run TestColleafListOrigins -count=1 .",
-      "rg -n 'Source != nil|manydocOrigin' colleaf_navigation.go colleaf_tables.go colleaf_sections.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_LIST_ORIGIN_QA=output/vdocs-qa/list-origins.json GOWORK=off go test -run TestVDOCSListOrigins -count=1 .",
+      "node scripts/verify_vdocs_list_origins.cjs",
+      "MANYDOC_VDOCS_LIST_ORIGIN_SAVED=output/vdocs-qa/list-origins-saved.json MANYDOC_VDOCS_LIST_ORIGIN_EDITED=output/vdocs-qa/list-origins-edited.json MANYDOC_VDOCS_LIST_ORIGIN_RESTARTED=output/vdocs-qa/list-origins-restarted.json MANYDOC_VDOCS_LIST_ORIGIN_DETACHED=output/vdocs-qa/list-origins-detached.json MANYDOC_VDOCS_LIST_ORIGIN_ITEM_DETACHED=output/vdocs-qa/list-origins-item-detached.json GOWORK=off go test -run TestVDOCSListOrigins -count=1 .",
+      "rg -n 'Source != nil|manydocOrigin' vdocs_navigation.go vdocs_tables.go vdocs_sections.go"
     ]
   },
-  "colleaf_anchor_origins_2026_11_24": {
+  "vdocs_anchor_origins_2026_11_24": {
     "scope": "Private native sourced inline anchor identity/context transport and explicit archival after current ownership changes. Full native integration and overall goal remain active/incomplete.",
     "implementation": [
       "Bookmark properties carry manydoc.anchor-origin/version1/ref only. evidence.anchorOrigins deduplicates original SourceInfo and hashes of source-free anchor identity plus paragraph semantics. No text/context cache.",
@@ -6820,9 +6820,9 @@
       "Rich note-body marker projection captures context before its temporary prefix. Source-only reference removal does not stale other anchors. The source-anchor negative regression now retains identityless-empty-text rejection and named sourced anchors have positive native/SF coverage; formatted anchors remain invalid."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_anchor_origins.cjs",
+      "script": "scripts/verify_vdocs_anchor_origins.cjs",
       "script_sha256": "91e13f1a8580d7b5db5e99e0418ad85dc8fd2bfe9d8fc0b23accb4cdabfd6cc9",
-      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned Colleaf validator and prosemirror-model1.25.13; no new dependency.",
+      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned retired host validator and prosemirror-model1.25.13; no new dependency.",
       "results": [
         "Seven synthetic main/list/cell/header/footer/note source records, reference-only point properties, no context/text cache. Rich note-body marker collapse preserves unchanged source context.",
         "Actual registered-plugin saves/reopens preserve source pools/streams, typed current point lookup and whole bold13pt emoji.",
@@ -6845,14 +6845,14 @@
     "runtime": "Pure-Go/std-library production only. No dependency/runtime executable/service/CGO/license server/upload, application/backend/permission/quota change or modified original corpus/oracle. SF value/schema unchanged; generated QA artifacts ignored.",
     "remaining": "Section/break/standalone source slots and identityless empty-text source policy; remaining marker appearance/nonvisual run/settings intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_ANCHOR_ORIGIN_QA=output/colleaf-qa/anchor-origins.json GOWORK=off go test -run TestColleafAnchorOrigins -count=1 .",
-      "node scripts/verify_colleaf_anchor_origins.cjs",
-      "MANYDOC_COLLEAF_ANCHOR_ORIGIN_SAVED=output/colleaf-qa/anchor-origins-saved.json MANYDOC_COLLEAF_ANCHOR_ORIGIN_EDITED=output/colleaf-qa/anchor-origins-edited.json MANYDOC_COLLEAF_ANCHOR_ORIGIN_MOVED=output/colleaf-qa/anchor-origins-moved.json MANYDOC_COLLEAF_ANCHOR_ORIGIN_RENAMED=output/colleaf-qa/anchor-origins-renamed.json MANYDOC_COLLEAF_ANCHOR_ORIGIN_DETACHED=output/colleaf-qa/anchor-origins-detached.json GOWORK=off go test -run TestColleafAnchorOrigins -count=1 .",
-      "rg -n 'Source != nil|manydocOrigin' colleaf_navigation.go colleaf_tables.go colleaf_sections.go colleaf_standalone_points.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_ANCHOR_ORIGIN_QA=output/vdocs-qa/anchor-origins.json GOWORK=off go test -run TestVDOCSAnchorOrigins -count=1 .",
+      "node scripts/verify_vdocs_anchor_origins.cjs",
+      "MANYDOC_VDOCS_ANCHOR_ORIGIN_SAVED=output/vdocs-qa/anchor-origins-saved.json MANYDOC_VDOCS_ANCHOR_ORIGIN_EDITED=output/vdocs-qa/anchor-origins-edited.json MANYDOC_VDOCS_ANCHOR_ORIGIN_MOVED=output/vdocs-qa/anchor-origins-moved.json MANYDOC_VDOCS_ANCHOR_ORIGIN_RENAMED=output/vdocs-qa/anchor-origins-renamed.json MANYDOC_VDOCS_ANCHOR_ORIGIN_DETACHED=output/vdocs-qa/anchor-origins-detached.json GOWORK=off go test -run TestVDOCSAnchorOrigins -count=1 .",
+      "rg -n 'Source != nil|manydocOrigin' vdocs_navigation.go vdocs_tables.go vdocs_sections.go vdocs_standalone_points.go"
     ]
   },
-  "colleaf_flow_origins_2026_11_24": {
+  "vdocs_flow_origins_2026_11_24": {
     "scope": "Private native section/hard-break/standalone-group sources and explicit identityless-empty-text SF source policy. Full native integration and overall goal remain active/incomplete.",
     "implementation": [
       "Section extras, single-hard-break paragraph style and first standalone-group bookmark carry manydoc.flow-origin/version1/ref. evidence.flowOrigins deduplicates original SourceInfo and source-free SF semantic hashes, without content/group caches.",
@@ -6861,9 +6861,9 @@
       "SF encoding now rejects Source on identityless empty text rather than silently dropping it. Detached facts can be retained explicitly in UnboundSources. Regression checks ErrUnsupported, input immutability and exact unbound SF round trip; ordinary source-free empty-run normalization stays intact."
     ],
     "independent_reader": {
-      "script": "scripts/verify_colleaf_flow_origins.cjs",
+      "script": "scripts/verify_vdocs_flow_origins.cjs",
       "script_sha256": "07b62d0562439dfccd1934a09b8eced816de44c12d43040fb4fc0fe5d317c80c",
-      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned Colleaf validator and prosemirror-model1.25.13; no new dependency.",
+      "packages": "Same attributed pinned Univer1.0.4 SDK/renderer/docs/drawing/hyperlink plugins, hash-pinned retired host validator and prosemirror-model1.25.13; no new dependency.",
       "results": [
         "Nine synthetic sources across two sections, one hard break and main/header/footer/note standalone groups including aliases; reference-only properties and no content cache.",
         "Actual registered-plugin saves/reopens preserve source pools/streams and bold13pt emoji. Current SDK skeleton has3 pages with the hard break and2 after marking it as a rendered soft boundary; original source pages are separate evidence.",
@@ -6885,14 +6885,14 @@
     "runtime": "Pure-Go/std-library production only. No dependency/runtime executable/service/CGO/license server/upload, application/backend/permission/quota change or modified original corpus/oracle. SF schema/value structure unchanged, previously silent source loss now explicitly rejects; generated QA artifacts ignored.",
     "remaining": "Combined real-source qualification and metadata/owner audit; remaining marker appearance/nonvisual run/settings intent; public native API/CLI and full-preset/browser qualification; nonmain lookup limits, per-page/decorated notes and broader PDF/source/resource/final acceptance audits.",
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_FLOW_ORIGIN_QA=output/colleaf-qa/flow-origins.json GOWORK=off go test -run TestColleafFlowOrigins -count=1 .",
-      "node scripts/verify_colleaf_flow_origins.cjs",
-      "MANYDOC_COLLEAF_FLOW_ORIGIN_SAVED=output/colleaf-qa/flow-origins-saved.json MANYDOC_COLLEAF_FLOW_ORIGIN_EDITED=output/colleaf-qa/flow-origins-edited.json MANYDOC_COLLEAF_FLOW_ORIGIN_RENAMED=output/colleaf-qa/flow-origins-renamed.json MANYDOC_COLLEAF_FLOW_ORIGIN_DETACHED=output/colleaf-qa/flow-origins-detached.json MANYDOC_COLLEAF_FLOW_ORIGIN_SOFT=output/colleaf-qa/flow-origins-soft.json GOWORK=off go test -run TestColleafFlowOrigins -count=1 .",
-      "rg -n 'ErrUnsupported|requires mapping|annotations|EastAsiaLanguage' colleaf_*.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_FLOW_ORIGIN_QA=output/vdocs-qa/flow-origins.json GOWORK=off go test -run TestVDOCSFlowOrigins -count=1 .",
+      "node scripts/verify_vdocs_flow_origins.cjs",
+      "MANYDOC_VDOCS_FLOW_ORIGIN_SAVED=output/vdocs-qa/flow-origins-saved.json MANYDOC_VDOCS_FLOW_ORIGIN_EDITED=output/vdocs-qa/flow-origins-edited.json MANYDOC_VDOCS_FLOW_ORIGIN_RENAMED=output/vdocs-qa/flow-origins-renamed.json MANYDOC_VDOCS_FLOW_ORIGIN_DETACHED=output/vdocs-qa/flow-origins-detached.json MANYDOC_VDOCS_FLOW_ORIGIN_SOFT=output/vdocs-qa/flow-origins-soft.json GOWORK=off go test -run TestVDOCSFlowOrigins -count=1 .",
+      "rg -n 'ErrUnsupported|requires mapping|annotations|EastAsiaLanguage' vdocs_*.go"
     ]
   },
-  "colleaf_real_source_transport_2026_11_24": {
+  "vdocs_real_source_transport_2026_11_24": {
     "status": "verified milestone; full goal active/incomplete",
     "implementation": "Lossless deterministic gzip/base64 native-intent/version2 for large private metadata; exact decompressed length, 128MiB parser expansion bound, legacy version1 retained; current native content remains authoritative.",
     "real_source": {
@@ -6909,10 +6909,10 @@
       "comparison": "Full SF graph equality after two Go cycles, two registered-plugin saves/reopens, strict envelope reimport and another Go cycle; input immutability. Original structural oracle/bytes unchanged."
     },
     "independent_QA": {
-      "script": "scripts/verify_colleaf_real_source.cjs",
+      "script": "scripts/verify_vdocs_real_source.cjs",
       "script_sha256": "15282556f045b28accb729ab238640fc539bdf59473ce76fabb6ac48412bc185",
       "sdk": "Actual Univer1.0.4 registered Docs/Drawing/DocsDrawing/Hyperlink facade saves in fresh instances",
-      "validator": "Unmodified pinned Colleaf validator; reconstructed old transport reproducibly fails unchanged5MiB limit, compact and saved snapshots pass",
+      "validator": "Unmodified pinned retired host validator; reconstructed old transport reproducibly fails unchanged5MiB limit, compact and saved snapshots pass",
       "validator_sha256": "c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0",
       "prosemirror": "1.25.13; 8872 nodes/marks/attributes checked"
     },
@@ -6926,8 +6926,8 @@
       "CGO_ENABLED=0 GOOS=linux GOARCH=arm64 GOWORK=off go build -o bin/manydoc-linux-arm64 ./cmd/manydoc": "passed; cross-build only",
       "actual_saved_full_graph": "passed9.332s; actual ProseMirror8872 nodes",
       "malformed_inputs": "checksum/truncation/trailing bytes/concatenated members/exact-size/bound/mixed encodings/version/profile/duplicate and unknown JSON fields/nulls/cancellation; strict resource preflight sees duplicate keys inside compressed record data",
-      "fuzz": "FuzzColleafCompressedIntent passed102415 executions/10.464s/2workers; short safety sample",
-      "node --check scripts/verify_colleaf_real_source.cjs": "passed",
+      "fuzz": "FuzzVDOCSCompressedIntent passed102415 executions/10.464s/2workers; short safety sample",
+      "node --check scripts/verify_vdocs_real_source.cjs": "passed",
       "git diff --check": "passed"
     },
     "limitations": [
@@ -6938,18 +6938,18 @@
       "Compression cannot guarantee arbitrary documents fit application limits; parser bound is unrelated to application authorization/admission."
     ],
     "next_commands": [
-      "cat docs/STATUS.md docs/COLLEAF_FORMAT.md",
-      "MANYDOC_COLLEAF_REAL_QA=output/colleaf-qa/real-source.json GOWORK=off go test -run TestColleafPublishedPDFSourceGraph -count=1 .",
-      "node scripts/verify_colleaf_real_source.cjs",
-      "MANYDOC_COLLEAF_REAL_SAVED=output/colleaf-qa/real-source-saved.json GOWORK=off go test -run TestColleafPublishedPDFSourceGraph -count=1 .",
-      "rg -n 'nonvisual|EastAsiaLanguage|ComplexLanguage|ComplexScript' colleaf_styles.go text_style.go"
+      "cat docs/STATUS.md docs/VDOCS_FORMAT.md",
+      "MANYDOC_VDOCS_REAL_QA=output/vdocs-qa/real-source.json GOWORK=off go test -run TestVDOCSPublishedPDFSourceGraph -count=1 .",
+      "node scripts/verify_vdocs_real_source.cjs",
+      "MANYDOC_VDOCS_REAL_SAVED=output/vdocs-qa/real-source-saved.json GOWORK=off go test -run TestVDOCSPublishedPDFSourceGraph -count=1 .",
+      "rg -n 'nonvisual|EastAsiaLanguage|ComplexLanguage|ComplexScript' vdocs_styles.go text_style.go"
     ]
   },
-  "colleaf_run_languages_2026_11_24": {
+  "vdocs_run_languages_2026_11_24": {
     "status": "verified component milestone; full goal active/incomplete",
     "implementation": {
       "native_altLang": "Current native scalar is authoritative for SF EastAsiaLanguage. Typed manydoc.run-languages/version1 style marker identifies the slot and independently retains ComplexLanguage; no alternate value/text cache.",
-      "foreign_altLang": "Preserved in the East Asian language slot with colleaf_alternate_language_inferred unless a recognized slot marker is present.",
+      "foreign_altLang": "Preserved in the East Asian language slot with vdocs_alternate_language_inferred unless a recognized slot marker is present.",
       "rendering_limit": "Native complex-language shaping is unproven. Run.Direction and ComplexScript output still reject explicitly. Persistence does not claim native shaping/paint equivalence."
     },
     "real_sources": [
@@ -6970,9 +6970,9 @@
     },
     "synthetic_scope": "Main, list, cell, header, footer, note text; literal/rich/default/empty body/citation marks; native glyph lang/altLang/private complex-language/bold/size propagation.",
     "independent_QA": {
-      "script": "scripts/verify_colleaf_languages.cjs",
+      "script": "scripts/verify_vdocs_languages.cjs",
       "script_sha256": "bd0084996e9667fe57bc23e830fd8c23b9b8b3f2c92e6a996ccbccda24239267",
-      "sdk": "Actual registered Univer1.0.4 Docs/Drawing/DocsDrawing/HyperLink plugins, FUniver createDocument/save in fresh instances, DocumentSkeleton glyph-style propagation; same hash-pinned Colleaf validator.",
+      "sdk": "Actual registered Univer1.0.4 Docs/Drawing/DocsDrawing/HyperLink plugins, FUniver createDocument/save in fresh instances, DocumentSkeleton glyph-style propagation; same hash-pinned retired host validator.",
       "cases": 6,
       "saves_per_baseline": 2,
       "edits": "Synthetic altLang ja-JP\u2192zh-Hant and authored ComplexLanguage ar-SA\u2192he-IL; separate altLang deletion. All five real documents remain in each artifact map.",
@@ -6991,18 +6991,18 @@
       "CGO_disabled_focused": "passed0.386s",
       "builds": "CGO-disabled host build and --help execution; Linux amd64/arm64 cross-builds pass, not Linux execution",
       "malformed_and_semantic": "Tag/profile/version/slot/unknown/miscased/duplicate/null fields, inherited/default/direct style and private-marker clearing, foreign-slot diagnostic, forced-script/run-direction rejection and edited run/paragraph source historical states.",
-      "fuzz": "FuzzColleafRunLanguages passed107375 executions/10.518s/2workers; short safety sample",
+      "fuzz": "FuzzVDOCSRunLanguages passed107375 executions/10.518s/2workers; short safety sample",
       "diff_check": "passed"
     },
     "remaining": "Native rendering/intent/settings, public API/CLI, full-preset/browser, other source/producer qualification, note policy/decorations and broader PDF/source/resource/final acceptance stay open.",
     "next_commands": [
       "cat docs/STATUS.md docs/ACCEPTANCE.md",
-      "MANYDOC_COLLEAF_LANGUAGES_QA=output/colleaf-qa/languages.json GOWORK=off go test -run TestColleafRealDOCXLanguageRoundTrips -count=1 .",
-      "node scripts/verify_colleaf_languages.cjs",
-      "rg -n 'ErrUnsupported|requires mapping|ComplexScript|run.Direction' colleaf_*.go"
+      "MANYDOC_VDOCS_LANGUAGES_QA=output/vdocs-qa/languages.json GOWORK=off go test -run TestVDOCSRealDOCXLanguageRoundTrips -count=1 .",
+      "node scripts/verify_vdocs_languages.cjs",
+      "rg -n 'ErrUnsupported|requires mapping|ComplexScript|run.Direction' vdocs_*.go"
     ]
   },
-  "colleaf_public_api_2026_11_24": {
+  "vdocs_public_api_2026_11_24": {
     "status": "public offline transport milestone; full goal active/incomplete; required PDF note acceptance fails",
     "public_api": [
       "VDOCS",
@@ -7014,18 +7014,18 @@
     "CLI": ".vdocs convert input/output and extract input; same atomic replacement. Native diagnostic/source history is retained without AllowLossy; unsupported mappings cannot be bypassed with AllowLossy.",
     "public_test_scope": "External-package full SF graph equality from original note/story DOCX, published Copyright Office PDF and table/image/list/Unicode corpus inputs; generic and dedicated functions, input immutability, envelope identity, nil/cancellation/I/O/wrong-envelope and unsupported output boundaries. CLI exact native/SF/gzip graph, typed DOCX notes and atomic failure.",
     "example": {
-      "command": "GOWORK=off go run ./examples/colleaf -out output/colleaf-example",
+      "command": "GOWORK=off go run ./examples/vdocs -out output/vdocs-example",
       "result": "passed; pure-Go native/SF/DOCX/PDF; native/SF graph equality verified",
-      "MIME": "application/vnd.vibedada.docs+json;version=3",
-      "app_envelope": "vibedada-document/version3/univer/engineVersion1.0.4"
+      "MIME": "retired-application-mime",
+      "app_envelope": "retired-application-envelope/version3/univer/engineVersion1.0.4"
     },
     "independent_QA": {
-      "script": "scripts/verify_colleaf_envelope.cjs",
+      "script": "scripts/verify_vdocs_envelope.cjs",
       "script_sha256": "66c9e84f903f83914eb362885cbc983dc2bf741a6351ad482cbc4cd5af410102",
-      "input": "output/colleaf-example/document.vdocs",
-      "validator": "Same hash-pinned actual Colleaf validator; passed",
+      "input": "output/vdocs-example/document.vdocs",
+      "validator": "Same hash-pinned actual retired host validator; passed",
       "SDK": "Registered Univer1.0.4 Docs/Drawing/DocsDrawing facade saves/reopens twice in fresh instances; passed. Absent and empty story/drawing maps are equivalent defaults, populated entries still compare.",
-      "public_reimport": "MANYDOC_PUBLIC_VDOCS_SAVED=output/colleaf-example/saved.vdocs GOWORK=off go test -run TestVDOCSPublicActualSavedExample -count=1 .; passed0.378s/full SF graph",
+      "public_reimport": "MANYDOC_PUBLIC_VDOCS_SAVED=output/vdocs-example/saved.vdocs GOWORK=off go test -run TestVDOCSPublicActualSavedExample -count=1 .; passed0.378s/full SF graph",
       "ProseMirror": "34-node example SF graph checked in document.sf and equivalent CLI SF; Python JSON/gzip confirms exact CLI graph",
       "pypdf_and_OOXML": {
         "PDF_pages": 2,
@@ -7060,7 +7060,7 @@
       "modules": "all modules verified",
       "CGO_disabled_public_tests": "passed5.630s",
       "builds": "CGO-disabled host build/--help and CLI native\u2192SF/gzip execution pass; Linux amd64/arm64 cross-builds pass (not execution)",
-      "fuzz": "FuzzColleafEnvelope passed1861 executions/11.464s/two workers; short safety sample, not exhaustive",
+      "fuzz": "FuzzVDOCSEnvelope passed1861 executions/11.464s/two workers; short safety sample, not exhaustive",
       "diff_check": "passed"
     },
     "remaining": "Generated-PDF typed-note recovery required gate fails. Native rendering/intent/browser and other PDF/inverse/source/resource/final acceptance remain open. No application/backend change or new production dependency.",
@@ -7293,24 +7293,24 @@
     "next_commands": [
       "GOWORK=off go test -run 'TestPDFAttribute|TestPDFPublished' -count=1 .",
       "GOWORK=off go test -run '^$' -fuzz '^FuzzPDFAttributeGraph$' -fuzztime=10s -parallel=2 .",
-      "cat docs/STATUS.md docs/ACCEPTANCE.md docs/COLLEAF_FORMAT.md"
+      "cat docs/STATUS.md docs/ACCEPTANCE.md docs/VDOCS_FORMAT.md"
     ]
   },
-  "colleaf_browser_note_order_audit": {
+  "vdocs_browser_note_order_audit": {
     "date": "2026-11-24",
     "goal": "active/incomplete",
     "scope": "First actual full-desktop-preset native browser probe; readiness succeeds but repeated-footnote body order fails. No application/vendor/production code or source oracle changed.",
     "sources": {
-      "Colleaf_commit": "5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6",
+      "VDOCS_commit": "5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6",
       "mount_sha256": "11d3fe8caadd351a3871b82ceecba3285cd77e02f777f7f7b1fecc57252b499a",
       "validator_sha256": "c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0",
       "Univer_presets": "1.0.4 core/drawing/hyperlink and find/replace; core/docs/engine-render also1.0.4",
       "other_QA_pins": "icons1.43.1,React/ReactDOM19.0.0,RxJS7.8.2,esbuild0.27.0; ignored optional QA only"
     },
     "reproduction": {
-      "prepare": "node scripts/prepare_colleaf_browser.cjs",
+      "prepare": "node scripts/prepare_vdocs_browser.cjs",
       "prepare_sha256": "49e3ffa0af12b0db6bf52d99b290d70da744765c75372e3151c4002dcb5a6285",
-      "checker": "node scripts/verify_colleaf_note_order.cjs",
+      "checker": "node scripts/verify_vdocs_note_order.cjs",
       "checker_sha256": "36082fac7acec399d24931dfff78912613dda147ce2db7d16000ab1e2a0b1650",
       "fixture_sha256": "43adc02a773866141fe29d625c31c42f23478297f888eedba1a45a47ba6aa0a5"
     },
@@ -7360,16 +7360,16 @@
     },
     "remaining": "Resolve native repeated-note placement without weakening original oracle, duplicating definitions/static body caches or patching applications. Browser edit/save/reopen/navigation/images/fonts/wrapping/mobile and broader goal audits remain unqualified. Overall goal active; not an all-work blocked claim.",
     "next_commands": [
-      "cat docs/COLLEAF_BROWSER.md",
-      "node scripts/verify_colleaf_note_order.cjs",
-      "node scripts/prepare_colleaf_browser.cjs",
-      "python3 -m http.server 8768 --bind 127.0.0.1 --directory output/colleaf-browser"
+      "cat docs/VDOCS_BROWSER.md",
+      "node scripts/verify_vdocs_note_order.cjs",
+      "node scripts/prepare_vdocs_browser.cjs",
+      "python3 -m http.server 8768 --bind 127.0.0.1 --directory output/vdocs-browser"
     ]
   },
-  "colleaf_note_order_edit_probe": {
+  "vdocs_note_order_edit_probe": {
     "date": "2026-11-25",
     "goal": "active/incomplete",
-    "command": "node scripts/verify_colleaf_note_order.cjs",
+    "command": "node scripts/verify_vdocs_note_order.cjs",
     "checker_sha256": "dcb53997ee3bb712efbe6afa2a10f6734ce369f7a80d9ab671a6b121d510d4cf",
     "source": "Unchanged public notes VDOCS, pinned actual core/engine-render1.0.4. Original first-reference-order oracle remains note-2 then note-3; no application/vendor changes.",
     "observations": {
@@ -7402,8 +7402,8 @@
       "diff_check": "passed"
     },
     "next_commands": [
-      "node scripts/verify_colleaf_note_order.cjs",
-      "cat docs/COLLEAF_BROWSER.md docs/STATUS.md"
+      "node scripts/verify_vdocs_note_order.cjs",
+      "cat docs/VDOCS_BROWSER.md docs/STATUS.md"
     ]
   },
   "pdf_constant_list_recovery_milestone": {
@@ -7441,7 +7441,7 @@
     },
     "remaining": "Native repeated-note placement remains unresolved; raw reordering demonstrably regresses after TextX edit. Variable/rich custom label representation, wider source/resource/untagged/native settings/browser and final semantic/API/visual acceptance remain open.",
     "next_commands": [
-      "node scripts/verify_colleaf_note_order.cjs",
+      "node scripts/verify_vdocs_note_order.cjs",
       "MANYDOC_PDF_CONSTANT_LIST_QA=output/pdf-constant-lists GOWORK=off go test -run 'TestPDFConstant|TestGeneratedPDFConstant' -count=1 .",
       "output/qa-venv/bin/python scripts/verify_pdf_constant_lists.py",
       "cat docs/STATUS.md docs/ACCEPTANCE.md"
@@ -7557,9 +7557,9 @@
     "remaining": "VDOCS literal markers remain required unfinished native mapping with atomic rejection. Native repeated-footnote placement, Word-PDF annotation reader discrepancy and broader source/resource/reflow/API/visual/original acceptance audits remain open. No overall blocker or completion exemption established.",
     "next_commands": [
       "cat docs/STATUS.md docs/LITERAL_LIST_MARKERS.md",
-      "rg -n 'ListBlock|Items|bullet|Marker' colleaf_lists.go colleaf_list_origins.go colleaf_tables.go",
+      "rg -n 'ListBlock|Items|bullet|Marker' vdocs_lists.go vdocs_list_origins.go vdocs_tables.go",
       "output/qa-venv/bin/python scripts/verify_docx_literal_markers.py --require-pdf-links",
-      "node scripts/verify_colleaf_note_order.cjs"
+      "node scripts/verify_vdocs_note_order.cjs"
     ]
   },
   "native_literal_marker_prototype": {
@@ -7568,14 +7568,14 @@
     "behavior": "Internal native literal-marker tables retain actual editable content with sparse checked ownership/counter metadata. Public VDOCS marker writer remains guarded until rendered qualification. Marker trees now participate in source/identity/citation/image-fitting walks.",
     "graph_checks": "Exact SF roundtrips cover rich formatting/links/notes, mixed automatic counters, nested images/tables/lists, stories, RTL and source owners. Actual native TextX edit and facade saves reimport current content. Unknown metadata rejects; stale ownership retains visible native tables and diagnostics.",
     "independent": {
-      "command": "node scripts/verify_colleaf_literal_markers.cjs",
+      "command": "node scripts/verify_vdocs_literal_markers.cjs",
       "sha256": "be98b445609ff29ad4f3b6c5d5a1914210994343815153fc3993609ecf00ea92",
       "validator_source_sha256": "c54b27b8c303713f5d5d5dfdb7cd54ec9b8410f5045613150861855b11c899c0",
-      "packages": "Published Univer core/engine-render/docs/drawing/docs-drawing 1.0.4; unmodified pinned Colleaf mount.",
+      "packages": "Published Univer core/engine-render/docs/drawing/docs-drawing 1.0.4; unmodified pinned VDOCS mount.",
       "result": "Native glyphs, geometry, complete Item 7)/Item 9) counters, notes/header caches, TextX edits and actual FDocument.save/reopen pass. Geometry/persistence do not establish canvas paint."
     },
     "browser": {
-      "probe": "scripts/colleaf_literal_browser_probe.js",
+      "probe": "scripts/vdocs_literal_browser_probe.js",
       "sha256": "e803732d951bc8d0f0869099fe53098b5b9904dd48b0d8ed7ad86b9bdb1e714b",
       "passed": "Lifecycle stage3/no runtime errors; rich/empty labels, note body, full automatic prefixes after right alignment and nested text visible.",
       "failed": "Strict original red-pixel oracle FAILS: nested, running/note and standalone control retain drawing records and independently decoded RGBA255,0,0,255 source, but canvas redPixels=0. Nested ordinary numbered label also appeared clipped.",
@@ -7597,9 +7597,9 @@
     "remaining": "Native image paint/list-in-cell/pagination qualification and public literal-marker writer enablement remain unfinished. Repeated-footnote native order bug, Word-PDF link discrepancy and broader source/resource/reflow/API/visual/original acceptance audits remain open. No overall blocker or completion exemption established.",
     "next_commands": [
       "cat docs/STATUS.md docs/NATIVE_LITERAL_MARKERS.md",
-      "node scripts/prepare_colleaf_browser.cjs output/native-literal/rich.vdocs",
-      "rg -n 'insertImage|renderImages|singleTransform|getImageSourceCache' output/colleaf-browser/node_modules/@univerjs/{docs-drawing-ui,drawing-ui,drawing}/lib/es/index.js",
-      "node scripts/verify_colleaf_literal_markers.cjs"
+      "node scripts/prepare_vdocs_browser.cjs output/native-literal/rich.vdocs",
+      "rg -n 'insertImage|renderImages|singleTransform|getImageSourceCache' output/vdocs-browser/node_modules/@univerjs/{docs-drawing-ui,drawing-ui,drawing}/lib/es/index.js",
+      "node scripts/verify_vdocs_literal_markers.cjs"
     ]
   },
   "native_drawing_registration": {
@@ -7630,9 +7630,9 @@
     "remaining": "Public VDOCS literal-marker export remains guarded: ordinary nested counter appears clipped/absent in canvas despite SDK glyph, long labels/pagination/mobile qualification remain. Native repeated-footnote order,Word-PDF annotation discrepancy and broader original acceptance audits remain open. No completion/blocker exemption claimed.",
     "next_commands": [
       "cat docs/STATUS.md docs/NATIVE_LITERAL_MARKERS.md",
-      "rg -n 'indentStart|hanging|bulletAlignment' colleaf_lists.go output/colleaf-browser/node_modules/@univerjs/{docs,docs-ui,engine-render}/lib/es/index.js",
-      "node scripts/prepare_colleaf_browser.cjs output/native-literal/nested.vdocs",
-      "node scripts/verify_colleaf_literal_markers.cjs"
+      "rg -n 'indentStart|hanging|bulletAlignment' vdocs_lists.go output/vdocs-browser/node_modules/@univerjs/{docs,docs-ui,engine-render}/lib/es/index.js",
+      "node scripts/prepare_vdocs_browser.cjs output/native-literal/nested.vdocs",
+      "node scripts/verify_vdocs_literal_markers.cjs"
     ]
   },
   "native_literal_public_measured_layout": {
@@ -7641,7 +7641,7 @@
     "behavior": "Public VDOCS rich literal-marker generation enabled; temporary writer guard removed. Actual editable label/body native content, source graph and sparse ownership remain authoritative. Ordinary lists indent21px per logical level with zero hanging,retaining actual measured counter advances. Empty right-aligned automatic-label cells keep measured layout without ordinary list properties. Custom foreign indents still diagnose.",
     "counter_discovery": "Actual native inserted numbered paragraph exposed missing indent. Fixed21px hanging first fixed short1. but clipped mixed Item7)/Item9) suffixes and overlapped original AppendixAA./compound/Roman/cell counter bodies. Original oracles retained. Label-only exception and measured zero-hanging fix now show full counters/body separation. AppendixAA. observed content88.874px/advance94.5px.",
     "SDK": {
-      "command": "node scripts/verify_colleaf_literal_markers.cjs",
+      "command": "node scripts/verify_vdocs_literal_markers.cjs",
       "sha256": "36395aaffb8423146eecb821a6f589eca7cc0bc5b2e743b6c44c65ff42e07062",
       "result": "Pinned validator/glyph/table/header/note/counter/TextX edit/actual facade saves pass,including continued case. Go actual-saved graph checks pass."
     },
@@ -7671,7 +7671,7 @@
     "remaining": "Full goal active: native repeated-footnote order defect,Word-PDF link annotation discrepancy and broader original source/resource/reflow/corpus/API/visual acceptance audits remain. Oversized/unbreakable counter and broader native font/layout cases still require qualification. No universal fidelity or completion/blocker exemption.",
     "next_commands": [
       "cat docs/STATUS.md docs/ACCEPTANCE.md docs/NATIVE_LITERAL_MARKERS.md",
-      "node scripts/verify_colleaf_note_order.cjs",
+      "node scripts/verify_vdocs_note_order.cjs",
       "rg -n 'resource|source|ParentTree|infer' docs/STATUS.md docs/ACCEPTANCE.md",
       "GOWORK=off go test ./..."
     ]
@@ -7700,7 +7700,7 @@
       "historical_comparison": "An older unrelated output differed in diagnostics/navigation/pages;not used as oracle or rewritten. Exact pre-change archive comparison passes."
     },
     "native_note_revalidation": {
-      "command": "node scripts/verify_colleaf_note_order.cjs",
+      "command": "node scripts/verify_vdocs_note_order.cjs",
       "sha256": "dcb53997ee3bb712efbe6afa2a10f6734ce369f7a80d9ab671a6b121d510d4cf",
       "result": "Original first-reference-order assertion still FAILS:expected note2,note3;observed reverse. No-repeat control passes;raw-range reorder initially passes then actual TextX edit reverses again. Source/oracle unchanged.",
       "source": "Pinned published1.0.4 resolveNoteReferences stores by text offset;footnote constructor overwrites _references by shared noteId,then sorts stored referenceIndex. IFootnoteCustomRange exposes noteId only. No proven stable data repair;does not prove all schema workarounds impossible. No duplicated bodies/static cache/vendor/app patch adopted."
@@ -7722,7 +7722,7 @@
       "cat docs/STATUS.md docs/ACCEPTANCE.md docs/PDF_RESOURCES.md",
       "rg -n 'CID width|for code|DereferenceNumber' pdf_font_metrics.go",
       "GOWORK=off go test ./...",
-      "node scripts/verify_colleaf_note_order.cjs"
+      "node scripts/verify_vdocs_note_order.cjs"
     ]
   },
   "pdf_cid_width_resources_uncertainty": {
