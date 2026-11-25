@@ -1,0 +1,3472 @@
+{
+  "schema": "manifold-five-optimizations/1",
+  "date_utc": "2026-11-25",
+  "implementation_commit": "4f32d78f77362f384d224e8d25cb58ca89108dbb",
+  "baseline_implementation_commit": "711187193428751653b037a517fe0d421f2ab74a",
+  "baseline_capacity_reference": "HUGE_RESULTS.json",
+  "baseline_profile_reference": "HUGE_PPROF_RESULTS.json",
+  "hardware": "MacBook Pro 18,2; M1 Max 10 cores (8P+2E); 32 GiB; macOS 15.4; active desktop",
+  "scope": "Unmodified original DOCX/PDF -> canonical SF; cold isolated processes, warm OS input cache after hashing, real buffered file output without fsync; not HTTP or same-process goroutine capacity",
+  "successful_large_jobs": 28,
+  "attempted_large_jobs": 28,
+  "materialized_sf_bytes": 45244410520,
+  "default_successes": 4,
+  "default_attempts": 7,
+  "all_successful_output_hashes_unchanged": true,
+  "environment": {
+    "arch": "arm64",
+    "cpus": 10,
+    "diagnostic_profiles": false,
+    "go": "go1.25.0",
+    "kind": "environment",
+    "large_document_work_policy": true,
+    "measurement": "cold process; storage mode recorded; file read + parse + content checks + fully materialized SHA-256 output; buffered file writes without fsync; separate timed parse/write; no warmup; unmodified downloaded originals",
+    "mem_profile_rate": 524288,
+    "os": "darwin",
+    "profile_mode": "cpu",
+    "profile_output_buffer_bytes": 0,
+    "rss_guard_mib_batch": 12288,
+    "soft_memory_mib_per_child": 8192,
+    "started_utc": "2026-11-25T16:23:15.264959Z",
+    "storage": "file",
+    "timeout": "10m0s"
+  },
+  "results": [
+    {
+      "fixture": {
+        "name": "ipcc-ar6-wgi",
+        "path": "output/hugetest-real/ipcc-ar6-wgi.pdf",
+        "source_url": "https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_FullReport.pdf",
+        "bytes": 423349528,
+        "sha256": "1f51c28a343161e057103b120ba4396a7eb54eaa293473114f55c12af8243481",
+        "pdf_pages": 2409,
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+      },
+      "sf_sha256": "df7598270fa776c217a09addfab547232dcb7bc445c6704854d4116bb23b4399",
+      "sf_bytes": 1745648991,
+      "comparison": {
+        "solo_wall_seconds_before": [
+          139.916492833,
+          141.280290834
+        ],
+        "solo_wall_seconds_after": [
+          124.96830725,
+          125.010728958
+        ],
+        "solo_mean_seconds_before": 140.5983918335,
+        "solo_mean_seconds_after": 124.989518104,
+        "solo_wall_speedup": 1.1248814617919585,
+        "solo_latency_reduction_percent": 11.101744142268988,
+        "solo_jobs_per_second_before": 0.007112456884885455,
+        "solo_jobs_per_second_after": 0.008000670897602232,
+        "solo_read_mean_before": 111.828569958,
+        "solo_read_mean_after": 110.2723457085,
+        "solo_write_mean_before": 28.6103544165,
+        "solo_write_mean_after": 14.448671625,
+        "allocated_gib_mean_before": 129.26204694435,
+        "allocated_gib_mean_after": 90.40112011134624,
+        "solo_peak_rss_mib_before": 8305.328125,
+        "solo_peak_rss_mib_after": 8052.359375,
+        "paired_wall_seconds_before": 175.999116417,
+        "paired_wall_seconds_after": 137.131931667,
+        "paired_throughput_speedup": 1.2834291348304048,
+        "paired_jobs_per_second_before": 0.011363693413444984,
+        "paired_jobs_per_second_after": 0.014584495206095666,
+        "paired_peak_rss_mib_before": 12013.75,
+        "paired_peak_rss_mib_after": 12428.734375,
+        "allocation_reduction_percent": 30.06367897742962
+      },
+      "optimized": {
+        "solo": {
+          "batches": [
+            {
+              "case": "ipcc-ar6-wgi",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 7936.140625,
+              "success": 1,
+              "successful_jobs_per_second": 0.008002028850398787,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 124.96830725,
+              "workers": 1
+            },
+            {
+              "case": "ipcc-ar6-wgi",
+              "kind": "batch",
+              "repeat": 2,
+              "sampled_peak_rss_mib": 8052.359375,
+              "success": 1,
+              "successful_jobs_per_second": 0.007999313405619539,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 125.010728958,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "ipcc-ar6-wgi",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_actualtext_unrepresentable": 2225,
+                    "pdf_artifact_properties": 2375,
+                    "pdf_clipped_text": 9,
+                    "pdf_clipping": 190,
+                    "pdf_cmap_codespace": 2389,
+                    "pdf_cmap_placeholder_encoding": 19,
+                    "pdf_color_state": 49,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_graphics_effects": 2393,
+                    "pdf_image_color": 206,
+                    "pdf_layout": 1,
+                    "pdf_link_action": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_kind_inferred": 1,
+                    "pdf_list_kind_unobserved": 1,
+                    "pdf_list_label_presentation": 1,
+                    "pdf_list_literal": 1,
+                    "pdf_list_numbering_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_page_crop": 15,
+                    "pdf_ruling_limit": 11,
+                    "pdf_structure_attributes": 1,
+                    "pdf_structure_figure_group": 1,
+                    "pdf_structure_inline": 1,
+                    "pdf_structure_layout": 1,
+                    "pdf_structure_missing_content": 1,
+                    "pdf_structure_role": 1,
+                    "pdf_structure_unclaimed": 1,
+                    "pdf_table_widths_inferred": 1,
+                    "pdf_text_color": 13,
+                    "pdf_text_color_approximation": 2389,
+                    "pdf_text_paint": 6,
+                    "pdf_text_partial_clip": 185,
+                    "pdf_text_transform": 203,
+                    "pdf_unmapped_glyph_outline": 2,
+                    "pdf_vector_graphics": 2430,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 110.1926825,
+                  "explicit_breaks": 0,
+                  "images": 42422,
+                  "input_bytes": 423349528,
+                  "physical_pages": 2409,
+                  "read_seconds": 110.163051083,
+                  "recovered_paragraphs": 90854,
+                  "recovered_text_bytes": 13518790,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 92589.73679351807,
+                  "gc_cycles": 70,
+                  "gc_pause_ms": 7.653122,
+                  "output_bytes": 1745648991,
+                  "output_sha256": "df7598270fa776c217a09addfab547232dcb7bc445c6704854d4116bb23b4399",
+                  "read_seconds": 110.163051083,
+                  "sampled_peak_heap_mib": 7036.549514770508,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 124.733817,
+                  "write_seconds": 14.539928125
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 3.837283,
+              "to": "sf",
+              "user_cpu_seconds": 172.7261,
+              "worker": 0,
+              "workers": 1
+            },
+            {
+              "case": "ipcc-ar6-wgi",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_actualtext_unrepresentable": 2225,
+                    "pdf_artifact_properties": 2375,
+                    "pdf_clipped_text": 9,
+                    "pdf_clipping": 190,
+                    "pdf_cmap_codespace": 2389,
+                    "pdf_cmap_placeholder_encoding": 19,
+                    "pdf_color_state": 49,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_graphics_effects": 2393,
+                    "pdf_image_color": 206,
+                    "pdf_layout": 1,
+                    "pdf_link_action": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_kind_inferred": 1,
+                    "pdf_list_kind_unobserved": 1,
+                    "pdf_list_label_presentation": 1,
+                    "pdf_list_literal": 1,
+                    "pdf_list_numbering_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_page_crop": 15,
+                    "pdf_ruling_limit": 11,
+                    "pdf_structure_attributes": 1,
+                    "pdf_structure_figure_group": 1,
+                    "pdf_structure_inline": 1,
+                    "pdf_structure_layout": 1,
+                    "pdf_structure_missing_content": 1,
+                    "pdf_structure_role": 1,
+                    "pdf_structure_unclaimed": 1,
+                    "pdf_table_widths_inferred": 1,
+                    "pdf_text_color": 13,
+                    "pdf_text_color_approximation": 2389,
+                    "pdf_text_paint": 6,
+                    "pdf_text_partial_clip": 185,
+                    "pdf_text_transform": 203,
+                    "pdf_unmapped_glyph_outline": 2,
+                    "pdf_vector_graphics": 2430,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 110.411459542,
+                  "explicit_breaks": 0,
+                  "images": 42422,
+                  "input_bytes": 423349528,
+                  "physical_pages": 2409,
+                  "read_seconds": 110.381640334,
+                  "recovered_paragraphs": 90854,
+                  "recovered_text_bytes": 13518790,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 92551.75719451904,
+                  "gc_cycles": 71,
+                  "gc_pause_ms": 5.9567,
+                  "output_bytes": 1745648991,
+                  "output_sha256": "df7598270fa776c217a09addfab547232dcb7bc445c6704854d4116bb23b4399",
+                  "read_seconds": 110.381640334,
+                  "sampled_peak_heap_mib": 7206.061637878418,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 124.769250708,
+                  "write_seconds": 14.357415125
+                }
+              ],
+              "repeat": 2,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 3.998831,
+              "to": "sf",
+              "user_cpu_seconds": 173.730188,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        },
+        "pair": {
+          "batches": [
+            {
+              "case": "ipcc-ar6-wgi",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 12428.734375,
+              "success": 2,
+              "successful_jobs_per_second": 0.014584495206095666,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 137.131931667,
+              "workers": 2
+            }
+          ],
+          "children": [
+            {
+              "case": "ipcc-ar6-wgi",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_actualtext_unrepresentable": 2225,
+                    "pdf_artifact_properties": 2375,
+                    "pdf_clipped_text": 9,
+                    "pdf_clipping": 190,
+                    "pdf_cmap_codespace": 2389,
+                    "pdf_cmap_placeholder_encoding": 19,
+                    "pdf_color_state": 49,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_graphics_effects": 2393,
+                    "pdf_image_color": 206,
+                    "pdf_layout": 1,
+                    "pdf_link_action": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_kind_inferred": 1,
+                    "pdf_list_kind_unobserved": 1,
+                    "pdf_list_label_presentation": 1,
+                    "pdf_list_literal": 1,
+                    "pdf_list_numbering_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_page_crop": 15,
+                    "pdf_ruling_limit": 11,
+                    "pdf_structure_attributes": 1,
+                    "pdf_structure_figure_group": 1,
+                    "pdf_structure_inline": 1,
+                    "pdf_structure_layout": 1,
+                    "pdf_structure_missing_content": 1,
+                    "pdf_structure_role": 1,
+                    "pdf_structure_unclaimed": 1,
+                    "pdf_table_widths_inferred": 1,
+                    "pdf_text_color": 13,
+                    "pdf_text_color_approximation": 2389,
+                    "pdf_text_paint": 6,
+                    "pdf_text_partial_clip": 185,
+                    "pdf_text_transform": 203,
+                    "pdf_unmapped_glyph_outline": 2,
+                    "pdf_vector_graphics": 2430,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 120.380014125,
+                  "explicit_breaks": 0,
+                  "images": 42422,
+                  "input_bytes": 423349528,
+                  "physical_pages": 2409,
+                  "read_seconds": 120.351563417,
+                  "recovered_paragraphs": 90854,
+                  "recovered_text_bytes": 13518790,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 92551.3755493164,
+                  "gc_cycles": 69,
+                  "gc_pause_ms": 27.109956,
+                  "output_bytes": 1745648991,
+                  "output_sha256": "df7598270fa776c217a09addfab547232dcb7bc445c6704854d4116bb23b4399",
+                  "read_seconds": 120.351563417,
+                  "sampled_peak_heap_mib": 7337.631378173828,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 136.432748792,
+                  "write_seconds": 16.052042458
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 10.150766,
+              "to": "sf",
+              "user_cpu_seconds": 176.256344,
+              "worker": 0,
+              "workers": 2
+            },
+            {
+              "case": "ipcc-ar6-wgi",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_actualtext_unrepresentable": 2225,
+                    "pdf_artifact_properties": 2375,
+                    "pdf_clipped_text": 9,
+                    "pdf_clipping": 190,
+                    "pdf_cmap_codespace": 2389,
+                    "pdf_cmap_placeholder_encoding": 19,
+                    "pdf_color_state": 49,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_graphics_effects": 2393,
+                    "pdf_image_color": 206,
+                    "pdf_layout": 1,
+                    "pdf_link_action": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_kind_inferred": 1,
+                    "pdf_list_kind_unobserved": 1,
+                    "pdf_list_label_presentation": 1,
+                    "pdf_list_literal": 1,
+                    "pdf_list_numbering_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_page_crop": 15,
+                    "pdf_ruling_limit": 11,
+                    "pdf_structure_attributes": 1,
+                    "pdf_structure_figure_group": 1,
+                    "pdf_structure_inline": 1,
+                    "pdf_structure_layout": 1,
+                    "pdf_structure_missing_content": 1,
+                    "pdf_structure_role": 1,
+                    "pdf_structure_unclaimed": 1,
+                    "pdf_table_widths_inferred": 1,
+                    "pdf_text_color": 13,
+                    "pdf_text_color_approximation": 2389,
+                    "pdf_text_paint": 6,
+                    "pdf_text_partial_clip": 185,
+                    "pdf_text_transform": 203,
+                    "pdf_unmapped_glyph_outline": 2,
+                    "pdf_vector_graphics": 2430,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 120.712501708,
+                  "explicit_breaks": 0,
+                  "images": 42422,
+                  "input_bytes": 423349528,
+                  "physical_pages": 2409,
+                  "read_seconds": 120.683187583,
+                  "recovered_paragraphs": 90854,
+                  "recovered_text_bytes": 13518790,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 92593.75361633301,
+                  "gc_cycles": 71,
+                  "gc_pause_ms": 52.957534,
+                  "output_bytes": 1745648991,
+                  "output_sha256": "df7598270fa776c217a09addfab547232dcb7bc445c6704854d4116bb23b4399",
+                  "read_seconds": 120.683187583,
+                  "sampled_peak_heap_mib": 7094.047897338867,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 136.982014375,
+                  "write_seconds": 16.269113459
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 10.924158,
+              "to": "sf",
+              "user_cpu_seconds": 179.961435,
+              "worker": 1,
+              "workers": 2
+            }
+          ]
+        },
+        "default": {
+          "batches": [
+            {
+              "case": "ipcc-ar6-wgi",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 2143.671875,
+              "success": 0,
+              "successful_jobs_per_second": 0,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 9.186841167,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "ipcc-ar6-wgi",
+              "exit_code": 1,
+              "kind": "child",
+              "records": null,
+              "repeat": 1,
+              "stderr": "PDF decoded streams exceed 268435456 bytes: PDF decoded stream limit exceeded: 2763826 bytes\n",
+              "success": false,
+              "system_cpu_seconds": 0.669709,
+              "to": "sf",
+              "user_cpu_seconds": 12.882248,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fixture": {
+        "name": "intel-sdm-084",
+        "path": "output/hugetest-real/intel-sdm.pdf",
+        "source_url": "https://cdrdv2-public.intel.com/825743/325462-sdm-vol-1-2abcd-3abcd-4.pdf",
+        "bytes": 25169252,
+        "sha256": "b0eb1fa3445b26dfa0eca6b8c264f74793367bb1f474988b2e48d2dd32b95662",
+        "pdf_pages": 5057,
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+      },
+      "sf_sha256": "8ab1eb3c7cd97f263ef7fb7e088a0b06a0cc03e4977eb904d72300b9a5ca2be0",
+      "sf_bytes": 3069352846,
+      "comparison": {
+        "solo_wall_seconds_before": [
+          94.590133292,
+          95.854009209
+        ],
+        "solo_wall_seconds_after": [
+          51.674553583,
+          51.620405334
+        ],
+        "solo_mean_seconds_before": 95.2220712505,
+        "solo_mean_seconds_after": 51.6474794585,
+        "solo_wall_speedup": 1.8436925141141347,
+        "solo_latency_reduction_percent": 45.761020758904344,
+        "solo_jobs_per_second_before": 0.010501766941923658,
+        "solo_jobs_per_second_after": 0.019362029095795937,
+        "solo_read_mean_before": 47.025217208499996,
+        "solo_read_mean_after": 28.355249062,
+        "solo_write_mean_before": 47.9922166255,
+        "solo_write_mean_after": 22.961469520999998,
+        "allocated_gib_mean_before": 99.88399414718151,
+        "allocated_gib_mean_after": 34.98717417195439,
+        "solo_peak_rss_mib_before": 8197.921875,
+        "solo_peak_rss_mib_after": 7995.6875,
+        "paired_wall_seconds_before": 132.303701917,
+        "paired_wall_seconds_after": 64.126103208,
+        "paired_throughput_speedup": 2.063180129437439,
+        "paired_jobs_per_second_before": 0.015116734989431276,
+        "paired_jobs_per_second_after": 0.031188547252166285,
+        "paired_peak_rss_mib_before": 13999.796875,
+        "paired_peak_rss_mib_after": 13623.71875,
+        "allocation_reduction_percent": 64.97219152009485
+      },
+      "optimized": {
+        "solo": {
+          "batches": [
+            {
+              "case": "intel-sdm-084",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 7995.6875,
+              "success": 1,
+              "successful_jobs_per_second": 0.01935188464461127,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 51.674553583,
+              "workers": 1
+            },
+            {
+              "case": "intel-sdm-084",
+              "kind": "batch",
+              "repeat": 2,
+              "sampled_peak_rss_mib": 7977.640625,
+              "success": 1,
+              "successful_jobs_per_second": 0.019372184188204074,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 51.620405334,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "intel-sdm-084",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipping": 27,
+                    "pdf_color_state": 18,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_destination_missing": 1,
+                    "pdf_font_family": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 5057,
+                    "pdf_inference_uncertain": 1,
+                    "pdf_layout": 1,
+                    "pdf_link_action": 570,
+                    "pdf_link_overlap": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_page_crop": 15,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color": 10,
+                    "pdf_text_color_approximation": 1,
+                    "pdf_text_color_quantized": 4814,
+                    "pdf_text_paint": 72,
+                    "pdf_text_partial_clip": 24,
+                    "pdf_text_transform": 200,
+                    "pdf_vector_graphics": 5011,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 28.399063667,
+                  "explicit_breaks": 5056,
+                  "images": 6,
+                  "input_bytes": 25169252,
+                  "physical_pages": 5057,
+                  "read_seconds": 28.321071833,
+                  "recovered_paragraphs": 184720,
+                  "recovered_text_bytes": 12320170,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 35827.08045959473,
+                  "gc_cycles": 37,
+                  "gc_pause_ms": 2.472535,
+                  "output_bytes": 3069352846,
+                  "output_sha256": "8ab1eb3c7cd97f263ef7fb7e088a0b06a0cc03e4977eb904d72300b9a5ca2be0",
+                  "read_seconds": 28.321071833,
+                  "sampled_peak_heap_mib": 7174.73690032959,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 51.432834709,
+                  "write_seconds": 23.028254625
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 3.684022,
+              "to": "sf",
+              "user_cpu_seconds": 64.047127,
+              "worker": 0,
+              "workers": 1
+            },
+            {
+              "case": "intel-sdm-084",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipping": 27,
+                    "pdf_color_state": 18,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_destination_missing": 1,
+                    "pdf_font_family": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 5057,
+                    "pdf_inference_uncertain": 1,
+                    "pdf_layout": 1,
+                    "pdf_link_action": 570,
+                    "pdf_link_overlap": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_page_crop": 15,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color": 10,
+                    "pdf_text_color_approximation": 1,
+                    "pdf_text_color_quantized": 4814,
+                    "pdf_text_paint": 72,
+                    "pdf_text_partial_clip": 24,
+                    "pdf_text_transform": 200,
+                    "pdf_vector_graphics": 5011,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 28.467224,
+                  "explicit_breaks": 5056,
+                  "images": 6,
+                  "input_bytes": 25169252,
+                  "physical_pages": 5057,
+                  "read_seconds": 28.389426291,
+                  "recovered_paragraphs": 184720,
+                  "recovered_text_bytes": 12320170,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 35826.65224456787,
+                  "gc_cycles": 37,
+                  "gc_pause_ms": 2.939418,
+                  "output_bytes": 3069352846,
+                  "output_sha256": "8ab1eb3c7cd97f263ef7fb7e088a0b06a0cc03e4977eb904d72300b9a5ca2be0",
+                  "read_seconds": 28.389426291,
+                  "sampled_peak_heap_mib": 7131.318168640137,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 51.372843125,
+                  "write_seconds": 22.894684417
+                }
+              ],
+              "repeat": 2,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 3.554027,
+              "to": "sf",
+              "user_cpu_seconds": 64.169917,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        },
+        "pair": {
+          "batches": [
+            {
+              "case": "intel-sdm-084",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 13623.71875,
+              "success": 2,
+              "successful_jobs_per_second": 0.031188547252166285,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 64.126103208,
+              "workers": 2
+            }
+          ],
+          "children": [
+            {
+              "case": "intel-sdm-084",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipping": 27,
+                    "pdf_color_state": 18,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_destination_missing": 1,
+                    "pdf_font_family": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 5057,
+                    "pdf_inference_uncertain": 1,
+                    "pdf_layout": 1,
+                    "pdf_link_action": 570,
+                    "pdf_link_overlap": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_page_crop": 15,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color": 10,
+                    "pdf_text_color_approximation": 1,
+                    "pdf_text_color_quantized": 4814,
+                    "pdf_text_paint": 72,
+                    "pdf_text_partial_clip": 24,
+                    "pdf_text_transform": 200,
+                    "pdf_vector_graphics": 5011,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 34.581331458,
+                  "explicit_breaks": 5056,
+                  "images": 6,
+                  "input_bytes": 25169252,
+                  "physical_pages": 5057,
+                  "read_seconds": 34.498737375,
+                  "recovered_paragraphs": 184720,
+                  "recovered_text_bytes": 12320170,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 35827.02336883545,
+                  "gc_cycles": 37,
+                  "gc_pause_ms": 8.772747,
+                  "output_bytes": 3069352846,
+                  "output_sha256": "8ab1eb3c7cd97f263ef7fb7e088a0b06a0cc03e4977eb904d72300b9a5ca2be0",
+                  "read_seconds": 34.498737375,
+                  "sampled_peak_heap_mib": 7167.736236572266,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 63.751955583,
+                  "write_seconds": 29.16965275
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 14.171821,
+              "to": "sf",
+              "user_cpu_seconds": 66.77049,
+              "worker": 0,
+              "workers": 2
+            },
+            {
+              "case": "intel-sdm-084",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipping": 27,
+                    "pdf_color_state": 18,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_destination_missing": 1,
+                    "pdf_font_family": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 5057,
+                    "pdf_inference_uncertain": 1,
+                    "pdf_layout": 1,
+                    "pdf_link_action": 570,
+                    "pdf_link_overlap": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_page_crop": 15,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color": 10,
+                    "pdf_text_color_approximation": 1,
+                    "pdf_text_color_quantized": 4814,
+                    "pdf_text_paint": 72,
+                    "pdf_text_partial_clip": 24,
+                    "pdf_text_transform": 200,
+                    "pdf_vector_graphics": 5011,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 34.543048959000004,
+                  "explicit_breaks": 5056,
+                  "images": 6,
+                  "input_bytes": 25169252,
+                  "physical_pages": 5057,
+                  "read_seconds": 34.459698375,
+                  "recovered_paragraphs": 184720,
+                  "recovered_text_bytes": 12320170,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 35825.58755493164,
+                  "gc_cycles": 37,
+                  "gc_pause_ms": 27.218878,
+                  "output_bytes": 3069352846,
+                  "output_sha256": "8ab1eb3c7cd97f263ef7fb7e088a0b06a0cc03e4977eb904d72300b9a5ca2be0",
+                  "read_seconds": 34.459698375,
+                  "sampled_peak_heap_mib": 7325.308937072754,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 63.436251084,
+                  "write_seconds": 28.891750333
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 13.947408,
+              "to": "sf",
+              "user_cpu_seconds": 67.534449,
+              "worker": 1,
+              "workers": 2
+            }
+          ]
+        },
+        "default": {
+          "batches": [
+            {
+              "case": "intel-sdm-084",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 4765.5,
+              "success": 0,
+              "successful_jobs_per_second": 0,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 9.063498292,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "intel-sdm-084",
+              "exit_code": 1,
+              "kind": "child",
+              "records": null,
+              "repeat": 1,
+              "stderr": "PDF navigation: PDF destination name budget exceeded\n",
+              "success": false,
+              "system_cpu_seconds": 0.782095,
+              "to": "sf",
+              "user_cpu_seconds": 14.749707,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fixture": {
+        "name": "ecma376-part1",
+        "path": "output/hugetest-real/ecma376-part1.pdf",
+        "source_url": "https://ecma-international.org/wp-content/uploads/ECMA-376-1_5th_edition_december_2016.zip",
+        "bytes": 35304993,
+        "sha256": "7cccfd0ad0e2ef89316acece15e44a8a088d0603ce4bba4e7b0361b50d13a37d",
+        "pdf_pages": 5039,
+        "archive_member": "Ecma Office Open XML Part 1 - Fundamentals And Markup Language Reference.pdf",
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+      },
+      "sf_sha256": "ec7b59e7042bb47614bcc8ee10b297d3e4253c6b1dd1efb0537804ca832c3982",
+      "sf_bytes": 4132810817,
+      "comparison": {
+        "solo_wall_seconds_before": [
+          143.579968125,
+          144.951096917
+        ],
+        "solo_wall_seconds_after": [
+          80.816165917,
+          79.458562916
+        ],
+        "solo_mean_seconds_before": 144.265532521,
+        "solo_mean_seconds_after": 80.1373644165,
+        "solo_wall_speedup": 1.800228065540127,
+        "solo_latency_reduction_percent": 44.45148261256734,
+        "solo_jobs_per_second_before": 0.00693166262602909,
+        "solo_jobs_per_second_after": 0.012478573600233144,
+        "solo_read_mean_before": 80.796596917,
+        "solo_read_mean_after": 51.152311583,
+        "solo_write_mean_before": 63.222863062,
+        "solo_write_mean_after": 28.5972558335,
+        "allocated_gib_mean_before": 215.085801910609,
+        "allocated_gib_mean_after": 50.17215221375227,
+        "solo_peak_rss_mib_before": 8775.671875,
+        "solo_peak_rss_mib_after": 8264.53125,
+        "paired_wall_seconds_before": 312.300645,
+        "paired_wall_seconds_after": 129.253809375,
+        "paired_throughput_speedup": 2.4161813606122196,
+        "paired_jobs_per_second_before": 0.00640408539662158,
+        "paired_jobs_per_second_after": 0.015473431767085974,
+        "paired_peak_rss_mib_before": 13955.90625,
+        "paired_peak_rss_mib_after": 13298.609375,
+        "allocation_reduction_percent": 76.67342438781517
+      },
+      "optimized": {
+        "solo": {
+          "batches": [
+            {
+              "case": "ecma376-part1",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 8264.53125,
+              "success": 1,
+              "successful_jobs_per_second": 0.012373761965236289,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 80.816165917,
+              "workers": 1
+            },
+            {
+              "case": "ecma376-part1",
+              "kind": "batch",
+              "repeat": 2,
+              "sampled_peak_rss_mib": 8195.875,
+              "success": 1,
+              "successful_jobs_per_second": 0.01258517601252309,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 79.458562916,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "ecma376-part1",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipped_text": 4,
+                    "pdf_clipping": 891,
+                    "pdf_color_state": 12,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 3416,
+                    "pdf_inference_uncertain": 2,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_page_crop": 6,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_quantized": 3246,
+                    "pdf_text_partial_clip": 2501,
+                    "pdf_text_transform": 17,
+                    "pdf_vector_graphics": 4098
+                  },
+                  "elapsed_seconds": 51.26877925,
+                  "explicit_breaks": 5038,
+                  "images": 3033,
+                  "input_bytes": 35304993,
+                  "physical_pages": 5039,
+                  "read_seconds": 51.180054541,
+                  "recovered_paragraphs": 164582,
+                  "recovered_text_bytes": 8809284,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 51375.39266204834,
+                  "gc_cycles": 52,
+                  "gc_pause_ms": 4.271125,
+                  "output_bytes": 4132810817,
+                  "output_sha256": "ec7b59e7042bb47614bcc8ee10b297d3e4253c6b1dd1efb0537804ca832c3982",
+                  "read_seconds": 51.180054541,
+                  "sampled_peak_heap_mib": 7420.748207092285,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 80.480837459,
+                  "write_seconds": 29.211516334
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 5.154195,
+              "to": "sf",
+              "user_cpu_seconds": 117.215938,
+              "worker": 0,
+              "workers": 1
+            },
+            {
+              "case": "ecma376-part1",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipped_text": 4,
+                    "pdf_clipping": 891,
+                    "pdf_color_state": 12,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 3416,
+                    "pdf_inference_uncertain": 2,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_page_crop": 6,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_quantized": 3246,
+                    "pdf_text_partial_clip": 2501,
+                    "pdf_text_transform": 17,
+                    "pdf_vector_graphics": 4098
+                  },
+                  "elapsed_seconds": 51.209393625,
+                  "explicit_breaks": 5038,
+                  "images": 3033,
+                  "input_bytes": 35304993,
+                  "physical_pages": 5039,
+                  "read_seconds": 51.124568625,
+                  "recovered_paragraphs": 164582,
+                  "recovered_text_bytes": 8809284,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 51377.17507171631,
+                  "gc_cycles": 52,
+                  "gc_pause_ms": 4.115588,
+                  "output_bytes": 4132810817,
+                  "output_sha256": "ec7b59e7042bb47614bcc8ee10b297d3e4253c6b1dd1efb0537804ca832c3982",
+                  "read_seconds": 51.124568625,
+                  "sampled_peak_heap_mib": 7361.48405456543,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 79.192693209,
+                  "write_seconds": 27.982995333
+                }
+              ],
+              "repeat": 2,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 4.908982,
+              "to": "sf",
+              "user_cpu_seconds": 117.164673,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        },
+        "pair": {
+          "batches": [
+            {
+              "case": "ecma376-part1",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 13298.609375,
+              "success": 2,
+              "successful_jobs_per_second": 0.015473431767085974,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 129.253809375,
+              "workers": 2
+            }
+          ],
+          "children": [
+            {
+              "case": "ecma376-part1",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipped_text": 4,
+                    "pdf_clipping": 891,
+                    "pdf_color_state": 12,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 3416,
+                    "pdf_inference_uncertain": 2,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_page_crop": 6,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_quantized": 3246,
+                    "pdf_text_partial_clip": 2501,
+                    "pdf_text_transform": 17,
+                    "pdf_vector_graphics": 4098
+                  },
+                  "elapsed_seconds": 83.4115915,
+                  "explicit_breaks": 5038,
+                  "images": 3033,
+                  "input_bytes": 35304993,
+                  "physical_pages": 5039,
+                  "read_seconds": 83.325131208,
+                  "recovered_paragraphs": 164582,
+                  "recovered_text_bytes": 8809284,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 51376.13793182373,
+                  "gc_cycles": 52,
+                  "gc_pause_ms": 25.462835,
+                  "output_bytes": 4132810817,
+                  "output_sha256": "ec7b59e7042bb47614bcc8ee10b297d3e4253c6b1dd1efb0537804ca832c3982",
+                  "read_seconds": 83.325131208,
+                  "sampled_peak_heap_mib": 7500.373069763184,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 127.598151875,
+                  "write_seconds": 44.185162708
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 69.912638,
+              "to": "sf",
+              "user_cpu_seconds": 127.911385,
+              "worker": 0,
+              "workers": 2
+            },
+            {
+              "case": "ecma376-part1",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipped_text": 4,
+                    "pdf_clipping": 891,
+                    "pdf_color_state": 12,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 3416,
+                    "pdf_inference_uncertain": 2,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_page_crop": 6,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_quantized": 3246,
+                    "pdf_text_partial_clip": 2501,
+                    "pdf_text_transform": 17,
+                    "pdf_vector_graphics": 4098
+                  },
+                  "elapsed_seconds": 84.810345084,
+                  "explicit_breaks": 5038,
+                  "images": 3033,
+                  "input_bytes": 35304993,
+                  "physical_pages": 5039,
+                  "read_seconds": 84.718414916,
+                  "recovered_paragraphs": 164582,
+                  "recovered_text_bytes": 8809284,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 51376.199157714844,
+                  "gc_cycles": 52,
+                  "gc_pause_ms": 27.968917,
+                  "output_bytes": 4132810817,
+                  "output_sha256": "ec7b59e7042bb47614bcc8ee10b297d3e4253c6b1dd1efb0537804ca832c3982",
+                  "read_seconds": 84.718414916,
+                  "sampled_peak_heap_mib": 7508.841361999512,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 128.823460292,
+                  "write_seconds": 44.012088083
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 81.679436,
+              "to": "sf",
+              "user_cpu_seconds": 127.27426,
+              "worker": 1,
+              "workers": 2
+            }
+          ]
+        },
+        "default": {
+          "batches": [
+            {
+              "case": "ecma376-part1",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 4072.953125,
+              "success": 0,
+              "successful_jobs_per_second": 0,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 11.627016125,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "ecma376-part1",
+              "exit_code": 1,
+              "kind": "child",
+              "records": null,
+              "repeat": 1,
+              "stderr": "PDF page 2842: PDF decoded streams exceed 268435456 bytes: PDF decoded stream limit exceeded: 1186932 bytes\n",
+              "success": false,
+              "system_cpu_seconds": 0.69404,
+              "to": "sf",
+              "user_cpu_seconds": 14.881738,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fixture": {
+        "name": "3gpp-38331-i00",
+        "path": "output/hugetest-real/38331-i00.docx",
+        "source_url": "https://www.3gpp.org/ftp/Specs/archive/38_series/38.331/38331-i00.zip",
+        "bytes": 3891288,
+        "sha256": "9e319813a4ba5e800702fe5991f7b6e671d889a552e1743e833c2af603ccdbc4",
+        "pdf_pages": 0,
+        "source_docx_paragraphs": 66185,
+        "producer_page_count": 1,
+        "note": "Producer page count is stale (1), not a pagination oracle. Original body contains 66,185 XML paragraphs.",
+        "archive_member": "38331-i00.docx",
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+      },
+      "sf_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+      "sf_bytes": 46390537,
+      "comparison": {
+        "solo_wall_seconds_before": [
+          3.199677291,
+          3.186681708
+        ],
+        "solo_wall_seconds_after": [
+          2.921505791,
+          2.941641209
+        ],
+        "solo_mean_seconds_before": 3.1931794995000002,
+        "solo_mean_seconds_after": 2.9315735,
+        "solo_wall_speedup": 1.089237400836104,
+        "solo_latency_reduction_percent": 8.19264934968309,
+        "solo_jobs_per_second_before": 0.3131674871884226,
+        "solo_jobs_per_second_after": 0.34111373977149134,
+        "solo_read_mean_before": 2.1735914585,
+        "solo_read_mean_after": 2.1625605620000004,
+        "solo_write_mean_before": 0.992582375,
+        "solo_write_mean_after": 0.7396627295,
+        "allocated_gib_mean_before": 2.56458156183362,
+        "allocated_gib_mean_after": 2.1885686963796616,
+        "solo_peak_rss_mib_before": 885.703125,
+        "solo_peak_rss_mib_after": 926.203125,
+        "paired_wall_seconds_before": 3.348453042,
+        "paired_wall_seconds_after": 3.144094041,
+        "paired_throughput_speedup": 1.064997738087695,
+        "paired_jobs_per_second_before": 0.5972907414002194,
+        "paired_jobs_per_second_after": 0.6361132885719559,
+        "paired_peak_rss_mib_before": 1813.390625,
+        "paired_peak_rss_mib_after": 1829.9375,
+        "allocation_reduction_percent": 14.661762801769406
+      },
+      "optimized": {
+        "solo": {
+          "batches": [
+            {
+              "case": "3gpp-38331-i00",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 883.078125,
+              "success": 1,
+              "successful_jobs_per_second": 0.34228924107581893,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 2.921505791,
+              "workers": 1
+            },
+            {
+              "case": "3gpp-38331-i00",
+              "kind": "batch",
+              "repeat": 2,
+              "sampled_peak_rss_mib": 926.203125,
+              "success": 1,
+              "successful_jobs_per_second": 0.33994628472720717,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 2.941641209,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "3gpp-38331-i00",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "bookmark_range": 1,
+                    "docx_page_settings": 1,
+                    "field": 1,
+                    "font_selectors": 1,
+                    "font_theme": 1,
+                    "font_theme_run_language": 1,
+                    "legacy_drawing_preview": 1,
+                    "office_math_native": 1,
+                    "paragraph_formatting": 16,
+                    "position_tab": 1,
+                    "run_formatting": 8,
+                    "symbol_font_unicode": 1,
+                    "table_autofit": 1,
+                    "table_cell_width_preference": 1,
+                    "table_grid_gaps": 1,
+                    "table_header_ignored": 1,
+                    "table_width_preference": 1
+                  },
+                  "elapsed_seconds": 2.164302542,
+                  "explicit_breaks": 3,
+                  "images": 73,
+                  "input_bytes": 3891288,
+                  "physical_pages": 0,
+                  "read_seconds": 2.157997083,
+                  "recovered_paragraphs": 66136,
+                  "recovered_text_bytes": 4258463,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 2241.107666015625,
+                  "gc_cycles": 28,
+                  "gc_pause_ms": 7.745711,
+                  "output_bytes": 46390537,
+                  "output_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+                  "read_seconds": 2.157997083,
+                  "sampled_peak_heap_mib": 700.7446899414062,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 2.898655459,
+                  "write_seconds": 0.733724959
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 0.226881,
+              "to": "sf",
+              "user_cpu_seconds": 3.955258,
+              "worker": 0,
+              "workers": 1
+            },
+            {
+              "case": "3gpp-38331-i00",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "bookmark_range": 1,
+                    "docx_page_settings": 1,
+                    "field": 1,
+                    "font_selectors": 1,
+                    "font_theme": 1,
+                    "font_theme_run_language": 1,
+                    "legacy_drawing_preview": 1,
+                    "office_math_native": 1,
+                    "paragraph_formatting": 16,
+                    "position_tab": 1,
+                    "run_formatting": 8,
+                    "symbol_font_unicode": 1,
+                    "table_autofit": 1,
+                    "table_cell_width_preference": 1,
+                    "table_grid_gaps": 1,
+                    "table_header_ignored": 1,
+                    "table_width_preference": 1
+                  },
+                  "elapsed_seconds": 2.17328775,
+                  "explicit_breaks": 3,
+                  "images": 73,
+                  "input_bytes": 3891288,
+                  "physical_pages": 0,
+                  "read_seconds": 2.167124041,
+                  "recovered_paragraphs": 66136,
+                  "recovered_text_bytes": 4258463,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 2241.081024169922,
+                  "gc_cycles": 29,
+                  "gc_pause_ms": 1.411374,
+                  "output_bytes": 46390537,
+                  "output_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+                  "read_seconds": 2.167124041,
+                  "sampled_peak_heap_mib": 681.8600540161133,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 2.919556292,
+                  "write_seconds": 0.7456005
+                }
+              ],
+              "repeat": 2,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 0.243342,
+              "to": "sf",
+              "user_cpu_seconds": 4.039711,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        },
+        "pair": {
+          "batches": [
+            {
+              "case": "3gpp-38331-i00",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 1829.9375,
+              "success": 2,
+              "successful_jobs_per_second": 0.6361132885719559,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 3.144094041,
+              "workers": 2
+            }
+          ],
+          "children": [
+            {
+              "case": "3gpp-38331-i00",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "bookmark_range": 1,
+                    "docx_page_settings": 1,
+                    "field": 1,
+                    "font_selectors": 1,
+                    "font_theme": 1,
+                    "font_theme_run_language": 1,
+                    "legacy_drawing_preview": 1,
+                    "office_math_native": 1,
+                    "paragraph_formatting": 16,
+                    "position_tab": 1,
+                    "run_formatting": 8,
+                    "symbol_font_unicode": 1,
+                    "table_autofit": 1,
+                    "table_cell_width_preference": 1,
+                    "table_grid_gaps": 1,
+                    "table_header_ignored": 1,
+                    "table_width_preference": 1
+                  },
+                  "elapsed_seconds": 2.2209795,
+                  "explicit_breaks": 3,
+                  "images": 73,
+                  "input_bytes": 3891288,
+                  "physical_pages": 0,
+                  "read_seconds": 2.213908625,
+                  "recovered_paragraphs": 66136,
+                  "recovered_text_bytes": 4258463,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 2241.141860961914,
+                  "gc_cycles": 29,
+                  "gc_pause_ms": 1.849003,
+                  "output_bytes": 46390537,
+                  "output_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+                  "read_seconds": 2.213908625,
+                  "sampled_peak_heap_mib": 686.2881774902344,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 3.006620958,
+                  "write_seconds": 0.780423333
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 0.252016,
+              "to": "sf",
+              "user_cpu_seconds": 4.05085,
+              "worker": 0,
+              "workers": 2
+            },
+            {
+              "case": "3gpp-38331-i00",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "bookmark_range": 1,
+                    "docx_page_settings": 1,
+                    "field": 1,
+                    "font_selectors": 1,
+                    "font_theme": 1,
+                    "font_theme_run_language": 1,
+                    "legacy_drawing_preview": 1,
+                    "office_math_native": 1,
+                    "paragraph_formatting": 16,
+                    "position_tab": 1,
+                    "run_formatting": 8,
+                    "symbol_font_unicode": 1,
+                    "table_autofit": 1,
+                    "table_cell_width_preference": 1,
+                    "table_grid_gaps": 1,
+                    "table_header_ignored": 1,
+                    "table_width_preference": 1
+                  },
+                  "elapsed_seconds": 2.222098792,
+                  "explicit_breaks": 3,
+                  "images": 73,
+                  "input_bytes": 3891288,
+                  "physical_pages": 0,
+                  "read_seconds": 2.214935167,
+                  "recovered_paragraphs": 66136,
+                  "recovered_text_bytes": 4258463,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 2240.97021484375,
+                  "gc_cycles": 28,
+                  "gc_pause_ms": 9.058083,
+                  "output_bytes": 46390537,
+                  "output_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+                  "read_seconds": 2.214935167,
+                  "sampled_peak_heap_mib": 741.8977813720703,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 3.011582583,
+                  "write_seconds": 0.788819417
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 0.242897,
+              "to": "sf",
+              "user_cpu_seconds": 4.043423,
+              "worker": 1,
+              "workers": 2
+            }
+          ]
+        },
+        "default": {
+          "batches": [
+            {
+              "case": "3gpp-38331-i00",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 879.90625,
+              "success": 1,
+              "successful_jobs_per_second": 0.34001238070081224,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 2.941069375,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "3gpp-38331-i00",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "bookmark_range": 1,
+                    "docx_page_settings": 1,
+                    "field": 1,
+                    "font_selectors": 1,
+                    "font_theme": 1,
+                    "font_theme_run_language": 1,
+                    "legacy_drawing_preview": 1,
+                    "office_math_native": 1,
+                    "paragraph_formatting": 16,
+                    "position_tab": 1,
+                    "run_formatting": 8,
+                    "symbol_font_unicode": 1,
+                    "table_autofit": 1,
+                    "table_cell_width_preference": 1,
+                    "table_grid_gaps": 1,
+                    "table_header_ignored": 1,
+                    "table_width_preference": 1
+                  },
+                  "elapsed_seconds": 2.1731385,
+                  "explicit_breaks": 3,
+                  "images": 73,
+                  "input_bytes": 3891288,
+                  "physical_pages": 0,
+                  "read_seconds": 2.166995375,
+                  "recovered_paragraphs": 66136,
+                  "recovered_text_bytes": 4258463,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 2241.173568725586,
+                  "gc_cycles": 28,
+                  "gc_pause_ms": 8.563289,
+                  "output_bytes": 46390537,
+                  "output_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+                  "read_seconds": 2.166995375,
+                  "sampled_peak_heap_mib": 700.9845657348633,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 2.919260667,
+                  "write_seconds": 0.745476042
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 0.239526,
+              "to": "sf",
+              "user_cpu_seconds": 3.973294,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fixture": {
+        "name": "3gpp-38331-i10",
+        "path": "output/hugetest-real/38331-i10.docx",
+        "source_url": "https://www.3gpp.org/ftp/Specs/archive/38_series/38.331/38331-i10.zip",
+        "bytes": 4002052,
+        "sha256": "58cdf26a2aa48c0c24e4f4bcf67fd969ce274d5f571b6418a90537fcc2e7659b",
+        "pdf_pages": 0,
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed.",
+        "source_docx_paragraphs": 68220,
+        "producer_page_count": 1,
+        "archive_member": "38331-i10.docx",
+        "note": "Corresponding ETSI TS 138 331 V18.1.0 PDF is 1624 pages; this is not verified Word pagination. Producer page metadata is not an oracle."
+      },
+      "sf_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+      "sf_bytes": 48307780,
+      "comparison": {
+        "solo_wall_seconds_before": [
+          3.285081125,
+          3.2876770840000002
+        ],
+        "solo_wall_seconds_after": [
+          3.039322791,
+          3.037987958
+        ],
+        "solo_mean_seconds_before": 3.2863791045,
+        "solo_mean_seconds_after": 3.0386553745000002,
+        "solo_wall_speedup": 1.0815241280991799,
+        "solo_latency_reduction_percent": 7.537892681364566,
+        "solo_jobs_per_second_before": 0.3042862579763582,
+        "solo_jobs_per_second_after": 0.3290929298504429,
+        "solo_read_mean_before": 2.2328413545,
+        "solo_read_mean_after": 2.2187515204999997,
+        "solo_write_mean_before": 1.0261014375,
+        "solo_write_mean_after": 0.7730334999999999,
+        "allocated_gib_mean_before": 2.7196601256728172,
+        "allocated_gib_mean_after": 2.293335609138012,
+        "solo_peak_rss_mib_before": 1008.875,
+        "solo_peak_rss_mib_after": 998.71875,
+        "paired_wall_seconds_before": 3.419442709,
+        "paired_wall_seconds_after": 3.182884375,
+        "paired_throughput_speedup": 1.0743220004653797,
+        "paired_jobs_per_second_before": 0.5848906299076116,
+        "paired_jobs_per_second_after": 0.6283608715758014,
+        "paired_peak_rss_mib_before": 1939.796875,
+        "paired_peak_rss_mib_after": 1931.171875,
+        "allocation_reduction_percent": 15.675654193346556
+      },
+      "optimized": {
+        "solo": {
+          "batches": [
+            {
+              "case": "3gpp-38331-i10",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 998.71875,
+              "success": 1,
+              "successful_jobs_per_second": 0.32902066307704664,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 3.039322791,
+              "workers": 1
+            },
+            {
+              "case": "3gpp-38331-i10",
+              "kind": "batch",
+              "repeat": 2,
+              "sampled_peak_rss_mib": 988.71875,
+              "success": 1,
+              "successful_jobs_per_second": 0.32916522837645823,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 3.037987958,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "3gpp-38331-i10",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "bookmark_range": 1,
+                    "color_system": 1,
+                    "color_theme": 1,
+                    "docx_page_settings": 1,
+                    "field": 1,
+                    "font_selectors": 1,
+                    "font_theme": 1,
+                    "font_theme_run_language": 1,
+                    "legacy_drawing_preview": 1,
+                    "office_math_native": 1,
+                    "paragraph_formatting": 17,
+                    "position_tab": 1,
+                    "run_formatting": 9,
+                    "symbol_font_unicode": 1,
+                    "table_autofit": 1,
+                    "table_cell_width_preference": 1,
+                    "table_grid_gaps": 1,
+                    "table_header_ignored": 1,
+                    "table_width_preference": 1
+                  },
+                  "elapsed_seconds": 2.207650416,
+                  "explicit_breaks": 3,
+                  "images": 73,
+                  "input_bytes": 4002052,
+                  "physical_pages": 0,
+                  "read_seconds": 2.200962583,
+                  "recovered_paragraphs": 68169,
+                  "recovered_text_bytes": 4419020,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 2348.283103942871,
+                  "gc_cycles": 29,
+                  "gc_pause_ms": 1.557711,
+                  "output_bytes": 48307780,
+                  "output_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+                  "read_seconds": 2.200962583,
+                  "sampled_peak_heap_mib": 753.7273330688477,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 2.984918083,
+                  "write_seconds": 0.776473
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 0.241963,
+              "to": "sf",
+              "user_cpu_seconds": 4.14355,
+              "worker": 0,
+              "workers": 1
+            },
+            {
+              "case": "3gpp-38331-i10",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "bookmark_range": 1,
+                    "color_system": 1,
+                    "color_theme": 1,
+                    "docx_page_settings": 1,
+                    "field": 1,
+                    "font_selectors": 1,
+                    "font_theme": 1,
+                    "font_theme_run_language": 1,
+                    "legacy_drawing_preview": 1,
+                    "office_math_native": 1,
+                    "paragraph_formatting": 17,
+                    "position_tab": 1,
+                    "run_formatting": 9,
+                    "symbol_font_unicode": 1,
+                    "table_autofit": 1,
+                    "table_cell_width_preference": 1,
+                    "table_grid_gaps": 1,
+                    "table_header_ignored": 1,
+                    "table_width_preference": 1
+                  },
+                  "elapsed_seconds": 2.24305225,
+                  "explicit_breaks": 3,
+                  "images": 73,
+                  "input_bytes": 4002052,
+                  "physical_pages": 0,
+                  "read_seconds": 2.236540458,
+                  "recovered_paragraphs": 68169,
+                  "recovered_text_bytes": 4419020,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 2348.4682235717773,
+                  "gc_cycles": 29,
+                  "gc_pause_ms": 1.588629,
+                  "output_bytes": 48307780,
+                  "output_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+                  "read_seconds": 2.236540458,
+                  "sampled_peak_heap_mib": 684.4240570068359,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 3.013348208,
+                  "write_seconds": 0.769594
+                }
+              ],
+              "repeat": 2,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 0.241716,
+              "to": "sf",
+              "user_cpu_seconds": 4.155454,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        },
+        "pair": {
+          "batches": [
+            {
+              "case": "3gpp-38331-i10",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 1931.171875,
+              "success": 2,
+              "successful_jobs_per_second": 0.6283608715758014,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 3.182884375,
+              "workers": 2
+            }
+          ],
+          "children": [
+            {
+              "case": "3gpp-38331-i10",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "bookmark_range": 1,
+                    "color_system": 1,
+                    "color_theme": 1,
+                    "docx_page_settings": 1,
+                    "field": 1,
+                    "font_selectors": 1,
+                    "font_theme": 1,
+                    "font_theme_run_language": 1,
+                    "legacy_drawing_preview": 1,
+                    "office_math_native": 1,
+                    "paragraph_formatting": 17,
+                    "position_tab": 1,
+                    "run_formatting": 9,
+                    "symbol_font_unicode": 1,
+                    "table_autofit": 1,
+                    "table_cell_width_preference": 1,
+                    "table_grid_gaps": 1,
+                    "table_header_ignored": 1,
+                    "table_width_preference": 1
+                  },
+                  "elapsed_seconds": 2.32670825,
+                  "explicit_breaks": 3,
+                  "images": 73,
+                  "input_bytes": 4002052,
+                  "physical_pages": 0,
+                  "read_seconds": 2.320291959,
+                  "recovered_paragraphs": 68169,
+                  "recovered_text_bytes": 4419020,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 2348.311622619629,
+                  "gc_cycles": 29,
+                  "gc_pause_ms": 13.636042,
+                  "output_bytes": 48307780,
+                  "output_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+                  "read_seconds": 2.320291959,
+                  "sampled_peak_heap_mib": 741.5974197387695,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 3.156218833,
+                  "write_seconds": 0.82879225
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 0.26629,
+              "to": "sf",
+              "user_cpu_seconds": 4.213767,
+              "worker": 0,
+              "workers": 2
+            },
+            {
+              "case": "3gpp-38331-i10",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "bookmark_range": 1,
+                    "color_system": 1,
+                    "color_theme": 1,
+                    "docx_page_settings": 1,
+                    "field": 1,
+                    "font_selectors": 1,
+                    "font_theme": 1,
+                    "font_theme_run_language": 1,
+                    "legacy_drawing_preview": 1,
+                    "office_math_native": 1,
+                    "paragraph_formatting": 17,
+                    "position_tab": 1,
+                    "run_formatting": 9,
+                    "symbol_font_unicode": 1,
+                    "table_autofit": 1,
+                    "table_cell_width_preference": 1,
+                    "table_grid_gaps": 1,
+                    "table_header_ignored": 1,
+                    "table_width_preference": 1
+                  },
+                  "elapsed_seconds": 2.317932625,
+                  "explicit_breaks": 3,
+                  "images": 73,
+                  "input_bytes": 4002052,
+                  "physical_pages": 0,
+                  "read_seconds": 2.310632625,
+                  "recovered_paragraphs": 68169,
+                  "recovered_text_bytes": 4419020,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 2348.335159301758,
+                  "gc_cycles": 28,
+                  "gc_pause_ms": 5.496418,
+                  "output_bytes": 48307780,
+                  "output_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+                  "read_seconds": 2.310632625,
+                  "sampled_peak_heap_mib": 759.2536926269531,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 3.151328625,
+                  "write_seconds": 0.832529042
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 0.269285,
+              "to": "sf",
+              "user_cpu_seconds": 4.177265,
+              "worker": 1,
+              "workers": 2
+            }
+          ]
+        },
+        "default": {
+          "batches": [
+            {
+              "case": "3gpp-38331-i10",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 999.109375,
+              "success": 1,
+              "successful_jobs_per_second": 0.3316790380277835,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 3.014962917,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "3gpp-38331-i10",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "bookmark_range": 1,
+                    "color_system": 1,
+                    "color_theme": 1,
+                    "docx_page_settings": 1,
+                    "field": 1,
+                    "font_selectors": 1,
+                    "font_theme": 1,
+                    "font_theme_run_language": 1,
+                    "legacy_drawing_preview": 1,
+                    "office_math_native": 1,
+                    "paragraph_formatting": 17,
+                    "position_tab": 1,
+                    "run_formatting": 9,
+                    "symbol_font_unicode": 1,
+                    "table_autofit": 1,
+                    "table_cell_width_preference": 1,
+                    "table_grid_gaps": 1,
+                    "table_header_ignored": 1,
+                    "table_width_preference": 1
+                  },
+                  "elapsed_seconds": 2.216356667,
+                  "explicit_breaks": 3,
+                  "images": 73,
+                  "input_bytes": 4002052,
+                  "physical_pages": 0,
+                  "read_seconds": 2.209956958,
+                  "recovered_paragraphs": 68169,
+                  "recovered_text_bytes": 4419020,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 2348.3174057006836,
+                  "gc_cycles": 29,
+                  "gc_pause_ms": 1.678373,
+                  "output_bytes": 48307780,
+                  "output_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+                  "read_seconds": 2.209956958,
+                  "sampled_peak_heap_mib": 694.5261840820312,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 2.990532292,
+                  "write_seconds": 0.773417458
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 0.247891,
+              "to": "sf",
+              "user_cpu_seconds": 4.14072,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fixture": {
+        "name": "etsi-38331-v180100",
+        "path": "output/hugetest-real/etsi-38331-v180100.pdf",
+        "source_url": "https://www.etsi.org/deliver/etsi_ts/138300_138399/138331/18.01.00_60/ts_138331v180100p.pdf",
+        "bytes": 7235315,
+        "sha256": "939befcf81d76ee493a45d8c9a47d32b0863bb0941a7b3ecf63f5907cf61ea3e",
+        "pdf_pages": 1624,
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+      },
+      "sf_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9",
+      "sf_bytes": 1081974112,
+      "comparison": {
+        "solo_wall_seconds_before": [
+          29.045866375,
+          29.854350084
+        ],
+        "solo_wall_seconds_after": [
+          16.164072834,
+          16.215911875
+        ],
+        "solo_mean_seconds_before": 29.4501082295,
+        "solo_mean_seconds_after": 16.1899923545,
+        "solo_wall_speedup": 1.819031632915772,
+        "solo_latency_reduction_percent": 45.02569488596113,
+        "solo_jobs_per_second_before": 0.03395573259721694,
+        "solo_jobs_per_second_after": 0.06176655171316684,
+        "solo_read_mean_before": 13.7397291455,
+        "solo_read_mean_after": 9.334778958,
+        "solo_write_mean_before": 15.639098,
+        "solo_write_mean_after": 6.706756583,
+        "allocated_gib_mean_before": 53.72699900716543,
+        "allocated_gib_mean_after": 11.775394089519978,
+        "solo_peak_rss_mib_before": 2956,
+        "solo_peak_rss_mib_after": 2842.921875,
+        "paired_wall_seconds_before": 31.854254291,
+        "paired_wall_seconds_after": 17.345779625,
+        "paired_throughput_speedup": 1.836426783901332,
+        "paired_jobs_per_second_before": 0.06278596201716999,
+        "paired_jobs_per_second_after": 0.11530182230134266,
+        "paired_peak_rss_mib_before": 6111.828125,
+        "paired_peak_rss_mib_after": 5678.296875,
+        "allocation_reduction_percent": 78.08291118595787
+      },
+      "optimized": {
+        "solo": {
+          "batches": [
+            {
+              "case": "etsi-38331-v180100",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 2842.921875,
+              "success": 1,
+              "successful_jobs_per_second": 0.061865596020859906,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 16.164072834,
+              "workers": 1
+            },
+            {
+              "case": "etsi-38331-v180100",
+              "kind": "batch",
+              "repeat": 2,
+              "sampled_peak_rss_mib": 2826.265625,
+              "success": 1,
+              "successful_jobs_per_second": 0.06166782403040162,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 16.215911875,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "etsi-38331-v180100",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipped_text": 1,
+                    "pdf_clipping": 2,
+                    "pdf_color_state": 1,
+                    "pdf_font_bounds": 80,
+                    "pdf_font_family": 2,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 1624,
+                    "pdf_inference_uncertain": 3,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_page_crop": 8,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_quantized": 900,
+                    "pdf_text_partial_clip": 1624,
+                    "pdf_text_transform": 1624,
+                    "pdf_vector_graphics": 755,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 9.336142209,
+                  "explicit_breaks": 1623,
+                  "images": 1743,
+                  "input_bytes": 7235315,
+                  "physical_pages": 1624,
+                  "read_seconds": 9.314875458,
+                  "recovered_paragraphs": 44329,
+                  "recovered_text_bytes": 4797937,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 12058.237991333008,
+                  "gc_cycles": 34,
+                  "gc_pause_ms": 2.450375,
+                  "output_bytes": 1081974112,
+                  "output_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9",
+                  "read_seconds": 9.314875458,
+                  "sampled_peak_heap_mib": 2577.7357482910156,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 16.03605475,
+                  "write_seconds": 6.6986968749999996
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 1.183168,
+              "to": "sf",
+              "user_cpu_seconds": 19.761022,
+              "worker": 0,
+              "workers": 1
+            },
+            {
+              "case": "etsi-38331-v180100",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipped_text": 1,
+                    "pdf_clipping": 2,
+                    "pdf_color_state": 1,
+                    "pdf_font_bounds": 80,
+                    "pdf_font_family": 2,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 1624,
+                    "pdf_inference_uncertain": 3,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_page_crop": 8,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_quantized": 900,
+                    "pdf_text_partial_clip": 1624,
+                    "pdf_text_transform": 1624,
+                    "pdf_vector_graphics": 755,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 9.376215417,
+                  "explicit_breaks": 1623,
+                  "images": 1743,
+                  "input_bytes": 7235315,
+                  "physical_pages": 1624,
+                  "read_seconds": 9.354682458,
+                  "recovered_paragraphs": 44329,
+                  "recovered_text_bytes": 4797937,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 12057.769104003906,
+                  "gc_cycles": 34,
+                  "gc_pause_ms": 2.063833,
+                  "output_bytes": 1081974112,
+                  "output_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9",
+                  "read_seconds": 9.354682458,
+                  "sampled_peak_heap_mib": 2596.834083557129,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 16.092259625,
+                  "write_seconds": 6.714816291
+                }
+              ],
+              "repeat": 2,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 1.206538,
+              "to": "sf",
+              "user_cpu_seconds": 19.821946,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        },
+        "pair": {
+          "batches": [
+            {
+              "case": "etsi-38331-v180100",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 5678.296875,
+              "success": 2,
+              "successful_jobs_per_second": 0.11530182230134266,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 17.345779625,
+              "workers": 2
+            }
+          ],
+          "children": [
+            {
+              "case": "etsi-38331-v180100",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipped_text": 1,
+                    "pdf_clipping": 2,
+                    "pdf_color_state": 1,
+                    "pdf_font_bounds": 80,
+                    "pdf_font_family": 2,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 1624,
+                    "pdf_inference_uncertain": 3,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_page_crop": 8,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_quantized": 900,
+                    "pdf_text_partial_clip": 1624,
+                    "pdf_text_transform": 1624,
+                    "pdf_vector_graphics": 755,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 9.735591,
+                  "explicit_breaks": 1623,
+                  "images": 1743,
+                  "input_bytes": 7235315,
+                  "physical_pages": 1624,
+                  "read_seconds": 9.712119167,
+                  "recovered_paragraphs": 44329,
+                  "recovered_text_bytes": 4797937,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 12057.587440490723,
+                  "gc_cycles": 34,
+                  "gc_pause_ms": 2.723044,
+                  "output_bytes": 1081974112,
+                  "output_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9",
+                  "read_seconds": 9.712119167,
+                  "sampled_peak_heap_mib": 2610.9312896728516,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 17.090393084,
+                  "write_seconds": 7.354211958
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 1.573525,
+              "to": "sf",
+              "user_cpu_seconds": 19.799297,
+              "worker": 0,
+              "workers": 2
+            },
+            {
+              "case": "etsi-38331-v180100",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipped_text": 1,
+                    "pdf_clipping": 2,
+                    "pdf_color_state": 1,
+                    "pdf_font_bounds": 80,
+                    "pdf_font_family": 2,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 1624,
+                    "pdf_inference_uncertain": 3,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_page_crop": 8,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_quantized": 900,
+                    "pdf_text_partial_clip": 1624,
+                    "pdf_text_transform": 1624,
+                    "pdf_vector_graphics": 755,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 9.769015375,
+                  "explicit_breaks": 1623,
+                  "images": 1743,
+                  "input_bytes": 7235315,
+                  "physical_pages": 1624,
+                  "read_seconds": 9.747765709,
+                  "recovered_paragraphs": 44329,
+                  "recovered_text_bytes": 4797937,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 12057.601997375488,
+                  "gc_cycles": 34,
+                  "gc_pause_ms": 2.453334,
+                  "output_bytes": 1081974112,
+                  "output_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9",
+                  "read_seconds": 9.747765709,
+                  "sampled_peak_heap_mib": 2577.428192138672,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 17.227807666,
+                  "write_seconds": 7.458274375
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 1.6012140000000001,
+              "to": "sf",
+              "user_cpu_seconds": 19.991195,
+              "worker": 1,
+              "workers": 2
+            }
+          ]
+        },
+        "default": {
+          "batches": [
+            {
+              "case": "etsi-38331-v180100",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 2798.921875,
+              "success": 1,
+              "successful_jobs_per_second": 0.061828209771722306,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 16.173846917,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "etsi-38331-v180100",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_clipped_text": 1,
+                    "pdf_clipping": 2,
+                    "pdf_color_state": 1,
+                    "pdf_font_bounds": 80,
+                    "pdf_font_family": 2,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 1624,
+                    "pdf_inference_uncertain": 3,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_mask_resampling": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_page_crop": 8,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_quantized": 900,
+                    "pdf_text_partial_clip": 1624,
+                    "pdf_text_transform": 1624,
+                    "pdf_vector_graphics": 755,
+                    "pdf_xmp_metadata": 1
+                  },
+                  "elapsed_seconds": 9.378209333,
+                  "explicit_breaks": 1623,
+                  "images": 1743,
+                  "input_bytes": 7235315,
+                  "physical_pages": 1624,
+                  "read_seconds": 9.356985166,
+                  "recovered_paragraphs": 44329,
+                  "recovered_text_bytes": 4797937,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 12058.3134765625,
+                  "gc_cycles": 35,
+                  "gc_pause_ms": 2.339127,
+                  "output_bytes": 1081974112,
+                  "output_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9",
+                  "read_seconds": 9.356985166,
+                  "sampled_peak_heap_mib": 2581.7509155273438,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 16.059858541,
+                  "write_seconds": 6.68035475
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 1.196478,
+              "to": "sf",
+              "user_cpu_seconds": 19.556678,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fixture": {
+        "name": "cpp-n4950",
+        "path": "output/hugetest-real/cpp-n4950.pdf",
+        "source_url": "https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4950.pdf",
+        "bytes": 8043551,
+        "sha256": "2a2fdee7eb4271263451468ff689d6fd3bbb377d7c6e45375796badfb60d50a2",
+        "pdf_pages": 2134,
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+      },
+      "sf_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1",
+      "sf_bytes": 1186617547,
+      "comparison": {
+        "solo_wall_seconds_before": [
+          38.267395708,
+          38.183841375
+        ],
+        "solo_wall_seconds_after": [
+          21.547725792,
+          21.478618834
+        ],
+        "solo_mean_seconds_before": 38.2256185415,
+        "solo_mean_seconds_after": 21.513172313,
+        "solo_wall_speedup": 1.7768471327866875,
+        "solo_latency_reduction_percent": 43.720538388034136,
+        "solo_jobs_per_second_before": 0.026160466152152402,
+        "solo_jobs_per_second_after": 0.046483149274815186,
+        "solo_read_mean_before": 20.833669604,
+        "solo_read_mean_after": 13.2064417915,
+        "solo_write_mean_before": 17.300834207999998,
+        "solo_write_mean_after": 8.144500083,
+        "allocated_gib_mean_before": 72.38251823559403,
+        "allocated_gib_mean_after": 14.636436246335506,
+        "solo_peak_rss_mib_before": 3845.34375,
+        "solo_peak_rss_mib_after": 3790.140625,
+        "paired_wall_seconds_before": 43.125190417,
+        "paired_wall_seconds_after": 23.049904458,
+        "paired_throughput_speedup": 1.8709487709842723,
+        "paired_jobs_per_second_before": 0.046376606819841376,
+        "paired_jobs_per_second_after": 0.08676825553200304,
+        "paired_peak_rss_mib_before": 7790.359375,
+        "paired_peak_rss_mib_after": 7410.734375,
+        "allocation_reduction_percent": 79.77904526795248
+      },
+      "optimized": {
+        "solo": {
+          "batches": [
+            {
+              "case": "cpp-n4950",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 3790.140625,
+              "success": 1,
+              "successful_jobs_per_second": 0.046408609876187897,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 21.547725792,
+              "workers": 1
+            },
+            {
+              "case": "cpp-n4950",
+              "kind": "batch",
+              "repeat": 2,
+              "sampled_peak_rss_mib": 3608.5,
+              "success": 1,
+              "successful_jobs_per_second": 0.046557928502228944,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 21.478618834,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "cpp-n4950",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_cmap_encoding_fallback": 35,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_font_family": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 5,
+                    "pdf_inference_uncertain": 1,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_approximation": 3,
+                    "pdf_text_transform": 1688,
+                    "pdf_vector_graphics": 345
+                  },
+                  "elapsed_seconds": 13.272793792,
+                  "explicit_breaks": 2133,
+                  "images": 0,
+                  "input_bytes": 8043551,
+                  "physical_pages": 2134,
+                  "read_seconds": 13.241448208,
+                  "recovered_paragraphs": 95188,
+                  "recovered_text_bytes": 5656020,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 14987.35090637207,
+                  "gc_cycles": 30,
+                  "gc_pause_ms": 1.964167,
+                  "output_bytes": 1186617547,
+                  "output_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1",
+                  "read_seconds": 13.241448208,
+                  "sampled_peak_heap_mib": 3287.542022705078,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 21.416280083,
+                  "write_seconds": 8.14257675
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 1.464432,
+              "to": "sf",
+              "user_cpu_seconds": 27.381248,
+              "worker": 0,
+              "workers": 1
+            },
+            {
+              "case": "cpp-n4950",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_cmap_encoding_fallback": 35,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_font_family": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 5,
+                    "pdf_inference_uncertain": 1,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_approximation": 3,
+                    "pdf_text_transform": 1688,
+                    "pdf_vector_graphics": 345
+                  },
+                  "elapsed_seconds": 13.202300084,
+                  "explicit_breaks": 2133,
+                  "images": 0,
+                  "input_bytes": 8043551,
+                  "physical_pages": 2134,
+                  "read_seconds": 13.171435375,
+                  "recovered_paragraphs": 95188,
+                  "recovered_text_bytes": 5656020,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 14988.070526123047,
+                  "gc_cycles": 31,
+                  "gc_pause_ms": 1.94321,
+                  "output_bytes": 1186617547,
+                  "output_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1",
+                  "read_seconds": 13.171435375,
+                  "sampled_peak_heap_mib": 3302.0341262817383,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 21.349219667,
+                  "write_seconds": 8.146423416
+                }
+              ],
+              "repeat": 2,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 1.4325459999999999,
+              "to": "sf",
+              "user_cpu_seconds": 27.55881,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        },
+        "pair": {
+          "batches": [
+            {
+              "case": "cpp-n4950",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 7410.734375,
+              "success": 2,
+              "successful_jobs_per_second": 0.08676825553200304,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 23.049904458,
+              "workers": 2
+            }
+          ],
+          "children": [
+            {
+              "case": "cpp-n4950",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_cmap_encoding_fallback": 35,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_font_family": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 5,
+                    "pdf_inference_uncertain": 1,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_approximation": 3,
+                    "pdf_text_transform": 1688,
+                    "pdf_vector_graphics": 345
+                  },
+                  "elapsed_seconds": 13.911548833,
+                  "explicit_breaks": 2133,
+                  "images": 0,
+                  "input_bytes": 8043551,
+                  "physical_pages": 2134,
+                  "read_seconds": 13.877520042,
+                  "recovered_paragraphs": 95188,
+                  "recovered_text_bytes": 5656020,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 14987.730346679688,
+                  "gc_cycles": 30,
+                  "gc_pause_ms": 23.61929,
+                  "output_bytes": 1186617547,
+                  "output_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1",
+                  "read_seconds": 13.877520042,
+                  "sampled_peak_heap_mib": 3341.6337127685547,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 22.772450625,
+                  "write_seconds": 8.860221083999999
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 1.941978,
+              "to": "sf",
+              "user_cpu_seconds": 27.656002,
+              "worker": 0,
+              "workers": 2
+            },
+            {
+              "case": "cpp-n4950",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_cmap_encoding_fallback": 35,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_font_family": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 5,
+                    "pdf_inference_uncertain": 1,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_approximation": 3,
+                    "pdf_text_transform": 1688,
+                    "pdf_vector_graphics": 345
+                  },
+                  "elapsed_seconds": 13.952120917,
+                  "explicit_breaks": 2133,
+                  "images": 0,
+                  "input_bytes": 8043551,
+                  "physical_pages": 2134,
+                  "read_seconds": 13.921143875,
+                  "recovered_paragraphs": 95188,
+                  "recovered_text_bytes": 5656020,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 14987.759994506836,
+                  "gc_cycles": 30,
+                  "gc_pause_ms": 16.843341,
+                  "output_bytes": 1186617547,
+                  "output_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1",
+                  "read_seconds": 13.921143875,
+                  "sampled_peak_heap_mib": 3348.5218200683594,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 22.920003708,
+                  "write_seconds": 8.967311292
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 1.916231,
+              "to": "sf",
+              "user_cpu_seconds": 27.780711,
+              "worker": 1,
+              "workers": 2
+            }
+          ]
+        },
+        "default": {
+          "batches": [
+            {
+              "case": "cpp-n4950",
+              "kind": "batch",
+              "repeat": 1,
+              "sampled_peak_rss_mib": 3664.359375,
+              "success": 1,
+              "successful_jobs_per_second": 0.046449905164970495,
+              "termination": "",
+              "to": "sf",
+              "wall_seconds": 21.52856925,
+              "workers": 1
+            }
+          ],
+          "children": [
+            {
+              "case": "cpp-n4950",
+              "exit_code": 0,
+              "kind": "child",
+              "records": [
+                {
+                  "diagnostics": {
+                    "pdf_cmap_encoding_fallback": 35,
+                    "pdf_destination_flow_inferred": 1,
+                    "pdf_font_family": 1,
+                    "pdf_font_family_inferred": 1,
+                    "pdf_graphics_effects": 5,
+                    "pdf_inference_uncertain": 1,
+                    "pdf_layout": 1,
+                    "pdf_link_partial_span": 1,
+                    "pdf_list_inferred": 1,
+                    "pdf_metadata_extra": 1,
+                    "pdf_note_inference_uncertain": 1,
+                    "pdf_structure_inferred": 1,
+                    "pdf_table_inferred": 1,
+                    "pdf_table_rulings_ambiguous": 1,
+                    "pdf_table_rulings_inferred": 1,
+                    "pdf_text_color_approximation": 3,
+                    "pdf_text_transform": 1688,
+                    "pdf_vector_graphics": 345
+                  },
+                  "elapsed_seconds": 13.288576417,
+                  "explicit_breaks": 2133,
+                  "images": 0,
+                  "input_bytes": 8043551,
+                  "physical_pages": 2134,
+                  "read_seconds": 13.257461375,
+                  "recovered_paragraphs": 95188,
+                  "recovered_text_bytes": 5656020,
+                  "stage": "read_complete"
+                },
+                {
+                  "allocated_mib": 14987.94546508789,
+                  "gc_cycles": 31,
+                  "gc_pause_ms": 1.978454,
+                  "output_bytes": 1186617547,
+                  "output_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1",
+                  "read_seconds": 13.257461375,
+                  "sampled_peak_heap_mib": 3289.511558532715,
+                  "stage": "complete",
+                  "storage": "file",
+                  "total_seconds": 21.394828459,
+                  "write_seconds": 8.105713792
+                }
+              ],
+              "repeat": 1,
+              "stderr": "",
+              "success": true,
+              "system_cpu_seconds": 1.519852,
+              "to": "sf",
+              "user_cpu_seconds": 27.512944,
+              "worker": 0,
+              "workers": 1
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "baseline_control": [
+    {
+      "arch": "arm64",
+      "cpus": 10,
+      "diagnostic_profiles": false,
+      "go": "go1.25.0",
+      "kind": "environment",
+      "large_document_work_policy": true,
+      "measurement": "cold process; storage mode recorded; file read + parse + content checks + fully materialized SHA-256 output; buffered file writes without fsync; separate timed parse/write; no warmup; unmodified downloaded originals",
+      "mem_profile_rate": 524288,
+      "os": "darwin",
+      "profile_mode": "cpu",
+      "profile_output_buffer_bytes": 0,
+      "rss_guard_mib_batch": 12288,
+      "soft_memory_mib_per_child": 8192,
+      "started_utc": "2026-11-25T16:40:47.892118Z",
+      "storage": "file",
+      "timeout": "10m0s"
+    },
+    {
+      "bytes": 35304993,
+      "kind": "fixture",
+      "name": "ecma376-part1",
+      "pdf_pages": 5039,
+      "producer_page_count": 0,
+      "sha256": "7cccfd0ad0e2ef89316acece15e44a8a088d0603ce4bba4e7b0361b50d13a37d",
+      "source_docx_paragraphs": 0,
+      "source_url": "https://ecma-international.org/wp-content/uploads/ECMA-376-1_5th_edition_december_2016.zip"
+    },
+    {
+      "case": "ecma376-part1",
+      "exit_code": 0,
+      "kind": "child",
+      "records": [
+        {
+          "diagnostics": {
+            "pdf_clipped_text": 4,
+            "pdf_clipping": 891,
+            "pdf_color_state": 12,
+            "pdf_destination_flow_inferred": 1,
+            "pdf_font_family_inferred": 1,
+            "pdf_graphics_effects": 3416,
+            "pdf_inference_uncertain": 2,
+            "pdf_layout": 1,
+            "pdf_link_partial_span": 1,
+            "pdf_list_inferred": 1,
+            "pdf_mask_resampling": 1,
+            "pdf_metadata_extra": 1,
+            "pdf_note_inference_uncertain": 1,
+            "pdf_page_crop": 6,
+            "pdf_structure_inferred": 1,
+            "pdf_table_inferred": 1,
+            "pdf_table_rulings_ambiguous": 1,
+            "pdf_table_rulings_inferred": 1,
+            "pdf_text_color_quantized": 3246,
+            "pdf_text_partial_clip": 2501,
+            "pdf_text_transform": 17,
+            "pdf_vector_graphics": 4098
+          },
+          "elapsed_seconds": 82.447692708,
+          "explicit_breaks": 5038,
+          "images": 3033,
+          "input_bytes": 35304993,
+          "physical_pages": 5039,
+          "read_seconds": 82.361730208,
+          "recovered_paragraphs": 164582,
+          "recovered_text_bytes": 8809284,
+          "stage": "read_complete"
+        },
+        {
+          "allocated_mib": 220247.2797088623,
+          "gc_cycles": 150,
+          "gc_pause_ms": 16.088795,
+          "output_bytes": 4132810817,
+          "output_sha256": "ec7b59e7042bb47614bcc8ee10b297d3e4253c6b1dd1efb0537804ca832c3982",
+          "read_seconds": 82.361730208,
+          "sampled_peak_heap_mib": 7627.404067993164,
+          "stage": "complete",
+          "storage": "file",
+          "total_seconds": 143.964616708,
+          "write_seconds": 61.516001583
+        }
+      ],
+      "repeat": 1,
+      "stderr": "",
+      "success": true,
+      "system_cpu_seconds": 9.036929,
+      "to": "sf",
+      "user_cpu_seconds": 351.881042,
+      "worker": 0,
+      "workers": 1
+    },
+    {
+      "case": "ecma376-part1",
+      "kind": "batch",
+      "repeat": 1,
+      "sampled_peak_rss_mib": 8809.046875,
+      "success": 1,
+      "successful_jobs_per_second": 0.0069318782308872475,
+      "termination": "",
+      "to": "sf",
+      "wall_seconds": 144.261045375,
+      "workers": 1
+    }
+  ],
+  "host_observations": {
+    "before": "vm.swapusage: total = 6144.00M  used = 4530.88M  free = 1613.12M  (encrypted)\nhw.memsize: 34359738368\nhw.model: MacBookPro18,2\nmachdep.cpu.brand_string: Apple M1 Max\nMach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                              468671.\nPages active:                            438495.\nPages inactive:                          421154.\nPages speculative:                        14634.\nPages throttled:                              0.\nPages wired down:                        223130.\nPages purgeable:                           7784.\n\"Translation faults\":               19796133374.\nPages copy-on-write:                  354588550.\nPages zero filled:                   3309604564.\nPages reactivated:                   8404244612.\nPages purged:                          65387004.\nFile-backed pages:                       255913.\nAnonymous pages:                         618370.\nPages stored in compressor:             1793498.\nPages occupied by compressor:            474510.\nDecompressions:                      8871011752.\nCompressions:                        9042628187.\nPageins:                              449551981.\nPageouts:                               6941723.\nSwapins:                               26453171.\nSwapouts:                              28483166.\n",
+    "after-pair": "vm.swapusage: total = 6144.00M  used = 4522.88M  free = 1621.12M  (encrypted)\nMach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                              751850.\nPages active:                            221645.\nPages inactive:                          241956.\nPages speculative:                         1228.\nPages throttled:                              0.\nPages wired down:                        201102.\nPages purgeable:                            563.\n\"Translation faults\":               19829771358.\nPages copy-on-write:                  355079174.\nPages zero filled:                   3320107857.\nPages reactivated:                   8424608635.\nPages purged:                          65433892.\nFile-backed pages:                       200461.\nAnonymous pages:                         264368.\nPages stored in compressor:             2112391.\nPages occupied by compressor:            622779.\nDecompressions:                      8888677832.\nCompressions:                        9062106047.\nPageins:                              449686096.\nPageouts:                               6943749.\nSwapins:                               26453578.\nSwapouts:                              28483166.\n"
+  },
+  "hosted_checks": {
+    "conclusion": "success",
+    "headSha": "4f32d78f77362f384d224e8d25cb58ca89108dbb",
+    "jobs": [
+      {
+        "completedAt": "2026-11-25T16:30:12Z",
+        "conclusion": "success",
+        "databaseId": 139346109183,
+        "name": "Check (windows-latest)",
+        "startedAt": "2026-11-25T16:27:52Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-11-25T16:27:54Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-11-25T16:27:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:04Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-11-25T16:27:54Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:55Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5",
+            "number": 3,
+            "startedAt": "2026-11-25T16:28:04Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:55Z",
+            "conclusion": "skipped",
+            "name": "Check formatting",
+            "number": 4,
+            "startedAt": "2026-11-25T16:28:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:55Z",
+            "conclusion": "skipped",
+            "name": "Check version",
+            "number": 5,
+            "startedAt": "2026-11-25T16:28:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:58Z",
+            "conclusion": "success",
+            "name": "Verify modules",
+            "number": 6,
+            "startedAt": "2026-11-25T16:28:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:29:07Z",
+            "conclusion": "success",
+            "name": "Vet",
+            "number": 7,
+            "startedAt": "2026-11-25T16:28:58Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:30:00Z",
+            "conclusion": "success",
+            "name": "Test",
+            "number": 8,
+            "startedAt": "2026-11-25T16:29:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:30:00Z",
+            "conclusion": "skipped",
+            "name": "Race test",
+            "number": 9,
+            "startedAt": "2026-11-25T16:30:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:30:08Z",
+            "conclusion": "success",
+            "name": "Build and run without CGO",
+            "number": 10,
+            "startedAt": "2026-11-25T16:30:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:30:08Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5",
+            "number": 19,
+            "startedAt": "2026-11-25T16:30:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:30:10Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 20,
+            "startedAt": "2026-11-25T16:30:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:30:10Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 21,
+            "startedAt": "2026-11-25T16:30:10Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/artpar/manifold/actions/runs/45653303125/job/139346109183"
+      },
+      {
+        "completedAt": "2026-11-25T16:29:42Z",
+        "conclusion": "success",
+        "databaseId": 139346109819,
+        "name": "Check (macos-latest)",
+        "startedAt": "2026-11-25T16:27:54Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-11-25T16:27:57Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-11-25T16:27:55Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:01Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-11-25T16:27:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:33Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5",
+            "number": 3,
+            "startedAt": "2026-11-25T16:28:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:33Z",
+            "conclusion": "skipped",
+            "name": "Check formatting",
+            "number": 4,
+            "startedAt": "2026-11-25T16:28:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:33Z",
+            "conclusion": "skipped",
+            "name": "Check version",
+            "number": 5,
+            "startedAt": "2026-11-25T16:28:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:36Z",
+            "conclusion": "success",
+            "name": "Verify modules",
+            "number": 6,
+            "startedAt": "2026-11-25T16:28:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:43Z",
+            "conclusion": "success",
+            "name": "Vet",
+            "number": 7,
+            "startedAt": "2026-11-25T16:28:36Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:29:30Z",
+            "conclusion": "success",
+            "name": "Test",
+            "number": 8,
+            "startedAt": "2026-11-25T16:28:43Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:29:30Z",
+            "conclusion": "skipped",
+            "name": "Race test",
+            "number": 9,
+            "startedAt": "2026-11-25T16:29:30Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:29:37Z",
+            "conclusion": "success",
+            "name": "Build and run without CGO",
+            "number": 10,
+            "startedAt": "2026-11-25T16:29:30Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:29:37Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5",
+            "number": 19,
+            "startedAt": "2026-11-25T16:29:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:29:38Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 20,
+            "startedAt": "2026-11-25T16:29:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:29:39Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 21,
+            "startedAt": "2026-11-25T16:29:38Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/artpar/manifold/actions/runs/45653303125/job/139346109819"
+      },
+      {
+        "completedAt": "2026-11-25T16:34:41Z",
+        "conclusion": "success",
+        "databaseId": 139346109990,
+        "name": "Check (ubuntu-latest)",
+        "startedAt": "2026-11-25T16:27:53Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-11-25T16:27:54Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-11-25T16:27:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:27:56Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-11-25T16:27:54Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:14Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5",
+            "number": 3,
+            "startedAt": "2026-11-25T16:27:56Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:14Z",
+            "conclusion": "success",
+            "name": "Check formatting",
+            "number": 4,
+            "startedAt": "2026-11-25T16:28:14Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:14Z",
+            "conclusion": "success",
+            "name": "Check version",
+            "number": 5,
+            "startedAt": "2026-11-25T16:28:14Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:16Z",
+            "conclusion": "success",
+            "name": "Verify modules",
+            "number": 6,
+            "startedAt": "2026-11-25T16:28:14Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:21Z",
+            "conclusion": "success",
+            "name": "Vet",
+            "number": 7,
+            "startedAt": "2026-11-25T16:28:16Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:28:59Z",
+            "conclusion": "success",
+            "name": "Test",
+            "number": 8,
+            "startedAt": "2026-11-25T16:28:21Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:34:33Z",
+            "conclusion": "success",
+            "name": "Race test",
+            "number": 9,
+            "startedAt": "2026-11-25T16:28:59Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:34:37Z",
+            "conclusion": "success",
+            "name": "Build and run without CGO",
+            "number": 10,
+            "startedAt": "2026-11-25T16:34:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:34:37Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5",
+            "number": 19,
+            "startedAt": "2026-11-25T16:34:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:34:37Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 20,
+            "startedAt": "2026-11-25T16:34:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:34:37Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 21,
+            "startedAt": "2026-11-25T16:34:37Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/artpar/manifold/actions/runs/45653303125/job/139346109990"
+      },
+      {
+        "completedAt": "2026-11-25T16:34:56Z",
+        "conclusion": "success",
+        "databaseId": 139350509028,
+        "name": "Publish version",
+        "startedAt": "2026-11-25T16:34:43Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-11-25T16:34:47Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-11-25T16:34:44Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:34:53Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 2,
+            "startedAt": "2026-11-25T16:34:47Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:34:53Z",
+            "conclusion": "success",
+            "name": "Plan release",
+            "number": 3,
+            "startedAt": "2026-11-25T16:34:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:34:53Z",
+            "conclusion": "skipped",
+            "name": "Run actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5",
+            "number": 4,
+            "startedAt": "2026-11-25T16:34:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:34:53Z",
+            "conclusion": "skipped",
+            "name": "Build, package and checksum",
+            "number": 5,
+            "startedAt": "2026-11-25T16:34:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:34:53Z",
+            "conclusion": "skipped",
+            "name": "Publish GitHub release",
+            "number": 6,
+            "startedAt": "2026-11-25T16:34:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:34:53Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "number": 12,
+            "startedAt": "2026-11-25T16:34:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-11-25T16:34:53Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 13,
+            "startedAt": "2026-11-25T16:34:53Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/artpar/manifold/actions/runs/45653303125/job/139350509028"
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/artpar/manifold/actions/runs/45653303125"
+  },
+  "diagnostics_status": "pending"
+}
