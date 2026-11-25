@@ -182,3 +182,11 @@ after complete model validation, then streams typed inline marks directly.
 Lists/tables/section bodies stream recursively instead of retaining nested SF
 graphs; container attrs and public full-tree APIs keep the established encoding.
 Strict rejection-before-output, canonical field/mark order and SF bytes remain.
+
+Performance change 5: short PDF names become owned request-local strings before
+entering long-lived source metadata. Per-run Quad/Baseline/Matrix share one
+geometry allocation, independently of mutable SourceInfo (so tagged copies do
+not retain obsolete SourceInfo). Flow SF shares immutable repeated metadata
+through a request-owned 4,096-entry / 1 MiB pool, with 256-byte entry eligibility;
+visible text and unique source identities are excluded. SF and navigation reserve
+run capacities. Source objects remain distinct and public mutation semantics stay.

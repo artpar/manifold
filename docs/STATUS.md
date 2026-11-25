@@ -92,7 +92,10 @@ and releasing it before structural recovery. Byte-identity/depth/palette and
 existing image/mask/glyph tests pass. Change 4 preflights representation restrictions without node construction, then
 emits typed inline marks directly through streaming containers. SF/citation/math
 regressions and exact-byte comparisons including lists/nested tables pass.
-Change 5 and final real-file qualification remain.
+Change 5 detaches retained PDF names, packs run geometry independently of mutable
+SourceInfo, interns bounded common SF metadata and reserves SF/navigation run
+capacity. Ownership/budget and targeted source/navigation/SF regressions pass.
+All five changes now await the full check matrix and real-file before/after runs.
 
 ## Known boundaries and next work
 

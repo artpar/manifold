@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"slices"
+	"strings"
 )
 
 // Point is in physical points in displayed page coordinates: top-left origin,
@@ -485,4 +486,110 @@ func cloneUnboundSources(sources []SourceInfo) []SourceInfo {
 		out[i] = *cloneSourceInfo(&sources[i])
 	}
 	return out
+}
+
+// Request-owned sharing of immutable metadata strings, never mutable sources.
+// Visible text and unique source identities are not interned.
+type sourceStringPool struct {
+	values map[string]string
+	bytes  int
+}
+
+func (p *sourceStringPool) intern(s string, own bool) string {
+	if s == "" {
+		return s
+	}
+	if value, ok := p.values[s]; ok {
+		return value
+	}
+	if own {
+		s = strings.Clone(s)
+	}
+	if len(s) <= 256 && len(p.values) < 4096 && p.bytes+len(s) <= 1<<20 {
+		if p.values == nil {
+			p.values = make(map[string]string)
+		}
+		p.values[s] = s
+		p.bytes += len(s)
+	}
+	return s
+}
+func (p *sourceStringPool) source(s *SourceInfo) {
+	if s == nil {
+		return
+	}
+	s.Format = Format(p.intern(string(s.Format), false))
+	s.Role = p.intern(s.Role, false)
+	s.Tag = p.intern(s.Tag, false)
+	s.Font = p.intern(s.Font, false)
+	s.FontFamilyEvidence = p.intern(s.FontFamilyEvidence, false)
+	s.ColorSpace = p.intern(s.ColorSpace, false)
+	s.Structure = p.intern(s.Structure, false)
+	s.Evidence = p.intern(s.Evidence, false)
+	s.Precision = p.intern(s.Precision, false)
+}
+func (p *sourceStringPool) runs(rs []Run) {
+	for i := range rs {
+		r := &rs[i]
+		p.source(r.Source)
+		r.FontFamily = p.intern(r.FontFamily, false)
+		r.Color = p.intern(r.Color, false)
+		r.Language = p.intern(r.Language, false)
+		r.EastAsiaLanguage = p.intern(r.EastAsiaLanguage, false)
+		r.ComplexLanguage = p.intern(r.ComplexLanguage, false)
+		r.Direction = p.intern(r.Direction, false)
+		if r.Note != nil {
+			p.runs(r.Note.LabelContent)
+		}
+	}
+}
+func (p *sourceStringPool) blocks(bs []Block) {
+	for i := range bs {
+		b := &bs[i]
+		p.source(b.Source)
+		p.runs(b.Runs)
+		if b.Section != nil {
+			p.blocks(b.Section.Blocks)
+			for _, s := range sectionStories(b.Section) {
+				if s != nil {
+					p.blocks(s.Blocks)
+				}
+			}
+		}
+		for j := range b.Items {
+			item := &b.Items[j]
+			p.source(item.Source)
+			p.blocks(item.Blocks)
+			if item.Marker != nil {
+				p.source(item.Marker.Source)
+				p.blocks(item.Marker.Blocks)
+			}
+		}
+		for j := range b.Rows {
+			for k := range b.Rows[j].Cells {
+				c := &b.Rows[j].Cells[k]
+				p.source(c.Source)
+				p.blocks(c.Blocks)
+			}
+		}
+	}
+}
+func (p *sourceStringPool) stories(d *Document) {
+	p.blocks(d.Headers)
+	p.blocks(d.Footers)
+	for i := range d.UnboundSources {
+		p.source(&d.UnboundSources[i])
+	}
+	for i := range d.Notes {
+		n := &d.Notes[i]
+		p.source(n.Source)
+		p.source(n.LabelSource)
+		p.blocks(n.Blocks)
+		p.runs(n.BodyLabelContent)
+		if n.BodyLabelStyle != nil {
+			style := []Run{*n.BodyLabelStyle}
+			p.runs(style)
+			*n.BodyLabelStyle = style[0]
+		}
+	}
 }

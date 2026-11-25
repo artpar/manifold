@@ -1482,7 +1482,7 @@ func (r *pdfReader) textStyle(s *pdfTextState, source *SourceInfo) Run {
 	if !unknown {
 		count := map[string]int{"DeviceGray": 1, "DeviceRGB": 3, "DeviceCMYK": 4}[space]
 		if count > 0 {
-			source.ColorSpace = space
+			source.ColorSpace = r.sourceStrings.intern(space, true)
 			source.ColorComponents = append([]float64(nil), values[:count]...)
 			rgb := colorRGB(space, values)
 			run.Color = fmt.Sprintf("#%02X%02X%02X", int(math.Round(rgb[0]*255)), int(math.Round(rgb[1]*255)), int(math.Round(rgb[2]*255)))

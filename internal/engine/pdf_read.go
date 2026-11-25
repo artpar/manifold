@@ -82,6 +82,15 @@ func (s *pdfTextState) moveLine(dx, dy float64) {
 	s.tm = s.lm
 	s.metricEstimate = false
 }
+
+// Geometry is one noscan allocation; SourceInfo stays separate so tagged-source
+// copies do not keep an obsolete mutable SourceInfo alive through its geometry.
+type pdfRunGeometry struct {
+	quad     Quad
+	baseline [2]Point
+	matrix   Matrix
+}
+
 func (r *pdfReader) sourceFor(s *pdfTextState, advance float64, estimated bool) *SourceInfo {
 	base := r.pageInfo.Transform.compose(s.ctm).compose(s.tm)
 	q := Quad{base.point(0, s.rise+s.font.ascent*s.size/1000), base.point(advance, s.rise+s.font.ascent*s.size/1000), base.point(advance, s.rise+s.font.descent*s.size/1000), base.point(0, s.rise+s.font.descent*s.size/1000)}
@@ -98,7 +107,8 @@ func (r *pdfReader) sourceFor(s *pdfTextState, advance float64, estimated bool) 
 		confidence = .5
 	}
 	r.order++
-	source := &SourceInfo{Format: PDF, Page: r.page, Order: r.order, Object: r.stream, Stream: r.stream, Quad: &q, Baseline: &baseline, Matrix: &matrix, Font: s.font.name, FontSize: math.Hypot(matrix[2], matrix[3]), Structure: "unstructured", Evidence: "pdf_text_operators", Precision: precision, Confidence: confidence, RenderMode: s.renderMode}
+	geometry := &pdfRunGeometry{quad: q, baseline: baseline, matrix: matrix}
+	source := &SourceInfo{Format: PDF, Page: r.page, Order: r.order, Object: r.stream, Stream: r.stream, Quad: &geometry.quad, Baseline: &geometry.baseline, Matrix: &geometry.matrix, Font: s.font.name, FontSize: math.Hypot(matrix[2], matrix[3]), Structure: "unstructured", Evidence: "pdf_text_operators", Precision: precision, Confidence: confidence, RenderMode: s.renderMode}
 	r.clipTextSource(source, s)
 	r.applyMarked(source)
 	return source
@@ -733,6 +743,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 }
 
 type pdfReader struct {
+	sourceStrings            sourceStringPool
 	pngBuffers               pdfPNGBufferPool
 	pageWarnings             map[Diagnostic]bool
 	collectFontWarnings      *[]Diagnostic
@@ -1531,7 +1542,7 @@ func (r *pdfReader) font(resources types.Dict, name string) (*pdfFont, error) {
 	base := d.NameEntry("BaseFont")
 	f.name = "unknown"
 	if base != nil {
-		f.name = *base
+		f.name = r.sourceStrings.intern(*base, true)
 		lower := strings.ToLower(*base)
 		f.bold = strings.Contains(lower, "bold")
 		f.italic = strings.Contains(lower, "italic") || strings.Contains(lower, "oblique")

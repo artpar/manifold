@@ -143,3 +143,8 @@ with the former implementation maps and qualification ledger.
   all pre-output rejection checks while removing the first complete encoding pass.
   Stream typed inline source/style/link marks once, preserving the public full-tree
   encoder as an independent byte oracle for nested tables/lists/sections.
+
+- Performance change 5: detach short retained names at PDF ownership boundaries;
+  pack geometry separately from SourceInfo to avoid keeping superseded mutable
+  sources alive. Share only immutable common strings under explicit request-local
+  bounds; reserve run arrays and preserve every persisted source byte and owner.

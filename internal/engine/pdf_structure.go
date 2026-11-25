@@ -310,7 +310,7 @@ func (r *pdfReader) applyMarked(source *SourceInfo) {
 	}
 }
 func (r *pdfReader) beginMarked(tag string, value any, resources types.Dict) error {
-	frame := pdfMarkedContent{tag: tag, stream: r.stream}
+	frame := pdfMarkedContent{tag: r.sourceStrings.intern(tag, true), stream: r.stream}
 	var properties types.Dict
 	if value != nil {
 		var d types.Dict

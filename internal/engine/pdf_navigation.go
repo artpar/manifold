@@ -1110,7 +1110,11 @@ func (r *pdfReader) bindPDFNavigation() {
 		}
 	}
 	for block, points := range inserts {
-		var out []Run
+		count := len(block.Runs)
+		for _, rs := range points {
+			count += len(rs)
+		}
+		out := make([]Run, 0, count)
 		for i, run := range block.Runs {
 			out = append(out, points[i]...)
 			out = append(out, run)

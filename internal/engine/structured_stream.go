@@ -119,6 +119,7 @@ func readFlowStructured(ctx context.Context, input io.Reader) (*Document, error)
 	root := &StructuredDocument{}
 	seen := map[string]bool{}
 	var blocks []Block
+	var strings sourceStringPool
 	rawValue := func(target any) error {
 		var raw json.RawMessage
 		if err := dec.Decode(&raw); err != nil {
@@ -176,6 +177,7 @@ func readFlowStructured(ctx context.Context, input io.Reader) (*Document, error)
 				if err != nil {
 					return nil, err
 				}
+				strings.blocks(bs)
 				blocks = append(blocks, bs...)
 			}
 			if _, err := dec.Token(); err != nil {
@@ -205,6 +207,7 @@ func readFlowStructured(ctx context.Context, input io.Reader) (*Document, error)
 		return nil, err
 	}
 	d.Blocks = blocks
+	strings.stories(d)
 	if err := d.Validate(); err != nil {
 		return nil, err
 	}

@@ -515,6 +515,9 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 			b.Level = a.Level
 			b.PageBreakBefore = a.PageBreakBefore
 			b.Direction = a.Direction
+			if len(n.Content) > 0 {
+				b.Runs = make([]Run, 0, len(n.Content))
+			}
 			for _, t := range n.Content {
 				r := Run{}
 				switch t.Type {
