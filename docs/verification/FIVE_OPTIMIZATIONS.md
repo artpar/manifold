@@ -48,4 +48,12 @@ allocation was ~215 GiB. This scout overlapped small development checks and is
 not a substitute for the frozen final campaign.
 
 Full normal suite passes fresh (engine 19.694s, facade 5.165s, CLI 0.491s).
-The full race/vet/build matrix and final measurements are underway.
+Full race suite passes fresh: engine 242.273s, facade 75.356s, CLI 2.898s.
+Vet, CGO-disabled CLI/harness builds and diff checks pass. Independent original
+image/glyph checks pass in 7.450s, including 48 preserved unmapped glyph spans.
+Final capacity/profiling measurements are underway.
+
+First frozen IPCC solo observation retains the original SF hash: read 110.32s,
+write 14.85s, total 125.20s, allocation 90.40 GiB. Read latency is nearly unchanged
+from baseline despite lower allocation; do not equate allocation reduction with
+latency reduction. Two-run/pair/profile qualification is still pending.

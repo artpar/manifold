@@ -95,7 +95,9 @@ regressions and exact-byte comparisons including lists/nested tables pass.
 Change 5 detaches retained PDF names, packs run geometry independently of mutable
 SourceInfo, interns bounded common SF metadata and reserves SF/navigation run
 capacity. Ownership/budget and targeted source/navigation/SF regressions pass.
-All five changes now await the full check matrix and real-file before/after runs.
+All five changes pass the full normal/race/vet/CGO-disabled build matrix. Fresh
+engine normal/race results are 19.694s/242.273s; original image/glyph checks pass
+(7.450s). Frozen real-file solo/pair/profile comparisons are running.
 
 ## Known boundaries and next work
 
