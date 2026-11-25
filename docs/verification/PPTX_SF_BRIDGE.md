@@ -56,4 +56,8 @@ are not claimed. Font-size recovery into DrawingML rounds to 0.01pt after explic
 loss acknowledgement. Source package/resource limits are documented in the SF
 contract. Readable source fixtures are pinned in testdata/real/manifest.json.
 
-Final hosted checks/release and expanded stress results are recorded when complete.
+Final production source `45bebca` passed all Linux/macOS/Windows jobs and the full
+Linux race suite in [Actions run 45597860193](https://github.com/artpar/manifold/actions/runs/45597860193).
+The automated [v0.3.0 release](https://github.com/artpar/manifold/releases/tag/v0.3.0)
+is published with six archives and checksums. Expanded stress results, including
+central PPTX/SF/PDF routes, are recorded in [PERFORMANCE.md](../PERFORMANCE.md).

@@ -8,6 +8,24 @@ The local checkout remains in the original `artpar/manydoc` directory.
 
 ## Current work
 
+Current completion checkpoint: **v0.3.0 is released automatically** from
+`45bebca`; PPTX↔SF and supported PPTX/PDF conversion use the central API/CLI.
+Original-deck preservation, guarded SF edits, independent consumers and hosted
+Linux/macOS/Windows plus full Linux race checks passed. Advanced PowerPoint
+rendering/regeneration remains explicitly limited; see
+[bridge qualification](verification/PPTX_SF_BRIDGE.md).
+
+Load/stress qualification is complete on this M1 Max baseline: 260 unprofiled
+phases, 801,104 successful jobs, zero conversion errors/partial responses, and
+1,251 bounded-queue overload rejections. Ten-worker mixed throughput was ~107
+jobs/s; medium flow SF→PDF ~27 jobs/s. Large documents differ dramatically.
+The global PDF shaping retention was fixed and the native result cache bounded.
+See [PERFORMANCE.md](PERFORMANCE.md) for ranges, input sizes, latency, memory,
+profiles, remaining bottlenecks and reproduction commands. Further performance
+work should target request-local font/measurement reuse and large-input admission;
+no additional optimization is claimed by the measurements. Final harness checks passed: normal/race tool tests, tool vet, CGO-disabled CLI build and git diff --check. Historical checkpoints
+below describe earlier states, not outstanding release work.
+
 The original rich-conversion goal is qualified: DOCX → SF, SF → DOCX, SF → PDF
 and PDF → SF. The established SF is ProseMirror JSON with the compatibility
 identifier `manydoc-prosemirror/1`. See [acceptance](verification/ACCEPTANCE.md) and
