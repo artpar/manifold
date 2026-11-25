@@ -14,7 +14,7 @@ import (
 )
 
 func TestFlowStructuredStreamingPreservesExactPersistentBytes(t *testing.T) {
-	for _, name := range []string{"docx_basic.docx", "docx_hyperlink.docx", "docx_image.docx", "docx_sections.docx", "docx_header_footer.docx", "pdf_w3c_dummy.pdf", "pdf_unicode.pdf", "pdf_form_xobject.pdf"} {
+	for _, name := range []string{"docx_basic.docx", "docx_hyperlink.docx", "docx_image.docx", "docx_sections.docx", "docx_header_footer.docx", "docx_lists.docx", "docx_table.docx", "docx_nested_table.docx", "pdf_table.pdf", "pdf_w3c_dummy.pdf", "pdf_unicode.pdf", "pdf_form_xobject.pdf"} {
 		t.Run(name, func(t *testing.T) {
 			data, e := os.ReadFile("testdata/corpus/" + name)
 			if e != nil {

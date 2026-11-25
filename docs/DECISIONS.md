@@ -138,3 +138,8 @@ with the former implementation maps and qualification ledger.
 - Performance change 3: reuse PNG compressor state only within an import request,
   bound image eligibility and release before recovery; keep existing codec/color/
   mask semantics and exact PNG output, with no global pool or compression shortcut.
+
+- Performance change 4: separate representation preflight from encoding; retain
+  all pre-output rejection checks while removing the first complete encoding pass.
+  Stream typed inline source/style/link marks once, preserving the public full-tree
+  encoder as an independent byte oracle for nested tables/lists/sections.

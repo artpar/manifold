@@ -89,7 +89,10 @@ Change 2 removes per-key JSON decoding for unescaped keys and redundant inner
 decoders; SourceInfo uses strict shape checks plus direct typed decoding. JSON/SF
 and unknown/nested-field/escaped-duplicate regression tests pass. Change 3 adds a single request-owned PNG buffer slot, bypassing large images
 and releasing it before structural recovery. Byte-identity/depth/palette and
-existing image/mask/glyph tests pass. Changes 4–5 and final qualification remain.
+existing image/mask/glyph tests pass. Change 4 preflights representation restrictions without node construction, then
+emits typed inline marks directly through streaming containers. SF/citation/math
+regressions and exact-byte comparisons including lists/nested tables pass.
+Change 5 and final real-file qualification remain.
 
 ## Known boundaries and next work
 

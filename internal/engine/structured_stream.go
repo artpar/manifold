@@ -27,13 +27,8 @@ func writeFlowStructured(ctx context.Context, w io.Writer, d *Document, compress
 			break
 		}
 	}
-	for _, b := range blocks {
-		if e := ctx.Err(); e != nil {
-			return e
-		}
-		if _, e := encodeSFBlocks([]Block{b}); e != nil {
-			return e
-		}
+	if e := preflightSFBlocks(ctx, blocks); e != nil {
+		return e
 	}
 
 	target := io.Writer(contextWriter{ctx, w})
@@ -42,26 +37,20 @@ func writeFlowStructured(ctx context.Context, w io.Writer, d *Document, compress
 		gz = gzip.NewWriter(target)
 		target = gz
 	}
-	produce := func(yield func(StructuredNode) error) error {
+	if e = encodeStructuredJSONRecords(target, root, func(yield func(sfNodeWriter) error) error {
 		for _, b := range blocks {
 			if e := ctx.Err(); e != nil {
 				return e
 			}
-			ns, e := encodeSFBlocks([]Block{b})
-			if e != nil {
+			if e := yield(func(w io.Writer) error { return writeFlowSFBlock(w, b) }); e != nil {
 				return e
-			}
-			for _, n := range ns {
-				if e := yield(n); e != nil {
-					return e
-				}
 			}
 		}
 		return nil
-	}
-	if e = encodeStructuredJSONStream(target, root, produce); e != nil {
+	}); e != nil {
 		return e
 	}
+
 	if gz != nil {
 		return gz.Close()
 	}

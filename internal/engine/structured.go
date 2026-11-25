@@ -935,68 +935,46 @@ func encodeStructuredJSON(w io.Writer, s *StructuredDocument) error {
 	})
 }
 func encodeStructuredJSONStream(w io.Writer, s *StructuredDocument, produce func(func(StructuredNode) error) error) error {
+	return encodeStructuredJSONRecords(w, s, func(yield func(sfNodeWriter) error) error {
+		return produce(func(n StructuredNode) error {
+			return yield(func(w io.Writer) error { return writeStructuredNode(w, n) })
+		})
+	})
+}
+
+func encodeStructuredJSONRecords(w io.Writer, s *StructuredDocument, produce func(func(sfNodeWriter) error) error) error {
 	out := bufio.NewWriter(w)
-	write := func(p []byte) error { _, e := out.Write(p); return e }
 	value := func(v any) error {
 		p, e := json.Marshal(v)
 		if e != nil {
 			return e
 		}
-		return write(p)
+		_, e = out.Write(p)
+		return e
 	}
-	if e := write([]byte(`{"type":`)); e != nil {
+	if _, e := out.WriteString(`{"type":`); e != nil {
 		return e
 	}
 	if e := value(s.Type); e != nil {
 		return e
 	}
-	if e := write([]byte(`,"attrs":`)); e != nil {
+	if _, e := out.WriteString(`,"attrs":`); e != nil {
 		return e
 	}
 	if e := value(s.Attrs); e != nil {
 		return e
 	}
-	var node func(StructuredNode) error
-	node = func(n StructuredNode) error {
-		children := n.Content
-		n.Content = nil
-		p, e := json.Marshal(n)
-		if e != nil {
-			return e
-		}
-		if len(children) == 0 {
-			return write(p)
-		}
-		if e = write(p[:len(p)-1]); e != nil {
-			return e
-		}
-		if e = write([]byte(`,"content":[`)); e != nil {
-			return e
-		}
-		for i, child := range children {
-			if i > 0 {
-				if e = out.WriteByte(','); e != nil {
-					return e
-				}
-			}
-			if e = node(child); e != nil {
-				return e
-			}
-		}
-		return write([]byte(`]}`))
-	}
-
 	first := true
-	if e := produce(func(n StructuredNode) error {
+	if e := produce(func(write sfNodeWriter) error {
 		if first {
-			if e := write([]byte(`,"content":[`)); e != nil {
+			if _, e := out.WriteString(`,"content":[`); e != nil {
 				return e
 			}
 			first = false
 		} else if e := out.WriteByte(','); e != nil {
 			return e
 		}
-		return node(n)
+		return write(out)
 	}); e != nil {
 		return e
 	}
@@ -1005,8 +983,7 @@ func encodeStructuredJSONStream(w io.Writer, s *StructuredDocument, produce func
 			return e
 		}
 	}
-
-	if e := write([]byte("}\n")); e != nil {
+	if _, e := out.WriteString("}\n"); e != nil {
 		return e
 	}
 	return out.Flush()

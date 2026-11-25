@@ -176,3 +176,9 @@ EncoderBuffer for images up to 8,192 pixels wide / 1M pixels total. Larger
 images bypass reuse. Release the opaque buffer (which can retain its last image)
 before navigation/structural recovery. Compression settings, pixels and bytes
 remain unchanged; upstream intermediate image conversions are still independent.
+
+Performance change 4: flowing SF uses allocation-light representation preflight
+after complete model validation, then streams typed inline marks directly.
+Lists/tables/section bodies stream recursively instead of retaining nested SF
+graphs; container attrs and public full-tree APIs keep the established encoding.
+Strict rejection-before-output, canonical field/mark order and SF bytes remain.
