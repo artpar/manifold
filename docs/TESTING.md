@@ -137,3 +137,35 @@ on original IPCC page 62, 12 additional RGB occurrences correspond to 12 `sh`
 operators with xref=0; the one embedded CMYK image is retained. Do not mislabel
 those derived tiles as missing embedded image assets. Shading/vector reconstruction
 remains explicitly diagnosed as unsupported appearance recovery.
+
+## Huge-original CPU and heap diagnosis
+
+See [the pprof investigation](verification/HUGE_PPROF.md) for source-backed
+allocation sites, retained model sizes, the modest buffering A/B and caveats.
+Use fresh profile roots; a repeated root/case/repeat/worker overwrites its files.
+Never treat diagnostic runs as replacement throughput measurements.
+
+```sh
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold-hugeprof ./tools/hugetest
+bin/manifold-hugeprof -large -memory-mib 8192 -rss-mib 12288 \
+  -storage file -cases ipcc-ar6-wgi,intel-sdm-084,ecma376-part1 \
+  -repeat 1 -timeout 15m -profile-mode cpu -profile-dir output/pprof-new/cpu
+bin/manifold-hugeprof -large -memory-mib 8192 -rss-mib 12288 \
+  -storage file -cases ipcc-ar6-wgi,intel-sdm-084,ecma376-part1 \
+  -repeat 1 -timeout 15m -profile-mode memory -profile-dir output/pprof-new/memory
+go tool pprof -top output/pprof-new/cpu/ecma376-part1-r1-w0/read.cpu.pprof
+go tool pprof -top -sample_index=inuse_space \
+  output/pprof-new/memory/ecma376-part1-r1-w0/read_live.heap.pprof
+go tool pprof -top -sample_index=alloc_space \
+  -base output/pprof-new/memory/ecma376-part1-r1-w0/read_live.heap.pprof \
+  output/pprof-new/memory/ecma376-part1-r1-w0/write_live.heap.pprof
+```
+
+Memory mode records baseline, natural read/write ends, explicit two-GC read/write
+live models, and the released two-GC heap. The document remains alive at live-model
+snapshots. MemStats phase deltas are exact counters; pprof site attribution is
+sampled. Inspect both alloc_space/alloc_objects and inuse_space/inuse_objects.
+`-profile-output-buffer 1048576` adds a diagnostic caller-side file buffer; zero
+preserves normal buffering. Underlying write counters and child OS user/system CPU
+allow cross-checking syscall attribution. Flush errors propagate and flush time
+is included. Neither this option nor profiling changes production codec defaults.

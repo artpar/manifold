@@ -118,3 +118,10 @@ with the former implementation maps and qualification ledger.
   but write time only 63.37s to 61.17s in one pair. Do not promote syscall samples
   into CPU accounting or latency savings. Prioritize measured layout/PNG/model
   allocation and repeated SF encoding; retain negative/modest experimental results.
+
+- 2026-11-25: Completed pprof evidence ranks page-local layout index/scratch work
+  first, strict SF key/decoder pass reduction next, and bounded PNG reuse before
+  speculative global caching. Source metadata and mutable model ownership remain
+  contractual. All 12 diagnostic outputs retain qualified hashes; codec changes
+  are next work, not an optimization already delivered. See HUGE_PPROF.md and its
+  curated results, with captured profiles kept outside version control.

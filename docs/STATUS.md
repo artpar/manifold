@@ -57,18 +57,26 @@ originals. The historical huge baseline was 0/46 completed attempts; its facts
 remain in [HUGE_INPUTS.md](verification/HUGE_INPUTS.md) and PERFORMANCE.md.
 The final repaired results supersede those input blockers, not the baseline record.
 
-## Profiling investigation in progress
+## Completed pprof investigation
 
-Stage CPU and heap runs on IPCC, Intel and ECMA originals all complete with
-qualified SF hashes. Evidence identifies layout-copy churn (66–78% of Intel/ECMA
-read allocation bytes), PNG/DEFLATE allocation on IPCC, pointer-heavy model
-retention and small file-write costs. Post-release Go live heap is below 1 MiB in
-all three observed children. See [profiling investigation](verification/HUGE_PPROF.md).
-Caller-buffer control cuts writes 255× but changes write time only 3.5% in one
-pair; the syscall sample share does not predict latency savings. Profiling of
-derived ECMA SF is underway. Production
-codec behavior and frozen capacity claims remain unchanged. Raw profiles stay
-under ignored `output/pprof-huge/`.
+Twelve diagnostic conversions on three huge PDF originals, a real Word control
+and qualified derived ECMA SF all retain exact output hashes. Captured 14 stage
+CPU and 30 heap profiles plus four allocation deltas. See [the full investigation](verification/HUGE_PPROF.md)
+and [counters/profile evidence](verification/HUGE_PPROF_RESULTS.json).
+
+Largest targets: recursive layout copies (66–78% of Intel/ECMA read allocation),
+SF key decoding / repeated decoder buffers (~991M allocations per 4.13 GB SF read),
+PNG/DEFLATE churn on IPCC, repeated SF encoding and full model retention. SF-loaded
+ECMA retains 5.65 GiB / 80.8M heap objects; PDF-import ECMA 4.83 GiB / 33.1M.
+All observed memory runs return below 1 MiB live Go heap after document release;
+that is not an RSS-return or long-lived service leak guarantee.
+
+Caller buffering cuts writes 255× but write time only 3.5% in one pair. Do not
+translate syscall samples into latency gains. Production codecs, VERSION and
+frozen capacity claims are unchanged. Next implement index-based page layout
+scratch, preserve exact hashes and rerun the pinned original profiles. Final
+normal/race suites (production packages cached), vet, CGO-disabled build and diff
+check pass; the new diagnostic buffering/error-propagation race test ran fresh.
 
 ## Known boundaries and next work
 

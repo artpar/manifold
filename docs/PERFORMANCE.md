@@ -1,5 +1,11 @@
 # Load and stress testing
 
+The huge-original [pprof investigation](verification/HUGE_PPROF.md) separately
+attributes CPU, cumulative allocation and live heap on v0.4.0. It identifies
+layout-copy churn, PNG/DEFLATE allocation, repeated SF JSON work and model retention.
+The buffer A/B reduces writes 255× but write time only 3.5% in one pair; profile
+sample shares are not predicted speedups. These are diagnostics, not new capacity.
+
 ## Plan and scope
 
 Baseline: the user's MacBook Pro (MacBookPro18,2), Apple M1 Max, 10 CPU cores,
