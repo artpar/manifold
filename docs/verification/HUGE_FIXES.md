@@ -231,3 +231,10 @@ compiler errors (new fields/imports absent from the initial package snapshot).
 These are invalid verification attempts, not passing checks. The final matrix is
 now running on frozen source; its result will supersede those attempts. Hosted
 c3285ec full CI passed; later hosted source checks are pending.
+
+ECMA's independent MuPDF / streaming ProseMirror audit checked all 5,039 pages,
+97,484 body nodes and 3,033 image blocks. Its source character inventory differs
+by 15 of 7,418,356 normalized characters. These are retained as observed reader
+representation differences, not silently corrected into a perfect-match claim.
+Full source audits and central Go SF read/write SHA-256 checks remain separate:
+the latter verifies exact persistence of Manifold's complete recovered graph.
