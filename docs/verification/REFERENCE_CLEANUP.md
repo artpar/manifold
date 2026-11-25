@@ -42,3 +42,14 @@ Ignored evidence is under output/reference-cleanup; current scopes/results are i
 docs/verification.json. Existing declared codec/script/layout limits remain in
 COMPATIBILITY.md. This change does not add legacy binary DOC or promise identical
 PDF layout round trips.
+
+
+## Published-tree verification
+
+Published source commit `8536dc0` passes a fresh clone/build and a scan of all
+tracked paths/text. SF→VDOCS→SF preserves the complete normalized graph, and native
+VDOCS→DOCX/PDF→SF recovers the expected three typed notes without an ignored QA
+environment. The first clone scan caught omitted neutral example/QA changes; the
+follow-up source commit fixes those omissions. The report example independently
+passes python-docx/Poppler readers (two PDF pages, one table and one image).
+This evidence follow-up changes documentation only.

@@ -62,7 +62,9 @@ Application-specific names/source links were removed while VDOCS was retained at
 user request. SF remains canonical; DOCX/PDF/native snapshot paths share its model.
 VDOCS now uses `manifold-document` and Manifold-owned MIME; retired headers need
 explicit migration. The native fixture's document payload is unchanged. Current
-normal/race/vet/build checks, all33 retained native SDK probes, fresh save/re-import
-and complete-SF equality for all51 accepted core fixtures pass. See
+normal/race/vet/build checks, all 33 retained native SDK probes, fresh save/re-import
+and complete-SF equality for all 51 accepted core fixtures pass. See
 [the report](verification/REFERENCE_CLEANUP.md) and [native contract](reference/VDOCS_FORMAT.md).
-Commit/push verification remains for this follow-up; prior publication is unchanged.
+Published source commit `8536dc0` passes a fresh clone/build and full tracked-reference
+scan. SF→VDOCS→SF retains the complete normalized graph; native→DOCX/PDF→SF
+recovers the expected typed notes. No follow-up publication work remains.
