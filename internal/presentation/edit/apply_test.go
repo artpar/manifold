@@ -3,6 +3,7 @@ package edit
 import (
 	"archive/zip"
 	"context"
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
@@ -296,14 +297,15 @@ func TestApplyReplacesImageAndPreservesSlideText(t *testing.T) {
 	if err := os.WriteFile(imagePath, []byte("new image"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	specPath := writeSpec(t, `{
-  "operation": "replace_image",
-  "target": {
-    "type": "object_id",
-    "object_id": "ppt/slides/slide1.xml#rId1"
-  },
-  "image_path": "`+imagePath+`"
-}`)
+	specJSON, err := json.Marshal(model.EditSpec{
+		Operation: "replace_image",
+		Target:    model.TargetSpec{Type: "object_id", ObjectID: "ppt/slides/slide1.xml#rId1"},
+		ImagePath: imagePath,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	specPath := writeSpec(t, string(specJSON))
 
 	result, err := Apply(context.Background(), deckPath, specPath, outputPath)
 	if err != nil {

@@ -94,3 +94,10 @@ Next commands: GOWORK=off go test -timeout 20m ./...;
 GOWORK=off go test -race -timeout 20m ./...; GOWORK=off go vet ./...;
 CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold;
 git diff --check. Do not claim PPTX/SF or PPTX/PDF conversion.
+
+Hosted integration verification found an upstream test constructing JSON by
+concatenating a Windows filesystem path. The test now uses encoding/json to
+encode the same image-replacement specification; assertions/expected bytes are
+unchanged. All production paths and imported renderer oracles remain unchanged.
+Release builds now stamp the presentation version from VERSION. Hosted checks
+must pass on the resulting commit before automatic v0.2.0 publication.
