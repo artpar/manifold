@@ -62,3 +62,16 @@ latency reduction. Two-run/pair/profile qualification is still pending.
 The initial 7290f2d capacity scout was stopped to include the promised navigation
 bounds follow-up. Its records remain intermediate evidence only. The final
 qualification uses fresh opt-five-final-* logs and a separately frozen binary.
+
+## Frozen capacity checkpoint
+
+Final source 4f32d78: **28/28** large-policy jobs complete with exact qualified
+SF hashes (14 solo and 14 children in seven two-worker batches). Mean solo wall
+speedups: IPCC 1.125×; Intel 1.844×; ECMA 1.800×; Word i00/i10 1.089×/1.082×;
+ETSI 1.819×; C++ draft 1.777×. ECMA paired wall time drops 312.30s to 129.25s.
+Peak RSS improvements are modest and IPCC paired RSS increases slightly.
+Default-policy, old-binary control and final diagnostic comparisons are pending.
+
+Exact final source passes [hosted Windows/macOS/Linux and Linux race checks](https://github.com/artpar/manifold/actions/runs/45653303125).
+The unchanged VERSION causes publication to skip new release assets; no manual
+release or tag is performed.

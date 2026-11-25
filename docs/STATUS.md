@@ -99,7 +99,9 @@ All five changes pass the full normal/race/vet/CGO-disabled build matrix. Fresh
 engine normal/race results are 19.694s/242.273s; original image/glyph checks pass
 (7.450s). The navigation bounds-cache follow-up also passes focused normal/race checks,
 including interleaved-page and exact tie ordering. Earlier intermediate capacity
-scouts are excluded; the final frozen snapshot is being measured afresh.
+scouts are excluded; the final frozen snapshot is being measured afresh. Source 4f32d78 now passes
+28/28 exact-hash capacity jobs and hosted Windows/macOS/Linux plus full Linux
+race checks. Diagnostic/control comparisons remain underway.
 
 ## Known boundaries and next work
 
