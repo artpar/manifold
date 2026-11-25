@@ -68,3 +68,13 @@ and complete-SF equality for all 51 accepted core fixtures pass. See
 Published source commit `8536dc0` passes a fresh clone/build and full tracked-reference
 scan. SF→VDOCS→SF retains the complete normalized graph; native→DOCX/PDF→SF
 recovers the expected typed notes. No follow-up publication work remains.
+
+
+## Hosted CI/CD
+
+`.github/workflows/ci.yml` owns checks and releases. Pull requests/main/tag pushes
+run native Linux/macOS/Windows Go checks, Linux race checks and CGO-disabled smoke
+builds. New VERSION values on main automatically create a gated tag/release with
+six platform archives, licenses and verified checksums. Hosted runs/releases are
+the current result authority; see [CI/CD](CI.md). Local qualification records below
+remain historical evidence, not a substitute for the hosted result.

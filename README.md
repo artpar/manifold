@@ -1,5 +1,7 @@
 # Manifold
 
+[![CI and Release](https://github.com/artpar/manifold/actions/workflows/ci.yml/badge.svg)](https://github.com/artpar/manifold/actions/workflows/ci.yml)
+
 Pure-Go rich document processing for embedded applications and the command line.
 
 Convert **DOCX → structured format → DOCX/PDF**, and recover structured content
@@ -89,3 +91,12 @@ Start with [documentation](docs/README.md), [compatibility](docs/COMPATIBILITY.m
 [verification](docs/verification/FINAL_AUDIT.md) or [testing](docs/TESTING.md).
 Original-source fixtures and third-party notices are documented in
 [THIRD_PARTY.md](THIRD_PARTY.md). The project is MIT licensed.
+
+
+## CI and releases
+
+GitHub Actions tests pushes and pull requests on Linux, macOS and Windows, with
+race checks on Linux. A new version in `VERSION` on `main` automatically creates
+the tag and release after checks pass. The pipeline builds CGO-disabled binaries
+for Linux/macOS/Windows on amd64/arm64, packages licenses and publishes checksums.
+See [CI/CD](docs/CI.md). No workstation build/upload step is needed for releases.

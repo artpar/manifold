@@ -39,3 +39,10 @@ with the former implementation maps and qualification ledger.
    envelope/MIME and native diagnostic namespace; remove host validators and their
    browser harness. Keep SDK reader/edit/save checks and the unchanged native
    document payload. Retired branded envelopes require explicit header migration.
+
+
+10. **Automated delivery.** The user requested CI/CD instead of workstation
+    releases. GitHub Actions gates publication on native OS checks and Linux race
+    checks. A reviewed VERSION bump on main creates the tag, archives, checksums
+    and GitHub release automatically. Release write permission is job-scoped;
+    published versions are not force-moved or overwritten on ordinary pushes.

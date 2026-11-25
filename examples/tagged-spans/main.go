@@ -13,16 +13,16 @@ import (
 )
 
 type cell struct {
-	Row     int                 `json:"row"`
-	ColSpan int                 `json:"colspan"`
-	RowSpan int                 `json:"rowspan"`
-	Text    string              `json:"text"`
+	Row     int                  `json:"row"`
+	ColSpan int                  `json:"colspan"`
+	RowSpan int                  `json:"rowspan"`
+	Text    string               `json:"text"`
 	Source  *manifold.SourceInfo `json:"source"`
 }
 type table struct {
 	Source *manifold.SourceInfo `json:"source"`
-	Rows   int                 `json:"rows"`
-	Cells  []cell              `json:"cells"`
+	Rows   int                  `json:"rows"`
+	Cells  []cell               `json:"cells"`
 }
 
 func main() {
@@ -70,8 +70,8 @@ func main() {
 		log.Fatal(err)
 	}
 	report := struct {
-		Pages       int                  `json:"pages"`
-		Tables      []table              `json:"tables"`
+		Pages       int                   `json:"pages"`
+		Tables      []table               `json:"tables"`
 		Diagnostics []manifold.Diagnostic `json:"diagnostics"`
 	}{len(d.Pages), tables, d.Diagnostics}
 	raw, err := json.MarshalIndent(report, "", "  ")

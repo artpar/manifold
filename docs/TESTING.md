@@ -60,3 +60,11 @@ conversion. Do not claim Word-equivalent layout from synthetic outputs.
 
 See [QA tools](../scripts/qa/README.md), [current evidence](verification.json),
 [acceptance](verification/FINAL_AUDIT.md) and [historical qualification](history/README.md).
+
+
+## Hosted automation
+
+GitHub Actions runs the required Go matrix and publishes new VERSION values only
+after it passes. See [CI/CD](CI.md) for triggers, platform coverage, artifact
+contents and retry rules. Hosted run logs and release checksums are the source of
+truth for new releases; workstation-built artifacts are not the release path.

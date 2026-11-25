@@ -114,5 +114,14 @@
     "publication_followup": "First source push omitted the neutral report example and matching QA defaults; clean-clone scan caught this. Follow-up commit8536dc0 includes them and passes the complete scan and conversion check.",
     "report_example": "Neutral Manifold product label and footer; python-docx/Poppler readers pass2 PDF pages,1 table,1 image; output/reference-cleanup/report-readers.log",
     "normal_followup": "Latest full run cached all tested packages; example compiled after neutral sample content update; output/reference-cleanup/current-tests.log"
+  },
+  "ci_cd": {
+    "workflow": ".github/workflows/ci.yml",
+    "runs": "https://github.com/artpar/manifold/actions/workflows/ci.yml",
+    "releases": "https://github.com/artpar/manifold/releases",
+    "version_file": "VERSION",
+    "checks": "native Linux/macOS/Windows normal/vet/modules/CGO-disabled CLI; Linux gofmt/version/race",
+    "publication": "new VERSION on main creates tag, six platform archives, license bundle, checksums and gated GitHub release through Actions",
+    "results": "Hosted run logs and release assets are authoritative; do not infer success from this configuration entry."
   }
 }

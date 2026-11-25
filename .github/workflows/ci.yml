@@ -1,0 +1,179 @@
+name: CI and Release
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  GOWORK: 'off'
+
+jobs:
+  check:
+    name: Check (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Check formatting
+        if: runner.os == 'Linux'
+        run: |
+          files=$(git ls-files '*.go' | xargs gofmt -l)
+          if [[ -n "$files" ]]; then
+            echo "$files"
+            exit 1
+          fi
+      - name: Check version
+        if: runner.os == 'Linux'
+        run: |
+          version=$(cat VERSION)
+          [[ "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]
+      - name: Verify modules
+        run: go mod verify
+      - name: Vet
+        run: go vet ./...
+      - name: Test
+        run: go test -timeout 20m ./...
+      - name: Race test
+        if: runner.os == 'Linux'
+        run: go test -race -timeout 20m ./...
+      - name: Build and run without CGO
+        env:
+          CGO_ENABLED: '0'
+        run: |
+          mkdir -p bin
+          binary=bin/manifold
+          if [[ "$RUNNER_OS" == Windows ]]; then binary="$binary.exe"; fi
+          go build -trimpath -o "$binary" ./cmd/manifold
+          "$binary" help
+
+  release:
+    name: Publish version
+    needs: check
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Plan release
+        id: plan
+        shell: bash
+        run: |
+          version=$(cat VERSION)
+          if [[ ! "$version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo 'VERSION must contain a stable semantic version such as 0.1.0'
+            exit 1
+          fi
+          tag="v$version"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF" == refs/tags/* && "$GITHUB_REF_NAME" != "$tag" ]]; then
+            echo 'Tag must match VERSION'
+            exit 1
+          fi
+          if git rev-parse --verify "refs/tags/$tag" >/dev/null 2>&1; then
+            tagged_commit=$(git rev-list -n 1 "$tag")
+            if [[ "$tagged_commit" != "$GITHUB_SHA" ]]; then
+              echo "Version $version already belongs to $tagged_commit; no release from this commit"
+              echo 'publish=false' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft' > /tmp/release-draft 2>/dev/null; then
+            if [[ "$(cat /tmp/release-draft)" == false ]]; then
+              echo 'Release already published'
+              echo 'publish=false' >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          echo 'publish=true' >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        if: steps.plan.outputs.publish == 'true'
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Build, package and checksum
+        if: steps.plan.outputs.publish == 'true'
+        shell: bash
+        env:
+          CGO_ENABLED: '0'
+          VERSION: ${{ steps.plan.outputs.version }}
+        run: |
+          mkdir -p dist
+          for target in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64; do
+            os=${target%/*}
+            arch=${target#*/}
+            name="manifold_${VERSION}_${os}_${arch}"
+            stage="dist/$name"
+            mkdir -p "$stage/third_party"
+            binary=manifold
+            if [[ "$os" == windows ]]; then binary=manifold.exe; fi
+            GOOS="$os" GOARCH="$arch" go build -trimpath -buildvcs=false -ldflags='-s -w' -o "$stage/$binary" ./cmd/manifold
+            cp LICENSE THIRD_PARTY.md "$stage/"
+            cp -R third_party/licenses "$stage/third_party/"
+            printf '%s\n%s\n' "$VERSION" "$GITHUB_SHA" > "$stage/VERSION"
+            if [[ "$target" == linux/amd64 ]]; then "$stage/$binary" help; fi
+            if [[ "$os" == windows ]]; then
+              (cd dist && zip -qr "$name.zip" "$name")
+            else
+              tar -C dist -czf "dist/$name.tar.gz" "$name"
+            fi
+          done
+          (cd dist && sha256sum *.tar.gz *.zip > checksums.txt && sha256sum --check checksums.txt)
+      - name: Publish GitHub release
+        if: steps.plan.outputs.publish == 'true'
+        shell: bash
+        env:
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          if ! git rev-parse --verify "refs/tags/$TAG" >/dev/null 2>&1; then
+            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$TAG" -f "sha=$GITHUB_SHA"
+          fi
+          cat > dist/release-notes.md <<NOTES
+          Pure-Go rich document conversion with a shared SF representation:
+          - DOCX ↔ SF
+          - PDF ↔ SF
+          - Optional VDOCS ↔ SF
+
+          Install the Go CLI:
+          \`go install github.com/$GITHUB_REPOSITORY/cmd/manifold@$TAG\`
+
+          Download the archive for your platform and verify it against \`checksums.txt\`.
+          Archives contain the CLI, version/commit information and dependency licenses.
+          [Compatibility contract](https://github.com/$GITHUB_REPOSITORY/blob/$GITHUB_SHA/docs/COMPATIBILITY.md).
+          NOTES
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/*.tar.gz dist/*.zip dist/checksums.txt --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" dist/*.tar.gz dist/*.zip dist/checksums.txt --repo "$GITHUB_REPOSITORY" --verify-tag --draft --title "Manifold $TAG" --notes-file dist/release-notes.md
+          fi
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          printf 'Published [%s](https://github.com/%s/releases/tag/%s) with six archives and verified checksums.\n' "$TAG" "$GITHUB_REPOSITORY" "$TAG" >> "$GITHUB_STEP_SUMMARY"

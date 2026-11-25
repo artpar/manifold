@@ -12,3 +12,5 @@ Start with [status](STATUS.md), [architecture](ARCHITECTURE.md),
 Current guides describe the current tree. Reference contracts retain scoped
 behavior/evidence. History preserves chronology and original check results; it is
 not a list of outstanding current requirements.
+
+- [Automated CI/CD and release process](CI.md)
