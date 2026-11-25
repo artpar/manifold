@@ -37,6 +37,12 @@ def audit(source, sf):
     env.setdefault('NODE_PATH', str(Path('output/sf-qa/node_modules').resolve()))
     consumer = subprocess.Popen(['node', 'scripts/qa/structured/verify_structured_stream.cjs'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, env=env)
     with open(sf, 'rb') as f:
+        digest = hashlib.sha256()
+        for chunk in iter(lambda:f.read(1<<20), b''):
+            digest.update(chunk)
+        sf_sha256 = digest.hexdigest()
+        sf_bytes = os.fstat(f.fileno()).st_size
+        f.seek(0)
         for body in ijson.items(f, 'content.item', use_float=True):
             consumer.stdin.write(json.dumps(body, ensure_ascii=False) + '\n')
             nodes += 1
@@ -71,7 +77,7 @@ def audit(source, sf):
     checked = consumer.stdout.read()
     if consumer.wait():
         raise RuntimeError('independent ProseMirror rejection')
-    result = {'source': str(source), 'sf': str(sf), 'body_nodes': nodes, 'prosemirror': json.loads(checked), 'images': sum(images.values()), 'distinct_images': len(images), 'native_equations': math_count, 'original_list_label_characters_in_provenance': provenance_label_characters}
+    result = {'source': str(source), 'sf': str(sf), 'sf_sha256': sf_sha256, 'sf_bytes': sf_bytes, 'body_nodes': nodes, 'prosemirror': json.loads(checked), 'images': sum(images.values()), 'distinct_images': len(images), 'native_equations': math_count, 'original_list_label_characters_in_provenance': provenance_label_characters}
     if source.suffix == '.docx':
         with zipfile.ZipFile(source) as z:
             root = ET.fromstring(z.read('word/document.xml'))
