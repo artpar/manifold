@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"reflect"
 	"sort"
 	"strings"
 )
@@ -420,6 +421,16 @@ func strictSFAttrs(raw json.RawMessage, v any) error {
 	}
 	if !bytes.HasPrefix(bytes.TrimSpace(raw), []byte("{")) {
 		return fmt.Errorf("structured attrs must be an object")
+	}
+	if _, ok := v.(*SourceInfo); ok {
+		validator := strictJSONParser{ctx: context.Background(), data: raw, rejectUnknown: true, allowAliases: true, allowScalarNull: true, sharedFields: sourceJSONSchema()}
+		if err := validator.validate(reflect.TypeFor[SourceInfo]()); err != nil {
+			return fmt.Errorf("structured attrs: %w", err)
+		}
+		if err := json.Unmarshal(raw, v); err != nil {
+			return fmt.Errorf("structured attrs: %w", err)
+		}
+		return nil
 	}
 	dec := json.NewDecoder(bytes.NewReader(raw))
 	dec.DisallowUnknownFields()

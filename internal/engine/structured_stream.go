@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"bytes"
 	"compress/gzip"
 	"context"
 	"encoding/json"
@@ -136,12 +135,11 @@ func readFlowStructured(ctx context.Context, input io.Reader) (*Document, error)
 		if err := dec.Decode(&raw); err != nil {
 			return err
 		}
-		if err := validateTypedJSON(ctx, raw, reflect.TypeOf(target).Elem()); err != nil {
+		validator := strictJSONParser{ctx: ctx, data: raw, rejectUnknown: true}
+		if err := validator.validate(reflect.TypeOf(target).Elem()); err != nil {
 			return err
 		}
-		inner := json.NewDecoder(bytes.NewReader(raw))
-		inner.DisallowUnknownFields()
-		return inner.Decode(target)
+		return json.Unmarshal(raw, target)
 	}
 	for dec.More() {
 		if err := ctx.Err(); err != nil {

@@ -1,11 +1,13 @@
 package engine
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 	"unicode/utf8"
 )
 
@@ -17,7 +19,11 @@ func validateStrictJSON(ctx context.Context, data []byte) error {
 }
 
 func validateTypedJSON(ctx context.Context, data []byte, shape reflect.Type) error {
-	p := strictJSONParser{ctx: ctx, data: data}
+	return (&strictJSONParser{ctx: ctx, data: data}).validate(shape)
+}
+func (p *strictJSONParser) validate(shape reflect.Type) error {
+	ctx := p.ctx
+
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -27,17 +33,19 @@ func validateTypedJSON(ctx context.Context, data []byte, shape reflect.Type) err
 	if err := p.space(); err != nil {
 		return err
 	}
-	if p.at != len(data) {
+	if p.at != len(p.data) {
 		return p.invalid("trailing data")
 	}
 	return ctx.Err()
 }
 
 type strictJSONParser struct {
-	ctx         context.Context
-	data        []byte
-	at, checked int
-	fields      map[reflect.Type]map[string]reflect.Type
+	ctx                                          context.Context
+	data                                         []byte
+	at, checked                                  int
+	fields                                       map[reflect.Type]map[string]reflect.Type
+	sharedFields                                 map[reflect.Type]map[string]reflect.Type
+	rejectUnknown, allowAliases, allowScalarNull bool
 }
 
 func (p *strictJSONParser) invalid(s string) error { return fmt.Errorf("JSON byte %d: %s", p.at, s) }
@@ -98,7 +106,7 @@ func (p *strictJSONParser) value(depth int, typ reflect.Type) error {
 	if p.at == len(p.data) {
 		return p.invalid("missing value")
 	}
-	if p.data[p.at] == 'n' && !nullable {
+	if p.data[p.at] == 'n' && !nullable && !p.allowScalarNull {
 		return p.invalid("null for nonnullable native field")
 	}
 	switch p.data[p.at] {
@@ -110,20 +118,46 @@ func (p *strictJSONParser) value(depth int, typ reflect.Type) error {
 		if p.consume('}') {
 			return nil
 		}
-		keys := make(map[string]bool)
+		// Small objects dominate SF. Keep decoded key views on the stack; only
+		// unusually wide objects need a map. Views never escape this validation.
+		var small [32][]byte
+		count := 0
+		var keys map[string]bool
 		for {
 			start := p.at
 			if err := p.string(); err != nil {
 				return err
 			}
-			var key string
-			if err := json.Unmarshal(p.data[start:p.at], &key); err != nil {
-				return err
+			key := p.data[start+1 : p.at-1]
+			if bytes.IndexByte(key, '\\') >= 0 {
+				var decoded string
+				if err := json.Unmarshal(p.data[start:p.at], &decoded); err != nil {
+					return err
+				}
+				key = []byte(decoded)
 			}
-			if keys[key] {
-				return p.invalid("duplicate object member")
+			if keys != nil {
+				if keys[string(key)] {
+					return p.invalid("duplicate object member")
+				}
+				keys[string(key)] = true
+			} else {
+				for _, previous := range small[:count] {
+					if bytes.Equal(previous, key) {
+						return p.invalid("duplicate object member")
+					}
+				}
+				if count < len(small) {
+					small[count] = key
+					count++
+				} else {
+					keys = make(map[string]bool, 64)
+					for _, previous := range small {
+						keys[string(previous)] = true
+					}
+					keys[string(key)] = true
+				}
 			}
-			keys[key] = true
 			if err := p.space(); err != nil {
 				return err
 			}
@@ -133,12 +167,19 @@ func (p *strictJSONParser) value(depth int, typ reflect.Type) error {
 			next := child
 			if typ != nil && typ.Kind() == reflect.Struct {
 				fields := p.recordFields(typ)
-				next = fields[key]
+				next = fields[string(key)]
 				if next == nil {
 					for known := range fields {
-						if strings.EqualFold(key, known) {
-							return p.invalid("noncanonical native field name")
+						if bytes.EqualFold(key, []byte(known)) {
+							if !p.allowAliases {
+								return p.invalid("noncanonical native field name")
+							}
+							next = fields[known]
+							break
 						}
+					}
+					if next == nil && p.rejectUnknown {
+						return p.invalid("unknown field " + string(key))
 					}
 				}
 			}
@@ -315,6 +356,9 @@ func (p *strictJSONParser) string() error {
 }
 
 func (p *strictJSONParser) recordFields(typ reflect.Type) map[string]reflect.Type {
+	if fields := p.sharedFields[typ]; fields != nil {
+		return fields
+	}
 	if p.fields == nil {
 		p.fields = make(map[reflect.Type]map[string]reflect.Type)
 	}
@@ -346,3 +390,27 @@ func (p *strictJSONParser) recordFields(typ reflect.Type) map[string]reflect.Typ
 func validateVDOCSJSON(ctx context.Context, data []byte) error {
 	return validateTypedJSON(ctx, data, reflect.TypeFor[vdocsEnvelope]())
 }
+
+// Immutable schema metadata for the fixed SourceInfo type graph, never customer
+// data or an unbounded cache of caller-provided types.
+var sourceJSONSchema = sync.OnceValue(func() map[reflect.Type]map[string]reflect.Type {
+	p := &strictJSONParser{}
+	seen := map[reflect.Type]bool{}
+	var visit func(reflect.Type)
+	visit = func(t reflect.Type) {
+		if seen[t] {
+			return
+		}
+		seen[t] = true
+		switch t.Kind() {
+		case reflect.Pointer, reflect.Slice, reflect.Array, reflect.Map:
+			visit(t.Elem())
+		case reflect.Struct:
+			for _, child := range p.recordFields(t) {
+				visit(child)
+			}
+		}
+	}
+	visit(reflect.TypeFor[SourceInfo]())
+	return p.fields
+})

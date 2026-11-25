@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -60,5 +62,52 @@ func TestStrictJSONValueScannerAvoidsLargeStringCopies(t *testing.T) {
 		}
 	}); got != 0 {
 		t.Fatalf("large string scan allocated %g times", got)
+	}
+}
+
+func TestStrictJSONSmallKeysAndWideEscapedDuplicates(t *testing.T) {
+	small := []byte(`{"format":"pdf","page":1,"quad":[1,2,3,4],"evidence":"source"}`)
+	if got := testing.AllocsPerRun(3, func() {
+		if err := validateStrictJSON(context.Background(), small); err != nil {
+			panic(err)
+		}
+	}); got != 0 {
+		t.Fatalf("small key scan allocated %g times", got)
+	}
+	var wide strings.Builder
+	wide.WriteByte('{')
+	for i := 0; i < 40; i++ {
+		if i > 0 {
+			wide.WriteByte(',')
+		}
+		wide.WriteString(fmt.Sprintf(`"key%d":1`, i))
+	}
+	if err := validateStrictJSON(context.Background(), []byte(wide.String()+`}`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := validateStrictJSON(context.Background(), []byte(wide.String()+`,"\u006bey0":2}`)); err == nil {
+		t.Fatal("wide escaped duplicate accepted")
+	}
+}
+
+func TestSourceAttrsFastDecoderPreservesUnknownChecks(t *testing.T) {
+	for _, raw := range []string{`{"format":"pdf","page":1}`, `{"Format":"pdf","page":null}`, `{"format":"pdf","quad":[{"x":1,"y":2},{"x":2,"y":2},{"x":2,"y":3},{"x":1,"y":3}]}`} {
+		var got, want SourceInfo
+		dec := json.NewDecoder(strings.NewReader(raw))
+		dec.DisallowUnknownFields()
+		if err := dec.Decode(&want); err != nil {
+			t.Fatal(err)
+		}
+		if err := strictSFAttrs([]byte(raw), &got); err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Fatal("source attrs changed")
+		}
+	}
+	for _, raw := range []string{`{"format":"pdf","unexpected":1}`, `{"format":"pdf","quad":[{"x":1,"y":2,"unexpected":1}]}`, `{"format":"pdf"} {}`, `{"format":"pdf","format":"docx"}`, `{"font":"\ud800"}`} {
+		if err := strictSFAttrs([]byte(raw), &SourceInfo{}); err == nil {
+			t.Fatalf("invalid source attrs accepted: %s", raw)
+		}
 	}
 }

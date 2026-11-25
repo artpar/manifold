@@ -163,3 +163,10 @@ Performance change 1: recursive layout ordering partitions integer indices into
 one page-owned box array; a final cycle permutation moves each wide box once.
 Stable sorts elsewhere also apply index cycles rather than allocating a second
 wide box array. Geometric decisions, stable ties and column labels remain intact.
+
+Performance change 2: the strict scanner borrows validated unescaped key byte
+views for stack-local duplicate detection (wide objects fall back to a map).
+Streaming SF uses that scanner to enforce unknown fields before direct Unmarshal,
+avoiding a second Decoder. SourceInfo attrs use strict unknown-field validation
+and direct Unmarshal with immutable metadata for the fixed type graph; legacy
+scalar-null/field-alias semantics remain. No customer graph enters a global cache.

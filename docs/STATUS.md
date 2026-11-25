@@ -83,8 +83,12 @@ check pass; the new diagnostic buffering/error-propagation race test ran fresh.
 Change 1 replaces recursive wide layout copies with stable page-local index
 partitions and in-place permutation cycles. Existing geometry/table/list tests
 and 100 deterministic comparisons against the frozen previous ordering algorithm
-pass. A real ECMA conversion is running to verify the original SF hash. Changes
-2–5 and the final before/after qualification remain outstanding.
+pass. A real ECMA conversion retains the original SF hash: read 53.88s, total
+117.71s, 63.73 GiB allocated (single intermediate run, not final qualification).
+Change 2 removes per-key JSON decoding for unescaped keys and redundant inner
+decoders; SourceInfo uses strict shape checks plus direct typed decoding. JSON/SF
+and unknown/nested-field/escaped-duplicate regression tests pass. Changes 3–5
+and final before/after qualification remain outstanding.
 
 ## Known boundaries and next work
 

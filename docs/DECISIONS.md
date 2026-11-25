@@ -129,3 +129,8 @@ with the former implementation maps and qualification ledger.
 - Performance change 1: preserve the frozen layout algorithm's decisions while
   moving recursive work to integer indices; validate stable ties/column labels
   against the previous implementation and pinned original SF hashes.
+
+- Performance change 2: eliminate redundant JSON key/decoder allocations while
+  preserving Unicode/duplicate/canonical field checks, unknown nested attributes
+  and final model references. Cache only fixed SourceInfo schema metadata, not
+  arbitrary user types or document data. Final original/SF hashes remain required.
