@@ -176,3 +176,11 @@ PDF text, one image, two vectors and 720x540pt geometry. The rendered example wa
 visually inspected. A standards check fixed the main presentation MIME and
 notes-body placeholder. See verification/PPTX_SF_BRIDGE.md. This does not upgrade
 unsupported native features to general PowerPoint fidelity.
+
+## Huge-input follow-up (in progress)
+
+The previous 137-page maximum does not establish 100 MB / 1,000-page capacity.
+Added tools/hugetest with independent deterministic PDF/OOXML fixtures, complete
+page-marker/image checks, isolated child processes, hard timeouts and sampled
+aggregate RSS guard. Small generator/read checks pass. Huge-input measurements,
+concurrency qualification and report updates are pending; see PERFORMANCE.md.
