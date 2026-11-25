@@ -104,7 +104,17 @@ func (r *pdfReader) sourceFor(s *pdfTextState, advance float64, estimated bool) 
 	return source
 }
 func (r *pdfReader) warnPage(code, message string) {
-	r.doc.warn(code, "PDF page "+strconv.Itoa(r.page)+": "+message)
+	diagnostic := Diagnostic{code, "PDF page " + strconv.Itoa(r.page) + ": " + message}
+	if r.pageWarnings == nil {
+		r.pageWarnings = map[Diagnostic]bool{}
+		for _, d := range r.doc.Diagnostics {
+			r.pageWarnings[d] = true
+		}
+	}
+	if !r.pageWarnings[diagnostic] {
+		r.pageWarnings[diagnostic] = true
+		r.doc.Diagnostics = append(r.doc.Diagnostics, diagnostic)
+	}
 }
 func sourceForRuns(runs []Run) *SourceInfo {
 	var first *SourceInfo
@@ -520,13 +530,17 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 		}
 	}()
 
+	limits, err := resolvePDFReadLimits(opts.PDFLimits)
+	if err != nil {
+		return nil, err
+	}
 	p, err := readPDFSource(ctx, src, opts.Password)
 	if err != nil {
 		return nil, err
 	}
 
 	p.XRefTable.ValidationMode = model.ValidationStrict
-	r := &pdfReader{ctx: ctx, pdf: p, skipNoteKindInference: opts.PDFSkipInference}
+	r := &pdfReader{ctx: ctx, pdf: p, skipNoteKindInference: opts.PDFSkipInference, limits: limits}
 	if err := r.validateParserStreams(); err != nil {
 		return nil, err
 	}
@@ -660,6 +674,17 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 	if e := r.recoverPDFNavigation(catalog); e != nil {
 		return nil, fmt.Errorf("PDF navigation: %w", e)
 	}
+	// No parser objects are needed for geometric inference of an untagged
+	// document. Drop them before building the editable model, not afterwards.
+	if catalog["StructTreeRoot"] == nil || opts.PDFSkipStructure {
+		r.pdf = nil
+		p = nil
+		r.fonts = nil
+		r.streamBudget = nil
+		r.objects = nil
+		r.lines = nil
+		r.current = nil
+	}
 	if e := r.geometricLinks(); e != nil {
 		return nil, e
 	}
@@ -675,6 +700,13 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 	} else if catalog["StructTreeRoot"] != nil {
 		doc.warn("pdf_structure_skipped", "Logical PDF structure was explicitly skipped; positioned paint content is retained")
 	}
+	r.pdf = nil
+	p = nil
+	r.fonts = nil
+	r.streamBudget = nil
+	r.objects = nil
+	r.lines = nil
+	r.current = nil
 	r.diagnosePartialLinks()
 	if !opts.PDFSkipInference {
 		if err := r.inferLinkedPDFNotes(); err != nil {
@@ -692,6 +724,8 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 }
 
 type pdfReader struct {
+	pageWarnings             map[Diagnostic]bool
+	limits                   PDFReadLimits
 	skipNoteKindInference    bool
 	noteInferenceWork        int
 	streamBudget             *pdfStreamBudget

@@ -144,5 +144,16 @@ func TestDOCXSkippedTableColumnsRetainAlignmentAndDiscloseNormalization(t *testi
 	if len(cells) != 3 || cells[1].Blocks[0].Runs[0].Text != "Middle" {
 		t.Fatalf("skipped columns shifted content: %+v", cells)
 	}
-	assertRecoverySF(t, d)
+	sf, e := ToStructured(d)
+	if e != nil {
+		t.Fatal(e)
+	}
+	recovered, e := FromStructured(sf)
+	if e != nil {
+		t.Fatal(e)
+	}
+	g, e := tableGrid(recovered.Blocks[0].Rows)
+	if e != nil || g.Columns != 3 || g.Origins[1].Column != 1 || recovered.Blocks[0].Rows[0].Cells[1].Blocks[0].Runs[0].Text != "Middle" {
+		t.Fatalf("SF shifted normalized cells: %v", e)
+	}
 }

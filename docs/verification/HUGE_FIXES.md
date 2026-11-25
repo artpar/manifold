@@ -44,3 +44,37 @@ final capacity. ECMA subsequently hit the existing 256 MiB decoded-work budget.
 Word imports progressed to grid omissions, now handled with explicit diagnostics.
 Large-file resource policy, bounded SF serialization, independent full-content QA,
 full regressions and final frozen-source stress reruns remain pending.
+
+## Bounded processing checkpoint (in progress)
+
+Flowing SF Write now validates the complete model/references and preflights every
+encoder chunk before emitting bytes, then streams bounded body chunks. It avoids
+the redundant full SF-tree → model self-round-trip in this writer path. Public
+ToStructured/FromStructured retain full graph validation. Eight original small
+corpus files produce byte-identical SF through both writers; malformed suffixes
+still reject before any output. Existing SF regressions pass. No persisted schema
+or original oracle/fixture bytes were changed.
+
+ReadOptions.PDFLimits adds explicit aggregate decoded-work, raster-work and
+navigation-entry policies. Zero fields retain the old conservative defaults;
+per-stream/image/recursion guards remain. The model caps navigation at one million
+entries AND 64 MiB total destination-name bytes. Decoded-stream caching is capped
+at 32 MiB / 4,096 entries independently of permitted cumulative work. Duplicate
+page diagnostics are indexed without changing their ordered persisted values.
+Parser-only state is released before untagged geometric inference (or after tagged
+recovery) so it does not remain live while the editable graph is built.
+
+CLI flags expose the policies: -pdf-max-decoded-mib, -pdf-max-raster-pixels and
+-pdf-max-navigation. The huge runner's explicit -large profile currently chooses
+2 GiB decoded work, 500M raster pixels and 1M navigation entries, still guarded by
+an external process deadline/RSS budget. -storage file uses seekable input and
+materializes streamed output in a real file (optional -output-dir keeps it), with
+output SHA-256 included. This is a separately labelled measurement from the old
+in-memory baseline, not a silent change to its denominator or retained outputs.
+The runner's nonempty-content walker was corrected to descend into Sections;
+the earlier empty-DOCX scout was a harness accounting bug, not missing content.
+
+Indexed device-color images now decode directly from original palette/sample
+bytes, including CMYK, instead of relying on an unsupported intermediary TIFF.
+Original-file scouts and full-content checks are still in progress; do not claim
+all seven originals pass from these implementation changes alone.

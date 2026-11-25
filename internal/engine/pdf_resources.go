@@ -271,8 +271,8 @@ func (r *pdfReader) chargePDFRaster(w, h int) error {
 		return err
 	}
 	n := int64(w) * int64(h)
-	if n > maxPDFRasterPixels-r.rasterPixels {
-		return fmt.Errorf("PDF raster work exceeds %d pixels", maxPDFRasterPixels)
+	if n > r.rasterLimit()-r.rasterPixels {
+		return fmt.Errorf("PDF raster work exceeds %d pixels", r.rasterLimit())
 	}
 	r.rasterPixels += n
 	return nil
@@ -387,7 +387,7 @@ func (r *pdfReader) preparePDFImage(sd *types.StreamDict, w, h int) error {
 			mode = ccitt.Group4
 		}
 		reader := ccitt.NewReader(contextReader{r.ctx, bytes.NewReader(data)}, ccitt.MSB, mode, w, h, &ccitt.Options{Invert: invert, Align: align})
-		limit := min(maxPDFImageBytes, maxPDFDecodedBytes-r.streamBudget.total)
+		limit := min(maxPDFImageBytes, r.decodedLimit()-r.streamBudget.total)
 		data, err = readPDFDecoded(r.ctx, reader, limit)
 		if err != nil {
 			return err
@@ -441,6 +441,9 @@ func (r *pdfReader) preparePDFColorSpace(o types.Object, depth int) (types.Objec
 func (r *pdfReader) deviceImage(sd *types.StreamDict, w, h int) (image.Image, bool, error) {
 	if len(sd.FilterPipeline) != 0 {
 		return nil, false, nil
+	}
+	if cs, ok := sd.Dict["ColorSpace"].(types.Array); ok && len(cs) > 0 && cs[0] == types.Name("Indexed") {
+		return r.indexedDeviceImage(sd, w, h, cs)
 	}
 	name, ok := sd.Dict["ColorSpace"].(types.Name)
 	if !ok {
@@ -709,8 +712,39 @@ const maxPDFStreamFilters = 16
 var errPDFDecodedLimit = errors.New("PDF decoded stream limit exceeded")
 
 type pdfStreamBudget struct {
-	total int
-	cache map[types.IndirectRef][]byte
+	total             int
+	cache             map[types.IndirectRef][]byte
+	cacheBytes        int
+	order             []types.IndirectRef
+	head, tail, count int
+}
+
+// Cached bytes are bounded independently from the caller's cumulative work
+// allowance. Eviction may require re-decoding and is charged as new work.
+func (b *pdfStreamBudget) store(ref types.IndirectRef, data []byte) {
+	const cacheLimit = 32 << 20
+	const entries = 4096
+	if len(data) > cacheLimit {
+		return
+	}
+	if b.cache == nil {
+		b.cache = map[types.IndirectRef][]byte{}
+	}
+	if b.order == nil {
+		b.order = make([]types.IndirectRef, entries)
+	}
+	for b.count > 0 && (b.cacheBytes+len(data) > cacheLimit || b.count >= entries) {
+		old := b.order[b.head]
+		b.cacheBytes -= len(b.cache[old])
+		delete(b.cache, old)
+		b.head = (b.head + 1) % entries
+		b.count--
+	}
+	b.cache[ref] = data
+	b.cacheBytes += len(data)
+	b.order[b.tail] = ref
+	b.tail = (b.tail + 1) % entries
+	b.count++
 }
 
 func readPDFDecoded(ctx context.Context, src io.Reader, limit int) ([]byte, error) {
@@ -743,8 +777,8 @@ func (r *pdfReader) decodePDFStreamLimit(object types.Object, sd *types.StreamDi
 		if len(data) > streamLimit {
 			return fmt.Errorf("PDF decoded stream exceeds %d bytes", streamLimit)
 		}
-		if len(data) > maxPDFDecodedBytes-r.streamBudget.total {
-			return fmt.Errorf("PDF decoded streams exceed %d bytes", maxPDFDecodedBytes)
+		if len(data) > r.decodedLimit()-r.streamBudget.total {
+			return fmt.Errorf("PDF decoded streams exceed %d bytes", r.decodedLimit())
 		}
 		r.streamBudget.total += len(data)
 		return nil
@@ -761,7 +795,7 @@ func (r *pdfReader) decodePDFStreamLimit(object types.Object, sd *types.StreamDi
 			}
 		}
 		for _, f := range sd.FilterPipeline {
-			limit := min(streamLimit, maxPDFDecodedBytes-r.streamBudget.total)
+			limit := min(streamLimit, r.decodedLimit()-r.streamBudget.total)
 			if err := r.ctx.Err(); err != nil {
 				return nil, err
 			}
@@ -806,7 +840,7 @@ func (r *pdfReader) decodePDFStreamLimit(object types.Object, sd *types.StreamDi
 			}
 			if err != nil {
 				if errors.Is(err, errPDFDecodedLimit) && limit < streamLimit {
-					return nil, fmt.Errorf("PDF decoded streams exceed %d bytes: %w", maxPDFDecodedBytes, err)
+					return nil, fmt.Errorf("PDF decoded streams exceed %d bytes: %w", r.decodedLimit(), err)
 				}
 				return nil, fmt.Errorf("PDF stream %s: %w", f.Name, err)
 			}
@@ -842,7 +876,7 @@ func (r *pdfReader) decodePDFStreamLimit(object types.Object, sd *types.StreamDi
 		return nil, err
 	}
 	if indirect {
-		r.streamBudget.cache[ref] = data
+		r.streamBudget.store(ref, data)
 	}
 	return data, nil
 }

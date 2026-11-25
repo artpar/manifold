@@ -531,16 +531,24 @@ func pdfViewCount(view string) int {
 	return -1
 }
 
+const maxPDFNavigationEntries = 1_000_000
+const maxPDFDestinationNameBytes = 64 << 20
+
 func (n *PDFNavigation) validate(d *Document, c *destinationCatalog) error {
 	if n == nil {
 		return nil
 	}
-	if len(n.Destinations)+len(n.Links) > 100000 {
-		return fmt.Errorf("PDF navigation exceeds 100000 entries")
+	if len(n.Destinations)+len(n.Links) > maxPDFNavigationEntries {
+		return fmt.Errorf("PDF navigation exceeds %d entries", maxPDFNavigationEntries)
 	}
 	ids := map[string]bool{}
 	names := map[string]bool{}
+	totalNameBytes := 0
 	for _, v := range n.Destinations {
+		totalNameBytes += len(v.NameBytes)
+		if totalNameBytes > maxPDFDestinationNameBytes {
+			return fmt.Errorf("PDF destination name bytes exceed limit")
+		}
 		if destinationID(v.ID) != nil || ids[v.ID] {
 			return fmt.Errorf("invalid/duplicate PDF destination ID")
 		}
@@ -639,23 +647,25 @@ type pdfNamedView struct {
 	value types.Object
 }
 type pdfViewRegistry struct {
-	r      *pdfReader
-	names  map[string]pdfNamedView
-	ids    map[string]string
-	owners map[string]string
-	views  map[string]int
-	visits int
+	r         *pdfReader
+	names     map[string]pdfNamedView
+	ids       map[string]string
+	owners    map[string]string
+	views     map[string]int
+	visits    int
+	nameBytes int
 }
 
 func pdfViewKey(kind string, raw []byte) string { return kind + ":" + string(raw) }
 func (v *pdfViewRegistry) named(kind string, raw []byte, obj types.Object) error {
 	key := pdfViewKey(kind, raw)
-	if len(raw) > 65536 || len(v.names) >= 100000 {
+	if len(raw) > 65536 || len(v.names) >= v.r.navigationLimit() || len(raw) > maxPDFDestinationNameBytes-v.nameBytes {
 		return fmt.Errorf("PDF destination name budget exceeded")
 	}
 	if _, ok := v.names[key]; ok {
 		return fmt.Errorf("duplicate PDF destination name")
 	}
+	v.nameBytes += len(raw)
 	v.names[key] = pdfNamedView{kind, append([]byte(nil), raw...), obj}
 	return nil
 }
@@ -988,7 +998,7 @@ func (r *pdfReader) recoverPDFNavigation(catalog types.Dict) error {
 		if link.hasURI || link.view != nil {
 			r.doc.PDFNavigation.Links = append(r.doc.PDFNavigation.Links, PDFNavigationLink{Kind: kind, Page: key.page, Object: key.object, URI: link.target.uri, Destination: link.target.destination, Regions: append([]Quad(nil), link.regions...)})
 		}
-		if len(r.doc.PDFNavigation.Destinations)+len(r.doc.PDFNavigation.Links) > 100000 {
+		if len(r.doc.PDFNavigation.Destinations)+len(r.doc.PDFNavigation.Links) > r.navigationLimit() {
 			return fmt.Errorf("PDF navigation budget exceeded")
 		}
 	}

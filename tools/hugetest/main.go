@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"crypto/sha256"
 	"io"
@@ -45,7 +46,11 @@ func main() {
 func run() error {
 	selected := flag.String("cases", "all", "comma separated manifest case names or all")
 	manifest := flag.String("manifest", "docs/verification/HUGE_CORPUS.json", "original-file manifest with source URLs and hashes")
-	target := flag.String("to", "sf", "output format: sf, pdf, docx")
+	target := flag.String("to", "sf", "output format: sf, sf.gz, pdf, docx")
+	storage := flag.String("storage", "memory", "memory or file: input/output materialization; file output is streamed to disk")
+	outputDir := flag.String("output-dir", "", "optional directory retaining converted files (file storage only)")
+	outputPath := flag.String("output", "", "internal output path")
+	large := flag.Bool("large", false, "explicit large-document work policy: 2 GiB decoded bytes, 500M raster pixels, 1M navigation entries")
 	workers := flag.Int("workers", 1, "isolated concurrent conversions per batch")
 	repeat := flag.Int("repeat", 2, "batches per case")
 	timeout := flag.Duration("timeout", 120*time.Second, "hard child process deadline")
@@ -58,12 +63,23 @@ func run() error {
 
 	flag.Parse()
 	if *worker {
-		return convert(*input, manifold.Format(*target), *pages, *profile, *operationTimeout)
+		return convert(*input, manifold.Format(*target), *pages, *profile, *operationTimeout, *large, *storage, *outputPath)
+	}
+	if *storage != "memory" && *storage != "file" {
+		return fmt.Errorf("invalid storage mode")
+	}
+	if *outputDir != "" {
+		if *storage != "file" {
+			return fmt.Errorf("output-dir requires file storage")
+		}
+		if e := os.MkdirAll(*outputDir, 0700); e != nil {
+			return e
+		}
 	}
 	if *workers < 1 || *repeat < 1 || *timeout <= 0 || *guard < 1 {
 		return fmt.Errorf("invalid batch bounds")
 	}
-	if *target != "sf" && *target != "pdf" && *target != "docx" {
+	if *target != "sf" && *target != "sf.gz" && *target != "pdf" && *target != "docx" {
 		return fmt.Errorf("invalid output format")
 	}
 	if _, e := exec.LookPath("ps"); e != nil {
@@ -84,7 +100,7 @@ func run() error {
 	if e != nil {
 		return e
 	}
-	emit(map[string]any{"kind": "environment", "go": runtime.Version(), "os": runtime.GOOS, "arch": runtime.GOARCH, "cpus": runtime.NumCPU(), "soft_memory_mib_per_child": 4096, "rss_guard_mib_batch": *guard, "timeout": timeout.String(), "started_utc": time.Now().UTC(), "measurement": "cold process, file read + parse + content checks + buffered output; separate timed parse/write; no warmup; unmodified downloaded real documents"})
+	emit(map[string]any{"kind": "environment", "go": runtime.Version(), "os": runtime.GOOS, "arch": runtime.GOARCH, "cpus": runtime.NumCPU(), "soft_memory_mib_per_child": 4096, "rss_guard_mib_batch": *guard, "timeout": timeout.String(), "started_utc": time.Now().UTC(), "large_document_work_policy": *large, "storage": *storage, "measurement": "cold process, file read + parse + content checks + buffered output; separate timed parse/write; no warmup; unmodified downloaded real documents"})
 	wanted := map[string]bool{}
 	for _, n := range strings.Split(*selected, ",") {
 		wanted[n] = false
@@ -119,7 +135,14 @@ func run() error {
 			var wg sync.WaitGroup
 			start := time.Now()
 			for i := range cmds {
-				cmd := exec.CommandContext(ctx, exe, "-worker", "-input", path, "-to", *target, "-pages", strconv.Itoa(f.Pages))
+				args := []string{"-worker", "-input", path, "-to", *target, "-pages", strconv.Itoa(f.Pages), "-storage", *storage}
+				if *outputDir != "" {
+					args = append(args, "-output", filepath.Join(*outputDir, fmt.Sprintf("%s-w%d.%s", f.Name, i, *target)))
+				}
+				if *large {
+					args = append(args, "-large")
+				}
+				cmd := exec.CommandContext(ctx, exe, args...)
 				cmd.Stdout = &outs[i]
 				cmd.Stderr = &errs[i]
 				cmds[i] = cmd
@@ -200,7 +223,7 @@ func run() error {
 	}
 	return nil
 }
-func convert(path string, to manifold.Format, pages int, profile string, operationTimeout time.Duration) error {
+func convert(path string, to manifold.Format, pages int, profile string, operationTimeout time.Duration, large bool, storage, outputPath string) error {
 	ctx := context.Background()
 	if operationTimeout > 0 {
 		var cancel context.CancelFunc
@@ -245,16 +268,42 @@ func convert(path string, to manifold.Format, pages int, profile string, operati
 		}
 	}()
 	defer func() { close(stop); <-done }()
-	data, e := os.ReadFile(path)
-	if e != nil {
-		return e
+
+	var source io.Reader
+	var data []byte
+	var inputBytes int64
+	if storage == "file" {
+		file, e := os.Open(path)
+		if e != nil {
+			return e
+		}
+		defer file.Close()
+		st, e := file.Stat()
+		if e != nil {
+			return e
+		}
+		inputBytes = st.Size()
+		source = file
+	} else {
+		var e error
+		data, e = os.ReadFile(path)
+		if e != nil {
+			return e
+		}
+		inputBytes = int64(len(data))
+		source = bytes.NewReader(data)
 	}
+
 	format, e := manifold.FormatFromName(path)
 	if e != nil {
 		return e
 	}
 	beginRead := time.Now()
-	d, e := manifold.Read(ctx, bytes.NewReader(data), format, manifold.ReadOptions{})
+	opts := manifold.ReadOptions{}
+	if large {
+		opts.PDFLimits = &manifold.PDFReadLimits{MaxDecodedBytes: 2 << 30, MaxRasterPixels: 500_000_000, MaxNavigationEntries: 1_000_000}
+	}
+	d, e := manifold.Read(ctx, source, format, opts)
 	if e != nil {
 		return e
 	}
@@ -264,6 +313,9 @@ func convert(path string, to manifold.Format, pages int, profile string, operati
 	var walk func([]manifold.Block)
 	walk = func(bs []manifold.Block) {
 		for _, b := range bs {
+			if b.Section != nil {
+				walk(b.Section.Blocks)
+			}
 			if b.Kind == manifold.Picture {
 				pictures++
 			}
@@ -298,20 +350,57 @@ func convert(path string, to manifold.Format, pages int, profile string, operati
 	for _, x := range d.Diagnostics {
 		codes[x.Code]++
 	}
-	emit(map[string]any{"stage": "read_complete", "read_seconds": readSeconds, "elapsed_seconds": time.Since(start).Seconds(), "input_bytes": len(data), "recovered_text_bytes": textBytes, "recovered_paragraphs": paragraphs, "images": pictures, "explicit_breaks": breaks, "physical_pages": len(d.Pages), "diagnostics": codes})
+	emit(map[string]any{"stage": "read_complete", "read_seconds": readSeconds, "elapsed_seconds": time.Since(start).Seconds(), "input_bytes": inputBytes, "recovered_text_bytes": textBytes, "recovered_paragraphs": paragraphs, "images": pictures, "explicit_breaks": breaks, "physical_pages": len(d.Pages), "diagnostics": codes})
+
 	var out bytes.Buffer
+	var destination io.Writer = &out
+	var outputFile *os.File
+	var temporary string
+	if storage == "file" {
+		dir := ""
+		if outputPath != "" {
+			dir = filepath.Dir(outputPath)
+		}
+		outputFile, e = os.CreateTemp(dir, ".manifold-huge-*")
+		if e != nil {
+			return e
+		}
+		temporary = outputFile.Name()
+		defer os.Remove(temporary)
+		defer outputFile.Close()
+		destination = outputFile
+	}
+	hash := sha256.New()
+	destination = io.MultiWriter(destination, hash)
 	beginWrite := time.Now()
-	e = manifold.Write(ctx, &out, d, to, manifold.WriteOptions{AllowLossy: true})
+	e = manifold.Write(ctx, destination, d, to, manifold.WriteOptions{AllowLossy: true})
 	if e != nil {
 		return e
 	}
+	outputBytes := int64(out.Len())
+	if outputFile != nil {
+		st, e := outputFile.Stat()
+		if e != nil {
+			return e
+		}
+		outputBytes = st.Size()
+		if e = outputFile.Close(); e != nil {
+			return e
+		}
+		if outputPath != "" {
+			if e = os.Rename(temporary, outputPath); e != nil {
+				return e
+			}
+		}
+	}
+
 	var after runtime.MemStats
 	runtime.ReadMemStats(&after)
 	mu.Lock()
 	peak = max(peak, after.HeapAlloc)
 	finalPeak := peak
 	mu.Unlock()
-	emit(map[string]any{"stage": "complete", "read_seconds": readSeconds, "write_seconds": time.Since(beginWrite).Seconds(), "total_seconds": time.Since(start).Seconds(), "output_bytes": out.Len(), "sampled_peak_heap_mib": float64(finalPeak) / (1 << 20), "allocated_mib": float64(after.TotalAlloc-before.TotalAlloc) / (1 << 20), "gc_cycles": after.NumGC - before.NumGC, "gc_pause_ms": float64(after.PauseTotalNs-before.PauseTotalNs) / 1e6})
+	emit(map[string]any{"stage": "complete", "read_seconds": readSeconds, "write_seconds": time.Since(beginWrite).Seconds(), "total_seconds": time.Since(start).Seconds(), "output_bytes": outputBytes, "output_sha256": fmt.Sprintf("%x", hash.Sum(nil)), "storage": storage, "sampled_peak_heap_mib": float64(finalPeak) / (1 << 20), "allocated_mib": float64(after.TotalAlloc-before.TotalAlloc) / (1 << 20), "gc_cycles": after.NumGC - before.NumGC, "gc_pause_ms": float64(after.PauseTotalNs-before.PauseTotalNs) / 1e6})
 	runtime.KeepAlive(data)
 	runtime.KeepAlive(d)
 	runtime.KeepAlive(out)

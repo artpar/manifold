@@ -210,3 +210,10 @@ PDF input. Focused regressions and independent original-mask pixel checks pass.
 ETSI and C++ now complete full original PDF→SF scouts; memory/serialization remain
 expensive, and the complete seven-file cohort is not yet qualified. See
 verification/HUGE_FIXES.md for actual evidence, remaining work and limitations.
+
+Bounded-processing checkpoint: streaming flow-SF writer retains model/reference and
+encoder preflight, with exact-wire checks against the established writer. Explicit
+PDFReadLimits preserve conservative defaults while permitting guarded large work;
+stream cache is bounded and parser state released before untagged inference.
+CLI/huge-runner flags expose the policy and actual file streaming. These changes
+remain under original-file qualification; final cohort/race/CI checks are pending.

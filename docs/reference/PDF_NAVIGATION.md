@@ -82,7 +82,13 @@ native provenance bindings and full adapter/browser qualification remain open.
 
 ## Validation, robustness and evidence
 
-Import bounds destination-tree depth at 64 and nodes/entries/navigation at 100,000,
+Import bounds destination-tree depth at 64 and tree nodes at 100,000. The default
+import navigation-entry policy remains 100,000; callers can explicitly select up
+to 1,000,000 through ReadOptions.PDFLimits.MaxNavigationEntries. The model/SF
+ceiling is 1,000,000 entries and 64 MiB aggregate raw destination-name bytes, in
+addition to the 65,536-byte per-name bound. These separate work and aggregate-byte
+bounds allow large, short-name registries without allowing unbounded long names.
+Import
 checks local page references, view syntax, finite coordinates, nullable positions,
 name-byte duplication and cyclic/repeated tree nodes. Unknown view kinds reject.
 Model/SF checks validate unique IDs/names, defined/unresolved graph membership,

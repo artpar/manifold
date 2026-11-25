@@ -229,8 +229,17 @@ type Diagnostic struct {
 var ErrUnsupported = errors.New("unsupported document feature")
 var ErrLossy = errors.New("conversion would lose document features")
 
+// PDFReadLimits bounds aggregate work for a single import. Zero fields use the
+// conservative defaults; increasing one requires explicit caller resource policy.
+// Per-stream, per-image, recursion and model validation bounds still apply.
+type PDFReadLimits struct {
+	MaxDecodedBytes      int   `json:"max_decoded_bytes,omitempty"`
+	MaxRasterPixels      int64 `json:"max_raster_pixels,omitempty"`
+	MaxNavigationEntries int   `json:"max_navigation_entries,omitempty"`
+}
 type ReadOptions struct {
-	Password string
+	PDFLimits *PDFReadLimits
+	Password  string
 	// PDFSkipInference retains untagged PDF paint order and baseline groups for
 	// callers inspecting physical extraction. Tagged logical trees still apply.
 	// The default recovers geometric structure with disclosed uncertainty.
@@ -366,6 +375,9 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 	case PDF:
 		return writePDFWithFonts(ctx, w, d, opts.PDFFonts, opts.PDFFontMap)
 	case SF, SFGzip:
+		if d.Presentation == nil {
+			return writeFlowStructured(ctx, w, d, format == SFGzip)
+		}
 		s, err := ToStructured(d)
 		if err != nil {
 			return err

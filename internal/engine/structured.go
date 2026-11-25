@@ -68,14 +68,25 @@ func sfAttrs(v any) json.RawMessage { b, _ := json.Marshal(v); return b }
 
 // ToStructured maps the declared Document semantics to ProseMirror JSON.
 // Empty text runs and the equivalent zero/one column spans are normalized.
-func ToStructured(d *Document) (*StructuredDocument, error) {
+func ToStructured(d *Document) (*StructuredDocument, error) { return toStructured(d, true) }
+
+func toStructured(d *Document, includeBody bool) (*StructuredDocument, error) {
 	if err := d.Validate(); err != nil {
 		return nil, err
 	}
-	d = resolveNumberingDocument(d)
+	if includeBody {
+		d = resolveNumberingDocument(d)
+	}
+	sources, nav, pages, layout := d.UnboundSources, d.PDFNavigation, d.Pages, d.Layout
+	if includeBody {
+		sources = cloneUnboundSources(sources)
+		nav = clonePDFNavigation(nav)
+		pages = clonePDFPages(pages)
+		layout = cloneLayout(layout)
+	}
 	s := &StructuredDocument{Type: "doc", Attrs: StructuredAttributes{
-		UnboundSources: cloneUnboundSources(d.UnboundSources), PDFNavigation: clonePDFNavigation(d.PDFNavigation), Schema: StructuredSchema, Metadata: d.Metadata, Layout: cloneLayout(d.Layout), EvenAndOddHeaders: d.EvenAndOddHeaders,
-		Diagnostics: append([]Diagnostic(nil), d.Diagnostics...), Pages: clonePDFPages(d.Pages),
+		UnboundSources: sources, PDFNavigation: nav, Schema: StructuredSchema, Metadata: d.Metadata, Layout: layout, EvenAndOddHeaders: d.EvenAndOddHeaders,
+		Diagnostics: append([]Diagnostic(nil), d.Diagnostics...), Pages: pages,
 		UnresolvedDestinations: append([]string(nil), d.UnresolvedDestinations...),
 	}}
 	var presErr error
@@ -85,8 +96,10 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 	}
 	sort.Strings(s.Attrs.UnresolvedDestinations)
 	var err error
-	if s.Content, err = encodeSFBlocks(d.Blocks); err != nil {
-		return nil, err
+	if includeBody {
+		if s.Content, err = encodeSFBlocks(d.Blocks); err != nil {
+			return nil, err
+		}
 	}
 	if d.Presentation != nil {
 		s.Content = []StructuredNode{{Type: "presentation", Attrs: sfAttrs(struct {
@@ -128,8 +141,10 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 		}
 		s.Attrs.Notes = append(s.Attrs.Notes, StructuredNote{BodyLabelContent: rich, BodyLabelMarks: marks, ID: n.ID, Kind: n.Kind, Content: bs, Label: n.Label, Source: n.Source, KindInferred: n.KindInferred, LabelSource: n.LabelSource, BodyLabel: n.BodyLabel})
 	}
-	if _, err := FromStructured(s); err != nil {
-		return nil, err
+	if includeBody {
+		if _, err := FromStructured(s); err != nil {
+			return nil, err
+		}
 	}
 	return s, nil
 }
@@ -885,6 +900,16 @@ func decodeSourceAttrs(raw json.RawMessage) (json.RawMessage, *SourceInfo, error
 }
 
 func encodeStructuredJSON(w io.Writer, s *StructuredDocument) error {
+	return encodeStructuredJSONStream(w, s, func(yield func(StructuredNode) error) error {
+		for _, n := range s.Content {
+			if e := yield(n); e != nil {
+				return e
+			}
+		}
+		return nil
+	})
+}
+func encodeStructuredJSONStream(w io.Writer, s *StructuredDocument, produce func(func(StructuredNode) error) error) error {
 	out := bufio.NewWriter(w)
 	write := func(p []byte) error { _, e := out.Write(p); return e }
 	value := func(v any) error {
@@ -935,24 +960,27 @@ func encodeStructuredJSON(w io.Writer, s *StructuredDocument) error {
 		}
 		return write([]byte(`]}`))
 	}
-	if len(s.Content) > 0 {
-		if e := write([]byte(`,"content":[`)); e != nil {
-			return e
-		}
-		for i, n := range s.Content {
-			if i > 0 {
-				if e := out.WriteByte(','); e != nil {
-					return e
-				}
-			}
-			if e := node(n); e != nil {
+
+	first := true
+	if e := produce(func(n StructuredNode) error {
+		if first {
+			if e := write([]byte(`,"content":[`)); e != nil {
 				return e
 			}
+			first = false
+		} else if e := out.WriteByte(','); e != nil {
+			return e
 		}
+		return node(n)
+	}); e != nil {
+		return e
+	}
+	if !first {
 		if e := out.WriteByte(']'); e != nil {
 			return e
 		}
 	}
+
 	if e := write([]byte("}\n")); e != nil {
 		return e
 	}

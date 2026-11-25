@@ -102,6 +102,9 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 			dctDecode = nil
 		}
 	}
+	if copySD.Dict["ColorSpace"] == types.Name("DeviceCMYK") {
+		r.warnPage("pdf_image_color", "Device CMYK samples are converted to RGB; original device-color semantics are not retained")
+	}
 	if cs, ok := copySD.Dict["ColorSpace"].(types.Array); ok && len(cs) > 0 && (cs[0] == types.Name("ICCBased") || cs[0] == types.Name("Separation") || cs[0] == types.Name("DeviceN")) {
 		r.warnPage("pdf_image_color", "Image extraction uses the decoder's alternate/device color conversion; original color-profile semantics are not retained")
 	}

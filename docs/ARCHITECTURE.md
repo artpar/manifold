@@ -96,3 +96,9 @@ matching indexes links by physical page instead of scanning all document links f
 every span. Image masks operate in source component/sample space; uncertainty in
 device/profile color conversion remains diagnosed. The repair ledger distinguishes
 per-feature checks, original-file completion, fidelity and final capacity evidence.
+
+The internal flowing-SF writer preflights a validated model and bounded encoder
+chunks before streaming them; it does not retain a complete second SF graph and
+a third decoded model. Public SF graph constructors/readers still validate whole
+graphs. Aggregate PDF work policy is explicit in ReadOptions.PDFLimits, independent
+of bounded decoded-stream caching; conservative zero-value defaults remain.

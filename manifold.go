@@ -129,6 +129,8 @@ func ReadDOCX(ctx context.Context, src io.Reader) (*Document, error) {
 	return engine.ReadDOCX(ctx, src)
 }
 
+type PDFReadLimits = engine.PDFReadLimits
+
 type ReadOptions = engine.ReadOptions
 
 // ReadPDF recovers PDF content, physical source facts and qualified structure.
