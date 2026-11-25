@@ -145,10 +145,24 @@ actual artifacts independently of their embedded pre-commit VCS metadata.
 VERSION remains unchanged. Automated CI publication skips new assets; no existing
 release/tag is moved and no workstation release is performed.
 
-## Diagnostic comparison pending
+## Diagnostic comparison in progress
 
 Separate CPU and two-GC heap campaigns are running on IPCC/Intel/ECMA, real Word
 i00 and the existing 4.13 GB ECMA-derived SF artifact. The latter is derived from
 the pinned publisher original, not a fabricated input. SF output uses the same
 explicit 1 MiB diagnostic caller buffer as its baseline. Instrumented timings
 will not replace the capacity figures above.
+
+Interim final-snapshot diagnostics: IPCC read sampled CPU 158.85s → 135.00s
+(gcDrain 52.39s → 35.47s); Intel 77.89s → 38.18s (navigation 9.80s → 1.46s);
+ECMA 233.57s → 75.88s (gcDrain 141.81s → 25.52s). CPU sample shares overlap and
+include idle GC; they are not kernel CPU accounting or predicted latency shares.
+Darwin sampling limitations from the baseline report still apply.
+
+Fresh ECMA old-control OS user+system CPU is 360.918s; optimized solo observations
+are 122.370s and 122.074s (~66% less CPU). This is an independently accounted
+whole-process measurement for that case, not inferred from pprof percentages.
+
+The SF CPU run retains its exact 4.13 GB hash: read 142.387s vs 167.198s,
+31.381 GiB / 356,785,739 allocations vs 95.465 GiB / 990,930,363; write 28.370s
+vs 62.941s. The separate SF live-heap run is still underway.
