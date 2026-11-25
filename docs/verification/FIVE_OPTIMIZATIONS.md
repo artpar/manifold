@@ -1,6 +1,6 @@
 # Five performance changes: implementation and comparison
 
-Implementation checkpoint: 7290f2d. Measurement in progress; do not read intermediate
+Implementation checkpoint: 7290f2d plus navigation bounds follow-up. Measurement in progress; do not read intermediate
 results as final capacity. Baseline is v0.4.0 implementation 7111871, using
 [huge qualification](HUGE_QUALIFICATION.md) and [pprof evidence](HUGE_PPROF.md).
 
@@ -16,7 +16,8 @@ results as final capacity. Baseline is v0.4.0 implementation 7111871, using
 4. d7a6e57: allocation-light complete preflight and typed inline emission through
    streamed tables/lists/sections; public full-tree encoder remains the byte oracle.
 5. 7290f2d: owned short PDF names, independently packed run geometry, bounded
-   immutable metadata sharing during SF import, exact SF/navigation run capacity.
+   immutable metadata sharing during SF import, exact SF/navigation run capacity, plus lazy candidate/region bounds reuse with
+   unchanged global destination iteration and source-order ties.
 
 No production dependency, alternate canonical format, global document/image cache,
 work-limit relaxation, source-fact omission or mutable-source sharing is added.
@@ -57,3 +58,7 @@ First frozen IPCC solo observation retains the original SF hash: read 110.32s,
 write 14.85s, total 125.20s, allocation 90.40 GiB. Read latency is nearly unchanged
 from baseline despite lower allocation; do not equate allocation reduction with
 latency reduction. Two-run/pair/profile qualification is still pending.
+
+The initial 7290f2d capacity scout was stopped to include the promised navigation
+bounds follow-up. Its records remain intermediate evidence only. The final
+qualification uses fresh opt-five-final-* logs and a separately frozen binary.

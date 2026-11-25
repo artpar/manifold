@@ -1059,10 +1059,40 @@ func (r *pdfReader) bindPDFNavigation() {
 	}
 	inserts := map[*Block]map[int][]Run{}
 	pageAnchors := map[int][]string{}
+	// Preserve global destination order/ties, but compute immutable candidate
+	// bounds once per used page. Release a page after its final positioned view.
+	remaining := map[int]int{}
+	for _, v := range r.doc.PDFNavigation.Destinations {
+		if !v.Unresolved && (v.Point != nil || v.Region != nil) {
+			remaining[v.Page]++
+		}
+	}
+	pageBounds := map[int][][4]float64{}
 	for i := range r.doc.PDFNavigation.Destinations {
 		v := &r.doc.PDFNavigation.Destinations[i]
 		if v.Unresolved {
 			continue
+		}
+		var bounds [][4]float64
+		var region [4]float64
+		if v.Point != nil || v.Region != nil {
+			bounds = pageBounds[v.Page]
+			if bounds == nil && len(candidates[v.Page]) > 0 {
+				bounds = make([][4]float64, len(candidates[v.Page]))
+				for j, c := range candidates[v.Page] {
+					a, b, c, d := quadBounds(*c.source.Quad)
+					bounds[j] = [4]float64{a, b, c, d}
+				}
+				pageBounds[v.Page] = bounds
+			}
+			remaining[v.Page]--
+			if remaining[v.Page] == 0 {
+				delete(pageBounds, v.Page)
+			}
+			if v.Region != nil {
+				a, b, c, d := quadBounds(*v.Region)
+				region = [4]float64{a, b, c, d}
+			}
 		}
 		best := -1
 		score := math.Inf(1)
@@ -1070,13 +1100,13 @@ func (r *pdfReader) bindPDFNavigation() {
 			if v.Point == nil && v.Region == nil {
 				break
 			}
-			x0, y0, x1, y1 := quadBounds(*c.source.Quad)
+			x0, y0, x1, y1 := bounds[j][0], bounds[j][1], bounds[j][2], bounds[j][3]
 			distance := 0.0
 			if v.Point != nil {
 				p := v.Point
 				distance = math.Hypot(max(0, x0-p.X, p.X-x1), max(0, y0-p.Y, p.Y-y1))
 			} else {
-				a, b, c, d := quadBounds(*v.Region)
+				a, b, c, d := region[0], region[1], region[2], region[3]
 				distance = math.Hypot(max(0, x0-c, a-x1), max(0, y0-d, b-y1))
 			}
 			if best < 0 || distance < score-1e-6 || (math.Abs(distance-score) < 1e-6 && c.source.Order < candidates[v.Page][best].source.Order) {

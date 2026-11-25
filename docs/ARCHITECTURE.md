@@ -190,3 +190,8 @@ not retain obsolete SourceInfo). Flow SF shares immutable repeated metadata
 through a request-owned 4,096-entry / 1 MiB pool, with 256-byte entry eligibility;
 visible text and unique source identities are excluded. SF and navigation reserve
 run capacities. Source objects remain distinct and public mutation semantics stay.
+
+The fifth performance change also caches immutable candidate bounds lazily by
+physical page during navigation binding. Destination iteration and tolerance/
+source-order tie rules remain unchanged; page bounds are released after that
+page's final positioned destination. Region bounds are computed once per view.

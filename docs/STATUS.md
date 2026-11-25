@@ -97,7 +97,9 @@ SourceInfo, interns bounded common SF metadata and reserves SF/navigation run
 capacity. Ownership/budget and targeted source/navigation/SF regressions pass.
 All five changes pass the full normal/race/vet/CGO-disabled build matrix. Fresh
 engine normal/race results are 19.694s/242.273s; original image/glyph checks pass
-(7.450s). Frozen real-file solo/pair/profile comparisons are running.
+(7.450s). The navigation bounds-cache follow-up also passes focused normal/race checks,
+including interleaved-page and exact tie ordering. Earlier intermediate capacity
+scouts are excluded; the final frozen snapshot is being measured afresh.
 
 ## Known boundaries and next work
 

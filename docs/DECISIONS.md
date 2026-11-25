@@ -148,3 +148,7 @@ with the former implementation maps and qualification ledger.
   pack geometry separately from SourceInfo to avoid keeping superseded mutable
   sources alive. Share only immutable common strings under explicit request-local
   bounds; reserve run arrays and preserve every persisted source byte and owner.
+
+- Complete performance change 5 with page-local navigation bounds reuse, preserving
+  global destination iteration and source-order ties. Restart final measurements
+  on this source snapshot; exclude the pre-follow-up capacity scouts.

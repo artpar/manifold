@@ -288,3 +288,32 @@ func FuzzPDFASCIIURI(f *testing.F) {
 		}
 	})
 }
+
+func TestPDFNavigationCachedBoundsPreserveInterleavedTies(t *testing.T) {
+	q := Quad{{0, 0}, {10, 0}, {10, 10}, {0, 10}}
+	point := Point{5, 5}
+	source := func(page, order int) *SourceInfo { return &SourceInfo{Page: page, Order: order, Quad: &q} }
+	d := &Document{Blocks: []Block{
+		{Kind: Paragraph, Runs: []Run{{Text: "a", Source: source(1, 2)}, {Text: "b", Source: source(1, 1)}}},
+		{Kind: Paragraph, Runs: []Run{{Text: "c", Source: source(2, 3)}}},
+	}, PDFNavigation: &PDFNavigation{Destinations: []PDFDestination{
+		{ID: "p2-first", Page: 2, Point: &point},
+		{ID: "p1-first", Page: 1, Region: &q},
+		{ID: "p2-second", Page: 2, Point: &point},
+		{ID: "p1-second", Page: 1, Point: &point},
+	}}}
+	reader := &pdfReader{ctx: context.Background(), doc: d}
+	reader.bindPDFNavigation()
+	if !reflect.DeepEqual(d.Blocks[1].Anchors, []string{"p2-first", "p2-second"}) {
+		t.Fatal("interleaved page anchor order changed")
+	}
+	runs := d.Blocks[0].Runs
+	if len(runs) != 4 || runs[1].Anchor != "p1-first" || runs[2].Anchor != "p1-second" || runs[3].Text != "b" {
+		t.Fatal("tie/order changed")
+	}
+	for _, v := range d.PDFNavigation.Destinations {
+		if v.Page == 1 && v.FlowOrder != 1 {
+			t.Fatal("lower source-order tie lost")
+		}
+	}
+}
