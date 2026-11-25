@@ -68,3 +68,13 @@ GitHub Actions runs the required Go matrix and publishes new VERSION values only
 after it passes. See [CI/CD](CI.md) for triggers, platform coverage, artifact
 contents and retry rules. Hosted run logs and release checksums are the source of
 truth for new releases; workstation-built artifacts are not the release path.
+
+
+## Integrated presentation checks
+
+The ordinary Go/race/vet/build commands include internal/presentation and the
+public presentation facade. Public API and CLI tests exercise the integration;
+original package-preservation/edit/renderer tests retain their content oracles.
+See [the integration record](verification/PRESENTATION_INTEGRATION.md) for actual
+checks, hosted results, the Windows JSON fixture fix and skipped external visual
+qualification. Rendering a valid PNG is not a PowerPoint visual-parity assertion.

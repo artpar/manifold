@@ -79,7 +79,7 @@ six platform archives, licenses and verified checksums. Hosted runs/releases are
 the current result authority; see [CI/CD](CI.md). Local qualification records below
 remain historical evidence, not a substitute for the hosted result.
 
-## Presentation integration (in progress)
+## Presentation integration
 
 Puppt source commit 7f8d6d0b2dab54296fde444af7f9ac6a5816a2a7 is integrated
 under internal/presentation, with public presentation API and one namespaced CLI.
@@ -87,8 +87,13 @@ Original synthetic/structural tests and PNG renderer tests are retained. New pub
 API tests cover inspect/plan/edit/validate/render and unchanged source text.
 Repository-relative QA paths were relocated; external pixel-oracle corpora are not
 present. Combined normal tests, vet, module verification, CGO-disabled build, public API
-workflow and CLI dispatch/help checks pass. Final race checks and hosted CI are
-pending at this checkpoint. VERSION 0.2.0 requests publication through Actions. See presentation/README.md for scope and limitations.
+workflow and CLI dispatch/help checks pass. The final local race suite also passes.
+Hosted Linux/macOS/Windows checks, Linux race checks and automated packaging/
+publication pass for source commit 7bb3aae. Actions published v0.2.0 with all six
+platform archives and checksums; the release tag points to that checked commit.
+See [the verification record](verification/PRESENTATION_INTEGRATION.md) and
+[presentation scope](presentation/README.md). No integration/release work remains
+within that declared scope; external visual-oracle qualification remains opt-in.
 
 Next commands: GOWORK=off go test -timeout 20m ./...;
 GOWORK=off go test -race -timeout 20m ./...; GOWORK=off go vet ./...;
