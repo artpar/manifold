@@ -124,7 +124,7 @@ def audit(source, sf):
             missing_total += missing.total()
             if missing:
                 worst.append({'page':i, 'missing':missing.total(), 'source_chars':expected.total(), 'characters':missing.most_common(8)})
-        result.update(source_pages=len(d), source_image_placements=original_image_placements, recovered_text_pages=len(pages), source_characters=source_total, missing_character_count=missing_total, missing_fraction=missing_total/max(1,source_total), source_unmapped_replacement_characters=replacement, source_control_characters=control_characters.most_common(), global_missing_character_count=(expected_all-all_text).total(), global_missing_characters=(expected_all-all_text).most_common(30), worst_pages=sorted(worst,key=lambda x:x['missing'],reverse=True)[:20])
+        result.update(source_pages=len(d), mupdf_image_device_occurrences=original_image_placements, recovered_text_pages=len(pages), source_characters=source_total, missing_character_count=missing_total, missing_fraction=missing_total/max(1,source_total), source_unmapped_replacement_characters=replacement, source_control_characters=control_characters.most_common(), global_missing_character_count=(expected_all-all_text).total(), global_missing_characters=(expected_all-all_text).most_common(30), worst_pages=sorted(worst,key=lambda x:x['missing'],reverse=True)[:20])
     return result
 
 if __name__ == '__main__':

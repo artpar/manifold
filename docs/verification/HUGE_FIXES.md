@@ -285,3 +285,25 @@ Intel, IPCC and ETSI re-emit byte-identical SF SHA-256 values after central Go R
 The IPCC persistence check predates the final dot-placeholder repair; it proves
 exact persistence of that recovered graph, not final visible-content fidelity.
 Final original-file reruns and independent audits are still required.
+
+## Image-count denominator and frozen regression results
+
+MuPDF's generic image-device inventory includes images it rasterizes from vector
+shadings. Original IPCC page 62 has one embedded CMYK XObject (1052), no `BI`
+operators, and 12 `sh` operators; MuPDF additionally reports 12 tiny RGB tiles with
+xref=0. Direct original-page production-reader checks agree on the real image
+placements for pages 1 / 6 / 61 / 508 / 1436: **1 / 2 / 8 / 769 / 5**. Do not call
+all 53,657 MuPDF image-device occurrences embedded assets, or claim shading
+appearance recovery. Unsupported shading/vector effects retain explicit diagnostics.
+The independent audit field is named `mupdf_image_device_occurrences` accordingly.
+
+Frozen implementation **711187193428751653b037a517fe0d421f2ab74a** passes the full
+normal and race suites, vet, CGO-disabled CLI build and diff check. Normal engine
+20.582s / facade 6.039s / CLI 0.508s; race engine 236.147s / facade 78.847s / CLI
+2.983s. These final commands ran without Go source edits during the matrix. Earlier
+mixed-snapshot build failures are not substituted for these passing results.
+
+Final repeated measurements are running with QA stopped. First two 423 MB IPCC
+jobs complete at 139.916s / 141.276s batch wall; identical full SF SHA-256 df759827…;
+peaks 8,305 / 8,162 MiB child RSS. Intel's first 5,057-page job completes at 94.59s.
+These are preliminary rows of the frozen run, not the completed stress verdict.
