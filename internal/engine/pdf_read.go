@@ -843,6 +843,10 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 	text := ""
 	actual := r.actualFrame()
 	decoded, decodeErr := s.font.decode(b)
+	if s.font.placeholderFallbackUsed {
+		r.warnPage("pdf_cmap_placeholder_encoding", "A simple-font ToUnicode U+FFFD placeholder is resolved only through its explicit source Encoding glyph name; no character is guessed")
+		s.font.placeholderFallbackUsed = false
+	}
 	if s.font.fallbackUsed {
 		r.warnPage("pdf_cmap_encoding_fallback", "A partial simple-font ToUnicode map is completed using explicit source Encoding glyph names")
 		s.font.fallbackUsed = false
@@ -1389,6 +1393,7 @@ type pdfFont struct {
 	mapping                                                        *unicodeMap
 	explicitEncoding                                               map[byte]string
 	fallbackUsed                                                   bool
+	placeholderFallbackUsed                                        bool
 	encoding                                                       simpleencodings.Encoding
 	unicode                                                        bool
 	bold, italic                                                   bool
@@ -1413,7 +1418,7 @@ func (f *pdfFont) decode(b []byte) (text string, err error) {
 
 	if f.mapping != nil {
 		text, err := f.mapping.decode(b)
-		if err == nil || f.composite || len(f.explicitEncoding) == 0 {
+		if (err == nil && !strings.ContainsRune(text, '\ufffd')) || f.composite || len(f.explicitEncoding) == 0 {
 			return text, err
 		}
 		var out strings.Builder
@@ -1429,6 +1434,12 @@ func (f *pdfFont) decode(b []byte) (text string, err error) {
 					return "", e
 				}
 				f.fallbackUsed = true
+			}
+			if strings.ContainsRune(part, '\ufffd') {
+				if declared, ok := f.explicitEncoding[code]; ok && declared != "" && !strings.ContainsRune(declared, '\ufffd') && validateString(declared) == nil {
+					part = declared
+					f.placeholderFallbackUsed = true
+				}
 			}
 			out.WriteString(part)
 		}

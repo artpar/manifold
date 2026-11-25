@@ -259,3 +259,29 @@ Published format references used for independently authored preservation code:
 [EMF signature](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-emf/b55cbd24-612d-47fe-81c9-1da6a682246f), and
 [Adobe CFF Technical Note 5176](https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf).
 No proprietary UniDoc implementation was copied or translated.
+
+## Precise TOC root cause and source-backed recovery
+
+Closer source inspection supersedes the earlier “control-plus-dots” explanation
+for the original TOCs: their ActualText often contains **only U+0008**, while
+font **KIAGLJ+FrutigerLTPro-Light**, ToUnicode object **63**, explicitly maps
+`<2E>` to `<FFFD>`. The same original font explicitly declares WinAnsiEncoding,
+whose glyph name is `period`. Ignoring invalid ActualText alone therefore left
+replacement characters instead of dots. Retain valid replacement characters as
+above, and resolve a simple-font U+FFFD placeholder **only when an explicit source
+Encoding supplies a valid, different glyph Unicode value**. Diagnose this separately
+as `pdf_cmap_placeholder_encoding`. An undeclared placeholder stays unchanged;
+there is no family/GID/ASCII guess.
+
+Direct original-page checks after this fix recover dot counts 1,824 / 2,145 /
+2,912 / 3,155 on pages 16 / 166 / 1532 / 1947. MuPDF counts 1,824 / 2,142 / 2,909 /
+3,152; the additional three correspond to source placeholder extraction differences,
+not thousands of lost leaders. The source font map/Encoding was inspected directly.
+This uses original bytes, not a rewritten font or altered oracle. Focused regressions
+check declared period recovery and prohibit an undeclared-character fallback.
+
+Derived SF persistence checks completed for all five PDF originals: C++, ECMA,
+Intel, IPCC and ETSI re-emit byte-identical SF SHA-256 values after central Go Read.
+The IPCC persistence check predates the final dot-placeholder repair; it proves
+exact persistence of that recovered graph, not final visible-content fidelity.
+Final original-file reruns and independent audits are still required.

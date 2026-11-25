@@ -287,3 +287,18 @@ func TestPDFControlMetadataDoesNotDiscardValidReplacementCharacters(t *testing.T
 	}
 	assertRecoverySF(t, d)
 }
+
+func TestPDFUnicodePlaceholderUsesOnlyExplicitSourceGlyphEncoding(t *testing.T) {
+	// Original IPCC CMap object 63 maps <2E> to <FFFD>; its font explicitly declares
+	// WinAnsiEncoding, where source glyph name period has unambiguous Unicode.
+	f := pdfFont{mapping: &unicodeMap{spaces: []codeRange{{size: 1, low: 0, high: 255}}, chars: map[string]string{".": "\ufffd"}}, explicitEncoding: map[byte]string{'.': "."}}
+	if got, err := f.decode([]byte("...")); err != nil || got != "..." || !f.placeholderFallbackUsed {
+		t.Fatalf("declared period not recovered: %q %v", got, err)
+	}
+	// Do not assign arbitrary Unicode when no declared glyph encoding exists.
+	f.explicitEncoding = nil
+	f.placeholderFallbackUsed = false
+	if got, err := f.decode([]byte(".")); err != nil || got != "\ufffd" || f.placeholderFallbackUsed {
+		t.Fatal("undeclared placeholder was guessed")
+	}
+}
