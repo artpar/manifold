@@ -416,8 +416,9 @@ func (s *pdfStructureRecovery) logicalLink(nodes []*pdfStructureNode) (pdfLinkTa
 	walk = func(nodes []*pdfStructureNode) {
 		for _, n := range nodes {
 			if n.kind == "OBJR" {
-				for key, link := range s.reader.links {
-					if key.object == n.object && (n.page == 0 || key.page == n.page) && !link.target.empty() {
+				for _, key := range s.logicalLinkKeys(n) {
+					link := s.reader.links[key]
+					if !link.target.empty() {
 						if !target.empty() && target != link.target {
 							conflict = true
 						}
@@ -1186,4 +1187,20 @@ func pdfASCIIURI(iri string) string {
 		}
 	}
 	return out.String()
+}
+
+// The reader already keys annotation ownership by page/object. Preserve unknown-
+// page conflict checks through a request-owned object index instead of scanning
+// all annotations once per tagged Link.
+func (s *pdfStructureRecovery) logicalLinkKeys(n *pdfStructureNode) []pdfObjectKey {
+	if n.page != 0 {
+		return []pdfObjectKey{{n.page, n.object}}
+	}
+	if s.linksByObject == nil {
+		s.linksByObject = map[string][]pdfObjectKey{}
+		for key := range s.reader.links {
+			s.linksByObject[key.object] = append(s.linksByObject[key.object], key)
+		}
+	}
+	return s.linksByObject[n.object]
 }

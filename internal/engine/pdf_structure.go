@@ -763,6 +763,7 @@ type pdfStructureRecovery struct {
 	roles, classes types.Dict
 	units          []pdfContentUnit
 	unitsByPage    map[int][]int
+	linksByObject  map[string][]pdfObjectKey
 	marked         map[pdfContentKey][]int
 	active, seen   map[string]bool
 	referenceTotal int
@@ -1231,6 +1232,9 @@ func (s *pdfStructureRecovery) content(n *pdfStructureNode) ([]Block, error) {
 		// OBJR refers to a physical page/object. Do not rescan every painted
 		// unit in a multi-thousand-page document for each object reference.
 		candidates := s.unitsByPage[n.page]
+		if n.page != 0 && len(s.reader.objects[pdfObjectKey{n.page, n.object}]) == 0 {
+			candidates = nil
+		}
 		if n.page == 0 {
 			candidates = make([]int, len(s.units))
 			for i := range candidates {
@@ -1257,8 +1261,8 @@ func (s *pdfStructureRecovery) content(n *pdfStructureNode) ([]Block, error) {
 		}
 	}
 	if len(ids) == 0 && n.kind == "OBJR" {
-		for key := range s.reader.links {
-			if key.object == n.object && (n.page == 0 || key.page == n.page) {
+		for _, key := range s.logicalLinkKeys(n) {
+			if _, ok := s.reader.links[key]; ok {
 				return nil, nil
 			}
 		}

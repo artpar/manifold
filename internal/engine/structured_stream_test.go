@@ -3,10 +3,14 @@ package engine
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
+	"io"
 	"os"
+	"runtime/debug"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestFlowStructuredStreamingPreservesExactPersistentBytes(t *testing.T) {
@@ -118,4 +122,41 @@ func TestFlowStructuredReadChecksWholeGraphAndStrictChunks(t *testing.T) {
 	if d, err := Read(context.Background(), strings.NewReader(reordered), SF, ReadOptions{}); err != nil || d.Text() != "ok" {
 		t.Fatalf("root order: %v", err)
 	}
+}
+
+// This is derived-artifact persistence QA, not an additional Internet-original
+// stress fixture. Never substitute it for HUGE_CORPUS original input runs.
+func TestHugeOriginalDerivedSFRead(t *testing.T) {
+	name := os.Getenv("MANIFOLD_HUGE_SF")
+	if name == "" {
+		t.Skip("requires SF output of a pinned original import")
+	}
+	previous := debug.SetMemoryLimit(8 << 30)
+	defer debug.SetMemoryLimit(previous)
+	file, err := os.Open("output/huge-fixed-output/" + name + "-w0.sf")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	original := sha256.New()
+	if _, err := io.Copy(original, file); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := file.Seek(0, 0); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Now()
+	d, err := Read(context.Background(), file, SF, ReadOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	readTime := time.Since(start)
+	recovered := sha256.New()
+	if err := Write(context.Background(), recovered, d, SF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(original.Sum(nil), recovered.Sum(nil)) {
+		t.Fatalf("SF persistence changed original import graph %x != %x", original.Sum(nil), recovered.Sum(nil))
+	}
+	t.Logf("%s: pages=%d SF read=%s total=%s byte-identical SHA-256=%x", name, len(d.Pages), readTime, time.Since(start), original.Sum(nil))
 }

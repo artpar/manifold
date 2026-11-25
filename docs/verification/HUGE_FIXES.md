@@ -173,3 +173,11 @@ keys, malformed suffixes and dangling cross-chunk references reject. Gzip checks
 errors remain wrapped with their original identity. Focused SF checks pass. This
 is required because original PDF outputs are multi-gigabyte SF files; compressed
 persistence and memory limits must remain explicit capacity considerations.
+
+A subsequent original IPCC sample located the same document-wide rescan pattern
+in tagged logical-link ownership. Reuse authoritative page/object annotation keys;
+unknown-page ownership uses a lazy object index and preserves target-conflict
+checks. Unpainted annotation OBJRs skip page content scans. This is an indexing
+repair, not a decision to omit tagged links. Focused navigation/structure checks
+are being rerun before final measurements. Earlier scout cancellations stay
+explicitly classified as cancelled.
