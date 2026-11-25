@@ -7,7 +7,7 @@ support contract, not arbitrary-document or Word-equivalent fidelity.
 | Format | Supported behavior | Explicit limits |
 | --- | --- | --- |
 | SF | Versioned ProseMirror tree, formatting, relationships, assets, sections/stories/notes and provenance; plain or gzip persistence | Unknown/unrepresented semantics reject; `manydoc-prosemirror/1` remains the wire identity |
-| DOCX input/output | Paragraphs/headings, styled runs, links/bookmarks, lists, merged/nested/repeated tables, images, metadata, page/section settings, conditional headers/footers and rich foot/endnotes | No Word layout engine/font embedding; unsupported OOXML editing/layout semantics diagnose or reject |
+| DOCX input/output | Paragraphs/headings, styled runs, links/bookmarks, lists, merged/nested/repeated tables, images, native OMML/WMF/EMF preservation, metadata, page/section settings, conditional headers/footers and rich foot/endnotes | No Word layout engine/font embedding; unsupported OOXML editing/layout semantics diagnose or reject |
 | PDF input | Text/images, physical pages/geometry/navigation, supported explicit tagged structure; disclosed geometric recovery of paragraphs/headings/lists/tables/notes | Ambiguous structure stays uncertain; unsupported codecs/encodings/operators reject; no OCR or general editable vector reconstruction |
 | PDF output | Measured wrapping/pagination, tables/continuations, images, section frames, stories, rich notes, links and painted logical structure | Declared font/script contract; no matching source pagination, PDF/A/UA/WTPDF certification or silent font fallback |
 | PPTX/SF | Typed slide/object/text/image/notes geometry, master/layout resources; bounded native OPC preservation; supported native text/frame edits; authored basic slides | Advanced native features round-trip or reject unsupported regeneration; legacy .ppt unsupported; no PowerPoint-equivalent layout claim |
@@ -17,15 +17,21 @@ support contract, not arbitrary-document or Word-equivalent fidelity.
 
 ## Observed huge-file boundaries
 
-The original large-file cohort is currently **not qualified for full conversion**:
-all seven downloaded originals rejected during input interpretation (46 ordinary
-attempts), including a 423 MB IPCC report and 5,000+ page manuals. Specific observed
-limits include JPEG color spaces, soft-mask Matte/color-key masks, used DOCX theme
-fonts, navigation destination budget and unmapped ToUnicode codes. This is evidence
-about these pinned documents, not a universal byte/page limit. See
-[measured results](PERFORMANCE.md#huge-real-input-results--2026-11-25) and
-[original-source record](verification/HUGE_INPUTS.md). Earlier small/synthetic-file
-throughput is not successful capacity evidence for this cohort.
+Seven pinned Internet originals now complete DOCX/PDF → canonical SF under an
+explicit large-file work policy: **28/28 conversions** in repeated solo/two-worker
+runs, including the unchanged 423 MB IPCC report and 5,000+ page manuals. Four also
+complete with default limits; the other three reject by conservative decoded-work
+or navigation limits. Defaults were not weakened. See [qualification](verification/HUGE_QUALIFICATION.md)
+and [the API/CLI policy](reference/PDF_RESOURCES.md#explicit-large-document-work-policy).
+The earlier 0/46 baseline remains historical evidence, not current feature status.
+
+This qualifies the stated import/persistence cohort, not arbitrary-file rendering.
+Native Office Math and legacy WMF/EMF previews retain source structure/bytes through
+SF/DOCX; PDF rendering remains unsupported, and PPTX/VDOCS math output rejects.
+Unsupported PDF shading/vector/clipping/transparency and approximate color recovery
+stay diagnosed. Whole-model memory remains large; more workers are not always faster.
+Exact rendered Word pagination and whole-document browser/service capacity are not
+claimed from these tests.
 
 ## Interpretation and losses
 

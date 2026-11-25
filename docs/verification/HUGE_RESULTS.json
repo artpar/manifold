@@ -1,0 +1,4133 @@
+{
+  "schema": "manifold-huge-qualification/1",
+  "date_utc": "2026-11-25",
+  "go_implementation_commit": "711187193428751653b037a517fe0d421f2ab74a",
+  "measurement_snapshot_commit": "487f28f8cbfeb640749756a3a18ea7ce55c1967a",
+  "production_go_and_schema_unchanged_since_implementation_commit": true,
+  "environment": {
+    "arch": "arm64",
+    "cpus": 10,
+    "go": "go1.25.0",
+    "kind": "environment",
+    "large_document_work_policy": true,
+    "measurement": "cold process; storage mode recorded; file read + parse + content checks + fully materialized SHA-256 output; buffered file writes without fsync; separate timed parse/write; no warmup; unmodified downloaded originals",
+    "os": "darwin",
+    "rss_guard_mib_batch": 12288,
+    "soft_memory_mib_per_child": 8192,
+    "started_utc": "2026-11-25T13:13:09.042041Z",
+    "storage": "file",
+    "timeout": "10m0s"
+  },
+  "hardware": "MacBook Pro 18,2; M1 Max 10 cores (8P+2E); 32 GiB; macOS 15.4; active desktop",
+  "scope": "Unmodified original DOCX/PDF -> canonical SF; cold isolated processes, warm OS input cache after hashing, real buffered file output without fsync; not HTTP or same-process goroutine capacity",
+  "successful_large_jobs": 28,
+  "attempted_large_jobs": 28,
+  "physical_pdf_pages_processed": 65052,
+  "source_docx_xml_paragraphs_processed": 537620,
+  "materialized_sf_bytes": 45244410520,
+  "default_successes": 4,
+  "default_attempts": 7,
+  "controls": {
+    "rss": [
+      {
+        "arch": "arm64",
+        "cpus": 10,
+        "go": "go1.25.0",
+        "kind": "environment",
+        "large_document_work_policy": true,
+        "measurement": "cold process; storage mode recorded; file read + parse + content checks + fully materialized SHA-256 output; buffered file writes without fsync; separate timed parse/write; no warmup; unmodified downloaded originals",
+        "os": "darwin",
+        "rss_guard_mib_batch": 1,
+        "soft_memory_mib_per_child": 8192,
+        "started_utc": "2026-11-25T13:43:27.802542Z",
+        "storage": "file",
+        "timeout": "10m0s"
+      },
+      {
+        "bytes": 423349528,
+        "kind": "fixture",
+        "name": "ipcc-ar6-wgi",
+        "pdf_pages": 2409,
+        "producer_page_count": 0,
+        "sha256": "1f51c28a343161e057103b120ba4396a7eb54eaa293473114f55c12af8243481",
+        "source_docx_paragraphs": 0,
+        "source_url": "https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_FullReport.pdf"
+      },
+      {
+        "case": "ipcc-ar6-wgi",
+        "exit_code": -1,
+        "kind": "child",
+        "records": null,
+        "repeat": 1,
+        "stderr": "",
+        "success": false,
+        "to": "sf",
+        "worker": 0,
+        "workers": 1
+      },
+      {
+        "case": "ipcc-ar6-wgi",
+        "kind": "batch",
+        "repeat": 1,
+        "sampled_peak_rss_mib": 159.3125,
+        "success": 0,
+        "successful_jobs_per_second": 0,
+        "termination": "rss_guard",
+        "to": "sf",
+        "wall_seconds": 0.208712291,
+        "workers": 1
+      }
+    ],
+    "deadline": [
+      {
+        "arch": "arm64",
+        "cpus": 10,
+        "go": "go1.25.0",
+        "kind": "environment",
+        "large_document_work_policy": true,
+        "measurement": "cold process; storage mode recorded; file read + parse + content checks + fully materialized SHA-256 output; buffered file writes without fsync; separate timed parse/write; no warmup; unmodified downloaded originals",
+        "os": "darwin",
+        "rss_guard_mib_batch": 12288,
+        "soft_memory_mib_per_child": 8192,
+        "started_utc": "2026-11-25T13:43:28.24033Z",
+        "storage": "file",
+        "timeout": "50ms"
+      },
+      {
+        "bytes": 423349528,
+        "kind": "fixture",
+        "name": "ipcc-ar6-wgi",
+        "pdf_pages": 2409,
+        "producer_page_count": 0,
+        "sha256": "1f51c28a343161e057103b120ba4396a7eb54eaa293473114f55c12af8243481",
+        "source_docx_paragraphs": 0,
+        "source_url": "https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_FullReport.pdf"
+      },
+      {
+        "case": "ipcc-ar6-wgi",
+        "exit_code": -1,
+        "kind": "child",
+        "records": null,
+        "repeat": 1,
+        "stderr": "",
+        "success": false,
+        "to": "sf",
+        "worker": 0,
+        "workers": 1
+      },
+      {
+        "case": "ipcc-ar6-wgi",
+        "kind": "batch",
+        "repeat": 1,
+        "sampled_peak_rss_mib": 0,
+        "success": 0,
+        "successful_jobs_per_second": 0,
+        "termination": "deadline",
+        "to": "sf",
+        "wall_seconds": 0.051988417,
+        "workers": 1
+      }
+    ]
+  },
+  "results": [
+    {
+      "fixture": {
+        "name": "ipcc-ar6-wgi",
+        "path": "output/hugetest-real/ipcc-ar6-wgi.pdf",
+        "source_url": "https://www.ipcc.ch/report/ar6/wg1/downloads/report/IPCC_AR6_WGI_FullReport.pdf",
+        "bytes": 423349528,
+        "sha256": "1f51c28a343161e057103b120ba4396a7eb54eaa293473114f55c12af8243481",
+        "pdf_pages": 2409,
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+      },
+      "solo": {
+        "batches": [
+          {
+            "case": "ipcc-ar6-wgi",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 8305.328125,
+            "success": 1,
+            "successful_jobs_per_second": 0.007147120255462443,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 139.916492833,
+            "workers": 1
+          },
+          {
+            "case": "ipcc-ar6-wgi",
+            "kind": "batch",
+            "repeat": 2,
+            "sampled_peak_rss_mib": 8162.09375,
+            "success": 1,
+            "successful_jobs_per_second": 0.007078128124573082,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 141.280290834,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "ipcc-ar6-wgi",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_actualtext_unrepresentable": 2225,
+                  "pdf_artifact_properties": 2375,
+                  "pdf_clipped_text": 9,
+                  "pdf_clipping": 190,
+                  "pdf_cmap_codespace": 2389,
+                  "pdf_cmap_placeholder_encoding": 19,
+                  "pdf_color_state": 49,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_graphics_effects": 2393,
+                  "pdf_image_color": 206,
+                  "pdf_layout": 1,
+                  "pdf_link_action": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_kind_inferred": 1,
+                  "pdf_list_kind_unobserved": 1,
+                  "pdf_list_label_presentation": 1,
+                  "pdf_list_literal": 1,
+                  "pdf_list_numbering_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_page_crop": 15,
+                  "pdf_ruling_limit": 11,
+                  "pdf_structure_attributes": 1,
+                  "pdf_structure_figure_group": 1,
+                  "pdf_structure_inline": 1,
+                  "pdf_structure_layout": 1,
+                  "pdf_structure_missing_content": 1,
+                  "pdf_structure_role": 1,
+                  "pdf_structure_unclaimed": 1,
+                  "pdf_table_widths_inferred": 1,
+                  "pdf_text_color": 13,
+                  "pdf_text_color_approximation": 2389,
+                  "pdf_text_paint": 6,
+                  "pdf_text_partial_clip": 185,
+                  "pdf_text_transform": 203,
+                  "pdf_unmapped_glyph_outline": 2,
+                  "pdf_vector_graphics": 2430,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 111.42465225,
+                "explicit_breaks": 0,
+                "images": 42422,
+                "input_bytes": 423349528,
+                "physical_pages": 2409,
+                "read_seconds": 111.394992083,
+                "recovered_paragraphs": 90854,
+                "recovered_text_bytes": 13518790,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 132375.98307037354,
+                "gc_cycles": 84,
+                "gc_pause_ms": 6.569795,
+                "output_bytes": 1745648991,
+                "output_sha256": "df7598270fa776c217a09addfab547232dcb7bc445c6704854d4116bb23b4399",
+                "read_seconds": 111.394992083,
+                "sampled_peak_heap_mib": 7561.055908203125,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 139.802965834,
+                "write_seconds": 28.378052083
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          },
+          {
+            "case": "ipcc-ar6-wgi",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_actualtext_unrepresentable": 2225,
+                  "pdf_artifact_properties": 2375,
+                  "pdf_clipped_text": 9,
+                  "pdf_clipping": 190,
+                  "pdf_cmap_codespace": 2389,
+                  "pdf_cmap_placeholder_encoding": 19,
+                  "pdf_color_state": 49,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_graphics_effects": 2393,
+                  "pdf_image_color": 206,
+                  "pdf_layout": 1,
+                  "pdf_link_action": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_kind_inferred": 1,
+                  "pdf_list_kind_unobserved": 1,
+                  "pdf_list_label_presentation": 1,
+                  "pdf_list_literal": 1,
+                  "pdf_list_numbering_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_page_crop": 15,
+                  "pdf_ruling_limit": 11,
+                  "pdf_structure_attributes": 1,
+                  "pdf_structure_figure_group": 1,
+                  "pdf_structure_inline": 1,
+                  "pdf_structure_layout": 1,
+                  "pdf_structure_missing_content": 1,
+                  "pdf_structure_role": 1,
+                  "pdf_structure_unclaimed": 1,
+                  "pdf_table_widths_inferred": 1,
+                  "pdf_text_color": 13,
+                  "pdf_text_color_approximation": 2389,
+                  "pdf_text_paint": 6,
+                  "pdf_text_partial_clip": 185,
+                  "pdf_text_transform": 203,
+                  "pdf_unmapped_glyph_outline": 2,
+                  "pdf_vector_graphics": 2430,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 112.291735,
+                "explicit_breaks": 0,
+                "images": 42422,
+                "input_bytes": 423349528,
+                "physical_pages": 2409,
+                "read_seconds": 112.262147833,
+                "recovered_paragraphs": 90854,
+                "recovered_text_bytes": 13518790,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 132352.68907165527,
+                "gc_cycles": 85,
+                "gc_pause_ms": 6.617035,
+                "output_bytes": 1745648991,
+                "output_sha256": "df7598270fa776c217a09addfab547232dcb7bc445c6704854d4116bb23b4399",
+                "read_seconds": 112.262147833,
+                "sampled_peak_heap_mib": 7574.53010559082,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 141.134690791,
+                "write_seconds": 28.84265675
+              }
+            ],
+            "repeat": 2,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "two-worker": {
+        "batches": [
+          {
+            "case": "ipcc-ar6-wgi",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 12013.75,
+            "success": 2,
+            "successful_jobs_per_second": 0.011363693413444984,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 175.999116417,
+            "workers": 2
+          }
+        ],
+        "children": [
+          {
+            "case": "ipcc-ar6-wgi",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_actualtext_unrepresentable": 2225,
+                  "pdf_artifact_properties": 2375,
+                  "pdf_clipped_text": 9,
+                  "pdf_clipping": 190,
+                  "pdf_cmap_codespace": 2389,
+                  "pdf_cmap_placeholder_encoding": 19,
+                  "pdf_color_state": 49,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_graphics_effects": 2393,
+                  "pdf_image_color": 206,
+                  "pdf_layout": 1,
+                  "pdf_link_action": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_kind_inferred": 1,
+                  "pdf_list_kind_unobserved": 1,
+                  "pdf_list_label_presentation": 1,
+                  "pdf_list_literal": 1,
+                  "pdf_list_numbering_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_page_crop": 15,
+                  "pdf_ruling_limit": 11,
+                  "pdf_structure_attributes": 1,
+                  "pdf_structure_figure_group": 1,
+                  "pdf_structure_inline": 1,
+                  "pdf_structure_layout": 1,
+                  "pdf_structure_missing_content": 1,
+                  "pdf_structure_role": 1,
+                  "pdf_structure_unclaimed": 1,
+                  "pdf_table_widths_inferred": 1,
+                  "pdf_text_color": 13,
+                  "pdf_text_color_approximation": 2389,
+                  "pdf_text_paint": 6,
+                  "pdf_text_partial_clip": 185,
+                  "pdf_text_transform": 203,
+                  "pdf_unmapped_glyph_outline": 2,
+                  "pdf_vector_graphics": 2430,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 139.100682167,
+                "explicit_breaks": 0,
+                "images": 42422,
+                "input_bytes": 423349528,
+                "physical_pages": 2409,
+                "read_seconds": 139.0705495,
+                "recovered_paragraphs": 90854,
+                "recovered_text_bytes": 13518790,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 132361.97165679932,
+                "gc_cycles": 84,
+                "gc_pause_ms": 44.499339,
+                "output_bytes": 1745648991,
+                "output_sha256": "df7598270fa776c217a09addfab547232dcb7bc445c6704854d4116bb23b4399",
+                "read_seconds": 139.0705495,
+                "sampled_peak_heap_mib": 7415.925689697266,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 175.64763475,
+                "write_seconds": 36.546614333
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 2
+          },
+          {
+            "case": "ipcc-ar6-wgi",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_actualtext_unrepresentable": 2225,
+                  "pdf_artifact_properties": 2375,
+                  "pdf_clipped_text": 9,
+                  "pdf_clipping": 190,
+                  "pdf_cmap_codespace": 2389,
+                  "pdf_cmap_placeholder_encoding": 19,
+                  "pdf_color_state": 49,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_graphics_effects": 2393,
+                  "pdf_image_color": 206,
+                  "pdf_layout": 1,
+                  "pdf_link_action": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_kind_inferred": 1,
+                  "pdf_list_kind_unobserved": 1,
+                  "pdf_list_label_presentation": 1,
+                  "pdf_list_literal": 1,
+                  "pdf_list_numbering_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_page_crop": 15,
+                  "pdf_ruling_limit": 11,
+                  "pdf_structure_attributes": 1,
+                  "pdf_structure_figure_group": 1,
+                  "pdf_structure_inline": 1,
+                  "pdf_structure_layout": 1,
+                  "pdf_structure_missing_content": 1,
+                  "pdf_structure_role": 1,
+                  "pdf_structure_unclaimed": 1,
+                  "pdf_table_widths_inferred": 1,
+                  "pdf_text_color": 13,
+                  "pdf_text_color_approximation": 2389,
+                  "pdf_text_paint": 6,
+                  "pdf_text_partial_clip": 185,
+                  "pdf_text_transform": 203,
+                  "pdf_unmapped_glyph_outline": 2,
+                  "pdf_vector_graphics": 2430,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 139.285344458,
+                "explicit_breaks": 0,
+                "images": 42422,
+                "input_bytes": 423349528,
+                "physical_pages": 2409,
+                "read_seconds": 139.254563292,
+                "recovered_paragraphs": 90854,
+                "recovered_text_bytes": 13518790,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 132338.89924621582,
+                "gc_cycles": 84,
+                "gc_pause_ms": 37.574044,
+                "output_bytes": 1745648991,
+                "output_sha256": "df7598270fa776c217a09addfab547232dcb7bc445c6704854d4116bb23b4399",
+                "read_seconds": 139.254563292,
+                "sampled_peak_heap_mib": 7466.878494262695,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 175.557341333,
+                "write_seconds": 36.271578
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 1,
+            "workers": 2
+          }
+        ]
+      },
+      "default": {
+        "batches": [
+          {
+            "case": "ipcc-ar6-wgi",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 2063.953125,
+            "success": 0,
+            "successful_jobs_per_second": 0,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 9.339200834,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "ipcc-ar6-wgi",
+            "exit_code": 1,
+            "kind": "child",
+            "records": null,
+            "repeat": 1,
+            "stderr": "PDF decoded streams exceed 268435456 bytes: PDF decoded stream limit exceeded: 2763826 bytes\n",
+            "success": false,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "sf_sha256": "df7598270fa776c217a09addfab547232dcb7bc445c6704854d4116bb23b4399",
+      "sf_bytes": 1745648991,
+      "independent_audit": {
+        "source": "output/hugetest-real/ipcc-ar6-wgi.pdf",
+        "sf": "output/huge-fixed-output/ipcc-ar6-wgi-w0.sf",
+        "sf_sha256": "df7598270fa776c217a09addfab547232dcb7bc445c6704854d4116bb23b4399",
+        "sf_bytes": 1745648991,
+        "body_nodes": 94658,
+        "prosemirror": {
+          "prosemirror_body_nodes_checked": 94658
+        },
+        "images": 42422,
+        "distinct_images": 40944,
+        "native_equations": 0,
+        "original_list_label_characters_in_provenance": 658,
+        "source_pages": 2409,
+        "recovered_text_pages": 2409,
+        "source_characters": 11467581,
+        "missing_character_count": 3037,
+        "missing_fraction": 0.0002648335337679324,
+        "source_unmapped_replacement_characters": 3878,
+        "source_control_characters": [
+          [
+            "\b",
+            2797
+          ],
+          [
+            "\u0007",
+            100
+          ],
+          [
+            "\u0014",
+            14
+          ],
+          [
+            "\u0018",
+            13
+          ],
+          [
+            "\u000f",
+            13
+          ],
+          [
+            "\u0015",
+            11
+          ],
+          [
+            "\u0011",
+            9
+          ],
+          [
+            "\u0017",
+            8
+          ],
+          [
+            "\u001a",
+            6
+          ],
+          [
+            "\u0012",
+            6
+          ],
+          [
+            "\u0019",
+            5
+          ],
+          [
+            "\u000e",
+            5
+          ],
+          [
+            "\u0016",
+            4
+          ],
+          [
+            "\u001b",
+            3
+          ],
+          [
+            "\u0013",
+            3
+          ],
+          [
+            "\u0010",
+            3
+          ],
+          [
+            "\u0006",
+            2
+          ],
+          [
+            "\u0005",
+            1
+          ],
+          [
+            "\u0004",
+            1
+          ],
+          [
+            "\u0003",
+            1
+          ],
+          [
+            "\u0002",
+            1
+          ],
+          [
+            "\u0001",
+            1
+          ]
+        ],
+        "global_missing_character_count": 3036,
+        "global_missing_characters": [
+          [
+            "\b",
+            2797
+          ],
+          [
+            "\u0007",
+            100
+          ],
+          [
+            "\u019f",
+            18
+          ],
+          [
+            "\u0014",
+            14
+          ],
+          [
+            "\u0018",
+            13
+          ],
+          [
+            "\u000f",
+            13
+          ],
+          [
+            "\u0015",
+            11
+          ],
+          [
+            "\u0011",
+            9
+          ],
+          [
+            "\u0017",
+            8
+          ],
+          [
+            "\u001a",
+            6
+          ],
+          [
+            "\u0012",
+            6
+          ],
+          [
+            "\u2022",
+            5
+          ],
+          [
+            "\u0019",
+            5
+          ],
+          [
+            "\u000e",
+            5
+          ],
+          [
+            "\u0016",
+            4
+          ],
+          [
+            "\u001b",
+            3
+          ],
+          [
+            "\u0013",
+            3
+          ],
+          [
+            "\u0010",
+            3
+          ],
+          [
+            "\u01a9",
+            3
+          ],
+          [
+            "\u0006",
+            2
+          ],
+          [
+            "\u0005",
+            1
+          ],
+          [
+            "\u0004",
+            1
+          ],
+          [
+            "\u0003",
+            1
+          ],
+          [
+            "\u0002",
+            1
+          ],
+          [
+            "\u0001",
+            1
+          ],
+          [
+            "\u007f",
+            1
+          ],
+          [
+            "\u0081",
+            1
+          ],
+          [
+            "\u008d",
+            1
+          ]
+        ],
+        "worst_pages": [
+          {
+            "page": 98,
+            "missing": 117,
+            "source_chars": 303,
+            "characters": [
+              [
+                "\u0014",
+                14
+              ],
+              [
+                "\u0018",
+                13
+              ],
+              [
+                "\u000f",
+                13
+              ],
+              [
+                "\u0015",
+                11
+              ],
+              [
+                "\u0011",
+                9
+              ],
+              [
+                "\u0017",
+                8
+              ],
+              [
+                "\u001a",
+                6
+              ],
+              [
+                "\u0012",
+                6
+              ]
+            ]
+          },
+          {
+            "page": 1947,
+            "missing": 63,
+            "source_chars": 5646,
+            "characters": [
+              [
+                "\b",
+                63
+              ]
+            ]
+          },
+          {
+            "page": 1532,
+            "missing": 58,
+            "source_chars": 5022,
+            "characters": [
+              [
+                "\b",
+                58
+              ]
+            ]
+          },
+          {
+            "page": 166,
+            "missing": 49,
+            "source_chars": 4456,
+            "characters": [
+              [
+                "\b",
+                49
+              ]
+            ]
+          },
+          {
+            "page": 692,
+            "missing": 46,
+            "source_chars": 4229,
+            "characters": [
+              [
+                "\b",
+                46
+              ]
+            ]
+          },
+          {
+            "page": 1382,
+            "missing": 44,
+            "source_chars": 4036,
+            "characters": [
+              [
+                "\b",
+                44
+              ]
+            ]
+          },
+          {
+            "page": 835,
+            "missing": 42,
+            "source_chars": 3818,
+            "characters": [
+              [
+                "\b",
+                42
+              ]
+            ]
+          },
+          {
+            "page": 441,
+            "missing": 38,
+            "source_chars": 3216,
+            "characters": [
+              [
+                "\b",
+                38
+              ]
+            ]
+          },
+          {
+            "page": 1786,
+            "missing": 37,
+            "source_chars": 3541,
+            "characters": [
+              [
+                "\b",
+                37
+              ]
+            ]
+          },
+          {
+            "page": 571,
+            "missing": 36,
+            "source_chars": 3502,
+            "characters": [
+              [
+                "\b",
+                36
+              ]
+            ]
+          },
+          {
+            "page": 54,
+            "missing": 34,
+            "source_chars": 1694,
+            "characters": [
+              [
+                "\b",
+                34
+              ]
+            ]
+          },
+          {
+            "page": 306,
+            "missing": 34,
+            "source_chars": 3040,
+            "characters": [
+              [
+                "\b",
+                34
+              ]
+            ]
+          },
+          {
+            "page": 941,
+            "missing": 33,
+            "source_chars": 3318,
+            "characters": [
+              [
+                "\b",
+                33
+              ]
+            ]
+          },
+          {
+            "page": 1073,
+            "missing": 31,
+            "source_chars": 3045,
+            "characters": [
+              [
+                "\b",
+                31
+              ]
+            ]
+          },
+          {
+            "page": 1230,
+            "missing": 31,
+            "source_chars": 3125,
+            "characters": [
+              [
+                "\b",
+                31
+              ]
+            ]
+          },
+          {
+            "page": 16,
+            "missing": 29,
+            "source_chars": 3033,
+            "characters": [
+              [
+                "\b",
+                29
+              ]
+            ]
+          },
+          {
+            "page": 2171,
+            "missing": 12,
+            "source_chars": 974,
+            "characters": [
+              [
+                "\b",
+                12
+              ]
+            ]
+          },
+          {
+            "page": 2211,
+            "missing": 12,
+            "source_chars": 902,
+            "characters": [
+              [
+                "\b",
+                12
+              ]
+            ]
+          },
+          {
+            "page": 41,
+            "missing": 10,
+            "source_chars": 4671,
+            "characters": [
+              [
+                "\u0007",
+                10
+              ]
+            ]
+          },
+          {
+            "page": 25,
+            "missing": 9,
+            "source_chars": 4421,
+            "characters": [
+              [
+                "\u0007",
+                9
+              ]
+            ]
+          }
+        ],
+        "mupdf_image_device_occurrences": 53657
+      }
+    },
+    {
+      "fixture": {
+        "name": "intel-sdm-084",
+        "path": "output/hugetest-real/intel-sdm.pdf",
+        "source_url": "https://cdrdv2-public.intel.com/825743/325462-sdm-vol-1-2abcd-3abcd-4.pdf",
+        "bytes": 25169252,
+        "sha256": "b0eb1fa3445b26dfa0eca6b8c264f74793367bb1f474988b2e48d2dd32b95662",
+        "pdf_pages": 5057,
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+      },
+      "solo": {
+        "batches": [
+          {
+            "case": "intel-sdm-084",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 8113.578125,
+            "success": 1,
+            "successful_jobs_per_second": 0.010571927168270259,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 94.590133292,
+            "workers": 1
+          },
+          {
+            "case": "intel-sdm-084",
+            "kind": "batch",
+            "repeat": 2,
+            "sampled_peak_rss_mib": 8197.921875,
+            "success": 1,
+            "successful_jobs_per_second": 0.01043253180802903,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 95.854009209,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "intel-sdm-084",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipping": 27,
+                  "pdf_color_state": 18,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_destination_missing": 1,
+                  "pdf_font_family": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 5057,
+                  "pdf_inference_uncertain": 1,
+                  "pdf_layout": 1,
+                  "pdf_link_action": 570,
+                  "pdf_link_overlap": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_page_crop": 15,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color": 10,
+                  "pdf_text_color_approximation": 1,
+                  "pdf_text_color_quantized": 4814,
+                  "pdf_text_paint": 72,
+                  "pdf_text_partial_clip": 24,
+                  "pdf_text_transform": 200,
+                  "pdf_vector_graphics": 5011,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 47.081873041,
+                "explicit_breaks": 5056,
+                "images": 6,
+                "input_bytes": 25169252,
+                "physical_pages": 5057,
+                "read_seconds": 47.0002935,
+                "recovered_paragraphs": 184720,
+                "recovered_text_bytes": 12320170,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 102280.6612701416,
+                "gc_cycles": 61,
+                "gc_pause_ms": 4.999372,
+                "output_bytes": 3069352846,
+                "output_sha256": "8ab1eb3c7cd97f263ef7fb7e088a0b06a0cc03e4977eb904d72300b9a5ca2be0",
+                "read_seconds": 47.0002935,
+                "sampled_peak_heap_mib": 7044.6987380981445,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 94.469906,
+                "write_seconds": 47.387799167
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          },
+          {
+            "case": "intel-sdm-084",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipping": 27,
+                  "pdf_color_state": 18,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_destination_missing": 1,
+                  "pdf_font_family": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 5057,
+                  "pdf_inference_uncertain": 1,
+                  "pdf_layout": 1,
+                  "pdf_link_action": 570,
+                  "pdf_link_overlap": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_page_crop": 15,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color": 10,
+                  "pdf_text_color_approximation": 1,
+                  "pdf_text_color_quantized": 4814,
+                  "pdf_text_paint": 72,
+                  "pdf_text_partial_clip": 24,
+                  "pdf_text_transform": 200,
+                  "pdf_vector_graphics": 5011,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 47.131975249999996,
+                "explicit_breaks": 5056,
+                "images": 6,
+                "input_bytes": 25169252,
+                "physical_pages": 5057,
+                "read_seconds": 47.050140917,
+                "recovered_paragraphs": 184720,
+                "recovered_text_bytes": 12320170,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 102281.75874328613,
+                "gc_cycles": 61,
+                "gc_pause_ms": 5.964882,
+                "output_bytes": 3069352846,
+                "output_sha256": "8ab1eb3c7cd97f263ef7fb7e088a0b06a0cc03e4977eb904d72300b9a5ca2be0",
+                "read_seconds": 47.050140917,
+                "sampled_peak_heap_mib": 7037.919853210449,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 95.728864458,
+                "write_seconds": 48.596634084
+              }
+            ],
+            "repeat": 2,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "two-worker": {
+        "batches": [
+          {
+            "case": "intel-sdm-084",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 13999.796875,
+            "success": 2,
+            "successful_jobs_per_second": 0.015116734989431276,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 132.303701917,
+            "workers": 2
+          }
+        ],
+        "children": [
+          {
+            "case": "intel-sdm-084",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipping": 27,
+                  "pdf_color_state": 18,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_destination_missing": 1,
+                  "pdf_font_family": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 5057,
+                  "pdf_inference_uncertain": 1,
+                  "pdf_layout": 1,
+                  "pdf_link_action": 570,
+                  "pdf_link_overlap": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_page_crop": 15,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color": 10,
+                  "pdf_text_color_approximation": 1,
+                  "pdf_text_color_quantized": 4814,
+                  "pdf_text_paint": 72,
+                  "pdf_text_partial_clip": 24,
+                  "pdf_text_transform": 200,
+                  "pdf_vector_graphics": 5011,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 72.122884375,
+                "explicit_breaks": 5056,
+                "images": 6,
+                "input_bytes": 25169252,
+                "physical_pages": 5057,
+                "read_seconds": 72.038161917,
+                "recovered_paragraphs": 184720,
+                "recovered_text_bytes": 12320170,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 102280.20037078857,
+                "gc_cycles": 60,
+                "gc_pause_ms": 34.63813,
+                "output_bytes": 3069352846,
+                "output_sha256": "8ab1eb3c7cd97f263ef7fb7e088a0b06a0cc03e4977eb904d72300b9a5ca2be0",
+                "read_seconds": 72.038161917,
+                "sampled_peak_heap_mib": 7106.086357116699,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 130.480433292,
+                "write_seconds": 58.35721325
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 2
+          },
+          {
+            "case": "intel-sdm-084",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipping": 27,
+                  "pdf_color_state": 18,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_destination_missing": 1,
+                  "pdf_font_family": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 5057,
+                  "pdf_inference_uncertain": 1,
+                  "pdf_layout": 1,
+                  "pdf_link_action": 570,
+                  "pdf_link_overlap": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_page_crop": 15,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color": 10,
+                  "pdf_text_color_approximation": 1,
+                  "pdf_text_color_quantized": 4814,
+                  "pdf_text_paint": 72,
+                  "pdf_text_partial_clip": 24,
+                  "pdf_text_transform": 200,
+                  "pdf_vector_graphics": 5011,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 73.841725292,
+                "explicit_breaks": 5056,
+                "images": 6,
+                "input_bytes": 25169252,
+                "physical_pages": 5057,
+                "read_seconds": 73.75436275,
+                "recovered_paragraphs": 184720,
+                "recovered_text_bytes": 12320170,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 102275.6996307373,
+                "gc_cycles": 60,
+                "gc_pause_ms": 32.56583,
+                "output_bytes": 3069352846,
+                "output_sha256": "8ab1eb3c7cd97f263ef7fb7e088a0b06a0cc03e4977eb904d72300b9a5ca2be0",
+                "read_seconds": 73.75436275,
+                "sampled_peak_heap_mib": 7192.231910705566,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 131.954693375,
+                "write_seconds": 58.112582833
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 1,
+            "workers": 2
+          }
+        ]
+      },
+      "default": {
+        "batches": [
+          {
+            "case": "intel-sdm-084",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 4465.5,
+            "success": 0,
+            "successful_jobs_per_second": 0,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 9.600238083,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "intel-sdm-084",
+            "exit_code": 1,
+            "kind": "child",
+            "records": null,
+            "repeat": 1,
+            "stderr": "PDF navigation: PDF destination name budget exceeded\n",
+            "success": false,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "sf_sha256": "8ab1eb3c7cd97f263ef7fb7e088a0b06a0cc03e4977eb904d72300b9a5ca2be0",
+      "sf_bytes": 3069352846,
+      "independent_audit": {
+        "source": "output/hugetest-real/intel-sdm.pdf",
+        "sf": "output/huge-fixed-output/intel-sdm-084-w0.sf",
+        "body_nodes": 115637,
+        "prosemirror": {
+          "prosemirror_body_nodes_checked": 115637
+        },
+        "images": 6,
+        "distinct_images": 2,
+        "native_equations": 0,
+        "original_list_label_characters_in_provenance": 8145,
+        "source_pages": 5057,
+        "recovered_text_pages": 5057,
+        "source_characters": 10272447,
+        "missing_character_count": 0,
+        "missing_fraction": 0.0,
+        "source_unmapped_replacement_characters": 0,
+        "worst_pages": [],
+        "sf_sha256": "8ab1eb3c7cd97f263ef7fb7e088a0b06a0cc03e4977eb904d72300b9a5ca2be0"
+      }
+    },
+    {
+      "fixture": {
+        "name": "ecma376-part1",
+        "path": "output/hugetest-real/ecma376-part1.pdf",
+        "source_url": "https://ecma-international.org/wp-content/uploads/ECMA-376-1_5th_edition_december_2016.zip",
+        "bytes": 35304993,
+        "sha256": "7cccfd0ad0e2ef89316acece15e44a8a088d0603ce4bba4e7b0361b50d13a37d",
+        "pdf_pages": 5039,
+        "archive_member": "Ecma Office Open XML Part 1 - Fundamentals And Markup Language Reference.pdf",
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+      },
+      "solo": {
+        "batches": [
+          {
+            "case": "ecma376-part1",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 8744.9375,
+            "success": 1,
+            "successful_jobs_per_second": 0.006964759869074529,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 143.579968125,
+            "workers": 1
+          },
+          {
+            "case": "ecma376-part1",
+            "kind": "batch",
+            "repeat": 2,
+            "sampled_peak_rss_mib": 8775.671875,
+            "success": 1,
+            "successful_jobs_per_second": 0.006898878458109267,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 144.951096917,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "ecma376-part1",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipped_text": 4,
+                  "pdf_clipping": 891,
+                  "pdf_color_state": 12,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 3416,
+                  "pdf_inference_uncertain": 2,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_page_crop": 6,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_quantized": 3246,
+                  "pdf_text_partial_clip": 2501,
+                  "pdf_text_transform": 17,
+                  "pdf_vector_graphics": 4098
+                },
+                "elapsed_seconds": 80.840729292,
+                "explicit_breaks": 5038,
+                "images": 3033,
+                "input_bytes": 35304993,
+                "physical_pages": 5039,
+                "read_seconds": 80.754154084,
+                "recovered_paragraphs": 164582,
+                "recovered_text_bytes": 8809284,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 220248.5094909668,
+                "gc_cycles": 147,
+                "gc_pause_ms": 17.322008,
+                "output_bytes": 4132810817,
+                "output_sha256": "ec7b59e7042bb47614bcc8ee10b297d3e4253c6b1dd1efb0537804ca832c3982",
+                "read_seconds": 80.754154084,
+                "sampled_peak_heap_mib": 7275.85977935791,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 143.420087459,
+                "write_seconds": 62.579120541
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          },
+          {
+            "case": "ecma376-part1",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipped_text": 4,
+                  "pdf_clipping": 891,
+                  "pdf_color_state": 12,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 3416,
+                  "pdf_inference_uncertain": 2,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_page_crop": 6,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_quantized": 3246,
+                  "pdf_text_partial_clip": 2501,
+                  "pdf_text_transform": 17,
+                  "pdf_vector_graphics": 4098
+                },
+                "elapsed_seconds": 80.927498375,
+                "explicit_breaks": 5038,
+                "images": 3033,
+                "input_bytes": 35304993,
+                "physical_pages": 5039,
+                "read_seconds": 80.83903975,
+                "recovered_paragraphs": 164582,
+                "recovered_text_bytes": 8809284,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 220247.21282196045,
+                "gc_cycles": 148,
+                "gc_pause_ms": 18.043629,
+                "output_bytes": 4132810817,
+                "output_sha256": "ec7b59e7042bb47614bcc8ee10b297d3e4253c6b1dd1efb0537804ca832c3982",
+                "read_seconds": 80.83903975,
+                "sampled_peak_heap_mib": 7373.536834716797,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 144.794358459,
+                "write_seconds": 63.866605583
+              }
+            ],
+            "repeat": 2,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "two-worker": {
+        "batches": [
+          {
+            "case": "ecma376-part1",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 13955.90625,
+            "success": 2,
+            "successful_jobs_per_second": 0.00640408539662158,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 312.300645,
+            "workers": 2
+          }
+        ],
+        "children": [
+          {
+            "case": "ecma376-part1",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipped_text": 4,
+                  "pdf_clipping": 891,
+                  "pdf_color_state": 12,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 3416,
+                  "pdf_inference_uncertain": 2,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_page_crop": 6,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_quantized": 3246,
+                  "pdf_text_partial_clip": 2501,
+                  "pdf_text_transform": 17,
+                  "pdf_vector_graphics": 4098
+                },
+                "elapsed_seconds": 218.500708958,
+                "explicit_breaks": 5038,
+                "images": 3033,
+                "input_bytes": 35304993,
+                "physical_pages": 5039,
+                "read_seconds": 218.404191208,
+                "recovered_paragraphs": 164582,
+                "recovered_text_bytes": 8809284,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 220244.66680145264,
+                "gc_cycles": 148,
+                "gc_pause_ms": 64.172872,
+                "output_bytes": 4132810817,
+                "output_sha256": "ec7b59e7042bb47614bcc8ee10b297d3e4253c6b1dd1efb0537804ca832c3982",
+                "read_seconds": 218.404191208,
+                "sampled_peak_heap_mib": 7609.023712158203,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 306.808601208,
+                "write_seconds": 88.307358959
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 2
+          },
+          {
+            "case": "ecma376-part1",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipped_text": 4,
+                  "pdf_clipping": 891,
+                  "pdf_color_state": 12,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 3416,
+                  "pdf_inference_uncertain": 2,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_page_crop": 6,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_quantized": 3246,
+                  "pdf_text_partial_clip": 2501,
+                  "pdf_text_transform": 17,
+                  "pdf_vector_graphics": 4098
+                },
+                "elapsed_seconds": 224.052920458,
+                "explicit_breaks": 5038,
+                "images": 3033,
+                "input_bytes": 35304993,
+                "physical_pages": 5039,
+                "read_seconds": 223.953340667,
+                "recovered_paragraphs": 164582,
+                "recovered_text_bytes": 8809284,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 220259.37953186035,
+                "gc_cycles": 147,
+                "gc_pause_ms": 55.795917,
+                "output_bytes": 4132810817,
+                "output_sha256": "ec7b59e7042bb47614bcc8ee10b297d3e4253c6b1dd1efb0537804ca832c3982",
+                "read_seconds": 223.953340667,
+                "sampled_peak_heap_mib": 7465.7475509643555,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 311.849572041,
+                "write_seconds": 87.796245416
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 1,
+            "workers": 2
+          }
+        ]
+      },
+      "default": {
+        "batches": [
+          {
+            "case": "ecma376-part1",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 4059.453125,
+            "success": 0,
+            "successful_jobs_per_second": 0,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 12.116755959,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "ecma376-part1",
+            "exit_code": 1,
+            "kind": "child",
+            "records": null,
+            "repeat": 1,
+            "stderr": "PDF page 2842: PDF decoded streams exceed 268435456 bytes: PDF decoded stream limit exceeded: 1186932 bytes\n",
+            "success": false,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "sf_sha256": "ec7b59e7042bb47614bcc8ee10b297d3e4253c6b1dd1efb0537804ca832c3982",
+      "sf_bytes": 4132810817,
+      "independent_audit": {
+        "source": "output/hugetest-real/ecma376-part1.pdf",
+        "sf": "output/huge-fixed-output/ecma376-part1-w0.sf",
+        "body_nodes": 97484,
+        "prosemirror": {
+          "prosemirror_body_nodes_checked": 97484
+        },
+        "images": 3033,
+        "distinct_images": 2020,
+        "native_equations": 0,
+        "original_list_label_characters_in_provenance": 502,
+        "source_pages": 5039,
+        "recovered_text_pages": 5039,
+        "source_characters": 7418356,
+        "missing_character_count": 15,
+        "missing_fraction": 2.0220113459100643e-06,
+        "source_unmapped_replacement_characters": 0,
+        "worst_pages": [
+          {
+            "page": 4989,
+            "missing": 4,
+            "source_chars": 1485,
+            "characters": [
+              [
+                "\u0227",
+                1
+              ],
+              [
+                "\u00e4",
+                1
+              ],
+              [
+                "\u00e3",
+                1
+              ],
+              [
+                "\u00e2",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 3616,
+            "missing": 3,
+            "source_chars": 3041,
+            "characters": [
+              [
+                "\u0227",
+                1
+              ],
+              [
+                "\u00e1",
+                1
+              ],
+              [
+                "\u00e3",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 3637,
+            "missing": 3,
+            "source_chars": 1522,
+            "characters": [
+              [
+                "\u0227",
+                1
+              ],
+              [
+                "\u00e2",
+                1
+              ],
+              [
+                "\u00e3",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1467,
+            "missing": 1,
+            "source_chars": 1284,
+            "characters": [
+              [
+                "\u1edd",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 3627,
+            "missing": 1,
+            "source_chars": 1151,
+            "characters": [
+              [
+                "\u00e3",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 3638,
+            "missing": 1,
+            "source_chars": 997,
+            "characters": [
+              [
+                "\u00e3",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 3650,
+            "missing": 1,
+            "source_chars": 1775,
+            "characters": [
+              [
+                "\u00e3",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 3706,
+            "missing": 1,
+            "source_chars": 1318,
+            "characters": [
+              [
+                "\u00e3",
+                1
+              ]
+            ]
+          }
+        ],
+        "sf_sha256": "ec7b59e7042bb47614bcc8ee10b297d3e4253c6b1dd1efb0537804ca832c3982"
+      }
+    },
+    {
+      "fixture": {
+        "name": "3gpp-38331-i00",
+        "path": "output/hugetest-real/38331-i00.docx",
+        "source_url": "https://www.3gpp.org/ftp/Specs/archive/38_series/38.331/38331-i00.zip",
+        "bytes": 3891288,
+        "sha256": "9e319813a4ba5e800702fe5991f7b6e671d889a552e1743e833c2af603ccdbc4",
+        "pdf_pages": 0,
+        "source_docx_paragraphs": 66185,
+        "producer_page_count": 1,
+        "note": "Producer page count is stale (1), not a pagination oracle. Original body contains 66,185 XML paragraphs.",
+        "archive_member": "38331-i00.docx",
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+      },
+      "solo": {
+        "batches": [
+          {
+            "case": "3gpp-38331-i00",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 883.578125,
+            "success": 1,
+            "successful_jobs_per_second": 0.31253151772923593,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 3.199677291,
+            "workers": 1
+          },
+          {
+            "case": "3gpp-38331-i00",
+            "kind": "batch",
+            "repeat": 2,
+            "sampled_peak_rss_mib": 885.703125,
+            "success": 1,
+            "successful_jobs_per_second": 0.3138060501899363,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 3.186681708,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "3gpp-38331-i00",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "bookmark_range": 1,
+                  "docx_page_settings": 1,
+                  "field": 1,
+                  "font_selectors": 1,
+                  "font_theme": 1,
+                  "font_theme_run_language": 1,
+                  "legacy_drawing_preview": 1,
+                  "office_math_native": 1,
+                  "paragraph_formatting": 16,
+                  "position_tab": 1,
+                  "run_formatting": 8,
+                  "symbol_font_unicode": 1,
+                  "table_autofit": 1,
+                  "table_cell_width_preference": 1,
+                  "table_grid_gaps": 1,
+                  "table_header_ignored": 1,
+                  "table_width_preference": 1
+                },
+                "elapsed_seconds": 2.168834208,
+                "explicit_breaks": 3,
+                "images": 73,
+                "input_bytes": 3891288,
+                "physical_pages": 0,
+                "read_seconds": 2.162593667,
+                "recovered_paragraphs": 66136,
+                "recovered_text_bytes": 4258463,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 2627.0225830078125,
+                "gc_cycles": 32,
+                "gc_pause_ms": 6.711497,
+                "output_bytes": 46390537,
+                "output_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+                "read_seconds": 2.162593667,
+                "sampled_peak_heap_mib": 686.7108612060547,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 3.178539,
+                "write_seconds": 1.009484084
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          },
+          {
+            "case": "3gpp-38331-i00",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "bookmark_range": 1,
+                  "docx_page_settings": 1,
+                  "field": 1,
+                  "font_selectors": 1,
+                  "font_theme": 1,
+                  "font_theme_run_language": 1,
+                  "legacy_drawing_preview": 1,
+                  "office_math_native": 1,
+                  "paragraph_formatting": 16,
+                  "position_tab": 1,
+                  "run_formatting": 8,
+                  "symbol_font_unicode": 1,
+                  "table_autofit": 1,
+                  "table_cell_width_preference": 1,
+                  "table_grid_gaps": 1,
+                  "table_header_ignored": 1,
+                  "table_width_preference": 1
+                },
+                "elapsed_seconds": 2.190950083,
+                "explicit_breaks": 3,
+                "images": 73,
+                "input_bytes": 3891288,
+                "physical_pages": 0,
+                "read_seconds": 2.18458925,
+                "recovered_paragraphs": 66136,
+                "recovered_text_bytes": 4258463,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 2625.2404556274414,
+                "gc_cycles": 32,
+                "gc_pause_ms": 1.716584,
+                "output_bytes": 46390537,
+                "output_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+                "read_seconds": 2.18458925,
+                "sampled_peak_heap_mib": 723.9856567382812,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 3.166819125,
+                "write_seconds": 0.975680666
+              }
+            ],
+            "repeat": 2,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "two-worker": {
+        "batches": [
+          {
+            "case": "3gpp-38331-i00",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 1813.390625,
+            "success": 2,
+            "successful_jobs_per_second": 0.5972907414002194,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 3.348453042,
+            "workers": 2
+          }
+        ],
+        "children": [
+          {
+            "case": "3gpp-38331-i00",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "bookmark_range": 1,
+                  "docx_page_settings": 1,
+                  "field": 1,
+                  "font_selectors": 1,
+                  "font_theme": 1,
+                  "font_theme_run_language": 1,
+                  "legacy_drawing_preview": 1,
+                  "office_math_native": 1,
+                  "paragraph_formatting": 16,
+                  "position_tab": 1,
+                  "run_formatting": 8,
+                  "symbol_font_unicode": 1,
+                  "table_autofit": 1,
+                  "table_cell_width_preference": 1,
+                  "table_grid_gaps": 1,
+                  "table_header_ignored": 1,
+                  "table_width_preference": 1
+                },
+                "elapsed_seconds": 2.242245958,
+                "explicit_breaks": 3,
+                "images": 73,
+                "input_bytes": 3891288,
+                "physical_pages": 0,
+                "read_seconds": 2.23592725,
+                "recovered_paragraphs": 66136,
+                "recovered_text_bytes": 4258463,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 2627.030830383301,
+                "gc_cycles": 32,
+                "gc_pause_ms": 6.22942,
+                "output_bytes": 46390537,
+                "output_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+                "read_seconds": 2.23592725,
+                "sampled_peak_heap_mib": 734.8761291503906,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 3.268270291,
+                "write_seconds": 1.025777125
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 2
+          },
+          {
+            "case": "3gpp-38331-i00",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "bookmark_range": 1,
+                  "docx_page_settings": 1,
+                  "field": 1,
+                  "font_selectors": 1,
+                  "font_theme": 1,
+                  "font_theme_run_language": 1,
+                  "legacy_drawing_preview": 1,
+                  "office_math_native": 1,
+                  "paragraph_formatting": 16,
+                  "position_tab": 1,
+                  "run_formatting": 8,
+                  "symbol_font_unicode": 1,
+                  "table_autofit": 1,
+                  "table_cell_width_preference": 1,
+                  "table_grid_gaps": 1,
+                  "table_header_ignored": 1,
+                  "table_width_preference": 1
+                },
+                "elapsed_seconds": 2.205297334,
+                "explicit_breaks": 3,
+                "images": 73,
+                "input_bytes": 3891288,
+                "physical_pages": 0,
+                "read_seconds": 2.198682208,
+                "recovered_paragraphs": 66136,
+                "recovered_text_bytes": 4258463,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 2626.6100311279297,
+                "gc_cycles": 31,
+                "gc_pause_ms": 2.116997,
+                "output_bytes": 46390537,
+                "output_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+                "read_seconds": 2.198682208,
+                "sampled_peak_heap_mib": 651.2923812866211,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 3.230547709,
+                "write_seconds": 1.024987666
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 1,
+            "workers": 2
+          }
+        ]
+      },
+      "default": {
+        "batches": [
+          {
+            "case": "3gpp-38331-i00",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 863.609375,
+            "success": 1,
+            "successful_jobs_per_second": 0.30625869509780307,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 3.265213416,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "3gpp-38331-i00",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "bookmark_range": 1,
+                  "docx_page_settings": 1,
+                  "field": 1,
+                  "font_selectors": 1,
+                  "font_theme": 1,
+                  "font_theme_run_language": 1,
+                  "legacy_drawing_preview": 1,
+                  "office_math_native": 1,
+                  "paragraph_formatting": 16,
+                  "position_tab": 1,
+                  "run_formatting": 8,
+                  "symbol_font_unicode": 1,
+                  "table_autofit": 1,
+                  "table_cell_width_preference": 1,
+                  "table_grid_gaps": 1,
+                  "table_header_ignored": 1,
+                  "table_width_preference": 1
+                },
+                "elapsed_seconds": 2.238998833,
+                "explicit_breaks": 3,
+                "images": 73,
+                "input_bytes": 3891288,
+                "physical_pages": 0,
+                "read_seconds": 2.232785333,
+                "recovered_paragraphs": 66136,
+                "recovered_text_bytes": 4258463,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 2628.340431213379,
+                "gc_cycles": 32,
+                "gc_pause_ms": 1.850332,
+                "output_bytes": 46390537,
+                "output_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+                "read_seconds": 2.232785333,
+                "sampled_peak_heap_mib": 699.2302856445312,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 3.244969125,
+                "write_seconds": 1.005715625
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "sf_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+      "sf_bytes": 46390537,
+      "independent_audit": {
+        "source": "output/hugetest-real/38331-i00.docx",
+        "sf": "output/huge-final-output/3gpp-38331-i00-w0.sf",
+        "sf_sha256": "7711f5ad788a0311587515e0f7b0c98a3ca3432e52ad427dc7126fc60887ccdb",
+        "sf_bytes": 46390537,
+        "body_nodes": 12,
+        "prosemirror": {
+          "prosemirror_body_nodes_checked": 12
+        },
+        "images": 73,
+        "distinct_images": 71,
+        "native_equations": 15,
+        "original_list_label_characters_in_provenance": 0,
+        "original_distinct_assets": 71,
+        "original_assets_missing": [],
+        "original_preview_placements": 73,
+        "original_equations": 15,
+        "original_equation_structures_missing": 0,
+        "source_characters": 3248134,
+        "recovered_characters": 3248134,
+        "missing_character_count": 0,
+        "missing_characters": [],
+        "extra_characters": []
+      }
+    },
+    {
+      "fixture": {
+        "name": "3gpp-38331-i10",
+        "path": "output/hugetest-real/38331-i10.docx",
+        "source_url": "https://www.3gpp.org/ftp/Specs/archive/38_series/38.331/38331-i10.zip",
+        "bytes": 4002052,
+        "sha256": "58cdf26a2aa48c0c24e4f4bcf67fd969ce274d5f571b6418a90537fcc2e7659b",
+        "pdf_pages": 0,
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed.",
+        "source_docx_paragraphs": 68220,
+        "producer_page_count": 1,
+        "archive_member": "38331-i10.docx",
+        "note": "Corresponding ETSI TS 138 331 V18.1.0 PDF is 1624 pages; this is not verified Word pagination. Producer page metadata is not an oracle."
+      },
+      "solo": {
+        "batches": [
+          {
+            "case": "3gpp-38331-i10",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 973.921875,
+            "success": 1,
+            "successful_jobs_per_second": 0.30440648554759814,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 3.285081125,
+            "workers": 1
+          },
+          {
+            "case": "3gpp-38331-i10",
+            "kind": "batch",
+            "repeat": 2,
+            "sampled_peak_rss_mib": 1008.875,
+            "success": 1,
+            "successful_jobs_per_second": 0.30416612533714393,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 3.2876770840000002,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "3gpp-38331-i10",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "bookmark_range": 1,
+                  "color_system": 1,
+                  "color_theme": 1,
+                  "docx_page_settings": 1,
+                  "field": 1,
+                  "font_selectors": 1,
+                  "font_theme": 1,
+                  "font_theme_run_language": 1,
+                  "legacy_drawing_preview": 1,
+                  "office_math_native": 1,
+                  "paragraph_formatting": 17,
+                  "position_tab": 1,
+                  "run_formatting": 9,
+                  "symbol_font_unicode": 1,
+                  "table_autofit": 1,
+                  "table_cell_width_preference": 1,
+                  "table_grid_gaps": 1,
+                  "table_header_ignored": 1,
+                  "table_width_preference": 1
+                },
+                "elapsed_seconds": 2.239465375,
+                "explicit_breaks": 3,
+                "images": 73,
+                "input_bytes": 4002052,
+                "physical_pages": 0,
+                "read_seconds": 2.232867709,
+                "recovered_paragraphs": 68169,
+                "recovered_text_bytes": 4419020,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 2782.4844360351562,
+                "gc_cycles": 32,
+                "gc_pause_ms": 7.920255,
+                "output_bytes": 48307780,
+                "output_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+                "read_seconds": 2.232867709,
+                "sampled_peak_heap_mib": 753.7771759033203,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 3.264659292,
+                "write_seconds": 1.024998375
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          },
+          {
+            "case": "3gpp-38331-i10",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "bookmark_range": 1,
+                  "color_system": 1,
+                  "color_theme": 1,
+                  "docx_page_settings": 1,
+                  "field": 1,
+                  "font_selectors": 1,
+                  "font_theme": 1,
+                  "font_theme_run_language": 1,
+                  "legacy_drawing_preview": 1,
+                  "office_math_native": 1,
+                  "paragraph_formatting": 17,
+                  "position_tab": 1,
+                  "run_formatting": 9,
+                  "symbol_font_unicode": 1,
+                  "table_autofit": 1,
+                  "table_cell_width_preference": 1,
+                  "table_grid_gaps": 1,
+                  "table_header_ignored": 1,
+                  "table_width_preference": 1
+                },
+                "elapsed_seconds": 2.239551625,
+                "explicit_breaks": 3,
+                "images": 73,
+                "input_bytes": 4002052,
+                "physical_pages": 0,
+                "read_seconds": 2.232815,
+                "recovered_paragraphs": 68169,
+                "recovered_text_bytes": 4419020,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 2787.3795013427734,
+                "gc_cycles": 32,
+                "gc_pause_ms": 5.494375,
+                "output_bytes": 48307780,
+                "output_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+                "read_seconds": 2.232815,
+                "sampled_peak_heap_mib": 725.6080932617188,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 3.26697975,
+                "write_seconds": 1.0272045
+              }
+            ],
+            "repeat": 2,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "two-worker": {
+        "batches": [
+          {
+            "case": "3gpp-38331-i10",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 1939.796875,
+            "success": 2,
+            "successful_jobs_per_second": 0.5848906299076116,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 3.419442709,
+            "workers": 2
+          }
+        ],
+        "children": [
+          {
+            "case": "3gpp-38331-i10",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "bookmark_range": 1,
+                  "color_system": 1,
+                  "color_theme": 1,
+                  "docx_page_settings": 1,
+                  "field": 1,
+                  "font_selectors": 1,
+                  "font_theme": 1,
+                  "font_theme_run_language": 1,
+                  "legacy_drawing_preview": 1,
+                  "office_math_native": 1,
+                  "paragraph_formatting": 17,
+                  "position_tab": 1,
+                  "run_formatting": 9,
+                  "symbol_font_unicode": 1,
+                  "table_autofit": 1,
+                  "table_cell_width_preference": 1,
+                  "table_grid_gaps": 1,
+                  "table_header_ignored": 1,
+                  "table_width_preference": 1
+                },
+                "elapsed_seconds": 2.2867480000000002,
+                "explicit_breaks": 3,
+                "images": 73,
+                "input_bytes": 4002052,
+                "physical_pages": 0,
+                "read_seconds": 2.2796512079999998,
+                "recovered_paragraphs": 68169,
+                "recovered_text_bytes": 4419020,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 2787.786262512207,
+                "gc_cycles": 33,
+                "gc_pause_ms": 2.527085,
+                "output_bytes": 48307780,
+                "output_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+                "read_seconds": 2.2796512079999998,
+                "sampled_peak_heap_mib": 628.9084930419922,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 3.370781,
+                "write_seconds": 1.083801459
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 2
+          },
+          {
+            "case": "3gpp-38331-i10",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "bookmark_range": 1,
+                  "color_system": 1,
+                  "color_theme": 1,
+                  "docx_page_settings": 1,
+                  "field": 1,
+                  "font_selectors": 1,
+                  "font_theme": 1,
+                  "font_theme_run_language": 1,
+                  "legacy_drawing_preview": 1,
+                  "office_math_native": 1,
+                  "paragraph_formatting": 17,
+                  "position_tab": 1,
+                  "run_formatting": 9,
+                  "symbol_font_unicode": 1,
+                  "table_autofit": 1,
+                  "table_cell_width_preference": 1,
+                  "table_grid_gaps": 1,
+                  "table_header_ignored": 1,
+                  "table_width_preference": 1
+                },
+                "elapsed_seconds": 2.3030255,
+                "explicit_breaks": 3,
+                "images": 73,
+                "input_bytes": 4002052,
+                "physical_pages": 0,
+                "read_seconds": 2.296340334,
+                "recovered_paragraphs": 68169,
+                "recovered_text_bytes": 4419020,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 2787.1698150634766,
+                "gc_cycles": 32,
+                "gc_pause_ms": 10.417208,
+                "output_bytes": 48307780,
+                "output_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+                "read_seconds": 2.296340334,
+                "sampled_peak_heap_mib": 764.2663726806641,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 3.396106042,
+                "write_seconds": 1.092858834
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 1,
+            "workers": 2
+          }
+        ]
+      },
+      "default": {
+        "batches": [
+          {
+            "case": "3gpp-38331-i10",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 990.9375,
+            "success": 1,
+            "successful_jobs_per_second": 0.3003141210627786,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 3.32984675,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "3gpp-38331-i10",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "bookmark_range": 1,
+                  "color_system": 1,
+                  "color_theme": 1,
+                  "docx_page_settings": 1,
+                  "field": 1,
+                  "font_selectors": 1,
+                  "font_theme": 1,
+                  "font_theme_run_language": 1,
+                  "legacy_drawing_preview": 1,
+                  "office_math_native": 1,
+                  "paragraph_formatting": 17,
+                  "position_tab": 1,
+                  "run_formatting": 9,
+                  "symbol_font_unicode": 1,
+                  "table_autofit": 1,
+                  "table_cell_width_preference": 1,
+                  "table_grid_gaps": 1,
+                  "table_header_ignored": 1,
+                  "table_width_preference": 1
+                },
+                "elapsed_seconds": 2.27378675,
+                "explicit_breaks": 3,
+                "images": 73,
+                "input_bytes": 4002052,
+                "physical_pages": 0,
+                "read_seconds": 2.266811083,
+                "recovered_paragraphs": 68169,
+                "recovered_text_bytes": 4419020,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 2785.6969451904297,
+                "gc_cycles": 32,
+                "gc_pause_ms": 2.200959,
+                "output_bytes": 48307780,
+                "output_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+                "read_seconds": 2.266811083,
+                "sampled_peak_heap_mib": 741.1996231079102,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 3.307382917,
+                "write_seconds": 1.033310125
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "sf_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+      "sf_bytes": 48307780,
+      "independent_audit": {
+        "source": "output/hugetest-real/38331-i10.docx",
+        "sf": "output/huge-final-output/3gpp-38331-i10-w0.sf",
+        "sf_sha256": "40b7b6ac6afc8cb65c39f53ea891d189932d5613b05fe2f85c8be5e8e2fb303a",
+        "sf_bytes": 48307780,
+        "body_nodes": 12,
+        "prosemirror": {
+          "prosemirror_body_nodes_checked": 12
+        },
+        "images": 73,
+        "distinct_images": 71,
+        "native_equations": 21,
+        "original_list_label_characters_in_provenance": 0,
+        "original_distinct_assets": 71,
+        "original_assets_missing": [],
+        "original_preview_placements": 73,
+        "original_equations": 21,
+        "original_equation_structures_missing": 0,
+        "source_characters": 3360695,
+        "recovered_characters": 3360695,
+        "missing_character_count": 0,
+        "missing_characters": [],
+        "extra_characters": []
+      }
+    },
+    {
+      "fixture": {
+        "name": "etsi-38331-v180100",
+        "path": "output/hugetest-real/etsi-38331-v180100.pdf",
+        "source_url": "https://www.etsi.org/deliver/etsi_ts/138300_138399/138331/18.01.00_60/ts_138331v180100p.pdf",
+        "bytes": 7235315,
+        "sha256": "939befcf81d76ee493a45d8c9a47d32b0863bb0941a7b3ecf63f5907cf61ea3e",
+        "pdf_pages": 1624,
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+      },
+      "solo": {
+        "batches": [
+          {
+            "case": "etsi-38331-v180100",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 2956,
+            "success": 1,
+            "successful_jobs_per_second": 0.03442830684027066,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 29.045866375,
+            "workers": 1
+          },
+          {
+            "case": "etsi-38331-v180100",
+            "kind": "batch",
+            "repeat": 2,
+            "sampled_peak_rss_mib": 2955.140625,
+            "success": 1,
+            "successful_jobs_per_second": 0.03349595610644143,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 29.854350084,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "etsi-38331-v180100",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipped_text": 1,
+                  "pdf_clipping": 2,
+                  "pdf_color_state": 1,
+                  "pdf_font_bounds": 80,
+                  "pdf_font_family": 2,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 1624,
+                  "pdf_inference_uncertain": 3,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_page_crop": 8,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_quantized": 900,
+                  "pdf_text_partial_clip": 1624,
+                  "pdf_text_transform": 1624,
+                  "pdf_vector_graphics": 755,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 13.755619917,
+                "explicit_breaks": 1623,
+                "images": 1743,
+                "input_bytes": 7235315,
+                "physical_pages": 1624,
+                "read_seconds": 13.733745875,
+                "recovered_paragraphs": 44329,
+                "recovered_text_bytes": 4797937,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 55016.51761627197,
+                "gc_cycles": 74,
+                "gc_pause_ms": 5.820833,
+                "output_bytes": 1081974112,
+                "output_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9",
+                "read_seconds": 13.733745875,
+                "sampled_peak_heap_mib": 2579.202590942383,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 28.996627959,
+                "write_seconds": 15.240789167
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          },
+          {
+            "case": "etsi-38331-v180100",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipped_text": 1,
+                  "pdf_clipping": 2,
+                  "pdf_color_state": 1,
+                  "pdf_font_bounds": 80,
+                  "pdf_font_family": 2,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 1624,
+                  "pdf_inference_uncertain": 3,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_page_crop": 8,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_quantized": 900,
+                  "pdf_text_partial_clip": 1624,
+                  "pdf_text_transform": 1624,
+                  "pdf_vector_graphics": 755,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 13.767228333,
+                "explicit_breaks": 1623,
+                "images": 1743,
+                "input_bytes": 7235315,
+                "physical_pages": 1624,
+                "read_seconds": 13.745712416,
+                "recovered_paragraphs": 44329,
+                "recovered_text_bytes": 4797937,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 55016.37635040283,
+                "gc_cycles": 74,
+                "gc_pause_ms": 6.110828,
+                "output_bytes": 1081974112,
+                "output_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9",
+                "read_seconds": 13.745712416,
+                "sampled_peak_heap_mib": 2576.5627365112305,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 29.805804292,
+                "write_seconds": 16.037406833
+              }
+            ],
+            "repeat": 2,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "two-worker": {
+        "batches": [
+          {
+            "case": "etsi-38331-v180100",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 6111.828125,
+            "success": 2,
+            "successful_jobs_per_second": 0.06278596201716999,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 31.854254291,
+            "workers": 2
+          }
+        ],
+        "children": [
+          {
+            "case": "etsi-38331-v180100",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipped_text": 1,
+                  "pdf_clipping": 2,
+                  "pdf_color_state": 1,
+                  "pdf_font_bounds": 80,
+                  "pdf_font_family": 2,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 1624,
+                  "pdf_inference_uncertain": 3,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_page_crop": 8,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_quantized": 900,
+                  "pdf_text_partial_clip": 1624,
+                  "pdf_text_transform": 1624,
+                  "pdf_vector_graphics": 755,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 15.558186875,
+                "explicit_breaks": 1623,
+                "images": 1743,
+                "input_bytes": 7235315,
+                "physical_pages": 1624,
+                "read_seconds": 15.535678,
+                "recovered_paragraphs": 44329,
+                "recovered_text_bytes": 4797937,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 55017.30294036865,
+                "gc_cycles": 72,
+                "gc_pause_ms": 16.04958,
+                "output_bytes": 1081974112,
+                "output_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9",
+                "read_seconds": 15.535678,
+                "sampled_peak_heap_mib": 2668.32266998291,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 31.532509875,
+                "write_seconds": 15.974046208
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 2
+          },
+          {
+            "case": "etsi-38331-v180100",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipped_text": 1,
+                  "pdf_clipping": 2,
+                  "pdf_color_state": 1,
+                  "pdf_font_bounds": 80,
+                  "pdf_font_family": 2,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 1624,
+                  "pdf_inference_uncertain": 3,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_page_crop": 8,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_quantized": 900,
+                  "pdf_text_partial_clip": 1624,
+                  "pdf_text_transform": 1624,
+                  "pdf_vector_graphics": 755,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 15.49274325,
+                "explicit_breaks": 1623,
+                "images": 1743,
+                "input_bytes": 7235315,
+                "physical_pages": 1624,
+                "read_seconds": 15.469251084,
+                "recovered_paragraphs": 44329,
+                "recovered_text_bytes": 4797937,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 55016.443687438965,
+                "gc_cycles": 74,
+                "gc_pause_ms": 17.888083,
+                "output_bytes": 1081974112,
+                "output_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9",
+                "read_seconds": 15.469251084,
+                "sampled_peak_heap_mib": 2662.629425048828,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 31.732167208,
+                "write_seconds": 16.239141125
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 1,
+            "workers": 2
+          }
+        ]
+      },
+      "default": {
+        "batches": [
+          {
+            "case": "etsi-38331-v180100",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 2905.828125,
+            "success": 1,
+            "successful_jobs_per_second": 0.03379907301141401,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 29.58661025,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "etsi-38331-v180100",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_clipped_text": 1,
+                  "pdf_clipping": 2,
+                  "pdf_color_state": 1,
+                  "pdf_font_bounds": 80,
+                  "pdf_font_family": 2,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 1624,
+                  "pdf_inference_uncertain": 3,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_mask_resampling": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_page_crop": 8,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_quantized": 900,
+                  "pdf_text_partial_clip": 1624,
+                  "pdf_text_transform": 1624,
+                  "pdf_vector_graphics": 755,
+                  "pdf_xmp_metadata": 1
+                },
+                "elapsed_seconds": 13.955956291,
+                "explicit_breaks": 1623,
+                "images": 1743,
+                "input_bytes": 7235315,
+                "physical_pages": 1624,
+                "read_seconds": 13.933118292,
+                "recovered_paragraphs": 44329,
+                "recovered_text_bytes": 4797937,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 55018.532554626465,
+                "gc_cycles": 73,
+                "gc_pause_ms": 6.770081,
+                "output_bytes": 1081974112,
+                "output_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9",
+                "read_seconds": 13.933118292,
+                "sampled_peak_heap_mib": 2596.623695373535,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 29.46826075,
+                "write_seconds": 15.512075083
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "sf_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9",
+      "sf_bytes": 1081974112,
+      "independent_audit": {
+        "source": "output/hugetest-real/etsi-38331-v180100.pdf",
+        "sf": "output/huge-fixed-output/etsi-38331-v180100-w0.sf",
+        "body_nodes": 30512,
+        "prosemirror": {
+          "prosemirror_body_nodes_checked": 30512
+        },
+        "images": 1743,
+        "distinct_images": 770,
+        "native_equations": 0,
+        "original_list_label_characters_in_provenance": 562,
+        "source_pages": 1624,
+        "recovered_text_pages": 1624,
+        "source_characters": 3644064,
+        "missing_character_count": 138,
+        "missing_fraction": 3.7869806896915095e-05,
+        "source_unmapped_replacement_characters": 0,
+        "worst_pages": [
+          {
+            "page": 261,
+            "missing": 36,
+            "source_chars": 1705,
+            "characters": [
+              [
+                "\u0005",
+                8
+              ],
+              [
+                "\u0000",
+                4
+              ],
+              [
+                "\u0002",
+                4
+              ],
+              [
+                "\u0003",
+                4
+              ],
+              [
+                "\u0004",
+                4
+              ],
+              [
+                "\u0006",
+                4
+              ],
+              [
+                "\u0007",
+                4
+              ],
+              [
+                "\b",
+                4
+              ]
+            ]
+          },
+          {
+            "page": 262,
+            "missing": 36,
+            "source_chars": 2191,
+            "characters": [
+              [
+                "\u0005",
+                8
+              ],
+              [
+                "\u0000",
+                4
+              ],
+              [
+                "\u0002",
+                4
+              ],
+              [
+                "\u0003",
+                4
+              ],
+              [
+                "\u0004",
+                4
+              ],
+              [
+                "\u0006",
+                4
+              ],
+              [
+                "\u0007",
+                4
+              ],
+              [
+                "\b",
+                4
+              ]
+            ]
+          },
+          {
+            "page": 1078,
+            "missing": 16,
+            "source_chars": 3986,
+            "characters": [
+              [
+                "\u0003",
+                4
+              ],
+              [
+                "\u000e",
+                4
+              ],
+              [
+                "\u000f",
+                4
+              ],
+              [
+                "\u0010",
+                4
+              ]
+            ]
+          },
+          {
+            "page": 1106,
+            "missing": 14,
+            "source_chars": 4464,
+            "characters": [
+              [
+                "\u0006",
+                2
+              ],
+              [
+                "\u0011",
+                2
+              ],
+              [
+                "\u0013",
+                2
+              ],
+              [
+                "\u0014",
+                2
+              ],
+              [
+                "\u0007",
+                2
+              ],
+              [
+                "\b",
+                2
+              ],
+              [
+                "\u0012",
+                1
+              ],
+              [
+                "\u0015",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 722,
+            "missing": 11,
+            "source_chars": 3500,
+            "characters": [
+              [
+                "\u0003",
+                2
+              ],
+              [
+                "\u0004",
+                2
+              ],
+              [
+                "\u0005",
+                2
+              ],
+              [
+                "\u0000",
+                1
+              ],
+              [
+                "\u0002",
+                1
+              ],
+              [
+                "\u0006",
+                1
+              ],
+              [
+                "\u0007",
+                1
+              ],
+              [
+                "\b",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1533,
+            "missing": 11,
+            "source_chars": 2541,
+            "characters": [
+              [
+                "\u0000",
+                3
+              ],
+              [
+                "\u0002",
+                2
+              ],
+              [
+                "\u0003",
+                2
+              ],
+              [
+                "\u0004",
+                2
+              ],
+              [
+                "\u0005",
+                1
+              ],
+              [
+                "\u0006",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1535,
+            "missing": 9,
+            "source_chars": 3874,
+            "characters": [
+              [
+                "\u0000",
+                2
+              ],
+              [
+                "\u0007",
+                1
+              ],
+              [
+                "\b",
+                1
+              ],
+              [
+                "\u0002",
+                1
+              ],
+              [
+                "\u0003",
+                1
+              ],
+              [
+                "\u0004",
+                1
+              ],
+              [
+                "\u0005",
+                1
+              ],
+              [
+                "\u0006",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 490,
+            "missing": 2,
+            "source_chars": 2897,
+            "characters": [
+              [
+                "\u0000",
+                1
+              ],
+              [
+                "\u0002",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 887,
+            "missing": 2,
+            "source_chars": 3975,
+            "characters": [
+              [
+                "\u0004",
+                2
+              ]
+            ]
+          },
+          {
+            "page": 983,
+            "missing": 1,
+            "source_chars": 3004,
+            "characters": [
+              [
+                "\u0005",
+                1
+              ]
+            ]
+          }
+        ],
+        "sf_sha256": "53002dd5aff652a89f9e507bd94b611ce492d716c25471c5eacdb7d658f313c9"
+      }
+    },
+    {
+      "fixture": {
+        "name": "cpp-n4950",
+        "path": "output/hugetest-real/cpp-n4950.pdf",
+        "source_url": "https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4950.pdf",
+        "bytes": 8043551,
+        "sha256": "2a2fdee7eb4271263451468ff689d6fd3bbb377d7c6e45375796badfb60d50a2",
+        "pdf_pages": 2134,
+        "retrieved_utc": "2026-11-25",
+        "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+      },
+      "solo": {
+        "batches": [
+          {
+            "case": "cpp-n4950",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 3818.265625,
+            "success": 1,
+            "successful_jobs_per_second": 0.026131906326485255,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 38.267395708,
+            "workers": 1
+          },
+          {
+            "case": "cpp-n4950",
+            "kind": "batch",
+            "repeat": 2,
+            "sampled_peak_rss_mib": 3845.34375,
+            "success": 1,
+            "successful_jobs_per_second": 0.026189088472767626,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 38.183841375,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "cpp-n4950",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_cmap_encoding_fallback": 35,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_font_family": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 5,
+                  "pdf_inference_uncertain": 1,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_approximation": 3,
+                  "pdf_text_transform": 1688,
+                  "pdf_vector_graphics": 345
+                },
+                "elapsed_seconds": 21.027287458,
+                "explicit_breaks": 2133,
+                "images": 0,
+                "input_bytes": 8043551,
+                "physical_pages": 2134,
+                "read_seconds": 20.995655,
+                "recovered_paragraphs": 95188,
+                "recovered_text_bytes": 5656020,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 74119.02800750732,
+                "gc_cycles": 72,
+                "gc_pause_ms": 6.192572,
+                "output_bytes": 1186617547,
+                "output_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1",
+                "read_seconds": 20.995655,
+                "sampled_peak_heap_mib": 3317.541015625,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 38.207163208,
+                "write_seconds": 17.179623375
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          },
+          {
+            "case": "cpp-n4950",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_cmap_encoding_fallback": 35,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_font_family": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 5,
+                  "pdf_inference_uncertain": 1,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_approximation": 3,
+                  "pdf_text_transform": 1688,
+                  "pdf_vector_graphics": 345
+                },
+                "elapsed_seconds": 20.703642417,
+                "explicit_breaks": 2133,
+                "images": 0,
+                "input_bytes": 8043551,
+                "physical_pages": 2134,
+                "read_seconds": 20.671684208,
+                "recovered_paragraphs": 95188,
+                "recovered_text_bytes": 5656020,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 74120.36933898926,
+                "gc_cycles": 72,
+                "gc_pause_ms": 7.832127,
+                "output_bytes": 1186617547,
+                "output_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1",
+                "read_seconds": 20.671684208,
+                "sampled_peak_heap_mib": 3385.1499633789062,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 38.125891625,
+                "write_seconds": 17.422045041
+              }
+            ],
+            "repeat": 2,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "two-worker": {
+        "batches": [
+          {
+            "case": "cpp-n4950",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 7790.359375,
+            "success": 2,
+            "successful_jobs_per_second": 0.046376606819841376,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 43.125190417,
+            "workers": 2
+          }
+        ],
+        "children": [
+          {
+            "case": "cpp-n4950",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_cmap_encoding_fallback": 35,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_font_family": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 5,
+                  "pdf_inference_uncertain": 1,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_approximation": 3,
+                  "pdf_text_transform": 1688,
+                  "pdf_vector_graphics": 345
+                },
+                "elapsed_seconds": 24.397381417,
+                "explicit_breaks": 2133,
+                "images": 0,
+                "input_bytes": 8043551,
+                "physical_pages": 2134,
+                "read_seconds": 24.365974125,
+                "recovered_paragraphs": 95188,
+                "recovered_text_bytes": 5656020,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 74110.47663116455,
+                "gc_cycles": 70,
+                "gc_pause_ms": 35.545288,
+                "output_bytes": 1186617547,
+                "output_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1",
+                "read_seconds": 24.365974125,
+                "sampled_peak_heap_mib": 3447.032402038574,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 42.993671292,
+                "write_seconds": 18.596071792
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 2
+          },
+          {
+            "case": "cpp-n4950",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_cmap_encoding_fallback": 35,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_font_family": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 5,
+                  "pdf_inference_uncertain": 1,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_approximation": 3,
+                  "pdf_text_transform": 1688,
+                  "pdf_vector_graphics": 345
+                },
+                "elapsed_seconds": 24.11338,
+                "explicit_breaks": 2133,
+                "images": 0,
+                "input_bytes": 8043551,
+                "physical_pages": 2134,
+                "read_seconds": 24.080571167,
+                "recovered_paragraphs": 95188,
+                "recovered_text_bytes": 5656020,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 74118.87435150146,
+                "gc_cycles": 70,
+                "gc_pause_ms": 20.983004,
+                "output_bytes": 1186617547,
+                "output_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1",
+                "read_seconds": 24.080571167,
+                "sampled_peak_heap_mib": 3437.8304443359375,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 42.637238792,
+                "write_seconds": 18.523616375
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 1,
+            "workers": 2
+          }
+        ]
+      },
+      "default": {
+        "batches": [
+          {
+            "case": "cpp-n4950",
+            "kind": "batch",
+            "repeat": 1,
+            "sampled_peak_rss_mib": 3775.578125,
+            "success": 1,
+            "successful_jobs_per_second": 0.025632060745625816,
+            "termination": "",
+            "to": "sf",
+            "wall_seconds": 39.013640375,
+            "workers": 1
+          }
+        ],
+        "children": [
+          {
+            "case": "cpp-n4950",
+            "exit_code": 0,
+            "kind": "child",
+            "records": [
+              {
+                "diagnostics": {
+                  "pdf_cmap_encoding_fallback": 35,
+                  "pdf_destination_flow_inferred": 1,
+                  "pdf_font_family": 1,
+                  "pdf_font_family_inferred": 1,
+                  "pdf_graphics_effects": 5,
+                  "pdf_inference_uncertain": 1,
+                  "pdf_layout": 1,
+                  "pdf_link_partial_span": 1,
+                  "pdf_list_inferred": 1,
+                  "pdf_metadata_extra": 1,
+                  "pdf_note_inference_uncertain": 1,
+                  "pdf_structure_inferred": 1,
+                  "pdf_table_inferred": 1,
+                  "pdf_table_rulings_ambiguous": 1,
+                  "pdf_table_rulings_inferred": 1,
+                  "pdf_text_color_approximation": 3,
+                  "pdf_text_transform": 1688,
+                  "pdf_vector_graphics": 345
+                },
+                "elapsed_seconds": 21.335873625,
+                "explicit_breaks": 2133,
+                "images": 0,
+                "input_bytes": 8043551,
+                "physical_pages": 2134,
+                "read_seconds": 21.303380209,
+                "recovered_paragraphs": 95188,
+                "recovered_text_bytes": 5656020,
+                "stage": "read_complete"
+              },
+              {
+                "allocated_mib": 74119.17568206787,
+                "gc_cycles": 72,
+                "gc_pause_ms": 7.005202,
+                "output_bytes": 1186617547,
+                "output_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1",
+                "read_seconds": 21.303380209,
+                "sampled_peak_heap_mib": 3308.8148651123047,
+                "stage": "complete",
+                "storage": "file",
+                "total_seconds": 38.879666459,
+                "write_seconds": 17.543569708
+              }
+            ],
+            "repeat": 1,
+            "stderr": "",
+            "success": true,
+            "to": "sf",
+            "worker": 0,
+            "workers": 1
+          }
+        ]
+      },
+      "sf_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1",
+      "sf_bytes": 1186617547,
+      "independent_audit": {
+        "source": "output/hugetest-real/cpp-n4950.pdf",
+        "sf": "output/huge-fixed-output/cpp-n4950-w0.sf",
+        "body_nodes": 89839,
+        "prosemirror": {
+          "prosemirror_body_nodes_checked": 89839
+        },
+        "images": 0,
+        "distinct_images": 0,
+        "native_equations": 0,
+        "original_list_label_characters_in_provenance": 430,
+        "source_pages": 2134,
+        "recovered_text_pages": 2134,
+        "source_characters": 4933357,
+        "missing_character_count": 109,
+        "missing_fraction": 2.2094488600764146e-05,
+        "source_unmapped_replacement_characters": 0,
+        "worst_pages": [
+          {
+            "page": 1426,
+            "missing": 11,
+            "source_chars": 2386,
+            "characters": [
+              [
+                "\u0000",
+                3
+              ],
+              [
+                "\u0001",
+                3
+              ],
+              [
+                "m",
+                1
+              ],
+              [
+                "l",
+                1
+              ],
+              [
+                "\u0010",
+                1
+              ],
+              [
+                "P",
+                1
+              ],
+              [
+                "\u0011",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1427,
+            "missing": 9,
+            "source_chars": 2423,
+            "characters": [
+              [
+                "\u0000",
+                2
+              ],
+              [
+                "\u0001",
+                2
+              ],
+              [
+                "\u0002",
+                1
+              ],
+              [
+                "\u0003",
+                1
+              ],
+              [
+                "\u0010",
+                1
+              ],
+              [
+                "P",
+                1
+              ],
+              [
+                "\u0011",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1455,
+            "missing": 8,
+            "source_chars": 2758,
+            "characters": [
+              [
+                "\u0001",
+                4
+              ],
+              [
+                "\u0002",
+                2
+              ],
+              [
+                "\u0000",
+                2
+              ]
+            ]
+          },
+          {
+            "page": 1445,
+            "missing": 6,
+            "source_chars": 1577,
+            "characters": [
+              [
+                "\u0010",
+                3
+              ],
+              [
+                "\u0011",
+                3
+              ]
+            ]
+          },
+          {
+            "page": 1450,
+            "missing": 6,
+            "source_chars": 1590,
+            "characters": [
+              [
+                "\u0010",
+                2
+              ],
+              [
+                "\u0011",
+                2
+              ],
+              [
+                "\u0000",
+                1
+              ],
+              [
+                "\u0001",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 809,
+            "missing": 4,
+            "source_chars": 3220,
+            "characters": [
+              [
+                "\u0004",
+                1
+              ],
+              [
+                "\u0005",
+                1
+              ],
+              [
+                "\u0006",
+                1
+              ],
+              [
+                "\u0007",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1446,
+            "missing": 4,
+            "source_chars": 1820,
+            "characters": [
+              [
+                "\u0012",
+                2
+              ],
+              [
+                "\u0013",
+                2
+              ]
+            ]
+          },
+          {
+            "page": 1449,
+            "missing": 4,
+            "source_chars": 1685,
+            "characters": [
+              [
+                "!",
+                2
+              ],
+              [
+                "\u0012",
+                1
+              ],
+              [
+                "\u0013",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1451,
+            "missing": 4,
+            "source_chars": 1594,
+            "characters": [
+              [
+                "\u0000",
+                1
+              ],
+              [
+                "\u0001",
+                1
+              ],
+              [
+                "\u0012",
+                1
+              ],
+              [
+                "\u0013",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1457,
+            "missing": 4,
+            "source_chars": 2806,
+            "characters": [
+              [
+                "\u0002",
+                2
+              ],
+              [
+                "\u0001",
+                2
+              ]
+            ]
+          },
+          {
+            "page": 1486,
+            "missing": 4,
+            "source_chars": 2061,
+            "characters": [
+              [
+                "p",
+                2
+              ],
+              [
+                "Z",
+                2
+              ]
+            ]
+          },
+          {
+            "page": 1488,
+            "missing": 4,
+            "source_chars": 1855,
+            "characters": [
+              [
+                "X",
+                2
+              ],
+              [
+                "\u0014",
+                1
+              ],
+              [
+                "\u0015",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 392,
+            "missing": 3,
+            "source_chars": 2762,
+            "characters": [
+              [
+                "7",
+                3
+              ]
+            ]
+          },
+          {
+            "page": 1428,
+            "missing": 3,
+            "source_chars": 2182,
+            "characters": [
+              [
+                "\u0010",
+                1
+              ],
+              [
+                "P",
+                1
+              ],
+              [
+                "\u0011",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1429,
+            "missing": 3,
+            "source_chars": 2844,
+            "characters": [
+              [
+                "\u0010",
+                1
+              ],
+              [
+                "P",
+                1
+              ],
+              [
+                "\u0011",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1487,
+            "missing": 3,
+            "source_chars": 1962,
+            "characters": [
+              [
+                "Z",
+                2
+              ],
+              [
+                "p",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1378,
+            "missing": 2,
+            "source_chars": 2515,
+            "characters": [
+              [
+                "\u0004",
+                1
+              ],
+              [
+                "\u0005",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1384,
+            "missing": 2,
+            "source_chars": 2772,
+            "characters": [
+              [
+                "\u0004",
+                1
+              ],
+              [
+                "\u0005",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1430,
+            "missing": 2,
+            "source_chars": 2032,
+            "characters": [
+              [
+                "\u0004",
+                1
+              ],
+              [
+                "\u0005",
+                1
+              ]
+            ]
+          },
+          {
+            "page": 1431,
+            "missing": 2,
+            "source_chars": 2096,
+            "characters": [
+              [
+                "j",
+                1
+              ],
+              [
+                "k",
+                1
+              ]
+            ]
+          }
+        ],
+        "sf_sha256": "96bae8149a3fa5c5dec4aa805626cfb6838ce9f7b97e936fac9883b1b9760cc1"
+      }
+    }
+  ],
+  "local_checks": {
+    "normal": "pass; engine 20.582s, facade 6.039s, CLI 0.508s",
+    "race": "pass; engine 236.147s, facade 78.847s, CLI 2.983s",
+    "vet": "pass",
+    "cgo_disabled_cli_build": "pass",
+    "diff_check": "pass",
+    "original_word_sf_docx_preservation": "pass; final rerun 18.93s",
+    "derived_pdf_sf_persistence": "all five byte-identical; final IPCC SHA df759827... read 65.124s, total 91.091s"
+  },
+  "hosted_source_checks": "https://github.com/artpar/manifold/actions/runs/45621690181",
+  "limitations": [
+    "Only two solo observations and one two-worker batch per original; no p99, sustained saturation, HTTP RPS or higher-concurrency claim.",
+    "Go soft heap targets and sampled child RSS guards do not reserve memory or measure all OS memory.",
+    "ECMA two-worker throughput regressed; about 4.55 GiB host swap use observed just after that batch, without per-process or before/after attribution.",
+    "Native OMML and WMF/EMF preserved through SF/DOCX; PDF rendering and VDOCS/PPTX math conversion remain unsupported.",
+    "PDF shading/vector/clipping/general transparency reconstruction and color-managed visual parity are not qualified; losses are diagnosed.",
+    "NFKC/nonwhitespace character inventories do not prove order, pagination or visual fidelity; original list labels in provenance counted separately; MuPDF U+FFFD excluded and reported separately.",
+    "MuPDF image-device occurrences include derived shading tiles; do not equate them with embedded assets.",
+    "Exact 100 MB file and exact rendered 1000-page DOCX pagination were not qualified; actual unchanged 423 MB and 5000+ page originals were."
+  ]
+}

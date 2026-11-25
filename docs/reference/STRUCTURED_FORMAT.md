@@ -876,7 +876,7 @@ presentation attribute. Missing/extra markers or mixed flowing content reject.
 self-contained OOXML `oMath` or `oMathPara` root. `OfficeMathBlock` / `OfficeMath`
 expose it through the Go model. Native XML is authoritative; there is no second
 editable text cache. The bounded reader rejects directives, external/package
-relationships and unrelated namespaces. DOCX output retains native equations;
+relationships and unrelated element namespaces. DOCX output retains native equations;
 SF and typed JSON retain the payload. `PlainText` derives source tokens only,
 without pretending to reconstruct fraction/radical/operator layout. Inline Word
 equations become separate flow blocks with a diagnostic. PDF/PPTX/VDOCS output

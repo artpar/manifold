@@ -263,7 +263,11 @@ Linux race suite in [Actions run 45597860193](https://github.com/artpar/manifold
 contains six platform archives and checksums. Independent original-deck/SF/PDF
 qualification is recorded in [PPTX_SF_BRIDGE.md](verification/PPTX_SF_BRIDGE.md).
 
-## Huge real-input results — 2026-11-25
+## Huge real-input results — 2026-11-25 (historical v0.3.0 baseline)
+
+**Superseded input blockers:** the repaired implementation completes 28/28 original
+→ SF jobs under explicit limits. Keep the baseline below unchanged; current results
+are in [HUGE_QUALIFICATION.md](verification/HUGE_QUALIFICATION.md).
 
 The user explicitly requires original Internet-sourced documents. The earlier
 synthetic huge-input scout was stopped and excluded from real-file evidence;
@@ -374,3 +378,35 @@ and huge-real-deadline.jsonl. Source implementation is unchanged v0.3.0; the rea
 runner is source-equivalent to 4709926, with subsequent manifest/KT additions.
 The harness process exit code indicates evidence collection completed; consult
 child.success, child.stderr and batch.termination for conversion outcomes.
+
+
+## Repaired huge-original measurements — v0.4.0
+
+The frozen repaired Go implementation completes **28/28** original DOCX/PDF → SF
+jobs: two solo jobs plus a two-worker batch for every pinned source. That is
+65,052 physical PDF pages, 537,620 source Word XML paragraphs and 45.24 GB of fully
+materialized SF, with identical SHA-256 across repetitions/workers for each source.
+
+Solo complete PDF jobs take 29–145s (0.0069–0.0344 jobs/s); the two large Word
+originals take ~3.2–3.3s (~0.30–0.31 jobs/s). Two-worker PDF throughput ranges
+0.0064–0.0628 jobs/s; Word ~0.58–0.60 jobs/s. These are isolated processes, not HTTP
+RPS or a same-process service ceiling. Only two solo observations and one paired
+batch were measured per source; no p99 or sustained saturation claim is made.
+
+Observed solo RSS reaches 8,776 MiB; paired RSS reaches ~14,000 MiB. ECMA paired
+throughput regresses: 312.30s for two jobs versus 288.53s total across the solo runs.
+Whole-model/provenance memory, allocation/GC and multi-gigabyte SF serialization
+remain bottlenecks. About 4.55 GiB host swap use was observed after ECMA, without
+before/after or per-process attribution; it is not a measured allocation breakdown.
+
+Four of seven originals also complete with default limits; IPCC/ECMA decoded-work
+and Intel navigation budgets reject explicitly. The successful large-file policy
+is opt-in, documented and externally guarded. No source hash, original oracle,
+page, image or equation was removed merely to obtain a passing result. Source
+inspection/independent audits drove diagram, equation, Unicode, mask and lookup
+repairs; unsupported native rendering and general PDF appearance remain declared.
+
+See [the full table/protocol](verification/HUGE_QUALIFICATION.md),
+[machine-readable observations](verification/HUGE_RESULTS.json),
+[repair rationale](verification/HUGE_FIXES.md) and
+[explicit resource policy](reference/PDF_RESOURCES.md#explicit-large-document-work-policy).

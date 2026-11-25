@@ -89,6 +89,10 @@ def audit(source, sf):
                 if not deleted:
                     if e.tag in {W+'t', M+'t'}:
                         expected.update(characters(e.text or ''))
+                    elif e.tag == W+'noBreakHyphen':
+                        expected.update(characters('\u2011'))
+                    elif e.tag == W+'softHyphen':
+                        expected.update(characters('\u00ad'))
                     elif e.tag == W+'sym':
                         known = {'F057':'Ω', 'F077':'ω', 'F061':'α'}
                         code = e.attrib[W+'char'].upper()

@@ -93,3 +93,16 @@ with the former implementation maps and qualification ledger.
     text. Preserve unmapped embedded CFF outlines as diagnosed span images without
     inventing Unicode. Keep conservative default work limits; opt-in huge policies,
     soft Go heap targets and external RSS guards are separate measured controls.
+
+
+17. **Qualified huge imports, explicit limits and honest capacity.** Fix the seven
+    original blockers through source-backed interpretation and bounded lookup/cache
+    improvements, not by skipping pages/assets, disabling tags, replacing source
+    files or weakening defaults. Preserve native math/previews through the SF hub;
+    reject unsupported rendering. Keep valid ActualText characters and original
+    unrepresentable metadata bytes, and resolve placeholders only from declared
+    glyph encodings. Require exact output hashes, independent content/consumer
+    audits and separate regression/control runs. Publish observed per-workload
+    conversion jobs/s; retain poor concurrency scaling and default-policy rejections
+    alongside successes. Do not advertise HTTP/service or universal visual parity.
+    v0.4.0 publication continues through the existing gated VERSION workflow.

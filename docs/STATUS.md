@@ -2,243 +2,92 @@
 
 Updated 2026-11-25. Read this, then ARCHITECTURE.md and DECISIONS.md.
 
-Manifold is a standalone pure-Go document library and CLI. Its module is
-`github.com/artpar/manifold`, package `manifold`, executable `cmd/manifold`.
+Manifold is a standalone pure-Go document library and CLI, module
+`github.com/artpar/manifold`, package `manifold`, command `cmd/manifold`.
 The local checkout remains in the original `artpar/manydoc` directory.
 
-## Current work
+## Current implementation
 
-Current completion checkpoint: **v0.3.0 is released automatically** from
-`45bebca`; PPTX↔SF and supported PPTX/PDF conversion use the central API/CLI.
-Original-deck preservation, guarded SF edits, independent consumers and hosted
-Linux/macOS/Windows plus full Linux race checks passed. Advanced PowerPoint
-rendering/regeneration remains explicitly limited; see
-[bridge qualification](verification/PPTX_SF_BRIDGE.md).
+The v0.4.0 implementation qualifies the seven pinned huge Internet originals for
+DOCX/PDF → canonical SF: **28/28 complete conversions**, including a 423 MB /
+2,409-page PDF and 5,057/5,039-page manuals. Two solo runs and one two-worker batch
+per source materialized 45.24 GB of SF with identical hashes across every repeat.
+Four originals also complete under default limits; the other three require the
+explicit large work policy. See [qualification](verification/HUGE_QUALIFICATION.md)
+and [full observations](verification/HUGE_RESULTS.json), including poor ECMA
+concurrency scaling, memory use and remaining fidelity boundaries.
 
-Load/stress qualification is complete on this M1 Max baseline: 260 unprofiled
-phases, 801,104 successful jobs, zero conversion errors/partial responses, and
-1,251 bounded-queue overload rejections. Ten-worker mixed throughput was ~107
-jobs/s; medium flow SF→PDF ~27 jobs/s. Large documents differ dramatically.
-The global PDF shaping retention was fixed and the native result cache bounded.
-See [PERFORMANCE.md](PERFORMANCE.md) for ranges, input sizes, latency, memory,
-profiles, remaining bottlenecks and reproduction commands. Further performance
-work should target request-local font/measurement reuse and large-input admission;
-no additional optimization is claimed by the measurements. Final harness checks passed: normal/race tool tests, tool vet, CGO-disabled CLI build and git diff --check. Historical checkpoints
-below describe earlier states, not outstanding release work.
+Both original Word files retain 73 preview placements / 71 byte-identical WMF/EMF
+assets and all 15/21 native equation structures through SF and DOCX. Independent
+XML/ProseMirror audits have zero missing normalized source characters. All five
+PDF-derived SF artifacts pass central Go Read/Write with identical SHA-256,
+including final corrected IPCC and 4.13 GB ECMA SF. Known representation losses
+remain explicit; this is not Word-equivalent rendering or arbitrary-file support.
 
-The original rich-conversion goal is qualified: DOCX → SF, SF → DOCX, SF → PDF
-and PDF → SF. The established SF is ProseMirror JSON with the compatibility
-identifier `manydoc-prosemirror/1`. See [acceptance](verification/ACCEPTANCE.md) and
-[the audit](verification/FINAL_AUDIT.md) for source, reader and visual evidence.
+SF remains the single canonical ProseMirror JSON profile,
+`manydoc-prosemirror/1`; SF.gz is that same data compressed. DOCX, PDF, PPTX,
+JSON/text and optional VDOCS use the shared typed model. Native Office Math is an
+additive atomic SF node, not another interchange format. The PPTX bridge includes
+root Read/Write and supported native PDF paths; see [bridge qualification](verification/PPTX_SF_BRIDGE.md).
 
-The user requested renaming/publishing as `artpar/manifold`, then flagged the
-fragmented file organization. The repository is public at https://github.com/artpar/manifold. Main contains
-the rename and qualified organization cleanup. A clean clone of source commit
-249414d333e6e2179f06161feeebf4ae7e7b0b06 builds with CGO disabled and passes
-SF→DOCX→SF / SF→PDF→SF with three typed notes. The root now contains the public API and public API tests; implementation
-and unit tests live in cohesive modules under `internal/engine`. QA tools are
-grouped by concern under `scripts/qa`. Current guides, detailed contracts and
-historical evidence are separate. The engine deliberately shares one document
-model; it does not claim independent codec packages that the implementation lacks.
+The optional VDOCS adapter targets a pinned Univer snapshot profile and requires
+no editor service/host application. See [its contract](reference/VDOCS_FORMAT.md).
+Public API lives at the root; cohesive codec/model implementations are under
+`internal/engine`; presentation internals are under `internal/presentation`.
+No production subprocess, service, CGO or application permission gate is added.
 
-The optional VDOCS adapter handles a pinned Univer snapshot profile. It requires
-no editor service or host application. See the [adapter contract](reference/VDOCS_FORMAT.md).
+## Verification and delivery
 
-## Verification
+Frozen Go implementation `7111871` passes the full normal suite, full race suite,
+vet, CGO-disabled CLI build and diff check. Engine normal/race 20.582s/236.147s;
+facade 6.039s/78.847s; CLI 0.508s/2.983s. Final original Word preservation checks
+pass, as do RSS/deadline enforcement controls and independent source audits.
+Clean hosted Linux/macOS/Windows plus Linux race checks pass on identical code at
+[run 45621690181](https://github.com/artpar/manifold/actions/runs/45621690181).
 
-Rename checks pass: normal suite 31.281s/CLI0.564s; race suite
-351.804s/CLI2.868s; vet/modules; CGO-disabled host execution and Linux amd64/arm64
-cross-builds; all 51 accepted corpus documents through actual ProseMirror; the
-section example; and a clean-checkout all-four-path note conversion.
+GitHub Actions owns publication from VERSION, gating the tag, six platform
+archives, licenses, checksums and release on the hosted matrix. The v0.4.0 source
+uses that pipeline; [CI.md](CI.md) and the
+[release page](https://github.com/artpar/manifold/releases) are delivery authorities.
+Do not create/upload a workstation release manually.
 
-Organization normal/race/vet/build checks, complete-SF corpus equality, moved
-QA tools, original-source readers and clean published-clone checks pass. Exact scopes/results are recorded in
-[verification.json](verification.json). No source fixture or independent oracle
-was rewritten. Generated output, binaries and QA environments remain ignored.
+Earlier small/medium load qualification remains workload-specific: 801,104
+successful jobs and ~107 mixed jobs/s at ten workers do not describe these huge
+originals. The historical huge baseline was 0/46 completed attempts; its facts
+remain in [HUGE_INPUTS.md](verification/HUGE_INPUTS.md) and PERFORMANCE.md.
+The final repaired results supersede those input blockers, not the baseline record.
 
-## Next commands
+## Known boundaries and next work
+
+- Large jobs retain a complete typed model; observed solo RSS reaches ~8.6 GiB.
+  Extra workers can reduce throughput. Use caller admission and explicit limits;
+  GOMEMLIMIT is a soft target, sampled RSS is not total OS memory.
+- Native OMML and WMF/EMF preserve through SF/DOCX; their PDF rendering remains
+  unsupported. Math conversion through PPTX/VDOCS rejects rather than dropping it.
+- General PDF vector/shading/clipping/transparency reconstruction, OCR, source
+  pagination and color-managed/Word-equivalent visual fidelity are not qualified.
+  Unmapped CFF glyphs may remain diagnosed span images, not editable Unicode.
+- Huge HTTP/same-process service capacity, higher concurrency and whole-document
+  browser editor capacity remain unmeasured. See COMPATIBILITY.md for the contract.
+
+Concrete next commands for changes or reproduction:
 
 ```sh
 GOWORK=off go test ./...
 GOWORK=off go test -race -timeout 20m ./...
 GOWORK=off go vet ./...
 CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
-GOWORK=off go run ./examples/sections
-output/qa-venv/bin/python scripts/qa/structured/verify_structured_corpus.py
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold-hugetest ./tools/hugetest
+bin/manifold-hugetest -large -memory-mib 8192 -rss-mib 12288 \
+  -storage file -repeat 2 -timeout 10m
 git diff --check
 ```
 
-For future changes, run affected checks and the required matrix, commit aligned
-code/docs/evidence and verify the pushed commit. No publication work remains.
-Keep Daptin/application code unchanged.
-For earlier milestones and old filenames, use [history](history/README.md).
-
-
-## Reference cleanup
-
-Application-specific names/source links were removed while VDOCS was retained at
-user request. SF remains canonical; DOCX/PDF/native snapshot paths share its model.
-VDOCS now uses `manifold-document` and Manifold-owned MIME; retired headers need
-explicit migration. The native fixture's document payload is unchanged. Current
-normal/race/vet/build checks, all 33 retained native SDK probes, fresh save/re-import
-and complete-SF equality for all 51 accepted core fixtures pass. See
-[the report](verification/REFERENCE_CLEANUP.md) and [native contract](reference/VDOCS_FORMAT.md).
-Published source commit `8536dc0` passes a fresh clone/build and full tracked-reference
-scan. SF→VDOCS→SF retains the complete normalized graph; native→DOCX/PDF→SF
-recovers the expected typed notes. No follow-up publication work remains.
-
-
-## Hosted CI/CD
-
-`.github/workflows/ci.yml` owns checks and releases. Pull requests/main/tag pushes
-run native Linux/macOS/Windows Go checks, Linux race checks and CGO-disabled smoke
-builds. New VERSION values on main automatically create a gated tag/release with
-six platform archives, licenses and verified checksums. Hosted runs/releases are
-the current result authority; see [CI/CD](CI.md). Local qualification records below
-remain historical evidence, not a substitute for the hosted result.
-
-## Presentation integration
-
-Puppt source commit 7f8d6d0b2dab54296fde444af7f9ac6a5816a2a7 is integrated
-under internal/presentation, with public presentation API and one namespaced CLI.
-Original synthetic/structural tests and PNG renderer tests are retained. New public
-API tests cover inspect/plan/edit/validate/render and unchanged source text.
-Repository-relative QA paths were relocated; external pixel-oracle corpora are not
-present. Combined normal tests, vet, module verification, CGO-disabled build, public API
-workflow and CLI dispatch/help checks pass. The final local race suite also passes.
-Hosted Linux/macOS/Windows checks, Linux race checks and automated packaging/
-publication pass for source commit 7bb3aae. Actions published v0.2.0 with all six
-platform archives and checksums; the release tag points to that checked commit.
-See [the verification record](verification/PRESENTATION_INTEGRATION.md) and
-[presentation scope](presentation/README.md). No integration/release work remains
-within that declared scope; external visual-oracle qualification remains opt-in.
-
-Next commands: GOWORK=off go test -timeout 20m ./...;
-GOWORK=off go test -race -timeout 20m ./...; GOWORK=off go vet ./...;
-CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold;
-git diff --check. Do not claim PPTX/SF or PPTX/PDF conversion.
-
-Hosted integration verification found an upstream test constructing JSON by
-concatenating a Windows filesystem path. The test now uses encoding/json to
-encode the same image-replacement specification; assertions/expected bytes are
-unchanged. All production paths and imported renderer oracles remain unchanged.
-Release builds now stamp the presentation version from VERSION. Hosted checks
-must pass on the resulting commit before automatic v0.2.0 publication.
-
-## Performance qualification (in progress)
-
-The user requested a plan and actual load/stress testing with bottlenecks and TPS.
-The baseline is this M1 Max desktop. tools/loadtest implements public-API jobs,
-closed-loop concurrency sweeps, bounded open-loop overload, latency/heap/GC metrics
-and optional profiles. docs/PERFORMANCE.md records the plan, measurement semantics
-and limits. Initial fixture/scout checks run; repeated matrix, soak/overload,
-profiling and final capacity evidence remain pending. Production conversion code
-and reference inputs/oracles are unchanged.
-
-## SF presentation bridge (in progress)
-
-The user rejected a PPTX-only facade as incomplete and required SF alignment.
-PPTX now enters the root Read/Write API through a typed Presentation extension of
-the existing SF root attributes. Slides retain positioned objects, rich SF text,
-images, notes and master/layout resources; original OPC parts retain unmodeled
-features. Native-package round trips, central-SF text/geometry edits, searchable
-vector PDF output, PDF→PPTX and basic flow-SF→PPTX tests pass on synthetic fixtures.
-Full compatibility/negative tests, original-source qualification and hosted checks
-remain pending. This is not a claim of arbitrary PowerPoint rendering parity.
-The performance matrix is paused until this pipeline is qualified, then will be
-rerun including the new routes. A preliminary allocation profile identified
-repeated font parsing retained by textlayout/harfbuzz's global face-keyed shaping
-plan cache; that finding needs mitigation and a sustained recheck before capacity
-claims. Existing raw stress/profile data remains ignored under output/.
-
-SF bridge qualification update: synthetic end-to-end/negative tests pass; two
-unmodified Apache POI PowerPoint packages survive SF with every original ZIP part
-unchanged, and the actual ProseMirror reader checks the nested rich content.
-Native text/frame patches preserve unrelated style/theme XML. Unsupported output,
-ambiguous owners and overflowing frames reject; deleted notes do not reappear.
-Full normal suite passes. Shaping was migrated to the already-pinned go-text
-backend, whose plan cache is request-owned; existing glyph/ligature/bidi/caret
-oracles pass unchanged. Sustained memory recheck and final race/hosted checks are
-pending before the resumed performance matrix and final release.
-
-Central-SF feature completion checkpoint: root API and CLI cover PPTX↔SF and
-supported PPTX/PDF paths; original-source structural, SF marker/old-reader rejection,
-notes-deletion, native text edit/slide addition and unsupported-output tests pass.
-Actual ProseMirror accepts the extension. PPTX-specific frame/font/language rules
-reject unrepresented output semantics. Native PNG/inspect/edit helpers remain.
-Final regression/hosted checks and expanded capacity matrix are pending; all
-throughput claims must use that final production pipeline. See the current
-presentation/README.md and PERFORMANCE.md; older facade-only limits are historical.
-
-Independent consumer checkpoint: python-pptx 1.0.2 reads source/edited/recovered
-PPTX output and verifies title/frame/notes; PyMuPDF 1.28.2 verifies searchable
-PDF text, one image, two vectors and 720x540pt geometry. The rendered example was
-visually inspected. A standards check fixed the main presentation MIME and
-notes-body placeholder. See verification/PPTX_SF_BRIDGE.md. This does not upgrade
-unsupported native features to general PowerPoint fidelity.
-
-## Huge real-input follow-up — measured limits
-
-At the user's explicit direction, stop synthetic huge-file tests and use only
-unmodified Internet originals for this qualification. Removed fixture generation;
-tools/hugetest now verifies the URL/hash/size manifest HUGE_CORPUS.json and runs
-isolated children with hard timeouts and an aggregate RSS guard. Independent
-PyMuPDF/XML counts qualify file scale. The real cohort includes a 423 MB IPCC PDF,
-two 5,000+ page PDFs, large 3GPP DOCX sources and a 1,624-page ETSI PDF.
-Seven real originals were tested twice alone and in two two-child batches each,
-plus a four-child IPCC batch: **0/46 full conversions**. All reject during input
-interpretation: unsupported JPEG color space, image masks/Matte, unresolved used
-theme font, destination-name budget or unmapped ToUnicode code. Peak combined RSS
-was 7,763 MiB. Two extra controls confirmed deadline/RSS-guard kills. This is not
-successful huge-file capacity qualification: do not extend earlier small-file TPS
-claims to these originals. See PERFORMANCE.md and verification/HUGE_INPUTS.md for
-sources/hashes, exact limits and reproduction. Next work is fixing actual input
-feature failures with independent original-source oracles, then rerunning full
-conversions; huge-file serialization/soak throughput remains unmeasured.
-
-Final huge-file QA checks: full normal suite and vet, CGO-disabled CLI build and
-diff check pass. Race tool tests and a two-child real-ETSI race-instrumented harness
-smoke pass their declared scope (the expected input rejections persist). Full local
-race was not repeated for tooling/docs; hosted CI owns the pushed-source matrix.
-
-## Huge-file repairs (in progress)
-
-The user requested fixing the actual original-file failures. Initial Go fixes
-cover source-backed theme/Symbol and partial CMap mappings, CMYK, explicit masks
-and Matte, diagnosed Word grid gaps, page-indexed link matching and direct seekable
-PDF input. Focused regressions and independent original-mask pixel checks pass.
-ETSI and C++ now complete full original PDF→SF scouts; memory/serialization remain
-expensive, and the complete seven-file cohort is not yet qualified. See
-verification/HUGE_FIXES.md for actual evidence, remaining work and limitations.
-
-Bounded-processing checkpoint: streaming flow-SF writer retains model/reference and
-encoder preflight, with exact-wire checks against the established writer. Explicit
-PDFReadLimits preserve conservative defaults while permitting guarded large work;
-stream cache is bounded and parser state released before untagged inference.
-CLI/huge-runner flags expose the policy and actual file streaming. These changes
-remain under original-file qualification; final cohort/race/CI checks are pending.
-
-## Huge-original repairs in progress (2026-11-25)
-
-The previous zero-success huge baseline is being repaired; it is not superseded
-by a completion claim yet. Five original imports completed in a diagnostic scout.
-Further source inspection found skipped legacy Word diagrams and native equations;
-73 preview placements / 71 distinct original assets and 15/21 native equations now
-survive SF and DOCX round trips in both original Word files. PDF mask/color/text,
-navigation, bounded caching/streaming and inference performance repairs are in
-place. See [repair ledger](verification/HUGE_FIXES.md) for tested scopes and limits.
-Full original reruns, independent content/consumer checks and required regressions
-remain pending. Next: run `MANIFOLD_HUGE_WORD=1 GOWORK=off go test ./internal/engine
--run TestHugeOriginalWordAssets -v`, finish frozen-source `tools/hugetest` runs,
-then the normal/race/vet/CGO-disabled matrix listed above. No release claim yet.
-
-### Huge-import completion scout
-
-All seven pinned originals now complete input → SF in individual diagnostic scouts,
-including the unchanged 423 MB / 2,409-page IPCC file. Intel's independent 5,057-page
-text inventory has zero missing normalized source characters; both original Word
-files preserve all diagram bytes, native equations and normalized text inventory.
-This is not a final throughput/fidelity signoff. Frozen-source regressions,
-independent remaining audits and repeated guarded original-file runs are underway.
-See the latest [repair ledger](verification/HUGE_FIXES.md) for exact scopes and raw
-local evidence; previous zero-success baseline remains historical evidence.
+The huge command requires the exact downloaded originals. Acquisition is in
+verification/HUGE_INPUTS.md; full protocol and independent checks are in TESTING.md.
+If extending scope, qualify native math/metafile rendering, smaller provenance
+retention and deployment-specific same-process admission/capacity separately.
+Keep STATUS/ARCHITECTURE/DECISIONS current, dependencies/notices aligned and original
+oracles intact. Keep Daptin/application code unchanged; publisher/customer binaries
+and generated artifacts remain untracked. Earlier milestones are in verification
+reports and [history](history/README.md).

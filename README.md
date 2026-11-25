@@ -125,3 +125,17 @@ manifold convert -allow-lossy -o recovered.pptx deck.pdf
 The root Go API accepts `manifold.PPTX`; slides are editable typed SF objects.
 Advanced native features remain preserved or explicitly unsupported for edits/PDF
 output; this is not a PowerPoint layout-equivalence claim.
+
+
+## Huge original documents
+
+Seven unchanged publisher originals, including a 423 MB / 2,409-page PDF and
+5,000+ page manuals, pass 28/28 guarded original → SF conversions. Large jobs need
+explicit resource policy: three originals exceed conservative defaults. See
+[measured throughput/RSS and boundaries](docs/verification/HUGE_QUALIFICATION.md)
+and the [Go/CLI policy recipe](docs/reference/PDF_RESOURCES.md#explicit-large-document-work-policy).
+
+Native equations and legacy WMF/EMF previews preserve through SF/DOCX. Their PDF
+rendering is unsupported; PDF shading/vector/color/layout limitations remain
+explicit. These results qualify the recorded import/persistence workloads, not
+arbitrary-document or Word-equivalent rendering.

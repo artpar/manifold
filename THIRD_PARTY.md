@@ -310,3 +310,12 @@ or Unlicense, upstream choice) with request-owned buffer/plan caches. This avoid
 the process-global face retention in the previously used textlayout/harfbuzz path.
 The old textlayout module is still used for independent glyph names/encodings;
 its notices remain intact. Existing shaping test oracles are unchanged.
+
+
+Huge-input repairs additionally use the already-attributed go-text/typesetting CFF
+outline reader and x/image/vector rasterizer; no new production module is required.
+CFF FontMatrix and legacy metafile framing code are independently authored from
+published format specifications linked in docs/verification/HUGE_FIXES.md. Original
+publisher files/fonts/assets remain local reference data and are not redistributed.
+Optional huge SF QA adds ijson 3.6.0 (BSD-3-Clause AND ISC, as declared by its package
+metadata), pinned in scripts/qa/requirements.txt; it is not a runtime dependency.

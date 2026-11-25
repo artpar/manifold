@@ -1,5 +1,9 @@
 # Original huge-file qualification
 
+**Historical baseline:** current repaired import/persistence results are in
+[HUGE_QUALIFICATION.md](HUGE_QUALIFICATION.md). The original acquisition, hashes and
+zero-success observations below remain unchanged.
+
 Updated 2026-11-25. This follows the user's explicit request to use actual files
 from the internet. No duplicated pages, generated document payloads, padding,
 rewritten packages, stripped metadata or skipped inference/structure are used.

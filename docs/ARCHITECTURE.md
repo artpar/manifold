@@ -116,3 +116,33 @@ unsupported. No OLE application code or metafile commands execute.
 PDF import may preserve genuinely unmapped simple CFF glyphs as span images from
 the original embedded outlines, with source codes/geometry and a missing-Unicode
 diagnostic. Known text remains text. This does not introduce OCR or bitmap pages.
+
+
+## Huge-file processing and caller policy
+
+Flow SF Read decodes top-level nodes into one typed model, then validates global
+references at EOF. Write validates the model and preflights all encoder chunks
+before emitting output. Public full-tree APIs still allocate a full SF tree.
+Streaming reduces duplicate representations; it does not make model memory constant.
+
+PDF parsing uses a seekable caller source directly where available. A request-owned
+256-entry font cache, 32 MiB/4,096-entry decoded-stream cache and diagnostic index
+bound retention/repeated work independently of cumulative work policy. Parser-only
+state is released before untagged inference, or after tagged recovery. Page-sliced
+inference releases processed ownership; stable sorting moves integer indices before
+reordering wide block values. Geometric links/OBJR units index by physical page;
+logical annotation ownership indexes by page/object instead of whole-document scans.
+
+PDFReadLimits exposes decoded/raster/navigation/structure/ParentTree-slot policies.
+Defaults stay conservative; the original IPCC's 22M mostly-null owner slots require
+an explicit scan budget distinct from logical identities. Cycle, reciprocal owner,
+name-byte and complete model validation remain. The development runner adds cold
+child-process isolation, sampled aggregate RSS/deadline guards and output hashes.
+These are caller/measurement controls, not identity/authorization gates.
+
+Invalid ActualText controls retain exact original bytes in diagnostics while
+representable replacement text remains text; when none remains, painted content
+is retained. A ToUnicode U+FFFD placeholder may resolve only through a declared
+source Encoding glyph name, with a separate diagnostic. Unknown Unicode is never
+inferred from GIDs/family names; supported embedded CFF outlines may form span
+images. See [measured qualification](verification/HUGE_QUALIFICATION.md).

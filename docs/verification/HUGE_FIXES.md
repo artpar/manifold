@@ -1,7 +1,9 @@
 # Huge original-file repair ledger
 
 Baseline failures and pinned unchanged originals: HUGE_INPUTS.md / HUGE_CORPUS.json.
-Work is in progress; a first blocker passing is not full-document qualification.
+This is a chronological repair ledger. Final input/persistence qualification is
+complete in [HUGE_QUALIFICATION.md](HUGE_QUALIFICATION.md); historical pending
+checkpoints below describe earlier states, not current outstanding work.
 
 ## First implementation checkpoint
 
@@ -307,3 +309,22 @@ Final repeated measurements are running with QA stopped. First two 423 MB IPCC
 jobs complete at 139.916s / 141.276s batch wall; identical full SF SHA-256 df759827…;
 peaks 8,305 / 8,162 MiB child RSS. Intel's first 5,057-page job completes at 94.59s.
 These are preliminary rows of the frozen run, not the completed stress verdict.
+
+
+## Final qualification
+
+All 28 guarded large-policy original → SF jobs pass; all four repetitions/workers
+per source have identical SF hashes. Default policy also completes four originals;
+three reject only by documented work budgets. Deliberate RSS/deadline controls
+terminate correctly. Final source/ProseMirror audits, original Word SF/DOCX asset
+and native-equation checks, all five PDF-derived Go SF persistence checks, complete
+normal/race/vet/CGO-disabled build and clean hosted cross-platform checks pass.
+The final corrected IPCC SF (df759827…) read/writes identically in 91.091s during
+separate QA. No Go/module/schema source changed after frozen implementation 7111871.
+
+The independent Word audit was tightened to count its 20 explicit no-break-hyphen
+nodes as well as w:t/math/symbol text; both originals now have equal normalized
+source/recovered character inventories, not merely zero missing characters. No
+source or expected original glyph/asset/equation was removed. The remaining native
+rendering, PDF appearance, memory and service-capacity limits are explicit in the
+final report; this is not an unrestricted Word-equivalent completion claim.
