@@ -102,3 +102,17 @@ chunks before streaming them; it does not retain a complete second SF graph and
 a third decoded model. Public SF graph constructors/readers still validate whole
 graphs. Aggregate PDF work policy is explicit in ReadOptions.PDFLimits, independent
 of bounded decoded-stream caching; conservative zero-value defaults remain.
+
+## Native equation and legacy diagram preservation
+
+Flow SF includes an additive `office_math` block with authoritative self-contained
+OMML (`OfficeMath.OMML`). DOCX import/export preserves native equation structure;
+plain text derives source text tokens only. Unsupported math renderers/adapters
+reject before output. Legacy Word object wrappers retain their original static
+WMF/EMF previews as image bytes, with bounded framing validation and explicit
+floating/OLE-behavior diagnostics. DOCX re-embeds those bytes; PDF rendering remains
+unsupported. No OLE application code or metafile commands execute.
+
+PDF import may preserve genuinely unmapped simple CFF glyphs as span images from
+the original embedded outlines, with source codes/geometry and a missing-Unicode
+diagnostic. Known text remains text. This does not introduce OCR or bitmap pages.

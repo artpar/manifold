@@ -72,14 +72,15 @@ type Layout struct {
 type Kind string
 
 const (
-	Paragraph    Kind = "paragraph"
-	Heading      Kind = "heading"
-	Table        Kind = "table"
-	ListBlock    Kind = "list"
-	Picture      Kind = "image"
-	PageBreak    Kind = "page_break"
-	SectionBlock Kind = "section"
-	AnchorPoint  Kind = "anchor_point"
+	Paragraph       Kind = "paragraph"
+	Heading         Kind = "heading"
+	Table           Kind = "table"
+	ListBlock       Kind = "list"
+	Picture         Kind = "image"
+	OfficeMathBlock Kind = "office_math"
+	PageBreak       Kind = "page_break"
+	SectionBlock    Kind = "section"
+	AnchorPoint     Kind = "anchor_point"
 )
 
 type Block struct {
@@ -97,9 +98,10 @@ type Block struct {
 	Rows      []Row  `json:"rows,omitempty"`
 	// ColumnWidths are preferred logical grid-column widths in points. Empty uses
 	// equal available widths. Renderers shrink proportionally to fit a container.
-	ColumnWidths []float64  `json:"column_widths,omitempty"`
-	Image        *Image     `json:"image,omitempty"`
-	Items        []ListItem `json:"items,omitempty"`
+	ColumnWidths []float64   `json:"column_widths,omitempty"`
+	Image        *Image      `json:"image,omitempty"`
+	Math         *OfficeMath `json:"math,omitempty"`
+	Items        []ListItem  `json:"items,omitempty"`
 	// Start is the first ordered-list value; nil means one. Zero is valid.
 	Numbering               *ListNumbering `json:"numbering,omitempty"`
 	Start                   *int           `json:"start,omitempty"`
@@ -361,6 +363,9 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 			return fmt.Errorf("%w: presentation output %s", ErrUnsupported, format)
 		}
 	}
+	if format != DOCX && format != SF && format != SFGzip && format != JSON && format != Text && documentHasOfficeMath(d) {
+		return fmt.Errorf("%w: native Office Math requires DOCX or SF preservation", ErrUnsupported)
+	}
 	if format == PPTX {
 		return writePPTX(ctx, w, d, opts)
 	}
@@ -453,6 +458,11 @@ func textBlocks(b *strings.Builder, blocks []Block) {
 				}
 				textBlocks(b, item.Blocks)
 			}
+		case OfficeMathBlock:
+			if v.Math != nil {
+				b.WriteString(v.Math.PlainText())
+				b.WriteByte('\n')
+			}
 		case Picture:
 			if v.Image != nil && v.Image.Alt != "" {
 				b.WriteString(v.Image.Alt)
@@ -507,6 +517,9 @@ func (d *Document) Validate() error {
 			return errors.New("document nesting exceeds 64 levels")
 		}
 		for _, b := range bs {
+			if b.Kind != OfficeMathBlock && b.Math != nil {
+				return errors.New("math payload requires office_math block")
+			}
 			if err := b.Source.validate(d.Pages); err != nil {
 				return err
 			}
@@ -642,6 +655,13 @@ func (d *Document) Validate() error {
 							return err
 						}
 					}
+				}
+			case OfficeMathBlock:
+				if b.Math == nil || len(b.Runs) > 0 || len(b.Rows) > 0 || b.Image != nil || len(b.Items) > 0 || b.Section != nil || b.List != "" || b.Level != 0 || b.PageBreakBefore || b.Direction != "" {
+					return errors.New("office_math requires only native math payload")
+				}
+				if _, err := parseOfficeMath(b.Math.OMML); err != nil {
+					return err
 				}
 			case Picture:
 				if b.Image == nil || len(b.Image.Data) == 0 {

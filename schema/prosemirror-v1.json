@@ -298,6 +298,21 @@
           "validate": "number"
         }
       }
+    },
+    "office_math": {
+      "group": "block",
+      "atom": true,
+      "attrs": {
+        "omml": {
+          "validate": "string"
+        },
+        "source": {
+          "default": null
+        },
+        "anchors": {
+          "default": []
+        }
+      }
     }
   },
   "marks": {

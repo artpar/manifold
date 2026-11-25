@@ -68,9 +68,12 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 	delete(copySD.Dict, "Mask")
 	soft := copySD.Dict["SMask"]
 	delete(copySD.Dict, "SMask")
-	var pixels image.Image
+	pixels, separated, err := r.separationImage(&copySD, w, h)
+	if err != nil {
+		return err
+	}
 	var dctDecode []float64
-	if len(copySD.FilterPipeline) > 0 && copySD.FilterPipeline[len(copySD.FilterPipeline)-1].Name == "DCTDecode" && copySD.Dict["Decode"] != nil {
+	if len(copySD.FilterPipeline) > 0 && copySD.FilterPipeline[len(copySD.FilterPipeline)-1].Name == "DCTDecode" && copySD.Dict["Decode"] != nil && !separated {
 		a, e := r.pdf.DereferenceArray(copySD.Dict["Decode"])
 		if e != nil {
 			return e
@@ -109,7 +112,9 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 		r.warnPage("pdf_image_color", "Image extraction uses the decoder's alternate/device color conversion; original color-profile semantics are not retained")
 	}
 
-	if stencil := copySD.BooleanEntry("ImageMask"); stencil != nil && *stencil {
+	if separated {
+		// Source Decode and tint transformation have already been applied.
+	} else if stencil := copySD.BooleanEntry("ImageMask"); stencil != nil && *stencil {
 		if state.fillUnknown {
 			return fmt.Errorf("%w: stencil requires unresolved general fill color", ErrUnsupported)
 		}

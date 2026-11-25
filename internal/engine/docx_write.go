@@ -354,7 +354,7 @@ func (w *docxWriter) runningFlow(bs []Block, width, height float64, depth int, i
 				images += n
 			}
 		case Picture:
-			cfg, _, err := decodeOutputImage(w.ctx, b.Image.Data, w.validatedImages)
+			cfg, _, err := decodeDOCXImage(w.ctx, b.Image.Data, w.validatedImages)
 			if err != nil {
 				return nil, 0, err
 			}
@@ -850,7 +850,7 @@ func (w *docxWriter) output(out io.Writer, d *Document) error {
 	w.parts["word/_rels/document.xml.rels"] = []byte(relsHead + strings.Join(w.rels, "") + `</Relationships>`)
 	w.parts["_rels/.rels"] = []byte(relsHead + `<Relationship Id="rId1" Type="` + relNS + `/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/></Relationships>`)
 	w.parts["docProps/core.xml"] = []byte(xmlHeader + `<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>` + escape(d.Metadata.Title) + `</dc:title><dc:creator>` + escape(d.Metadata.Author) + `</dc:creator><dc:subject>` + escape(d.Metadata.Subject) + `</dc:subject></cp:coreProperties>`)
-	ct := xmlHeader + `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Default Extension="jpg" ContentType="image/jpeg"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>`
+	ct := xmlHeader + `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="wmf" ContentType="image/x-wmf"/><Default Extension="emf" ContentType="image/x-emf"/><Default Extension="png" ContentType="image/png"/><Default Extension="jpg" ContentType="image/jpeg"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>`
 	storyParts := []struct{ name, kind string }{}
 	var names []string
 	for name := range w.parts {
@@ -1125,15 +1125,19 @@ func (w *docxWriter) blocksAt(blocks []Block, depth int) (string, error) {
 				return "", err
 			}
 			out.WriteString(v)
+		case OfficeMathBlock:
+			out.WriteString("<w:p>" + b.Math.OMML + "</w:p>")
 		case Picture:
 			im := b.Image
-			config, kind, err := decodeOutputImage(w.ctx, im.Data, w.validatedImages)
+			config, kind, err := decodeDOCXImage(w.ctx, im.Data, w.validatedImages)
 			if err != nil {
 				return "", fmt.Errorf("image: %w", err)
 			}
 			ext := "png"
 			if kind == "jpeg" {
 				ext = "jpg"
+			} else if kind == "wmf" || kind == "emf" {
+				ext = kind
 			} else if kind != "png" {
 				return "", fmt.Errorf("%w: DOCX image %s", ErrUnsupported, kind)
 			}

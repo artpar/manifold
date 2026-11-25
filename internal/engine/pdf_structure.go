@@ -858,10 +858,10 @@ func (r *pdfReader) recoverStructure(root types.Object) error {
 		blocks = append(blocks, s.materialize(leftovers, false, "")...)
 	}
 	r.doc.Blocks = blocks
-	r.doc.warn("pdf_structure_layout", "Logical tree order replaces paint order; physical page boundaries remain in pages and source regions, without invented breaks inside logical paragraphs")
+	r.warn("pdf_structure_layout", "Logical tree order replaces paint order; physical page boundaries remain in pages and source regions, without invented breaks inside logical paragraphs")
 	return nil
 }
-func (s *pdfStructureRecovery) warn(code, message string) { s.reader.doc.warn(code, message) }
+func (s *pdfStructureRecovery) warn(code, message string) { s.reader.warn(code, message) }
 func (s *pdfStructureRecovery) page(value types.Object, inherited int) (int, error) {
 	if value == nil {
 		return inherited, nil

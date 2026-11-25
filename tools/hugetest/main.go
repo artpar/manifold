@@ -10,7 +10,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 
 	"crypto/sha256"
 	"io"
@@ -50,7 +52,8 @@ func run() error {
 	storage := flag.String("storage", "memory", "memory or file: input/output materialization; file output is streamed to disk")
 	outputDir := flag.String("output-dir", "", "optional directory retaining converted files (file storage only)")
 	outputPath := flag.String("output", "", "internal output path")
-	large := flag.Bool("large", false, "explicit large-document work policy: 2 GiB decoded bytes, 500M raster pixels, 1M navigation entries")
+	large := flag.Bool("large", false, "explicit large-document work policy: 4 GiB decoded bytes, 2B raster pixels, 1M navigation entries")
+	memoryMiB := flag.Int64("memory-mib", 4096, "Go soft memory limit per child, MiB; not an RSS cap")
 	workers := flag.Int("workers", 1, "isolated concurrent conversions per batch")
 	repeat := flag.Int("repeat", 2, "batches per case")
 	timeout := flag.Duration("timeout", 120*time.Second, "hard child process deadline")
@@ -63,7 +66,7 @@ func run() error {
 
 	flag.Parse()
 	if *worker {
-		return convert(*input, manifold.Format(*target), *pages, *profile, *operationTimeout, *large, *storage, *outputPath)
+		return convert(*input, manifold.Format(*target), *pages, *profile, *operationTimeout, *large, *storage, *outputPath, *memoryMiB)
 	}
 	if *storage != "memory" && *storage != "file" {
 		return fmt.Errorf("invalid storage mode")
@@ -75,6 +78,9 @@ func run() error {
 		if e := os.MkdirAll(*outputDir, 0700); e != nil {
 			return e
 		}
+	}
+	if *memoryMiB < 1 {
+		return fmt.Errorf("invalid memory limit")
 	}
 	if *workers < 1 || *repeat < 1 || *timeout <= 0 || *guard < 1 {
 		return fmt.Errorf("invalid batch bounds")
@@ -100,7 +106,9 @@ func run() error {
 	if e != nil {
 		return e
 	}
-	emit(map[string]any{"kind": "environment", "go": runtime.Version(), "os": runtime.GOOS, "arch": runtime.GOARCH, "cpus": runtime.NumCPU(), "soft_memory_mib_per_child": 4096, "rss_guard_mib_batch": *guard, "timeout": timeout.String(), "started_utc": time.Now().UTC(), "large_document_work_policy": *large, "storage": *storage, "measurement": "cold process, file read + parse + content checks + buffered output; separate timed parse/write; no warmup; unmodified downloaded real documents"})
+	emit(map[string]any{"kind": "environment", "go": runtime.Version(), "os": runtime.GOOS, "arch": runtime.GOARCH, "cpus": runtime.NumCPU(), "soft_memory_mib_per_child": *memoryMiB, "rss_guard_mib_batch": *guard, "timeout": timeout.String(), "started_utc": time.Now().UTC(), "large_document_work_policy": *large, "storage": *storage, "measurement": "cold process; storage mode recorded; file read + parse + content checks + fully materialized SHA-256 output; buffered file writes without fsync; separate timed parse/write; no warmup; unmodified downloaded originals"})
+	baseCtx, stopSignals := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stopSignals()
 	wanted := map[string]bool{}
 	for _, n := range strings.Split(*selected, ",") {
 		wanted[n] = false
@@ -127,7 +135,10 @@ func run() error {
 		}
 		emit(map[string]any{"kind": "fixture", "name": f.Name, "bytes": size, "sha256": hash, "source_url": f.SourceURL, "pdf_pages": f.Pages, "source_docx_paragraphs": f.SourceParagraphs, "producer_page_count": f.ProducerPageCount})
 		for rep := 1; rep <= *repeat; rep++ {
-			ctx, cancel := context.WithTimeout(context.Background(), *timeout)
+			if err := baseCtx.Err(); err != nil {
+				return err
+			}
+			ctx, cancel := context.WithTimeout(baseCtx, *timeout)
 			cmds := make([]*exec.Cmd, *workers)
 			outs := make([]bytes.Buffer, *workers)
 			errs := make([]bytes.Buffer, *workers)
@@ -135,7 +146,7 @@ func run() error {
 			var wg sync.WaitGroup
 			start := time.Now()
 			for i := range cmds {
-				args := []string{"-worker", "-input", path, "-to", *target, "-pages", strconv.Itoa(f.Pages), "-storage", *storage}
+				args := []string{"-worker", "-input", path, "-to", *target, "-pages", strconv.Itoa(f.Pages), "-storage", *storage, "-memory-mib", strconv.FormatInt(*memoryMiB, 10)}
 				if *outputDir != "" {
 					args = append(args, "-output", filepath.Join(*outputDir, fmt.Sprintf("%s-w%d.%s", f.Name, i, *target)))
 				}
@@ -189,6 +200,9 @@ func run() error {
 					deadlineDone = nil
 					if reason == "" {
 						reason = "deadline"
+						if baseCtx.Err() != nil {
+							reason = "cancelled"
+						}
 					}
 					for i := range active {
 						_ = cmds[i].Process.Kill()
@@ -223,7 +237,7 @@ func run() error {
 	}
 	return nil
 }
-func convert(path string, to manifold.Format, pages int, profile string, operationTimeout time.Duration, large bool, storage, outputPath string) error {
+func convert(path string, to manifold.Format, pages int, profile string, operationTimeout time.Duration, large bool, storage, outputPath string, memoryMiB int64) error {
 	ctx := context.Background()
 	if operationTimeout > 0 {
 		var cancel context.CancelFunc
@@ -243,7 +257,7 @@ func convert(path string, to manifold.Format, pages int, profile string, operati
 	}
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	debug.SetMemoryLimit(4096 << 20)
+	debug.SetMemoryLimit(memoryMiB << 20)
 	start := time.Now()
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -301,7 +315,7 @@ func convert(path string, to manifold.Format, pages int, profile string, operati
 	beginRead := time.Now()
 	opts := manifold.ReadOptions{}
 	if large {
-		opts.PDFLimits = &manifold.PDFReadLimits{MaxDecodedBytes: 2 << 30, MaxRasterPixels: 500_000_000, MaxNavigationEntries: 1_000_000}
+		opts.PDFLimits = &manifold.PDFReadLimits{MaxDecodedBytes: 4 << 30, MaxRasterPixels: 2_000_000_000, MaxNavigationEntries: 1_000_000}
 	}
 	d, e := manifold.Read(ctx, source, format, opts)
 	if e != nil {

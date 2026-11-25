@@ -403,7 +403,7 @@ func (r *pdfReader) geometricLinks() error {
 				copy.Evidence += ";link_from_rectangle"
 				run.Source = &copy
 			} else if ambiguous {
-				r.doc.warn("pdf_link_overlap", "Overlapping different link targets leave geometric association unresolved")
+				r.warn("pdf_link_overlap", "Overlapping different link targets leave geometric association unresolved")
 			}
 		}
 	}
@@ -438,7 +438,7 @@ func (r *pdfReader) diagnosePartialLinks() {
 		for _, b := range blocks {
 			for _, run := range b.Runs {
 				if run.Source != nil && r.partialLinks[run.Source.Order] && run.Link == "" && run.Destination == "" && run.Source.Precision != "synthetic_separator" {
-					r.doc.warn("pdf_link_partial_span", "Link rectangle partially covers a text span; exact ownership requires tagged Link structure or finer glyph recovery")
+					r.warn("pdf_link_partial_span", "Link rectangle partially covers a text span; exact ownership requires tagged Link structure or finer glyph recovery")
 				}
 			}
 			for _, row := range b.Rows {
@@ -763,7 +763,7 @@ func (v *pdfViewRegistry) array(obj types.Object) (PDFDestination, error) {
 	}
 	if d, ok := o.(types.Dict); ok {
 		if d["SD"] != nil {
-			v.r.doc.warn("pdf_destination_structure", "Physical destination retained; additional structure-destination navigation semantics are not yet represented")
+			v.r.warn("pdf_destination_structure", "Physical destination retained; additional structure-destination navigation semantics are not yet represented")
 		}
 		o, err = v.r.pdf.Dereference(d["D"])
 		if err != nil {
@@ -893,7 +893,7 @@ func (v *pdfViewRegistry) resolve(obj types.Object) (string, error) {
 			v.r.doc.PDFNavigation.Destinations = append(v.r.doc.PDFNavigation.Destinations, PDFDestination{ID: id, NameKind: kind, NameBytes: append([]byte(nil), raw...), Unresolved: true})
 			v.views[key] = len(v.r.doc.PDFNavigation.Destinations) - 1
 			v.r.doc.UnresolvedDestinations = append(v.r.doc.UnresolvedDestinations, id)
-			v.r.doc.warn("pdf_destination_missing", "Named PDF link target is absent; its identity is retained explicitly unresolved")
+			v.r.warn("pdf_destination_missing", "Named PDF link target is absent; its identity is retained explicitly unresolved")
 			return id, nil
 		}
 		d, e := v.array(entry.value)
@@ -1151,12 +1151,12 @@ func (r *pdfReader) bindPDFNavigation() {
 		sort.Ints(remaining)
 		for _, p := range remaining {
 			out = append(out, Block{Kind: AnchorPoint, Anchors: pageAnchors[p], Source: &SourceInfo{Format: PDF, Page: p, Structure: "inferred", Evidence: "destination_missing_flow_page", Confidence: 0}})
-			r.doc.warn("pdf_destination_page_fallback", "A source page without recovered content/control has no exact flow boundary; its physical view is retained and editable anchor is placed at the document tail")
+			r.warn("pdf_destination_page_fallback", "A source page without recovered content/control has no exact flow boundary; its physical view is retained and editable anchor is placed at the document tail")
 		}
 		r.doc.Blocks = out
 	}
 	if len(r.doc.PDFNavigation.Destinations) > 0 {
-		r.doc.warn("pdf_destination_flow_inferred", "Explicit PDF views retained; editable anchor ownership is inferred from nearby content or a page boundary, not authorial bookmark structure")
+		r.warn("pdf_destination_flow_inferred", "Explicit PDF views retained; editable anchor ownership is inferred from nearby content or a page boundary, not authorial bookmark structure")
 	}
 }
 

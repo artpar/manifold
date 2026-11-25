@@ -45,20 +45,28 @@ func pdfLayoutBlock(b Block) (pdfLayoutBox, bool) {
 
 func (r *pdfReader) inferStructure() error {
 	var out []Block
+
+	original := r.doc.Blocks
 	pages := map[int][]Block{}
-	pageNumber := 1
-	for _, b := range r.doc.Blocks {
+	pageNumber, start := 1, 0
+	for i, b := range original {
 		if b.Kind == PageBreak {
+			pages[pageNumber] = original[start:i]
 			pageNumber++
-			continue
+			start = i + 1
 		}
-		pages[pageNumber] = append(pages[pageNumber], b)
 	}
+	pages[pageNumber] = original[start:]
+	// No inference helper needs the whole physical body. Consume page slices and
+	// release processed run/source ownership while the new flow graph is built.
+	r.doc.Blocks = nil
+
 	for _, page := range r.doc.Pages {
 		if err := r.ctx.Err(); err != nil {
 			return err
 		}
 		originals := pages[page.Number]
+		delete(pages, page.Number)
 		if page.Number > 1 {
 			out = append(out, Block{Kind: PageBreak})
 		}
@@ -106,8 +114,9 @@ func (r *pdfReader) inferStructure() error {
 			}
 		}
 		if !eligible {
-			r.doc.warn("pdf_inference_uncertain", "A page has missing geometry, nonhorizontal text or bidirectional text; paint order and original line groups are retained rather than assigning uncertain geometric structure")
+			r.warn("pdf_inference_uncertain", "A page has missing geometry, nonhorizontal text or bidirectional text; paint order and original line groups are retained rather than assigning uncertain geometric structure")
 			out = append(out, originals...)
+			clear(originals)
 			continue
 		}
 		r.alignPDFLinkedLabels(boxes, page.Number)
@@ -118,7 +127,7 @@ func (r *pdfReader) inferStructure() error {
 			}
 			for j, other := range boxes {
 				if i != j && min(image.x1, other.x1) > max(image.x0, other.x0) && min(image.y1, other.y1) > max(image.y0, other.y0) {
-					r.doc.warn("pdf_inference_uncertain", "Image/content regions overlap; both are retained and their geometric reading order is uncertain")
+					r.warn("pdf_inference_uncertain", "Image/content regions overlap; both are retained and their geometric reading order is uncertain")
 					break
 				}
 			}
@@ -132,12 +141,13 @@ func (r *pdfReader) inferStructure() error {
 		lines := pdfLayoutLines(boxes)
 		r.inferHeadings(lines, em)
 		out = append(out, r.inferFlow(lines)...)
+		clear(originals)
 		if err := r.ctx.Err(); err != nil {
 			return err
 		}
 	}
 	r.doc.Blocks = out
-	r.doc.warn("pdf_structure_inferred", "Untagged reading order, paragraphs, typographic heading ranks, marker lists and aligned/painted-grid tables are geometric inferences, not explicit semantics; ambiguous layouts and original authorial boundaries may differ")
+	r.warn("pdf_structure_inferred", "Untagged reading order, paragraphs, typographic heading ranks, marker lists and aligned/painted-grid tables are geometric inferences, not explicit semantics; ambiguous layouts and original authorial boundaries may differ")
 	return nil
 }
 
@@ -173,7 +183,7 @@ func (r *pdfReader) layoutOrder(boxes []pdfLayoutBox, em float64, column string,
 		return boxes
 	}
 	if depth >= 64 {
-		r.doc.warn("pdf_inference_uncertain", "Geometric subdivision reached its depth limit; remaining content uses top-to-bottom order")
+		r.warn("pdf_inference_uncertain", "Geometric subdivision reached its depth limit; remaining content uses top-to-bottom order")
 	}
 	if depth < 64 {
 		// Peel isolated wide edge bands before looking for a persistent gutter.
@@ -213,7 +223,7 @@ func (r *pdfReader) layoutOrder(boxes []pdfLayoutBox, em float64, column string,
 			return append(r.layoutOrder(rest, em, column, depth+1), b)
 		}
 		xs := append([]pdfLayoutBox(nil), boxes...)
-		sort.SliceStable(xs, func(i, j int) bool { return xs[i].x0 < xs[j].x0 })
+		sortPDFLayoutBoxes(xs, func(i, j int) bool { return xs[i].x0 < xs[j].x0 })
 		right = xs[0].x1
 		for i := 1; i < len(xs); i++ {
 			if xs[i].x0-right >= max(2*em, 12) && pdfColumnExtent(xs[:i], em) && pdfColumnExtent(xs[i:], em) {
@@ -222,7 +232,7 @@ func (r *pdfReader) layoutOrder(boxes []pdfLayoutBox, em float64, column string,
 			right = max(right, xs[i].x1)
 		}
 		ys := append([]pdfLayoutBox(nil), boxes...)
-		sort.SliceStable(ys, func(i, j int) bool { return ys[i].y0 < ys[j].y0 })
+		sortPDFLayoutBoxes(ys, func(i, j int) bool { return ys[i].y0 < ys[j].y0 })
 		yBottom, cut := ys[0].y1, 0
 		for i := 1; i < len(ys); i++ {
 			if ys[i].y0-yBottom > max(.5, em*.12) {
@@ -238,7 +248,7 @@ func (r *pdfReader) layoutOrder(boxes []pdfLayoutBox, em float64, column string,
 	for i := range boxes {
 		boxes[i].column = column
 	}
-	sort.SliceStable(boxes, func(i, j int) bool {
+	sortPDFLayoutBoxes(boxes, func(i, j int) bool {
 		if math.Round(boxes[i].base*1000) == math.Round(boxes[j].base*1000) {
 			return boxes[i].x0 < boxes[j].x0
 		}
@@ -263,12 +273,27 @@ func pdfColumnExtent(boxes []pdfLayoutBox, em float64) bool {
 
 func pdfLayoutLines(boxes []pdfLayoutBox) []pdfLayoutBox {
 	var out []pdfLayoutBox
+	merged := false
+	finish := func() {
+		if len(out) == 0 {
+			return
+		}
+		last := &out[len(out)-1]
+		if last.block.Kind == Paragraph {
+			if merged {
+				last.block.Source = inferredPDFSource([]Block{{Runs: last.block.Runs}}, "geometric_baseline_line", .7)
+			} else {
+				last.block.Source = inferredPDFSource([]Block{last.block}, "geometric_baseline_line", .7)
+			}
+		}
+		merged = false
+	}
 	for _, b := range boxes {
 		if len(out) > 0 {
 			last := &out[len(out)-1]
 			if b.block.Kind == Paragraph && last.block.Kind == Paragraph && b.column == last.column && math.Abs(b.base-last.base) <= max(1, min(b.size, last.size)*.25) && b.x0 >= last.x0-.1 {
 				last.block.Runs = joinPDFLayoutRuns(last.block.Runs, b.block.Runs)
-				last.block.Source = inferredPDFSource([]Block{{Runs: last.block.Runs}}, "geometric_baseline_line", .7)
+				merged = true
 				last.size = max(last.size, b.size)
 				last.x1 = max(last.x1, b.x1)
 				last.y0 = min(last.y0, b.y0)
@@ -276,12 +301,26 @@ func pdfLayoutLines(boxes []pdfLayoutBox) []pdfLayoutBox {
 				continue
 			}
 		}
-		if b.block.Kind == Paragraph {
-			b.block.Source = inferredPDFSource([]Block{b.block}, "geometric_baseline_line", .7)
-		}
+		finish()
 		out = append(out, b)
 	}
+	finish()
 	return out
+}
+
+// Stable-sort indices so swaps do not repeatedly move pointer-heavy Block
+// payloads (and invoke their write barriers) through every sort comparison.
+func sortPDFLayoutBoxes(boxes []pdfLayoutBox, less func(int, int) bool) {
+	ids := make([]int, len(boxes))
+	for i := range ids {
+		ids[i] = i
+	}
+	sort.SliceStable(ids, func(i, j int) bool { return less(ids[i], ids[j]) })
+	ordered := make([]pdfLayoutBox, len(boxes))
+	for i, id := range ids {
+		ordered[i] = boxes[id]
+	}
+	copy(boxes, ordered)
 }
 
 func joinPDFLayoutRuns(a, b []Run) []Run {
@@ -452,7 +491,7 @@ func (r *pdfReader) inferList(lines []pdfLayoutBox, start int) (Block, int, bool
 
 func (r *pdfReader) inferListAt(lines []pdfLayoutBox, start, depth int) (Block, int, bool) {
 	if depth >= 16 {
-		r.doc.warn("pdf_inference_uncertain", "List inference reached its nesting limit; remaining markers stay literal text")
+		r.warn("pdf_inference_uncertain", "List inference reached its nesting limit; remaining markers stay literal text")
 		return Block{}, start, false
 	}
 	if r.ctx.Err() != nil {
@@ -511,7 +550,7 @@ func (r *pdfReader) inferListAt(lines []pdfLayoutBox, start, depth int) (Block, 
 		return Block{}, start, false
 	}
 	list.Source = inferredPDFSource([]Block{list}, "consecutive_list_markers", .65)
-	r.doc.warn("pdf_list_inferred", "List membership and nesting are inferred from consecutive markers and indentation; marker styling/punctuation normalize and original labels persist in source provenance")
+	r.warn("pdf_list_inferred", "List membership and nesting are inferred from consecutive markers and indentation; marker styling/punctuation normalize and original labels persist in source provenance")
 	return list, i, true
 }
 
@@ -656,7 +695,7 @@ func (r *pdfReader) inferTables(boxes []pdfLayoutBox, em float64) []pdfLayoutBox
 		box, _ := pdfLayoutBlock(table)
 		tables = append(tables, box)
 		i = j
-		r.doc.warn("pdf_table_inferred", "Table cells are inferred from repeated aligned rows and numeric columns; header roles, multiline cells, empty cells and spanning cells are not established by this heuristic")
+		r.warn("pdf_table_inferred", "Table cells are inferred from repeated aligned rows and numeric columns; header roles, multiline cells, empty cells and spanning cells are not established by this heuristic")
 	}
 	var out []pdfLayoutBox
 	for i, b := range boxes {
@@ -899,7 +938,7 @@ func (r *pdfReader) planPDFNoteExtents(marks []pdfLinkedNoteMark, bodies map[int
 				break
 			}
 			if owner, exists := claims[i]; exists && owner != bodyLink {
-				r.doc.warn("pdf_note_inference_uncertain", "Competing note bodies claim one continuation; the unassigned source remains in flow")
+				r.warn("pdf_note_inference_uncertain", "Competing note bodies claim one continuation; the unassigned source remains in flow")
 				return nil, false
 			}
 			claims[i] = bodyLink
@@ -1081,7 +1120,7 @@ func (r *pdfReader) removePDFNoteFlow(removed map[*Block]bool) {
 			if !moved || remaining || b.Source != nil {
 				out = append(out, b)
 			} else {
-				r.doc.warn("pdf_note_flow_boundary_inferred", "A physical page whose complete flow moved to inferred notes no longer creates an empty reflow page; original physical pages remain recorded")
+				r.warn("pdf_note_flow_boundary_inferred", "A physical page whose complete flow moved to inferred notes no longer creates an empty reflow page; original physical pages remain recorded")
 			}
 		}
 		for i := start; i < end; i++ {
@@ -1112,7 +1151,7 @@ func (r *pdfReader) noteInferenceStep() bool {
 			r.noteInferenceWork = pdfNoteInferenceLimit + 1
 			return false
 		}
-		r.doc.warn("pdf_note_inference_uncertain", "Note-link inference reached its comparison bound; unproven content remains in flow with original physical navigation")
+		r.warn("pdf_note_inference_uncertain", "Note-link inference reached its comparison bound; unproven content remains in flow with original physical navigation")
 		return false
 	}
 	return true
@@ -1519,19 +1558,19 @@ func (r *pdfReader) inferLinkedPDFNotes() error {
 	}
 	if len(removed) > 0 {
 		r.removePDFNoteFlow(removed)
-		r.doc.warn("pdf_note_relationship_inferred", "Matching raised marks and reciprocal physical GoTo views infer note relationships; original annotations, views and glyph geometry remain source evidence")
-		r.doc.warn("pdf_note_body_extent_inferred", "Note body extent is inferred from its linked leading paragraph and available note-zone evidence; unqualified or ambiguous continuation remains in flow")
+		r.warn("pdf_note_relationship_inferred", "Matching raised marks and reciprocal physical GoTo views infer note relationships; original annotations, views and glyph geometry remain source evidence")
+		r.warn("pdf_note_body_extent_inferred", "Note body extent is inferred from its linked leading paragraph and available note-zone evidence; unqualified or ambiguous continuation remains in flow")
 		if continuations > 0 {
-			r.doc.warn("pdf_note_continuation_inferred", "Consecutive coherent rich blocks in a separator-backed footnote zone or leading endnote page are grouped as inferred continuation; physical bounds remain source facts")
+			r.warn("pdf_note_continuation_inferred", "Consecutive coherent rich blocks in a separator-backed footnote zone or leading endnote page are grouped as inferred continuation; physical bounds remain source facts")
 		}
 		if pageContinuations > 0 {
-			r.doc.warn("pdf_note_page_continuation_inferred", "Matching physical note zones infer ownership across pages; ordinary page content and original physical boundaries remain independently represented")
+			r.warn("pdf_note_page_continuation_inferred", "Matching physical note zones infer ownership across pages; ordinary page content and original physical boundaries remain independently represented")
 		}
 		if paragraphJoins > 0 {
-			r.doc.warn("pdf_note_paragraph_continuation_inferred", "Compatible wrap geometry and boundary text infer one note paragraph across physical pages; explicit or ambiguous paragraph boundaries remain separate")
+			r.warn("pdf_note_paragraph_continuation_inferred", "Compatible wrap geometry and boundary text infer one note paragraph across physical pages; explicit or ambiguous paragraph boundaries remain separate")
 		}
-		r.doc.warn("pdf_note_kind_inferred", "Foot/endnote reflow kind is inferred from page position, not an explicit authorial note policy")
-		r.doc.warn("pdf_note_label_presentation", "Inferred body marks retain original style and label_source; reflow may normalize their independent placement")
+		r.warn("pdf_note_kind_inferred", "Foot/endnote reflow kind is inferred from page position, not an explicit authorial note policy")
+		r.warn("pdf_note_label_presentation", "Inferred body marks retain original style and label_source; reflow may normalize their independent placement")
 	}
 	return nil
 }

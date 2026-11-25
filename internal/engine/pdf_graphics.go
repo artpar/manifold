@@ -403,7 +403,7 @@ func rulingCoverage(lines []pdfRuling, horizontal bool, pos, start, end float64)
 func (r *pdfReader) rulingRegions(page int) []pdfGridRegion {
 	lines := mergePDFRulings(r.rulings[page])
 	if len(lines) > 4096 {
-		r.doc.warn("pdf_ruling_limit", "Merged ruling count exceeds the inference budget; text/images persist without a partial grid")
+		r.warn("pdf_ruling_limit", "Merged ruling count exceeds the inference budget; text/images persist without a partial grid")
 		return nil
 	}
 	sets := newPDFGridSets(len(lines))
@@ -450,7 +450,7 @@ func (r *pdfReader) rulingRegions(page int) []pdfGridRegion {
 		}
 		g := pdfGridRegion{rect: pdfRulingRect{xs[0], ys[0], xs[len(xs)-1], ys[len(ys)-1]}, xs: xs, ys: ys}
 		if len(xs) > 1001 || len(ys) > 1001 || (len(xs)-1)*(len(ys)-1) > 100_000 {
-			r.doc.warn("pdf_ruling_limit", "Candidate grid exceeds axis/slot inference budgets; text/images persist")
+			r.warn("pdf_ruling_limit", "Candidate grid exceeds axis/slot inference budgets; text/images persist")
 			out = append(out, g)
 			continue
 		}
@@ -494,13 +494,13 @@ func (r *pdfReader) rulingPatchLines(page int, group []pdfRuling, xs, ys []float
 			lines = append(lines, pdfRuling{pos: xs[i], start: p.y0, end: p.y1, width: p.x1 - p.x0})
 		}
 		if len(lines) > 100000 {
-			r.doc.warn("pdf_ruling_limit", "Projected ruling patches exceed the inference budget; candidate grid is skipped")
+			r.warn("pdf_ruling_limit", "Projected ruling patches exceed the inference budget; candidate grid is skipped")
 			return nil, false
 		}
 	}
 	lines = mergePDFRulings(lines)
 	if len(lines) > 4096 {
-		r.doc.warn("pdf_ruling_limit", "Merged ruling patches exceed the inference budget; candidate grid is skipped")
+		r.warn("pdf_ruling_limit", "Merged ruling patches exceed the inference budget; candidate grid is skipped")
 		return nil, false
 	}
 	return lines, true
@@ -641,7 +641,7 @@ func (r *pdfReader) inferRuledTables(boxes []pdfLayoutBox, page int, em float64)
 			consumed[i] = true
 		}
 		if !valid {
-			r.doc.warn("pdf_table_rulings_ambiguous", "Painted grid is incomplete, nonrectangular, partially divided or crossed by a content span; grid semantics are not assigned and original content persists")
+			r.warn("pdf_table_rulings_ambiguous", "Painted grid is incomplete, nonrectangular, partially divided or crossed by a content span; grid semantics are not assigned and original content persists")
 			for i, b := range boxes {
 				if rulingIntersects(g.rect, pdfRulingRect{b.x0, b.y0, b.x1, b.y1}) {
 					boxes[i].tableBarrier = true
@@ -669,7 +669,7 @@ func (r *pdfReader) inferRuledTables(boxes []pdfLayoutBox, page int, em float64)
 			table.Rows[c.row].Cells = append(table.Rows[c.row].Cells, Cell{ColSpan: c.cols, RowSpan: rs, Blocks: bs, Source: source})
 		}
 		if _, err := tableGrid(table.Rows); err != nil {
-			r.doc.warn("pdf_table_rulings_ambiguous", "Inferred ruling grid failed shared span validation; content persists without that table")
+			r.warn("pdf_table_rulings_ambiguous", "Inferred ruling grid failed shared span validation; content persists without that table")
 			continue
 		}
 		table.Source = rulingBoundsSource(page, g.rect, []Block{table}, "Table")
@@ -682,7 +682,7 @@ func (r *pdfReader) inferRuledTables(boxes []pdfLayoutBox, page int, em float64)
 		}
 		b, _ := pdfLayoutBlock(table)
 		boxes = append(remaining, b)
-		r.doc.warn("pdf_table_rulings_inferred", "Cell boundaries, rectangular merges and empty cells are inferred from painted grid adjacency; border appearance and authorial table/header semantics are not established")
+		r.warn("pdf_table_rulings_inferred", "Cell boundaries, rectangular merges and empty cells are inferred from painted grid adjacency; border appearance and authorial table/header semantics are not established")
 	}
 	return boxes
 }

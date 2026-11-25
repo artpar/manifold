@@ -47,6 +47,11 @@ const Heading = engine.Heading
 
 type Image = engine.Image
 
+// OfficeMath retains native OOXML equations through SF and DOCX.
+type OfficeMath = engine.OfficeMath
+
+const OfficeMathBlock = engine.OfficeMathBlock
+
 const JSON = engine.JSON
 
 type Kind = engine.Kind

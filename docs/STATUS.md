@@ -217,3 +217,17 @@ PDFReadLimits preserve conservative defaults while permitting guarded large work
 stream cache is bounded and parser state released before untagged inference.
 CLI/huge-runner flags expose the policy and actual file streaming. These changes
 remain under original-file qualification; final cohort/race/CI checks are pending.
+
+## Huge-original repairs in progress (2026-11-25)
+
+The previous zero-success huge baseline is being repaired; it is not superseded
+by a completion claim yet. Five original imports completed in a diagnostic scout.
+Further source inspection found skipped legacy Word diagrams and native equations;
+73 preview placements / 71 distinct original assets and 15/21 native equations now
+survive SF and DOCX round trips in both original Word files. PDF mask/color/text,
+navigation, bounded caching/streaming and inference performance repairs are in
+place. See [repair ledger](verification/HUGE_FIXES.md) for tested scopes and limits.
+Full original reruns, independent content/consumer checks and required regressions
+remain pending. Next: run `MANIFOLD_HUGE_WORD=1 GOWORK=off go test ./internal/engine
+-run TestHugeOriginalWordAssets -v`, finish frozen-source `tools/hugetest` runs,
+then the normal/race/vet/CGO-disabled matrix listed above. No release claim yet.

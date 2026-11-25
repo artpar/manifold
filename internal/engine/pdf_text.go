@@ -1377,7 +1377,7 @@ func (r *pdfReader) fontFamily(f *pdfFont, descriptor types.Dict) {
 				return
 			}
 		}
-		r.doc.warn("pdf_font_family", "Invalid font-family metadata is ignored while text and font identity are retained")
+		r.warn("pdf_font_family", "Invalid font-family metadata is ignored while text and font identity are retained")
 	}
 	for _, key := range []string{"FontFile2", "FontFile3"} {
 		if descriptor[key] == nil {
@@ -1385,7 +1385,7 @@ func (r *pdfReader) fontFamily(f *pdfFont, descriptor types.Dict) {
 		}
 		stream, _, err := r.pdf.DereferenceStreamDict(descriptor[key])
 		if err != nil || stream == nil {
-			r.doc.warn("pdf_font_family", "Embedded font metadata is unavailable; a face-name fallback may be needed")
+			r.warn("pdf_font_family", "Embedded font metadata is unavailable; a face-name fallback may be needed")
 			continue
 		}
 		data, err := boundedFontMetadata(r.ctx, stream)
@@ -1402,7 +1402,7 @@ func (r *pdfReader) fontFamily(f *pdfFont, descriptor types.Dict) {
 				}
 			}
 		}
-		r.doc.warn("pdf_font_family", "Embedded font family could not be recovered within supported metadata bounds; text is retained")
+		r.warn("pdf_font_family", "Embedded font family could not be recovered within supported metadata bounds; text is retained")
 	}
 	name := pdfSubsetName(f.name)
 	family := ""
@@ -1420,11 +1420,11 @@ func (r *pdfReader) fontFamily(f *pdfFont, descriptor types.Dict) {
 		return
 	}
 	if name != "unknown" && accept(name, "postscript_fallback") {
-		r.doc.warn("pdf_font_family_inferred", "A PostScript face name is used as a family lookup identifier; its family grouping is uncertain")
+		r.warn("pdf_font_family_inferred", "A PostScript face name is used as a family lookup identifier; its family grouping is uncertain")
 		return
 	}
 	f.familyEvidence = "unresolved"
-	r.doc.warn("pdf_font_family", "Font family is unresolved; font identity and content remain in source evidence")
+	r.warn("pdf_font_family", "Font family is unresolved; font identity and content remain in source evidence")
 }
 
 const maxFontMetadataBytes = 32 << 20

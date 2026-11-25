@@ -3,6 +3,8 @@ package engine
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
@@ -155,5 +157,95 @@ func TestDOCXSkippedTableColumnsRetainAlignmentAndDiscloseNormalization(t *testi
 	g, e := tableGrid(recovered.Blocks[0].Rows)
 	if e != nil || g.Columns != 3 || g.Origins[1].Column != 1 || recovered.Blocks[0].Rows[0].Cells[1].Blocks[0].Runs[0].Text != "Middle" {
 		t.Fatalf("SF shifted normalized cells: %v", e)
+	}
+}
+
+func TestHugeOriginalGlyphOutlines(t *testing.T) {
+	if os.Getenv("MANIFOLD_HUGE_IMAGES") != "1" {
+		t.Skip("requires downloaded original corpus")
+	}
+	file, e := os.Open("output/hugetest-real/ipcc-ar6-wgi.pdf")
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer file.Close()
+	p, e := pdfcpu.ReadWithContext(context.Background(), file, &model.Configuration{Reader15: true, ValidationMode: model.ValidationRelaxed, Offline: true})
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = p.EnsurePageCount(); e != nil {
+		t.Fatal(e)
+	}
+	page, _, attrs, e := p.PageDict(98, false)
+	if e != nil {
+		t.Fatal(e)
+	}
+	r := &pdfReader{ctx: context.Background(), pdf: p, doc: &Document{Pages: make([]PDFPage, 98)}, page: 98, stream: "page:98", fonts: map[string]*pdfFont{}, objects: map[pdfObjectKey][]pdfPaintRange{}, links: map[pdfObjectKey]pdfRecoveredLink{}, partialLinks: map[int]bool{}}
+	geometry, e := r.pageGeometry(98, page, attrs)
+	if e != nil {
+		t.Fatal(e)
+	}
+	r.pageInfo = geometry
+	r.doc.Pages[97] = geometry
+	content, e := r.pageContent(page)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if e = r.content(content, attrs.Resources, 0, initialPDFState()); e != nil {
+		t.Fatal(e)
+	}
+	r.newline()
+	if !hasDiagnostic(r.doc, "pdf_unmapped_glyph_outline") {
+		t.Fatal("missing Unicode absence diagnostic")
+	}
+	if e = os.MkdirAll("output/huge-glyph-fixed", 0700); e != nil {
+		t.Fatal(e)
+	}
+	count := 0
+	for _, b := range r.lines {
+		if b.Source != nil && b.Source.Evidence == "embedded_glyph_outline_raster" {
+			count++
+			name := fmt.Sprintf("output/huge-glyph-fixed/span-%d", count)
+			if e = os.WriteFile(name+".png", b.Image.Data, 0600); e != nil {
+				t.Fatal(e)
+			}
+			data, e := json.Marshal(b)
+			if e != nil {
+				t.Fatal(e)
+			}
+			if e = os.WriteFile(name+".json", data, 0600); e != nil {
+				t.Fatal(e)
+			}
+		}
+	}
+	if count == 0 {
+		t.Fatal("unmapped source glyphs lost")
+	}
+	t.Logf("preserved %d original unmapped spans", count)
+}
+func TestPDFSeparationDecodeBeforeTint(t *testing.T) {
+	cs := `[/Separation /Black /DeviceCMYK << /FunctionType 2 /Domain [0 1] /C0 [0 0 0 0] /C1 [0 0 0 1] /N 1 >>]`
+	obj := recoveryStream("/Type /XObject /Subtype /Image /Width 2 /Height 1 /BitsPerComponent 8 /ColorSpace "+cs+" /Decode [1 0]", string([]byte{0, 255}))
+	d := readRecovery(t, recoveryPage("q 20 0 0 10 0 0 cm /X Do Q", "", obj))
+	im, _, e := image.Decode(bytes.NewReader(d.Blocks[0].Image.Data))
+	if e != nil {
+		t.Fatal(e)
+	}
+	a := color.GrayModel.Convert(im.At(0, 0)).(color.Gray).Y
+	b := color.GrayModel.Convert(im.At(1, 0)).(color.Gray).Y
+	if a != 0 || b != 255 {
+		t.Fatalf("Decode/tint order changed black/white: %d %d", a, b)
+	}
+}
+func TestPDFFontMatrixDefaultAndMalformed(t *testing.T) {
+	minimal := []byte{1, 0, 4, 4, 0, 1, 1, 1, 2, 'X', 0, 1, 1, 1, 1}
+	m, e := cffFontMatrix(minimal)
+	if e != nil || m != (Matrix{.001, 0, 0, .001, 0, 0}) {
+		t.Fatalf("default matrix %v %v", m, e)
+	}
+	for i := 0; i < len(minimal)-1; i++ {
+		if _, e := cffFontMatrix(minimal[:i]); e == nil {
+			t.Fatalf("truncated CFF accepted at %d", i)
+		}
 	}
 }

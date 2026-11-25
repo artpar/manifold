@@ -89,12 +89,23 @@ func documentDestinationRuns(d *Document, visit func(Run) error) error {
 
 func catalogDestinations(d *Document, checkLinks bool) (*destinationCatalog, error) {
 	c := &destinationCatalog{anchors: map[string]bool{}, missing: map[string]bool{}, links: map[string]bool{}}
+	totalBytes := 0
+	charge := func(id string) error {
+		totalBytes += len(id)
+		if totalBytes > 64<<20 || len(c.anchors)+len(c.missing)+len(c.links) >= 1_000_000 {
+			return fmt.Errorf("destination graph exceeds identity/reference or aggregate byte budget")
+		}
+		return nil
+	}
 	for _, id := range d.UnresolvedDestinations {
 		if err := destinationID(id); err != nil {
 			return nil, err
 		}
 		if c.missing[id] {
 			return nil, fmt.Errorf("duplicate unresolved destination %q", id)
+		}
+		if e := charge(id); e != nil {
+			return nil, e
 		}
 		c.missing[id] = true
 	}
@@ -108,6 +119,9 @@ func catalogDestinations(d *Document, checkLinks bool) (*destinationCatalog, err
 			}
 			if r.Text != "" || r.Note != nil || r.Link != "" || r.Destination != "" || r.Bold || r.Italic || r.Underline || r.Strike || r.FontFamily != "" || r.FontSize != 0 || r.Color != "" || r.Language != "" || r.EastAsiaLanguage != "" || r.ComplexLanguage != "" || r.Direction != "" || r.ComplexScript {
 				return fmt.Errorf("anchor is a zero-width unformatted inline atom")
+			}
+			if e := charge(r.Anchor); e != nil {
+				return e
 			}
 			c.anchors[r.Anchor] = true
 		}
@@ -124,10 +138,12 @@ func catalogDestinations(d *Document, checkLinks bool) (*destinationCatalog, err
 					return fmt.Errorf("internal link href contradicts destination %q", r.Destination)
 				}
 			}
+			if !c.links[r.Destination] {
+				if e := charge(r.Destination); e != nil {
+					return e
+				}
+			}
 			c.links[r.Destination] = true
-		}
-		if len(c.anchors)+len(c.missing)+len(c.links) > 100000 {
-			return fmt.Errorf("destination graph exceeds 100000 identities/references")
 		}
 		return nil
 	})

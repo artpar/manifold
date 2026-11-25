@@ -287,6 +287,8 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 				}
 				n.Content = append(n.Content, rn)
 			}
+		case OfficeMathBlock:
+			n.Attrs = sfAttrs(b.Math)
 		case Picture:
 			n.Attrs = sfAttrs(struct {
 				Src    string  `json:"src"`
@@ -735,6 +737,14 @@ func decodeSFBlocks(ns []StructuredNode, depth int) ([]Block, error) {
 				return nil, fmt.Errorf("anchor point cannot have content")
 			}
 			if err := emptySFAttrs(n.Attrs); err != nil {
+				return nil, err
+			}
+		case "office_math":
+			if len(n.Content) > 0 {
+				return nil, fmt.Errorf("office_math cannot have content")
+			}
+			b.Math = &OfficeMath{}
+			if err := strictSFAttrs(n.Attrs, b.Math); err != nil {
 				return nil, err
 			}
 		case "image":

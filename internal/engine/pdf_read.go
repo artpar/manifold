@@ -103,19 +103,26 @@ func (r *pdfReader) sourceFor(s *pdfTextState, advance float64, estimated bool) 
 	r.applyMarked(source)
 	return source
 }
-func (r *pdfReader) warnPage(code, message string) {
-	diagnostic := Diagnostic{code, "PDF page " + strconv.Itoa(r.page) + ": " + message}
+func (r *pdfReader) warn(code, message string) {
+	d := Diagnostic{code, message}
 	if r.pageWarnings == nil {
 		r.pageWarnings = map[Diagnostic]bool{}
-		for _, d := range r.doc.Diagnostics {
-			r.pageWarnings[d] = true
+		for _, existing := range r.doc.Diagnostics {
+			r.pageWarnings[existing] = true
 		}
 	}
-	if !r.pageWarnings[diagnostic] {
-		r.pageWarnings[diagnostic] = true
-		r.doc.Diagnostics = append(r.doc.Diagnostics, diagnostic)
+	if !r.pageWarnings[d] {
+		r.pageWarnings[d] = true
+		r.doc.Diagnostics = append(r.doc.Diagnostics, d)
 	}
 }
+func (r *pdfReader) warnPage(code, message string) {
+	if r.collectFontWarnings != nil {
+		*r.collectFontWarnings = append(*r.collectFontWarnings, Diagnostic{code, message})
+	}
+	r.warn(code, "PDF page "+strconv.Itoa(r.page)+": "+message)
+}
+
 func sourceForRuns(runs []Run) *SourceInfo {
 	var first *SourceInfo
 	var bounds Quad
@@ -591,6 +598,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 	r.objects = map[pdfObjectKey][]pdfPaintRange{}
 	r.links = map[pdfObjectKey]pdfRecoveredLink{}
 	r.partialLinks = map[int]bool{}
+	r.fonts = map[string]*pdfFont{}
 	for page := 1; page <= p.PageCount; page++ {
 		if err := ctx.Err(); err != nil {
 			return nil, err
@@ -616,7 +624,6 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 		}
 		r.lines = nil
 		r.current = nil
-		r.fonts = map[string]*pdfFont{}
 		if e = r.content(data, attrs.Resources, 0, initialPDFState()); e != nil {
 			return nil, fmt.Errorf("PDF page %d: %w", page, e)
 		}
@@ -652,7 +659,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 						o = states[*state]
 						appearanceObject = o
 					} else {
-						r.doc.warn("annotation_state", "Annotation has multiple appearances without a selected state")
+						r.warn("annotation_state", "Annotation has multiple appearances without a selected state")
 						continue
 					}
 				}
@@ -725,6 +732,9 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 
 type pdfReader struct {
 	pageWarnings             map[Diagnostic]bool
+	collectFontWarnings      *[]Diagnostic
+	fontOrder                []string
+	fontNext                 int
 	limits                   PDFReadLimits
 	skipNoteKindInference    bool
 	noteInferenceWork        int
@@ -839,6 +849,13 @@ func (r *pdfReader) show(v any, s *pdfTextState) error {
 	}
 	if actual == nil {
 		if decodeErr != nil {
+			handled, e := r.preserveUnmappedGlyphs(b, s)
+			if e != nil {
+				return e
+			}
+			if handled {
+				return nil
+			}
 			return decodeErr
 		}
 		text = decoded
@@ -960,8 +977,8 @@ func (r *pdfReader) content(data []byte, resources types.Dict, depth int, state 
 	if err := r.ctx.Err(); err != nil {
 		return err
 	}
-	if len(data) > maxPDFDecodedBytes-r.contentBytes {
-		return fmt.Errorf("PDF interpreted syntax exceeds %d bytes", maxPDFDecodedBytes)
+	if len(data) > r.decodedLimit()-r.contentBytes {
+		return fmt.Errorf("PDF interpreted syntax exceeds %d bytes", r.decodedLimit())
 	}
 	r.contentBytes += len(data)
 	spaces, err := r.pdf.DereferenceDict(resources["ColorSpace"])
@@ -1365,6 +1382,10 @@ func (r *pdfReader) form(o types.Object, parent types.Dict, depth int, state pdf
 }
 
 type pdfFont struct {
+	diagnostics                                                    []Diagnostic
+	diagnosticPage                                                 int
+	dictionary                                                     types.Dict
+	outlines                                                       *pdfOutlineFont
 	mapping                                                        *unicodeMap
 	explicitEncoding                                               map[byte]string
 	fallbackUsed                                                   bool
@@ -1437,13 +1458,37 @@ func (r *pdfReader) font(resources types.Dict, name string) (*pdfFont, error) {
 
 	key := fmt.Sprint(obj)
 	if cached := r.fonts[key]; cached != nil {
+		if cached.diagnosticPage != r.page {
+			for _, d := range cached.diagnostics {
+				r.warnPage(d.Code, d.Message)
+			}
+			cached.diagnosticPage = r.page
+		}
 		return cached, nil
 	}
 	d, err := r.pdf.DereferenceDict(obj)
 	if err != nil || d == nil {
 		return nil, errors.New("invalid PDF font dictionary")
 	}
-	f := &pdfFont{encoding: simpleencodings.AdobeStandard, widths: map[uint32]float64{}}
+	f := &pdfFont{encoding: simpleencodings.AdobeStandard, widths: map[uint32]float64{}, dictionary: d}
+	previous := r.collectFontWarnings
+	var diagnostics []Diagnostic
+	r.collectFontWarnings = &diagnostics
+	defer func() { r.collectFontWarnings = previous }()
+	saveFont := func() {
+		f.diagnostics = diagnostics
+		f.diagnosticPage = r.page
+		const entries = 256
+		if len(r.fontOrder) < entries {
+			r.fontOrder = append(r.fontOrder, key)
+		} else {
+			delete(r.fonts, r.fontOrder[r.fontNext])
+			r.fontOrder[r.fontNext] = key
+			r.fontNext = (r.fontNext + 1) % entries
+		}
+		r.fonts[key] = f
+	}
+
 	if widths, e := r.pdf.DereferenceArray(d["Widths"]); e != nil {
 		return nil, e
 	} else {
@@ -1500,7 +1545,7 @@ func (r *pdfReader) font(resources types.Dict, name string) (*pdfFont, error) {
 				return nil, err
 			}
 		}
-		r.fonts[key] = f
+		saveFont()
 		return f, nil
 	}
 	enc, err := r.pdf.Dereference(d["Encoding"])
@@ -1564,7 +1609,7 @@ func (r *pdfReader) font(resources types.Dict, name string) (*pdfFont, error) {
 	if err := r.fontMetrics(f, d); err != nil {
 		return nil, err
 	}
-	r.fonts[key] = f
+	saveFont()
 	return f, nil
 }
 

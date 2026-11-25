@@ -1051,6 +1051,35 @@ func (r *docxReader) paragraph(n *xmlNode, rels map[string]docxRelation) ([]Bloc
 				b.Runs = append(b.Runs, parts...)
 			}
 			return nil
+		case "oMath", "oMathPara":
+			if c.Name.Space != officeMathNS {
+				return fmt.Errorf("unexpected math namespace")
+			}
+			native, err := serializeOfficeMath(c)
+			if err != nil {
+				return err
+			}
+			if len(b.Runs) > 0 || b.PageBreakBefore {
+				flush()
+			}
+			out = append(out, Block{Kind: OfficeMathBlock, Math: &OfficeMath{OMML: native}})
+			r.doc.warn("office_math_native", "Native Office Math markup retained; inline equations use independent flow blocks and plain text exposes tokens only")
+			return nil
+		case "object", "pict":
+			images, err := r.legacyPictures(c, rels)
+			if err != nil {
+				return err
+			}
+			if len(images) > 0 {
+				if len(b.Runs) > 0 || b.PageBreakBefore {
+					flush()
+				}
+				out = append(out, images...)
+				return nil
+			}
+			if len(c.all("txbxContent")) == 0 {
+				return fmt.Errorf("%w: legacy drawing has no supported preview or text", ErrUnsupported)
+			}
 		case "drawing":
 			blips := c.all("blip")
 			for _, blip := range blips {

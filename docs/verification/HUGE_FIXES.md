@@ -78,3 +78,47 @@ Indexed device-color images now decode directly from original palette/sample
 bytes, including CMYK, instead of relying on an unsupported intermediary TIFF.
 Original-file scouts and full-content checks are still in progress; do not claim
 all seven originals pass from these implementation changes alone.
+
+## Original-content preservation checkpoint (2026-11-25, in progress)
+
+The original Word imports revealed a silent-loss defect beyond the initial blockers:
+73 legacy drawing placements (71 distinct WMF/EMF assets) and 15/21 native Office
+Math equations. These are now preserved through typed model → SF → DOCX. An opt-in
+original-file test verifies every preview SHA-256 and placement count and the native
+equation count in both outputs. Both original versions pass. Native previews use
+bounded metafile framing validation, without executing embedded OLE applications.
+Floating geometry is diagnosed as normalized. Native equations use an additive
+`office_math` SF block with authoritative self-contained OMML, not guessed Unicode.
+Plain text exposes its source tokens; PDF/PPTX/VDOCS math output rejects explicitly.
+This is preservation, not a newly claimed equation/metafile rendering engine.
+
+PDF fixes also retain unmapped embedded CFF outlines as transparent span images;
+known Unicode stays text. The original IPCC page 98 has 48 such spans. Missing
+Unicode is diagnosed with source font/codes/geometry; OCR/text is not fabricated.
+Raster density includes the PDF frame transform. Source tint Decode is applied
+before Separation/one-component DeviceN functions; bounded type-2 and numeric
+calculator-function subsets support the original black-channel images. Unknown
+operators/color semantics reject. A request-owned 256-entry font cache and indexed
+warnings avoid reparsing fonts and rescanning thousands of diagnostics per span.
+Inference consumes/relinquishes page graphs and sorts integer indices rather than
+repeatedly moving large block values. Navigation validation now also budgets
+explicit unresolved references against one million identities/64 MiB name bytes.
+
+The explicit huge scout profile is now **4 GiB cumulative decoded work, 2B raster
+pixels, one million navigation entries**, with **6 GiB Go soft heap policy** and
+**8 GiB sampled external RSS guard** for solo jobs. These opt-in policies do not
+change default import limits. The previous 4 GiB soft heap produced severe GC
+thrashing on large live graphs. The runner now cancels children on parent signals.
+The earlier 2 GiB profile above is historical, superseded by this scout profile.
+
+Five of seven full original imports completed in a diagnostic scout, but that
+scout predates the Word preservation repair and the latest IPCC/Intel fixes.
+It is **not final qualification**. Frozen-source reruns, independent full-text and
+ProseMirror audits, complete regressions and publication remain in progress.
+
+Independent streaming ProseMirror + XML audit of i00 currently reports zero missing
+NFKC/nonwhitespace source characters, all 71 original media hashes / 73 placements,
+and all 15 native equations. The normal Go suite passes after this checkpoint.
+The IPCC original consumes more than 500M aggregate raster pixels (guard at page
+1566); the opt-in huge policy is now 2B, with the same external RSS/deadline guards.
+Default policy is unchanged; this guard rejection remains recorded in scout logs.

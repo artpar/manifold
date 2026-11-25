@@ -85,3 +85,11 @@ with the former implementation maps and qualification ledger.
     unsupported input, bounded-work rejection, memory-guard kills and timeouts as
     failures, never successful capacity; do not weaken fidelity or production work
     limits merely to complete a benchmark. Isolate extreme jobs in guarded processes.
+
+16. **Preserve native source content discovered by huge originals.** A successful
+    import counter is insufficient: validate original diagrams/equations as well
+    as text. Retain WMF/EMF previews byte-for-byte and native OMML in typed SF blocks;
+    reject unsupported rendering instead of flattening equations into incomplete
+    text. Preserve unmapped embedded CFF outlines as diagnosed span images without
+    inventing Unicode. Keep conservative default work limits; opt-in huge policies,
+    soft Go heap targets and external RSS guards are separate measured controls.
