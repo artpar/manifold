@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/png"
 	"math"
 	"strconv"
 	"strings"
@@ -208,7 +207,7 @@ func (r *pdfReader) paintGlyphSpan(data []byte, s *pdfTextState) error {
 	fill := color.NRGBA{uint8(math.Round(s.fill[0] * 255)), uint8(math.Round(s.fill[1] * 255)), uint8(math.Round(s.fill[2] * 255)), alpha}
 	raster.Draw(dst, dst.Bounds(), image.NewUniform(fill), image.Point{})
 	var encoded bytes.Buffer
-	if e = png.Encode(&encoded, dst); e != nil {
+	if e = r.encodePNG(&encoded, dst); e != nil {
 		return e
 	}
 	source := r.sourceFor(s, advance, estimated)

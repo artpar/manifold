@@ -10,6 +10,7 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
+	"io"
 	"math"
 )
 
@@ -325,7 +326,7 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 		}
 	}
 	var encoded bytes.Buffer
-	if err := png.Encode(&encoded, pixels); err != nil {
+	if err := r.encodePNG(&encoded, pixels); err != nil {
 		return err
 	}
 	m := r.pageInfo.Transform.compose(state.ctm)
@@ -337,4 +338,19 @@ func (r *pdfReader) imageXObject(sd *types.StreamDict, object types.Object, reso
 	r.newline()
 	r.lines = append(r.lines, Block{Kind: Picture, Source: source, Image: &Image{Data: encoded.Bytes(), MediaType: "image/png", Width: math.Hypot(m[0], m[1]), Height: math.Hypot(m[2], m[3])}})
 	return nil
+}
+
+// A single request-owned compressor buffer. Eligibility bounds retained scanlines
+// and the opaque encoder's last image; oversized images use an uncached encoder.
+type pdfPNGBufferPool struct{ buffer *png.EncoderBuffer }
+
+func (p *pdfPNGBufferPool) Get() *png.EncoderBuffer  { b := p.buffer; p.buffer = nil; return b }
+func (p *pdfPNGBufferPool) Put(b *png.EncoderBuffer) { p.buffer = b }
+func (r *pdfReader) encodePNG(w io.Writer, im image.Image) error {
+	b := im.Bounds()
+	if b.Dx() > 8192 || int64(b.Dx())*int64(b.Dy()) > 1<<20 {
+		return png.Encode(w, im)
+	}
+	encoder := png.Encoder{BufferPool: &r.pngBuffers}
+	return encoder.Encode(w, im)
 }

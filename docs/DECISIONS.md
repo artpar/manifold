@@ -134,3 +134,7 @@ with the former implementation maps and qualification ledger.
   preserving Unicode/duplicate/canonical field checks, unknown nested attributes
   and final model references. Cache only fixed SourceInfo schema metadata, not
   arbitrary user types or document data. Final original/SF hashes remain required.
+
+- Performance change 3: reuse PNG compressor state only within an import request,
+  bound image eligibility and release before recovery; keep existing codec/color/
+  mask semantics and exact PNG output, with no global pool or compression shortcut.

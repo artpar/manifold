@@ -170,3 +170,9 @@ Streaming SF uses that scanner to enforce unknown fields before direct Unmarshal
 avoiding a second Decoder. SourceInfo attrs use strict unknown-field validation
 and direct Unmarshal with immutable metadata for the fixed type graph; legacy
 scalar-null/field-alias semantics remain. No customer graph enters a global cache.
+
+Performance change 3: PDF raster/glyph PNG encoding reuses one request-owned
+EncoderBuffer for images up to 8,192 pixels wide / 1M pixels total. Larger
+images bypass reuse. Release the opaque buffer (which can retain its last image)
+before navigation/structural recovery. Compression settings, pixels and bytes
+remain unchanged; upstream intermediate image conversions are still independent.

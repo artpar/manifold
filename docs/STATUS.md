@@ -87,8 +87,9 @@ pass. A real ECMA conversion retains the original SF hash: read 53.88s, total
 117.71s, 63.73 GiB allocated (single intermediate run, not final qualification).
 Change 2 removes per-key JSON decoding for unescaped keys and redundant inner
 decoders; SourceInfo uses strict shape checks plus direct typed decoding. JSON/SF
-and unknown/nested-field/escaped-duplicate regression tests pass. Changes 3–5
-and final before/after qualification remain outstanding.
+and unknown/nested-field/escaped-duplicate regression tests pass. Change 3 adds a single request-owned PNG buffer slot, bypassing large images
+and releasing it before structural recovery. Byte-identity/depth/palette and
+existing image/mask/glyph tests pass. Changes 4–5 and final qualification remain.
 
 ## Known boundaries and next work
 

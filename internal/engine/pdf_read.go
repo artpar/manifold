@@ -678,6 +678,8 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 		}
 		doc.Blocks = append(doc.Blocks, r.lines...)
 	}
+	// Pixel conversion is complete; do not retain the pool's last image during recovery.
+	r.pngBuffers.buffer = nil
 	if e := r.recoverPDFNavigation(catalog); e != nil {
 		return nil, fmt.Errorf("PDF navigation: %w", e)
 	}
@@ -731,6 +733,7 @@ func ReadPDF(ctx context.Context, src io.Reader, opts ReadOptions) (doc *Documen
 }
 
 type pdfReader struct {
+	pngBuffers               pdfPNGBufferPool
 	pageWarnings             map[Diagnostic]bool
 	collectFontWarnings      *[]Diagnostic
 	fontOrder                []string
