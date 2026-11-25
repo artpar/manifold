@@ -103,16 +103,22 @@ def audit(source, sf):
         missing_total = 0
         source_total = 0
         worst = []
+        original_image_placements = 0
         replacement = 0
+        expected_all = collections.Counter()
+        control_characters = collections.Counter()
         for i, page in enumerate(d, 1):
+            original_image_placements += len(page.get_image_info())
             expected = characters(page.get_text())
             replacement += expected.pop('\ufffd', 0)
+            expected_all.update(expected)
+            control_characters.update({c:n for c,n in expected.items() if ord(c)<32})
             missing = expected-pages[i]
             source_total += expected.total()
             missing_total += missing.total()
             if missing:
                 worst.append({'page':i, 'missing':missing.total(), 'source_chars':expected.total(), 'characters':missing.most_common(8)})
-        result.update(source_pages=len(d), recovered_text_pages=len(pages), source_characters=source_total, missing_character_count=missing_total, missing_fraction=missing_total/max(1,source_total), source_unmapped_replacement_characters=replacement, worst_pages=sorted(worst,key=lambda x:x['missing'],reverse=True)[:20])
+        result.update(source_pages=len(d), source_image_placements=original_image_placements, recovered_text_pages=len(pages), source_characters=source_total, missing_character_count=missing_total, missing_fraction=missing_total/max(1,source_total), source_unmapped_replacement_characters=replacement, source_control_characters=control_characters.most_common(), global_missing_character_count=(expected_all-all_text).total(), global_missing_characters=(expected_all-all_text).most_common(30), worst_pages=sorted(worst,key=lambda x:x['missing'],reverse=True)[:20])
     return result
 
 if __name__ == '__main__':
