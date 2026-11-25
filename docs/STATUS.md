@@ -177,12 +177,26 @@ visually inspected. A standards check fixed the main presentation MIME and
 notes-body placeholder. See verification/PPTX_SF_BRIDGE.md. This does not upgrade
 unsupported native features to general PowerPoint fidelity.
 
-## Huge real-input follow-up (in progress)
+## Huge real-input follow-up — measured limits
 
 At the user's explicit direction, stop synthetic huge-file tests and use only
 unmodified Internet originals for this qualification. Removed fixture generation;
 tools/hugetest now verifies the URL/hash/size manifest HUGE_CORPUS.json and runs
 isolated children with hard timeouts and an aggregate RSS guard. Independent
 PyMuPDF/XML counts qualify file scale. The real cohort includes a 423 MB IPCC PDF,
-two 5,000+ page PDFs, large 3GPP DOCX sources and a 1,624-page ETSI PDF. Single and
-concurrent measurements, rejection boundaries and final report are in progress.
+two 5,000+ page PDFs, large 3GPP DOCX sources and a 1,624-page ETSI PDF.
+Seven real originals were tested twice alone and in two two-child batches each,
+plus a four-child IPCC batch: **0/46 full conversions**. All reject during input
+interpretation: unsupported JPEG color space, image masks/Matte, unresolved used
+theme font, destination-name budget or unmapped ToUnicode code. Peak combined RSS
+was 7,763 MiB. Two extra controls confirmed deadline/RSS-guard kills. This is not
+successful huge-file capacity qualification: do not extend earlier small-file TPS
+claims to these originals. See PERFORMANCE.md and verification/HUGE_INPUTS.md for
+sources/hashes, exact limits and reproduction. Next work is fixing actual input
+feature failures with independent original-source oracles, then rerunning full
+conversions; huge-file serialization/soak throughput remains unmeasured.
+
+Final huge-file QA checks: full normal suite and vet, CGO-disabled CLI build and
+diff check pass. Race tool tests and a two-child real-ETSI race-instrumented harness
+smoke pass their declared scope (the expected input rejections persist). Full local
+race was not repeated for tooling/docs; hosted CI owns the pushed-source matrix.

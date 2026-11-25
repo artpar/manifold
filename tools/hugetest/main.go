@@ -1,4 +1,4 @@
-// Command hugetest qualifies synthetic extreme inputs in isolated child processes.
+// Command hugetest measures downloaded original documents in isolated child processes.
 // It is development tooling, not a production service or a microbenchmark.
 package main
 

@@ -77,3 +77,11 @@ with the former implementation maps and qualification ledger.
     face. Do not add a permanent process-wide font cache or lifetime font quotas.
     Preserve existing glyph/ligature/bidi/caret expectations and independently
     rerun load/heap qualification after the change.
+
+15. **Real originals for huge-input qualification.** The user explicitly rejected
+    synthetic huge-file evidence. Stop that scout and remove huge fixture generation.
+    Download unmodified publisher documents, pin source URLs and SHA-256/size, and
+    independently count pages/XML structure. Keep publisher bytes untracked. Count
+    unsupported input, bounded-work rejection, memory-guard kills and timeouts as
+    failures, never successful capacity; do not weaken fidelity or production work
+    limits merely to complete a benchmark. Isolate extreme jobs in guarded processes.

@@ -79,3 +79,13 @@ objects and writes searchable text, vector shapes and native images. Flow/PDF
 input can be mapped to slides with explicit lossy acknowledgement; unsupported
 layouts reject. This replaces the facade-only architectural boundary above;
 that facade remains a convenience API for source-native workflows.
+
+## Capacity qualification tools
+
+`tools/loadtest` measures warm embedded conversion operations. `tools/hugetest`
+measures isolated cold conversions of downloaded, immutable originals pinned by
+URL/size/SHA-256 in docs/verification/HUGE_CORPUS.json. The latter has no fixture
+generator. A Unix development-only ps sampler guards aggregate child RSS and a
+parent deadline kills overdue children. These process controls are test-harness
+bounds, not new production admission limits. Publisher documents and raw profiles
+remain untracked; curated evidence and actual unsupported outcomes belong in KT.

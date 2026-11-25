@@ -15,6 +15,18 @@ support contract, not arbitrary-document or Word-equivalent fidelity.
 | JSON/text | Strict typed model JSON; explicit reduced plain text | Text intentionally omits formatting/assets |
 | VDOCS | Optional checked Univer snapshot-envelope adapter | Pinned native consumer discrepancies remain documented; full browser/editor parity is not claimed |
 
+## Observed huge-file boundaries
+
+The original large-file cohort is currently **not qualified for full conversion**:
+all seven downloaded originals rejected during input interpretation (46 ordinary
+attempts), including a 423 MB IPCC report and 5,000+ page manuals. Specific observed
+limits include JPEG color spaces, soft-mask Matte/color-key masks, used DOCX theme
+fonts, navigation destination budget and unmapped ToUnicode codes. This is evidence
+about these pinned documents, not a universal byte/page limit. See
+[measured results](PERFORMANCE.md#huge-real-input-results--2026-11-25) and
+[original-source record](verification/HUGE_INPUTS.md). Earlier small/synthetic-file
+throughput is not successful capacity evidence for this cohort.
+
 ## Interpretation and losses
 
 DOCX uses the final visible revision view: inserted content retained, deleted text

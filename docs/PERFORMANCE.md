@@ -263,7 +263,7 @@ Linux race suite in [Actions run 45597860193](https://github.com/artpar/manifold
 contains six platform archives and checksums. Independent original-deck/SF/PDF
 qualification is recorded in [PPTX_SF_BRIDGE.md](verification/PPTX_SF_BRIDGE.md).
 
-## Huge real-input extension (in progress)
+## Huge real-input results — 2026-11-25
 
 The user explicitly requires original Internet-sourced documents. The earlier
 synthetic huge-input scout was stopped and excluded from real-file evidence;
@@ -299,4 +299,78 @@ bin/manifold-hugetest -repeat 2 > output/huge-real-single.jsonl
 bin/manifold-hugetest -cases ipcc-ar6-wgi -workers 2 -repeat 2 > output/huge-real-concurrent.jsonl
 ```
 
-Measurements and explicit rejection/timeout boundaries are being collected.
+**Result: zero successful full conversions across 46 ordinary attempts** (seven
+original documents × two single-process attempts + four attempts in two two-process
+batches each; plus four simultaneous IPCC attempts). Two additional forced-boundary
+controls were killed by the harness as expected. All ordinary jobs failed during
+input interpretation, before SF serialization. These are reproducible compatibility
+and resource boundaries, **not successful throughput benchmarks**. No successful
+huge-file TPS/RPS is established; this corpus cannot currently be advertised as
+supported. Production feature/work limits were not changed to force a pass.
+
+Single-child wall time includes process start, file read and failed interpretation;
+RSS is the largest 200-ms sample across two attempts, not an exact OS high-water mark.
+
+| Unmodified original | Actual scale | Time to rejection (s) | Peak sampled RSS MiB | First failure |
+| --- | --- | ---: | ---: | --- |
+| IPCC AR6 WGI full report | 423.35 MB; 2,409 pages | 5.44–5.86 | 3,124 | Page 61: DCT/JPEG color space unsupported |
+| Intel SDM revision 084 | 25.17 MB; 5,057 pages | 19.13–19.67 | 4,040 | PDF destination-name budget exceeded |
+| ECMA-376 Part 1 | 35.30 MB; 5,039 pages | 8.86–8.87 | 1,468 | Page 625: soft-mask Matte unsupported |
+| 3GPP 38.331 V18.0.0 DOCX | 3.89 MB; 66,185 XML paragraphs | 1.10 | 404 | Used majorBidi theme font unresolved |
+| 3GPP 38.331 V18.1.0 DOCX | 4.00 MB; 68,220 XML paragraphs | 1.17–1.25 | 431 | Used majorBidi theme font unresolved |
+| ETSI 138 331 V18.1.0 PDF | 7.24 MB; 1,624 pages | 0.25 | 91 | Page 41: explicit/color-key image masks unsupported |
+| C++ N4950 draft | 8.04 MB; 2,134 pages | 1.24 | 683 | Page 389: unmapped ToUnicode code 37 |
+
+MB here is decimal input bytes / 1,000,000; RSS uses MiB. Both DOCX files' cached
+Pages=1 metadata is stale. The corresponding ETSI V18.1.0 PDF has 1,624 physical
+pages; exact Word pagination was not rendered or claimed. PDF counts are independent
+PyMuPDF 1.28.2 observations. This is an original **423 MB** test, not a padded or
+resized 100 MB test; a document of exactly 100 MB has not been qualified.
+
+Two-child batches reproduced the same feature/budget failures for every file.
+Peak combined RSS reached 6,256 MiB for IPCC and **7,763 MiB for Intel**; Intel
+batches took 22.95–25.67 seconds to reject both jobs. Four simultaneous IPCC jobs
+all rejected in 9.84 seconds, peaking at 7,480 MiB sampled RSS. The normal 8 GiB
+batch guard and 120s deadline were not reached. Higher process counts therefore
+provide no supported full-conversion capacity for this corpus; rejection rate
+must not be reported as successful TPS.
+
+Boundary controls used these same originals: a 1 GiB RSS guard killed an IPCC
+child in 0.23s at a 1,300 MiB sample (visible sampling overshoot), and a one-second
+hard deadline killed an Intel child in 1.01s. These are **intentional harness
+kills**, not engine limits or accidental OOM crashes. They prove the supervisor
+can stop work but are not hard OS memory guarantees. No ordinary run crashed or
+was killed; it returned an explicit parser/unsupported/budget error.
+
+### Remaining bottlenecks and concrete next work
+
+1. **Feature coverage blocks capacity first.** Qualified JPEG color-space and
+   soft-mask/color-key handling, used DOCX theme-font resolution and font mapping
+   must be addressed with original source fixtures and independent paint/text
+   checks. Do not delete images, replace fonts silently or skip unsupported pages.
+2. **Navigation complexity has a bounded-work ceiling.** Intel contains **279,501 named destinations** (independently counted by
+   PyMuPDF; longest name 100 UTF-8 bytes), exceeding the existing 100,000-entry
+   registry ceiling despite its modest compressed file size. Review
+   a scalable representation while retaining names/links and bounded memory;
+   merely increasing the budget is not demonstrated safe by this study.
+3. **High memory precedes rejection.** ReadPDF currently buffers all source bytes;
+   this harness additionally retains its caller-owned full input. Parser/model
+   state and allocation/GC also contribute. That code-path observation explains
+   why file size is not an RSS ceiling, but this study has not apportioned giant
+   file memory with a new allocation profile. Investigate bounded/spooled source
+   handling and earlier validation before increasing concurrency. The earlier
+   small-file/PDF-layout profiles are not profiles of these huge originals.
+4. **Requalification is still required.** After fixing each actual feature failure,
+   rerun these exact hashes at one child, then guarded concurrency. Only successful
+   complete conversions can establish latency/TPS or justify a sustained huge-file
+   soak. Writer/load capacity remains unmeasured because every input failed first.
+
+Use [HUGE_INPUTS.md](verification/HUGE_INPUTS.md) for publisher URLs, download and
+extraction commands, independent checks and source boundaries. The manifest pins
+all original bytes. Raw local evidence: output/huge-real-single.jsonl,
+huge-real-etsi-single.jsonl, huge-real-cpp-single.jsonl, huge-real-concurrent.jsonl,
+huge-real-cpp-concurrent.jsonl, huge-real-guard.jsonl, huge-real-guard-control.jsonl
+and huge-real-deadline.jsonl. Source implementation is unchanged v0.3.0; the real
+runner is source-equivalent to 4709926, with subsequent manifest/KT additions.
+The harness process exit code indicates evidence collection completed; consult
+child.success, child.stderr and batch.termination for conversion outcomes.

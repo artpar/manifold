@@ -67,5 +67,15 @@
     "pdf_pages": 1624,
     "retrieved_utc": "2026-11-25",
     "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
+  },
+  {
+    "name": "cpp-n4950",
+    "path": "output/hugetest-real/cpp-n4950.pdf",
+    "source_url": "https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/n4950.pdf",
+    "bytes": 8043551,
+    "sha256": "2a2fdee7eb4271263451468ff689d6fd3bbb377d7c6e45375796badfb60d50a2",
+    "pdf_pages": 2134,
+    "retrieved_utc": "2026-11-25",
+    "redistribution": "Local downloaded reference only; publisher rights retained; bytes not committed."
   }
 ]
