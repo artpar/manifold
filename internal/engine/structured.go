@@ -318,7 +318,9 @@ func encodeSFBlocks(bs []Block) ([]StructuredNode, error) {
 // FromStructured checks the schema and converts without discarding unrepresented
 // semantics. Valid ProseMirror constructs outside the current engine return
 // ErrUnsupported; AllowLossy cannot override these errors.
-func FromStructured(s *StructuredDocument) (*Document, error) {
+func FromStructured(s *StructuredDocument) (*Document, error) { return fromStructured(s, true) }
+
+func fromStructured(s *StructuredDocument, validate bool) (*Document, error) {
 	if s == nil || s.Type != "doc" {
 		return nil, fmt.Errorf("structured document requires doc root")
 	}
@@ -403,8 +405,10 @@ func FromStructured(s *StructuredDocument) (*Document, error) {
 			return nil, err
 		}
 	}
-	if err := d.Validate(); err != nil {
-		return nil, err
+	if validate {
+		if err := d.Validate(); err != nil {
+			return nil, err
+		}
 	}
 	return d, nil
 }

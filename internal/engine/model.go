@@ -288,8 +288,7 @@ func Read(ctx context.Context, r io.Reader, format Format, opts ReadOptions) (*D
 	case PDF:
 		return ReadPDF(ctx, r, opts)
 	case SF:
-		_, d, err := readStructured(ctx, r)
-		return d, err
+		return readFlowStructured(ctx, r)
 	case SFGzip:
 		if r == nil {
 			return nil, errors.New("nil document reader")
@@ -299,8 +298,7 @@ func Read(ctx context.Context, r io.Reader, format Format, opts ReadOptions) (*D
 			return nil, fmt.Errorf("structured gzip: %w", err)
 		}
 		defer compressed.Close()
-		_, d, err := readStructured(ctx, compressed)
-		return d, err
+		return readFlowStructured(ctx, compressed)
 	case JSON:
 		var d Document
 		dec := json.NewDecoder(r)

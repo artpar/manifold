@@ -155,3 +155,21 @@ The C++ and ETSI independent text inventories initially excluded original list
 labels held in `list_item.attrs.source.label` after diagnosed list normalization.
 The audit now counts those source labels separately from text nodes; it does not
 pretend original marker styling is rendered unchanged. Both audits are rerunning.
+
+## Further measured bottleneck repair (in progress)
+
+A native stack sample of original IPCC recovery located repeated work in OBJR
+content lookup: every tagged object reference scanned every painted unit in the
+entire document. Index units by physical page, preserving range/owner checks and
+adding cancellation checks. Unknown-page references retain the original global
+lookup. The obsolete pre-index scout was explicitly cancelled, not counted as a
+success or a deadline failure.
+
+SF `Read` now decodes top-level body chunks directly into the typed model, keeping
+strict chunk validation and final global reference/model checks. It avoids holding
+a complete SF tree alongside the recovered model; public `ReadStructured` still
+returns a complete tree. Root property order is unrestricted; duplicate/unknown
+keys, malformed suffixes and dangling cross-chunk references reject. Gzip checksum
+errors remain wrapped with their original identity. Focused SF checks pass. This
+is required because original PDF outputs are multi-gigabyte SF files; compressed
+persistence and memory limits must remain explicit capacity considerations.

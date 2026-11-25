@@ -1,9 +1,13 @@
 package engine
 
 import (
+	"bytes"
 	"compress/gzip"
 	"context"
+	"encoding/json"
+	"fmt"
 	"io"
+	"reflect"
 )
 
 // Preflight the complete document and every generated body chunk before any
@@ -106,4 +110,119 @@ func flowNeedsNumbering(d *Document) bool {
 		}
 	}
 	return false
+}
+
+// Read directly into the typed model one top-level body node at a time. Public
+// ReadStructured still returns a complete SF tree; Read need not retain that tree
+// alongside the model for multi-gigabyte source/provenance-heavy documents.
+func readFlowStructured(ctx context.Context, input io.Reader) (*Document, error) {
+	if input == nil {
+		return nil, fmt.Errorf("nil document reader")
+	}
+	dec := json.NewDecoder(contextReader{ctx, input})
+	dec.DisallowUnknownFields()
+	opening, err := dec.Token()
+	if err != nil {
+		return nil, err
+	}
+	if opening != json.Delim('{') {
+		return nil, fmt.Errorf("structured JSON requires object root")
+	}
+	root := &StructuredDocument{}
+	seen := map[string]bool{}
+	var blocks []Block
+	rawValue := func(target any) error {
+		var raw json.RawMessage
+		if err := dec.Decode(&raw); err != nil {
+			return err
+		}
+		if err := validateTypedJSON(ctx, raw, reflect.TypeOf(target).Elem()); err != nil {
+			return err
+		}
+		inner := json.NewDecoder(bytes.NewReader(raw))
+		inner.DisallowUnknownFields()
+		return inner.Decode(target)
+	}
+	for dec.More() {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		key, err := dec.Token()
+		if err != nil {
+			return nil, err
+		}
+		name, ok := key.(string)
+		if !ok || seen[name] {
+			return nil, fmt.Errorf("duplicate or invalid structured root key")
+		}
+		seen[name] = true
+		switch name {
+		case "type":
+			if err := rawValue(&root.Type); err != nil {
+				return nil, err
+			}
+		case "attrs":
+			if err := rawValue(&root.Attrs); err != nil {
+				return nil, err
+			}
+		case "content":
+			token, err := dec.Token()
+			if err != nil {
+				return nil, err
+			}
+			if token == nil {
+				continue
+			}
+			if token != json.Delim('[') {
+				return nil, fmt.Errorf("structured content requires array")
+			}
+			for dec.More() {
+				var node StructuredNode
+				if err := rawValue(&node); err != nil {
+					return nil, err
+				}
+				if node.Type == "presentation" {
+					root.Content = append(root.Content, node)
+					continue
+				}
+				bs, err := decodeSFBlocks([]StructuredNode{node}, 0)
+				if err != nil {
+					return nil, err
+				}
+				blocks = append(blocks, bs...)
+			}
+			if _, err := dec.Token(); err != nil {
+				return nil, err
+			}
+		default:
+			return nil, fmt.Errorf("unknown structured root key %q", name)
+		}
+	}
+	if _, err := dec.Token(); err != nil {
+		return nil, err
+	}
+	if err := dec.Decode(new(any)); err != io.EOF {
+		if err != nil {
+			return nil, fmt.Errorf("structured JSON trailing data: %w", err)
+		}
+		return nil, fmt.Errorf("structured JSON must contain one value")
+	}
+	if root.Attrs.Presentation == nil && len(root.Content) > 0 {
+		return nil, sfUnsupported("presentation")
+	}
+	if root.Attrs.Presentation != nil && len(blocks) > 0 {
+		return nil, fmt.Errorf("presentation and flow SF cannot coexist")
+	}
+	d, err := fromStructured(root, false)
+	if err != nil {
+		return nil, err
+	}
+	d.Blocks = blocks
+	if err := d.Validate(); err != nil {
+		return nil, err
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	return d, nil
 }

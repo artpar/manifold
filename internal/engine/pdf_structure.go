@@ -762,6 +762,7 @@ type pdfStructureRecovery struct {
 	reader         *pdfReader
 	roles, classes types.Dict
 	units          []pdfContentUnit
+	unitsByPage    map[int][]int
 	marked         map[pdfContentKey][]int
 	active, seen   map[string]bool
 	referenceTotal int
@@ -806,7 +807,11 @@ func (r *pdfReader) recoverStructure(root types.Object) error {
 			s.units = append(s.units, pdfContentUnit{block: bi, run: &copy, source: copy.Source})
 		}
 	}
+	s.unitsByPage = map[int][]int{}
 	for i, u := range s.units {
+		if u.source != nil {
+			s.unitsByPage[u.source.Page] = append(s.unitsByPage[u.source.Page], i)
+		}
 		if u.source != nil && u.source.MCID != nil {
 			key := pdfContentKey{u.source.Page, u.source.Stream, *u.source.MCID}
 			s.marked[key] = append(s.marked[key], i)
@@ -1223,7 +1228,22 @@ func (s *pdfStructureRecovery) content(n *pdfStructureNode) ([]Block, error) {
 		// do not invent empty cells or discard the table's structure/content.
 
 	} else {
-		for i, u := range s.units {
+		// OBJR refers to a physical page/object. Do not rescan every painted
+		// unit in a multi-thousand-page document for each object reference.
+		candidates := s.unitsByPage[n.page]
+		if n.page == 0 {
+			candidates = make([]int, len(s.units))
+			for i := range candidates {
+				candidates[i] = i
+			}
+		}
+		for j, i := range candidates {
+			if j%1024 == 0 {
+				if err := s.reader.ctx.Err(); err != nil {
+					return nil, err
+				}
+			}
+			u := s.units[i]
 			if u.source == nil || (n.page != 0 && u.source.Page != n.page) {
 				continue
 			}

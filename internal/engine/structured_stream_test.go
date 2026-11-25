@@ -5,6 +5,7 @@ import (
 	"context"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -89,5 +90,32 @@ func TestPDFReadLimitsAndCacheRemainBounded(t *testing.T) {
 	}
 	if _, recent := b.cache[types.IndirectRef{ObjectNumber: 80}]; !recent {
 		t.Fatal("recent stream not cached")
+	}
+}
+
+func TestFlowStructuredReadChecksWholeGraphAndStrictChunks(t *testing.T) {
+	valid := `{"type":"doc","attrs":{"schema":"manydoc-prosemirror/1"},"content":[{"type":"paragraph","content":[{"type":"text","text":"start","marks":[{"type":"link","attrs":{"href":"#end","destination":"end"}}]}]},{"type":"paragraph","attrs":{"anchors":["end"]},"content":[{"type":"text","text":"end"}]}]}`
+	d, err := Read(context.Background(), strings.NewReader(valid), SF, ReadOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(d.Blocks) != 2 {
+		t.Fatal("later anchor lost")
+	}
+	for _, bad := range []string{
+		strings.Replace(valid, `"end"]`, `"different"]`, 1),
+		strings.Replace(valid, `"type":"doc"`, `"type":"doc","type":"doc"`, 1),
+		strings.Replace(valid, `"text":"start"`, `"text":"start","text":"changed"`, 1),
+		strings.Replace(valid, `"text":"start"`, `"Text":"start"`, 1),
+		valid + `{}`, valid[:len(valid)-2],
+	} {
+		if _, err := Read(context.Background(), strings.NewReader(bad), SF, ReadOptions{}); err == nil {
+			t.Fatal("accepted malformed or dangling streamed input")
+		}
+	}
+	// Body can precede attributes; decoding order must not become a wire rule.
+	reordered := `{"content":[{"type":"paragraph","content":[{"type":"text","text":"ok"}]}],"attrs":{"schema":"manydoc-prosemirror/1"},"type":"doc"}`
+	if d, err := Read(context.Background(), strings.NewReader(reordered), SF, ReadOptions{}); err != nil || d.Text() != "ok" {
+		t.Fatalf("root order: %v", err)
 	}
 }
