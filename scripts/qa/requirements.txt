@@ -12,3 +12,4 @@ reportlab==5.1.0
 typing-extensions==4.16.0
 
 uharfbuzz==0.57.0
+ijson==3.6.0

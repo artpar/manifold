@@ -78,3 +78,62 @@ original package-preservation/edit/renderer tests retain their content oracles.
 See [the integration record](verification/PRESENTATION_INTEGRATION.md) for actual
 checks, hosted results, the Windows JSON fixture fix and skipped external visual
 qualification. Rendering a valid PNG is not a PowerPoint visual-parity assertion.
+
+## Huge original-file repair qualification
+
+Publisher URLs, exact SHA-256 values, unmodified extracted members and download
+commands are in `verification/HUGE_CORPUS.json` and `verification/HUGE_INPUTS.md`.
+Publisher bytes, generated SF, binaries, environments and profiles remain ignored.
+Do not replace those originals with generated or padded documents.
+
+The pure-Go runner uses isolated cold child processes, explicit work policy,
+Go soft memory targets, sampled external RSS guards, context/deadline controls and
+fully materialized output SHA-256. OS file data is warmed by the integrity check;
+file output is buffered without fsync. `-storage file` avoids the old caller-held
+input/output buffers, and is recorded separately from that historical baseline.
+
+```sh
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold-hugetest ./tools/hugetest
+bin/manifold-hugetest -large -memory-mib 8192 -rss-mib 12288 \
+  -storage file -output-dir output/huge-final-output -repeat 2 -timeout 10m
+bin/manifold-hugetest -large -memory-mib 8192 -rss-mib 20480 \
+  -storage file -repeat 1 -workers 2 -timeout 15m
+```
+
+A runner exit status alone is not a conversion result. Inspect `child.success`,
+its error/stages, and `batch.termination`; budget rejection, timeout and RSS kills
+are never counted as successful capacity. Do not benchmark while running other QA.
+The aggregate guard covers child RSS, not all operating-system memory.
+
+Original-content and derived-persistence checks are separate:
+
+```sh
+MANIFOLD_HUGE_IMAGES=1 GOWORK=off go test ./internal/engine \
+  -run 'TestHugeOriginal(ImagePixels|GlyphOutlines)' -v -count=1
+MANIFOLD_HUGE_WORD=1 GOWORK=off go test ./internal/engine \
+  -run TestHugeOriginalWordAssets -v -count=1
+MANIFOLD_HUGE_SF=ecma376-part1 GOWORK=off go test ./internal/engine \
+  -run TestHugeOriginalDerivedSFRead -v -count=1 -timeout 10m
+```
+
+The Word test checks all 73 preview placements / 71 distinct original media hashes
+and 15/21 native equations through SF and DOCX. Derived SF tests require identical
+SHA-256 after central Go Read/Write; they are not additional Internet originals.
+Optional independent Python/Node readers use `scripts/qa/requirements.txt` plus
+`prosemirror-model` installed in ignored `output/sf-qa/node_modules`:
+
+```sh
+output/qa-venv/bin/python scripts/qa/structured/huge_audit.py \
+  output/hugetest-real/ipcc-ar6-wgi.pdf \
+  output/huge-final-output/ipcc-ar6-wgi-w0.sf
+```
+
+The audit streams body nodes through actual ProseMirror, inventories normalized
+nonwhitespace characters by source page and globally, separately counts original
+list labels retained in provenance, and checks Word native math structures/assets.
+Character inventories do not prove reading order, pagination or visual parity.
+MuPDF `get_image_info()` also reports raster tiles it creates for vector shading:
+on original IPCC page 62, 12 additional RGB occurrences correspond to 12 `sh`
+operators with xref=0; the one embedded CMYK image is retained. Do not mislabel
+those derived tiles as missing embedded image assets. Shading/vector reconstruction
+remains explicitly diagnosed as unsupported appearance recovery.
