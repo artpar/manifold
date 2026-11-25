@@ -50,3 +50,15 @@ are not all executed individually.
 If checks fail, fix the source/workflow and push normally. If the version tag was
 created but upload failed, rerun the failed job at that same commit. Do not replace
 an already published version; bump VERSION for subsequent source changes.
+
+## Latest verified publication
+
+v0.4.1 was published automatically on 2026-11-25 at 17:21:02 UTC from
+`bdb8ed3ee8af40256e2eb3851032800917464784`.
+[Release](https://github.com/artpar/manifold/releases/tag/v0.4.1) ·
+[Successful gated run](https://github.com/artpar/manifold/actions/runs/45660838689).
+Windows/macOS/Linux checks and the full Linux race gate passed; the pipeline
+built six CGO-disabled platform archives and checksums.txt. After publication,
+the tag target and latest-release status were verified, and all six manifest
+hashes matched GitHub's SHA-256 asset digests. No workstation build/upload or
+manual tag was used. Later KT-only commits do not move this release tag.

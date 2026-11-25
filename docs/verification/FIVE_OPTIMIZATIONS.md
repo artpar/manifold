@@ -142,8 +142,11 @@ actual artifacts independently of their embedded pre-commit VCS metadata.
 - All 28 large-policy outputs and four default-policy successes match original
   qualified SF bytes/hashes; references, native math/previews and source facts stay.
 
-VERSION remains unchanged. Automated CI publication skips new assets; no existing
-release/tag is moved and no workstation release is performed.
+At the measurement checkpoint VERSION was unchanged. The subsequent user-requested
+[v0.4.1 release](https://github.com/artpar/manifold/releases/tag/v0.4.1) publishes
+this optimized implementation from bdb8ed3 through the existing gated pipeline.
+All platform/race checks passed and all six archive checksums were verified;
+no existing release/tag was moved and no workstation release was performed.
 
 ## CPU and allocation-site comparison
 

@@ -85,9 +85,10 @@ live bytes stay near 4,940 MiB despite fewer objects. All observed released heap
 remain below 1 MiB; this is not an RSS-return or long-lived service leak guarantee.
 
 Source is frozen at 4f32d78; subsequent report/KT/version commits do not change Go code.
-VERSION is 0.4.1 for the user-requested performance release. Publication is pending
-the existing gated VERSION workflow; verify the hosted run and published assets
-before claiming delivery. No existing release or tag is moved.
+VERSION is 0.4.1. [The published release](https://github.com/artpar/manifold/releases/tag/v0.4.1)
+was produced by [run 45660838689](https://github.com/artpar/manifold/actions/runs/45660838689)
+at bdb8ed3 after all platform/race gates passed. Its tag resolves to that commit;
+all six archive checksums match GitHub asset SHA-256 digests. Existing tags stay unchanged.
 
 ## Known boundaries and next work
 
