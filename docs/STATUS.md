@@ -57,6 +57,14 @@ originals. The historical huge baseline was 0/46 completed attempts; its facts
 remain in [HUGE_INPUTS.md](verification/HUGE_INPUTS.md) and PERFORMANCE.md.
 The final repaired results supersede those input blockers, not the baseline record.
 
+## Profiling investigation in progress
+
+The development huge-file runner now supports separate per-stage CPU profiles and
+memory snapshots (natural stage end, two-GC live model, and after release). The
+real 3GPP i00 smoke run preserves its qualified SF SHA-256. ECMA, IPCC and Intel
+diagnostic campaigns are running; no new optimization or throughput claim follows
+from this instrumentation. Profiles stay under ignored `output/pprof-huge/`.
+
 ## Known boundaries and next work
 
 - Large jobs retain a complete typed model; observed solo RSS reaches ~8.6 GiB.

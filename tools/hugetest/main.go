@@ -18,7 +18,6 @@ import (
 	"io"
 	"runtime"
 	"runtime/debug"
-	"runtime/pprof"
 	"strconv"
 	"strings"
 	"sync"
@@ -58,7 +57,10 @@ func run() error {
 	repeat := flag.Int("repeat", 2, "batches per case")
 	timeout := flag.Duration("timeout", 120*time.Second, "hard child process deadline")
 	guard := flag.Int64("rss-mib", 8192, "sampled aggregate child RSS guard; requires ps on Unix")
-	profile := flag.String("cpuprofile", "", "child-only diagnostic CPU profile")
+	profile := flag.String("cpuprofile", "", "child-only diagnostic whole-job CPU profile")
+	profileDir := flag.String("profile-dir", "", "diagnostic profiles directory; isolated subdirectory per case/repeat/worker")
+	profileMode := flag.String("profile-mode", "cpu", "cpu or memory; separate diagnostic runs, never capacity measurements")
+	memRate := flag.Int("mem-profile-rate", 512*1024, "memory profile sampling rate in bytes; diagnostic memory runs only")
 	operationTimeout := flag.Duration("operation-timeout", 0, "child-only graceful conversion deadline; zero disables")
 	worker := flag.Bool("worker", false, "internal child mode")
 	input := flag.String("input", "", "internal input path")
@@ -66,7 +68,16 @@ func run() error {
 
 	flag.Parse()
 	if *worker {
-		return convert(*input, manifold.Format(*target), *pages, *profile, *operationTimeout, *large, *storage, *outputPath, *memoryMiB)
+		return convert(*input, manifold.Format(*target), *pages, profileConfig{Directory: *profileDir, Mode: *profileMode, MemRate: *memRate, LegacyCPU: *profile}, *operationTimeout, *large, *storage, *outputPath, *memoryMiB)
+	}
+	if *profileMode != "cpu" && *profileMode != "memory" {
+		return fmt.Errorf("invalid profile mode")
+	}
+	if *memRate <= 0 {
+		return fmt.Errorf("invalid memory profile rate")
+	}
+	if *profile != "" {
+		return fmt.Errorf("cpuprofile requires worker mode; use profile-dir for guarded profiling")
 	}
 	if *storage != "memory" && *storage != "file" {
 		return fmt.Errorf("invalid storage mode")
@@ -106,7 +117,7 @@ func run() error {
 	if e != nil {
 		return e
 	}
-	emit(map[string]any{"kind": "environment", "go": runtime.Version(), "os": runtime.GOOS, "arch": runtime.GOARCH, "cpus": runtime.NumCPU(), "soft_memory_mib_per_child": *memoryMiB, "rss_guard_mib_batch": *guard, "timeout": timeout.String(), "started_utc": time.Now().UTC(), "large_document_work_policy": *large, "storage": *storage, "measurement": "cold process; storage mode recorded; file read + parse + content checks + fully materialized SHA-256 output; buffered file writes without fsync; separate timed parse/write; no warmup; unmodified downloaded originals"})
+	emit(map[string]any{"kind": "environment", "go": runtime.Version(), "os": runtime.GOOS, "arch": runtime.GOARCH, "cpus": runtime.NumCPU(), "soft_memory_mib_per_child": *memoryMiB, "rss_guard_mib_batch": *guard, "timeout": timeout.String(), "started_utc": time.Now().UTC(), "large_document_work_policy": *large, "storage": *storage, "diagnostic_profiles": *profileDir != "", "profile_mode": *profileMode, "mem_profile_rate": *memRate, "measurement": "cold process; storage mode recorded; file read + parse + content checks + fully materialized SHA-256 output; buffered file writes without fsync; separate timed parse/write; no warmup; unmodified downloaded originals"})
 	baseCtx, stopSignals := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stopSignals()
 	wanted := map[string]bool{}
@@ -149,6 +160,9 @@ func run() error {
 				args := []string{"-worker", "-input", path, "-to", *target, "-pages", strconv.Itoa(f.Pages), "-storage", *storage, "-memory-mib", strconv.FormatInt(*memoryMiB, 10)}
 				if *outputDir != "" {
 					args = append(args, "-output", filepath.Join(*outputDir, fmt.Sprintf("%s-w%d.%s", f.Name, i, *target)))
+				}
+				if *profileDir != "" {
+					args = append(args, "-profile-dir", filepath.Join(*profileDir, fmt.Sprintf("%s-r%d-w%d", filepath.Base(f.Name), rep, i)), "-profile-mode", *profileMode, "-mem-profile-rate", strconv.Itoa(*memRate))
 				}
 				if *large {
 					args = append(args, "-large")
@@ -237,27 +251,24 @@ func run() error {
 	}
 	return nil
 }
-func convert(path string, to manifold.Format, pages int, profile string, operationTimeout time.Duration, large bool, storage, outputPath string, memoryMiB int64) error {
+func convert(path string, to manifold.Format, pages int, profile profileConfig, operationTimeout time.Duration, large bool, storage, outputPath string, memoryMiB int64) error {
 	ctx := context.Background()
 	if operationTimeout > 0 {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, operationTimeout)
 		defer cancel()
 	}
-	if profile != "" {
-		f, e := os.Create(profile)
-		if e != nil {
-			return e
-		}
-		if e = pprof.StartCPUProfile(f); e != nil {
-			f.Close()
-			return e
-		}
-		defer func() { pprof.StopCPUProfile(); f.Close() }()
-	}
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	debug.SetMemoryLimit(memoryMiB << 20)
+	profiler, e := newDiagnosticProfiler(profile)
+	if e != nil {
+		return e
+	}
+	defer profiler.close()
+	if e = profiler.snapshot("baseline", true); e != nil {
+		return e
+	}
 	start := time.Now()
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -317,11 +328,25 @@ func convert(path string, to manifold.Format, pages int, profile string, operati
 	if large {
 		opts.PDFLimits = &manifold.PDFReadLimits{MaxDecodedBytes: 4 << 30, MaxRasterPixels: 2_000_000_000, MaxNavigationEntries: 1_000_000, MaxStructureEntries: 2_000_000, MaxParentTreeSlots: 32_000_000}
 	}
-	d, e := manifold.Read(ctx, source, format, opts)
+	var d *manifold.Document
+	var readSeconds float64
+	e = profiler.phase(ctx, "read", func(stageCtx context.Context) error {
+		beginRead = time.Now()
+		var err error
+		d, err = manifold.Read(stageCtx, source, format, opts)
+		readSeconds = time.Since(beginRead).Seconds()
+		return err
+	})
 	if e != nil {
 		return e
 	}
-	readSeconds := time.Since(beginRead).Seconds()
+	if e = profiler.snapshot("read_end", false); e != nil {
+		return e
+	}
+	if e = profiler.snapshot("read_live", true); e != nil {
+		return e
+	}
+	runtime.KeepAlive(d)
 	textBytes, paragraphs := 0, 0
 	pictures, breaks := 0, 0
 	var walk func([]manifold.Block)
@@ -387,10 +412,23 @@ func convert(path string, to manifold.Format, pages int, profile string, operati
 	hash := sha256.New()
 	destination = io.MultiWriter(destination, hash)
 	beginWrite := time.Now()
-	e = manifold.Write(ctx, destination, d, to, manifold.WriteOptions{AllowLossy: true})
+	var writeSeconds float64
+	e = profiler.phase(ctx, "write", func(stageCtx context.Context) error {
+		beginWrite = time.Now()
+		err := manifold.Write(stageCtx, destination, d, to, manifold.WriteOptions{AllowLossy: true})
+		writeSeconds = time.Since(beginWrite).Seconds()
+		return err
+	})
 	if e != nil {
 		return e
 	}
+	if e = profiler.snapshot("write_end", false); e != nil {
+		return e
+	}
+	if e = profiler.snapshot("write_live", true); e != nil {
+		return e
+	}
+	runtime.KeepAlive(d)
 	outputBytes := int64(out.Len())
 	if outputFile != nil {
 		st, e := outputFile.Stat()
@@ -414,9 +452,16 @@ func convert(path string, to manifold.Format, pages int, profile string, operati
 	peak = max(peak, after.HeapAlloc)
 	finalPeak := peak
 	mu.Unlock()
-	emit(map[string]any{"stage": "complete", "read_seconds": readSeconds, "write_seconds": time.Since(beginWrite).Seconds(), "total_seconds": time.Since(start).Seconds(), "output_bytes": outputBytes, "output_sha256": fmt.Sprintf("%x", hash.Sum(nil)), "storage": storage, "sampled_peak_heap_mib": float64(finalPeak) / (1 << 20), "allocated_mib": float64(after.TotalAlloc-before.TotalAlloc) / (1 << 20), "gc_cycles": after.NumGC - before.NumGC, "gc_pause_ms": float64(after.PauseTotalNs-before.PauseTotalNs) / 1e6})
+	emit(map[string]any{"stage": "complete", "read_seconds": readSeconds, "write_seconds": writeSeconds, "total_seconds": time.Since(start).Seconds(), "output_bytes": outputBytes, "output_sha256": fmt.Sprintf("%x", hash.Sum(nil)), "storage": storage, "sampled_peak_heap_mib": float64(finalPeak) / (1 << 20), "allocated_mib": float64(after.TotalAlloc-before.TotalAlloc) / (1 << 20), "gc_cycles": after.NumGC - before.NumGC, "gc_pause_ms": float64(after.PauseTotalNs-before.PauseTotalNs) / 1e6})
 	runtime.KeepAlive(data)
 	runtime.KeepAlive(d)
 	runtime.KeepAlive(out)
+	d = nil
+	data = nil
+	source = nil
+	out = bytes.Buffer{}
+	if e = profiler.snapshot("released", true); e != nil {
+		return e
+	}
 	return nil
 }

@@ -106,3 +106,9 @@ with the former implementation maps and qualification ledger.
     conversion jobs/s; retain poor concurrency scaling and default-policy rejections
     alongside successes. Do not advertise HTTP/service or universal visual parity.
     v0.4.0 publication continues through the existing gated VERSION workflow.
+
+- 2026-11-25: Investigate huge-original CPU and memory with stage-separated pprof
+  runs before selecting optimizations. Separate CPU runs from forced-GC heap runs;
+  distinguish cumulative allocation churn, live model retention and post-release
+  residue. Preserve original hashes, large-policy limits and process RSS/deadline
+  controls. Profiling remains development tooling, with no production codec change.

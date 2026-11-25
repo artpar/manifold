@@ -146,3 +146,9 @@ is retained. A ToUnicode U+FFFD placeholder may resolve only through a declared
 source Encoding glyph name, with a separate diagnostic. Unknown Unicode is never
 inferred from GIDs/family names; supported embedded CFF outlines may form span
 images. See [measured qualification](verification/HUGE_QUALIFICATION.md).
+
+The diagnostic runner's `-profile-dir` creates an isolated directory for each
+child. `-profile-mode cpu` captures separate read/write CPU profiles; memory mode
+captures cumulative allocations and sampled live heaps before/read/write/release.
+Forced live snapshots run two GC cycles and keep the document alive explicitly.
+They are diagnostic runs, not replacements for uninstrumented capacity results.
