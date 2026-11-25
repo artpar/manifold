@@ -53,3 +53,9 @@ with the former implementation maps and qualification ledger.
     compatibility. Do not flatten slide geometry into document SF or advertise
     cross-format conversion without an explicit mapping and qualification.
     Use the existing CI/release pipeline and retain embedded font/dependency notices.
+
+12. **Measured performance boundaries.** Use a pure-Go public-API load harness
+    with immutable inputs, request-owned state, bounded overload queues, latency
+    histograms, allocation/GC measurements and separate profiling/race runs. Report
+    hardware/workload/limits and successful jobs per second; do not present embedded
+    operation throughput as an unmeasured HTTP service capacity or fidelity claim.

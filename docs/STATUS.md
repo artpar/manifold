@@ -106,3 +106,13 @@ encode the same image-replacement specification; assertions/expected bytes are
 unchanged. All production paths and imported renderer oracles remain unchanged.
 Release builds now stamp the presentation version from VERSION. Hosted checks
 must pass on the resulting commit before automatic v0.2.0 publication.
+
+## Performance qualification (in progress)
+
+The user requested a plan and actual load/stress testing with bottlenecks and TPS.
+The baseline is this M1 Max desktop. tools/loadtest implements public-API jobs,
+closed-loop concurrency sweeps, bounded open-loop overload, latency/heap/GC metrics
+and optional profiles. docs/PERFORMANCE.md records the plan, measurement semantics
+and limits. Initial fixture/scout checks run; repeated matrix, soak/overload,
+profiling and final capacity evidence remain pending. Production conversion code
+and reference inputs/oracles are unchanged.
