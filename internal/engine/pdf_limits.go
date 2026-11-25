@@ -3,11 +3,11 @@ package engine
 import "fmt"
 
 func resolvePDFReadLimits(opts *PDFReadLimits) (PDFReadLimits, error) {
-	out := PDFReadLimits{MaxDecodedBytes: maxPDFDecodedBytes, MaxRasterPixels: maxPDFRasterPixels, MaxNavigationEntries: 100000}
+	out := PDFReadLimits{MaxDecodedBytes: maxPDFDecodedBytes, MaxRasterPixels: maxPDFRasterPixels, MaxNavigationEntries: 100000, MaxStructureEntries: 200000}
 	if opts == nil {
 		return out, nil
 	}
-	if opts.MaxDecodedBytes < 0 || opts.MaxRasterPixels < 0 || opts.MaxNavigationEntries < 0 || opts.MaxNavigationEntries > maxPDFNavigationEntries {
+	if opts.MaxStructureEntries < 0 || opts.MaxStructureEntries > 10_000_000 || opts.MaxDecodedBytes < 0 || opts.MaxRasterPixels < 0 || opts.MaxNavigationEntries < 0 || opts.MaxNavigationEntries > maxPDFNavigationEntries {
 		return out, fmt.Errorf("invalid PDF read limits")
 	}
 	if opts.MaxDecodedBytes > 0 {
@@ -18,6 +18,9 @@ func resolvePDFReadLimits(opts *PDFReadLimits) (PDFReadLimits, error) {
 	}
 	if opts.MaxNavigationEntries > 0 {
 		out.MaxNavigationEntries = opts.MaxNavigationEntries
+	}
+	if opts.MaxStructureEntries > 0 {
+		out.MaxStructureEntries = opts.MaxStructureEntries
 	}
 	return out, nil
 }
@@ -38,4 +41,11 @@ func (r *pdfReader) navigationLimit() int {
 		return r.limits.MaxNavigationEntries
 	}
 	return 100000
+}
+
+func (r *pdfReader) structureLimit() int {
+	if r.limits.MaxStructureEntries > 0 {
+		return r.limits.MaxStructureEntries
+	}
+	return 200000
 }

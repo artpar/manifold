@@ -122,3 +122,23 @@ and all 15 native equations. The normal Go suite passes after this checkpoint.
 The IPCC original consumes more than 500M aggregate raster pixels (guard at page
 1566); the opt-in huge policy is now 2B, with the same external RSS/deadline guards.
 Default policy is unchanged; this guard rejection remains recorded in scout logs.
+
+## Logical-structure work policy (in progress)
+
+IPCC full page interpretation now completes, then the original tagged tree exceeds
+200,000 attribute-work entries. `PDFReadLimits.MaxStructureEntries` (CLI
+`-pdf-max-structure`) makes the existing structure/ParentTree/reference/attribute
+work limits explicit. Zero retains 200,000; the maximum accepted policy is 10M.
+Depth/cycle/owner/reference validation is retained. The huge profile opts into 2M
+structure entries. Unit checks verify unchanged defaults, policy ceilings and
+actual attribute-work enforcement. A new diagnostic scout uses 8 GiB Go soft
+memory / 12 GiB external RSS after smaller policies exposed GC pressure. Neither
+that scout nor concurrently running QA is a final throughput measurement.
+
+Both Word independent audits now verify **zero missing normalized source
+characters**, zero missing native equation structures, and all original diagram
+hashes. Extra 20 source discretionary-hyphen displays are retained. MuPDF-vs-SF
+PDF character inventories are under review; these compare representations, not
+page visual parity. Original mask composites and CFF outline contact sheets have
+been independently rendered and visually checked; source/recovered glyph shapes
+agree in the inspected original page-98 spans.

@@ -46,6 +46,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	pdfSkipStructure := fs.Bool("pdf-skip-structure", false, "ignore PDF logical tags; use with -pdf-skip-inference for physical paint inspection")
 	pdfDecodedMiB := fs.Int("pdf-max-decoded-mib", 0, "aggregate PDF decoded-work limit in MiB; 0 uses conservative default")
 	pdfRasterPixels := fs.Int64("pdf-max-raster-pixels", 0, "aggregate PDF raster-work limit; 0 uses conservative default")
+	pdfStructure := fs.Int("pdf-max-structure", 0, "PDF logical structure work-entry limit; 0 uses conservative default")
 	pdfNavigation := fs.Int("pdf-max-navigation", 0, "PDF navigation entry limit; 0 uses conservative default")
 	var fontMaps, fontFiles repeatedFlag
 	fs.Var(&fontMaps, "pdf-font-map", "explicit requested=target font family mapping (repeatable)")
@@ -83,11 +84,11 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 		}
 	}
 	opts := manifold.ReadOptions{PDFSkipInference: *pdfSkipInference, PDFSkipStructure: *pdfSkipStructure}
-	if *pdfDecodedMiB < 0 || *pdfDecodedMiB > int(^uint(0)>>1)>>20 || *pdfRasterPixels < 0 || *pdfNavigation < 0 {
+	if *pdfDecodedMiB < 0 || *pdfDecodedMiB > int(^uint(0)>>1)>>20 || *pdfRasterPixels < 0 || *pdfNavigation < 0 || *pdfStructure < 0 {
 		return fmt.Errorf("invalid PDF read limits")
 	}
-	if *pdfDecodedMiB != 0 || *pdfRasterPixels != 0 || *pdfNavigation != 0 {
-		opts.PDFLimits = &manifold.PDFReadLimits{MaxDecodedBytes: *pdfDecodedMiB << 20, MaxRasterPixels: *pdfRasterPixels, MaxNavigationEntries: *pdfNavigation}
+	if *pdfDecodedMiB != 0 || *pdfRasterPixels != 0 || *pdfNavigation != 0 || *pdfStructure != 0 {
+		opts.PDFLimits = &manifold.PDFReadLimits{MaxDecodedBytes: *pdfDecodedMiB << 20, MaxRasterPixels: *pdfRasterPixels, MaxNavigationEntries: *pdfNavigation, MaxStructureEntries: *pdfStructure}
 	}
 
 	if *passwordEnv != "" {

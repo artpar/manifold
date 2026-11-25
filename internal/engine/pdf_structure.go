@@ -471,7 +471,7 @@ func (s *pdfStructureRecovery) validateParentTree(value types.Object, kids []*pd
 			return 0, 0, err
 		}
 		count++
-		if depth > 64 || count > 200000 {
+		if depth > 64 || count > s.reader.structureLimit() {
 			return 0, 0, fmt.Errorf("ParentTree exceeds nesting/entry limit")
 		}
 		if ref, ok := value.(types.IndirectRef); ok {
@@ -491,12 +491,12 @@ func (s *pdfStructureRecovery) validateParentTree(value types.Object, kids []*pd
 		min, max := -1, -1
 		if d["Nums"] != nil {
 			nums, e := s.reader.pdf.DereferenceArray(d["Nums"])
-			if e != nil || nums == nil || len(nums)%2 != 0 || len(nums) > 400000 {
+			if e != nil || nums == nil || len(nums)%2 != 0 || len(nums) > 2*s.reader.structureLimit() {
 				return 0, 0, fmt.Errorf("invalid ParentTree Nums")
 			}
 			for i := 0; i < len(nums); i += 2 {
 				count++
-				if count > 200000 {
+				if count > s.reader.structureLimit() {
 					return 0, 0, fmt.Errorf("ParentTree exceeds entry limit")
 				}
 				key, e := s.reader.pdf.DereferenceInteger(nums[i])
@@ -514,7 +514,7 @@ func (s *pdfStructureRecovery) validateParentTree(value types.Object, kids []*pd
 			}
 		} else if d["Kids"] != nil {
 			children, e := s.reader.pdf.DereferenceArray(d["Kids"])
-			if e != nil || len(children) == 0 || len(children) > 200000 {
+			if e != nil || len(children) == 0 || len(children) > s.reader.structureLimit() {
 				return 0, 0, fmt.Errorf("invalid ParentTree Kids")
 			}
 			for _, child := range children {
@@ -673,7 +673,7 @@ func (s *pdfStructureRecovery) validateParentTree(value types.Object, kids []*pd
 		if array, ok := obj.(types.Array); ok {
 			arrayEntries[key] = true
 			count += len(array)
-			if count > 400000 {
+			if count > 2*s.reader.structureLimit() {
 				return fmt.Errorf("ParentTree exceeds owner slot limit")
 			}
 			for mcid, v := range array {
@@ -912,8 +912,8 @@ func (s *pdfStructureRecovery) parse(value types.Object, page int, parent string
 		return nil, fmt.Errorf("structure nesting exceeds 64")
 	}
 	s.nodes++
-	if s.nodes > 200000 {
-		return nil, fmt.Errorf("structure exceeds 200000 entries")
+	if s.nodes > s.reader.structureLimit() {
+		return nil, fmt.Errorf("structure exceeds %d entries", s.reader.structureLimit())
 	}
 	id := ""
 	if ref, ok := value.(types.IndirectRef); ok {
@@ -1035,8 +1035,8 @@ func (s *pdfStructureRecovery) parse(value types.Object, page int, parent string
 			}
 			for _, value := range refs {
 				s.referenceTotal++
-				if s.referenceTotal > 200000 {
-					return nil, fmt.Errorf("structure Ref graph exceeds 200000 targets")
+				if s.referenceTotal > s.reader.structureLimit() {
+					return nil, fmt.Errorf("structure Ref graph exceeds %d targets", s.reader.structureLimit())
 				}
 				ref, ok := value.(types.IndirectRef)
 				if !ok {
@@ -1207,8 +1207,8 @@ func (s *pdfStructureRecovery) attributeWork() error {
 		return err
 	}
 	s.attributeTotal++
-	if s.attributeTotal > 200000 {
-		return fmt.Errorf("structure attributes exceed 200000 work entries")
+	if s.attributeTotal > s.reader.structureLimit() {
+		return fmt.Errorf("structure attributes exceed %d work entries", s.reader.structureLimit())
 	}
 	return nil
 }

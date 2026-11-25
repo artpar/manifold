@@ -238,6 +238,7 @@ type PDFReadLimits struct {
 	MaxDecodedBytes      int   `json:"max_decoded_bytes,omitempty"`
 	MaxRasterPixels      int64 `json:"max_raster_pixels,omitempty"`
 	MaxNavigationEntries int   `json:"max_navigation_entries,omitempty"`
+	MaxStructureEntries  int   `json:"max_structure_entries,omitempty"`
 }
 type ReadOptions struct {
 	PDFLimits *PDFReadLimits
