@@ -199,3 +199,11 @@ The derived 1,186,617,547-byte C++ SF was read back through the central API and
 written with **identical SHA-256** (96bae814…): read 50.90s, read+write 70.37s during
 concurrent QA. This is persistence QA, not a quiet capacity measurement. The opt-in
 `TestHugeOriginalDerivedSFRead` keeps a Go soft limit and validates the entire graph.
+
+The next full IPCC attempt exposed U+0008 from decoded glyph text after the
+ActualText repair. Font decoding now rejects XML-forbidden declared codepoints
+before they enter the model, allowing the already-qualified embedded-CFF outline
+preservation path instead of a late model failure. No source Unicode is guessed;
+fonts without supported outline preservation still reject. Focused font/control
+checks pass; the original full-document rerun is pending. Run-text validation errors
+now include source page/font context to make any remaining source failure actionable.

@@ -270,3 +270,10 @@ func TestPDFUnrepresentableActualTextRetainsPaintedContentAndOriginalBytes(t *te
 	}
 	assertRecoverySF(t, d)
 }
+
+func TestPDFDeclaredControlMappingCannotEnterTextModel(t *testing.T) {
+	f := pdfFont{name: "source-font", mapping: &unicodeMap{spaces: []codeRange{{size: 1, low: 0, high: 255}}, chars: map[string]string{"A": "\b"}}}
+	if _, err := f.decode([]byte("A")); err == nil {
+		t.Fatal("unrepresentable declared codepoint entered text model")
+	}
+}

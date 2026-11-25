@@ -548,6 +548,9 @@ func (d *Document) Validate() error {
 					return err
 				}
 				if err := validateString(r.Text); err != nil {
+					if r.Source != nil {
+						return fmt.Errorf("run on page %d font %s: %w", r.Source.Page, r.Source.Font, err)
+					}
 					return err
 				}
 				if err := validateString(r.Link); err != nil {

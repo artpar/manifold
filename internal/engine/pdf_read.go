@@ -1400,7 +1400,17 @@ type pdfFont struct {
 	cidWidthOverlap                                                bool
 }
 
-func (f *pdfFont) decode(b []byte) (string, error) {
+func (f *pdfFont) decode(b []byte) (text string, err error) {
+	// A declared mapping to XML-forbidden controls cannot enter the shared text
+	// model. The caller may preserve genuine embedded outlines instead.
+	defer func() {
+		if err == nil {
+			if invalid := validateString(text); invalid != nil {
+				err = fmt.Errorf("%w: font %s maps source codes to unrepresentable text: %v", ErrUnsupported, f.name, invalid)
+			}
+		}
+	}()
+
 	if f.mapping != nil {
 		text, err := f.mapping.decode(b)
 		if err == nil || f.composite || len(f.explicitEncoding) == 0 {
