@@ -2044,3 +2044,13 @@ extent. A shared finite comparison budget and pre-mutation ownership plan keep
 ambiguous/exhausted content visible. PDF_UNTAGGED_NOTES.md records the exact
 single-paragraph scope, original-source/independent checks and remaining rich-body
 work. No new dependency, runtime process, app policy or public schema was added.
+
+## Rich geometric note-body ownership
+
+After reciprocal link qualification, pdf_infer_note_extent.go plans same-page rich
+body ownership using separator/leading-note-page evidence and coherent physical
+flow. Cached nested source facts share the inference work budget; note/citation
+roots remain boundaries. Complete plans precede mutation, preserving child block
+roles, glyph geometry, assets and navigation while disclosing inferred ownership.
+PDF_NOTE_CONTINUATION.md records public round trips, actual source/reader/visual
+checks and the remaining cross-page/long-note and final-audit work.

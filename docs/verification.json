@@ -8024,5 +8024,78 @@
     "word_reader": "LibreOffice independently renders all four generated DOCX files; both pypdf/MuPDF require their actual note body and one/two-page counts. Last-page contact sheet inspected; no observed missing notes or clipping. Optional --word-render checks remain reproducible.",
     "prosemirror": "Actual pinned ProseMirror validates118 nodes and all marks/attributes across four new SF profiles.",
     "next_source_failure": "Independent LibreOffice export of the explicitly synthetic POI-footnote extension owns two paragraphs, including a24pt-separated italic continuation. Current geometric graph links only first snoska paragraph, retaining the visible italic continuation in main flow. generate_pdf_note_continuation_probe.py --check fails the unchanged authored two-paragraph graph oracle; next implementation, not external blocker or unsupported-feature exception."
+  },
+  "pdf_rich_note_continuation": {
+    "date": "2026-11-25",
+    "goal": "active/incomplete",
+    "behavior": "Plan rich same-page continuation after reciprocal note relationships, using separator-backed footnote zones or leading endnote pages. Keep paragraphs/headings/lists/tables/pictures as blocks with source/styles/assets. Distinct roots remain boundaries; coherent later notes inherit shared separator zones. Cache nested physical facts, sort root plans stably, share inference work bound and finish plans before graph mutation.",
+    "uncertainty": "Ownership remains inferred with evidence pdf_note_reciprocal_views;separated_note_zone_continuation and heuristic confidence0.7. Original child role facts, glyph text/font/color/matrices/quads/baselines/paint order, image pixels and physical links/views persist. Unqualified or conflicting/page-crossing content remains in flow with diagnostics. No new API/schema/dependency, runtime process/service/CGO, application policy or proprietary code.",
+    "default_tests": "Both raw-object foot/endnote profiles retain five body blocks: leading body, bold blue URI paragraph,2x2 A/B/C/D table, centered red/blue2x1 raster, tail. Exact SF/gzip/JSON and normalized DOCX semantics; complete physical glyph/source inventory and annotations; no-separator/column/gap/small-footer barriers; two shared-separator notes with five whole-JSON determinism reads; five budget exhaustion stages include extent planning. Existing malformed/graph/view tests unchanged.",
+    "source_oracle": "At eb4573e, original-owned two-paragraph synthetic POI derivative kept the italic second paragraph outside its note. Current strict generator --check passes unchanged body/paragraph/kind/style expectations; pinned actual Word fixture bytes unchanged. This is an explicitly synthetic extension, not an unchanged real export.",
+    "independent": {
+      "footnote": {
+        "physical_pages": 1,
+        "glyphs": 46,
+        "note_blocks": 5,
+        "table": "2x2 A/B/C/D",
+        "pixels": "red/blue exact",
+        "source": "fully untagged independent raw PDF objects",
+        "outputs": "DOCX ZIP/XML, SF reread, actual tagged native PDF reread, independent pypdf/MuPDF and renders",
+        "word_render_checked": true
+      },
+      "endnote": {
+        "physical_pages": 2,
+        "glyphs": 46,
+        "note_blocks": 5,
+        "table": "2x2 A/B/C/D",
+        "pixels": "red/blue exact",
+        "source": "fully untagged independent raw PDF objects",
+        "outputs": "DOCX ZIP/XML, SF reread, actual tagged native PDF reread, independent pypdf/MuPDF and renders",
+        "word_render_checked": true
+      },
+      "authored_docx_derivative": {
+        "note_paragraphs": 2,
+        "italic": true,
+        "source_relationship": "authored OOXML; pinned original unchanged",
+        "strict_oracle": "passed unchanged"
+      }
+    },
+    "readers": "pypdf strict checks actual untagged source dictionaries, annotations/URI and original RGB image bytes; MuPDF matches all46 painted glyph origins exactly per foot/endnote profile, actual bold/blue10pt source spans and centered image placement against model. Generated DOCX XML/relationships own table, URI and raster; actual LibreOffice opens/renders both. Native PDF source is reread through actual tagged structure into five rich blocks with styles/URI/pixels, not an embedded model cache; both PDF readers check content/navigation.",
+    "visual": "Source/native/Word note-page sheet and generated output renders inspected: all text/table cells/blue bold continuation/red-blue raster/tail remain readable with safe separation and no observed clipping. Endnotes heading, fonts/page dimensions/spacing/image alignment/table row heights differ. No Word/source print-equivalence claim.",
+    "prosemirror": "Actual pinned ProseMirror validates174 nodes with all marks/attributes across six source/DOCX/native-PDF SF artifacts.",
+    "original_regression": {
+      "scope": "complete original publication/MQTT SF byte equality against prior direct-encryption qualification",
+      "mqtt_sha256": "14742c55e8295feb0058a74cc33afe394f1ac340fa82aa422af3ad325524f526",
+      "publication_sha256": "2d630c8ff72ec594b95b67542d66bf2df13886380672f6a213e5713b8095a7b2"
+    },
+    "checks": {
+      "normal": "passed full library74.855s/CLI2.348s",
+      "race": "passed full final production go test -race -timeout20m ./... library669.569s/CLI6.919s; all packages pass. Longer budget follows the recorded parent default10m timeout; test inputs/assertions unchanged.",
+      "focused_race": "passed final TestPDFUntagged7.660s",
+      "cgo_disabled_tests": "passed final focused1.867s",
+      "vet": "passed",
+      "modules": "all modules verified; no go.mod/go.sum changes",
+      "builds": "CGO-disabled host CLI built/executed, Linux amd64/arm64 cross-built; no Linux execution claim",
+      "diff_check": "passed",
+      "malformed": "Full existing malformed input/graph/view and fuzz seed cases run in normal/race suites, plus inference-region barriers and atomic shared-budget cases. No exhaustive parser safety claim."
+    },
+    "next_source_failure": {
+      "pages": 3,
+      "expected_note_count": 1,
+      "actual_note_count": 0,
+      "expected_note_paragraphs": 2,
+      "text_complete": true,
+      "source": "explicitly synthetic long-note derivative; original fixture unchanged",
+      "strict_oracle": "fails; remains required recovery work"
+    },
+    "remaining": "Long-note placement above the current60% body-height cutoff and cross-page geometric body/paragraph continuity remain required. The new three-page independent export has zero inferred notes despite source-owned one-note/two-paragraph expectation; exact strict --cross-page --check fails and remains reproducible. Tagged fallback kind, initial parser boundary and original final source/native/API/visual acceptance remain open. No overall blocker or completion waiver.",
+    "next_commands": [
+      "cat docs/STATUS.md docs/ACCEPTANCE.md docs/PDF_NOTE_CONTINUATION.md",
+      "python3 scripts/generate_pdf_note_continuation_probe.py --cross-page",
+      "python3 scripts/generate_pdf_note_continuation_probe.py --cross-page --check output/pdf-note-continuation-crosspage/geometric.json # currently fails; render/extract commands in PDF_NOTE_CONTINUATION.md",
+      "GOWORK=off go test -run TestPDFUntagged -count=1 .",
+      "GOWORK=off go test ./...",
+      "GOWORK=off go test -race -timeout 20m ./..."
+    ]
   }
 }

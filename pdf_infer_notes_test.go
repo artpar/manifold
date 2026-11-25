@@ -161,7 +161,7 @@ func TestPDFUntaggedEndnoteOnlyPage(t *testing.T) {
 	}
 }
 func TestPDFUntaggedNoteBudgetPreservesFlow(t *testing.T) {
-	for _, remaining := range []int{0, 5, 12} {
+	for _, remaining := range []int{0, 5, 12, 14, 18} {
 		t.Run(fmt.Sprint(remaining), func(t *testing.T) {
 			source := untaggedNoteSource("")
 			d, err := ReadPDF(context.Background(), bytes.NewReader(source), ReadOptions{})

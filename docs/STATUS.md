@@ -40,18 +40,26 @@ Read COLLEAF_FORMAT.md for exact primary sources, comparison and mapping queue.
 No Colleaf or Daptin code was modified; app persistence/authorization is not part
 of the adapter. Native snapshot budgets do not become library quota gates.
 
-## Work in progress: rich inferred note-body extent
+## Latest progress: rich inferred note-body continuation
 
-The uncommitted pdf_infer_note_extent.go prototype groups coherent consecutive
-blocks in separator-backed footnote zones and leading endnote pages. The authored
-two-paragraph source oracle now passes; focused tests also preserve a bold/blue
-URI paragraph, a2x2 table, centered two-pixel raster and following text, with exact
-physical glyph/source inventory and SF/gzip/JSON/DOCX semantic round trips. Both
-foot/endnote cases and negative separator/column/gap/footer cases pass0.887s.
-Broader multi-note/continuation/source qualification and full current checks are
-still pending; the parent full race result below does not qualify this prototype.
+PDF_NOTE_CONTINUATION.md records rich continuation grouping from separator-backed
+footnote zones and leading endnote pages. The original two-paragraph source oracle
+passes unchanged. Both foot/endnote raw-source tests preserve five blocks including
+a bold blue URI,2x2 table and exact red/blue raster. Shared-separator multi-note
+boundaries, deterministic output, negative column/gap/footer cues and atomic
+budget exhaustion are qualified. Public SF/gzip/JSON/DOCX/native-PDF paths retain
+structure and assets; independent pypdf/MuPDF, actual Word rendering and174-node
+ProseMirror checks pass. The overall goal remains active/incomplete; cross-page
+and long-note geometry/kind policies and final audits remain.
+Normal tests74.855s/CLI2.348s, final focused race7.660s, CGO-disabled focused tests
+1.867s, vet/module verification and host/Linux builds pass. Full current race with
+-timeout20m passes669.569s/CLI6.919s; the677.584s parent result below is a separate
+scope. The next long-note source exports three pages and still recovers zero notes:
+its label starts above the60% placement cutoff, and page changes block geometric
+extent. PDF_NOTE_CONTINUATION.md retains the strict one-note/two-paragraph oracle
+and exact commands; do not weaken it.
 
-## Latest progress: untagged reciprocal note inference
+## Prior progress: untagged reciprocal note inference
 
 PDF_UNTAGGED_NOTES.md records geometric note graphs from matching raised labels
 and reciprocal physical GoTo views, with explicit relationship/kind/body-extent
@@ -66,7 +74,7 @@ is not completion of arbitrary rich note recovery.
 Normal tests85.087s, final focused race5.375s, vet/module verification and CGO-
 disabled host/Linux builds pass. The default full race command timed out at601.321s
 in an existing custom-font seed; the unchanged full suite with -timeout20m now
-passes at eb4573e: library677.584s/CLI4.442s. This predates current rich-extent work. Exact scopes are in verification.json.
+passes at eb4573e: library677.584s/CLI4.442s. This predates rich-extent work recorded above. Exact scopes are in verification.json.
 The goal remains active/incomplete; broader body ownership and final audits remain.
 
 ## Prior progress: direct encryption dictionaries now decrypt
@@ -690,21 +698,18 @@ QA only. Historical codec timings are retained in the verification ledger.
 
 ## Next concrete implementation order
 
-Direct Encrypt and the reciprocal single-paragraph untagged note cases are
-qualified in PDF_DIRECT_ENCRYPTION.md and PDF_UNTAGGED_NOTES.md. Broaden actual
-untagged multi-paragraph/page note ownership against original DOCX graphs,
-preserving physical source/asset/relationship oracles and inference uncertainty.
-A precise next failure is now pinned by generate_pdf_note_continuation_probe.py:
-an independently exported synthetic extension owns two footnote paragraphs, but
-geometric recovery links only the first and leaves the italic continuation visible
-in main flow. PDF_UNTAGGED_NOTES.md records the strict failing graph oracle and
-reproduction; do not weaken it. Initial parser allocations remain separate.
+Direct Encrypt and rich same-page reciprocal note continuation are qualified in
+PDF_DIRECT_ENCRYPTION.md, PDF_UNTAGGED_NOTES.md and PDF_NOTE_CONTINUATION.md.
+The strict authored two-paragraph note oracle now passes unchanged. Next extend
+source qualification to long/multi-page note placement and continuation, retaining
+original-owned graph/style/physical source expectations. Initial parser allocation,
+tagged kind fallback and the original final acceptance audit remain separate.
 
 ```sh
-cat docs/ACCEPTANCE.md docs/PDF_UNTAGGED_NOTES.md docs/REAL_DOCX_CORPUS.md
+cat docs/ACCEPTANCE.md docs/PDF_NOTE_CONTINUATION.md docs/REAL_DOCX_CORPUS.md
 GOWORK=off go test -run TestPDFUntagged -count=1 .
-python3 scripts/generate_pdf_note_continuation_probe.py
-# Render/extract and run its strict --check as in PDF_UNTAGGED_NOTES.md.
+python3 scripts/generate_pdf_note_continuation_probe.py --cross-page
+# Render/extract and run its strict --check as in PDF_NOTE_CONTINUATION.md.
 rg -n 'untagged|infer|remaining' pdf_infer.go pdf_structure_notes*.go docs/PDF_NOTES.md
 rg --files output | rg '(footnotes|endnotes).*\.pdf$'
 GOWORK=off go test -run 'TestPDF.*Note|TestGeneratedPDF|TestCLIVDOCSSemantics' -count=1 ./...

@@ -2497,3 +2497,14 @@ literal. Bound comparison work and resolve conflicts before graph mutation.
 PDF_UNTAGGED_NOTES.md qualifies actual original exports and separately identified
 untagged derivatives against independent DOCX source ownership and PDF readers;
 rich geometric continuation ownership remains required acceptance work.
+
+## 2026-11-25 Preserve rich inferred note continuations as blocks
+
+Use separator-backed footnote zones or leading endnote pages to infer coherent
+following rich blocks. Preserve their original structure, sources and assets; do
+not concatenate them into plain note text. A next qualified body inherits a shared
+zone while retaining independent identity. Cache geometry, bound nested traversal,
+stop at conflicting/unqualified evidence and plan before graph mutation. The
+original authored two-paragraph oracle remains unchanged and now passes.
+PDF_NOTE_CONTINUATION.md records the exact heuristics, uncertainty, independent
+reader/asset/source proof and remaining cross-page/long-note policy work.

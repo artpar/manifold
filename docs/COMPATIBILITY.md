@@ -1308,15 +1308,28 @@ repair or structured-recovery compatibility.
 ## Untagged reciprocal note recovery
 
 Geometric PDF recovery now recognizes a matching pair of uniquely link-owned
-raised labels with reciprocal explicit XYZ views. One leading-label paragraph
-becomes a note; later matching citations reuse it. Kind, relationship and body
+raised labels with reciprocal explicit XYZ views. A leading-label paragraph
+qualifies a note; later matching citations reuse it. Rich same-page continuation
+is now qualified separately in PDF_NOTE_CONTINUATION.md. Kind, relationship and body
 extent are explicitly inferred/diagnosed; glyph geometry and original navigation
 persist. Mismatched/ambiguous/partial/unpaired cases stay literal. PDFSkipInference
 disables this rule. Shared finite work bounds preserve unassigned flow on
-exhaustion. Multi-block/page/nested/bidirectional geometric note bodies remain
-unqualified acceptance work; explicit rich tagged recovery is separate. Read
+exhaustion. Cross-page and broader nested/bidirectional geometric ownership remain
+acceptance work; rich same-page blocks are now qualified; explicit rich tagged recovery is separate. Read
 PDF_UNTAGGED_NOTES.md for original-source, independent-reader and visual evidence.
 
 Trailing physical pages containing only moved inferred note bodies no longer leave
 empty flow pages ahead of generated notes. Pages/source evidence remain; the
 reflow boundary adjustment is explicitly diagnosed.
+
+## Rich same-page geometric note continuation
+
+Reciprocal inferred notes can now own consecutive coherent paragraphs/headings,
+lists, tables and pictures in a separator-backed footnote zone or leading endnote
+page. Shared-separator notes retain separate bodies. Original glyph/source/asset
+and physical navigation facts persist; ownership evidence/confidence and extent
+uncertainty remain explicit. Page/owner changes, incompatible geometry/type size
+or unqualified cues stop grouping and keep content in ordinary flow. Read
+PDF_NOTE_CONTINUATION.md for exact thresholds, source/reader proof and remaining
+cross-page/long-note policy and final acceptance work. No general authorial
+structure or print-fidelity guarantee follows from these heuristics.

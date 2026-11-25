@@ -1,5 +1,8 @@
 # Geometric PDF notes from reciprocal navigation
 
+This records the initial reciprocal-note milestone. PDF_NOTE_CONTINUATION.md
+contains the current rich-body extension, verification and next long-note failure.
+
 `pdf_infer_notes.go` extends geometric reconstruction without requiring Note/Ref
 structure tags. A compact raised text mark must have a uniquely owning physical
 GoTo annotation. Its explicit XYZ view must identify another uniquely owned mark
@@ -31,7 +34,9 @@ with a diagnostic; physical Pages remain recorded. This prevents an extra blank
 page before generated endnotes. A two-page independent source and public PDF
 write/read regression check the behavior.
 
-Body extent uses one recovered paragraph. Adjacent continuation ownership is
+At eb4573e, body extent used one recovered paragraph. PDF_NOTE_CONTINUATION.md
+now qualifies rich same-page continuation and shared note zones. The prior limit
+and its original failure are retained below as milestone history. Adjacent continuation ownership is
 unproven, stays visible in ordinary flow, and is explicitly diagnosed. Multi-block,
 nested, cross-page or bidirectional geometric note bodies and more ambiguous
 physical policies remain acceptance work, not completed rich-note capability.
@@ -123,7 +128,7 @@ Verification scopes/timings are recorded in verification.json. The default full
 race run hit its ten-minute deadline in an existing custom-font seed; final
 focused race passes and the unchanged full suite with -timeout20m passes at
 eb4573e: library677.584s/CLI4.442s. The original timeout remains recorded. This
-qualification predates the new rich-extent prototype. The overall goal
+qualification predates the rich-extent extension in PDF_NOTE_CONTINUATION.md. The overall goal
 remains active/incomplete. Next: broaden actual multi-paragraph/page and conflicting
 source note cases while retaining the existing physical/relationship oracles, then
 continue the source/resource/reflow/native and final acceptance audit.
@@ -141,15 +146,15 @@ recovery links only ` snoska` into the footnote; `Continuation paragraph belongs
 this footnote, with italic text.` remains visible and italic in ordinary flow.
 The body-extent diagnostic is emitted, but the required two-paragraph note graph
 is not complete. The strict source oracle failed at that milestone and must not be weakened.
-The current uncommitted rich-extent prototype passes the same authored oracle;
-full qualification of that broader implementation is still pending. This is
+PDF_NOTE_CONTINUATION.md records the new rich-extent implementation passing the
+same authored oracle, with structural/source/asset and independent-reader proof. This is
 an implementation task, not an external blocker or a completion waiver.
 
 ```sh
 python3 scripts/generate_pdf_note_continuation_probe.py
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file:///tmp/manydoc-note-continuation-qa --headless --convert-to pdf --outdir output/pdf-note-continuation output/pdf-note-continuation/continuation-source.docx
 bin/manydoc extract -pdf-skip-structure -format json -o output/pdf-note-continuation/geometric.json output/pdf-note-continuation/continuation-source.pdf
-# Failed at eb4573e; current rich-extent prototype must preserve this exact oracle.
+# Failed at eb4573e; the current rich-extent implementation passes this exact oracle.
 python3 scripts/generate_pdf_note_continuation_probe.py --check output/pdf-note-continuation/geometric.json
 ```
 

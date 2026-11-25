@@ -14,8 +14,10 @@ import xml.etree.ElementTree as ET
 
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--out',type=Path,default=Path('output/pdf-note-continuation'))
+parser.add_argument('--cross-page',action='store_true',help='author a separate long paragraph that forces independent editor continuation pages')
 parser.add_argument('--check',type=Path,help='strictly require the authored two-paragraph note graph in CLI model JSON')
 args=parser.parse_args()
+if args.cross_page and args.out==Path('output/pdf-note-continuation'):args.out=Path('output/pdf-note-continuation-crosspage')
 args.out.mkdir(parents=True,exist_ok=True)
 source=Path('testdata/real/poi-footnotes.docx')
 original=source.read_bytes()
@@ -23,6 +25,8 @@ W='http://schemas.openxmlformats.org/wordprocessingml/2006/main'
 ET.register_namespace('w',W)
 q=lambda n:'{'+W+'}'+n
 continuation='Continuation paragraph belongs to this footnote, with italic text.'
+if args.cross_page:
+    continuation=' '.join('Segment %03d belongs to the same italic footnote paragraph and retains its source relationship.' % i for i in range(1,121))
 with zipfile.ZipFile(source) as archive:
     tree=ET.fromstring(archive.read('word/footnotes.xml'))
     notes=[n for n in tree if n.get(q('type'),'normal')=='normal']
@@ -48,7 +52,7 @@ with zipfile.ZipFile(source) as archive:
         for item in archive.infolist():
             target.writestr(item,ET.tostring(tree,encoding='utf-8',xml_declaration=True) if item.filename=='word/footnotes.xml' else archive.read(item.filename))
 assert source.read_bytes()==original
-expected={'kind':'footnote','note_count':1,'body_paragraphs':[source_text,continuation],'second_paragraph_italic':True,'original_fixture_sha256':hashlib.sha256(original).hexdigest(),'profile':'synthetic extension of an unchanged pinned real fixture; not an original exported document'}
+expected={'kind':'footnote','note_count':1,'cross_page':args.cross_page,'body_paragraphs':[source_text,continuation],'second_paragraph_italic':True,'original_fixture_sha256':hashlib.sha256(original).hexdigest(),'profile':'synthetic extension of an unchanged pinned real fixture; not an original exported document'}
 (args.out/'expected.json').write_text(json.dumps(expected,indent=2)+'\n')
 print(json.dumps(expected,indent=2))
 
