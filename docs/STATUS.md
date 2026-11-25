@@ -231,3 +231,14 @@ Full original reruns, independent content/consumer checks and required regressio
 remain pending. Next: run `MANIFOLD_HUGE_WORD=1 GOWORK=off go test ./internal/engine
 -run TestHugeOriginalWordAssets -v`, finish frozen-source `tools/hugetest` runs,
 then the normal/race/vet/CGO-disabled matrix listed above. No release claim yet.
+
+### Huge-import completion scout
+
+All seven pinned originals now complete input → SF in individual diagnostic scouts,
+including the unchanged 423 MB / 2,409-page IPCC file. Intel's independent 5,057-page
+text inventory has zero missing normalized source characters; both original Word
+files preserve all diagram bytes, native equations and normalized text inventory.
+This is not a final throughput/fidelity signoff. Frozen-source regressions,
+independent remaining audits and repeated guarded original-file runs are underway.
+See the latest [repair ledger](verification/HUGE_FIXES.md) for exact scopes and raw
+local evidence; previous zero-success baseline remains historical evidence.

@@ -207,3 +207,27 @@ preservation path instead of a late model failure. No source Unicode is guessed;
 fonts without supported outline preservation still reject. Focused font/control
 checks pass; the original full-document rerun is pending. Run-text validation errors
 now include source page/font context to make any remaining source failure actionable.
+
+## All original imports complete; final qualification pending
+
+The 2026-11-25 IPCC scout completed all **2,409 physical pages**, **42,455 image
+blocks** and **90,887 paragraphs**. Read 115.99s; SF write 30.95s; total 146.97s;
+external sampled peak RSS 7,766.5 MiB. Output 1,745,726,243 bytes, SHA-256
+5e932817a98bfb317aa0b611756554e333a0abce0e717a4f25d48df7bea9a252.
+This was a diagnostic scout during independent QA, not a quiet throughput run.
+All seven pinned originals have now completed an input → SF scout; final repeated
+measurements will use one frozen implementation and explicitly recorded work policy.
+
+Intel independent MuPDF / streaming ProseMirror audit reports **zero missing
+normalized source characters** across 5,057 pages / 10,272,447 characters, including
+original normalized-list labels retained in provenance. C++ and ETSI still have
+109/138 inventory differences from MuPDF respectively, mostly source control-code
+representations; they are not being relabelled perfect textual/visual fidelity.
+Independent full IPCC/ECMA audits, original Word preservation reruns, full regression
+matrix and repeated solo/two-worker stress remain pending before completion.
+
+Earlier local race attempts overlapped source-file edits and produced mixed-build
+compiler errors (new fields/imports absent from the initial package snapshot).
+These are invalid verification attempts, not passing checks. The final matrix is
+now running on frozen source; its result will supersede those attempts. Hosted
+c3285ec full CI passed; later hosted source checks are pending.
