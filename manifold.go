@@ -241,3 +241,13 @@ func WriteStructured(ctx context.Context, w io.Writer, s *StructuredDocument) er
 func WriteVDOCS(ctx context.Context, w io.Writer, d *Document) error {
 	return engine.WriteVDOCS(ctx, w, d)
 }
+
+const PPTX = engine.PPTX
+
+type Presentation = engine.Presentation
+type PresentationSlide = engine.PresentationSlide
+type PresentationResource = engine.PresentationResource
+type SlideObject = engine.SlideObject
+type StructuredPresentation = engine.StructuredPresentation
+
+func ReadPPTX(ctx context.Context, r io.Reader) (*Document, error) { return engine.ReadPPTX(ctx, r) }

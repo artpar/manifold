@@ -17,6 +17,7 @@ type Format string
 
 const (
 	DOCX Format = "docx"
+	PPTX Format = "pptx"
 	PDF  Format = "pdf"
 	JSON Format = "json"
 	// SF is versioned ProseMirror JSON, stored with the .sf extension.
@@ -32,6 +33,7 @@ const (
 // whose structure cannot be represented. Converters reject lossy output unless
 // the caller explicitly acknowledges those diagnostics.
 type Document struct {
+	Presentation *Presentation `json:"presentation,omitempty"`
 	// UnboundSources retains original source facts without a current content owner.
 	UnboundSources    []SourceInfo   `json:"unbound_sources,omitempty"`
 	PDFNavigation     *PDFNavigation `json:"pdf_navigation,omitempty"`
@@ -254,7 +256,7 @@ func FormatFromName(name string) (Format, error) {
 	}
 	f := Format(strings.ToLower(strings.TrimPrefix(filepath.Ext(name), ".")))
 	switch f {
-	case DOCX, PDF, JSON, SF, Text, VDOCS:
+	case DOCX, PPTX, PDF, JSON, SF, Text, VDOCS:
 		return f, nil
 	}
 	return "", fmt.Errorf("%w: format %q", ErrUnsupported, f)
@@ -264,6 +266,8 @@ func Read(ctx context.Context, r io.Reader, format Format, opts ReadOptions) (*D
 		return nil, err
 	}
 	switch format {
+	case PPTX:
+		return ReadPPTX(ctx, r)
 	case VDOCS:
 		return ReadVDOCS(ctx, r)
 	case DOCX:
@@ -337,6 +341,20 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 			}
 		}
 	}
+	if d.Presentation != nil {
+		switch format {
+		case PPTX:
+			return writePPTX(ctx, w, d, opts)
+		case PDF:
+			return writePresentationPDF(ctx, w, d, opts)
+		case SF, SFGzip, JSON, Text:
+		default:
+			return fmt.Errorf("%w: presentation output %s", ErrUnsupported, format)
+		}
+	}
+	if format == PPTX {
+		return writePPTX(ctx, w, d, opts)
+	}
 	if format == DOCX || format == PDF {
 		d = resolveNumberingDocument(d)
 	}
@@ -366,6 +384,9 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 
 // Text includes body content and notes. Page boundaries are form-feed characters.
 func (d *Document) Text() string {
+	if d.Presentation != nil {
+		return presentationText(d.Presentation)
+	}
 	if d == nil {
 		return ""
 	}
@@ -440,6 +461,14 @@ func textBlocks(b *strings.Builder, blocks []Block) {
 func (d *Document) Validate() error {
 	if d == nil {
 		return errors.New("nil document")
+	}
+	if d.Presentation != nil {
+		if len(d.Blocks) > 0 || len(d.Headers) > 0 || len(d.Footers) > 0 || len(d.Notes) > 0 {
+			return errors.New("presentation and flow document content cannot coexist")
+		}
+		if err := d.Presentation.validate(); err != nil {
+			return err
+		}
 	}
 	if err := validatePDFPages(d.Pages); err != nil {
 		return err

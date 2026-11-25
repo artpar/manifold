@@ -23,18 +23,19 @@ type StructuredDocument struct {
 	Content []StructuredNode     `json:"content,omitempty"`
 }
 type StructuredAttributes struct {
-	UnboundSources         []SourceInfo     `json:"unboundSources,omitempty"`
-	PDFNavigation          *PDFNavigation   `json:"pdfNavigation,omitempty"`
-	Schema                 string           `json:"schema"`
-	Metadata               Metadata         `json:"metadata,omitempty"`
-	Layout                 Layout           `json:"layout,omitempty"`
-	Headers                []StructuredNode `json:"headers,omitempty"`
-	Footers                []StructuredNode `json:"footers,omitempty"`
-	Notes                  []StructuredNote `json:"notes,omitempty"`
-	Diagnostics            []Diagnostic     `json:"diagnostics,omitempty"`
-	Pages                  []PDFPage        `json:"pages,omitempty"`
-	EvenAndOddHeaders      bool             `json:"evenAndOddHeaders,omitempty"`
-	UnresolvedDestinations []string         `json:"unresolvedDestinations,omitempty"`
+	Presentation           *StructuredPresentation `json:"presentation,omitempty"`
+	UnboundSources         []SourceInfo            `json:"unboundSources,omitempty"`
+	PDFNavigation          *PDFNavigation          `json:"pdfNavigation,omitempty"`
+	Schema                 string                  `json:"schema"`
+	Metadata               Metadata                `json:"metadata,omitempty"`
+	Layout                 Layout                  `json:"layout,omitempty"`
+	Headers                []StructuredNode        `json:"headers,omitempty"`
+	Footers                []StructuredNode        `json:"footers,omitempty"`
+	Notes                  []StructuredNote        `json:"notes,omitempty"`
+	Diagnostics            []Diagnostic            `json:"diagnostics,omitempty"`
+	Pages                  []PDFPage               `json:"pages,omitempty"`
+	EvenAndOddHeaders      bool                    `json:"evenAndOddHeaders,omitempty"`
+	UnresolvedDestinations []string                `json:"unresolvedDestinations,omitempty"`
 }
 type StructuredNote struct {
 	BodyLabelContent []StructuredNode  `json:"body_label_content,omitempty"`
@@ -77,6 +78,11 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 		Diagnostics: append([]Diagnostic(nil), d.Diagnostics...), Pages: clonePDFPages(d.Pages),
 		UnresolvedDestinations: append([]string(nil), d.UnresolvedDestinations...),
 	}}
+	var presErr error
+	s.Attrs.Presentation, presErr = presentationToSF(d.Presentation)
+	if presErr != nil {
+		return nil, presErr
+	}
 	sort.Strings(s.Attrs.UnresolvedDestinations)
 	var err error
 	if s.Content, err = encodeSFBlocks(d.Blocks); err != nil {
@@ -299,6 +305,10 @@ func FromStructured(s *StructuredDocument) (*Document, error) {
 	}
 	d := &Document{UnboundSources: cloneUnboundSources(s.Attrs.UnboundSources), PDFNavigation: clonePDFNavigation(s.Attrs.PDFNavigation), EvenAndOddHeaders: s.Attrs.EvenAndOddHeaders, Metadata: s.Attrs.Metadata, Layout: cloneLayout(s.Attrs.Layout), Diagnostics: append([]Diagnostic(nil), s.Attrs.Diagnostics...), Pages: clonePDFPages(s.Attrs.Pages), UnresolvedDestinations: append([]string(nil), s.Attrs.UnresolvedDestinations...)}
 	var err error
+	d.Presentation, err = presentationFromSF(s.Attrs.Presentation)
+	if err != nil {
+		return nil, err
+	}
 	if d.Blocks, err = decodeSFBlocks(s.Content, 0); err != nil {
 		return nil, err
 	}

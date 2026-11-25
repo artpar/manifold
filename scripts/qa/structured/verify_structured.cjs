@@ -43,6 +43,14 @@ for (const filename of process.argv.slice(2)) {
   const input = JSON.parse(filename.toLowerCase().endsWith('.sf.gz') ? zlib.gunzipSync(bytes).toString('utf8') : bytes.toString('utf8'));
   assert.equal(input.attrs.schema, 'manydoc-prosemirror/1');
   verifyTree([input]);
+  if (input.attrs.presentation != null) {
+    const p = input.attrs.presentation;
+    assert.equal(p.version, 1);
+    assert.ok(p.width > 0 && p.height > 0);
+    function objects(items) { for (const o of items || []) { verifyTree(o.content); objects(o.children); } }
+    for (const slide of p.slides || []) { objects(slide.objects); verifyTree(slide.notes); }
+    for (const resource of p.resources || []) objects(resource.objects);
+  }
   verifyTree(input.attrs.headers);
   verifyTree(input.attrs.footers);
   for (const note of input.attrs.notes || []) {

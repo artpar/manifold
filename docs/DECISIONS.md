@@ -59,3 +59,13 @@ with the former implementation maps and qualification ledger.
     histograms, allocation/GC measurements and separate profiling/race runs. Report
     hardware/workload/limits and successful jobs per second; do not present embedded
     operation throughput as an unmeasured HTTP service capacity or fidelity claim.
+
+13. **One SF hub includes presentations.** The earlier facade-only integration
+    did not satisfy the user's intended scope. Add a typed, optional presentation
+    extension to the existing ProseMirror SF attributes and root reader/writer API.
+    Reuse SF rich-content nodes in slide objects/notes and retain native source
+    parts as provenance/preservation data, not as a competing interchange format.
+    Native PDF output must paint text/vector/image objects; no hidden whole-slide
+    bitmap conversion. Unsupported native features must round-trip unchanged or
+    reject unsupported edits/output explicitly. Performance results must be rerun
+    for this completed path rather than advertised for the superseded facade.

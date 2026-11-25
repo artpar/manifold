@@ -32,10 +32,17 @@
           "default": false,
           "validate": "boolean"
         },
-        "pdfNavigation": {"default": null},
-        "unboundSources": {"default": []},
+        "pdfNavigation": {
+          "default": null
+        },
+        "unboundSources": {
+          "default": []
+        },
         "unresolvedDestinations": {
           "default": []
+        },
+        "presentation": {
+          "default": null
         }
       }
     },
@@ -127,7 +134,11 @@
     },
     "list_marker": {
       "content": "block+",
-      "attrs": { "source": { "default": null } }
+      "attrs": {
+        "source": {
+          "default": null
+        }
+      }
     },
     "table": {
       "group": "block",
@@ -211,9 +222,16 @@
       "inline": true,
       "atom": true,
       "attrs": {
-        "label": {"default": null},
-        "label_content": {"default": null},
-        "inferred": {"default": false, "validate": "boolean"},
+        "label": {
+          "default": null
+        },
+        "label_content": {
+          "default": null
+        },
+        "inferred": {
+          "default": false,
+          "validate": "boolean"
+        },
         "id": {
           "validate": "string"
         },
@@ -290,13 +308,29 @@
     },
     "source": {
       "attrs": {
-        "historical": {"default": false, "validate": "boolean"},
-        "table_widths": {"default": null},
-        "table_spans": {"default": null},
-        "parent_element": {"default": "", "validate": "string"},
-        "structure_id": {"default": null},
-        "references": {"default": []},
-        "artifacts": {"default": []},
+        "historical": {
+          "default": false,
+          "validate": "boolean"
+        },
+        "table_widths": {
+          "default": null
+        },
+        "table_spans": {
+          "default": null
+        },
+        "parent_element": {
+          "default": "",
+          "validate": "string"
+        },
+        "structure_id": {
+          "default": null
+        },
+        "references": {
+          "default": []
+        },
+        "artifacts": {
+          "default": []
+        },
         "format": {
           "default": "pdf",
           "validate": "string"

@@ -65,3 +65,17 @@ one module, dependency graph, CI matrix and release binary. No runtime subproces
 or presentation service is introduced. Presentation package preservation and
 positioned slide objects remain distinct from the flowing SF document tree;
 no cross-format slide/SF conversion is implied. See [presentation KT](presentation/README.md).
+
+## Central SF presentation extension (qualification in progress)
+
+`Document.Presentation` is mutually exclusive with flowing root blocks. Its typed
+slides contain positioned objects with rich Block content, images and notes;
+resources identify master/layout object owners. SF stores this in the optional
+`attrs.presentation` field using the existing rich ProseMirror nodes for object
+content and notes. Original OPC parts preserve native features and are checked
+against parsed canonical objects before regenerating an edited object.
+Root Read/Write recognizes PPTX. Presentation PDF output consumes these canonical
+objects and writes searchable text, vector shapes and native images. Flow/PDF
+input can be mapped to slides with explicit lossy acknowledgement; unsupported
+layouts reject. This replaces the facade-only architectural boundary above;
+that facade remains a convenience API for source-native workflows.

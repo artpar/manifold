@@ -121,6 +121,37 @@ func Open(ctx context.Context, filePath string) (*Package, error) {
 		return nil, packageError(ErrorInvalidPackage, "read", filePath, "", err)
 	}
 
+	return FromParts(ctx, parts, filePath)
+}
+
+// OpenReader reads a bounded, in-memory PPTX package without a temporary file.
+func OpenReader(ctx context.Context, input io.Reader) (*Package, error) {
+	if input == nil {
+		return nil, errors.New("nil PPTX reader")
+	}
+	data, err := io.ReadAll(io.LimitReader(input, 256<<20+1))
+	if err != nil {
+		return nil, err
+	}
+	if len(data) > 256<<20 {
+		return nil, errors.New("PPTX compressed input exceeds 256 MiB")
+	}
+	reader, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		return nil, err
+	}
+	parts, err := readParts(ctx, reader)
+	if err != nil {
+		return nil, err
+	}
+	return FromParts(ctx, parts, "")
+}
+
+// FromParts validates package relationships and exposes the canonical slide order.
+func FromParts(ctx context.Context, parts map[string][]byte, filePath string) (*Package, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	contentTypesData, ok := parts[contentTypesPart]
 	if !ok {
 		return nil, packageError(ErrorMissingPart, "read", filePath, contentTypesPart, nil)
@@ -232,7 +263,7 @@ func OpenForSlide(ctx context.Context, filePath string, slideNumber int) (*Packa
 		if err != nil {
 			return nil, false, err
 		}
-		data, readErr := io.ReadAll(handle)
+		data, readErr := io.ReadAll(io.LimitReader(handle, 64<<20+1))
 		closeErr := handle.Close()
 		if readErr != nil {
 			return nil, false, readErr
@@ -377,7 +408,11 @@ func shouldFollowSlideRenderRelationship(partName string) bool {
 }
 
 func readParts(ctx context.Context, reader *zip.Reader) (map[string][]byte, error) {
+	if len(reader.File) > 10000 {
+		return nil, errors.New("PPTX part count exceeds 10000")
+	}
 	parts := make(map[string][]byte, len(reader.File))
+	var total uint64
 	for _, file := range reader.File {
 		if err := ctx.Err(); err != nil {
 			return nil, err
@@ -385,17 +420,30 @@ func readParts(ctx context.Context, reader *zip.Reader) (map[string][]byte, erro
 		if file.FileInfo().IsDir() {
 			continue
 		}
+		if file.UncompressedSize64 > 64<<20 || total+file.UncompressedSize64 > 256<<20 {
+			return nil, errors.New("PPTX uncompressed resource limit")
+		}
+		if _, exists := parts[file.Name]; exists {
+			return nil, errors.New("duplicate PPTX part")
+		}
+		if strings.Contains(file.Name, "\\") || strings.HasPrefix(file.Name, "/") || path.Clean(file.Name) != file.Name || strings.HasPrefix(file.Name, "../") {
+			return nil, errors.New("invalid PPTX part name")
+		}
+		total += file.UncompressedSize64
 		handle, err := file.Open()
 		if err != nil {
 			return nil, err
 		}
-		data, readErr := io.ReadAll(handle)
+		data, readErr := io.ReadAll(io.LimitReader(handle, 64<<20+1))
 		closeErr := handle.Close()
 		if readErr != nil {
 			return nil, readErr
 		}
 		if closeErr != nil {
 			return nil, closeErr
+		}
+		if len(data) > 64<<20 {
+			return nil, errors.New("PPTX part exceeds 64 MiB")
 		}
 		parts[file.Name] = data
 	}

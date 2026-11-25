@@ -116,3 +116,19 @@ and optional profiles. docs/PERFORMANCE.md records the plan, measurement semanti
 and limits. Initial fixture/scout checks run; repeated matrix, soak/overload,
 profiling and final capacity evidence remain pending. Production conversion code
 and reference inputs/oracles are unchanged.
+
+## SF presentation bridge (in progress)
+
+The user rejected a PPTX-only facade as incomplete and required SF alignment.
+PPTX now enters the root Read/Write API through a typed Presentation extension of
+the existing SF root attributes. Slides retain positioned objects, rich SF text,
+images, notes and master/layout resources; original OPC parts retain unmodeled
+features. Native-package round trips, central-SF text/geometry edits, searchable
+vector PDF output, PDF→PPTX and basic flow-SF→PPTX tests pass on synthetic fixtures.
+Full compatibility/negative tests, original-source qualification and hosted checks
+remain pending. This is not a claim of arbitrary PowerPoint rendering parity.
+The performance matrix is paused until this pipeline is qualified, then will be
+rerun including the new routes. A preliminary allocation profile identified
+repeated font parsing retained by textlayout/harfbuzz's global face-keyed shaping
+plan cache; that finding needs mitigation and a sustained recheck before capacity
+claims. Existing raw stress/profile data remains ignored under output/.

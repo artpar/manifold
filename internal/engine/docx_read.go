@@ -219,10 +219,11 @@ const strictWordNS = "http://purl.oclc.org/ooxml/wordprocessingml/main"
 const relNS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 
 type xmlNode struct {
-	Name     xml.Name
-	Attr     []xml.Attr
-	Text     string
-	Children []*xmlNode
+	rawStart, rawEnd int64
+	Name             xml.Name
+	Attr             []xml.Attr
+	Text             string
+	Children         []*xmlNode
 }
 
 func parseXML(ctx context.Context, b []byte) (*xmlNode, error) {
@@ -233,6 +234,7 @@ func parseXML(ctx context.Context, b []byte) (*xmlNode, error) {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
+		startOffset := dec.InputOffset()
 		t, err := dec.Token()
 		if err == io.EOF {
 			break
@@ -254,7 +256,7 @@ func parseXML(ctx context.Context, b []byte) (*xmlNode, error) {
 			if len(stack) > 256 {
 				return nil, errors.New("XML nesting exceeds 256 levels")
 			}
-			n := &xmlNode{Name: v.Name, Attr: v.Attr}
+			n := &xmlNode{Name: v.Name, Attr: v.Attr, rawStart: startOffset}
 			if len(stack) == 0 {
 				if root != nil {
 					return nil, errors.New("multiple XML roots")
@@ -275,6 +277,7 @@ func parseXML(ctx context.Context, b []byte) (*xmlNode, error) {
 			if len(stack) == 0 {
 				return nil, errors.New("unexpected XML closing element")
 			}
+			stack[len(stack)-1].rawEnd = dec.InputOffset()
 			stack = stack[:len(stack)-1]
 		case xml.Directive:
 			return nil, errors.New("XML directives are not supported")
