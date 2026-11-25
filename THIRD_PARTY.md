@@ -270,3 +270,31 @@ clause 14.7.5.4 and its public corrections:
 https://pdf-issues.pdfa.org/32000-2-2020/clause14.html#14754-finding-structure-elements-from-content-items
 Optional pypdf checks reuse the previously attributed original Copyright Office
 PDF and generated notes; no production dependency or proprietary code is added.
+
+## Presentation integration
+
+Presentation implementation and original tests were imported from the user's
+`artpar/puppt` repository, commit `7f8d6d0b2dab54296fde444af7f9ac6a5816a2a7`,
+at the user's request. Import paths, repository-relative test paths and CLI identity
+were adapted. Original `puppt.v1` JSON envelopes and optional `PUPPT_*` QA variables
+remain compatible. No proprietary implementation was imported.
+
+Additional runtime dependencies and notices in `third_party/licenses/`:
+
+| Module | Version | License |
+| --- | --- | --- |
+| github.com/go-text/typesetting | v0.3.4 | BSD-3-Clause / Unlicense (see upstream LICENSE) |
+| github.com/llgcode/draw2d | v0.0.0-20260422081035-c4331ac66734 | BSD-3-Clause |
+| github.com/spf13/cobra | v1.10.2 | Apache-2.0 |
+| github.com/golang/freetype | v0.0.0-20170609003504-e2365dfdc4a0 | FreeType License (chosen upstream license option) |
+| github.com/inconshreveable/mousetrap | v1.1.0 | Apache-2.0 |
+| github.com/spf13/pflag | v1.0.9 | BSD-3-Clause |
+
+The shared x/image and x/text modules advance to v0.36.0 and v0.34.0;
+their BSD notices remain included. Embedded Carlito regular/bold/italic fonts retain
+their SIL Open Font License beside the assets and in `Carlito-OFL.txt`. Release
+archives include these notices through the existing automated packaging job.
+
+The presentation rasterizer includes FreeType-Go software developed by the
+FreeType Project (https://www.freetype.org/); distributed under the FreeType License.
+The full license and required attribution are retained in `FreeType-FTL.txt`.

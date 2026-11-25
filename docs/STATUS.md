@@ -78,3 +78,18 @@ builds. New VERSION values on main automatically create a gated tag/release with
 six platform archives, licenses and verified checksums. Hosted runs/releases are
 the current result authority; see [CI/CD](CI.md). Local qualification records below
 remain historical evidence, not a substitute for the hosted result.
+
+## Presentation integration (in progress)
+
+Puppt source commit 7f8d6d0b2dab54296fde444af7f9ac6a5816a2a7 is integrated
+under internal/presentation, with public presentation API and one namespaced CLI.
+Original synthetic/structural tests and PNG renderer tests are retained. New public
+API tests cover inspect/plan/edit/validate/render and unchanged source text.
+Repository-relative QA paths were relocated; external pixel-oracle corpora are not
+present. Combined normal/race/vet/build checks and hosted CI are pending at this
+checkpoint. See presentation/README.md for scope and limitations.
+
+Next commands: GOWORK=off go test -timeout 20m ./...;
+GOWORK=off go test -race -timeout 20m ./...; GOWORK=off go vet ./...;
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold;
+git diff --check. Do not claim PPTX/SF or PPTX/PDF conversion.

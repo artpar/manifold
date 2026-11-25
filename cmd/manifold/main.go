@@ -13,6 +13,7 @@ import (
 	"syscall"
 
 	"github.com/artpar/manifold"
+	presentationcli "github.com/artpar/manifold/internal/presentation/cli"
 )
 
 func main() {
@@ -24,8 +25,11 @@ func main() {
 	}
 }
 func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
+	if len(args) > 0 && args[0] == "presentation" {
+		return presentationcli.Execute(ctx, args[1:], stdout, stderr)
+	}
 	if len(args) == 0 || args[0] == "help" || args[0] == "-h" || args[0] == "--help" {
-		fmt.Fprintln(stdout, "Usage:\n  manifold convert -o output.docx|pdf|sf|sf.gz|vdocs|json|txt [-allow-lossy] input.docx|pdf|sf|sf.gz|vdocs|json|txt\n  manifold extract [-format txt|sf|sf.gz|json] [-o output|-] input.docx|pdf|vdocs\n\nOptions precede the input filename. PDF passwords may be supplied with -password-env NAME.\nPDF fonts: -pdf-font Family[/B|I|BI]=path.ttf and -pdf-font-map Requested=Target (repeatable).")
+		fmt.Fprintln(stdout, "Usage:\n  manifold presentation inspect|plan|edit|validate|review|render|version [options]\n  manifold convert -o output.docx|pdf|sf|sf.gz|vdocs|json|txt [-allow-lossy] input.docx|pdf|sf|sf.gz|vdocs|json|txt\n  manifold extract [-format txt|sf|sf.gz|json] [-o output|-] input.docx|pdf|vdocs\n\nOptions precede the input filename. PDF passwords may be supplied with -password-env NAME.\nPDF fonts: -pdf-font Family[/B|I|BI]=path.ttf and -pdf-font-map Requested=Target (repeatable).")
 		return nil
 	}
 	command := args[0]

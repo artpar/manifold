@@ -54,3 +54,14 @@ pinned Univer snapshot. It is optional interchange with the same SF/model, not a
 second canonical representation. Application-specific validators/browser mounts
 are no longer part of QA; remaining optional SDK checks inspect actual native
 models, glyphs, plugins, edits and facade saves. See VDOCS_FORMAT.md for migration.
+
+## Presentations
+
+`presentation` exposes a public facade for PPTX inspection, planned edits,
+validation, review and PNG rendering. `internal/presentation` contains the imported
+cohesive reader/writer, model, edit/inspection workflows and raster renderer.
+The shared CLI dispatches `manifold presentation …` there. Both subsystems use
+one module, dependency graph, CI matrix and release binary. No runtime subprocess
+or presentation service is introduced. Presentation package preservation and
+positioned slide objects remain distinct from the flowing SF document tree;
+no cross-format slide/SF conversion is implied. See [presentation KT](presentation/README.md).

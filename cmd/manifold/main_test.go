@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/artpar/manifold/internal/presentation/fixtures"
 	"os"
 	"path/filepath"
 	"strings"
@@ -131,5 +132,37 @@ func TestCLIGzipStructuredPaths(t *testing.T) {
 	after, e := os.ReadFile(keep)
 	if e != nil || string(after) != "KEEP" {
 		t.Fatal("atomic output changed", e)
+	}
+}
+
+func TestPresentationCommandDispatch(t *testing.T) {
+	dir := t.TempDir()
+	input := filepath.Join(dir, "deck.pptx")
+	if err := fixtures.WriteMinimalPPTX(input, []string{"ppt/slides/slide1.xml"}); err != nil {
+		t.Fatal(err)
+	}
+	var out, errOut bytes.Buffer
+	if err := run(context.Background(), []string{"presentation", "inspect", input, "--json"}, &out, &errOut); err != nil {
+		t.Fatal(err)
+	}
+	var report struct {
+		SchemaVersion string `json:"schema_version"`
+		Status        string `json:"status"`
+		Inspection    struct {
+			SlideCount int `json:"slide_count"`
+		} `json:"inspection"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.SchemaVersion != "puppt.v1" || report.Status != "ok" || report.Inspection.SlideCount != 1 {
+		t.Fatalf("bad report: %s", out.String())
+	}
+	out.Reset()
+	if err := run(context.Background(), []string{"presentation", "--help"}, &out, &errOut); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), "manifold presentation") {
+		t.Fatalf("unexpected help: %s", out.String())
 	}
 }

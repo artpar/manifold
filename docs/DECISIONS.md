@@ -46,3 +46,10 @@ with the former implementation maps and qualification ledger.
     checks. A reviewed VERSION bump on main creates the tag, archives, checksums
     and GitHub release automatically. Release write permission is job-scoped;
     published versions are not force-moved or overwritten on ordinary pushes.
+
+11. **Integrated presentations.** At the user's request, incorporate Puppt source
+    under internal/presentation with a public presentation facade and namespaced
+    CLI. Preserve original format oracles, diagnostic contracts and puppt.v1 report
+    compatibility. Do not flatten slide geometry into document SF or advertise
+    cross-format conversion without an explicit mapping and qualification.
+    Use the existing CI/release pipeline and retain embedded font/dependency notices.

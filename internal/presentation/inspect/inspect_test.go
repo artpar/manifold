@@ -1,0 +1,221 @@
+package inspect
+
+import (
+	"bytes"
+	"context"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/artpar/manifold/internal/presentation/fixtures"
+	"github.com/artpar/manifold/internal/presentation/report"
+)
+
+func TestInspectReturnsSlideOrderAndVisibleText(t *testing.T) {
+	filePath := filepath.Join(t.TempDir(), "deck.pptx")
+	if err := fixtures.WriteMinimalPPTX(filePath, []string{"ppt/slides/slide1.xml", "ppt/slides/slide2.xml"}); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := Inspect(context.Background(), filePath)
+	if err != nil {
+		t.Fatalf("inspect failed: %v", err)
+	}
+
+	if result.SchemaVersion != "puppt.v1" {
+		t.Fatalf("unexpected schema version: %s", result.SchemaVersion)
+	}
+	if result.Command != "inspect" || result.Status != "ok" {
+		t.Fatalf("unexpected command status: %s %s", result.Command, result.Status)
+	}
+	if result.Inspection == nil {
+		t.Fatal("missing inspection")
+	}
+	if result.Inspection.SlideCount != 2 {
+		t.Fatalf("unexpected slide count: %d", result.Inspection.SlideCount)
+	}
+	if got := result.Inspection.Slides[0].Part; got != "ppt/slides/slide1.xml" {
+		t.Fatalf("unexpected first slide part: %s", got)
+	}
+	if got := result.Inspection.Slides[0].VisibleText[0].Text; got != "Slide 1" {
+		t.Fatalf("unexpected first slide text: %s", got)
+	}
+	if got := result.Inspection.Slides[0].VisibleText[0].ObjectID; got != "ppt/slides/slide1.xml#shape-2" {
+		t.Fatalf("unexpected first slide object id: %s", got)
+	}
+	if got := result.Inspection.Slides[1].VisibleText[0].Text; got != "Slide 2" {
+		t.Fatalf("unexpected second slide text: %s", got)
+	}
+	if len(result.Warnings) == 0 {
+		t.Fatal("expected partial inspection warning")
+	}
+}
+
+func TestInspectReturnsMetadataNotesImagesAndLayout(t *testing.T) {
+	filePath := filepath.Join(t.TempDir(), "rich.pptx")
+	if err := fixtures.WritePPTX(filePath, fixtures.PPTXOptions{
+		Metadata: fixtures.Metadata{
+			Title:   "Quarterly Review",
+			Creator: "Puppt Test",
+			Subject: "Inspection",
+		},
+		Slides: []fixtures.Slide{
+			{
+				PartName: "ppt/slides/slide1.xml",
+				Text:     "Summary",
+				Notes:    "Speaker note",
+				Image:    "fake png bytes",
+				Audio:    "fake audio bytes",
+				Video:    "fake video bytes",
+				OLE:      "fake ole bytes",
+				Layout:   "Title Layout",
+				Master:   "Corporate Master",
+			},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := Inspect(context.Background(), filePath)
+	if err != nil {
+		t.Fatalf("inspect failed: %v", err)
+	}
+
+	inspection := result.Inspection
+	if inspection.Metadata.Title != "Quarterly Review" {
+		t.Fatalf("unexpected title metadata: %q", inspection.Metadata.Title)
+	}
+	if inspection.Metadata.Author != "Puppt Test" {
+		t.Fatalf("unexpected author metadata: %q", inspection.Metadata.Author)
+	}
+	if inspection.Metadata.Subject != "Inspection" {
+		t.Fatalf("unexpected subject metadata: %q", inspection.Metadata.Subject)
+	}
+
+	slide := inspection.Slides[0]
+	if slide.Layout != "ppt/slideLayouts/slideLayout1.xml" {
+		t.Fatalf("unexpected layout: %q", slide.Layout)
+	}
+	if slide.LayoutName != "Title Layout" {
+		t.Fatalf("unexpected layout name: %q", slide.LayoutName)
+	}
+	if slide.Master != "ppt/slideMasters/slideMaster1.xml" {
+		t.Fatalf("unexpected master: %q", slide.Master)
+	}
+	if slide.MasterName != "Corporate Master" {
+		t.Fatalf("unexpected master name: %q", slide.MasterName)
+	}
+	if len(slide.Notes) != 1 || slide.Notes[0].Text != "Speaker note" {
+		t.Fatalf("unexpected notes: %+v", slide.Notes)
+	}
+	if len(slide.Images) != 1 {
+		t.Fatalf("unexpected images: %+v", slide.Images)
+	}
+	if slide.Images[0].Target != "ppt/media/image1.png" {
+		t.Fatalf("unexpected image target: %+v", slide.Images[0])
+	}
+	if slide.Images[0].ContentType != "image/png" {
+		t.Fatalf("unexpected image content type: %+v", slide.Images[0])
+	}
+	if slide.Images[0].Kind != "image" || slide.Images[0].Extension != "png" {
+		t.Fatalf("unexpected image classification: %+v", slide.Images[0])
+	}
+	if len(slide.Media) != 4 {
+		t.Fatalf("unexpected media refs: %+v", slide.Media)
+	}
+	seenMedia := map[string]bool{}
+	for _, media := range slide.Media {
+		seenMedia[media.Kind] = true
+	}
+	for _, want := range []string{"image", "audio", "video", "ole_object"} {
+		if !seenMedia[want] {
+			t.Fatalf("missing media kind %s in %+v", want, slide.Media)
+		}
+	}
+	if len(slide.Warnings) != 1 || slide.Warnings[0].Code != "unsupported_ole_object" {
+		t.Fatalf("unexpected slide warnings: %+v", slide.Warnings)
+	}
+}
+
+func TestInspectWarnsForUnsupportedPreservedParts(t *testing.T) {
+	filePath := filepath.Join(t.TempDir(), "unsupported.pptx")
+	if err := fixtures.WritePPTX(filePath, fixtures.PPTXOptions{
+		Slides: []fixtures.Slide{
+			{PartName: "ppt/slides/slide1.xml", Text: "Slide"},
+		},
+		ExtraParts: []fixtures.ExtraPart{
+			{Name: "ppt/vbaProject.bin", Data: []byte("macro bytes")},
+			{Name: "ppt/charts/chart1.xml", Data: []byte("<chart/>")},
+			{Name: "ppt/diagrams/data1.xml", Data: []byte("<diagram/>")},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := Inspect(context.Background(), filePath)
+	if err != nil {
+		t.Fatalf("inspect failed: %v", err)
+	}
+
+	seen := map[string]bool{}
+	for _, warning := range result.Warnings {
+		seen[warning.Code] = true
+	}
+	for _, want := range []string{"unsupported_macros", "unsupported_chart", "unsupported_diagram"} {
+		if !seen[want] {
+			t.Fatalf("missing warning %s in %+v", want, result.Warnings)
+		}
+	}
+}
+
+func TestInspectReportsRepeatedVisibleText(t *testing.T) {
+	filePath := filepath.Join(t.TempDir(), "repeated.pptx")
+	if err := fixtures.WritePPTX(filePath, fixtures.PPTXOptions{
+		Slides: []fixtures.Slide{
+			{PartName: "ppt/slides/slide1.xml", Text: "Repeat me"},
+			{PartName: "ppt/slides/slide2.xml", Text: "Repeat me"},
+			{PartName: "ppt/slides/slide3.xml", Text: "Unique"},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := Inspect(context.Background(), filePath)
+	if err != nil {
+		t.Fatalf("inspect failed: %v", err)
+	}
+
+	repeated := result.Inspection.RepeatedText
+	if len(repeated) != 1 {
+		t.Fatalf("unexpected repeated text: %+v", repeated)
+	}
+	if repeated[0].Text != "Repeat me" || repeated[0].Count != 2 {
+		t.Fatalf("unexpected repeated text result: %+v", repeated[0])
+	}
+}
+
+func TestInspectGoldenJSON(t *testing.T) {
+	filePath := filepath.Join(t.TempDir(), "minimal.pptx")
+	if err := fixtures.WriteMinimalPPTX(filePath, []string{"ppt/slides/slide1.xml"}); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := Inspect(context.Background(), filePath)
+	if err != nil {
+		t.Fatalf("inspect failed: %v", err)
+	}
+	result.Input = "testdata/minimal.pptx"
+
+	var output bytes.Buffer
+	if err := report.WriteJSON(&output, result); err != nil {
+		t.Fatalf("write json: %v", err)
+	}
+
+	golden, err := os.ReadFile(filepath.Join("testdata", "minimal.golden.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if output.String() != string(golden) {
+		t.Fatalf("golden mismatch\n--- got ---\n%s\n--- want ---\n%s", output.String(), string(golden))
+	}
+}

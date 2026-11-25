@@ -1,0 +1,329 @@
+package edit
+
+import (
+	"context"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/artpar/manifold/internal/presentation/fixtures"
+)
+
+func TestPlanReadyForObjectID(t *testing.T) {
+	deckPath := filepath.Join(t.TempDir(), "deck.pptx")
+	if err := fixtures.WriteMinimalPPTX(deckPath, []string{"ppt/slides/slide1.xml"}); err != nil {
+		t.Fatal(err)
+	}
+	specPath := writeSpec(t, `{
+  "operation": "replace_text",
+  "target": {
+    "type": "object_id",
+    "object_id": "ppt/slides/slide1.xml#shape-2"
+  },
+  "replacement": "New title"
+}`)
+
+	result, err := Plan(context.Background(), deckPath, specPath)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	if result.Status != "ok" {
+		t.Fatalf("unexpected status: %s", result.Status)
+	}
+	if result.Plan == nil || result.Plan.Status != "ready" {
+		t.Fatalf("unexpected plan: %+v", result.Plan)
+	}
+	if len(result.Plan.Matches) != 1 {
+		t.Fatalf("unexpected matches: %+v", result.Plan.Matches)
+	}
+}
+
+func TestPlanReportsAmbiguousVisibleText(t *testing.T) {
+	deckPath := filepath.Join(t.TempDir(), "deck.pptx")
+	if err := fixtures.WritePPTX(deckPath, fixtures.PPTXOptions{
+		Slides: []fixtures.Slide{
+			{PartName: "ppt/slides/slide1.xml", Text: "Repeat"},
+			{PartName: "ppt/slides/slide2.xml", Text: "Repeat"},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	specPath := writeSpec(t, `{
+  "operation": "replace_text",
+  "target": {
+    "type": "visible_text",
+    "text": "Repeat"
+  },
+  "replacement": "Updated"
+}`)
+
+	result, err := Plan(context.Background(), deckPath, specPath)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	if result.Status != "ambiguous" {
+		t.Fatalf("unexpected status: %s", result.Status)
+	}
+	if len(result.Ambiguous) != 1 {
+		t.Fatalf("expected ambiguous item: %+v", result.Ambiguous)
+	}
+}
+
+func TestPlanReportsUnsupportedOperationTarget(t *testing.T) {
+	deckPath := filepath.Join(t.TempDir(), "deck.pptx")
+	if err := fixtures.WriteMinimalPPTX(deckPath, []string{"ppt/slides/slide1.xml"}); err != nil {
+		t.Fatal(err)
+	}
+	specPath := writeSpec(t, `{
+  "operation": "update_metadata",
+  "target": {
+    "type": "visible_text",
+    "text": "Slide 1"
+  },
+  "replacement": "Updated"
+}`)
+
+	result, err := Plan(context.Background(), deckPath, specPath)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	if result.Status != "unsupported" {
+		t.Fatalf("unexpected status: %s", result.Status)
+	}
+	if len(result.Unsupported) != 1 {
+		t.Fatalf("expected unsupported item: %+v", result.Unsupported)
+	}
+}
+
+func TestPlanReportsMissingRequiredReplacement(t *testing.T) {
+	deckPath := filepath.Join(t.TempDir(), "deck.pptx")
+	if err := fixtures.WriteMinimalPPTX(deckPath, []string{"ppt/slides/slide1.xml"}); err != nil {
+		t.Fatal(err)
+	}
+	specPath := writeSpec(t, `{
+  "operation": "replace_text",
+  "target": {
+    "type": "object_id",
+    "object_id": "ppt/slides/slide1.xml#shape-2"
+  }
+}`)
+
+	result, err := Plan(context.Background(), deckPath, specPath)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	if result.Status != "unsupported" {
+		t.Fatalf("unexpected status: %s", result.Status)
+	}
+	if result.Plan.Message != "replace_text requires replacement" {
+		t.Fatalf("unexpected message: %s", result.Plan.Message)
+	}
+}
+
+func TestPlanReadyForImageReplacement(t *testing.T) {
+	deckPath := filepath.Join(t.TempDir(), "deck.pptx")
+	if err := fixtures.WritePPTX(deckPath, fixtures.PPTXOptions{
+		Slides: []fixtures.Slide{
+			{PartName: "ppt/slides/slide1.xml", Text: "Slide", Image: "old image"},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	specPath := writeSpec(t, `{
+  "operation": "replace_image",
+  "target": {
+    "type": "object_id",
+    "object_id": "ppt/slides/slide1.xml#rId1"
+  },
+  "image_path": "replacement.png"
+}`)
+
+	result, err := Plan(context.Background(), deckPath, specPath)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	if result.Status != "ok" {
+		t.Fatalf("unexpected status: %s", result.Status)
+	}
+	if result.Plan.ImagePath != "replacement.png" {
+		t.Fatalf("unexpected image path: %s", result.Plan.ImagePath)
+	}
+	if len(result.Plan.Matches) != 1 || result.Plan.Matches[0].Kind != "image" {
+		t.Fatalf("unexpected matches: %+v", result.Plan.Matches)
+	}
+}
+
+func TestPlanReportsAmbiguousImageTarget(t *testing.T) {
+	deckPath := filepath.Join(t.TempDir(), "deck.pptx")
+	if err := fixtures.WritePPTX(deckPath, fixtures.PPTXOptions{
+		Slides: []fixtures.Slide{
+			{PartName: "ppt/slides/slide1.xml", Text: "Slide 1", Image: "image 1"},
+			{PartName: "ppt/slides/slide2.xml", Text: "Slide 2", Image: "image 2"},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	specPath := writeSpec(t, `{
+  "operation": "replace_image",
+  "target": {
+    "type": "image"
+  },
+  "image_path": "replacement.png"
+}`)
+
+	result, err := Plan(context.Background(), deckPath, specPath)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	if result.Status != "ambiguous" {
+		t.Fatalf("unexpected status: %s", result.Status)
+	}
+	if len(result.Ambiguous) != 1 || len(result.Plan.Matches) != 2 {
+		t.Fatalf("unexpected ambiguous image result: %+v", result)
+	}
+}
+
+func TestPlanReadyForSimpleAdditions(t *testing.T) {
+	deckPath := filepath.Join(t.TempDir(), "deck.pptx")
+	if err := fixtures.WriteMinimalPPTX(deckPath, []string{"ppt/slides/slide1.xml"}); err != nil {
+		t.Fatal(err)
+	}
+	specPath := writeSpec(t, `{
+  "operation": "add_text_box",
+  "target": {
+    "type": "slide_number",
+    "slide_number": 1
+  },
+  "replacement": "New text"
+}`)
+
+	result, err := Plan(context.Background(), deckPath, specPath)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	if result.Status != "ok" {
+		t.Fatalf("unexpected status: %s", result.Status)
+	}
+	if result.Plan.Operation != "add_text_box" || len(result.Plan.Matches) != 1 {
+		t.Fatalf("unexpected plan: %+v", result.Plan)
+	}
+}
+
+func TestPlanRejectsTextReplacementForImageObject(t *testing.T) {
+	deckPath := filepath.Join(t.TempDir(), "deck.pptx")
+	if err := fixtures.WritePPTX(deckPath, fixtures.PPTXOptions{
+		Slides: []fixtures.Slide{
+			{PartName: "ppt/slides/slide1.xml", Text: "Slide", Image: "old image"},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	specPath := writeSpec(t, `{
+  "operation": "replace_text",
+  "target": {
+    "type": "object_id",
+    "object_id": "ppt/slides/slide1.xml#rId1"
+  },
+  "replacement": "Updated"
+}`)
+
+	result, err := Plan(context.Background(), deckPath, specPath)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	if result.Status != "unsupported" {
+		t.Fatalf("unexpected status: %s", result.Status)
+	}
+	if len(result.Unsupported) != 1 {
+		t.Fatalf("expected unsupported item: %+v", result.Unsupported)
+	}
+}
+
+func TestPlanRequiresImagePath(t *testing.T) {
+	deckPath := filepath.Join(t.TempDir(), "deck.pptx")
+	if err := fixtures.WritePPTX(deckPath, fixtures.PPTXOptions{
+		Slides: []fixtures.Slide{
+			{PartName: "ppt/slides/slide1.xml", Text: "Slide", Image: "old image"},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	specPath := writeSpec(t, `{
+  "operation": "replace_image",
+  "target": {
+    "type": "object_id",
+    "object_id": "ppt/slides/slide1.xml#rId1"
+  }
+}`)
+
+	result, err := Plan(context.Background(), deckPath, specPath)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	if result.Status != "unsupported" {
+		t.Fatalf("unexpected status: %s", result.Status)
+	}
+	if result.Plan.Message != "replace_image requires image_path" {
+		t.Fatalf("unexpected message: %s", result.Plan.Message)
+	}
+}
+
+func TestPlanReadyForSlideMove(t *testing.T) {
+	deckPath := filepath.Join(t.TempDir(), "deck.pptx")
+	if err := fixtures.WriteMinimalPPTX(deckPath, []string{"ppt/slides/slide1.xml", "ppt/slides/slide2.xml"}); err != nil {
+		t.Fatal(err)
+	}
+	specPath := writeSpec(t, `{
+  "operation": "slide_move",
+  "target": {
+    "type": "slide_number",
+    "slide_number": 1
+  },
+  "destination_slide_number": 2
+}`)
+
+	result, err := Plan(context.Background(), deckPath, specPath)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	if result.Status != "ok" {
+		t.Fatalf("unexpected status: %s", result.Status)
+	}
+	if result.Plan.DestinationSlideNumber != 2 {
+		t.Fatalf("unexpected destination: %d", result.Plan.DestinationSlideNumber)
+	}
+}
+
+func TestPlanRequiresDuplicateInsertAfterSlide(t *testing.T) {
+	deckPath := filepath.Join(t.TempDir(), "deck.pptx")
+	if err := fixtures.WriteMinimalPPTX(deckPath, []string{"ppt/slides/slide1.xml"}); err != nil {
+		t.Fatal(err)
+	}
+	specPath := writeSpec(t, `{
+  "operation": "slide_duplicate",
+  "target": {
+    "type": "slide_number",
+    "slide_number": 1
+  }
+}`)
+
+	result, err := Plan(context.Background(), deckPath, specPath)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	if result.Status != "unsupported" {
+		t.Fatalf("unexpected status: %s", result.Status)
+	}
+	if result.Plan.Message != "slide_duplicate requires insert_after_slide" {
+		t.Fatalf("unexpected message: %s", result.Plan.Message)
+	}
+}
+
+func writeSpec(t *testing.T, data string) string {
+	t.Helper()
+	filePath := filepath.Join(t.TempDir(), "edit.json")
+	if err := os.WriteFile(filePath, []byte(data), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	return filePath
+}

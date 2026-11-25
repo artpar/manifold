@@ -100,3 +100,16 @@ race checks on Linux. A new version in `VERSION` on `main` automatically creates
 the tag and release after checks pass. The pipeline builds CGO-disabled binaries
 for Linux/macOS/Windows on amd64/arm64, packages licenses and publishes checksums.
 See [CI/CD](docs/CI.md). No workstation build/upload step is needed for releases.
+
+## PowerPoint presentations
+
+Manifold also includes a pure-Go presentation API and CLI, integrated from Puppt:
+
+```sh
+manifold presentation inspect deck.pptx --json
+manifold presentation render deck.pptx --slide 1 --out slide.png --json
+```
+
+Import `github.com/artpar/manifold/presentation` for inspection, planned edits,
+validation, review and diagnostic PNG rendering. See [presentation guide](docs/presentation/README.md)
+for supported operations and limits. PPTX/SF and PPTX/PDF conversion are not yet supported.
