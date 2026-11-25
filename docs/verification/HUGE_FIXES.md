@@ -238,3 +238,16 @@ by 15 of 7,418,356 normalized characters. These are retained as observed reader
 representation differences, not silently corrected into a perfect-match claim.
 Full source audits and central Go SF read/write SHA-256 checks remain separate:
 the latter verifies exact persistence of Manifold's complete recovered graph.
+
+## Audit caught a real replacement-content loss
+
+The full IPCC audit was not accepted merely because import completed. Its 31,713
+page-inventory differences included thousands of valid TOC dot leaders: producer
+ActualText combines those dots with U+0008. Ignoring the entire invalid replacement
+(as the previous checkpoint did) dropped valid replacement characters. Correct the
+policy: retain **all XML-compatible replacement characters**, disclose controls and
+retain exact original bytes in diagnostics. When no printable replacement remains,
+retain painted glyph content instead. Structural ActualText uses the same policy;
+Alt controls remain literal escapes. A focused regression requires the original
+control-plus-dots pattern to retain its dots. The original full rerun and audit are
+pending. The earlier successful import scout is not final content qualification.

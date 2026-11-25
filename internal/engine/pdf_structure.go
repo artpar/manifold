@@ -356,7 +356,11 @@ func (r *pdfReader) beginMarked(tag string, value any, resources types.Dict) err
 				if len(raw) > 65536 {
 					return fmt.Errorf("%w: unrepresentable ActualText exceeds preservation budget", ErrUnsupported)
 				}
-				r.warnPage("pdf_actualtext_unrepresentable", fmt.Sprintf("ActualText contains controls outside the XML-compatible text model; original painted glyph content is retained instead of applying the replacement; original PDF string hex=%X", raw))
+				r.warnPage("pdf_actualtext_unrepresentable", fmt.Sprintf("ActualText contains controls outside the XML-compatible text model; valid replacement characters are retained, or painted glyph content when no printable replacement remains; original PDF string hex=%X", raw))
+				clean := xmlCompatiblePDFText(text)
+				if strings.TrimSpace(clean) != "" {
+					frame.actual = &clean
+				}
 			} else {
 				frame.actual = &text
 			}
@@ -1040,8 +1044,12 @@ func (s *pdfStructureRecovery) parse(value types.Object, page int, parent string
 					if len(raw) > 65536 {
 						return nil, fmt.Errorf("%w: unrepresentable structure text exceeds preservation budget", ErrUnsupported)
 					}
-					s.warn("pdf_structure_text_unrepresentable", fmt.Sprintf("Structure %s property %s contains controls outside the XML-compatible model; original PDF string hex=%X; painted content is retained and controls in Alt use literal Unicode escapes", n.id, entry.key, raw))
+					s.warn("pdf_structure_text_unrepresentable", fmt.Sprintf("Structure %s property %s contains controls outside the XML-compatible model; original PDF string hex=%X; valid ActualText characters are retained (or painted content if none remain), and Alt controls use literal Unicode escapes", n.id, entry.key, raw))
 					if entry.key == "ActualText" {
+						clean := xmlCompatiblePDFText(text)
+						if strings.TrimSpace(clean) != "" {
+							*entry.target = &clean
+						}
 						continue
 					}
 					var safe strings.Builder
@@ -2478,4 +2486,15 @@ func (s *pdfStructureRecovery) matchTaggedGrid(table Block, nodes []*pdfStructur
 		return table, false, true
 	}
 	return result, changed, true
+}
+
+// Retain every representable replacement character, including dot leaders and
+// math text, when unrelated producer control metadata cannot enter OOXML text.
+func xmlCompatiblePDFText(text string) string {
+	return strings.Map(func(c rune) rune {
+		if validateString(string(c)) != nil {
+			return -1
+		}
+		return c
+	}, text)
 }

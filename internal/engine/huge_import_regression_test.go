@@ -277,3 +277,13 @@ func TestPDFDeclaredControlMappingCannotEnterTextModel(t *testing.T) {
 		t.Fatal("unrepresentable declared codepoint entered text model")
 	}
 }
+
+func TestPDFControlMetadataDoesNotDiscardValidReplacementCharacters(t *testing.T) {
+	// Original IPCC TOCs contain dot leaders alongside a control character in
+	// ActualText. Ignoring the whole replacement loses thousands of valid dots.
+	d := readRecovery(t, recoveryPage(`/Span << /ActualText <FEFF0008002E002E002E> >> BDC BT /F 10 Tf 20 100 Td ( ) Tj ET EMC`, ""))
+	if d.Text() != "..." || !hasDiagnostic(d, "pdf_actualtext_unrepresentable") {
+		t.Fatalf("valid replacement lost: %q", d.Text())
+	}
+	assertRecoverySF(t, d)
+}
