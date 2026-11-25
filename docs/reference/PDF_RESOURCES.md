@@ -135,3 +135,54 @@ packed TIFF/PNG predictors are covered. PDF_SYNTAX_STREAMS.md records exact boun
 independent raw/typed/geometry oracles, original bad-checksum acceptance/fix and
 reader discrepancies. This does not bound image codecs or initial dependency
 xref/object-stream parsing; those remain separate audit paths.
+
+## Explicit large-document work policy
+
+`ReadOptions.PDFLimits` separates cumulative interpretation work from bounded
+stream-cache retention. Zero/nil fields retain conservative defaults:
+
+| Work unit | Default | Explicit policy used for original huge-file qualification |
+| --- | ---: | ---: |
+| Decoded/interpreted bytes | 256 MiB | 4 GiB |
+| Raster pixels processed | 100M | 2B |
+| Navigation entries | 100,000 | 1M |
+| Logical structure entries / attribute work | 200,000 | 2M |
+| ParentTree owner slots scanned | 400,000 | 32M |
+
+The original IPCC ParentTree contains 22M slots, mostly null; Intel contains 279,501
+named destinations. These are distinct work units, not compressed input bytes.
+Per-stream/image/depth/cycle checks and complete model/reference validation remain.
+Structure policy is capped at 10M and owner-slot policy at 100M. Navigation model
+validation also caps aggregate name bytes at 64 MiB. Cache retention is bounded to
+32 MiB / 4,096 decoded streams independently of permitted cumulative work.
+
+On the 64-bit, 32 GiB baseline, the explicit CLI policy is:
+
+```sh
+GOMEMLIMIT=8GiB manifold extract \
+  -pdf-max-decoded-mib 4096 \
+  -pdf-max-raster-pixels 2000000000 \
+  -pdf-max-navigation 1000000 \
+  -pdf-max-structure 2000000 \
+  -pdf-max-parent-slots 32000000 \
+  -format sf.gz -o recovered.sf.gz original.pdf
+```
+
+Go embedding uses the same policy:
+
+```go
+opts := manifold.ReadOptions{PDFLimits: &manifold.PDFReadLimits{
+    MaxDecodedBytes:      4 << 30,
+    MaxRasterPixels:      2_000_000_000,
+    MaxNavigationEntries: 1_000_000,
+    MaxStructureEntries:  2_000_000,
+    MaxParentTreeSlots:   32_000_000,
+}}
+doc, err := manifold.Read(ctx, source, manifold.PDF, opts)
+```
+
+This opts into work; it does not reserve memory or guarantee RSS. GOMEMLIMIT is a
+Go soft target. The stress runner adds an external sampled RSS guard and deadline.
+SF.gz is compressed SF, not another canonical representation. Native equations
+and legacy metafiles can be preserved through SF/DOCX; unsupported PDF rendering
+still rejects. See [repair qualification](../verification/HUGE_FIXES.md).
