@@ -169,3 +169,9 @@ sampled. Inspect both alloc_space/alloc_objects and inuse_space/inuse_objects.
 preserves normal buffering. Underlying write counters and child OS user/system CPU
 allow cross-checking syscall attribution. Flush errors propagate and flush time
 is included. Neither this option nor profiling changes production codec defaults.
+
+The completed five-change source/measurement snapshot is 4f32d78. See
+[comparison](verification/FIVE_OPTIMIZATIONS.md) and [evidence](verification/FIVE_OPTIMIZATIONS_RESULTS.json)
+for original-hash checks, old-binary control, diagnostic live/released heaps and
+hosted exact-source normal/race checks. Historical original and profile baselines
+remain intact; do not replace them with new expected hashes.

@@ -6,6 +6,12 @@ layout-copy churn, PNG/DEFLATE allocation, repeated SF JSON work and model reten
 The buffer A/B reduces writes 255× but write time only 3.5% in one pair; profile
 sample shares are not predicted speedups. These are diagnostics, not new capacity.
 
+The [completed five-change comparison](verification/FIVE_OPTIMIZATIONS.md)
+preserves all original SF hashes across 28 capacity jobs and ten profile jobs.
+It reports 8–46% lower mean solo latency, allocation reductions, paired capacity
+and remaining peak/live-memory costs. [Full evidence](verification/FIVE_OPTIMIZATIONS_RESULTS.json)
+keeps exact counters and profile artifacts separate from historical baselines.
+
 ## Plan and scope
 
 Baseline: the user's MacBook Pro (MacBookPro18,2), Apple M1 Max, 10 CPU cores,

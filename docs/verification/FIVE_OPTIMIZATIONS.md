@@ -3,7 +3,7 @@
 All five implementation changes are complete at **4f32d78**. Capacity qualification
 is **28/28 successful original → SF jobs**, every output byte count and SHA-256
 unchanged from v0.4.0. No work limits, schema, source facts or format fidelity
-requirements were weakened. Diagnostic CPU/live-heap comparisons are still running.
+requirements were weakened. All 10 diagnostic jobs also pass with unchanged hashes.
 
 [Complete counters and source/binary/check evidence](FIVE_OPTIMIZATIONS_RESULTS.json)
 complement this report. Before: [frozen huge qualification](HUGE_QUALIFICATION.md),
@@ -65,7 +65,7 @@ Max of two solo observations and combined sampled paired RSS, in MiB.
 Peak RSS changes are modest, with some increases (notably IPCC's paired RSS).
 The complete typed model remains large and the 8 GiB soft Go target influences
 heap growth/GC. A 77% allocation reduction is not a 77% peak-memory reduction.
-Forced-GC live-model measurements are separate and will be added below.
+Forced-GC live-model measurements are separate and appear below.
 
 ## What changed
 
@@ -145,24 +145,113 @@ actual artifacts independently of their embedded pre-commit VCS metadata.
 VERSION remains unchanged. Automated CI publication skips new assets; no existing
 release/tag is moved and no workstation release is performed.
 
-## Diagnostic comparison in progress
+## CPU and allocation-site comparison
 
-Separate CPU and two-GC heap campaigns are running on IPCC/Intel/ECMA, real Word
-i00 and the existing 4.13 GB ECMA-derived SF artifact. The latter is derived from
-the pinned publisher original, not a fabricated input. SF output uses the same
-explicit 1 MiB diagnostic caller buffer as its baseline. Instrumented timings
-will not replace the capacity figures above.
+Ten final CPU/memory jobs pass with original hashes. Captured 10 stage CPU and
+30 heap profiles, plus five derived write-allocation deltas. Raw profiles stay
+under output/pprof-opt-five; artifact digests and sampled function summaries are
+in the results JSON. CPU and memory runs remain separate. Heap sampling is 512 KiB,
+with natural stage ends and explicit two-GC live/released checkpoints. These
+instrumented timings are not replacements for capacity numbers above.
 
-Interim final-snapshot diagnostics: IPCC read sampled CPU 158.85s → 135.00s
-(gcDrain 52.39s → 35.47s); Intel 77.89s → 38.18s (navigation 9.80s → 1.46s);
-ECMA 233.57s → 75.88s (gcDrain 141.81s → 25.52s). CPU sample shares overlap and
-include idle GC; they are not kernel CPU accounting or predicted latency shares.
-Darwin sampling limitations from the baseline report still apply.
+| Read CPU profile | Sampled CPU seconds before → after | gcDrain sampled seconds before → after |
+| --- | ---: | ---: |
+| IPCC | 158.85 → 135.00 | 52.39 → 35.47 |
+| Intel | 77.89 → 38.18 | 31.54 → 11.09 |
+| ECMA | 233.57 → 75.88 | 141.81 → 25.52 |
+| ECMA-derived SF | 188.89 → 139.01 | 35.27 → 10.48 |
 
-Fresh ECMA old-control OS user+system CPU is 360.918s; optimized solo observations
-are 122.370s and 122.074s (~66% less CPU). This is an independently accounted
-whole-process measurement for that case, not inferred from pprof percentages.
+Cumulative functions overlap; idle/background GC is included. Darwin sample
+limitations from [the baseline study](HUGE_PPROF.md) remain. Samples do not equal
+wall-time shares, kernel CPU accounting or predicted speedups. Fresh ECMA control
+OS user+system CPU is **360.918s**; optimized solo observations are 122.370s and
+122.074s (~66% less CPU). This independent whole-process counter supports the
+CPU reduction for that workload.
 
-The SF CPU run retains its exact 4.13 GB hash: read 142.387s vs 167.198s,
-31.381 GiB / 356,785,739 allocations vs 95.465 GiB / 990,930,363; write 28.370s
-vs 62.941s. The separate SF live-heap run is still underway.
+- **Layout:** Intel layoutOrder drops 6.72s → 1.65s inclusive sampled CPU; ECMA
+  11.75s → 4.10s. The earlier 56.36/152.81 GiB recursive layout-copy allocations
+  disappear as dominant sites; recursive work now uses integer index slices.
+  Inference/table/run construction remains substantial.
+- **Navigation:** Intel binding drops 9.80s → 1.46s; whole quadBounds inclusive
+  samples drop 7.83s → 0.80s. Global destination/tie order and SF hash remain exact.
+- **PNG:** IPCC total PNG Encoder CPU stays ~27–28s; pooling reduces compressor
+  allocation, not the underlying compression work. Fresh flate state remains
+  significant through upstream image conversion. IPCC read allocation drops
+  119.476 → 86.027 GiB, while read latency changes little.
+- **Writing:** exact write-phase allocation drops IPCC 9.758 → 4.379 GiB, Intel
+  14.050 → 5.799 GiB, ECMA 18.170 → 6.955 GiB. Typed emission removes repeated
+  node/RawMessage/source-attribute materialization; preflight still rejects before
+  output. The source figures differ slightly from CPU-run counters, as expected.
+
+## SF reader and retained model
+
+The existing 4,132,810,817-byte ECMA SF artifact comes from the pinned original,
+not a generated dummy. CPU and heap runs both reproduce its exact hash. As in the
+baseline, these SF diagnostic runs use an explicit 1 MiB caller buffer for output.
+
+| SF diagnostic observation | Before | After |
+| --- | ---: | ---: |
+| Read seconds (CPU run) | 167.198 | 142.387 |
+| Write seconds (CPU run) | 62.941 | 28.370 |
+| Read allocated GiB (memory run) | 95.464 | 31.380 |
+| Read allocations (memory run) | 990,930,129 | 356,785,400 |
+| Read GC cycles (memory run) | 112 | 44 |
+| Write allocated GiB (memory run) | 18.174 | 6.954 |
+
+Read allocation drops ~67%, allocation count ~64%; read latency improves ~15%.
+The strict parser's per-key Unmarshal is no longer a dominant allocation site.
+Sampled Decoder.refill falls ~26.59 → 5.51 GiB; direct Unmarshal allocation
+~29.05 → 1.49 GiB. Remaining RawMessage copies stay ~8 GiB and are now a principal
+allocation site, along with remaining attrs decoders and typed tree construction.
+The implementation reduces passes/allocations; it is not a fully fused zero-copy
+SF decoder or a constant-memory document API.
+
+Exact MemStats after two GC cycles with the complete model explicitly alive:
+
+| Input | Live MiB before → after | Live heap objects before → after | Released live MiB after |
+| --- | ---: | ---: | ---: |
+| IPCC PDF | 2,727.15 → 1,928.20 | 13,037,477 → 9,975,480 | 0.698 |
+| Intel PDF | 3,649.65 → 3,520.17 | 25,500,773 → 18,590,624 | 0.688 |
+| ECMA PDF | 4,946.93 → 4,939.83 | 33,143,805 → 22,878,117 | 0.690 |
+| Word i00 DOCX | 100.80 → 100.81 | 339,925 → 339,940 | 0.691 |
+| ECMA-derived SF | 5,781.23 → 4,678.31 | 80,763,533 → 38,562,359 | 0.697 |
+
+IPCC live bytes fall ~29%; its old ~791 MiB live content-string allocation no
+longer appears among significant retained sites after names become owned. SF
+live bytes fall ~19% and object count ~52%. ECMA PDF live bytes barely change,
+while objects fall ~31%: packing geometry mainly reduces object/GC overhead, not
+its numerical payload. Word import model size is unchanged.
+
+All five observed released heaps remain under 1 MiB, but this does not establish
+RSS return, arbitrary-file bounds or unlimited same-process service behavior.
+Full typed models and provenance remain multi-GiB. Changing that floor further
+requires carefully designed representation/lifetime work, not dropping facts.
+
+## Remaining bottlenecks and reproduction
+
+The remaining measured targets are upstream image encode/decode/compression,
+PDF table/run construction, SF RawMessage copies and remaining attrs decoders.
+No higher-concurrency, HTTP, huge-PPTX or universal visual-fidelity claim follows
+from this campaign. Individual changes were not independently isolated except
+the explicitly marked layout scout; report combined gains, not additive speedups.
+
+The source snapshot is 4f32d78; later commits update reports/KT only. Binary
+hashes/build metadata are recorded because the binary was compiled before the
+checkpoint commit and embeds the preceding revision plus modified=true.
+
+```sh
+CGO_ENABLED=0 GOWORK=off go build -o bin/manifold-opt ./tools/hugetest
+bin/manifold-opt -large -memory-mib 8192 -rss-mib 12288 \
+  -storage file -repeat 2 -timeout 10m
+bin/manifold-opt -large -memory-mib 8192 -rss-mib 20480 \
+  -storage file -repeat 1 -workers 2 -timeout 15m
+go tool pprof -top -sample_index=alloc_space \
+  output/pprof-opt-five/memory/ecma376-part1-r1-w0/read_live.heap.pprof
+go tool pprof -top -sample_index=inuse_space \
+  output/pprof-opt-five/sf-memory/ecma-derived-sf-r1-w0/read_live.heap.pprof
+```
+
+[Profiling protocol](../TESTING.md#huge-original-cpu-and-heap-diagnosis) covers
+fresh profile roots, stage allocation deltas and exact caller-buffer settings.
+Raw capacity logs: output/opt-five-final-{solo,pair,default}.jsonl; the old control
+is output/opt-five-baseline-control.jsonl. All source bytes remain untracked.

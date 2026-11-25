@@ -8,14 +8,16 @@ The local checkout remains in the original `artpar/manydoc` directory.
 
 ## Current implementation
 
-The v0.4.0 implementation qualifies the seven pinned huge Internet originals for
+The v0.4.0 baseline and completed performance changes qualify seven pinned huge Internet originals for
 DOCX/PDF → canonical SF: **28/28 complete conversions**, including a 423 MB /
 2,409-page PDF and 5,057/5,039-page manuals. Two solo runs and one two-worker batch
 per source materialized 45.24 GB of SF with identical hashes across every repeat.
 Four originals also complete under default limits; the other three require the
 explicit large work policy. See [qualification](verification/HUGE_QUALIFICATION.md)
 and [full observations](verification/HUGE_RESULTS.json), including poor ECMA
-concurrency scaling, memory use and remaining fidelity boundaries.
+concurrency scaling, memory use and remaining fidelity boundaries. The completed
+five-change source 4f32d78 preserves all hashes and improves mean solo latency
+by 8–46% across these originals; see [before/after results](verification/FIVE_OPTIMIZATIONS.md).
 
 Both original Word files retain 73 preview placements / 71 byte-identical WMF/EMF
 assets and all 15/21 native equation structures through SF and DOCX. Independent
@@ -38,12 +40,13 @@ No production subprocess, service, CGO or application permission gate is added.
 
 ## Verification and delivery
 
-Frozen Go implementation `7111871` passes the full normal suite, full race suite,
-vet, CGO-disabled CLI build and diff check. Engine normal/race 20.582s/236.147s;
-facade 6.039s/78.847s; CLI 0.508s/2.983s. Final original Word preservation checks
-pass, as do RSS/deadline enforcement controls and independent source audits.
-Clean hosted Linux/macOS/Windows plus Linux race checks pass on identical code at
-[run 45621690181](https://github.com/artpar/manifold/actions/runs/45621690181).
+Final performance source `4f32d78` passes complete hosted Windows/macOS/Linux
+checks plus Linux race at [run 45653303125](https://github.com/artpar/manifold/actions/runs/45653303125).
+Local full normal/race checks pass on 7290f2d (engine 19.694s/242.273s), followed
+by focused normal/race navigation checks on the final follow-up. Final vet and
+CGO-disabled builds pass. Independent original image/glyph and Word asset/math
+checks pass; all 28 capacity and 10 diagnostic outputs preserve qualified hashes.
+Default acceptance stays 4/7; the other three still reject explicit work budgets.
 
 GitHub Actions owns publication from VERSION, gating the tag, six platform
 archives, licenses, checksums and release on the hosted matrix. The v0.4.0 source
@@ -57,55 +60,37 @@ originals. The historical huge baseline was 0/46 completed attempts; its facts
 remain in [HUGE_INPUTS.md](verification/HUGE_INPUTS.md) and PERFORMANCE.md.
 The final repaired results supersede those input blockers, not the baseline record.
 
-## Completed pprof investigation
+## Completed performance work
 
-Twelve diagnostic conversions on three huge PDF originals, a real Word control
-and qualified derived ECMA SF all retain exact output hashes. Captured 14 stage
-CPU and 30 heap profiles plus four allocation deltas. See [the full investigation](verification/HUGE_PPROF.md)
-and [counters/profile evidence](verification/HUGE_PPROF_RESULTS.json).
+The [baseline pprof investigation](verification/HUGE_PPROF.md) identified layout
+copying, repeated SF JSON decoding/encoding, PNG compressor churn and provenance
+retention. Those observations led to all five completed changes: stable page-local
+index ordering; strict key/direct typed decoding; bounded request-owned PNG reuse;
+allocation-light preflight/direct streaming SF emission; owned names, packed
+geometry, bounded immutable metadata sharing, exact run capacity and navigation
+bounds reuse. Public mutable source ownership and canonical SF bytes remain intact.
 
-Largest targets: recursive layout copies (66–78% of Intel/ECMA read allocation),
-SF key decoding / repeated decoder buffers (~991M allocations per 4.13 GB SF read),
-PNG/DEFLATE churn on IPCC, repeated SF encoding and full model retention. SF-loaded
-ECMA retains 5.65 GiB / 80.8M heap objects; PDF-import ECMA 4.83 GiB / 33.1M.
-All observed memory runs return below 1 MiB live Go heap after document release;
-that is not an RSS-return or long-lived service leak guarantee.
+[The comparison report](verification/FIVE_OPTIMIZATIONS.md) and
+[complete evidence](verification/FIVE_OPTIMIZATIONS_RESULTS.json) record 28/28
+large-policy capacity jobs plus 10/10 diagnostic jobs. Intel solo mean drops
+95.22s → 51.65s; ECMA 144.27s → 80.14s; IPCC 140.60s → 124.99s. ECMA paired
+wall drops 312.30s → 129.25s. Allocations fall 30–80% across the PDFs, while peak
+RSS changes remain modest and some increase. These are conversion jobs/s, not
+HTTP RPS or sustained maximum service capacity.
 
-Caller buffering cuts writes 255× but write time only 3.5% in one pair. Do not
-translate syscall samples into latency gains. Production codecs, VERSION and
-frozen capacity claims are unchanged. Next implement index-based page layout
-scratch, preserve exact hashes and rerun the pinned original profiles. Final
-normal/race suites (production packages cached), vet, CGO-disabled build and diff
-check pass; the new diagnostic buffering/error-propagation race test ran fresh.
+The 4.13 GB derived ECMA SF read drops 167.20s → 142.39s and allocation
+95.46 GiB → 31.38 GiB. Its live model drops 5,781 MiB / 80.8M objects to
+4,678 MiB / 38.6M objects; IPCC live model 2,727 MiB → 1,928 MiB. ECMA PDF
+live bytes stay near 4,940 MiB despite fewer objects. All observed released heaps
+remain below 1 MiB; this is not an RSS-return or long-lived service leak guarantee.
 
-## Performance implementation underway
-
-Change 1 replaces recursive wide layout copies with stable page-local index
-partitions and in-place permutation cycles. Existing geometry/table/list tests
-and 100 deterministic comparisons against the frozen previous ordering algorithm
-pass. A real ECMA conversion retains the original SF hash: read 53.88s, total
-117.71s, 63.73 GiB allocated (single intermediate run, not final qualification).
-Change 2 removes per-key JSON decoding for unescaped keys and redundant inner
-decoders; SourceInfo uses strict shape checks plus direct typed decoding. JSON/SF
-and unknown/nested-field/escaped-duplicate regression tests pass. Change 3 adds a single request-owned PNG buffer slot, bypassing large images
-and releasing it before structural recovery. Byte-identity/depth/palette and
-existing image/mask/glyph tests pass. Change 4 preflights representation restrictions without node construction, then
-emits typed inline marks directly through streaming containers. SF/citation/math
-regressions and exact-byte comparisons including lists/nested tables pass.
-Change 5 detaches retained PDF names, packs run geometry independently of mutable
-SourceInfo, interns bounded common SF metadata and reserves SF/navigation run
-capacity. Ownership/budget and targeted source/navigation/SF regressions pass.
-All five changes pass the full normal/race/vet/CGO-disabled build matrix. Fresh
-engine normal/race results are 19.694s/242.273s; original image/glyph checks pass
-(7.450s). The navigation bounds-cache follow-up also passes focused normal/race checks,
-including interleaved-page and exact tie ordering. Earlier intermediate capacity
-scouts are excluded; the final frozen snapshot is being measured afresh. Source 4f32d78 now passes
-28/28 exact-hash capacity jobs and hosted Windows/macOS/Linux plus full Linux
-race checks. Diagnostic/control comparisons remain underway.
+Source is frozen at 4f32d78; subsequent report/KT commits do not change Go code.
+VERSION remains 0.4.0: these changes are published on main, with no new release
+or existing tag moved. Publication continues through the existing VERSION workflow.
 
 ## Known boundaries and next work
 
-- Large jobs retain a complete typed model; observed solo RSS reaches ~8.6 GiB.
+- Large jobs retain a complete typed model; observed optimized solo RSS still reaches ~8 GiB.
   Extra workers can reduce throughput. Use caller admission and explicit limits;
   GOMEMLIMIT is a soft target, sampled RSS is not total OS memory.
 - Native OMML and WMF/EMF preserve through SF/DOCX; their PDF rendering remains

@@ -152,3 +152,11 @@ with the former implementation maps and qualification ledger.
 - Complete performance change 5 with page-local navigation bounds reuse, preserving
   global destination iteration and source-order ties. Restart final measurements
   on this source snapshot; exclude the pre-follow-up capacity scouts.
+
+- Completed five-change qualification at 4f32d78: 28/28 capacity and 10/10
+  diagnostic outputs retain exact original SF hashes. Report combined measured
+  gains, retain modest/negative RSS cases, unchanged default-policy rejections,
+  an old-binary control and separate CPU/live/allocated memory measurements.
+  Do not claim independent additive speedups, constant-memory APIs, HTTP capacity
+  or arbitrary-file fidelity. Source/check/profile evidence lives in the five-change
+  comparison; VERSION publication remains independent and automated.

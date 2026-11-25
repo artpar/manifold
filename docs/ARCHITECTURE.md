@@ -97,8 +97,8 @@ every span. Image masks operate in source component/sample space; uncertainty in
 device/profile color conversion remains diagnosed. The repair ledger distinguishes
 per-feature checks, original-file completion, fidelity and final capacity evidence.
 
-The internal flowing-SF writer preflights a validated model and bounded encoder
-chunks before streaming them; it does not retain a complete second SF graph and
+The internal flowing-SF writer preflights a validated model and representation
+restrictions without constructing encoder chunks, then streams typed runs/containers; it does not retain a complete second SF graph and
 a third decoded model. Public SF graph constructors/readers still validate whole
 graphs. Aggregate PDF work policy is explicit in ReadOptions.PDFLimits, independent
 of bounded decoded-stream caching; conservative zero-value defaults remain.
@@ -121,8 +121,8 @@ diagnostic. Known text remains text. This does not introduce OCR or bitmap pages
 ## Huge-file processing and caller policy
 
 Flow SF Read decodes top-level nodes into one typed model, then validates global
-references at EOF. Write validates the model and preflights all encoder chunks
-before emitting output. Public full-tree APIs still allocate a full SF tree.
+references at EOF. Write validates the model and preflights representation restrictions
+without constructing nodes before emitting output. Public full-tree APIs still allocate a full SF tree.
 Streaming reduces duplicate representations; it does not make model memory constant.
 
 PDF parsing uses a seekable caller source directly where available. A request-owned
@@ -187,7 +187,7 @@ Performance change 5: short PDF names become owned request-local strings before
 entering long-lived source metadata. Per-run Quad/Baseline/Matrix share one
 geometry allocation, independently of mutable SourceInfo (so tagged copies do
 not retain obsolete SourceInfo). Flow SF shares immutable repeated metadata
-through a request-owned 4,096-entry / 1 MiB pool, with 256-byte entry eligibility;
+through a request-owned 4,096-entry / 1 MiB string-payload pool plus map overhead, with 256-byte entry eligibility;
 visible text and unique source identities are excluded. SF and navigation reserve
 run capacities. Source objects remain distinct and public mutation semantics stay.
 
@@ -195,3 +195,9 @@ The fifth performance change also caches immutable candidate bounds lazily by
 physical page during navigation binding. Destination iteration and tolerance/
 source-order tie rules remain unchanged; page bounds are released after that
 page's final positioned destination. Region bounds are computed once per view.
+
+The completed five-change comparison is in verification/FIVE_OPTIMIZATIONS.md.
+All original/SF hashes stay exact. Allocation and object-count reductions exceed
+peak-RSS savings; complete typed models and repeated JSON attrs still define a
+large memory/CPU floor. RawMessage/remaining attrs decode and upstream PNG
+conversion remain measured targets, not optimizations already delivered.
