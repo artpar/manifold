@@ -1,0 +1,593 @@
+package engine
+
+import (
+	"bytes"
+	"compress/gzip"
+	"context"
+	"encoding/json"
+	"errors"
+	"io"
+	"os"
+	"reflect"
+	"strings"
+	"testing"
+)
+
+func codecGzip(t testing.TB, raw []byte) []byte {
+	t.Helper()
+	var b bytes.Buffer
+	g := gzip.NewWriter(&b)
+	if _, e := g.Write(raw); e != nil {
+		t.Fatal(e)
+	}
+	if e := g.Close(); e != nil {
+		t.Fatal(e)
+	}
+	return b.Bytes()
+}
+func TestStructuredCompressedSemantics(t *testing.T) {
+	ctx := context.Background()
+	for _, d := range []*Document{destinationDocument(), noteDocument(), readRecovery(t, navigationFixture(fullNavigationTree(), `/foo [6 0 R /FitH 100]`, `(foo)`))} {
+		before := canonicalSF(t, d)
+		var plain, compressed, repeated bytes.Buffer
+		for _, o := range []struct {
+			f Format
+			b *bytes.Buffer
+		}{{SF, &plain}, {SFGzip, &compressed}, {SFGzip, &repeated}} {
+			if e := Write(ctx, o.b, d, o.f, WriteOptions{}); e != nil {
+				t.Fatal(e)
+			}
+		}
+		if !bytes.Equal(compressed.Bytes(), repeated.Bytes()) {
+			t.Fatal("nondeterministic gzip metadata")
+		}
+		var compact bytes.Buffer
+		if e := json.Compact(&compact, bytes.TrimSpace(plain.Bytes())); e != nil {
+			t.Fatal(e)
+		}
+		if !bytes.Equal(compact.Bytes(), bytes.TrimSpace(plain.Bytes())) {
+			t.Fatal("SF not compact JSON")
+		}
+		z, e := gzip.NewReader(bytes.NewReader(compressed.Bytes()))
+		if e != nil {
+			t.Fatal(e)
+		}
+		raw, e := io.ReadAll(z)
+		if e != nil {
+			t.Fatal(e)
+		}
+		z.Close()
+		if !bytes.Equal(raw, plain.Bytes()) {
+			t.Fatal("gzip changed canonical JSON payload")
+		}
+		back, e := Read(ctx, bytes.NewReader(compressed.Bytes()), SFGzip, ReadOptions{})
+		if e != nil {
+			t.Fatal(e)
+		}
+		if !bytes.Equal(before, canonicalSF(t, back)) {
+			t.Fatal("compressed SF graph/provenance/asset semantics changed")
+		}
+		if !bytes.Equal(before, canonicalSF(t, d)) {
+			t.Fatal("caller mutated")
+		}
+	}
+	for name, want := range map[string]Format{"REPORT.SF.GZ": SFGzip, "report.sf": SF, "archive.json.gz": ""} {
+		got, e := FormatFromName(name)
+		if want == "" {
+			if e == nil {
+				t.Fatal("unrecognized compression accepted")
+			}
+		} else if e != nil || got != want {
+			t.Fatal(name, got, e)
+		}
+	}
+}
+func TestStructuredCompressedMalformed(t *testing.T) {
+	raw := canonicalSF(t, destinationDocument())
+	valid := codecGzip(t, raw)
+	badCRC := append([]byte(nil), valid...)
+	badCRC[len(badCRC)-8] ^= 1
+	cases := [][]byte{nil, raw, valid[:4], valid[:len(valid)-1], badCRC, append(append([]byte(nil), valid...), valid...), append(append([]byte(nil), valid...), []byte("junk")...), codecGzip(t, []byte(`{"type":"doc","attrs":{"schema":"manydoc-prosemirror/1"},"content":[{"type":"unsupported"}]}`))}
+	for i, b := range cases {
+		d, e := Read(context.Background(), bytes.NewReader(b), SFGzip, ReadOptions{})
+		if e == nil || d != nil {
+			t.Fatalf("invalid gzip/SF accepted: %d: %v", i, e)
+		}
+	}
+	_, e := Read(context.Background(), bytes.NewReader(badCRC), SFGzip, ReadOptions{})
+	if !errors.Is(e, gzip.ErrChecksum) {
+		t.Fatal("checksum error lost", e)
+	}
+	if _, e := Read(context.Background(), nil, SFGzip, ReadOptions{}); e == nil {
+		t.Fatal("nil compressed reader accepted")
+	}
+}
+
+var errCodecOutput = errors.New("codec output failure")
+
+type codecFailWriter struct{}
+
+func (codecFailWriter) Write([]byte) (int, error) { return 0, errCodecOutput }
+
+type codecShortWriter struct{}
+
+func (codecShortWriter) Write(p []byte) (int, error) { return len(p) - 1, nil }
+
+type codecCancelWriter struct{ cancel context.CancelFunc }
+
+func (w codecCancelWriter) Write(p []byte) (int, error) { w.cancel(); return len(p), nil }
+func TestStructuredCodecOutputAndAdmission(t *testing.T) {
+	for _, format := range []Format{SF, SFGzip} {
+		if e := Write(context.Background(), codecFailWriter{}, destinationDocument(), format, WriteOptions{}); !errors.Is(e, errCodecOutput) {
+			t.Fatal(format, e)
+		}
+		if e := Write(context.Background(), codecShortWriter{}, destinationDocument(), format, WriteOptions{}); !errors.Is(e, io.ErrShortWrite) {
+			t.Fatal(format, e)
+		}
+		d := destinationDocument()
+		d.UnresolvedDestinations = nil
+		var out bytes.Buffer
+		if e := Write(context.Background(), &out, d, format, WriteOptions{}); e == nil || out.Len() != 0 {
+			t.Fatal("invalid graph emitted a transport header")
+		}
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel()
+		if e := Write(ctx, &out, destinationDocument(), format, WriteOptions{}); !errors.Is(e, context.Canceled) || out.Len() != 0 {
+			t.Fatal("cancelled output emitted", e)
+		}
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	if e := Write(ctx, codecCancelWriter{cancel}, destinationDocument(), SFGzip, WriteOptions{}); !errors.Is(e, context.Canceled) {
+		t.Fatal("gzip finalization ignored cancellation", e)
+	}
+}
+func TestStructuredCompressedCorpus(t *testing.T) {
+	// The original corpus and its oracles are unchanged. Compression must preserve
+	// every declared normalized SF field, including source, notes and asset bytes.
+
+	// Unknown source diagnostics survive SF, and continue to gate rendered output.
+
+	// The corpus is independently fixed. Compare every model field, including
+	// table nesting, links, images, notes, headers, metadata and diagnostics.
+
+	// Span zero and span one have identical semantics; empty runs have none.
+
+	// JSON comparison ignores nil versus empty slices under omitempty only.
+
+	for _, c := range corpus(t) {
+		if c.Expect == "reject" {
+			continue
+		}
+		t.Run(c.Name, func(t *testing.T) {
+			f, e := FormatFromName(c.Name)
+			if e != nil {
+				t.Fatal(e)
+			}
+			d, e := Read(context.Background(), bytes.NewReader(fixture(t, c.Name)), f, ReadOptions{Password: "secret"})
+			if e != nil {
+				t.Fatal(e)
+			}
+			var b bytes.Buffer
+			if e = Write(context.Background(), &b, d, SFGzip, WriteOptions{}); e != nil {
+				t.Fatal(e)
+			}
+			got, e := Read(context.Background(), &b, SFGzip, ReadOptions{})
+			if e != nil {
+				t.Fatal(e)
+			}
+			if !reflect.DeepEqual(canonicalSF(t, d), canonicalSF(t, got)) {
+				t.Fatal("compressed corpus semantics changed")
+			}
+		})
+	}
+}
+func FuzzReadStructuredGzip(f *testing.F) {
+	raw := []byte(`{"type":"doc","attrs":{"schema":"manydoc-prosemirror/1"},"content":[{"type":"paragraph","content":[{"type":"text","text":"document"}]}]}`)
+	f.Add(codecGzip(f, raw))
+	f.Add(raw)
+	f.Add([]byte{0x1f, 0x8b})
+	f.Fuzz(func(t *testing.T, b []byte) {
+		d, e := Read(context.Background(), bytes.NewReader(b), SFGzip, ReadOptions{})
+		if e != nil {
+			return
+		}
+		if e = d.Validate(); e != nil {
+			t.Fatal(e)
+		}
+		var out bytes.Buffer
+		if e = Write(context.Background(), &out, d, SFGzip, WriteOptions{}); e != nil {
+			t.Fatal(e)
+		}
+	})
+}
+func TestStructuredSemantics(t *testing.T) {
+	p := func(s string) Block { return Block{Kind: Paragraph, Runs: []Run{{Text: s}}} }
+	d := &Document{Metadata: Metadata{Title: "Tree", Author: "Author", Subject: "Subject", PageCount: 2}, Layout: Layout{Width: 612, Height: 792, Margin: 40},
+		Headers: []Block{p("header")}, Footers: []Block{p("footer")}, Notes: []Note{{ID: "42", Kind: "footnote", Blocks: []Block{p("note")}}},
+		Diagnostics: []Diagnostic{{Code: "source", Message: "source limitation"}},
+		Blocks: []Block{
+			{Kind: Heading, Level: 2, Runs: []Run{{Text: "Title"}}},
+			{Kind: Paragraph, Runs: []Run{{Text: "all marks", Bold: true, Italic: true, Underline: true, Strike: true, Link: "https://example.invalid/?x=1&y=2"}}},
+			{Kind: ListBlock, List: "number", Items: []ListItem{{Blocks: []Block{p("one")}}, {Blocks: []Block{p("two")}}}},
+			{Kind: ListBlock, List: "bullet", Items: []ListItem{{Blocks: []Block{p("bullet")}}}},
+			{Kind: Table, Rows: []Row{{Cells: []Cell{{ColSpan: 2, Blocks: []Block{p("merged"), {Kind: Table, Rows: []Row{{Cells: []Cell{{ColSpan: 1, Blocks: []Block{p("nested")}}}}}}}}}}}},
+			{Kind: Picture, Image: &Image{Data: []byte{0, 1, 2, 255}, MediaType: "image/png", Alt: "asset", Width: 30, Height: 20}},
+			{Kind: PageBreak}, p("second page"),
+		}}
+	s, err := ToStructured(d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s.Content[1].Content[0].Type != "text" || len(s.Content[1].Content[0].Marks) != 5 {
+		t.Fatal("formatted text lost")
+	}
+	if s.Content[2].Type != "ordered_list" || len(s.Content[2].Content) != 2 {
+		t.Fatal("list grouping lost")
+	}
+	if s.Content[4].Content[0].Content[0].Type != "table_cell" {
+		t.Fatal("table structure lost")
+	}
+	var encoded bytes.Buffer
+	if err = WriteStructured(context.Background(), &encoded, s); err != nil {
+		t.Fatal(err)
+	}
+	parsed, err := ReadStructured(context.Background(), &encoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	actual, err := FromStructured(parsed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(d, actual) {
+		t.Fatalf("semantics changed\nwant %#v\ngot %#v", d, actual)
+	}
+
+	if err = Write(context.Background(), &bytes.Buffer{}, actual, DOCX, WriteOptions{}); !errors.Is(err, ErrLossy) {
+		t.Fatalf("diagnostics bypassed: %v", err)
+	}
+}
+
+func TestStructuredCorpusRoundTrips(t *testing.T) {
+
+	for _, c := range corpus(t) {
+		if c.Expect == "reject" {
+			continue
+		}
+		t.Run(c.Name, func(t *testing.T) {
+			f, err := FormatFromName(c.Name)
+			if err != nil {
+				t.Fatal(err)
+			}
+			d, err := Read(context.Background(), bytes.NewReader(fixture(t, c.Name)), f, ReadOptions{Password: "secret"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			s, err := ToStructured(d)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, err := FromStructured(s)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			var normalize func([]Block)
+			normalize = func(bs []Block) {
+				for i := range bs {
+					b := &bs[i]
+					runs := b.Runs[:0]
+					for _, r := range b.Runs {
+						if r.Text != "" || r.Note != nil {
+							runs = append(runs, r)
+						}
+					}
+					b.Runs = runs
+					if len(b.Runs) == 0 {
+						b.Runs = nil
+					}
+					if len(b.Rows) == 0 {
+						b.Rows = nil
+					}
+					for ri := range b.Rows {
+						for ci := range b.Rows[ri].Cells {
+							c := &b.Rows[ri].Cells[ci]
+							if c.ColSpan == 0 {
+								c.ColSpan = 1
+							}
+							normalize(c.Blocks)
+							if len(c.Blocks) == 0 {
+								c.Blocks = nil
+							}
+						}
+					}
+				}
+			}
+			for _, v := range []*Document{d, got} {
+				normalize(v.Blocks)
+				normalize(v.Headers)
+				normalize(v.Footers)
+				for i := range v.Notes {
+					normalize(v.Notes[i].Blocks)
+				}
+			}
+
+			wantJSON, _ := json.Marshal(d)
+			gotJSON, _ := json.Marshal(got)
+			if !bytes.Equal(wantJSON, gotJSON) {
+				t.Fatalf("SF lost model semantics\nwant %s\ngot %s", wantJSON, gotJSON)
+			}
+		})
+	}
+}
+
+func TestStructuredRejectsUnrepresentedSemantics(t *testing.T) {
+	for _, body := range []string{
+		`{"type":"paragraph","attrs":{"align":"center"}}`,
+		`{"type":"paragraph","content":[{"type":"text","text":"x","marks":[{"type":"code"}]}]}`,
+		`{"type":"paragraph","content":[{"type":"text","text":"x","marks":[{"type":"strong"},{"type":"strong"}]}]}`,
+		`{"type":"paragraph","content":[{"type":"text","text":"x","marks":[{"type":"link","attrs":{"href":"x","title":"lost"}}]}]}`,
+		`{"type":"paragraph","content":[{"type":"image","attrs":{"src":"https://example.invalid/image"}}]}`,
+		`{"type":"image","attrs":{"src":"https://example.invalid/image"}}`,
+		`{"type":"image","attrs":{"src":"data:image/png;base64,%%%"}}`,
+		`{"type":"image","content":[{"type":"paragraph"}]}`,
+		`{"type":"ordered_list","attrs":{"order":-1},"content":[{"type":"list_item","content":[{"type":"paragraph"}]}]}`,
+		`{"type":"bullet_list","content":[]}`,
+		`{"type":"table","content":[{"type":"table_row","content":[{"type":"table_cell","attrs":{"rowspan":2}}]}]}`,
+		`{"type":"table","content":[{"type":"table_row","content":[{"type":"table_cell","attrs":{"colspan":0}}]}]}`,
+		`{"type":"page_break","text":"hidden"}`,
+		`{"type":"page_break","content":[{"type":"paragraph"}]}`,
+		`{"type":"paragraph","attrs":null}`,
+		`{"type":"paragraph","attrs":[]}`,
+		`{"type":"heading","attrs":{"level":0}}`,
+		`{"type":"paragraph","content":[{"type":"text","text":""}]}`,
+		`{"type":"mystery","content":[{"type":"paragraph"}]}`,
+	} {
+		input := `{"type":"doc","attrs":{"schema":"` + StructuredSchema + `"},"content":[` + body + `]}`
+		if _, err := ReadStructured(context.Background(), strings.NewReader(input)); err == nil {
+			t.Errorf("accepted %s", body)
+		}
+	}
+	for _, input := range []string{`null`, `{}`, `{"type":"doc","attrs":{"schema":"future"}}`, `{"type":"doc","attrs":{"schema":"` + StructuredSchema + `","unknown":1}}`, `{"type":"doc","attrs":{"schema":"` + StructuredSchema + `"},"unknown":true}`} {
+		if _, err := ReadStructured(context.Background(), strings.NewReader(input)); err == nil {
+			t.Errorf("accepted %s", input)
+		}
+	}
+	s, _ := ToStructured(&Document{})
+	b, _ := json.Marshal(s)
+	if _, err := ReadStructured(context.Background(), strings.NewReader(string(b)+"{}")); err == nil {
+		t.Fatal("trailing JSON accepted")
+	}
+	if _, err := ReadStructured(context.Background(), nil); err == nil {
+		t.Fatal("nil reader accepted")
+	}
+	if err := WriteStructured(context.Background(), nil, s); err == nil {
+		t.Fatal("nil writer accepted")
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := ReadStructured(ctx, strings.NewReader(string(b))); !errors.Is(err, context.Canceled) {
+		t.Fatal(err)
+	}
+	if err := WriteStructured(ctx, &bytes.Buffer{}, s); !errors.Is(err, context.Canceled) {
+		t.Fatal(err)
+	}
+}
+
+func TestStructuredFourPaths(t *testing.T) {
+	ctx := context.Background()
+	d := readFixture(t, "docx_image.docx")
+	var sf bytes.Buffer
+	if err := Write(ctx, &sf, d, SF, WriteOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	shared, err := Read(ctx, bytes.NewReader(sf.Bytes()), SF, ReadOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range []Format{DOCX, PDF} {
+		var out bytes.Buffer
+		if err := Write(ctx, &out, shared, f, WriteOptions{AllowLossy: true, PDFFontMap: map[string]string{"Calibri": "Go", "Cambria": "Go"}}); err != nil {
+			t.Fatal(err)
+		}
+		imported, err := Read(ctx, &out, f, ReadOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := Write(ctx, &bytes.Buffer{}, imported, SF, WriteOptions{}); err != nil {
+			t.Fatal(err)
+		}
+		// DOCX must retain the binary asset, not just a placeholder or text.
+		if f == DOCX {
+			a, _ := ToStructured(shared)
+			b, _ := ToStructured(imported)
+			if !reflect.DeepEqual(a.Content, b.Content) {
+				t.Fatal("DOCX structure or asset changed")
+			}
+		}
+	}
+}
+
+func TestStructuredListBoundaryRoundTrip(t *testing.T) {
+	s, err := ToStructured(&Document{Blocks: []Block{{Kind: Paragraph, List: "number", Runs: []Run{{Text: "one"}}}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.Content = append(s.Content, s.Content[0])
+	d, err := FromStructured(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := ToStructured(d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got.Content) != 2 || !reflect.DeepEqual(s.Content, got.Content) {
+		t.Fatal("adjacent list boundary lost")
+	}
+
+}
+
+func FuzzReadStructured(f *testing.F) {
+	nested, nestedErr := ReadPDF(context.Background(), bytes.NewReader(recoveryPDF(nestedDefinitionObjects()...)), ReadOptions{})
+	if nestedErr != nil {
+		f.Fatal(nestedErr)
+	}
+	var nestedSF bytes.Buffer
+	if err := Write(context.Background(), &nestedSF, nested, SF, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(nestedSF.Bytes())
+	var richCitation bytes.Buffer
+	if err := Write(context.Background(), &richCitation, richCitationDocument(true), SF, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(richCitation.Bytes())
+	var richLabel bytes.Buffer
+	if err := Write(context.Background(), &richLabel, richBodyNoteDocument(true), SF, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(richLabel.Bytes())
+	var precision bytes.Buffer
+	if err := Write(context.Background(), &precision, precisionDocument(true, true), SF, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(precision.Bytes())
+	inferred, err := ReadPDF(context.Background(), bytes.NewReader(recoveryPDF(adjacentNoteObjects()...)), ReadOptions{})
+	if err != nil {
+		f.Fatal(err)
+	}
+	var inferredSF bytes.Buffer
+	if err = Write(context.Background(), &inferredSF, inferred, SF, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(inferredSF.Bytes())
+	var variant bytes.Buffer
+	if err := Write(context.Background(), &variant, variantNoteDocument(), SF, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(variant.Bytes())
+	note, err := ReadPDF(context.Background(), bytes.NewReader(recoveryPDF(explicitNoteObjects("Note")...)), ReadOptions{})
+	if err != nil {
+		f.Fatal(err)
+	}
+	var noteSF bytes.Buffer
+	if err = Write(context.Background(), &noteSF, note, SF, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(noteSF.Bytes())
+
+	artifact, artifactErr := ReadPDF(context.Background(), bytes.NewReader(recoveryPage(`/Artifact << /Type /Pagination /Subtype /Header /BBox [10 350 220 390] /Attached [/Top] >> BDC BT /F 10 Tf 20 370 Td (HEADER) Tj ET EMC`, "")), ReadOptions{PDFSkipInference: true})
+	if artifactErr != nil {
+		f.Fatal(artifactErr)
+	}
+	var artifactSF bytes.Buffer
+	if artifactErr = Write(context.Background(), &artifactSF, artifact, SF, WriteOptions{}); artifactErr != nil {
+		f.Fatal(artifactErr)
+	}
+	f.Add(artifactSF.Bytes())
+	navigation, navErr := ReadPDF(context.Background(), bytes.NewReader(navigationFixture(fullNavigationTree(), `/foo [6 0 R /FitH 100]`, `(foo)`)), ReadOptions{PDFSkipInference: true})
+	if navErr != nil {
+		f.Fatal(navErr)
+	}
+	var navigationSF bytes.Buffer
+	if navErr = Write(context.Background(), &navigationSF, navigation, SF, WriteOptions{}); navErr != nil {
+		f.Fatal(navErr)
+	}
+	f.Add(navigationSF.Bytes())
+	var destinations bytes.Buffer
+	if err := Write(context.Background(), &destinations, destinationDocument(), SF, WriteOptions{}); err != nil {
+		f.Fatal(err)
+	}
+	f.Add(destinations.Bytes())
+
+	tagged, tagErr := ReadPDF(context.Background(), bytes.NewReader(taggedTestPDF(markedText(0, 20, 300, "Heading"), "<< /Type /StructTreeRoot /K 8 0 R /RoleMap << /Chapter /H2 >> >>", "<< /Type /StructElem /S /Chapter /P 7 0 R /Pg 3 0 R /K 0 >>")), ReadOptions{})
+	if tagErr != nil {
+		f.Fatal(tagErr)
+	}
+	var taggedSF bytes.Buffer
+	if tagErr = Write(context.Background(), &taggedSF, tagged, SF, WriteOptions{}); tagErr != nil {
+		f.Fatal(tagErr)
+	}
+	f.Add(taggedSF.Bytes())
+
+	recovered, e := ReadPDF(context.Background(), bytes.NewReader(recoveryPage("BT /F 10 Tf 10 100 Td /P << /MCID 0 /ActualText (replacement) >> BDC (A) Tj EMC ET", "/CropBox [20 20 220 320] /Rotate 90 /UserUnit 2")), ReadOptions{})
+	if e != nil {
+		f.Fatal(e)
+	}
+	var positioned bytes.Buffer
+	if e = Write(context.Background(), &positioned, recovered, SF, WriteOptions{}); e != nil {
+		f.Fatal(e)
+	}
+	f.Add(positioned.Bytes())
+
+	b, err := os.ReadFile("examples/merged-tables/document.sf")
+	if err != nil {
+		f.Fatal(err)
+	}
+	f.Add(b)
+	headers, err := os.ReadFile("examples/repeated-headers/document.sf")
+	if err != nil {
+		f.Fatal(err)
+	}
+	f.Add(headers)
+	styled, err := os.ReadFile("examples/text-style/document.sf")
+	if err != nil {
+		f.Fatal(err)
+	}
+	f.Add(styled)
+	lists, err := os.ReadFile("examples/lists/document.sf")
+	if err != nil {
+		f.Fatal(err)
+	}
+	f.Add(lists)
+	notes, err := os.ReadFile("examples/notes/document.sf")
+	if err != nil {
+		f.Fatal(err)
+	}
+	f.Add(notes)
+	f.Add([]byte(`{"type":"doc","attrs":{"schema":"manydoc-prosemirror/1"},"content":[{"type":"paragraph","content":[{"type":"text","text":"hello"}]}]}`))
+	f.Add([]byte(`{"type":"doc","attrs":{"schema":"manydoc-prosemirror/1"},"content":[{"type":"image","attrs":{"src":"data:image/png;base64,AA=="}}]}`))
+	f.Fuzz(func(t *testing.T, b []byte) {
+		s, err := ReadStructured(context.Background(), bytes.NewReader(b))
+		if err != nil {
+			return
+		}
+		if err = WriteStructured(context.Background(), &bytes.Buffer{}, s); err != nil {
+			t.Fatal(err)
+		}
+		d, err := FromStructured(s)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err = ToStructured(d); err != nil {
+			t.Fatal(err)
+		}
+	})
+}
+
+// The published ProseMirror mark must retain every typed public source fact.
+func TestStructuredSourceMarkAttributes(t *testing.T) {
+	raw, err := os.ReadFile("schema/prosemirror-v1.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var spec struct {
+		Marks map[string]struct {
+			Attrs map[string]json.RawMessage `json:"attrs"`
+		} `json:"marks"`
+	}
+	if err = json.Unmarshal(raw, &spec); err != nil {
+		t.Fatal(err)
+	}
+	attrs := spec.Marks["source"].Attrs
+	typ := reflect.TypeFor[SourceInfo]()
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		name := strings.Split(field.Tag.Get("json"), ",")[0]
+		if _, ok := attrs[name]; !ok {
+			t.Errorf("source mark omits public source field %s", name)
+		}
+	}
+}

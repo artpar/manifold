@@ -4,7 +4,7 @@
 GOWORK=off go run ./examples/running-images
 mkdir -p output/running-images/lo
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file://"$PWD"/output/running-images/lo-profile --headless --convert-to pdf --outdir output/running-images/lo output/running-images/serial.docx output/running-images/nested.docx output/running-images/body.docx output/running-images/jpeg.docx
-output/qa-venv/bin/python scripts/verify_docx_running_images.py
+output/qa-venv/bin/python scripts/qa/docx/verify_docx_running_images.py
 ```
 
 The example writes source SF, DOCX and reimported SF under ignored output/.
@@ -27,10 +27,10 @@ exporter omits URI annotations even in an independent python-docx control. To
 reproduce that separate qualification gap:
 
 ```sh
-output/qa-venv/bin/python scripts/verify_docx_running_images.py --write-uri-control
+output/qa-venv/bin/python scripts/qa/docx/verify_docx_running_images.py --write-uri-control
 /Applications/LibreOffice.app/Contents/MacOS/soffice -env:UserInstallation=file://"$PWD"/output/running-images/lo-profile --headless --convert-to pdf --outdir output/running-images/lo output/running-images/uri-control.docx
-output/qa-venv/bin/python scripts/verify_docx_running_images.py
-output/qa-venv/bin/python scripts/verify_docx_running_images.py --require-uri-annotations
+output/qa-venv/bin/python scripts/qa/docx/verify_docx_running_images.py
+output/qa-venv/bin/python scripts/qa/docx/verify_docx_running_images.py --require-uri-annotations
 ```
 
 The final strict URI gate currently fails (expected two, observed zero); the

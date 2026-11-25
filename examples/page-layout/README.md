@@ -2,8 +2,8 @@
 
 ```sh
 GOWORK=off go run ./examples/page-layout
-output/qa-venv/bin/python scripts/verify_page_layout.py
-NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/page-layout/*.sf
+output/qa-venv/bin/python scripts/qa/layout/verify_page_layout.py
+NODE_PATH=output/sf-qa/node_modules node scripts/qa/structured/verify_structured.cjs output/page-layout/*.sf
 ```
 
 The Go program writes source SF, DOCX, PDF and both reimports under ignored

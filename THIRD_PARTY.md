@@ -35,7 +35,7 @@ real exports below retain their original notices. Fixture provenance, SHA-256 ha
 and expectations are in `testdata/corpus/manifest.json`.
 
 Python fixture/verification tools are optional development tools, with package
-pins in `scripts/requirements.txt`. They are not linked to or invoked by the Go
+pins in `scripts/qa/requirements.txt`. They are not linked to or invoked by the Go
 library or CLI.
 
 `testdata/real/copyright-office-circular-1-2021.pdf` is the original published
@@ -64,7 +64,7 @@ The optional QA environment additionally pins uharfbuzz 0.57.0 to compare native
 HarfBuzz 15.0.0 with actual Go-generated GIDs/positions. This is a development-only
 reader/oracle, not a Go runtime dependency or required conversion executable.
 
-`scripts/font_oracles.py` records SHA256 values of original Go programs from the
+`scripts/qa/layout/font_oracles.py` records SHA256 values of original Go programs from the
 pinned x/image v0.32.0 byte constants. These QA facts qualify actual embedded
 programs independently of PDF resource aliases; no new font asset is vendored.
 
@@ -86,7 +86,7 @@ QA tools only; neither native nor Go textprocessing/fribidi is a runtime depende
 
 `testdata/rtl-shaping.json` contains authored Hebrew/Arabic/LTR vectors measured
 with optional native HarfBuzz 15.0.0 / uharfbuzz 0.57.0 against the existing original
-DejaVu Sans asset. `scripts/verify_bidi_output.py` independently compares actual
+DejaVu Sans asset. `scripts/qa/layout/verify_bidi_output.py` independently compares actual
 PDF groups with native HarfBuzz and C FriBidi; these are optional QA tools only.
 The two FuzzPDFBidiRoundTrip inputs are exact synthetic invented-space regressions.
 No additional font/module/service/CGO or proprietary code is introduced.
@@ -98,7 +98,7 @@ The existing testdata/assets/DejaVu-LICENSE.txt applies. TTF SHA256:
 `e6476c1b80502924294eed40894c5b18e06c181444ca953e5334262df9c27724`.
 It is test/example data, not embedded into the library/CLI. The authored
 `testdata/rtl-item-context.json` records fourteen original-font native HarfBuzz
-item-context measurements; optional scripts/verify_bidi_context.py checks actual
+item-context measurements; optional scripts/qa/layout/verify_bidi_context.py checks actual
 regular/bold PDF glyphs/positions. No proprietary implementation or new module.
 
 
@@ -118,7 +118,7 @@ QA conversions stay ignored.
 
 
 Optional font-subset verification now pins fontTools 4.68.0 (MIT) in
-scripts/requirements.txt. It is used only by independent development oracles,
+scripts/qa/requirements.txt. It is used only by independent development oracles,
 not by the Go library or CLI. The glyph subsetter retains original embedded name
 records/notices and honors the existing TrueType embedding/subsetting flags.
 
@@ -154,7 +154,7 @@ runtime requirements. The private Colleaf stream implementation is independently
 authored against published format declarations and executable reader APIs; no
 Univer implementation code is incorporated or translated. The unmodified app
 validator is loaded from its pinned ignored source only during QA. The native
-reference JSON fixture is manydoc-authored test data. See COLLEAF_FORMAT.md for
+reference JSON fixture is manydoc-authored test data. See VDOCS_FORMAT.md for
 exact versions, source hashes, unit/token discrepancies, commands and remaining
 semantic-adapter work.
 
@@ -165,13 +165,13 @@ actual drawing registry/scope APIs qualify embedded asset fields; no implementat
 code is copied/translated or linked into manydoc. Their downloads/installations and
 lockfile remain ignored QA material. The existing original OASIS MQTT reference's
 JPEG is reused unchanged by image transport tests, with its original byte oracle.
-Pillow is an optional independent raster reader only. COLLEAF_FORMAT.md records
+Pillow is an optional independent raster reader only. VDOCS_FORMAT.md records
 primary source/hash, commands, measured boxes/pixels and remaining qualification.
 
 
 The optional native hyperlink QA uses @univerjs/docs-hyper-link1.0.4 and reads
 @univerjs/docs-hyper-link-ui1.0.4 published source (Apache-2.0). Their pinned npm
-tar URLs and source hashes are in COLLEAF_FORMAT.md. The former is registered as
+tar URLs and source hashes are in VDOCS_FORMAT.md. The former is registered as
 a real QA plugin; a hash-pinned unmodified click-handler/helper source region from
 the latter runs in an optional Node VM with real models and a window.open stub.
 Neither package/source is a production Go dependency or runtime requirement; no
@@ -295,7 +295,7 @@ PDF and generated notes; no production dependency or proprietary code is added.
 
 Optional browser QA downloads/bundles the already attributed actual Colleaf mount
 and validator at 5ce2ef507b28b92f5b03443ade87bc0e17f3d8b6 with checked original
-hashes; see [browser QA](docs/COLLEAF_BROWSER.md). They remain ignored QA source, not Go implementation.
+hashes; see [browser QA](docs/VDOCS_BROWSER.md). They remain ignored QA source, not Go implementation.
 Univer core/drawing/hyperlink presets and find/replace 1.0.4 and RxJS 7.8.2 are
 Apache-2.0; Univer icons 1.43.1, React/ReactDOM 19.0.0 and esbuild 0.27.0 are MIT per installed package
 metadata. These optional pinned development dependencies are installed only in

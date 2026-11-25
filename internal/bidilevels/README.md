@@ -52,9 +52,9 @@ fixtures, not generated application output. No network is needed for tests.
 GOWORK=off go test ./internal/bidilevels -v
 GOWORK=off go test -race ./internal/bidilevels
 GOWORK=off go test ./internal/bidilevels -run '^$' -fuzz '^FuzzParagraphLines$' -fuzztime=20000x -parallel=2
-python3 scripts/verify_bidi_levels.py
+python3 scripts/qa/layout/verify_bidi_levels.py
 # Optional explicit ICU selection:
-MANYDOC_QA_ICU_LIBRARY=/opt/homebrew/opt/icu4c/lib/libicuuc.dylib python3 scripts/verify_bidi_levels.py
+MANYDOC_QA_ICU_LIBRARY=/opt/homebrew/opt/icu4c/lib/libicuuc.dylib python3 scripts/qa/layout/verify_bidi_levels.py
 ```
 
 The ordinary suite includes all 91,707 original BidiCharacterTest cases and 770,241

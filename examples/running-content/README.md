@@ -2,8 +2,8 @@
 
 ```sh
 GOWORK=off go run ./examples/running-content
-output/qa-venv/bin/python scripts/verify_running_content.py
-NODE_PATH=output/sf-qa/node_modules node scripts/verify_structured.cjs output/running-content/*.sf
+output/qa-venv/bin/python scripts/qa/layout/verify_running_content.py
+NODE_PATH=output/sf-qa/node_modules node scripts/qa/structured/verify_structured.cjs output/running-content/*.sf
 ```
 
 Writes source SF, DOCX, PDF and reimported SF under ignored

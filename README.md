@@ -1,338 +1,76 @@
 # Manifold
 
-Pure-Go document extraction, generation, and conversion for embedded applications.
+Pure-Go rich document processing for embedded applications and the command line.
 
-All four conversion paths are implemented and qualified for the declared support
-contract. See the [acceptance audit](docs/FINAL_AUDIT.md) and
-[current status](docs/STATUS.md) for evidence and compatibility limits. This is not a drop-in UniOffice/UniPDF replacement
-or a Word-compatible layout engine.
-
-The library reads and writes DOCX, extracts positioned text, raster images and supported tagged structure or disclosed geometric inference from PDF, generates PDFs from
-structured content, and exchanges documents as ProseMirror JSON (`.sf`, optionally gzip-compressed as `.sf.gz`), legacy JSON and text.
-The public offline `.vdocs` adapter maps the qualified Colleaf/Univer profile
-through SF; see [native integration](docs/COLLEAF_FORMAT.md) for its contract and
-remaining rendering/browser limits. PDF output carries a logical tree tied to
-painted content; import checks present reciprocal ownership indexes.
-The [structured-format decision](docs/STRUCTURED_FORMAT.md) records the schema,
-tradeoffs, profile extensions and checked integration boundary.
-Sectioned SF supports separate body frames and default/first/even running stories.
-Run `GOWORK=off go run ./examples/sections` for all four conversion paths; see
-[compatibility limits](docs/COMPATIBILITY.md) for shared-page and producer differences.
-`GOWORK=off go run ./examples/continuous` demonstrates story changes on shared pages.
-`GOWORK=off go run ./examples/continuous-geometry` adds margin and paper changes.
-`GOWORK=off go run ./examples/signed-overlap` covers fixed signed running overlap.
-`GOWORK=off go run ./examples/continuous-admission` covers incompatible continuous
-stories that start fresh native pages while preserving source start intent.
-`GOWORK=off go run ./examples/section-controls` qualifies page controls, empty
-section ownership and document-wide note numbering.
-The [real-export manifest](testdata/real/manifest.json) includes original Word and
-InDesign publications, independent structural oracles and current conversion gaps.
-Applications retain ownership of identity, authorization, persistence and jobs.
-No external Office installation or conversion service is required.
-
-## Recovering the project
-
-- [Status and handoff](docs/STATUS.md): implemented work, verification, open issues,
-  and the exact next steps.
-- [Architecture](docs/ARCHITECTURE.md): data model, format boundaries and layout.
-- [Decisions](docs/DECISIONS.md): requirements, design rationale and exclusions.
-- [Contributor instructions](AGENTS.md): engineering rules and completion checks.
-- [Compatibility](docs/COMPATIBILITY.md): supported features and fidelity limits.
-- [Testing](docs/TESTING.md): regression corpus and independent verification.
+Convert **DOCX → structured format → DOCX/PDF**, and recover structured content
+from PDF. The shared format is a versioned ProseMirror JSON profile, with typed Go
+trees for programmatic manipulation. Runtime conversion needs no CGO, external
+executables, services or license servers.
 
 ## Install
+
+Go 1.25 or newer:
 
 ```sh
 go get github.com/artpar/manifold
 go install github.com/artpar/manifold/cmd/manifold@latest
 ```
 
-Import `github.com/artpar/manifold` as package `manifold`. The CLI is `manifold`.
-Existing files keep the `manydoc-prosemirror/1` schema and embedded metadata
-identifiers for compatibility. See [the rename contract](docs/RENAME.md).
-
-## Build and use
-
-Go 1.25 or newer is required. There are no production executable/service/CGO
-dependencies. PDF output embeds licensed Go fonts.
+## CLI
 
 ```sh
-CGO_ENABLED=0 GOWORK=off go build -o bin/manifold ./cmd/manifold
-bin/manifold extract input.docx
-bin/manifold extract -format sf -o document.sf input.docx
-bin/manifold convert -allow-lossy -o report.docx document.sf
-bin/manifold convert -allow-lossy -o report.pdf document.sf
-bin/manifold extract -format sf -o recovered.sf report.pdf
-# Inspect physical paint order without logical or geometric reconstruction:
-bin/manifold extract -pdf-skip-structure -pdf-skip-inference -format sf -o physical.sf report.pdf
+manifold extract -format sf -o document.sf input.docx
+manifold convert -allow-lossy -o document.docx document.sf
+manifold convert -allow-lossy -o document.pdf document.sf
+manifold extract -format sf -o recovered.sf document.pdf
 ```
 
-Flags precede the input filename. SF uses the versioned ProseMirror profile;
-`ReadStructured`/`WriteStructured` expose the tree directly, while `ToStructured`
-and `FromStructured` bridge the Go conversion engine. Legacy JSON follows the public `Document`
-model in `document.go`; unknown fields are rejected. Review diagnostics before
-using `-allow-lossy` to acknowledge them. Text output includes page
-boundaries as form-feed characters. `extract -format json` retains diagnostics.
+Flags precede the input filename. Review import diagnostics before acknowledging
+losses with `-allow-lossy`. Unsupported output still rejects. `.sf.gz` compresses
+the same structured format. The CLI commits an output file only after success.
 
-For an imported document whose editing/layout semantics cannot be preserved,
-conversion returns `ErrLossy`. Review its diagnostics, then explicitly allow
-that reduction if appropriate:
-
-```sh
-bin/manifold convert -allow-lossy -o imported.docx input.pdf
-```
-
-Unsupported output features still return errors. Conversion writes to a
-temporary file and replaces the destination only after success. A failed
-conversion leaves an existing output file unchanged.
-
-For encrypted PDFs, supply the password through an environment variable:
-
-```sh
-bin/manifold extract -password-env DOCUMENT_PASSWORD protected.pdf
-```
-
-The variable must already be set; the CLI does not print its value.
-
-## Embed the library
+## Go API
 
 ```go
-doc := &manifold.Document{
-    Metadata: manifold.Metadata{Title: "Report"},
-    Blocks: []manifold.Block{
-        {Kind: manifold.Heading, Level: 1,
-            Runs: []manifold.Run{{Text: "Quarterly report"}}},
-        {Kind: manifold.Paragraph,
-            Runs: []manifold.Run{{Text: "Generated inside the Go process."}}},
-    },
+import "github.com/artpar/manifold"
+
+doc, err := manifold.Read(ctx, source, manifold.DOCX, manifold.ReadOptions{})
+if err != nil {
+    return err
 }
-err := manifold.Write(ctx, destination, doc, manifold.DOCX, manifold.WriteOptions{})
+return manifold.Write(ctx, destination, doc, manifold.SF, manifold.WriteOptions{})
 ```
 
-Read with `manifold.Read(ctx, source, manifold.DOCX, manifold.ReadOptions{})` or
-`manifold.ReadPDF(ctx, source, manifold.ReadOptions{Password: password})`.
-Inputs/outputs are `io.Reader`/`io.Writer`; callers control persistence and
-authorization. Documents must not be concurrently mutated by the caller.
+The public package exposes document types, conversion functions, options and
+errors. Callers own readers/writers, persistence and authorization. See
+[sections](examples/sections), [rich tables](examples/merged-tables) and
+[notes](examples/notes) for complete examples.
 
-Generate a two-page example with links, formatting, a table, image and Unicode:
+## Support and layout
 
-```sh
-GOWORK=off go run ./examples/report -out output
+Paragraphs/headings, formatted runs, links, lists, merged/nested tables, images,
+metadata, page settings, headers/footers and rich notes share the same model.
+PDF extraction distinguishes explicit structure from geometric inference and
+retains physical pages, positions, navigation and assets. Missing glyphs,
+unsupported shaping and representation losses have explicit outcomes.
+
+The optional offline [VDOCS adapter](docs/reference/VDOCS_FORMAT.md) supports a
+qualified native editor snapshot profile; no editor service is required.
+Existing files retain `manydoc-prosemirror/1` and embedded metadata identifiers
+for compatibility. This is not a Word layout engine or full UniDoc API replacement.
+
+```text
+manifold.go          public API
+cmd/manifold/        CLI and file handling
+internal/engine/     conversion model, codecs and layout; adjacent unit tests
+internal/bidilevels/ attributed bidi algorithm and conformance data
+examples/            runnable public API examples
+scripts/qa/          optional independent qualification, grouped by concern
+testdata/            pinned synthetic and original reference documents
+docs/                current guides, reference contracts, reports and history
 ```
 
-The SF-first examples exercise merged/nested cells, images, lists and rich notes:
-
-```sh
-GOWORK=off go run ./examples/image-fit
-GOWORK=off go run ./examples/paragraph-breaks
-GOWORK=off go run ./examples/page-breaks
-GOWORK=off go run ./examples/page-breaks -empty-note -out output/page-breaks/empty
-GOWORK=off go run ./examples/recursive-tables
-GOWORK=off go run ./examples/table-continuation
-GOWORK=off go run ./examples/rich-cells -out output/rich-cells
-GOWORK=off go run ./examples/rich-cells -out output/rich-cells/continued -continued
-GOWORK=off go run ./examples/merged-tables -out output/merged-tables
-GOWORK=off go run ./examples/lists -out output/lists
-GOWORK=off go run ./examples/lists -out output/lists/paginated -page-height 220
-GOWORK=off go run ./examples/notes -out output/notes
-GOWORK=off go run ./examples/notes -out output/notes/continued -page-height 220 -long-note
-```
-
-Generated files are deliberately ignored by Git. See the independent
-verification commands in [Testing](docs/TESTING.md).
-
-## Development
-
-```sh
-GOWORK=off go mod download
-GOWORK=off go test ./...
-GOWORK=off go test -race ./...
-GOWORK=off go vet ./...
-```
-
-Explicit lists use `Block{Kind: ListBlock, List: "number"}` with `Items` containing
-`ListItem{Blocks: ...}`. `Start` is an optional `*int` (nil means one, zero is
-valid); item blocks retain continuation paragraphs, nested lists and assets.
-Legacy paragraph `List` fields remain accepted as flat list runs.
-
-Inline note references use `Run{Note: &NoteReference{Kind: Footnote, ID: "source"}}`;
-define the body once in `Document.Notes`. IDs are scoped by kind and need not be
-numbers. Draft unreferenced notes may persist as SF/JSON but must be anchored
-before rendering. DOCX notes and PDF footnotes/endnotes accept rich blocks,
-including images and nested tables. PDF footnotes continue between measured
-fragments. Oversized body-table groups continue with their cell flows and note
-references, including nested tables and oversized merged footnote tables.
-Explicit cell/note breaks propagate through native PDF layout, including blank
-pages. `Block.PageBreakBefore` requests a paragraph page start without adding a
-blank page when already at page start; it is distinct from `PageBreak`. DOCX uses
-paragraph properties with checked metadata to preserve explicit controls and
-mitigate LibreOffice content loss. Cell/note pagination still differs between
-readers. Images fit full container width/height without cropping or resampling.
-A figure-first footnote can use a linked continuation notice. PNG/JPEG output is
-fully validated, with a 25-million-pixel allocation bound and explicit errors for
-invalid data or unrepresentable dimensions.
-
-The Go engine model starts in `document.go`; the canonical SF tree is in
-`structured.go`. `Read` and `Write` are
-the application boundary. `errors.Is(err, manifold.ErrUnsupported)` identifies
-unsupported output/features; `errors.Is(err, manifold.ErrLossy)` identifies
-unacknowledged imported-document diagnostics.
-
-## References
-
-- [ECMA-376 Office Open XML](https://ecma-international.org/publications-and-standards/standards/ecma-376/)
-- [PDF specifications](https://pdfa.org/resource/pdf-specification-archive/)
-
-This is an independent implementation using published formats and open-source
-components. No UniOffice/UniPDF implementation code is included.
-
-The Unicode typography example exercises measured spaces, logical NFC text,
-wrapping across formatting runs, decorations and note spacing:
-
-```sh
-GOWORK=off go run ./examples/typography -out output/typography
-```
-
-See the current support contract and unfinished structure/layout work in
-[COMPATIBILITY.md](docs/COMPATIBILITY.md) and [STATUS.md](docs/STATUS.md).
-
-
-Run `GOWORK=off go run ./examples/repeated-headers` for SF/DOCX/PDF outputs with
-repeating merged table headers, original raster assets, oversized body cells and
-linked footnotes. `Row.RepeatHeader` marks a contiguous row prefix; native PDF
-continues body/nested/footnote tables with that prefix and preserves authored SF.
-See docs/COMPATIBILITY.md for page-control and producer qualification limits.
-
-
-`GOWORK=off go run ./examples/text-style` writes a rich SF/DOCX/PDF example and
-an output-only TTF for the CLI example. Runs support FontFamily, FontSize in
-points and Color (#RRGGBB/auto). PDF has Go and Go Mono styles built in; supply
-FontFace values with WriteOptions.PDFFonts for additional TTF faces. Missing
-families/styles/glyphs return errors. PDFFontMap explicitly selects alternatives.
-
-```sh
-bin/manifold convert -pdf-font 'App Sans=output/text-style/app-sans.ttf' -o output/text-style/cli.pdf output/text-style/text-style.sf
-# An explicit alternative for a retained source font, when desired:
-bin/manifold convert -allow-lossy -pdf-font-map 'Calibri=Go' -pdf-font-map 'Cambria=Go' -o output/converted.pdf input.docx
-```
-
-DOCX sizes require half-points; PDF sizes require 0.01pt precision. Theme/script
-choices, shaping/bidi, broader PDF recovery and real-export qualification remain
-unfinished; see docs/COMPATIBILITY.md and docs/STATUS.md.
-
-
-PDF → SF also recovers editable font families, physical point sizes and device
-text colors, with source evidence and explicit uncertainty/loss diagnostics.
-Source font names are lookup requests; configure output faces or mappings before
-reflow. Imported sizes finer than writer precision require explicit caller choices.
-Optional QA: `output/qa-venv/bin/python scripts/verify_pdf_text_styles.py` checks an
-independent ReportLab source through SF, DOCX and mapped-font PDF. See the current
-recovery contract and remaining work in docs/COMPATIBILITY.md.
-
-
-DOCX imports calculate run theme tint/shade and document color mappings into RGB.
-Theme/system bindings and mismatched cached colors have explicit diagnostics;
-unsupported palette choices may use a final cached RGB with uncertainty. Optional
-QA: `output/qa-venv/bin/python scripts/verify_docx_theme_colors.py`.
-
-
-DOCX font slots and theme languages resolve into explicit styled spans instead of
-one family for an entire mixed-script run. Unused selector/theme losses and uncertain defaults have diagnostics; language
-and paragraph/run direction bindings now persist in SF and DOCX. Optional QA:
-`output/qa-venv/bin/python scripts/verify_docx_font_selection.py`. Broader font
-selection and native shaping/bidi remain required work; see docs/STATUS.md.
-
-
-`GOWORK=off go run ./examples/glyphs` exercises native positioned marks and
-monochrome supplementary glyphs with caller-supplied TTFs, tables, links, notes
-and running content. Optional QA: `output/qa-venv/bin/python scripts/verify_glyphs.py`.
-Native joining/bidi/complex-script support is still unfinished; errors remain
-explicit. See docs/COMPATIBILITY.md for the current glyph/font contract.
-
-
-`GOWORK=off go run ./examples/language` demonstrates general/East Asian/complex
-language bindings and independent paragraph/run direction in SF/DOCX. Native PDF
-examples qualify language-tagged LTR localization, kerning, ligatures and re-shaping
-after wrapping. Optional QA: `output/qa-venv/bin/python scripts/verify_language.py`.
-Directional Hebrew/Arabic PDF now exists; broader contextual/script/style
-shaping and qualification remain unfinished.
-
-
-`GOWORK=off go run ./examples/shaping` demonstrates ordinary default text with
-kerning, ligatures and final-line re-shaping; language tags are optional. QA:
-`output/qa-venv/bin/python scripts/verify_default_shaping.py`. Full original font
-embedding increases small PDF size. Bidi/joining and differing-style/font context
-remain required work; this is not a Word-equivalent layout engine.
-
-
-`GOWORK=off go run ./examples/paint-context` demonstrates shared kerning/ligatures
-across color, decoration and link boundaries, with emergency line re-shaping.
-QA: `output/qa-venv/bin/python scripts/verify_paint_context.py` after extracting
-`paint.pdf` to `output/paint-context/recovered.sf` (see docs/TESTING.md). Split
-ligatures retain original outlines and explicit invisible logical carriers.
-Hebrew/Arabic bidi now has the targeted support below; broader script and
-font/size/language context remains unfinished.
-
-
-`GOWORK=off go run ./examples/bidi` exercises Hebrew/Arabic direction, marks,
-joining, brackets, wrapping, colored ligatures, links, lists, notes and running
-content with the test-only supplied DejaVu font. It writes source/DOCX/PDF and
-checked recovered SF. QA: `output/qa-venv/bin/python scripts/verify_bidi_output.py`.
-Paragraph flow defaults LTR; explicit rtl aligns and orders within its content
-area. Source exposes invisible logical carriers alongside original visible
-outlines. Broader scripts/context, source fonts/layout/recovery and real-export
-qualification remain required; see docs/STATUS.md.
-
-The bidi example also writes context.sf/docx/pdf with regular/bold DejaVu faces
-and font/size/language/transparent-control boundaries. Additional native QA:
-`output/qa-venv/bin/python scripts/verify_bidi_context.py`. Item context is supplied;
-full itemization, cross-item positioning and within-grapheme styles remain open.
-
-`GOWORK=off go run ./examples/running-content` demonstrates rich native PDF
-headers/footers with merged/nested tables, links, images, lists and measured body/
-note containment. Optional QA: `output/qa-venv/bin/python scripts/verify_running_content.py`.
-The source SF stays unchanged. The example README and compatibility notes record
-the distinct native/LibreOffice pagination and broader producer/font qualification;
-this milestone does not complete the rich-document goal.
-
-`GOWORK=off go run ./examples/running-images` exercises the repaired shared DOCX
-running-image budget with serial/nested/merged PNG/JPEG content and body images.
-Optional QA: `output/qa-venv/bin/python scripts/verify_docx_running_images.py`.
-Original SF/asset bytes stay intact; rendered dimensions are checked separately.
-The verifier explicitly records the tested producer's URI-export qualification gap.
-
-`GOWORK=off go run ./examples/page-layout` exercises four-edge page settings,
-zero margins, independent header-top/footer-bottom distances and landscape output
-through SF/DOCX/PDF. Set `Layout.Margins` to override the scalar fallback and use
-optional distance pointers to retain explicit zero. The source SF/DOCX round trip
-and independent bounds/assets checks are in `scripts/verify_page_layout.py`.
-Section-specific stories and signed running/body overlap remain unfinished.
-
-## Compact structured interchange
-
-SF writes compact ProseMirror JSON. `.sf.gz` is the same schema/values in standard
-Go gzip, useful for source-heavy PDF provenance. CLI conversion infers that suffix;
-extraction selects it with `manifold extract -format sf.gz -o document.sf.gz input.pdf`.
-Go callers use `manifold.Read` / `manifold.Write` with `manifold.SFGzip`.
-Schema/graph/checksum validation and all assets/source fields remain intact. Full
-large-document trees still take memory; see [codec evidence and limits](docs/SF_CODEC.md).
-
-Colleaf's actual native `.vdocs` format uses a pinned Univer snapshot rather than
-SF. The checked offline adapter is available as `manifold.VDOCS`,
-`ReadVDOCS` / `WriteVDOCS`, and MIME constant `VDOCSMIME`:
-
-```sh
-bin/manifold convert -o document.vdocs examples/notes/document.sf
-bin/manifold extract -format sf -o reopened.sf document.vdocs
-GOWORK=off go run ./examples/colleaf -out output/colleaf-example
-```
-
-The version-3 envelope targets Univer 1.0.4. Supported native/SF round trips retain
-assets, notes, source facts and diagnostics without `-allow-lossy`; unsupported
-mappings still reject. [Native contract and limits](docs/COLLEAF_FORMAT.md) records
-actual validator/plugin-save evidence, rendering gaps and application size limits.
-Browser interaction and full native rendering remain unqualified. Generated PDFs
-now use PDF 2.0 logical structure tied to actual painted content, including typed
-foot/endnote relationships. For physical inspection, combine `-pdf-skip-structure`
-with `-pdf-skip-inference`; skipped logical interpretation is diagnosed. Tagged
-output is not a PDF/UA or WTPDF conformance claim. See [PDF note evidence](docs/PDF_NOTES.md).
+Start with [documentation](docs/README.md), [compatibility](docs/COMPATIBILITY.md),
+[verification](docs/verification/FINAL_AUDIT.md) or [testing](docs/TESTING.md).
+Original-source fixtures and third-party notices are documented in
+[THIRD_PARTY.md](THIRD_PARTY.md). The project is MIT licensed.
