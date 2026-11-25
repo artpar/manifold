@@ -86,8 +86,9 @@ under internal/presentation, with public presentation API and one namespaced CLI
 Original synthetic/structural tests and PNG renderer tests are retained. New public
 API tests cover inspect/plan/edit/validate/render and unchanged source text.
 Repository-relative QA paths were relocated; external pixel-oracle corpora are not
-present. Combined normal/race/vet/build checks and hosted CI are pending at this
-checkpoint. See presentation/README.md for scope and limitations.
+present. Combined normal tests, vet, module verification, CGO-disabled build, public API
+workflow and CLI dispatch/help checks pass. Final race checks and hosted CI are
+pending at this checkpoint. VERSION 0.2.0 requests publication through Actions. See presentation/README.md for scope and limitations.
 
 Next commands: GOWORK=off go test -timeout 20m ./...;
 GOWORK=off go test -race -timeout 20m ./...; GOWORK=off go vet ./...;

@@ -162,6 +162,9 @@ jobs:
           - DOCX ↔ SF
           - PDF ↔ SF
           - Optional VDOCS ↔ SF
+          - PPTX inspection, planned edits, validation, review and diagnostic PNG rendering
+
+          PPTX/SF and PPTX/PDF conversion are not included.
 
           Install the Go CLI:
           \`go install github.com/$GITHUB_REPOSITORY/cmd/manifold@$TAG\`
