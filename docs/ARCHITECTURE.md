@@ -152,3 +152,9 @@ child. `-profile-mode cpu` captures separate read/write CPU profiles; memory mod
 captures cumulative allocations and sampled live heaps before/read/write/release.
 Forced live snapshots run two GC cycles and keep the document alive explicitly.
 They are diagnostic runs, not replacements for uninstrumented capacity results.
+
+For I/O attribution, profiling can count underlying file writes and test an
+explicit caller-side buffer with `-profile-output-buffer`. Zero leaves normal
+output buffering in place. The hash still covers all SF bytes, and flushing is
+included in the write phase with errors propagated. This is a diagnostic A/B knob,
+not a codec default change. Child records also expose OS user/system CPU totals.

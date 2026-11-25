@@ -58,6 +58,7 @@ func run() error {
 	timeout := flag.Duration("timeout", 120*time.Second, "hard child process deadline")
 	guard := flag.Int64("rss-mib", 8192, "sampled aggregate child RSS guard; requires ps on Unix")
 	profile := flag.String("cpuprofile", "", "child-only diagnostic whole-job CPU profile")
+	outputBuffer := flag.Int("profile-output-buffer", 0, "diagnostic caller-side file output buffer bytes; zero preserves normal writer")
 	profileDir := flag.String("profile-dir", "", "diagnostic profiles directory; isolated subdirectory per case/repeat/worker")
 	profileMode := flag.String("profile-mode", "cpu", "cpu or memory; separate diagnostic runs, never capacity measurements")
 	memRate := flag.Int("mem-profile-rate", 512*1024, "memory profile sampling rate in bytes; diagnostic memory runs only")
@@ -68,7 +69,10 @@ func run() error {
 
 	flag.Parse()
 	if *worker {
-		return convert(*input, manifold.Format(*target), *pages, profileConfig{Directory: *profileDir, Mode: *profileMode, MemRate: *memRate, LegacyCPU: *profile}, *operationTimeout, *large, *storage, *outputPath, *memoryMiB)
+		return convert(*input, manifold.Format(*target), *pages, profileConfig{Directory: *profileDir, Mode: *profileMode, MemRate: *memRate, LegacyCPU: *profile, OutputBuffer: *outputBuffer}, *operationTimeout, *large, *storage, *outputPath, *memoryMiB)
+	}
+	if *outputBuffer < 0 || *outputBuffer > 64<<20 || (*outputBuffer > 0 && (*profileDir == "" || *storage != "file")) {
+		return fmt.Errorf("profile-output-buffer requires profiling and file storage; range 0..64MiB")
 	}
 	if *profileMode != "cpu" && *profileMode != "memory" {
 		return fmt.Errorf("invalid profile mode")
@@ -117,7 +121,7 @@ func run() error {
 	if e != nil {
 		return e
 	}
-	emit(map[string]any{"kind": "environment", "go": runtime.Version(), "os": runtime.GOOS, "arch": runtime.GOARCH, "cpus": runtime.NumCPU(), "soft_memory_mib_per_child": *memoryMiB, "rss_guard_mib_batch": *guard, "timeout": timeout.String(), "started_utc": time.Now().UTC(), "large_document_work_policy": *large, "storage": *storage, "diagnostic_profiles": *profileDir != "", "profile_mode": *profileMode, "mem_profile_rate": *memRate, "measurement": "cold process; storage mode recorded; file read + parse + content checks + fully materialized SHA-256 output; buffered file writes without fsync; separate timed parse/write; no warmup; unmodified downloaded originals"})
+	emit(map[string]any{"kind": "environment", "go": runtime.Version(), "os": runtime.GOOS, "arch": runtime.GOARCH, "cpus": runtime.NumCPU(), "soft_memory_mib_per_child": *memoryMiB, "rss_guard_mib_batch": *guard, "timeout": timeout.String(), "started_utc": time.Now().UTC(), "large_document_work_policy": *large, "storage": *storage, "diagnostic_profiles": *profileDir != "", "profile_mode": *profileMode, "profile_output_buffer_bytes": *outputBuffer, "mem_profile_rate": *memRate, "measurement": "cold process; storage mode recorded; file read + parse + content checks + fully materialized SHA-256 output; buffered file writes without fsync; separate timed parse/write; no warmup; unmodified downloaded originals"})
 	baseCtx, stopSignals := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stopSignals()
 	wanted := map[string]bool{}
@@ -162,7 +166,7 @@ func run() error {
 					args = append(args, "-output", filepath.Join(*outputDir, fmt.Sprintf("%s-w%d.%s", f.Name, i, *target)))
 				}
 				if *profileDir != "" {
-					args = append(args, "-profile-dir", filepath.Join(*profileDir, fmt.Sprintf("%s-r%d-w%d", filepath.Base(f.Name), rep, i)), "-profile-mode", *profileMode, "-mem-profile-rate", strconv.Itoa(*memRate))
+					args = append(args, "-profile-dir", filepath.Join(*profileDir, fmt.Sprintf("%s-r%d-w%d", filepath.Base(f.Name), rep, i)), "-profile-mode", *profileMode, "-mem-profile-rate", strconv.Itoa(*memRate), "-profile-output-buffer", strconv.Itoa(*outputBuffer))
 				}
 				if *large {
 					args = append(args, "-large")
@@ -238,7 +242,7 @@ func run() error {
 				if ok {
 					success++
 				}
-				emit(map[string]any{"kind": "child", "case": f.Name, "to": *target, "repeat": rep, "workers": *workers, "worker": i, "success": ok, "exit_code": cmd.ProcessState.ExitCode(), "records": records, "stderr": errs[i].String()})
+				emit(map[string]any{"kind": "child", "case": f.Name, "to": *target, "repeat": rep, "workers": *workers, "worker": i, "success": ok, "exit_code": cmd.ProcessState.ExitCode(), "user_cpu_seconds": cmd.ProcessState.UserTime().Seconds(), "system_cpu_seconds": cmd.ProcessState.SystemTime().Seconds(), "records": records, "stderr": errs[i].String()})
 			}
 			wall := time.Since(start).Seconds()
 			emit(map[string]any{"kind": "batch", "case": f.Name, "to": *target, "repeat": rep, "workers": *workers, "success": success, "wall_seconds": wall, "successful_jobs_per_second": float64(success) / wall, "sampled_peak_rss_mib": float64(peakRSS) / 1024, "termination": reason})
@@ -409,6 +413,11 @@ func convert(path string, to manifold.Format, pages int, profile profileConfig, 
 		defer outputFile.Close()
 		destination = outputFile
 	}
+	var flushOutput = func() error { return nil }
+	var fileWrites *profileFileWriter
+	if outputFile != nil {
+		destination, flushOutput, fileWrites = profileOutput(destination, profile)
+	}
 	hash := sha256.New()
 	destination = io.MultiWriter(destination, hash)
 	beginWrite := time.Now()
@@ -416,11 +425,17 @@ func convert(path string, to manifold.Format, pages int, profile profileConfig, 
 	e = profiler.phase(ctx, "write", func(stageCtx context.Context) error {
 		beginWrite = time.Now()
 		err := manifold.Write(stageCtx, destination, d, to, manifold.WriteOptions{AllowLossy: true})
+		if err == nil {
+			err = flushOutput()
+		}
 		writeSeconds = time.Since(beginWrite).Seconds()
 		return err
 	})
 	if e != nil {
 		return e
+	}
+	if fileWrites != nil {
+		emit(map[string]any{"stage": "profile_file_writes", "calls": fileWrites.Calls, "bytes": fileWrites.Bytes, "at_most_4k": fileWrites.AtMost4K, "over_4k": fileWrites.Over4K, "max_bytes": fileWrites.Max, "caller_buffer_bytes": profile.OutputBuffer, "diagnostic_only": true})
 	}
 	if e = profiler.snapshot("write_end", false); e != nil {
 		return e

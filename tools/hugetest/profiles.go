@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -11,10 +13,11 @@ import (
 )
 
 type profileConfig struct {
-	Directory string
-	Mode      string
-	MemRate   int
-	LegacyCPU string
+	Directory    string
+	Mode         string
+	MemRate      int
+	OutputBuffer int
+	LegacyCPU    string
 }
 type diagnosticProfiler struct {
 	config   profileConfig
@@ -60,6 +63,9 @@ func (p *diagnosticProfiler) close() {
 	}
 }
 func (p *diagnosticProfiler) phase(ctx context.Context, name string, fn func(context.Context) error) error {
+	if p.config.Directory == "" && p.config.LegacyCPU == "" {
+		return fn(ctx)
+	}
 	var cpu *os.File
 	if p.config.Directory != "" && p.config.Mode == "cpu" {
 		var err error
@@ -115,4 +121,35 @@ func (p *diagnosticProfiler) snapshot(name string, collect bool) error {
 	}
 	emit(map[string]any{"stage": "profile_snapshot", "name": name, "forced_two_gc": collect, "path": path, "heap_alloc_bytes": stats.HeapAlloc, "heap_inuse_bytes": stats.HeapInuse, "heap_sys_bytes": stats.HeapSys, "heap_released_bytes": stats.HeapReleased, "total_alloc_bytes": stats.TotalAlloc, "mallocs": stats.Mallocs, "heap_objects": stats.HeapObjects, "gc_cycles": stats.NumGC, "mem_profile_rate": runtime.MemProfileRate, "snapshot_seconds": time.Since(start).Seconds(), "diagnostic_only": true})
 	return nil
+}
+
+// Counts underlying writes, after optional diagnostic caller-side buffering.
+type profileFileWriter struct {
+	io.Writer
+	Calls, Bytes, AtMost4K, Over4K int64
+	Max                            int
+}
+
+func (w *profileFileWriter) Write(b []byte) (int, error) {
+	w.Calls++
+	w.Max = max(w.Max, len(b))
+	if len(b) <= 4096 {
+		w.AtMost4K++
+	} else {
+		w.Over4K++
+	}
+	n, err := w.Writer.Write(b)
+	w.Bytes += int64(n)
+	return n, err
+}
+func profileOutput(w io.Writer, c profileConfig) (io.Writer, func() error, *profileFileWriter) {
+	if c.Directory == "" {
+		return w, func() error { return nil }, nil
+	}
+	counter := &profileFileWriter{Writer: w}
+	if c.OutputBuffer == 0 {
+		return counter, func() error { return nil }, counter
+	}
+	buffered := bufio.NewWriterSize(counter, c.OutputBuffer)
+	return buffered, buffered.Flush, counter
 }
