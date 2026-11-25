@@ -40,7 +40,7 @@ func presentationFromPackage(ctx context.Context, pkg *opc.Package) (*Document, 
 		w, h = 720, 540
 	}
 	p := &Presentation{Version: 1, Width: w, Height: h, SourceParts: pkg.Parts}
-	d := &Document{Presentation: p, Layout: Layout{Width: w, Height: h}}
+	d := &Document{Presentation: p, Layout: Layout{Width: w, Height: h, Margins: &PageMargins{}}}
 	for _, rel := range pkg.RootRelationships {
 		if rel.Type == opc.CorePropertiesRelType {
 			if n, e := parseXML(ctx, pkg.Parts[opc.ResolveTargetPart("", rel.Target)]); e == nil {
@@ -184,6 +184,43 @@ func presentationFromPackage(ctx context.Context, pkg *opc.Package) (*Document, 
 		scan(p.Slides[si].Objects)
 		for _, u := range p.Slides[si].Unsupported {
 			d.warn("pptx_representation", u)
+		}
+	}
+	// Match the existing SF normalization of empty runs/paragraphs so unchanged
+	// source packages remain distinguishable from actual authored edits.
+	var canonical func([]SlideObject) error
+	canonical = func(objects []SlideObject) error {
+		for i := range objects {
+			nodes, e := encodeSFBlocks(objects[i].Content)
+			if e != nil {
+				return e
+			}
+			objects[i].Content, e = decodeSFBlocks(nodes, 0)
+			if e != nil {
+				return e
+			}
+			if e = canonical(objects[i].Children); e != nil {
+				return e
+			}
+		}
+		return nil
+	}
+	for i := range p.Slides {
+		if e := canonical(p.Slides[i].Objects); e != nil {
+			return nil, e
+		}
+		nodes, e := encodeSFBlocks(p.Slides[i].Notes)
+		if e != nil {
+			return nil, e
+		}
+		p.Slides[i].Notes, e = decodeSFBlocks(nodes, 0)
+		if e != nil {
+			return nil, e
+		}
+	}
+	for i := range p.Resources {
+		if e := canonical(p.Resources[i].Objects); e != nil {
+			return nil, e
 		}
 	}
 	d.Metadata.PageCount = len(p.Slides)
@@ -334,6 +371,53 @@ func (r *pptxSlideParser) objects(tree *xmlNode, depth int) ([]SlideObject, erro
 				o.Geometry = "line"
 			}
 			o.Content = pptxParagraphs(n.child("txBody"), targets, r.part, &o.Unsupported)
+			body := n.child("txBody")
+			if body != nil {
+				bp := body.child("bodyPr")
+				insets := &PageMargins{Left: 7.2, Right: 7.2, Top: 3.6, Bottom: 3.6}
+				for _, item := range []struct {
+					key   string
+					value *float64
+				}{{"lIns", &insets.Left}, {"rIns", &insets.Right}, {"tIns", &insets.Top}, {"bIns", &insets.Bottom}} {
+					if bp.attr(item.key) != "" {
+						*item.value = pptxNumber(bp, item.key) / pptxEMU
+					}
+				}
+				if *insets != (PageMargins{}) {
+					o.Insets = insets
+				}
+				o.VerticalAlign = bp.attr("anchor")
+				if o.VerticalAlign == "t" {
+					o.VerticalAlign = ""
+				}
+				o.NoWrap = bp.attr("wrap") == "none"
+				for _, paragraph := range body.Children {
+					if paragraph.Name.Local == "p" {
+						align := paragraph.child("pPr").attr("algn")
+						if align != "" && align != "l" && align != "ctr" && align != "r" {
+							o.Unsupported = append(o.Unsupported, "native paragraph alignment "+align+" is preserved")
+							align = ""
+						}
+						o.ParagraphAlign = append(o.ParagraphAlign, align)
+					}
+				}
+				allLeft := true
+				for _, a := range o.ParagraphAlign {
+					if a != "" && a != "l" {
+						allLeft = false
+					}
+				}
+				if allLeft {
+					o.ParagraphAlign = nil
+				}
+				if bp.attr("vert") != "" && bp.attr("vert") != "horz" {
+					o.Unsupported = append(o.Unsupported, "vertical native text is preserved")
+				}
+				if n.child("style") != nil {
+					o.Unsupported = append(o.Unsupported, "theme shape style references are preserved in native source")
+				}
+			}
+
 		case "pic":
 			o.Kind = "image"
 			blips := n.all("blip")
@@ -409,7 +493,17 @@ func pptxParagraphs(body *xmlNode, rels map[string]opc.Relationship, part string
 				}
 				b.Runs = append(b.Runs, style)
 			case "br":
-				b.Runs = append(b.Runs, Run{Text: "\n"})
+				style := defaults
+				if len(b.Runs) > 0 {
+					style = b.Runs[len(b.Runs)-1]
+				}
+				style.Text = "\n"
+				b.Runs = append(b.Runs, style)
+			default:
+				if c.Name.Local != "pPr" && c.Name.Local != "endParaRPr" && unsupported != nil {
+					*unsupported = append(*unsupported, "native paragraph child "+c.Name.Local+" preserved in source")
+				}
+
 			}
 		}
 		props := p.child("pPr")
@@ -421,7 +515,7 @@ func pptxParagraphs(body *xmlNode, rels map[string]opc.Relationship, part string
 					*unsupported = append(*unsupported, "native paragraph property "+c.Name.Local+" is retained in source")
 				}
 			}
-			if props.attr("algn") != "" && props.attr("algn") != "l" {
+			if props.attr("algn") != "" && props.attr("algn") != "l" && props.attr("algn") != "ctr" && props.attr("algn") != "r" {
 				*unsupported = append(*unsupported, "native paragraph alignment is retained in source")
 			}
 		}
@@ -433,6 +527,19 @@ func pptxRunStyle(n *xmlNode, base Run, unsupported *[]string) Run {
 	if n == nil {
 		return base
 	}
+	if unsupported != nil {
+		for _, a := range n.Attr {
+			switch a.Name.Local {
+			case "b", "i", "u", "strike", "sz", "lang", "dirty", "smtClean":
+			default:
+				*unsupported = append(*unsupported, "native run attribute "+a.Name.Local+" is retained in source")
+			}
+		}
+	}
+	if n.child("solidFill") != nil && n.child("solidFill").child("srgbClr") == nil && unsupported != nil {
+		*unsupported = append(*unsupported, "native text color requires theme/color transformation support")
+	}
+
 	if v := n.attr("b"); v != "" {
 		base.Bold = v == "1" || v == "true"
 	}

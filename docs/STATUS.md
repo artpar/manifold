@@ -132,3 +132,13 @@ rerun including the new routes. A preliminary allocation profile identified
 repeated font parsing retained by textlayout/harfbuzz's global face-keyed shaping
 plan cache; that finding needs mitigation and a sustained recheck before capacity
 claims. Existing raw stress/profile data remains ignored under output/.
+
+SF bridge qualification update: synthetic end-to-end/negative tests pass; two
+unmodified Apache POI PowerPoint packages survive SF with every original ZIP part
+unchanged, and the actual ProseMirror reader checks the nested rich content.
+Native text/frame patches preserve unrelated style/theme XML. Unsupported output,
+ambiguous owners and overflowing frames reject; deleted notes do not reappear.
+Full normal suite passes. Shaping was migrated to the already-pinned go-text
+backend, whose plan cache is request-owned; existing glyph/ligature/bidi/caret
+oracles pass unchanged. Sustained memory recheck and final race/hosted checks are
+pending before the resumed performance matrix and final release.

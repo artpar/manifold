@@ -4,10 +4,13 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"errors"
 	"image"
 	"image/color"
 	"image/png"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -131,4 +134,74 @@ func TestFlowSFCanCreatePPTX(t *testing.T) {
 	if len(back.Presentation.Slides) != 2 || !strings.Contains(back.Text(), "Flowing SF into slides") {
 		t.Fatal(back.Text())
 	}
+}
+
+func TestOriginalPowerPointPackagesSurviveCentralSF(t *testing.T) {
+	for _, name := range []string{"poi-SampleShow.pptx", "poi-smartart-simple.pptx"} {
+		t.Run(name, func(t *testing.T) {
+			data, err := os.ReadFile(filepath.Join("testdata", "real", name))
+			if err != nil {
+				t.Fatal(err)
+			}
+			d := readFormat(t, data, manifold.PPTX)
+			sf := readFormat(t, writeFormat(t, d, manifold.SF), manifold.SF)
+			var output bytes.Buffer
+			if err := manifold.Write(context.Background(), &output, sf, manifold.PPTX, manifold.WriteOptions{}); err != nil {
+				t.Fatal(err)
+			}
+			before, after := zipParts(t, data), zipParts(t, output.Bytes())
+			if len(before) != len(after) {
+				t.Fatal("native package parts added/discarded")
+			}
+			for part, source := range before {
+				if !bytes.Equal(source, after[part]) {
+					t.Fatalf("native part changed: %s", part)
+				}
+			}
+		})
+	}
+}
+func TestPresentationRejectsAmbiguousOrUnsupportedOutput(t *testing.T) {
+	ctx := context.Background()
+	t.Run("flow and slides cannot coexist", func(t *testing.T) {
+		d := presentationFixture(t)
+		d.Blocks = []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "ambiguous second content owner"}}}}
+		if err := d.Validate(); err == nil {
+			t.Fatal("ambiguous owners accepted")
+		}
+	})
+	t.Run("overflow leaves output empty", func(t *testing.T) {
+		d := presentationFixture(t)
+		d.Presentation.Slides[0].Objects[0].Height = 1
+		var out bytes.Buffer
+		if err := manifold.Write(ctx, &out, d, manifold.PDF, manifold.WriteOptions{AllowLossy: true}); !errors.Is(err, manifold.ErrUnsupported) {
+			t.Fatalf("overflow: %v", err)
+		}
+		if out.Len() != 0 {
+			t.Fatal("partial PDF escaped")
+		}
+	})
+	t.Run("unsupported output cannot ignore a shape", func(t *testing.T) {
+		d := presentationFixture(t)
+		d.Presentation.Slides[0].Objects[0].Unsupported = []string{"unsupported native effect"}
+		var out bytes.Buffer
+		if err := manifold.Write(ctx, &out, d, manifold.PDF, manifold.WriteOptions{AllowLossy: true}); !errors.Is(err, manifold.ErrUnsupported) {
+			t.Fatalf("unsupported feature: %v", err)
+		}
+	})
+	t.Run("speaker notes can be deleted", func(t *testing.T) {
+		d := readFormat(t, writeFormat(t, presentationFixture(t), manifold.PPTX), manifold.PPTX)
+		d.Presentation.Slides[0].Notes = nil
+		back := readFormat(t, writeFormat(t, d, manifold.PPTX), manifold.PPTX)
+		if strings.Contains(back.Text(), "Speaker note retained") {
+			t.Fatal("deleted notes reappeared")
+		}
+	})
+	t.Run("flow-to-slide mapping requires acknowledgement", func(t *testing.T) {
+		d := &manifold.Document{Blocks: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "new slide"}}}}}
+		var out bytes.Buffer
+		if err := manifold.Write(ctx, &out, d, manifold.PPTX, manifold.WriteOptions{}); !errors.Is(err, manifold.ErrLossy) {
+			t.Fatal(err)
+		}
+	})
 }

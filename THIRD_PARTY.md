@@ -298,3 +298,15 @@ archives include these notices through the existing automated packaging job.
 The presentation rasterizer includes FreeType-Go software developed by the
 FreeType Project (https://www.freetype.org/); distributed under the FreeType License.
 The full license and required attribution are retained in `FreeType-FTL.txt`.
+
+Two additional unmodified Apache POI slideshow fixtures, SampleShow.pptx and
+smartart-simple.pptx, are pinned to upstream commit
+4793c3e741c2858bf29e728f13f617ee784243f4. Provenance/hashes are in the real-fixture
+manifest; existing Apache POI fixture LICENSE/NOTICE files apply. They qualify
+native package preservation through SF, not PowerPoint visual parity.
+
+PDF shaping now uses the existing go-text/typesetting v0.3.4 dependency (BSD-3-Clause
+or Unlicense, upstream choice) with request-owned buffer/plan caches. This avoids
+the process-global face retention in the previously used textlayout/harfbuzz path.
+The old textlayout module is still used for independent glyph names/encodings;
+its notices remain intact. Existing shaping test oracles are unchanged.

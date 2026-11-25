@@ -9,6 +9,7 @@ import (
 	"math"
 	"path"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -58,6 +59,19 @@ func writePPTX(ctx context.Context, out io.Writer, d *Document, opts WriteOption
 			return err
 		}
 	}
+	if original != nil && reflect.DeepEqual(p, original.Presentation) && d.Metadata.Title == original.Metadata.Title && d.Metadata.Author == original.Metadata.Author && d.Metadata.Subject == original.Metadata.Subject {
+		return emitPPTXArchive(ctx, out, parts)
+	}
+	sameOrder := original != nil && p.Width == original.Presentation.Width && p.Height == original.Presentation.Height && len(p.Slides) == len(original.Presentation.Slides)
+	if sameOrder {
+		for i, slide := range p.Slides {
+			old := original.Presentation.Slides[i]
+			if slide.ID != old.ID || slide.Part != old.Part {
+				sameOrder = false
+				break
+			}
+		}
+	}
 	presentationPart := pkg.PresentationPath
 	var slideRefs strings.Builder
 	var slideRels []opc.Relationship
@@ -99,6 +113,10 @@ func writePPTX(ctx context.Context, out io.Writer, d *Document, opts WriteOption
 		}
 		fmt.Fprintf(&slideRefs, `<p:sldId id="%d" r:id="%s"/>`, nativeID, escape(relID))
 		old, hasOld := oldSlides[s.Part]
+		if hasOld && (s.LayoutPart != old.LayoutPart || s.MasterPart != old.MasterPart) {
+			return fmt.Errorf("%w: changing native layout/master bindings requires an explicit new resource mapping", ErrUnsupported)
+		}
+
 		if !hasOld || !reflect.DeepEqual(s.Objects, old.Objects) || s.Background != old.Background {
 			if hasOld && len(old.Unsupported) > 0 {
 				return fmt.Errorf("%w: edited native slide has unmodeled features: %s", ErrUnsupported, old.Unsupported[0])
@@ -141,6 +159,9 @@ func writePPTX(ctx context.Context, out io.Writer, d *Document, opts WriteOption
 		if !ok {
 			return fmt.Errorf("%w: authored master/layout resources need a native source part", ErrUnsupported)
 		}
+		if resource.Kind != old.Kind || resource.MasterPart != old.MasterPart {
+			return fmt.Errorf("%w: native resource binding edits", ErrUnsupported)
+		}
 		if reflect.DeepEqual(resource, old) {
 			continue
 		}
@@ -159,26 +180,29 @@ func writePPTX(ctx context.Context, out io.Writer, d *Document, opts WriteOption
 		}
 		parts[opc.RelationshipsPartFor(resource.Part)] = pptxRelationships(updated)
 	}
-	root, err := parseXML(ctx, parts[presentationPart])
-	if err != nil {
-		return err
-	}
-	data := parts[presentationPart]
-	sizeXML := fmt.Sprintf(`<p:sldSz cx="%d" cy="%d"/>`, int64(math.Round(p.Width*pptxEMU)), int64(math.Round(p.Height*pptxEMU)))
-	// Replace later source ranges first, using fresh parsing after each patch.
-	data, err = replacePPTXNode(ctx, data, "sldIdLst", `<p:sldIdLst>`+slideRefs.String()+`</p:sldIdLst>`)
-	if err != nil {
-		return err
-	}
-	if root.child("sldSz") != nil {
-		data, err = replacePPTXNode(ctx, data, "sldSz", sizeXML)
+	if !sameOrder {
+		root, err := parseXML(ctx, parts[presentationPart])
 		if err != nil {
 			return err
 		}
+		data := parts[presentationPart]
+		sizeXML := fmt.Sprintf(`<p:sldSz cx="%d" cy="%d"/>`, int64(math.Round(p.Width*pptxEMU)), int64(math.Round(p.Height*pptxEMU)))
+		// Replace later source ranges first, using fresh parsing after each patch.
+		data, err = replacePPTXNode(ctx, data, "sldIdLst", `<p:sldIdLst>`+slideRefs.String()+`</p:sldIdLst>`)
+		if err != nil {
+			return err
+		}
+		if root.child("sldSz") != nil {
+			data, err = replacePPTXNode(ctx, data, "sldSz", sizeXML)
+			if err != nil {
+				return err
+			}
+		}
+		data = ensurePPTXNamespaces(data)
+		parts[presentationPart] = data
+		parts[opc.RelationshipsPartFor(presentationPart)] = pptxRelationships(slideRels)
 	}
-	data = ensurePPTXNamespaces(data)
-	parts[presentationPart] = data
-	parts[opc.RelationshipsPartFor(presentationPart)] = pptxRelationships(slideRels)
+
 	if original == nil || d.Metadata.Title != original.Metadata.Title || d.Metadata.Author != original.Metadata.Author || d.Metadata.Subject != original.Metadata.Subject {
 		writePPTXCore(parts, d.Metadata)
 	}
@@ -186,6 +210,9 @@ func writePPTX(ctx context.Context, out io.Writer, d *Document, opts WriteOption
 	if _, err := opc.FromParts(ctx, parts, ""); err != nil {
 		return err
 	}
+	return emitPPTXArchive(ctx, out, parts)
+}
+func emitPPTXArchive(ctx context.Context, out io.Writer, parts map[string][]byte) error {
 	var staged bytes.Buffer
 	zw := zip.NewWriter(&staged)
 	for _, name := range sortedParts(parts) {
@@ -204,7 +231,7 @@ func writePPTX(ctx context.Context, out io.Writer, d *Document, opts WriteOption
 	if err := zw.Close(); err != nil {
 		return err
 	}
-	_, err = io.Copy(contextWriter{ctx, out}, &staged)
+	_, err := io.Copy(contextWriter{ctx, out}, &staged)
 	return err
 }
 func relativePart(from, to string) string {
@@ -351,6 +378,14 @@ func buildPPTXObjects(ctx context.Context, parts map[string][]byte, part string,
 			b.Write(native[o.ID])
 			continue
 		}
+		if previous, ok := oldMap[o.ID]; ok && native[o.ID] != nil {
+			if patched, ok, err := patchNativeTextFrame(ctx, native[o.ID], o, previous); err != nil {
+				return "", nil, err
+			} else if ok {
+				b.Write(patched)
+				continue
+			}
+		}
 		if previous, ok := oldMap[o.ID]; ok && len(previous.Unsupported) > 0 {
 			return "", nil, fmt.Errorf("%w: edited object %s contains unmodeled native features: %s", ErrUnsupported, o.ID, previous.Unsupported[0])
 		}
@@ -422,11 +457,14 @@ func pptxObjectXML(parts map[string][]byte, part string, o SlideObject, rels []o
 		stroke = fmt.Sprintf(`<a:ln w="%d"><a:solidFill><a:srgbClr val="%s"/></a:solidFill></a:ln>`, int64(o.StrokeWidth*pptxEMU), escape(strings.TrimPrefix(o.Stroke, "#")))
 	}
 	var body strings.Builder
-	for _, block := range o.Content {
+	for paragraphIndex, block := range o.Content {
 		if block.Kind != Paragraph && block.Kind != Heading {
 			return "", nil, fmt.Errorf("%w: PPTX text box content %s", ErrUnsupported, block.Kind)
 		}
 		body.WriteString(`<a:p>`)
+		if len(o.ParagraphAlign) > 0 && o.ParagraphAlign[paragraphIndex] != "" {
+			body.WriteString(`<a:pPr algn="` + o.ParagraphAlign[paragraphIndex] + `"/>`)
+		}
 		for _, run := range block.Runs {
 			if run.Note != nil || run.Anchor != "" || run.Destination != "" {
 				return "", nil, fmt.Errorf("%w: PPTX inline note/internal anchor", ErrUnsupported)
@@ -467,21 +505,76 @@ func pptxObjectXML(parts map[string][]byte, part string, o SlideObject, rels []o
 		}
 		body.WriteString(`<a:endParaRPr/></a:p>`)
 	}
-	return `<p:sp><p:nvSpPr>` + nv + `<p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr>` + xf + `<a:prstGeom prst="` + geometry + `"><a:avLst/></a:prstGeom>` + fill + stroke + `</p:spPr><p:txBody><a:bodyPr lIns="0" tIns="0" rIns="0" bIns="0"/><a:lstStyle/>` + body.String() + `</p:txBody></p:sp>`, rels, nil
+	return `<p:sp><p:nvSpPr>` + nv + `<p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr><p:spPr>` + xf + `<a:prstGeom prst="` + geometry + `"><a:avLst/></a:prstGeom>` + fill + stroke + `</p:spPr><p:txBody>` + pptxBodyProperties(o) + `<a:lstStyle/>` + body.String() + `</p:txBody></p:sp>`, rels, nil
 }
 func ensurePPTXContentType(parts map[string][]byte, part, ct string) {
 	data := parts["[Content_Types].xml"]
-	needle := `PartName="/` + part + `"`
-	if bytes.Contains(data, []byte(needle)) {
+	root, err := parseXML(context.Background(), data)
+	if err != nil {
 		return
 	}
-	insert := `<Override PartName="/` + escape(part) + `" ContentType="` + escape(ct) + `"/>`
-	parts["[Content_Types].xml"] = bytes.Replace(data, []byte(`</Types>`), []byte(insert+`</Types>`), 1)
+	for _, n := range root.all("Override") {
+		if strings.TrimPrefix(n.attr("PartName"), "/") == part {
+			return
+		}
+	}
+	insert := `<Override xmlns="http://schemas.openxmlformats.org/package/2006/content-types" PartName="/` + escape(part) + `" ContentType="` + escape(ct) + `"/>`
+	at := bytes.LastIndex(data, []byte(`</`))
+	if at < 0 {
+		return
+	}
+	parts["[Content_Types].xml"] = append(append(append([]byte{}, data[:at]...), []byte(insert)...), data[at:]...)
 }
+
 func writePPTXCore(parts map[string][]byte, m Metadata) {
-	parts["docProps/core.xml"] = []byte(`<?xml version="1.0"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>` + escape(m.Title) + `</dc:title><dc:creator>` + escape(m.Author) + `</dc:creator><dc:subject>` + escape(m.Subject) + `</dc:subject></cp:coreProperties>`)
-	ensurePPTXContentType(parts, "docProps/core.xml", "application/vnd.openxmlformats-package.core-properties+xml")
+	key := "docProps/core.xml"
+	if root, err := parseXML(context.Background(), parts["_rels/.rels"]); err == nil {
+		for _, n := range root.all("Relationship") {
+			if n.attr("Type") == opc.CorePropertiesRelType {
+				key = opc.ResolveTargetPart("", n.attr("Target"))
+			}
+		}
+	}
+	data := parts[key]
+	if len(data) == 0 {
+		data = []byte(`<?xml version="1.0"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"></cp:coreProperties>`)
+	}
+	for _, field := range []struct{ name, value string }{{"title", m.Title}, {"creator", m.Author}, {"subject", m.Subject}} {
+		replacement := `<dc:` + field.name + ` xmlns:dc="http://purl.org/dc/elements/1.1/">` + escape(field.value) + `</dc:` + field.name + `>`
+		root, err := parseXML(context.Background(), data)
+		if err != nil {
+			continue
+		}
+		nodes := root.all(field.name)
+		if len(nodes) == 1 {
+			node := nodes[0]
+			data = append(append(append([]byte{}, data[:node.rawStart]...), []byte(replacement)...), data[node.rawEnd:]...)
+		} else if len(nodes) == 0 {
+			at := bytes.LastIndex(data, []byte(`</`))
+			if at >= 0 {
+				data = append(append(append([]byte{}, data[:at]...), []byte(replacement)...), data[at:]...)
+			}
+		}
+	}
+	parts[key] = data
+	ensurePPTXContentType(parts, key, "application/vnd.openxmlformats-package.core-properties+xml")
 }
+func pptxBodyProperties(o SlideObject) string {
+	v := PageMargins{}
+	if o.Insets != nil {
+		v = *o.Insets
+	}
+	wrap := "square"
+	if o.NoWrap {
+		wrap = "none"
+	}
+	anchor := o.VerticalAlign
+	if anchor == "" {
+		anchor = "t"
+	}
+	return fmt.Sprintf(`<a:bodyPr lIns="%d" tIns="%d" rIns="%d" bIns="%d" wrap="%s" anchor="%s"/>`, int64(math.Round(v.Left*pptxEMU)), int64(math.Round(v.Top*pptxEMU)), int64(math.Round(v.Right*pptxEMU)), int64(math.Round(v.Bottom*pptxEMU)), wrap, anchor)
+}
+
 func blankPPTXParts(p *Presentation, m Metadata) map[string][]byte {
 	parts := map[string][]byte{"[Content_Types].xml": []byte(`<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/></Types>`)}
 	parts["_rels/.rels"] = pptxRelationships([]opc.Relationship{{ID: "rId1", Type: pptxRelBase + "officeDocument", Target: "ppt/presentation.xml"}, {ID: "rId2", Type: opc.CorePropertiesRelType, Target: "docProps/core.xml"}})
@@ -498,9 +591,6 @@ func blankPPTXParts(p *Presentation, m Metadata) map[string][]byte {
 	return parts
 }
 func writePPTXNotes(ctx context.Context, parts map[string][]byte, slidePart string, notes []Block) error {
-	if len(notes) == 0 {
-		return nil
-	}
 	rels := []opc.Relationship{}
 	if pkg, err := opc.FromParts(ctx, parts, ""); err == nil {
 		rels, _ = pkg.RelationshipsForPart(slidePart)
@@ -510,6 +600,9 @@ func writePPTXNotes(ctx context.Context, parts map[string][]byte, slidePart stri
 		if rel.Type == opc.NotesSlideRelType {
 			target = opc.ResolveTargetPart(slidePart, rel.Target)
 		}
+	}
+	if target == "" && len(notes) == 0 {
+		return nil
 	}
 	if target == "" {
 		target = "ppt/notesSlides/notes-" + strings.TrimSuffix(path.Base(slidePart), ".xml") + ".xml"
@@ -525,4 +618,101 @@ func writePPTXNotes(ctx context.Context, parts map[string][]byte, slidePart stri
 	parts[opc.RelationshipsPartFor(target)] = pptxRelationships([]opc.Relationship{{ID: "rId1", Type: pptxRelBase + "slide", Target: relativePart(target, slidePart)}})
 	ensurePPTXContentType(parts, target, pptxContentBase+"notesSlide+xml")
 	return nil
+}
+
+// Patch only source-bound text/frame fields when styles and unknown native
+// properties are unchanged. This preserves native effects/theme data instead of
+// regenerating an unsupported object merely to change its text.
+func patchNativeTextFrame(ctx context.Context, raw []byte, current, old SlideObject) ([]byte, bool, error) {
+	a, b := current, old
+	a.Content = nil
+	b.Content = nil
+	a.X, a.Y, a.Width, a.Height, a.Rotation = 0, 0, 0, 0, 0
+	b.X, b.Y, b.Width, b.Height, b.Rotation = 0, 0, 0, 0, 0
+	if !reflect.DeepEqual(a, b) || len(current.Content) != len(old.Content) {
+		return nil, false, nil
+	}
+	var oldText, newText []string
+	for i, c := range current.Content {
+		o := old.Content[i]
+		if len(c.Runs) != len(o.Runs) {
+			return nil, false, nil
+		}
+		cr, or := c.Runs, o.Runs
+		c.Runs = nil
+		o.Runs = nil
+		if !reflect.DeepEqual(c, o) {
+			return nil, false, nil
+		}
+		for j, r := range cr {
+			before := or[j]
+			oldText = append(oldText, before.Text)
+			newText = append(newText, r.Text)
+			r.Text = ""
+			before.Text = ""
+			if !reflect.DeepEqual(r, before) {
+				return nil, false, nil
+			}
+		}
+	}
+	wrapped := append(append([]byte(`<p:sp `+pptxNS+`>`), raw...), []byte(`</p:sp>`)...)
+	root, err := parseXML(ctx, wrapped)
+	if err != nil {
+		return nil, false, nil
+	}
+	if len(root.Children) != 1 {
+		return nil, false, nil
+	}
+	object := root.Children[0]
+	if len(object.all("fld")) > 0 || len(object.all("br")) > 0 {
+		return nil, false, nil
+	}
+	texts := object.all("t")
+	if len(texts) != len(oldText) {
+		return nil, false, nil
+	}
+	prefix := int64(len(`<p:sp ` + pptxNS + `>`))
+	type patch struct {
+		start, end int64
+		text       []byte
+	}
+	var patches []patch
+	for i, n := range texts {
+		if n.content() != oldText[i] {
+			return nil, false, nil
+		}
+		if newText[i] != oldText[i] {
+			patches = append(patches, patch{n.rawStart - prefix, n.rawEnd - prefix, []byte(`<a:t xml:space="preserve">` + escape(newText[i]) + `</a:t>`)})
+		}
+	}
+	if current.X != old.X || current.Y != old.Y || current.Width != old.Width || current.Height != old.Height || current.Rotation != old.Rotation {
+		frames := object.all("xfrm")
+		if len(frames) != 1 || frames[0].child("off") == nil || frames[0].child("ext") == nil {
+			return nil, false, nil
+		}
+		frame := frames[0]
+		// Child coordinate transforms and unmodeled xfrm attributes are not rewritten.
+		if len(frame.Children) != 2 {
+			return nil, false, nil
+		}
+		for _, attr := range frame.Attr {
+			if attr.Name.Local != "rot" && attr.Name.Local != "flipH" && attr.Name.Local != "flipV" {
+				return nil, false, nil
+			}
+		}
+		text := fmt.Sprintf(`<a:xfrm rot="%d" flipH="%t" flipV="%t"><a:off x="%d" y="%d"/><a:ext cx="%d" cy="%d"/></a:xfrm>`, int64(math.Round(current.Rotation*60000)), current.FlipH, current.FlipV, int64(math.Round(current.X*pptxEMU)), int64(math.Round(current.Y*pptxEMU)), int64(math.Round(current.Width*pptxEMU)), int64(math.Round(current.Height*pptxEMU)))
+		if object.Name.Local == "graphicFrame" {
+			text = strings.ReplaceAll(text, "a:xfrm", "p:xfrm")
+		}
+		patches = append(patches, patch{frame.rawStart - prefix, frame.rawEnd - prefix, []byte(text)})
+	}
+	sort.Slice(patches, func(i, j int) bool { return patches[i].start > patches[j].start })
+	result := append([]byte(nil), raw...)
+	for _, p := range patches {
+		if p.start < 0 || p.end > int64(len(result)) {
+			return nil, false, fmt.Errorf("invalid source-bound XML range")
+		}
+		result = append(append(append([]byte{}, result[:p.start]...), p.text...), result[p.end:]...)
+	}
+	return result, true, nil
 }

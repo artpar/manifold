@@ -162,36 +162,8 @@ func paintSlideObject(r *pdfRenderer, o SlideObject) error {
 				return fmt.Errorf("%w: vector geometry %s", ErrUnsupported, o.Geometry)
 			}
 		}
-		y := o.Y
-		for _, block := range o.Content {
-			if block.Kind != Paragraph && block.Kind != Heading {
-				return fmt.Errorf("%w: slide text block %s", ErrUnsupported, block.Kind)
-			}
-			size := 18.0
-			if block.Kind == Heading {
-				size = 24
-			}
-			for _, run := range block.Runs {
-				if run.Note != nil || run.Anchor != "" || run.Destination != "" {
-					return fmt.Errorf("%w: slide inline note/internal target", ErrUnsupported)
-				}
-			}
-			lines, err := r.linesDirection(block.Runs, o.Width, size, block.Direction)
-			if err != nil {
-				return err
-			}
-			for _, line := range lines {
-				height := pdfLineHeight(line, size, 1.15)
-				if y+height > o.Y+o.Height+.1 {
-					return fmt.Errorf("%w: text overflows slide object %s; increase its frame height", ErrUnsupported, o.ID)
-				}
-				r.drawLine(line, o.X, y, size)
-				if err := p.Error(); err != nil {
-					return err
-				}
-				y += height
-			}
-		}
+		return paintSlideText(r, o)
+
 	case "group":
 		for _, child := range o.Children {
 			if err := paintSlideObject(r, child); err != nil {
@@ -447,4 +419,85 @@ func pdfFlowToPresentation(d *Document) (*Presentation, error) {
 		}
 	}
 	return p, p.validate()
+}
+
+func paintSlideText(r *pdfRenderer, o SlideObject) error {
+	inset := PageMargins{}
+	if o.Insets != nil {
+		inset = *o.Insets
+	}
+	width, height := o.Width-inset.Left-inset.Right, o.Height-inset.Top-inset.Bottom
+	if width <= 0 || height <= 0 {
+		return fmt.Errorf("%w: slide text insets consume its frame", ErrUnsupported)
+	}
+	type placed struct {
+		line                pdfLine
+		size, height, width float64
+		align               string
+	}
+	var lines []placed
+	total := 0.0
+	for i, block := range o.Content {
+		if block.Kind != Paragraph && block.Kind != Heading {
+			return fmt.Errorf("%w: slide text block %s", ErrUnsupported, block.Kind)
+		}
+		size := 18.0
+		if block.Kind == Heading {
+			size = 24
+		}
+		for _, run := range block.Runs {
+			if run.Note != nil || run.Anchor != "" || run.Destination != "" {
+				return fmt.Errorf("%w: slide inline note/internal target", ErrUnsupported)
+			}
+		}
+		wrapWidth := width
+		if o.NoWrap {
+			wrapWidth = 14400
+		}
+		shaped, err := r.linesDirection(block.Runs, wrapWidth, size, block.Direction)
+		if err != nil {
+			return err
+		}
+		align := ""
+		if len(o.ParagraphAlign) > 0 {
+			align = o.ParagraphAlign[i]
+		}
+		for _, line := range shaped {
+			h := pdfLineHeight(line, size, 1.15)
+			advance := 0.0
+			for _, span := range line {
+				advance += span.width
+			}
+			if advance > width+.1 {
+				return fmt.Errorf("%w: slide text exceeds horizontal frame", ErrUnsupported)
+			}
+			lines = append(lines, placed{line, size, h, advance, align})
+			total += h
+		}
+	}
+	if total > height+.1 {
+		return fmt.Errorf("%w: text overflows slide object %s; enlarge its frame", ErrUnsupported, o.ID)
+	}
+	y := o.Y + inset.Top
+	switch o.VerticalAlign {
+	case "ctr":
+		y += (height - total) / 2
+	case "b":
+		y += height - total
+	}
+	for _, line := range lines {
+		x := o.X + inset.Left
+		switch line.align {
+		case "ctr":
+			x += (width - line.width) / 2
+		case "r":
+			x += width - line.width
+		}
+		r.drawLine(line.line, x, y, line.size)
+		if err := r.pdf.Error(); err != nil {
+			return err
+		}
+		y += line.height
+	}
+	return nil
 }

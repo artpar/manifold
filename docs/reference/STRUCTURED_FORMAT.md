@@ -828,3 +828,38 @@ scoped browser image/counter/six-page continuation checks pass. Custom native
 indentation diagnoses; generated ordinary lists retain measured counter advance.
 See NATIVE_LITERAL_MARKERS.md for evidence and wider qualification limits. Existing
 source/text/pixel oracles remain unchanged while structural assertions strengthen.
+
+## Optional presentation profile
+
+The existing `manydoc-prosemirror/1` root admits an additive optional
+`attrs.presentation` value, version 1. It is mutually exclusive with flowing root
+content, headers/footers and root notes. Old flow documents remain byte-compatible.
+Readers unaware of the extension must reject/preserve it rather than discard it.
+
+The profile has a width/height in physical points, ordered slides and master/layout
+resources. Each slide/resource has editable objects in z-order. Objects carry a
+stable native ID, kind, positioned frame, clockwise rotation/flips, primitive
+geometry, colors/stroke, text insets/alignment, image pixels and nested children.
+Object `content` and slide `notes` use the same declared ProseMirror nodes/marks
+as flowing SF. `source_parts` retains the bounded original OPC parts, including
+unmodeled media, themes and native features. It is preservation evidence, not a
+second canonical format: supported text/geometry edits are written from SF.
+
+Unchanged native parts survive PPTX -> SF -> PPTX byte-for-byte (ZIP container
+metadata may differ). Supported text/frame patches preserve unrelated native XML.
+Unsupported regeneration rejects explicitly; AllowLossy does not authorize
+silently dropping charts, SmartArt, animation or other unmodeled visible content.
+The PDF writer consumes canonical objects and emits actual text/vector/image
+objects. It rejects unsupported native geometry/effects and text overflow.
+Speaker notes remain in SF/PPTX and require acknowledgement when writing PDF.
+
+Root Read/Write accepts PPTX. Flowing SF and recovered PDF content can be mapped
+into slide frames with explicit AllowLossy acknowledgement; physical PDF text and
+image quads supply positions where available. This is a declared reflow/recovery
+mapping, not a claim of reconstructing PowerPoint authoring intent or arbitrary
+OOXML/Word layout parity. Layout/master binding changes, advanced groups, native
+graphic-frame regeneration and unsupported flow layouts currently reject.
+
+The source package is limited to 10,000 parts, 64 MiB per part and 256 MiB total;
+slide/group/object/resource validation rejects invalid, duplicate or ambiguous
+owners. Both Go and actual ProseMirror reader qualification cover the extension.

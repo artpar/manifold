@@ -328,7 +328,7 @@ func Write(ctx context.Context, w io.Writer, d *Document, format Format, opts Wr
 	if err := d.Validate(); err != nil {
 		return err
 	}
-	if format != JSON && format != SF && format != SFGzip && format != VDOCS && format != Text && len(d.Diagnostics) > 0 && !opts.AllowLossy {
+	if format != PPTX && format != JSON && format != SF && format != SFGzip && format != VDOCS && format != Text && len(d.Diagnostics) > 0 && !opts.AllowLossy {
 		return fmt.Errorf("%w: %s", ErrLossy, d.Diagnostics[0].Message)
 	}
 	if (format == DOCX || format == PDF) && d.hasPDFSource() && !opts.AllowLossy {

@@ -41,6 +41,10 @@ type PresentationResource struct {
 	Unsupported []string      `json:"unsupported,omitempty"`
 }
 type SlideObject struct {
+	Insets           *PageMargins  `json:"insets,omitempty"`
+	ParagraphAlign   []string      `json:"paragraph_align,omitempty"`
+	VerticalAlign    string        `json:"vertical_align,omitempty"`
+	NoWrap           bool          `json:"no_wrap,omitempty"`
 	ID               string        `json:"id"`
 	Kind             string        `json:"kind"` // shape, image, group, native
 	Name             string        `json:"name,omitempty"`
@@ -211,8 +215,8 @@ func (p *Presentation) validate() error {
 	if p.Version != 1 || !finite(p.Width) || !finite(p.Height) || p.Width <= 0 || p.Height <= 0 || p.Width > 14400 || p.Height > 14400 {
 		return fmt.Errorf("invalid presentation version/canvas")
 	}
-	if len(p.Slides) == 0 || len(p.Slides) > 10000 {
-		return fmt.Errorf("presentation requires 1..10000 slides")
+	if len(p.Slides) > 10000 {
+		return fmt.Errorf("presentation exceeds 10000 slides")
 	}
 	var bytesCount int64
 	for name, data := range p.SourceParts {
@@ -262,6 +266,24 @@ func (p *Presentation) validate() error {
 				if err := validateString(s); err != nil {
 					return err
 				}
+			}
+			if o.Insets != nil {
+				for _, v := range []float64{o.Insets.Top, o.Insets.Bottom, o.Insets.Left, o.Insets.Right} {
+					if !finite(v) || v < 0 || v > 14400 {
+						return fmt.Errorf("invalid slide text inset")
+					}
+				}
+			}
+			if len(o.ParagraphAlign) > 0 && len(o.ParagraphAlign) != len(o.Content) {
+				return fmt.Errorf("paragraph alignment count must match content")
+			}
+			for _, a := range o.ParagraphAlign {
+				if a != "" && a != "l" && a != "ctr" && a != "r" {
+					return fmt.Errorf("unsupported paragraph alignment %q", a)
+				}
+			}
+			if o.VerticalAlign != "" && o.VerticalAlign != "t" && o.VerticalAlign != "ctr" && o.VerticalAlign != "b" {
+				return fmt.Errorf("unsupported vertical text anchor")
 			}
 			if err := validateBlocks(o.Content); err != nil {
 				return err

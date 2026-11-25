@@ -207,6 +207,28 @@
         "https://github.com/apache/poi/blob/44d254e441b983d1338e1b4d2248023b807ce55f/legal/NOTICE"
       ],
       "structural_oracle": "poi-docx-oracle.json, generated only from original ZIP/XML by scripts/audit_poi_sources.py"
+    },
+    {
+      "path": "poi-SampleShow.pptx",
+      "sha256": "bfb4b2f07c9233afd2f32aa5781d849d0c7d225bf03721a10becf487b481d828",
+      "size": 39083,
+      "source": "https://raw.githubusercontent.com/apache/poi/4793c3e741c2858bf29e728f13f617ee784243f4/test-data/slideshow/SampleShow.pptx",
+      "retrieved": "2026-11-25",
+      "publisher": "Apache POI test-data/slideshow",
+      "classification": "unmodified original PowerPoint package; structural preservation fixture, not a visual fidelity oracle",
+      "rights": "Apache POI test-data license and notices retained in third_party/licenses/apache-poi-fixtures-LICENSE.txt and apache-poi-fixtures-NOTICE.txt",
+      "structural_oracle": "every original ZIP part must survive native PPTX -> SF -> PPTX byte-for-byte"
+    },
+    {
+      "path": "poi-smartart-simple.pptx",
+      "sha256": "238ff6433dac00b2722edb9a29d97f56ab4f3c9c37f33a73d6f53baf494916aa",
+      "size": 71102,
+      "source": "https://raw.githubusercontent.com/apache/poi/4793c3e741c2858bf29e728f13f617ee784243f4/test-data/slideshow/smartart-simple.pptx",
+      "retrieved": "2026-11-25",
+      "publisher": "Apache POI test-data/slideshow",
+      "classification": "unmodified original PowerPoint package; structural preservation fixture, not a visual fidelity oracle",
+      "rights": "Apache POI test-data license and notices retained in third_party/licenses/apache-poi-fixtures-LICENSE.txt and apache-poi-fixtures-NOTICE.txt",
+      "structural_oracle": "every original ZIP part must survive native PPTX -> SF -> PPTX byte-for-byte"
     }
   ]
 }
