@@ -14,9 +14,10 @@ identifier `manydoc-prosemirror/1`. See [acceptance](verification/ACCEPTANCE.md)
 [the audit](verification/FINAL_AUDIT.md) for source, reader and visual evidence.
 
 The user requested renaming/publishing as `artpar/manifold`, then flagged the
-fragmented file organization. The repository is created at
-https://github.com/artpar/manifold but its first push is pending the organization
-checks. The root now contains the public API and public API tests; implementation
+fragmented file organization. The repository is public at https://github.com/artpar/manifold. Main contains
+the rename and qualified organization cleanup. A clean clone of source commit
+249414d333e6e2179f06161feeebf4ae7e7b0b06 builds with CGO disabled and passes
+SF→DOCX→SF / SF→PDF→SF with three typed notes. The root now contains the public API and public API tests; implementation
 and unit tests live in cohesive modules under `internal/engine`. QA tools are
 grouped by concern under `scripts/qa`. Current guides, detailed contracts and
 historical evidence are separate. The engine deliberately shares one document
@@ -36,8 +37,7 @@ cross-builds; all 51 accepted corpus documents through actual ProseMirror; the
 section example; and a clean-checkout all-four-path note conversion.
 
 Organization normal/race/vet/build checks, complete-SF corpus equality, moved
-QA tools and original-source reader checks pass. Commit/push and clean-clone
-verification remain. Exact scopes/results are recorded in
+QA tools, original-source readers and clean published-clone checks pass. Exact scopes/results are recorded in
 [verification.json](verification.json). No source fixture or independent oracle
 was rewritten. Generated output, binaries and QA environments remain ignored.
 
@@ -53,6 +53,7 @@ output/qa-venv/bin/python scripts/qa/structured/verify_structured_corpus.py
 git diff --check
 ```
 
-Finish checks, commit aligned code/docs/evidence, push `main` to `origin`, and
-verify the remote commit and a clean clone. Keep Daptin/application code unchanged.
+For future changes, run affected checks and the required matrix, commit aligned
+code/docs/evidence and verify the pushed commit. No publication work remains.
+Keep Daptin/application code unchanged.
 For earlier milestones and old filenames, use [history](history/README.md).

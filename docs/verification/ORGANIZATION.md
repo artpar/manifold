@@ -37,3 +37,10 @@ Full Go checks, independent SF/reader qualification, clean-checkout conversion a
 publication verification are recorded in [the current ledger](../verification.json).
 Generated logs/output remain ignored under output/reorg. Structural/input/output
 oracles are retained; tests were not weakened to accommodate consolidation.
+
+
+Publication is verified at https://github.com/artpar/manifold. A clean remote
+clone of source commit249414d333e6e2179f06161feeebf4ae7e7b0b06 builds the CLI
+with CGO disabled and completes SF→DOCX→SF and SF→PDF→SF, recovering the
+three typed notes through both actual output formats. The clone has no ignored
+output/QA environment. This final evidence update changes documentation only.

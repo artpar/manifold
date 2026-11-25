@@ -19,16 +19,25 @@
     "normal": "31.281s library /0.564s CLI passed",
     "race": "351.804s library /2.868s CLI passed",
     "builds": "CGO-disabled host executed; Linux amd64/arm64 cross-built",
-    "independent": "51 SF corpus files/9034 ProseMirror nodes and marks; public section example; clean committed checkout all-four-path note conversion passed"
+    "independent": "51 SF corpus files/9034 ProseMirror nodes and marks; public section example; clean committed checkout all-four-path note conversion passed",
+    "publication": "https://github.com/artpar/manifold"
   },
   "organization": {
-    "status": "qualified; commit/push and clean remote clone verification pending",
+    "status": "qualified and published",
     "public": "manifold.go and public_api_test.go",
     "implementation": "36 cohesive engine files with adjacent tests; conversion model shared inside internal/engine",
     "qa": "scripts/qa grouped by format/concern",
     "docs": "current guides separate from reference contracts, qualification reports and history",
     "map": "docs/history/source-file-map.json",
-    "publication": "https://github.com/artpar/manifold; repository created, push pending",
+    "publication": {
+      "repository": "https://github.com/artpar/manifold",
+      "visibility": "public",
+      "default_branch": "main",
+      "verified_source_commit": "249414d333e6e2179f06161feeebf4ae7e7b0b06",
+      "clean_clone": "CGO-disabled build and standalone CLI all-four-path note conversion passed without output/QA environment; three typed notes preserved",
+      "log": "output/reorg/publication.json",
+      "followup": "This evidence update changes documentation only."
+    },
     "report": "docs/verification/ORGANIZATION.md",
     "inventory": {
       "functions_and_methods": 1729,
@@ -45,7 +54,7 @@
       "source_inventory": "all1729 functions/methods and691 test/fuzz/benchmark definitions retained after private adapter prefix normalization; TestMain added",
       "malformed_fuzz": "complete normal/race malformed cases passed; relocated FuzzPDFParentTree10010executions/2.383s/two workers passed",
       "independent": "51 SF corpus documents/9034 actual ProseMirror nodes/marks; section example/reader; native SDK source probe; eight original exports all four paths and33 producer/native reader pages passed",
-      "qa_syntax": "all moved Python/JavaScript tools parsed; local doc links checked"
+      "qa_syntax": "95 Python and38 JavaScript tools parsed; local Markdown links checked"
     },
     "logs": [
       "output/reorg/final-tests.log",
@@ -58,6 +67,6 @@
       "output/reorg/inventory.json",
       "output/reorg/corpus-equality.json"
     ],
-    "remaining": "No required conversion change pending. GitHub publication and clean-clone verification pending. Existing documented compatibility/reader limits remain; the engine is still a shared package, not independent codec packages."
+    "remaining": "No rename/organization/publication work pending. Existing documented compatibility and native-reader limitations remain. The internal engine is a shared Go package, not independent codec packages."
   }
 }
