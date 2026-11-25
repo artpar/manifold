@@ -9,7 +9,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/benoitkugler/textlayout/language"
+	"github.com/go-text/typesetting/language"
 	"io"
 	"math"
 	"os"

@@ -69,3 +69,11 @@ with the former implementation maps and qualification ledger.
     bitmap conversion. Unsupported native features must round-trip unchanged or
     reject unsupported edits/output explicitly. Performance results must be rerun
     for this completed path rather than advertised for the superseded facade.
+
+14. **Request-owned PDF shaping cache.** The measured old shaping path inserted
+    a freshly parsed font face into a process-global upstream cache on every PDF
+    request. Use the already-pinned go-text/typesetting backend, whose plan cache
+    is owned by the shaping buffer, and reuse one buffer per request-owned glyph
+    face. Do not add a permanent process-wide font cache or lifetime font quotas.
+    Preserve existing glyph/ligature/bidi/caret expectations and independently
+    rerun load/heap qualification after the change.

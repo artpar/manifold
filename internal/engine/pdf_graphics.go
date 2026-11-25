@@ -2,9 +2,9 @@ package engine
 
 import (
 	"fmt"
-	"github.com/benoitkugler/textlayout/fonts"
-	"github.com/benoitkugler/textlayout/harfbuzz"
-	"github.com/benoitkugler/textlayout/language"
+	fonts "github.com/go-text/typesetting/font"
+	"github.com/go-text/typesetting/harfbuzz"
+	"github.com/go-text/typesetting/language"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 	"github.com/rivo/uniseg"
 	"math"

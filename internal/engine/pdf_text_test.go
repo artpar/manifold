@@ -10,7 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/artpar/manifold/internal/bidilevels"
-	"github.com/benoitkugler/textlayout/language"
+	"github.com/go-text/typesetting/language"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 	"github.com/phpdave11/gofpdf"
 	"golang.org/x/image/font/gofont/goregular"

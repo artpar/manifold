@@ -8,13 +8,13 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/benoitkugler/textlayout/fonts/simpleencodings"
-	"github.com/benoitkugler/textlayout/fonts/truetype"
-	"github.com/benoitkugler/textlayout/harfbuzz"
+	gtfont "github.com/go-text/typesetting/font"
+	"github.com/go-text/typesetting/harfbuzz"
 
 	// Parse source assignments once. Applying them from the end can skip CIDs already
 	// owned by a later assignment, preserving existing last-assignment semantics
 	// without expanding every overlapping range repeatedly.
-	"github.com/benoitkugler/textlayout/language"
+	"github.com/go-text/typesetting/language"
 	pdffont "github.com/pdfcpu/pdfcpu/pkg/font"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
@@ -656,6 +656,7 @@ type pdfGlyphFace struct {
 	name     string
 	original pdfFontFace
 	shaper   *harfbuzz.Font
+	buffer   *harfbuzz.Buffer
 	codes    map[pdfGlyphCode]uint16
 	entries  []pdfGlyphCode
 }
@@ -732,14 +733,15 @@ func (r *pdfRenderer) shapeGlyphTextContext(face pdfFontFace, text string, run R
 	key := face.id + "/" + face.style
 	gf := r.glyphFaces[key]
 	if gf == nil {
-		parsed, e := truetype.Parse(bytes.NewReader(face.data))
+		parsed, e := gtfont.ParseTTF(bytes.NewReader(face.data))
 		if e != nil {
 			return nil, fmt.Errorf("%w: TrueType shaping tables: %v", ErrUnsupported, e)
 		}
-		gf = &pdfGlyphFace{name: fmt.Sprintf("MDG%d", len(r.glyphFaces)+1), original: face, shaper: harfbuzz.NewFont(parsed), codes: map[pdfGlyphCode]uint16{}}
+		gf = &pdfGlyphFace{name: fmt.Sprintf("MDG%d", len(r.glyphFaces)+1), original: face, shaper: harfbuzz.NewFont(parsed), buffer: harfbuzz.NewBuffer(), codes: map[pdfGlyphCode]uint16{}}
 		r.glyphFaces[key] = gf
 	}
-	b := harfbuzz.NewBuffer()
+	b := gf.buffer
+	b.Clear()
 	b.Props.Language = "und"
 	b.Flags = harfbuzz.DoNotinsertDottedCircle
 	normalized := []rune(norm.NFC.String(text))

@@ -7,7 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/artpar/manifold/internal/bidilevels"
-	"github.com/benoitkugler/textlayout/language"
+	"github.com/go-text/typesetting/language"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 
 	// Source positions count original scalars, before NFC, note-label substitution
