@@ -137,11 +137,14 @@ jobs:
             mkdir -p "$stage/third_party"
             binary=manifold
             if [[ "$os" == windows ]]; then binary=manifold.exe; fi
-            GOOS="$os" GOARCH="$arch" go build -trimpath -buildvcs=false -ldflags='-s -w' -o "$stage/$binary" ./cmd/manifold
+            GOOS="$os" GOARCH="$arch" go build -trimpath -buildvcs=false -ldflags "-s -w -X github.com/artpar/manifold/internal/presentation/cli.version=$VERSION" -o "$stage/$binary" ./cmd/manifold
             cp LICENSE THIRD_PARTY.md "$stage/"
             cp -R third_party/licenses "$stage/third_party/"
             printf '%s\n%s\n' "$VERSION" "$GITHUB_SHA" > "$stage/VERSION"
-            if [[ "$target" == linux/amd64 ]]; then "$stage/$binary" help; fi
+            if [[ "$target" == linux/amd64 ]]; then
+              "$stage/$binary" help
+              "$stage/$binary" presentation version | grep -F " $VERSION ("
+            fi
             if [[ "$os" == windows ]]; then
               (cd dist && zip -qr "$name.zip" "$name")
             else
