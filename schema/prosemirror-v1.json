@@ -288,6 +288,16 @@
           "default": null
         }
       }
+    },
+    "presentation": {
+      "group": "block",
+      "atom": true,
+      "attrs": {
+        "version": {
+          "default": 1,
+          "validate": "number"
+        }
+      }
     }
   },
   "marks": {

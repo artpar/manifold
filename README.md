@@ -5,7 +5,8 @@
 Pure-Go rich document processing for embedded applications and the command line.
 
 Convert **DOCX → structured format → DOCX/PDF**, and recover structured content
-from PDF. The shared format is a versioned ProseMirror JSON profile, with typed Go
+from PDF. PPTX also reads/writes through the same SF model, including supported
+PPTX/PDF conversion paths. The shared format is a versioned ProseMirror JSON profile, with typed Go
 trees for programmatic manipulation. Runtime conversion needs no CGO, external
 executables, services or license servers.
 
@@ -112,4 +113,15 @@ manifold presentation render deck.pptx --slide 1 --out slide.png --json
 
 Import `github.com/artpar/manifold/presentation` for inspection, planned edits,
 validation, review and diagnostic PNG rendering. See [presentation guide](docs/presentation/README.md)
-for supported operations and limits. PPTX/SF and PPTX/PDF conversion are not yet supported.
+for supported operations and limits. Central conversion examples:
+
+```sh
+manifold extract -format sf -o deck.sf input.pptx
+manifold convert -o roundtrip.pptx deck.sf
+manifold convert -allow-lossy -o deck.pdf deck.sf
+manifold convert -allow-lossy -o recovered.pptx deck.pdf
+```
+
+The root Go API accepts `manifold.PPTX`; slides are editable typed SF objects.
+Advanced native features remain preserved or explicitly unsupported for edits/PDF
+output; this is not a PowerPoint layout-equivalence claim.

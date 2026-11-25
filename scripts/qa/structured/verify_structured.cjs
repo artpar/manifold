@@ -45,6 +45,14 @@ for (const filename of process.argv.slice(2)) {
   verifyTree([input]);
   if (input.attrs.presentation != null) {
     const p = input.attrs.presentation;
+    assert.equal(input.content?.length, 1);
+    assert.equal(input.content[0].type, 'presentation');
+    assert.equal(input.content[0].attrs.version, 1);
+    const oldSpec = JSON.parse(JSON.stringify(spec));
+    delete oldSpec.nodes.presentation;
+    delete oldSpec.nodes.doc.attrs.presentation;
+    assert.throws(() => new Schema(oldSpec).nodeFromJSON(input), /Unknown node type/);
+
     assert.equal(p.version, 1);
     assert.ok(p.width > 0 && p.height > 0);
     function objects(items) { for (const o of items || []) { verifyTree(o.content); objects(o.children); } }

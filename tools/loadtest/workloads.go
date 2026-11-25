@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -10,9 +11,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 
 	"github.com/artpar/manifold"
-	"github.com/artpar/manifold/internal/presentation/fixtures"
 	"github.com/artpar/manifold/presentation"
 )
 
@@ -95,22 +96,29 @@ func makeWorkloads(ctx context.Context, dir string) ([]workload, error) {
 	}
 	for _, size := range []int{10, 100} {
 		deck := filepath.Join(dir, fmt.Sprintf("deck-%d.pptx", size))
-		opts := fixtures.PPTXOptions{}
+		fixture := &manifold.Document{Metadata: manifold.Metadata{Title: "Visible load-test slides"}, Presentation: &manifold.Presentation{Version: 1, Width: 960, Height: 540}}
 		for i := range size {
-			slide := fixtures.Slide{PartName: fmt.Sprintf("ppt/slides/slide%d.xml", i+1), Text: fmt.Sprintf("Slide %d. %s", i+1, strings.Repeat("Manifold performance fixture. ", 8)), Notes: "Speaker notes preserved during supported edits."}
+			slide := manifold.PresentationSlide{ID: fmt.Sprint(256 + i), Part: fmt.Sprintf("ppt/slides/slide%d.xml", i+1), Objects: []manifold.SlideObject{
+				{ID: "2", Kind: "shape", Geometry: "rect", X: 40, Y: 30, Width: 850, Height: 80, Content: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: fmt.Sprintf("Manifold visible slide %d", i+1), FontSize: 24, Bold: true}}}}},
+				{ID: "3", Kind: "shape", Geometry: "rect", X: 40, Y: 130, Width: 850, Height: 120, Content: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: strings.Repeat("Measured visible body content with supported text. ", 3), FontSize: 16}}}}},
+			}}
 			if i%3 == 0 {
-				slide.Image = picture.String()
+				slide.Objects = append(slide.Objects, manifold.SlideObject{ID: "4", Kind: "image", X: 40, Y: 290, Width: 128, Height: 128, Image: &manifold.Image{Data: picture.Bytes(), MediaType: "image/png", Alt: "Deterministic colored pixels"}})
 			}
-			opts.Slides = append(opts.Slides, slide)
+			fixture.Presentation.Slides = append(fixture.Presentation.Slides, slide)
 		}
-		if err := fixtures.WritePPTX(deck, opts); err != nil {
+		var encoded bytes.Buffer
+		if err := manifold.Write(ctx, &encoded, fixture, manifold.PPTX, manifold.WriteOptions{}); err != nil {
+			return nil, err
+		}
+		if err := os.WriteFile(deck, encoded.Bytes(), 0600); err != nil {
 			return nil, err
 		}
 		data, err := os.ReadFile(deck)
 		if err != nil {
 			return nil, err
 		}
-		all = append(all, workload{Name: fmt.Sprintf("pptx-%d-inspect", size), Description: fmt.Sprintf("Synthetic %d-slide PPTX with text, notes and image every third slide; read/inspect complete package", size), InputBytes: len(data), InputSHA256: digest(data), prepare: func(int) operation {
+		all = append(all, workload{Name: fmt.Sprintf("pptx-%d-inspect", size), Description: fmt.Sprintf("Synthetic %d-slide PPTX with explicit visible text/image frames; read/inspect complete package", size), InputBytes: len(data), InputSHA256: digest(data), prepare: func(int) operation {
 			return func(ctx context.Context) (observation, error) {
 				r, err := presentation.Inspect(ctx, deck)
 				if err != nil {
@@ -123,6 +131,56 @@ func makeWorkloads(ctx context.Context, dir string) ([]workload, error) {
 			}
 		}})
 		if size == 10 {
+			canonical, err := manifold.Read(ctx, bytes.NewReader(data), manifold.PPTX, manifold.ReadOptions{})
+			if err != nil {
+				return nil, err
+			}
+			var sfSlides, pdfSlides bytes.Buffer
+			if err := manifold.Write(ctx, &sfSlides, canonical, manifold.SF, manifold.WriteOptions{}); err != nil {
+				return nil, err
+			}
+			if err := manifold.Write(ctx, &pdfSlides, canonical, manifold.PDF, manifold.WriteOptions{AllowLossy: true}); err != nil {
+				return nil, err
+			}
+			conversion("pptx-central-sf", "Visible 10-slide PPTX through root Read and serialized central SF, including native preservation parts", data, manifold.PPTX, manifold.SF)
+			conversion("sf-slides-pptx", "Parse central slide SF and serialize PPTX, preserving native parts", sfSlides.Bytes(), manifold.SF, manifold.PPTX)
+			conversion("sf-slides-pdf", "Parse central slide SF and generate ten PDF pages with searchable/vector text and images", sfSlides.Bytes(), manifold.SF, manifold.PDF)
+			conversion("pdf-slides-pptx", "Recover positioned content from ten-page PDF and create PPTX through root Read/Write", pdfSlides.Bytes(), manifold.PDF, manifold.PPTX)
+			var sequence atomic.Uint64
+			all = append(all, workload{Name: "pptx-varied-edit-render", InputBytes: len(data), InputSHA256: digest(data), Description: "10-slide visible deck; uniquely vary title every request, apply native edit, render slide 1 at 144 DPI; probes high-cardinality shaping-cache retention", prepare: func(worker int) operation {
+				spec := filepath.Join(dir, fmt.Sprintf("vary-spec-%d.json", worker))
+				edited := filepath.Join(dir, fmt.Sprintf("vary-deck-%d.pptx", worker))
+				output := filepath.Join(dir, fmt.Sprintf("vary-render-%d.png", worker))
+				return func(ctx context.Context) (observation, error) {
+					title := fmt.Sprintf("Unique load-test title %d", sequence.Add(1))
+					b, err := json.Marshal(presentation.EditSpec{Operation: "replace_text", Target: presentation.TargetSpec{Type: "object_id", ObjectID: "ppt/slides/slide1.xml#shape-2"}, Replacement: title})
+					if err != nil {
+						return observation{}, err
+					}
+					if err = os.WriteFile(spec, b, 0600); err != nil {
+						return observation{}, err
+					}
+					edit, err := presentation.Edit(ctx, deck, spec, edited)
+					if err != nil {
+						return observation{}, err
+					}
+					if edit.Status != "ok" {
+						return observation{}, fmt.Errorf("varied edit: %s", edit.Status)
+					}
+					rendered, err := presentation.Render(ctx, edited, presentation.RenderOptions{SlideNumber: 1, OutputPath: output, DPI: 144})
+					if err != nil {
+						return observation{}, err
+					}
+					if rendered.Status != "ok" && rendered.Status != "partial" {
+						return observation{}, fmt.Errorf("varied render: %s", rendered.Status)
+					}
+					stat, err := os.Stat(output)
+					if err != nil {
+						return observation{}, err
+					}
+					return observation{bytes: stat.Size(), partial: rendered.Status == "partial"}, nil
+				}
+			}})
 			spec := filepath.Join(dir, "edit.json")
 			if err := os.WriteFile(spec, []byte(`{"operation":"replace_text","target":{"type":"object_id","object_id":"ppt/slides/slide1.xml#shape-2"},"replacement":"Edited load-test title"}`), 0600); err != nil {
 				return nil, err
@@ -164,10 +222,33 @@ func makeWorkloads(ctx context.Context, dir string) ([]workload, error) {
 					if err != nil {
 						return observation{}, err
 					}
-					return observation{bytes: s.Size(), partial: r.Status == "partial"}, nil
+					diagnostic := ""
+					if len(r.Unsupported) > 0 {
+						diagnostic = r.Unsupported[0].Message
+					}
+					return observation{bytes: s.Size(), partial: r.Status == "partial", diagnostic: diagnostic}, nil
 				}
 			}})
 		}
 	}
+	schedule := []string{"docx-small-sf", "docx-small-sf", "docx-small-sf", "pdf-small-sf", "pdf-small-sf", "sf-medium-docx", "sf-medium-pdf", "sf-medium-pdf", "pptx-central-sf", "sf-slides-pdf"}
+	byName := map[string]workload{}
+	for _, w := range all {
+		byName[w.Name] = w
+	}
+	fingerprint := ""
+	avgBytes := 0
+	for _, name := range schedule {
+		fingerprint += name + ":" + byName[name].InputSHA256 + ";"
+		avgBytes += byName[name].InputBytes
+	}
+	all = append(all, workload{Name: "mixed-api", InputBytes: avgBytes / len(schedule), InputSHA256: digest([]byte(fingerprint)), Description: "Weighted embedded jobs: DOCX-small->SF 30%, PDF-small->SF 20%, SF-medium->DOCX 10%, SF-medium->PDF 20%, PPTX-central->SF 10%, SF-slides->PDF 10%; hash identifies ordered workload schedule", prepare: func(worker int) operation {
+		ops := make([]operation, len(schedule))
+		for i, name := range schedule {
+			ops[i] = byName[name].prepare(worker)
+		}
+		n := worker % len(ops)
+		return func(ctx context.Context) (observation, error) { op := ops[n]; n = (n + 1) % len(ops); return op(ctx) }
+	}})
 	return all, nil
 }

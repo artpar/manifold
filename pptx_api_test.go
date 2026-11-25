@@ -4,12 +4,14 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"encoding/xml"
 	"errors"
 	"image"
 	"image/color"
 	"image/png"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -43,6 +45,9 @@ func writeFormat(t *testing.T, d *manifold.Document, f manifold.Format) []byte {
 	var b bytes.Buffer
 	if err := manifold.Write(context.Background(), &b, d, f, manifold.WriteOptions{AllowLossy: true}); err != nil {
 		t.Fatal(err)
+	}
+	if f == manifold.PPTX {
+		assertPackageRelationships(t, b.Bytes())
 	}
 	return b.Bytes()
 }
@@ -204,4 +209,150 @@ func TestPresentationRejectsAmbiguousOrUnsupportedOutput(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
+}
+
+func TestCentralSFEditsRealNativeTextAndAddsSlide(t *testing.T) {
+	source, err := os.ReadFile("testdata/real/poi-SampleShow.pptx")
+	if err != nil {
+		t.Fatal(err)
+	}
+	d := readFormat(t, source, manifold.PPTX)
+	sf := readFormat(t, writeFormat(t, d, manifold.SF), manifold.SF)
+	changed := false
+	for si := range sf.Presentation.Slides {
+		for oi := range sf.Presentation.Slides[si].Objects {
+			o := &sf.Presentation.Slides[si].Objects[oi]
+			if o.Kind == "shape" && len(o.Content) > 0 && len(o.Content[0].Runs) > 0 && o.Content[0].Runs[0].Text != "" {
+				o.Content[0].Runs[0].Text = "Edited through central SF"
+				changed = true
+				break
+			}
+		}
+		if changed {
+			break
+		}
+	}
+	if !changed {
+		t.Fatal("source has no editable native text")
+	}
+	encoded := writeFormat(t, sf, manifold.PPTX)
+	edited := readFormat(t, encoded, manifold.PPTX)
+	if !strings.Contains(edited.Text(), "Edited through central SF") {
+		t.Fatal("source-native edit ignored")
+	}
+	originalParts, after := zipParts(t, source), zipParts(t, encoded)
+	for part, data := range originalParts {
+		if strings.Contains(part, "/slides/") && !strings.Contains(part, "/_rels/") {
+			continue
+		}
+		if !bytes.Equal(data, after[part]) {
+			t.Fatalf("text edit modified unrelated source part %s", part)
+		}
+	}
+	sf.Presentation.Slides = append(sf.Presentation.Slides, manifold.PresentationSlide{ID: "9999", Objects: []manifold.SlideObject{{ID: "2", Kind: "shape", Geometry: "rect", X: 30, Y: 30, Width: 400, Height: 100, Content: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Added canonical slide"}}}}}}})
+	added := readFormat(t, writeFormat(t, sf, manifold.PPTX), manifold.PPTX)
+	if len(added.Presentation.Slides) != len(d.Presentation.Slides)+1 || !strings.Contains(added.Text(), "Added canonical slide") {
+		t.Fatal("canonical slide addition failed")
+	}
+}
+
+func TestPresentationSFRequiresExplicitFeatureMarker(t *testing.T) {
+	sf, err := manifold.ToStructured(presentationFixture(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(sf.Content) != 1 || sf.Content[0].Type != "presentation" {
+		t.Fatal("missing feature marker")
+	}
+	sf.Content = nil
+	if _, err := manifold.FromStructured(sf); err == nil {
+		t.Fatal("old-reader-droppable presentation admitted")
+	}
+}
+
+func TestPPTXInputDoesNotAcceptWordPackageAsEmptyDeck(t *testing.T) {
+	data, err := os.ReadFile("testdata/corpus/docx_basic.docx")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := manifold.Read(context.Background(), bytes.NewReader(data), manifold.PPTX, manifold.ReadOptions{}); err == nil {
+		t.Fatal("Word input masqueraded as an empty PPTX")
+	}
+}
+func TestHiddenSlideContentRemainsHidden(t *testing.T) {
+	d := presentationFixture(t)
+	d.Presentation.Slides[0].Objects[0].Hidden = true
+	d.Presentation.Slides[1].Hidden = true
+	back := readFormat(t, writeFormat(t, d, manifold.PPTX), manifold.PPTX)
+	if strings.Contains(back.Text(), "Hello SF.") || strings.Contains(back.Text(), "Second slide text") {
+		t.Fatal("hidden content became visible")
+	}
+	pdf := readFormat(t, writeFormat(t, back, manifold.PDF), manifold.PDF)
+	if len(pdf.Pages) != 1 || strings.Contains(pdf.Text(), "Hello SF.") {
+		t.Fatal("hidden content painted into PDF")
+	}
+}
+
+// Independent ZIP/XML graph check: native IDs must be unique and every internal
+// relationship target must actually exist. This does not use Manifold's parser.
+func assertPackageRelationships(t *testing.T, data []byte) {
+	t.Helper()
+	parts := zipParts(t, data)
+	var types struct {
+		Overrides []struct {
+			Name string `xml:"PartName,attr"`
+			Type string `xml:"ContentType,attr"`
+		} `xml:"Override"`
+	}
+	if err := xml.Unmarshal(parts["[Content_Types].xml"], &types); err != nil {
+		t.Fatal(err)
+	}
+	foundMain := false
+	for _, entry := range types.Overrides {
+		if entry.Name == "/ppt/presentation.xml" {
+			foundMain = true
+			if entry.Type != "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml" {
+				t.Fatalf("wrong presentation MIME type: %s", entry.Type)
+			}
+		}
+	}
+	if !foundMain {
+		t.Fatal("missing main presentation content type")
+	}
+	for name, raw := range parts {
+		if !strings.HasSuffix(name, ".rels") {
+			continue
+		}
+		var root struct {
+			Relationships []struct {
+				ID     string `xml:"Id,attr"`
+				Target string `xml:"Target,attr"`
+				Mode   string `xml:"TargetMode,attr"`
+			} `xml:"Relationship"`
+		}
+		if err := xml.Unmarshal(raw, &root); err != nil {
+			t.Fatal(err)
+		}
+		ids := map[string]bool{}
+		source := ""
+		if name != "_rels/.rels" {
+			source = path.Join(path.Dir(path.Dir(name)), strings.TrimSuffix(path.Base(name), ".rels"))
+		}
+		for _, r := range root.Relationships {
+			if r.ID == "" || ids[r.ID] {
+				t.Fatalf("duplicate/empty relationship in %s: %s", name, r.ID)
+			}
+			ids[r.ID] = true
+			if r.Mode == "External" {
+				continue
+			}
+			target := path.Clean(path.Join(path.Dir(source), r.Target))
+			if strings.HasPrefix(r.Target, "/") {
+				target = strings.TrimPrefix(r.Target, "/")
+			}
+			if _, exists := parts[target]; !exists {
+				t.Fatalf("missing target %s -> %s", name, target)
+			}
+		}
+	}
 }

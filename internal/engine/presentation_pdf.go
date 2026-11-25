@@ -16,6 +16,9 @@ import (
 // shapes and images. It never converts whole slides to opaque page bitmaps.
 func writePresentationPDF(ctx context.Context, out io.Writer, d *Document, opts WriteOptions) error {
 	pres := d.Presentation
+	if len(pres.Slides) == 0 {
+		return fmt.Errorf("%w: an empty deck has no PDF pages", ErrUnsupported)
+	}
 	p := gofpdf.NewCustom(&gofpdf.InitType{UnitStr: "pt", Size: gofpdf.SizeType{Wd: pres.Width, Ht: pres.Height}})
 	p.SetAutoPageBreak(false, 0)
 	p.SetMargins(0, 0, 0)
@@ -29,11 +32,23 @@ func writePresentationPDF(ctx context.Context, out io.Writer, d *Document, opts 
 	if err := r.addFonts(opts.PDFFonts); err != nil {
 		return err
 	}
+	visible := false
+	for _, slide := range pres.Slides {
+		if !slide.Hidden {
+			visible = true
+		}
+	}
+	if !visible {
+		return fmt.Errorf("%w: no visible presentation slides", ErrUnsupported)
+	}
 	resources := map[string]PresentationResource{}
 	for _, res := range pres.Resources {
 		resources[res.Part] = res
 	}
 	for _, slide := range pres.Slides {
+		if slide.Hidden {
+			continue
+		}
 		if err := ctx.Err(); err != nil {
 			return err
 		}
@@ -52,11 +67,11 @@ func writePresentationPDF(ctx context.Context, out io.Writer, d *Document, opts 
 		p.AddPageFormat("P", gofpdf.SizeType{Wd: w, Ht: h})
 		background := "#FFFFFF"
 		for _, part := range []string{slide.MasterPart, slide.LayoutPart} {
-			if res, ok := resources[part]; ok && res.Background != "" {
+			if res, ok := resources[part]; ok && res.Background != "" && res.Background != "none" {
 				background = res.Background
 			}
 		}
-		if slide.Background != "" {
+		if slide.Background != "" && slide.Background != "none" {
 			background = slide.Background
 		}
 		red, green, blue := textRGB(background)
@@ -101,6 +116,9 @@ func writePresentationPDF(ctx context.Context, out io.Writer, d *Document, opts 
 	return err
 }
 func paintSlideObject(r *pdfRenderer, o SlideObject) error {
+	if o.Hidden {
+		return nil
+	}
 	if len(o.Unsupported) > 0 {
 		return fmt.Errorf("%w: PDF object %s: %s", ErrUnsupported, o.ID, o.Unsupported[0])
 	}
@@ -122,6 +140,9 @@ func paintSlideObject(r *pdfRenderer, o SlideObject) error {
 	}
 	switch o.Kind {
 	case "image":
+		if (o.Fill != "" && o.Fill != "none") || (o.Stroke != "" && o.Stroke != "none") {
+			return fmt.Errorf("%w: image fill/border painting", ErrUnsupported)
+		}
 		im := *o.Image
 		_, kind, err := decodeOutputImage(r.ctx, im.Data, r.validatedImages)
 		if err != nil {
@@ -132,6 +153,11 @@ func paintSlideObject(r *pdfRenderer, o SlideObject) error {
 		}
 		return r.drawImage(&pdfImageLayout{image: &im, kind: kind, width: o.Width, height: o.Height}, o.X, o.Y)
 	case "shape":
+		switch o.Geometry {
+		case "", "rect", "ellipse", "roundRect", "line":
+		default:
+			return fmt.Errorf("%w: vector geometry %s", ErrUnsupported, o.Geometry)
+		}
 		style := ""
 		if o.Fill != "" && o.Fill != "none" {
 			red, green, blue := textRGB(o.Fill)
@@ -165,15 +191,10 @@ func paintSlideObject(r *pdfRenderer, o SlideObject) error {
 		return paintSlideText(r, o)
 
 	case "group":
-		for _, child := range o.Children {
-			if err := paintSlideObject(r, child); err != nil {
-				return err
-			}
-		}
+		return fmt.Errorf("%w: native group coordinate mappings are preserved but not painted into PDF", ErrUnsupported)
 	default:
 		return fmt.Errorf("%w: unmodeled native object cannot be painted into PDF", ErrUnsupported)
 	}
-	return nil
 }
 
 func flowToPresentation(d *Document) (*Presentation, error) {
@@ -225,6 +246,9 @@ func flowToPresentation(d *Document) (*Presentation, error) {
 				count := 0
 				for i := range runs {
 					runs[i].Source = nil
+					if runs[i].FontSize > 0 {
+						runs[i].FontSize = math.Round(runs[i].FontSize*100) / 100
+					}
 					if runs[i].FontSize > size {
 						size = runs[i].FontSize
 					}
@@ -233,6 +257,16 @@ func flowToPresentation(d *Document) (*Presentation, error) {
 						runs[i].Note = nil
 					}
 					count += utf8.RuneCountInString(runs[i].Text)
+				}
+				if b.Kind == Heading {
+					for i := range runs {
+						if runs[i].FontSize == 0 {
+							runs[i].FontSize = size
+						}
+						runs[i].Bold = true
+					}
+					b.Kind = Paragraph
+					b.Level = 0
 				}
 				b.Runs = runs
 				b.Source = nil
@@ -357,6 +391,7 @@ func pdfFlowToPresentation(d *Document) (*Presentation, error) {
 					if run.FontSize == 0 {
 						run.FontSize = 12
 					}
+					run.FontSize = math.Round(run.FontSize*100) / 100
 					if w <= 0 {
 						w = run.FontSize
 					}
@@ -422,6 +457,17 @@ func pdfFlowToPresentation(d *Document) (*Presentation, error) {
 }
 
 func paintSlideText(r *pdfRenderer, o SlideObject) error {
+	hasText := false
+	for _, block := range o.Content {
+		for _, run := range block.Runs {
+			if run.Text != "" {
+				hasText = true
+			}
+		}
+	}
+	if !hasText {
+		return nil
+	}
 	inset := PageMargins{}
 	if o.Insets != nil {
 		inset = *o.Insets

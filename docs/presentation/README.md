@@ -26,12 +26,32 @@ filename. This first integration preserves the upstream file-based API. Public
 result/specification types are available without importing internal packages.
 No Puppt executable or separate Go module is required.
 
-Slides preserve a package-based model with positioned shapes, layouts and masters.
-The document SF contract is unchanged. PPTX ↔ SF, PPTX ↔ PDF and DOCX ↔ PPTX
-conversion are not implemented by this integration. Legacy .ppt is unsupported.
-Rendering produces diagnostic PNGs with explicit unsupported-content reports;
-PowerPoint visual equivalence is not claimed. Notes updates require existing notes.
-New-deck creation is not exposed as a production API.
+Central conversions use the root Manifold API and the same SF format:
+
+```sh
+manifold extract -format sf -o deck.sf input.pptx
+manifold convert -o roundtrip.pptx deck.sf
+manifold convert -allow-lossy -o slides.pdf deck.sf
+manifold convert -allow-lossy -o recovered.pptx slides.pdf
+```
+
+`manifold.Read(..., manifold.PPTX, ...)` produces `Document.Presentation`;
+`manifold.Write` accepts PPTX/SF/PDF. SF stores typed slide objects, coordinates,
+text/image content, notes and master/layout resources, with an explicit feature
+marker that old readers reject. Native parts preserve unmodeled features.
+Supported text/frame edits patch native XML; unchanged source parts round-trip
+byte-for-byte. Authored slide objects can create new decks/slides.
+
+PDF output writes searchable text, vector shapes and images. It rejects unsupported
+native effects/groups/graphic frames and overflowing text, rather than silently
+rasterizing an incomplete slide. Explicit font-family mappings may be needed.
+Physical PDF text/image quads can be recovered into PPTX; flowing SF is reflowed
+into slide text boxes with AllowLossy acknowledgement. Unsupported complex flow
+layouts, native layout/master rebinding and unmodeled regeneration reject.
+Speaker notes remain in SF/PPTX; exporting visible PDF pages requires acknowledging
+that notes are not page content. Legacy .ppt remains unsupported. The native
+inspection/edit/review/PNG API remains available as a convenience, not a separate
+canonical representation. Full PowerPoint visual equivalence is not claimed.
 
 The `puppt.v1` command-result envelope is retained for existing consumers; it is
 an operation report, not a second canonical document interchange format.

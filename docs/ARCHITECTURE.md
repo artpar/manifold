@@ -62,11 +62,11 @@ validation, review and PNG rendering. `internal/presentation` contains the impor
 cohesive reader/writer, model, edit/inspection workflows and raster renderer.
 The shared CLI dispatches `manifold presentation …` there. Both subsystems use
 one module, dependency graph, CI matrix and release binary. No runtime subprocess
-or presentation service is introduced. Presentation package preservation and
-positioned slide objects remain distinct from the flowing SF document tree;
-no cross-format slide/SF conversion is implied. See [presentation KT](presentation/README.md).
+or presentation service is introduced. The native facade now coexists with the central SF codec: positioned objects
+are represented inside the shared SF root, while the native commands expose
+inspection/edit reports and diagnostic PNG rendering. See [presentation KT](presentation/README.md).
 
-## Central SF presentation extension (qualification in progress)
+## Central SF presentation extension
 
 `Document.Presentation` is mutually exclusive with flowing root blocks. Its typed
 slides contain positioned objects with rich Block content, images and notes;

@@ -863,3 +863,9 @@ graphic-frame regeneration and unsupported flow layouts currently reject.
 The source package is limited to 10,000 parts, 64 MiB per part and 256 MiB total;
 slide/group/object/resource validation rejects invalid, duplicate or ambiguous
 owners. Both Go and actual ProseMirror reader qualification cover the extension.
+
+A presentation SF root also requires exactly one leaf `presentation` feature
+marker (`attrs.version: 1`) in root content. An old ProseMirror schema rejects
+that unknown node instead of silently dropping an unfamiliar root attribute.
+The marker never duplicates content; editable content remains in the typed root
+presentation attribute. Missing/extra markers or mixed flowing content reject.

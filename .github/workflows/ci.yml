@@ -166,9 +166,10 @@ jobs:
           - DOCX ↔ SF
           - PDF ↔ SF
           - Optional VDOCS ↔ SF
+          - PPTX ↔ SF and supported native-text/vector PPTX/PDF conversion paths
           - PPTX inspection, planned edits, validation, review and diagnostic PNG rendering
 
-          PPTX/SF and PPTX/PDF conversion are not included.
+          Advanced native features are preserved or rejected explicitly; PowerPoint visual parity is not claimed.
 
           Install the Go CLI:
           \`go install github.com/$GITHUB_REPOSITORY/cmd/manifold@$TAG\`

@@ -251,3 +251,7 @@ type SlideObject = engine.SlideObject
 type StructuredPresentation = engine.StructuredPresentation
 
 func ReadPPTX(ctx context.Context, r io.Reader) (*Document, error) { return engine.ReadPPTX(ctx, r) }
+
+type StructuredSlide = engine.StructuredSlide
+type StructuredSlideObject = engine.StructuredSlideObject
+type StructuredSlideResource = engine.StructuredSlideResource

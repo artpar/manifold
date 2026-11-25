@@ -21,6 +21,7 @@ type Presentation struct {
 	SourceParts map[string][]byte      `json:"source_parts,omitempty"`
 }
 type PresentationSlide struct {
+	Hidden      bool          `json:"hidden,omitempty"`
 	ID          string        `json:"id"`
 	Part        string        `json:"part,omitempty"`
 	LayoutPart  string        `json:"layout_part,omitempty"`
@@ -41,6 +42,7 @@ type PresentationResource struct {
 	Unsupported []string      `json:"unsupported,omitempty"`
 }
 type SlideObject struct {
+	Hidden           bool          `json:"hidden,omitempty"`
 	Insets           *PageMargins  `json:"insets,omitempty"`
 	ParagraphAlign   []string      `json:"paragraph_align,omitempty"`
 	VerticalAlign    string        `json:"vertical_align,omitempty"`
@@ -220,6 +222,9 @@ func (p *Presentation) validate() error {
 	}
 	var bytesCount int64
 	for name, data := range p.SourceParts {
+		if err := validateString(name); err != nil {
+			return err
+		}
 		bytesCount += int64(len(data))
 		if path.Clean(name) != name || strings.HasPrefix(name, "/") || strings.HasPrefix(name, "../") || strings.Contains(name, "\\") || len(data) > 64<<20 {
 			return fmt.Errorf("invalid presentation source part %q", name)
@@ -227,6 +232,15 @@ func (p *Presentation) validate() error {
 	}
 	if len(p.SourceParts) > 10000 || bytesCount > 256<<20 {
 		return fmt.Errorf("presentation source resource limit")
+	}
+	validColor := func(c string) error {
+		if c == "" || c == "none" {
+			return nil
+		}
+		if c == "auto" {
+			return fmt.Errorf("canvas/background color requires explicit RGB")
+		}
+		return validateTextStyle(Run{Color: c})
 	}
 	validateBlocks := func(bs []Block) error { return (&Document{Blocks: bs}).Validate() }
 	var objects func([]SlideObject, int, map[string]bool) error
@@ -293,6 +307,12 @@ func (p *Presentation) validate() error {
 					return err
 				}
 			}
+			if o.Image != nil && o.Kind != "image" {
+				return fmt.Errorf("only image objects can own image pixels")
+			}
+			if o.Kind == "image" && (len(o.Content) > 0 || len(o.Children) > 0) {
+				return fmt.Errorf("image objects cannot also own text/group content")
+			}
 			if o.Kind == "image" && o.Image == nil {
 				return fmt.Errorf("image object requires pixels")
 			}
@@ -306,7 +326,17 @@ func (p *Presentation) validate() error {
 		return nil
 	}
 	ids := map[string]bool{}
+	partsUsed := map[string]bool{}
 	for _, s := range p.Slides {
+		if err := validColor(s.Background); err != nil {
+			return err
+		}
+		if s.Part != "" {
+			if partsUsed[s.Part] {
+				return fmt.Errorf("duplicate slide part")
+			}
+			partsUsed[s.Part] = true
+		}
 		if s.ID == "" || ids[s.ID] {
 			return fmt.Errorf("duplicate/empty slide ID")
 		}
@@ -323,6 +353,9 @@ func (p *Presentation) validate() error {
 	}
 	resourceIDs := map[string]bool{}
 	for _, r := range p.Resources {
+		if err := validColor(r.Background); err != nil {
+			return err
+		}
 		if r.Part == "" || resourceIDs[r.Part] || (r.Kind != "master" && r.Kind != "layout") {
 			return fmt.Errorf("invalid presentation resource")
 		}
@@ -338,6 +371,9 @@ func presentationText(p *Presentation) string {
 	var walk func([]SlideObject)
 	walk = func(objects []SlideObject) {
 		for _, o := range objects {
+			if o.Hidden {
+				continue
+			}
 			textBlocks(&b, o.Content)
 			if o.Image != nil && o.Image.Alt != "" {
 				b.WriteString(o.Image.Alt + "\n")
@@ -346,8 +382,22 @@ func presentationText(p *Presentation) string {
 		}
 	}
 	for i, s := range p.Slides {
+		if s.Hidden {
+			continue
+		}
 		if i > 0 {
 			b.WriteString("\f")
+		}
+		for _, part := range []string{s.MasterPart, s.LayoutPart} {
+			for _, resource := range p.Resources {
+				if resource.Part == part {
+					for _, o := range resource.Objects {
+						if o.Placeholder == "" {
+							walk([]SlideObject{o})
+						}
+					}
+				}
+			}
 		}
 		walk(s.Objects)
 		textBlocks(&b, s.Notes)

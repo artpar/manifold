@@ -142,3 +142,19 @@ Full normal suite passes. Shaping was migrated to the already-pinned go-text
 backend, whose plan cache is request-owned; existing glyph/ligature/bidi/caret
 oracles pass unchanged. Sustained memory recheck and final race/hosted checks are
 pending before the resumed performance matrix and final release.
+
+Central-SF feature completion checkpoint: root API and CLI cover PPTX↔SF and
+supported PPTX/PDF paths; original-source structural, SF marker/old-reader rejection,
+notes-deletion, native text edit/slide addition and unsupported-output tests pass.
+Actual ProseMirror accepts the extension. PPTX-specific frame/font/language rules
+reject unrepresented output semantics. Native PNG/inspect/edit helpers remain.
+Final regression/hosted checks and expanded capacity matrix are pending; all
+throughput claims must use that final production pipeline. See the current
+presentation/README.md and PERFORMANCE.md; older facade-only limits are historical.
+
+Independent consumer checkpoint: python-pptx 1.0.2 reads source/edited/recovered
+PPTX output and verifies title/frame/notes; PyMuPDF 1.28.2 verifies searchable
+PDF text, one image, two vectors and 720x540pt geometry. The rendered example was
+visually inspected. A standards check fixed the main presentation MIME and
+notes-body placeholder. See verification/PPTX_SF_BRIDGE.md. This does not upgrade
+unsupported native features to general PowerPoint fidelity.

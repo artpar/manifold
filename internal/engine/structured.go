@@ -88,6 +88,11 @@ func ToStructured(d *Document) (*StructuredDocument, error) {
 	if s.Content, err = encodeSFBlocks(d.Blocks); err != nil {
 		return nil, err
 	}
+	if d.Presentation != nil {
+		s.Content = []StructuredNode{{Type: "presentation", Attrs: sfAttrs(struct {
+			Version int `json:"version"`
+		}{1})}}
+	}
 	if s.Attrs.Headers, err = encodeSFBlocks(d.Headers); err != nil {
 		return nil, err
 	}
@@ -309,7 +314,23 @@ func FromStructured(s *StructuredDocument) (*Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	if d.Blocks, err = decodeSFBlocks(s.Content, 0); err != nil {
+	body := s.Content
+	if d.Presentation != nil {
+		if len(body) != 1 || body[0].Type != "presentation" || len(body[0].Content) > 0 || len(body[0].Marks) > 0 || body[0].Text != "" {
+			return nil, fmt.Errorf("presentation SF requires its sole feature-marker node")
+		}
+		var marker struct {
+			Version int `json:"version"`
+		}
+		if err := strictSFAttrs(body[0].Attrs, &marker); err != nil {
+			return nil, err
+		}
+		if marker.Version != 1 {
+			return nil, fmt.Errorf("unsupported presentation marker version")
+		}
+		body = nil
+	}
+	if d.Blocks, err = decodeSFBlocks(body, 0); err != nil {
 		return nil, err
 	}
 	if d.Headers, err = decodeSFBlocks(s.Attrs.Headers, 0); err != nil {

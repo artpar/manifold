@@ -1,6 +1,6 @@
 # Compatibility contract
 
-Manifold implements rich DOCX/SF/PDF conversion in pure Go. The original acceptance
+Manifold implements rich DOCX/SF/PDF and positioned PPTX conversion in pure Go. The original acceptance
 scope is qualified in [the audit](verification/FINAL_AUDIT.md). This is a declared
 support contract, not arbitrary-document or Word-equivalent fidelity.
 
@@ -10,6 +10,8 @@ support contract, not arbitrary-document or Word-equivalent fidelity.
 | DOCX input/output | Paragraphs/headings, styled runs, links/bookmarks, lists, merged/nested/repeated tables, images, metadata, page/section settings, conditional headers/footers and rich foot/endnotes | No Word layout engine/font embedding; unsupported OOXML editing/layout semantics diagnose or reject |
 | PDF input | Text/images, physical pages/geometry/navigation, supported explicit tagged structure; disclosed geometric recovery of paragraphs/headings/lists/tables/notes | Ambiguous structure stays uncertain; unsupported codecs/encodings/operators reject; no OCR or general editable vector reconstruction |
 | PDF output | Measured wrapping/pagination, tables/continuations, images, section frames, stories, rich notes, links and painted logical structure | Declared font/script contract; no matching source pagination, PDF/A/UA/WTPDF certification or silent font fallback |
+| PPTX/SF | Typed slide/object/text/image/notes geometry, master/layout resources; bounded native OPC preservation; supported native text/frame edits; authored basic slides | Advanced native features round-trip or reject unsupported regeneration; legacy .ppt unsupported; no PowerPoint-equivalent layout claim |
+| PPTX/PDF paths | Canonical SF slide objects paint native PDF text/vectors/images; PDF text/image quads recover into slide frames | Unsupported effects/groups/charts/SmartArt reject PDF output; text overflow rejects; flow/PDF reflow and notes omission require acknowledgement; no authoring-intent reconstruction |
 | JSON/text | Strict typed model JSON; explicit reduced plain text | Text intentionally omits formatting/assets |
 | VDOCS | Optional checked Univer snapshot-envelope adapter | Pinned native consumer discrepancies remain documented; full browser/editor parity is not claimed |
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"math"
+	"strings"
 	"sync"
 	"unicode"
 
@@ -41,14 +42,56 @@ var currentTextShapingBackend textShapingBackend = harfbuzzTextShapingBackend{}
 var textShapingFontSourceCache sync.Map
 var textShapingFaceCache sync.Map
 var textShapingHarfbuzzShaperPool sync.Pool
-var textShapingOutputCache sync.Map
+
+// Bound retained text under high-cardinality document traffic. Font-face caches
+// are separate; result eviction only causes deterministic shaping recomputation.
+var textShapingOutputCache = boundedShapingCache{limit: 4096}
+
+type boundedShapingCache struct {
+	mu     sync.Mutex
+	limit  int
+	values map[textShapingInput]textShapingOutput
+	order  []textShapingInput
+	next   int
+}
+
+func (c *boundedShapingCache) Load(key textShapingInput) (textShapingOutput, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	v, ok := c.values[key]
+	return v, ok
+}
+func (c *boundedShapingCache) LoadOrStore(key textShapingInput, value textShapingOutput) (textShapingOutput, bool) {
+	if c.limit <= 0 || len(key.Text) > 4096 || len(key.FontFamily) > 256 || math.IsNaN(key.PointScale) || math.IsInf(key.PointScale, 0) {
+		return value, false
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if old, ok := c.values[key]; ok {
+		return old, true
+	}
+	if c.values == nil {
+		c.values = make(map[textShapingInput]textShapingOutput)
+	}
+	key.Text = strings.Clone(key.Text)
+	key.FontFamily = strings.Clone(key.FontFamily)
+	if len(c.order) < c.limit {
+		c.order = append(c.order, key)
+	} else {
+		delete(c.values, c.order[c.next])
+		c.order[c.next] = key
+		c.next = (c.next + 1) % c.limit
+	}
+	c.values[key] = value
+	return value, false
+}
 
 func (harfbuzzTextShapingBackend) ShapeText(input textShapingInput) (textShapingOutput, bool) {
 	if input.Text == "" || textContainsRTL(input.Text) {
 		return textShapingOutput{}, false
 	}
 	if cached, ok := textShapingOutputCache.Load(input); ok {
-		return cached.(textShapingOutput), true
+		return cached, true
 	}
 	source, err := cachedTextShapingFontSource(input.FontFamily, input.Bold, input.Italic)
 	if err != nil {
@@ -88,7 +131,7 @@ func (harfbuzzTextShapingBackend) ShapeText(input textShapingInput) (textShaping
 		FontLabel: source.Label,
 	}
 	actual, _ := textShapingOutputCache.LoadOrStore(input, result)
-	return actual.(textShapingOutput), true
+	return actual, true
 }
 
 func pooledTextShapingHarfbuzzShaper() *shaping.HarfbuzzShaper {

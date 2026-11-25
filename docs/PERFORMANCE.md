@@ -65,6 +65,21 @@ separate profiling runs. Use `go tool pprof -top` and `-alloc_space` to inspect 
 Generated raw JSONL, temporary documents, binaries and profiles stay untracked in
 output/ or bin/. Curated measured results and limitations belong in this document.
 
+## Pipeline completion and preliminary memory finding
+
+Capacity qualification paused while PPTX was connected to the central SF API.
+The final matrix includes PPTX→SF, slide-SF→PPTX/PDF and PDF→PPTX. Slide fixtures
+now contain explicit visible frames rather than minimal native test skeletons.
+A mixed workload specifies its weights in the raw metadata; a varied-title edit/
+render workload probes cache growth under distinct document content.
+
+The preliminary 4-worker PDF profiling run found process-global font retention in
+the old textlayout shaping path. After migration to request-owned go-text buffers,
+three 8-second phases retained about 3.0/3.2/3.4 MiB post-GC instead of about
+146/292/447 MiB. Existing shaping expectations were preserved. These were separate
+profiled diagnostic runs, not final uninstrumented capacity results. The native
+renderer result cache is now bounded to 4096 entries, with oversized keys excluded.
+
 ## Results
 
 Measurement is in progress. No capacity claim is established by this plan alone.

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/artpar/manifold"
 	"github.com/artpar/manifold/internal/presentation/fixtures"
 	"os"
 	"path/filepath"
@@ -164,5 +165,34 @@ func TestPresentationCommandDispatch(t *testing.T) {
 	}
 	if !strings.Contains(out.String(), "manifold presentation") {
 		t.Fatalf("unexpected help: %s", out.String())
+	}
+}
+
+func TestCentralPPTXConversionCommands(t *testing.T) {
+	ctx := context.Background()
+	dir := t.TempDir()
+	input := filepath.Join(dir, "input.pptx")
+	d := &manifold.Document{Presentation: &manifold.Presentation{Version: 1, Width: 720, Height: 540, Slides: []manifold.PresentationSlide{{ID: "256", Objects: []manifold.SlideObject{{ID: "2", Kind: "shape", X: 30, Y: 30, Width: 400, Height: 100, Geometry: "rect", Content: []manifold.Block{{Kind: manifold.Paragraph, Runs: []manifold.Run{{Text: "Central CLI PPTX conversion", FontSize: 18}}}}}}}}}}
+	f, err := os.Create(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = manifold.Write(ctx, f, d, manifold.PPTX, manifold.WriteOptions{})
+	f.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	sf, pdf, back := filepath.Join(dir, "deck.sf"), filepath.Join(dir, "deck.pdf"), filepath.Join(dir, "back.pptx")
+	for _, args := range [][]string{{"extract", "-format", "sf", "-o", sf, input}, {"convert", "-allow-lossy", "-o", pdf, sf}, {"convert", "-allow-lossy", "-o", back, pdf}} {
+		if err := run(ctx, args, &bytes.Buffer{}, &bytes.Buffer{}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var out bytes.Buffer
+	if err := run(ctx, []string{"extract", back}, &out, &bytes.Buffer{}); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out.String(), "Central CLI PPTX conversion") {
+		t.Fatal(out.String())
 	}
 }

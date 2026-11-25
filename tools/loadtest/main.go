@@ -59,8 +59,9 @@ func (h *histogram) merge(other *histogram) {
 }
 
 type observation struct {
-	bytes   int64
-	partial bool
+	diagnostic string
+	bytes      int64
+	partial    bool
 }
 type operation func(context.Context) (observation, error)
 type workload struct {
@@ -79,9 +80,12 @@ type workerStats struct {
 }
 type result struct {
 	Kind                                        string `json:"kind"`
+	WarmupDiagnostic                            string `json:"warmup_diagnostic,omitempty"`
 	Workload                                    string `json:"workload"`
 	Workers, Repeat                             int
 	TargetRPS                                   float64 `json:"target_rps"`
+	ArrivalSeconds                              float64 `json:"arrival_seconds"`
+	MaxGeneratorLatenessMS                      float64 `json:"max_generator_lateness_ms"`
 	RequestedSeconds                            float64 `json:"requested_seconds"`
 	WallSeconds                                 float64 `json:"wall_seconds"`
 	DrainSeconds                                float64 `json:"drain_seconds"`
@@ -109,7 +113,8 @@ func runPhase(ctx context.Context, w workload, workers, repeat int, duration tim
 	for i := range ops {
 		ops[i] = w.prepare(i)
 	}
-	if _, err := ops[0](ctx); err != nil {
+	warmup, err := ops[0](ctx)
+	if err != nil {
 		return result{}, fmt.Errorf("warmup %s: %w", w.Name, err)
 	}
 	runtime.GC()
@@ -166,6 +171,8 @@ func runPhase(ctx context.Context, w workload, workers, repeat int, duration tim
 		}
 	}
 	var offered, rejected uint64
+	arrivalSeconds := duration.Seconds()
+	var generatorLateness time.Duration
 	if rate == 0 {
 		for i := range workers {
 			wg.Add(1)
@@ -216,6 +223,9 @@ func runPhase(ctx context.Context, w workload, workers, repeat int, duration tim
 					break arrivalLoop
 				}
 			}
+			if lag := time.Since(at); lag > generatorLateness {
+				generatorLateness = lag
+			}
 			offered++
 			select {
 			case queue <- at:
@@ -223,6 +233,7 @@ func runPhase(ctx context.Context, w workload, workers, repeat int, duration tim
 				rejected++
 			}
 		}
+		arrivalSeconds = math.Max(arrivalSeconds, time.Since(start).Seconds())
 		timer.Stop()
 		close(queue)
 		wg.Wait()
@@ -231,9 +242,12 @@ func runPhase(ctx context.Context, w workload, workers, repeat int, duration tim
 	close(sampleStop)
 	<-sampleDone
 	runtime.ReadMemStats(&after)
+	if after.HeapAlloc > peak {
+		peak = after.HeapAlloc
+	}
 	runtime.GC()
 	runtime.ReadMemStats(&retained)
-	r := result{Kind: "phase", Workload: w.Name, Workers: workers, Repeat: repeat, TargetRPS: rate, RequestedSeconds: duration.Seconds(), WallSeconds: elapsed.Seconds(), DrainSeconds: math.Max(0, elapsed.Seconds()-duration.Seconds()), PeakHeapMiB: float64(peak) / 1048576, EndHeapMiB: float64(after.HeapAlloc) / 1048576, RetainedHeapMiB: float64(retained.HeapAlloc) / 1048576, NumGC: after.NumGC - before.NumGC, GCPauseMS: float64(after.PauseTotalNs-before.PauseTotalNs) / 1e6, ErrorMessages: map[string]uint64{}}
+	r := result{Kind: "phase", WarmupDiagnostic: warmup.diagnostic, Workload: w.Name, Workers: workers, Repeat: repeat, TargetRPS: rate, RequestedSeconds: duration.Seconds(), WallSeconds: elapsed.Seconds(), DrainSeconds: math.Max(0, elapsed.Seconds()-duration.Seconds()), PeakHeapMiB: float64(peak) / 1048576, EndHeapMiB: float64(after.HeapAlloc) / 1048576, RetainedHeapMiB: float64(retained.HeapAlloc) / 1048576, NumGC: after.NumGC - before.NumGC, GCPauseMS: float64(after.PauseTotalNs-before.PauseTotalNs) / 1e6, ErrorMessages: map[string]uint64{}}
 	var latency, service histogram
 	for _, s := range stats {
 		r.Success += s.success
@@ -256,7 +270,9 @@ func runPhase(ctx context.Context, w workload, workers, repeat int, duration tim
 	r.Offered = offered
 	r.Rejected = rejected
 	r.SuccessfulJobsPerSecond = float64(r.Success) / r.WallSeconds
-	r.AchievedArrivalsPerSecond = float64(offered) / duration.Seconds()
+	r.ArrivalSeconds = arrivalSeconds
+	r.MaxGeneratorLatenessMS = float64(generatorLateness) / 1e6
+	r.AchievedArrivalsPerSecond = float64(offered) / arrivalSeconds
 	r.P50ms = latency.quantile(.5)
 	r.P95ms = latency.quantile(.95)
 	r.P99ms = latency.quantile(.99)

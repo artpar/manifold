@@ -34,6 +34,12 @@ func presentationFromPackage(ctx context.Context, pkg *opc.Package) (*Document, 
 	if err != nil {
 		return nil, err
 	}
+	if root.Name.Local != "presentation" || root.Name.Space != "http://schemas.openxmlformats.org/presentationml/2006/main" {
+		return nil, fmt.Errorf("%w: package root is not supported PresentationML", ErrUnsupported)
+	}
+	if pkg.ContentTypes.ForPart(pkg.PresentationPath) != "application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml" {
+		return nil, fmt.Errorf("%w: unsupported main presentation content type", ErrUnsupported)
+	}
 	size := root.child("sldSz")
 	w, h := pptxNumber(size, "cx")/pptxEMU, pptxNumber(size, "cy")/pptxEMU
 	if w <= 0 || h <= 0 {
@@ -63,8 +69,12 @@ func presentationFromPackage(ctx context.Context, pkg *opc.Package) (*Document, 
 			return nil, e
 		}
 		slide := PresentationSlide{ID: strconv.Itoa(256 + i), Part: part}
-		if i < len(ids) && ids[i].attr("id") != "" {
-			slide.ID = ids[i].attr("id")
+		slide.Hidden = n.attr("show") == "0" || n.attr("show") == "false"
+		if n.attr("showMasterSp") == "0" || n.attr("showMasterSp") == "false" {
+			slide.Unsupported = append(slide.Unsupported, "native master-visibility policy is preserved")
+		}
+		if i < len(ids) && ids[i].attributeNS("", "id") != "" {
+			slide.ID = ids[i].attributeNS("", "id")
 		}
 		rels, e := pkg.RelationshipsForPart(part)
 		if e != nil {
@@ -319,6 +329,7 @@ func (r *pptxSlideParser) objects(tree *xmlNode, depth int) ([]SlideObject, erro
 			continue
 		}
 		o := SlideObject{ID: ids[0].attr("id"), Name: ids[0].attr("name"), Kind: "shape"}
+		o.Hidden = ids[0].attr("hidden") == "1" || ids[0].attr("hidden") == "true"
 		if o.ID == "" {
 			return nil, fmt.Errorf("PPTX object has no ID")
 		}
@@ -477,6 +488,13 @@ func pptxParagraphs(body *xmlNode, rels map[string]opc.Relationship, part string
 			continue
 		}
 		b := Block{Kind: Paragraph}
+		if direction := p.child("pPr").attr("rtl"); direction != "" {
+			if direction == "1" || direction == "true" {
+				b.Direction = "rtl"
+			} else {
+				b.Direction = "ltr"
+			}
+		}
 		defaults := pptxRunStyle(p.child("pPr").child("defRPr"), Run{}, unsupported)
 		for _, c := range p.Children {
 			switch c.Name.Local {
@@ -540,6 +558,13 @@ func pptxRunStyle(n *xmlNode, base Run, unsupported *[]string) Run {
 		*unsupported = append(*unsupported, "native text color requires theme/color transformation support")
 	}
 
+	if rtl := n.child("rtl"); rtl != nil {
+		if rtl.attr("val") == "1" || rtl.attr("val") == "true" {
+			base.Direction = "rtl"
+		} else {
+			base.Direction = "ltr"
+		}
+	}
 	if v := n.attr("b"); v != "" {
 		base.Bold = v == "1" || v == "true"
 	}
@@ -567,7 +592,7 @@ func pptxRunStyle(n *xmlNode, base Run, unsupported *[]string) Run {
 	if unsupported != nil {
 		for _, c := range n.Children {
 			switch c.Name.Local {
-			case "latin", "solidFill", "hlinkClick", "extLst":
+			case "latin", "solidFill", "hlinkClick", "rtl", "extLst":
 			default:
 				*unsupported = append(*unsupported, "native run property "+c.Name.Local+" preserved in source")
 			}
